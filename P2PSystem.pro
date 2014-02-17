@@ -2,4 +2,7 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     PCPServer \
-    PCPClient
+    PCPClient \
+    libjingle \
+    libjingle_p2p \
+    libjingle_app

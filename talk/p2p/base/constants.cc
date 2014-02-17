@@ -156,6 +156,8 @@ const char NS_JINGLE_DRAFT_SCTP[] = "google:jingle:sctp";
 //const buzz::StaticQName QN_CRYPTO_SESSION_PARAMS =
 //    { NS_EMPTY, "session-params" };
 
+
+
 // Transports and candidates.
 const char LN_TRANSPORT[] = "transport";
 const char LN_CANDIDATE[] = "candidate";
@@ -256,11 +258,14 @@ const char STR_JINGLE_DRAFT_CONTENT_NAME_AUDIO[] = "audio";
 //const buzz::StaticQName QN_GINGLE_RAW_TRANSPORT = { NS_GINGLE_RAW, "transport" };
 //const buzz::StaticQName QN_GINGLE_RAW_CHANNEL = { NS_GINGLE_RAW, "channel" };
 
+
+
 // old stuff
 #ifdef FEATURE_ENABLE_VOICEMAIL
 const char NS_VOICEMAIL[] = "http://www.google.com/session/voicemail";
 //const buzz::StaticQName QN_VOICEMAIL_REGARDING = { NS_VOICEMAIL, "regarding" };
 #endif
+
 
 // From RFC 4145, SDP setup attribute values.
 const char CONNECTIONROLE_ACTIVE_STR[] = "active";
