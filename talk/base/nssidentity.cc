@@ -48,8 +48,15 @@
 #include "talk/base/logging.h"
 #include "talk/base/helpers.h"
 #include "talk/base/nssstreamadapter.h"
+#include "talk/base/safe_conversions.h"
 
 namespace talk_base {
+
+// Certificate validity lifetime in seconds.
+static const int CERTIFICATE_LIFETIME = 60*60*24*30;  // 30 days, arbitrarily
+// Certificate validity window in seconds.
+// This is to compensate for slightly incorrect system clocks.
+static const int CERTIFICATE_WINDOW = -60*60*24;
 
 NSSKeyPair::~NSSKeyPair() {
   if (privkey_)
@@ -137,7 +144,7 @@ NSSCertificate *NSSCertificate::FromPEMString(const std::string &pem_string) {
   SECItem der_cert;
   der_cert.data = reinterpret_cast<unsigned char *>(const_cast<char *>(
       der.data()));
-  der_cert.len = der.size();
+  der_cert.len = checked_cast<unsigned int>(der.size());
   CERTCertificate *cert = CERT_NewTempCertificate(CERT_GetDefaultCertDB(),
       &der_cert, NULL, PR_FALSE, PR_TRUE);
 
@@ -161,6 +168,47 @@ std::string NSSCertificate::ToPEMString() const {
 
 void NSSCertificate::ToDER(Buffer* der_buffer) const {
   der_buffer->SetData(certificate_->derCert.data, certificate_->derCert.len);
+}
+
+static bool Certifies(CERTCertificate* parent, CERTCertificate* child) {
+  // TODO(bemasc): Identify stricter validation checks to use here.  In the
+  // context of some future identity standard, it might make sense to check
+  // the certificates' roles, expiration dates, self-signatures (if
+  // self-signed), certificate transparency logging, or many other attributes.
+  // NOTE: Future changes to this validation may reject some previously allowed
+  // certificate chains.  Users should be advised not to deploy chained
+  // certificates except in controlled environments until the validity
+  // requirements are finalized.
+
+  // Check that the parent's name is the same as the child's claimed issuer.
+  SECComparison name_status =
+      CERT_CompareName(&child->issuer, &parent->subject);
+  if (name_status != SECEqual)
+    return false;
+
+  // Extract the parent's public key, or fail if the key could not be read
+  // (e.g. certificate is corrupted).
+  SECKEYPublicKey* parent_key = CERT_ExtractPublicKey(parent);
+  if (!parent_key)
+    return false;
+
+  // Check that the parent's privkey was actually used to generate the child's
+  // signature.
+  SECStatus verified = CERT_VerifySignedDataWithPublicKey(
+      &child->signatureWrap, parent_key, NULL);
+  SECKEY_DestroyPublicKey(parent_key);
+  return verified == SECSuccess;
+}
+
+bool NSSCertificate::IsValidChain(const CERTCertList* cert_list) {
+  CERTCertListNode* child = CERT_LIST_HEAD(cert_list);
+  for (CERTCertListNode* parent = CERT_LIST_NEXT(child);
+       !CERT_LIST_END(parent, cert_list);
+       child = parent, parent = CERT_LIST_NEXT(parent)) {
+    if (!Certifies(parent->cert, child->cert))
+      return false;
+  }
+  return true;
 }
 
 bool NSSCertificate::GetDigestLength(const std::string &algorithm,
@@ -299,8 +347,8 @@ bool NSSCertificate::GetDigestObject(const std::string &algorithm,
 }
 
 
-NSSIdentity *NSSIdentity::Generate(const std::string &common_name) {
-  std::string subject_name_string = "CN=" + common_name;
+NSSIdentity* NSSIdentity::GenerateInternal(const SSLIdentityParams& params) {
+  std::string subject_name_string = "CN=" + params.common_name;
   CERTName *subject_name = CERT_AsciiToName(
       const_cast<char *>(subject_name_string.c_str()));
   NSSIdentity *identity = NULL;
@@ -313,9 +361,11 @@ NSSIdentity *NSSIdentity::Generate(const std::string &common_name) {
   SECStatus rv;
   PLArenaPool* arena;
   SECItem signed_cert;
-  PRTime not_before, not_after;
   PRTime now = PR_Now();
-  PRTime one_day;
+  PRTime not_before =
+      now + static_cast<PRTime>(params.not_before) * PR_USEC_PER_SEC;
+  PRTime not_after =
+      now + static_cast<PRTime>(params.not_after) * PR_USEC_PER_SEC;
 
   inner_der.len = 0;
   inner_der.data = NULL;
@@ -341,11 +391,6 @@ NSSIdentity *NSSIdentity::Generate(const std::string &common_name) {
     LOG(LS_ERROR) << "Couldn't create certificate signing request";
     goto fail;
   }
-
-  one_day = 86400;
-  one_day *= PR_USEC_PER_SEC;
-  not_before = now - one_day;
-  not_after = now + 30 * one_day;
 
   validity = CERT_CreateValidity(not_before, not_after);
   if (!validity) {
@@ -408,6 +453,18 @@ NSSIdentity *NSSIdentity::Generate(const std::string &common_name) {
   return identity;
 }
 
+NSSIdentity* NSSIdentity::Generate(const std::string &common_name) {
+  SSLIdentityParams params;
+  params.common_name = common_name;
+  params.not_before = CERTIFICATE_WINDOW;
+  params.not_after = CERTIFICATE_LIFETIME;
+  return GenerateInternal(params);
+}
+
+NSSIdentity* NSSIdentity::GenerateForTest(const SSLIdentityParams& params) {
+  return GenerateInternal(params);
+}
+
 SSLIdentity* NSSIdentity::FromPEMStrings(const std::string& private_key,
                                          const std::string& certificate) {
   std::string private_key_der;
@@ -416,10 +473,9 @@ SSLIdentity* NSSIdentity::FromPEMStrings(const std::string& private_key,
     return NULL;
 
   SECItem private_key_item;
-  private_key_item.data =
-      reinterpret_cast<unsigned char *>(
-          const_cast<char *>(private_key_der.c_str()));
-  private_key_item.len = private_key_der.size();
+  private_key_item.data = reinterpret_cast<unsigned char *>(
+      const_cast<char *>(private_key_der.c_str()));
+  private_key_item.len = checked_cast<unsigned int>(private_key_der.size());
 
   const unsigned int key_usage = KU_KEY_ENCIPHERMENT | KU_DATA_ENCIPHERMENT |
       KU_DIGITAL_SIGNATURE;

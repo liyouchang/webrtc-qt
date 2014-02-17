@@ -61,8 +61,14 @@ inline void Unused(const void*) {}
 #endif  // UNUSED
 
 #ifndef WIN32
+
+#ifndef strnicmp
 #define strnicmp(x, y, n) strncasecmp(x, y, n)
+#endif
+
+#ifndef stricmp
 #define stricmp(x, y) strcasecmp(x, y)
+#endif
 
 // TODO(fbarchard): Remove this. std::max should be used everywhere in the code.
 // NOMINMAX must be defined where we include <windows.h>.
@@ -87,6 +93,11 @@ inline void Unused(const void*) {}
 
 namespace talk_base {
 
+
+// If a debugger is attached, triggers a debugger breakpoint. If a debugger is
+// not attached, forces program termination.
+void Break();
+
 // LogAssert writes information about an assertion to the log. It's called by
 // Assert (and from the ASSERT macro in debug mode) before any other action
 // is taken (e.g. breaking the debugger, abort()ing, etc.).
@@ -107,14 +118,9 @@ void SetCustomAssertLogger(AssertLogger logger);
 
 }  // namespace talk_base
 
-
 #if ENABLE_DEBUG
 
 namespace talk_base {
-
-// If a debugger is attached, triggers a debugger breakpoint. If a debugger is
-// not attached, forces program termination.
-void Break();
 
 inline bool Assert(bool result, const char* function, const char* file,
                    int line, const char* expression) {

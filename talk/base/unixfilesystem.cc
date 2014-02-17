@@ -42,19 +42,23 @@
 
 #if defined(POSIX) && !defined(OSX)
 #include <sys/types.h>
-#ifdef ANDROID
+#if defined(ANDROID)
 #include <sys/statfs.h>
-#else
+#elif !defined(__native_client__)
 #include <sys/statvfs.h>
-#endif  // ANDROID
+#endif  //  !defined(__native_client__)
+#include <limits.h>
 #include <pwd.h>
 #include <stdio.h>
-#include <unistd.h>
 #endif  // POSIX && !OSX
 
-#ifdef LINUX
+#if defined(LINUX)
 #include <ctype.h>
 #include <algorithm>
+#endif
+
+#if defined(__native_client__) && !defined(__GLIBC__)
+#include <sys/syslimits.h>
 #endif
 
 #include "talk/base/fileutils.h"
@@ -363,6 +367,8 @@ bool UnixFilesystem::GetAppPathname(Pathname* path) {
   if (success)
     path->SetPathname(path8);
   return success;
+#elif defined(__native_client__)
+  return false;
 #else  // OSX
   char buffer[NAME_MAX+1];
   size_t len = readlink("/proc/self/exe", buffer, ARRAY_SIZE(buffer) - 1);
@@ -448,6 +454,7 @@ bool UnixFilesystem::GetAppDataFolder(Pathname* path, bool per_user) {
   if (!CreateFolder(*path, 0700)) {
     return false;
   }
+#if !defined(__native_client__)
   // If the folder already exists, it may have the wrong mode or be owned by
   // someone else, both of which are security problems. Setting the mode
   // avoids both issues since it will fail if the path is not owned by us.
@@ -455,6 +462,7 @@ bool UnixFilesystem::GetAppDataFolder(Pathname* path, bool per_user) {
     LOG_ERR(LS_ERROR) << "Can't set mode on " << path;
     return false;
   }
+#endif
   return true;
 }
 
@@ -489,6 +497,9 @@ bool UnixFilesystem::GetAppTempFolder(Pathname* path) {
 }
 
 bool UnixFilesystem::GetDiskFreeSpace(const Pathname& path, int64 *freebytes) {
+#ifdef __native_client__
+  return false;
+#else  // __native_client__
   ASSERT(NULL != freebytes);
   // TODO: Consider making relative paths absolute using cwd.
   // TODO: When popping off a symlink, push back on the components of the
@@ -515,6 +526,7 @@ bool UnixFilesystem::GetDiskFreeSpace(const Pathname& path, int64 *freebytes) {
 #endif
 
   return true;
+#endif  // !__native_client__
 }
 
 Pathname UnixFilesystem::GetCurrentDirectory() {
@@ -544,3 +556,11 @@ char* UnixFilesystem::CopyString(const std::string& str) {
 }
 
 }  // namespace talk_base
+
+#if defined(__native_client__)
+extern "C" int __attribute__((weak))
+link(const char* oldpath, const char* newpath) {
+  errno = EACCES;
+  return -1;
+}
+#endif

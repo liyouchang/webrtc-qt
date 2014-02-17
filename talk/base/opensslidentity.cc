@@ -32,7 +32,6 @@
 // Must be included first before openssl headers.
 #include "talk/base/win32.h"  // NOLINT
 
-#include <openssl/ssl.h>
 #include <openssl/bio.h>
 #include <openssl/err.h>
 #include <openssl/pem.h>
@@ -43,6 +42,7 @@
 #include "talk/base/checks.h"
 #include "talk/base/helpers.h"
 #include "talk/base/logging.h"
+#include "talk/base/openssl.h"
 #include "talk/base/openssldigest.h"
 
 namespace talk_base {
@@ -57,7 +57,7 @@ static const int KEY_LENGTH = 1024;
 static const int SERIAL_RAND_BITS = 64;
 
 // Certificate validity lifetime
-static const int CERTIFICATE_LIFETIME = 60*60*24*365;  // one year, arbitrarily
+static const int CERTIFICATE_LIFETIME = 60*60*24*30;  // 30 days, arbitrarily
 // Certificate validity window.
 // This is to compensate for slightly incorrect system clocks.
 static const int CERTIFICATE_WINDOW = -60*60*24;
@@ -66,15 +66,6 @@ static const int CERTIFICATE_WINDOW = -60*60*24;
 static EVP_PKEY* MakeKey() {
   LOG(LS_INFO) << "Making key pair";
   EVP_PKEY* pkey = EVP_PKEY_new();
-#if OPENSSL_VERSION_NUMBER < 0x00908000l
-  // Only RSA_generate_key is available. Use that.
-  RSA* rsa = RSA_generate_key(KEY_LENGTH, 0x10001, NULL, NULL);
-  if (!EVP_PKEY_assign_RSA(pkey, rsa)) {
-    EVP_PKEY_free(pkey);
-    RSA_free(rsa);
-    return NULL;
-  }
-#else
   // RSA_generate_key is deprecated. Use _ex version.
   BIGNUM* exponent = BN_new();
   RSA* rsa = RSA_new();
@@ -89,15 +80,14 @@ static EVP_PKEY* MakeKey() {
   }
   // ownership of rsa struct was assigned, don't free it.
   BN_free(exponent);
-#endif
   LOG(LS_INFO) << "Returning key pair";
   return pkey;
 }
 
 // Generate a self-signed certificate, with the public key from the
 // given key pair. Caller is responsible for freeing the returned object.
-static X509* MakeCertificate(EVP_PKEY* pkey, const char* common_name) {
-  LOG(LS_INFO) << "Making certificate for " << common_name;
+static X509* MakeCertificate(EVP_PKEY* pkey, const SSLIdentityParams& params) {
+  LOG(LS_INFO) << "Making certificate for " << params.common_name;
   X509* x509 = NULL;
   BIGNUM* serial_number = NULL;
   X509_NAME* name = NULL;
@@ -128,14 +118,15 @@ static X509* MakeCertificate(EVP_PKEY* pkey, const char* common_name) {
   // clear during SSL negotiation, so there may be a privacy issue in
   // putting anything recognizable here.
   if ((name = X509_NAME_new()) == NULL ||
-      !X509_NAME_add_entry_by_NID(name, NID_commonName, MBSTRING_UTF8,
-                                     (unsigned char*)common_name, -1, -1, 0) ||
+      !X509_NAME_add_entry_by_NID(
+          name, NID_commonName, MBSTRING_UTF8,
+          (unsigned char*)params.common_name.c_str(), -1, -1, 0) ||
       !X509_set_subject_name(x509, name) ||
       !X509_set_issuer_name(x509, name))
     goto error;
 
-  if (!X509_gmtime_adj(X509_get_notBefore(x509), CERTIFICATE_WINDOW) ||
-      !X509_gmtime_adj(X509_get_notAfter(x509), CERTIFICATE_LIFETIME))
+  if (!X509_gmtime_adj(X509_get_notBefore(x509), params.not_before) ||
+      !X509_gmtime_adj(X509_get_notAfter(x509), params.not_after))
     goto error;
 
   if (!X509_sign(x509, pkey, EVP_sha1()))
@@ -199,12 +190,13 @@ static void PrintCert(X509* x509) {
 #endif
 
 OpenSSLCertificate* OpenSSLCertificate::Generate(
-    OpenSSLKeyPair* key_pair, const std::string& common_name) {
-  std::string actual_common_name = common_name;
-  if (actual_common_name.empty())
+    OpenSSLKeyPair* key_pair, const SSLIdentityParams& params) {
+  SSLIdentityParams actual_params(params);
+  if (actual_params.common_name.empty()) {
     // Use a random string, arbitrarily 8chars long.
-    actual_common_name = CreateRandomString(8);
-  X509* x509 = MakeCertificate(key_pair->pkey(), actual_common_name.c_str());
+    actual_params.common_name = CreateRandomString(8);
+  }
+  X509* x509 = MakeCertificate(key_pair->pkey(), actual_params);
   if (!x509) {
     LogSSLErrors("Generating certificate");
     return NULL;
@@ -222,11 +214,11 @@ OpenSSLCertificate* OpenSSLCertificate::FromPEMString(
   BIO* bio = BIO_new_mem_buf(const_cast<char*>(pem_string.c_str()), -1);
   if (!bio)
     return NULL;
-  (void)BIO_set_close(bio, BIO_NOCLOSE);
   BIO_set_mem_eof_return(bio, 0);
   X509 *x509 = PEM_read_bio_X509(bio, NULL, NULL,
                                  const_cast<char*>("\0"));
-  BIO_free(bio);
+  BIO_free(bio);  // Frees the BIO, but not the pointed-to string.
+
   if (!x509)
     return NULL;
 
@@ -320,17 +312,31 @@ void OpenSSLCertificate::AddReference() const {
   CRYPTO_add(&x509_->references, 1, CRYPTO_LOCK_X509);
 }
 
-OpenSSLIdentity* OpenSSLIdentity::Generate(const std::string& common_name) {
+OpenSSLIdentity* OpenSSLIdentity::GenerateInternal(
+    const SSLIdentityParams& params) {
   OpenSSLKeyPair *key_pair = OpenSSLKeyPair::Generate();
   if (key_pair) {
-    OpenSSLCertificate *certificate =
-        OpenSSLCertificate::Generate(key_pair, common_name);
+    OpenSSLCertificate *certificate = OpenSSLCertificate::Generate(
+        key_pair, params);
     if (certificate)
       return new OpenSSLIdentity(key_pair, certificate);
     delete key_pair;
   }
   LOG(LS_INFO) << "Identity generation failed";
   return NULL;
+}
+
+OpenSSLIdentity* OpenSSLIdentity::Generate(const std::string& common_name) {
+  SSLIdentityParams params;
+  params.common_name = common_name;
+  params.not_before = CERTIFICATE_WINDOW;
+  params.not_after = CERTIFICATE_LIFETIME;
+  return GenerateInternal(params);
+}
+
+OpenSSLIdentity* OpenSSLIdentity::GenerateForTest(
+    const SSLIdentityParams& params) {
+  return GenerateInternal(params);
 }
 
 SSLIdentity* OpenSSLIdentity::FromPEMStrings(
@@ -348,11 +354,10 @@ SSLIdentity* OpenSSLIdentity::FromPEMStrings(
     LOG(LS_ERROR) << "Failed to create a new BIO buffer.";
     return NULL;
   }
-  (void)BIO_set_close(bio, BIO_NOCLOSE);
   BIO_set_mem_eof_return(bio, 0);
   EVP_PKEY *pkey = PEM_read_bio_PrivateKey(bio, NULL, NULL,
                                            const_cast<char*>("\0"));
-  BIO_free(bio);
+  BIO_free(bio);  // Frees the BIO, but not the pointed-to string.
 
   if (!pkey) {
     LOG(LS_ERROR) << "Failed to create the private key from PEM string.";
@@ -376,5 +381,3 @@ bool OpenSSLIdentity::ConfigureIdentity(SSL_CTX* ctx) {
 }  // namespace talk_base
 
 #endif  // HAVE_OPENSSL_SSL_H
-
-

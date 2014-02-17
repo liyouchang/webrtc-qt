@@ -54,6 +54,8 @@ class MacCocoaSocketServer : public MacBaseSocketServer {
  private:
   MacCocoaSocketServerHelper* helper_;
   NSTimer* timer_;  // Weak.
+  // The count of how many times we're inside the NSApplication main loop.
+  int run_count_;
 
   DISALLOW_EVIL_CONSTRUCTORS(MacCocoaSocketServer);
 };

@@ -2,38 +2,64 @@
  * libjingle
  * Copyright 2004--2005, Google Inc.
  *
- * Redistribution and use in source and binary forms, with or without 
+ * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *  1. Redistributions of source code must retain the above copyright notice, 
+ *  1. Redistributions of source code must retain the above copyright notice,
  *     this list of conditions and the following disclaimer.
  *  2. Redistributions in binary form must reproduce the above copyright notice,
  *     this list of conditions and the following disclaimer in the documentation
  *     and/or other materials provided with the distribution.
- *  3. The name of the author may not be used to endorse or promote products 
+ *  3. The name of the author may not be used to endorse or promote products
  *     derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
  * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
  * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef TALK_BASE_ASYNCPACKETSOCKET_H_
 #define TALK_BASE_ASYNCPACKETSOCKET_H_
 
+#include "talk/base/buffer.h"
 #include "talk/base/dscp.h"
 #include "talk/base/sigslot.h"
 #include "talk/base/socket.h"
 #include "talk/base/timeutils.h"
 
 namespace talk_base {
+
+// This structure holds the info needed to update the packet send time header
+// extension, including the information needed to update the authentication tag
+// after changing the value.
+struct PacketTimeUpdateParams {
+  PacketTimeUpdateParams()
+      : rtp_sendtime_extension_id(-1), srtp_auth_tag_len(-1),
+        srtp_packet_index(-1) {
+  }
+
+  int rtp_sendtime_extension_id;  // extension header id present in packet.
+  Buffer srtp_auth_key;           // Authentication key.
+  int srtp_auth_tag_len;          // Authentication tag length.
+  int64 srtp_packet_index;        // Required for Rtp Packet authentication.
+};
+
+// This structure holds meta information for the packet which is about to send
+// over network.
+struct PacketOptions {
+  PacketOptions() : dscp(DSCP_NO_CHANGE) {}
+  explicit PacketOptions(DiffServCodePoint dscp) : dscp(dscp) {}
+
+  DiffServCodePoint dscp;
+  PacketTimeUpdateParams packet_time_params;
+};
 
 // This structure will have the information about when packet is actually
 // received by socket.
@@ -78,9 +104,9 @@ class AsyncPacketSocket : public sigslot::has_slots<> {
   virtual SocketAddress GetRemoteAddress() const = 0;
 
   // Send a packet.
-  virtual int Send(const void *pv, size_t cb, DiffServCodePoint dscp) = 0;
+  virtual int Send(const void *pv, size_t cb, const PacketOptions& options) = 0;
   virtual int SendTo(const void *pv, size_t cb, const SocketAddress& addr,
-                     DiffServCodePoint) = 0;
+                     const PacketOptions& options) = 0;
 
   // Close the socket.
   virtual int Close() = 0;

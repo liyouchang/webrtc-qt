@@ -495,7 +495,7 @@ bool FileStream::Flush() {
   return false;
 }
 
-#if defined(POSIX)
+#if defined(POSIX) && !defined(__native_client__)
 
 bool FileStream::TryLock() {
   if (file_ == NULL) {
@@ -711,7 +711,7 @@ void AsyncWriteStream::ClearBufferAndWrite() {
   }
 }
 
-#ifdef POSIX
+#if defined(POSIX) && !defined(__native_client__)
 
 // Have to identically rewrite the FileStream destructor or else it would call
 // the base class's Close() instead of the sub-class's.

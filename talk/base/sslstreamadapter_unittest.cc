@@ -49,32 +49,33 @@ static int kExporterContextLen = sizeof(kExporterContext);
 
 static const char kRSA_PRIVATE_KEY_PEM[] =
     "-----BEGIN RSA PRIVATE KEY-----\n"
-    "MIICXQIBAAKBgQDCueE4a9hDMZ3sbVZdlXOz9ZA+cvzie3zJ9gXnT/BCt9P4b9HE\n"
-    "vD/tr73YBqD3Wr5ZWScmyGYF9EMn0r3rzBxv6oooLU5TdUvOm4rzUjkCLQaQML8o\n"
-    "NxXq+qW/j3zUKGikLhaaAl/amaX2zSWUsRQ1CpngQ3+tmDNH4/25TncNmQIDAQAB\n"
-    "AoGAUcuU0Id0k10fMjYHZk4mCPzot2LD2Tr4Aznl5vFMQipHzv7hhZtx2xzMSRcX\n"
-    "vG+Qr6VkbcUWHgApyWubvZXCh3+N7Vo2aYdMAQ8XqmFpBdIrL5CVdVfqFfEMlgEy\n"
-    "LSZNG5klnrIfl3c7zQVovLr4eMqyl2oGfAqPQz75+fecv1UCQQD6wNHch9NbAG1q\n"
-    "yuFEhMARB6gDXb+5SdzFjjtTWW5uJfm4DcZLoYyaIZm0uxOwsUKd0Rsma+oGitS1\n"
-    "CXmuqfpPAkEAxszyN3vIdpD44SREEtyKZBMNOk5pEIIGdbeMJC5/XHvpxww9xkoC\n"
-    "+39NbvUZYd54uT+rafbx4QZKc0h9xA/HlwJBAL37lYVWy4XpPv1olWCKi9LbUCqs\n"
-    "vvQtyD1N1BkEayy9TQRsO09WKOcmigRqsTJwOx7DLaTgokEuspYvhagWVPUCQE/y\n"
-    "0+YkTbYBD1Xbs9SyBKXCU6uDJRWSdO6aZi2W1XloC9gUwDMiSJjD1Wwt/YsyYPJ+\n"
-    "/Hyc5yFL2l0KZimW/vkCQQCjuZ/lPcH46EuzhdbRfumDOG5N3ld7UhGI1TIRy17W\n"
-    "dGF90cG33/L6BfS8Ll+fkkW/2AMRk8FDvF4CZi2nfW4L\n"
+    "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAMYRkbhmI7kVA/rM\n"
+    "czsZ+6JDhDvnkF+vn6yCAGuRPV03zuRqZtDy4N4to7PZu9PjqrRl7nDMXrG3YG9y\n"
+    "rlIAZ72KjcKKFAJxQyAKLCIdawKRyp8RdK3LEySWEZb0AV58IadqPZDTNHHRX8dz\n"
+    "5aTSMsbbkZ+C/OzTnbiMqLL/vg6jAgMBAAECgYAvgOs4FJcgvp+TuREx7YtiYVsH\n"
+    "mwQPTum2z/8VzWGwR8BBHBvIpVe1MbD/Y4seyI2aco/7UaisatSgJhsU46/9Y4fq\n"
+    "2TwXH9QANf4at4d9n/R6rzwpAJOpgwZgKvdQjkfrKTtgLV+/dawvpxUYkRH4JZM1\n"
+    "CVGukMfKNrSVH4Ap4QJBAOJmGV1ASPnB4r4nc99at7JuIJmd7fmuVUwUgYi4XgaR\n"
+    "WhScBsgYwZ/JoywdyZJgnbcrTDuVcWG56B3vXbhdpMsCQQDf9zeJrjnPZ3Cqm79y\n"
+    "kdqANep0uwZciiNiWxsQrCHztywOvbFhdp8iYVFG9EK8DMY41Y5TxUwsHD+67zao\n"
+    "ZNqJAkEA1suLUP/GvL8IwuRneQd2tWDqqRQ/Td3qq03hP7e77XtF/buya3Ghclo5\n"
+    "54czUR89QyVfJEC6278nzA7n2h1uVQJAcG6mztNL6ja/dKZjYZye2CY44QjSlLo0\n"
+    "MTgTSjdfg/28fFn2Jjtqf9Pi/X+50LWI/RcYMC2no606wRk9kyOuIQJBAK6VSAim\n"
+    "1pOEjsYQn0X5KEIrz1G3bfCbB848Ime3U2/FWlCHMr6ch8kCZ5d1WUeJD3LbwMNG\n"
+    "UCXiYxSsu20QNVw=\n"
     "-----END RSA PRIVATE KEY-----\n";
 
 static const char kCERT_PEM[] =
     "-----BEGIN CERTIFICATE-----\n"
-    "MIIBmTCCAQICCQCPNJORW/M13DANBgkqhkiG9w0BAQUFADARMQ8wDQYDVQQDDAZ3\n"
-    "ZWJydGMwHhcNMTMwNjE0MjIzMDAxWhcNMTQwNjE0MjIzMDAxWjARMQ8wDQYDVQQD\n"
-    "DAZ3ZWJydGMwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMK54Thr2EMxnext\n"
-    "Vl2Vc7P1kD5y/OJ7fMn2BedP8EK30/hv0cS8P+2vvdgGoPdavllZJybIZgX0QyfS\n"
-    "vevMHG/qiigtTlN1S86bivNSOQItBpAwvyg3Fer6pb+PfNQoaKQuFpoCX9qZpfbN\n"
-    "JZSxFDUKmeBDf62YM0fj/blOdw2ZAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEAECMt\n"
-    "UZb35H8TnjGx4XPzco/kbnurMLFFWcuve/DwTsuf10Ia9N4md8LY0UtgIgtyNqWc\n"
-    "ZwyRMwxONF6ty3wcaIiPbGqiAa55T3YRuPibkRmck9CjrmM9JAtyvqHnpHd2TsBD\n"
-    "qCV42aXS3onOXDQ1ibuWq0fr0//aj0wo4KV474c=\n"
+    "MIIBmTCCAQKgAwIBAgIEbzBSAjANBgkqhkiG9w0BAQsFADARMQ8wDQYDVQQDEwZX\n"
+    "ZWJSVEMwHhcNMTQwMTAyMTgyNDQ3WhcNMTQwMjAxMTgyNDQ3WjARMQ8wDQYDVQQD\n"
+    "EwZXZWJSVEMwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMYRkbhmI7kVA/rM\n"
+    "czsZ+6JDhDvnkF+vn6yCAGuRPV03zuRqZtDy4N4to7PZu9PjqrRl7nDMXrG3YG9y\n"
+    "rlIAZ72KjcKKFAJxQyAKLCIdawKRyp8RdK3LEySWEZb0AV58IadqPZDTNHHRX8dz\n"
+    "5aTSMsbbkZ+C/OzTnbiMqLL/vg6jAgMBAAEwDQYJKoZIhvcNAQELBQADgYEAUflI\n"
+    "VUe5Krqf5RVa5C3u/UTAOAUJBiDS3VANTCLBxjuMsvqOG0WvaYWP3HYPgrz0jXK2\n"
+    "LJE/mGw3MyFHEqi81jh95J+ypl6xKW6Rm8jKLR87gUvCaVYn/Z4/P3AqcQTB7wOv\n"
+    "UD0A8qfhfDM+LK6rPAnCsVN0NRDY3jvd6rzix9M=\n"
     "-----END CERTIFICATE-----\n";
 
 #define MAYBE_SKIP_TEST(feature)                    \
@@ -208,11 +209,45 @@ class SSLStreamAdapterTestBase : public testing::Test,
   ~SSLStreamAdapterTestBase() {
     // Put it back for the next test.
     talk_base::SetRandomTestMode(false);
-    talk_base::CleanupSSL();
   }
 
   static void SetUpTestCase() {
     talk_base::InitializeSSL();
+  }
+
+  static void TearDownTestCase() {
+    talk_base::CleanupSSL();
+  }
+
+  // Recreate the client/server identities with the specified validity period.
+  // |not_before| and |not_after| are offsets from the current time in number
+  // of seconds.
+  void ResetIdentitiesWithValidity(int not_before, int not_after) {
+    client_stream_ =
+        new SSLDummyStream(this, "c2s", &client_buffer_, &server_buffer_);
+    server_stream_ =
+        new SSLDummyStream(this, "s2c", &server_buffer_, &client_buffer_);
+
+    client_ssl_.reset(talk_base::SSLStreamAdapter::Create(client_stream_));
+    server_ssl_.reset(talk_base::SSLStreamAdapter::Create(server_stream_));
+
+    client_ssl_->SignalEvent.connect(this, &SSLStreamAdapterTestBase::OnEvent);
+    server_ssl_->SignalEvent.connect(this, &SSLStreamAdapterTestBase::OnEvent);
+
+    talk_base::SSLIdentityParams client_params;
+    client_params.common_name = "client";
+    client_params.not_before = not_before;
+    client_params.not_after = not_after;
+    client_identity_ = talk_base::SSLIdentity::GenerateForTest(client_params);
+
+    talk_base::SSLIdentityParams server_params;
+    server_params.common_name = "server";
+    server_params.not_before = not_before;
+    server_params.not_after = not_after;
+    server_identity_ = talk_base::SSLIdentity::GenerateForTest(server_params);
+
+    client_ssl_->SetIdentity(client_identity_);
+    server_ssl_->SetIdentity(server_identity_);
   }
 
   virtual void OnEvent(talk_base::StreamInterface *stream, int sig, int err) {
@@ -227,24 +262,6 @@ class SSLStreamAdapterTestBase : public testing::Test,
     }
   }
 
-  void SetPeerIdentitiesByCertificate(bool correct) {
-    LOG(LS_INFO) << "Setting peer identities by certificate";
-
-    if (correct) {
-      client_ssl_->SetPeerCertificate(server_identity_->certificate().
-                                           GetReference());
-      server_ssl_->SetPeerCertificate(client_identity_->certificate().
-                                           GetReference());
-    } else {
-      // If incorrect, set up to expect our own certificate at the peer
-      client_ssl_->SetPeerCertificate(client_identity_->certificate().
-                                           GetReference());
-      server_ssl_->SetPeerCertificate(server_identity_->certificate().
-                                           GetReference());
-    }
-    identities_set_ = true;
-  }
-
   void SetPeerIdentitiesByDigest(bool correct) {
     unsigned char digest[20];
     size_t digest_len;
@@ -253,8 +270,8 @@ class SSLStreamAdapterTestBase : public testing::Test,
     LOG(LS_INFO) << "Setting peer identities by digest";
 
     rv = server_identity_->certificate().ComputeDigest(talk_base::DIGEST_SHA_1,
-                                                      digest, 20,
-                                                      &digest_len);
+                                                       digest, 20,
+                                                       &digest_len);
     ASSERT_TRUE(rv);
     if (!correct) {
       LOG(LS_INFO) << "Setting bogus digest for server cert";
@@ -266,7 +283,7 @@ class SSLStreamAdapterTestBase : public testing::Test,
 
 
     rv = client_identity_->certificate().ComputeDigest(talk_base::DIGEST_SHA_1,
-                                                      digest, 20, &digest_len);
+                                                       digest, 20, &digest_len);
     ASSERT_TRUE(rv);
     if (!correct) {
       LOG(LS_INFO) << "Setting bogus digest for client cert";
@@ -722,17 +739,6 @@ TEST_F(SSLStreamAdapterTestTLS, TestTLSBogusDigest) {
   TestHandshake(false);
 };
 
-// Test a handshake with a peer certificate
-TEST_F(SSLStreamAdapterTestTLS, TestTLSPeerCertificate) {
-  SetPeerIdentitiesByCertificate(true);
-  TestHandshake();
-};
-
-// Test a handshake with a bogus peer certificate
-TEST_F(SSLStreamAdapterTestTLS, TestTLSBogusPeerCertificate) {
-  SetPeerIdentitiesByCertificate(false);
-  TestHandshake(false);
-};
 // Test moving a bunch of data
 
 // Basic tests: DTLS
@@ -885,6 +891,24 @@ TEST_F(SSLStreamAdapterTestDTLS, TestDTLSExporter) {
   ASSERT_TRUE(result);
 
   ASSERT_TRUE(!memcmp(client_out, server_out, sizeof(client_out)));
+}
+
+// Test not yet valid certificates are not rejected.
+TEST_F(SSLStreamAdapterTestDTLS, TestCertNotYetValid) {
+  MAYBE_SKIP_TEST(HaveDtls);
+  long one_day = 60 * 60 * 24;
+  // Make the certificates not valid until one day later.
+  ResetIdentitiesWithValidity(one_day, one_day);
+  TestHandshake();
+}
+
+// Test expired certificates are not rejected.
+TEST_F(SSLStreamAdapterTestDTLS, TestCertExpired) {
+  MAYBE_SKIP_TEST(HaveDtls);
+  long one_day = 60 * 60 * 24;
+  // Make the certificates already expired.
+  ResetIdentitiesWithValidity(-one_day, -one_day);
+  TestHandshake();
 }
 
 // Test data transfer using certs created from strings.

@@ -53,6 +53,7 @@
 #endif
 
 #include "talk/base/nssidentity.h"
+#include "talk/base/safe_conversions.h"
 #include "talk/base/thread.h"
 
 namespace talk_base {
@@ -86,7 +87,8 @@ static const SrtpCipherMapEntry kSrtpCipherMap[] = {
 
 // Implementation of NSPR methods
 static PRStatus StreamClose(PRFileDesc *socket) {
-  // Noop
+  ASSERT(!socket->lower);
+  socket->dtor(socket);
   return PR_SUCCESS;
 }
 
@@ -96,7 +98,7 @@ static PRInt32 StreamRead(PRFileDesc *socket, void *buf, PRInt32 length) {
   int error;
   StreamResult result = stream->Read(buf, length, &read, &error);
   if (result == SR_SUCCESS) {
-    return read;
+    return checked_cast<PRInt32>(read);
   }
 
   if (result == SR_EOS) {
@@ -119,7 +121,7 @@ static PRInt32 StreamWrite(PRFileDesc *socket, const void *buf,
   int error;
   StreamResult result = stream->Write(buf, length, &written, &error);
   if (result == SR_SUCCESS) {
-    return written;
+    return checked_cast<PRInt32>(written);
   }
 
   if (result == SR_BLOCK) {
@@ -437,7 +439,7 @@ bool NSSStreamAdapter::Init() {
     LOG(LS_ERROR) << "Error disabling false start";
     return false;
   }
-          
+
   ssl_fd_ = ssl_fd;
 
   return true;
@@ -515,7 +517,7 @@ int NSSStreamAdapter::BeginSSL() {
       SSL_LIBRARY_VERSION_TLS_1_1 :
       SSL_LIBRARY_VERSION_TLS_1_0;
   vrange.max = SSL_LIBRARY_VERSION_TLS_1_1;
-  
+
   rv = SSL_VersionRangeSet(ssl_fd_, &vrange);
   if (rv != SECSuccess) {
     Error("BeginSSL", -1, false);
@@ -525,7 +527,9 @@ int NSSStreamAdapter::BeginSSL() {
   // SRTP
 #ifdef HAVE_DTLS_SRTP
   if (!srtp_ciphers_.empty()) {
-    rv = SSL_SetSRTPCiphers(ssl_fd_, &srtp_ciphers_[0], srtp_ciphers_.size());
+    rv = SSL_SetSRTPCiphers(
+        ssl_fd_, &srtp_ciphers_[0],
+        checked_cast<unsigned int>(srtp_ciphers_.size()));
     if (rv != SECSuccess) {
       Error("BeginSSL", -1, false);
       return -1;
@@ -644,7 +648,7 @@ StreamResult NSSStreamAdapter::Read(void* data, size_t data_len,
       return SR_ERROR;
   }
 
-  PRInt32 rv = PR_Read(ssl_fd_, data, data_len);
+  PRInt32 rv = PR_Read(ssl_fd_, data, checked_cast<PRInt32>(data_len));
 
   if (rv == 0) {
     return SR_EOS;
@@ -681,7 +685,7 @@ StreamResult NSSStreamAdapter::Write(const void* data, size_t data_len,
 
     case SSL_CONNECTED:
       break;
-      
+
     case SSL_ERROR:
     case SSL_CLOSED:
     default:
@@ -690,7 +694,7 @@ StreamResult NSSStreamAdapter::Write(const void* data, size_t data_len,
       return SR_ERROR;
   }
 
-  PRInt32 rv = PR_Write(ssl_fd_, data, data_len);
+  PRInt32 rv = PR_Write(ssl_fd_, data, checked_cast<PRInt32>(data_len));
 
   // Error
   if (rv < 0) {
@@ -781,11 +785,26 @@ SECStatus NSSStreamAdapter::AuthCertificateHook(void *arg,
                                                 PRBool isServer) {
   LOG(LS_INFO) << "NSSStreamAdapter::AuthCertificateHook";
   NSSCertificate peer_cert(SSL_PeerCertificate(fd));
-  bool ok = false;
-
-  // TODO(ekr@rtfm.com): Should we be enforcing self-signed like
-  // the OpenSSL version?
   NSSStreamAdapter *stream = reinterpret_cast<NSSStreamAdapter *>(arg);
+  stream->cert_ok_ = false;
+
+  // Read the peer's certificate chain.
+  CERTCertList* cert_list = SSL_PeerCertificateChain(fd);
+  ASSERT(cert_list != NULL);
+
+  // If the peer provided multiple certificates, check that they form a valid
+  // chain as defined by RFC 5246 Section 7.4.2: "Each following certificate
+  // MUST directly certify the one preceding it.".  This check does NOT
+  // verify other requirements, such as whether the chain reaches a trusted
+  // root, self-signed certificates have valid signatures, certificates are not
+  // expired, etc.
+  // Even if the chain is valid, the leaf certificate must still match a
+  // provided certificate or digest.
+  if (!NSSCertificate::IsValidChain(cert_list)) {
+    CERT_DestroyCertList(cert_list);
+    PORT_SetError(SEC_ERROR_BAD_SIGNATURE);
+    return SECFailure;
+  }
 
   if (stream->peer_certificate_.get()) {
     LOG(LS_INFO) << "Checking against specified certificate";
@@ -794,7 +813,7 @@ SECStatus NSSStreamAdapter::AuthCertificateHook(void *arg,
     if (reinterpret_cast<NSSCertificate *>(stream->peer_certificate_.get())->
         Equals(&peer_cert)) {
       LOG(LS_INFO) << "Accepted peer certificate";
-      ok = true;
+      stream->cert_ok_ = true;
     }
   } else if (!stream->peer_certificate_digest_algorithm_.empty()) {
     LOG(LS_INFO) << "Checking against specified digest";
@@ -810,7 +829,7 @@ SECStatus NSSStreamAdapter::AuthCertificateHook(void *arg,
       Buffer computed_digest(digest, digest_length);
       if (computed_digest == stream->peer_certificate_digest_value_) {
         LOG(LS_INFO) << "Accepted peer certificate";
-        ok = true;
+        stream->cert_ok_ = true;
       }
     }
   } else {
@@ -819,23 +838,18 @@ SECStatus NSSStreamAdapter::AuthCertificateHook(void *arg,
     UNIMPLEMENTED;
   }
 
-  if (ok) {
-    stream->cert_ok_ = true;
-
-    // Record the peer's certificate chain.
-    CERTCertList* cert_list = SSL_PeerCertificateChain(fd);
-    ASSERT(cert_list != NULL);
-
-    stream->peer_certificate_.reset(new NSSCertificate(cert_list));
-    CERT_DestroyCertList(cert_list);
-    return SECSuccess;
-  }
-
-  if (!ok && stream->ignore_bad_cert()) {
+  if (!stream->cert_ok_ && stream->ignore_bad_cert()) {
     LOG(LS_WARNING) << "Ignoring cert error while verifying cert chain";
     stream->cert_ok_ = true;
-    return SECSuccess;
   }
+
+  if (stream->cert_ok_)
+    stream->peer_certificate_.reset(new NSSCertificate(cert_list));
+
+  CERT_DestroyCertList(cert_list);
+
+  if (stream->cert_ok_)
+    return SECSuccess;
 
   PORT_SetError(SEC_ERROR_UNTRUSTED_CERT);
   return SECFailure;
@@ -869,11 +883,15 @@ bool NSSStreamAdapter::ExportKeyingMaterial(const std::string& label,
                                             bool use_context,
                                             uint8* result,
                                             size_t result_len) {
-  SECStatus rv = SSL_ExportKeyingMaterial(ssl_fd_,
-                                          label.c_str(), label.size(),
-                                          use_context,
-                                          context, context_len,
-                                          result, result_len);
+  SECStatus rv = SSL_ExportKeyingMaterial(
+      ssl_fd_,
+      label.c_str(),
+      checked_cast<unsigned int>(label.size()),
+      use_context,
+      context,
+      checked_cast<unsigned int>(context_len),
+      result,
+      checked_cast<unsigned int>(result_len));
 
   return rv == SECSuccess;
 }

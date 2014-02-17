@@ -38,15 +38,47 @@ struct Message;
 
 class MessageHandler {
  public:
+  virtual ~MessageHandler();
   virtual void OnMessage(Message* msg) = 0;
 
  protected:
   MessageHandler() {}
-  virtual ~MessageHandler();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(MessageHandler);
 };
+
+// Helper class to facilitate executing a functor on a thread.
+template <class ReturnT, class FunctorT>
+class FunctorMessageHandler : public MessageHandler {
+ public:
+  explicit FunctorMessageHandler(const FunctorT& functor)
+      : functor_(functor) {}
+  virtual void OnMessage(Message* msg) {
+    result_ = functor_();
+  }
+  const ReturnT& result() const { return result_; }
+
+ private:
+  FunctorT functor_;
+  ReturnT result_;
+};
+
+// Specialization for ReturnT of void.
+template <class FunctorT>
+class FunctorMessageHandler<void, FunctorT> : public MessageHandler {
+ public:
+  explicit FunctorMessageHandler(const FunctorT& functor)
+      : functor_(functor) {}
+  virtual void OnMessage(Message* msg) {
+    functor_();
+  }
+  void result() const {}
+
+ private:
+  FunctorT functor_;
+};
+
 
 } // namespace talk_base
 

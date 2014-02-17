@@ -37,7 +37,6 @@
 #include <openssl/crypto.h>
 #include <openssl/err.h>
 #include <openssl/rand.h>
-#include <openssl/ssl.h>
 #include <openssl/x509v3.h>
 
 #include <vector>
@@ -45,6 +44,7 @@
 #include "talk/base/common.h"
 #include "talk/base/logging.h"
 #include "talk/base/stream.h"
+#include "talk/base/openssl.h"
 #include "talk/base/openssladapter.h"
 #include "talk/base/openssldigest.h"
 #include "talk/base/opensslidentity.h"
@@ -53,15 +53,6 @@
 
 namespace talk_base {
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10001000L)
-#define HAVE_DTLS_SRTP
-#endif
-
-#if (OPENSSL_VERSION_NUMBER >= 0x10000000L)
-#define HAVE_DTLS
-#endif
-
-#ifdef HAVE_DTLS_SRTP
 // SRTP cipher suite table
 struct SrtpCipherMapEntry {
   const char* external_name;
@@ -74,7 +65,6 @@ static SrtpCipherMapEntry SrtpCipherMap[] = {
   {"AES_CM_128_HMAC_SHA1_32", "SRTP_AES128_CM_SHA1_32"},
   {NULL, NULL}
 };
-#endif
 
 //////////////////////////////////////////////////////////////////////
 // StreamBIO
@@ -210,13 +200,6 @@ void OpenSSLStreamAdapter::SetServerRole(SSLRole role) {
   role_ = role;
 }
 
-void OpenSSLStreamAdapter::SetPeerCertificate(SSLCertificate* cert) {
-  ASSERT(!peer_certificate_);
-  ASSERT(peer_certificate_digest_algorithm_.empty());
-  ASSERT(ssl_server_name_.empty());
-  peer_certificate_.reset(static_cast<OpenSSLCertificate*>(cert));
-}
-
 bool OpenSSLStreamAdapter::GetPeerCertificate(SSLCertificate** cert) const {
   if (!peer_certificate_)
     return false;
@@ -255,7 +238,6 @@ bool OpenSSLStreamAdapter::ExportKeyingMaterial(const std::string& label,
                                                 bool use_context,
                                                 uint8* result,
                                                 size_t result_len) {
-#ifdef HAVE_DTLS_SRTP
   int i;
 
   i = SSL_export_keying_material(ssl_, result, result_len,
@@ -267,9 +249,6 @@ bool OpenSSLStreamAdapter::ExportKeyingMaterial(const std::string& label,
     return false;
 
   return true;
-#else
-  return false;
-#endif
 }
 
 bool OpenSSLStreamAdapter::SetDtlsSrtpCiphers(
@@ -279,7 +258,6 @@ bool OpenSSLStreamAdapter::SetDtlsSrtpCiphers(
   if (state_ != SSL_NONE)
     return false;
 
-#ifdef HAVE_DTLS_SRTP
   for (std::vector<std::string>::const_iterator cipher = ciphers.begin();
        cipher != ciphers.end(); ++cipher) {
     bool found = false;
@@ -305,13 +283,9 @@ bool OpenSSLStreamAdapter::SetDtlsSrtpCiphers(
 
   srtp_ciphers_ = internal_ciphers;
   return true;
-#else
-  return false;
-#endif
 }
 
 bool OpenSSLStreamAdapter::GetDtlsSrtpCipher(std::string* cipher) {
-#ifdef HAVE_DTLS_SRTP
   ASSERT(state_ == SSL_CONNECTED);
   if (state_ != SSL_CONNECTED)
     return false;
@@ -333,9 +307,6 @@ bool OpenSSLStreamAdapter::GetDtlsSrtpCipher(std::string* cipher) {
   ASSERT(false);  // This should never happen
 
   return false;
-#else
-  return false;
-#endif
 }
 
 int OpenSSLStreamAdapter::StartSSLWithServer(const char* server_name) {
@@ -613,7 +584,6 @@ int OpenSSLStreamAdapter::BeginSSL() {
   // The underlying stream has open. If we are in peer-to-peer mode
   // then a peer certificate must have been specified by now.
   ASSERT(!ssl_server_name_.empty() ||
-         peer_certificate_ ||
          !peer_certificate_digest_algorithm_.empty());
   LOG(LS_INFO) << "BeginSSL: "
                << (!ssl_server_name_.empty() ? ssl_server_name_ :
@@ -661,9 +631,7 @@ int OpenSSLStreamAdapter::ContinueSSL() {
     case SSL_ERROR_NONE:
       LOG(LS_VERBOSE) << " -- success";
 
-      if (!SSLPostConnectionCheck(ssl_, ssl_server_name_.c_str(),
-                                  peer_certificate_ ?
-                                      peer_certificate_->x509() : NULL,
+      if (!SSLPostConnectionCheck(ssl_, ssl_server_name_.c_str(), NULL,
                                   peer_certificate_digest_algorithm_)) {
         LOG(LS_ERROR) << "TLS post connection check failed";
         return -1;
@@ -675,14 +643,12 @@ int OpenSSLStreamAdapter::ContinueSSL() {
 
     case SSL_ERROR_WANT_READ: {
         LOG(LS_VERBOSE) << " -- error want read";
-#ifdef HAVE_DTLS
         struct timeval timeout;
         if (DTLSv1_get_timeout(ssl_, &timeout)) {
           int delay = timeout.tv_sec * 1000 + timeout.tv_usec/1000;
 
           Thread::Current()->PostDelayed(delay, this, MSG_TIMEOUT, 0);
         }
-#endif
       }
       break;
 
@@ -737,9 +703,7 @@ void OpenSSLStreamAdapter::OnMessage(Message* msg) {
   // Process our own messages and then pass others to the superclass
   if (MSG_TIMEOUT == msg->message_id) {
     LOG(LS_INFO) << "DTLS timeout expired";
-#ifdef HAVE_DTLS
     DTLSv1_handle_timeout(ssl_);
-#endif
     ContinueSSL();
   } else {
     StreamInterface::OnMessage(msg);
@@ -750,19 +714,11 @@ SSL_CTX* OpenSSLStreamAdapter::SetupSSLContext() {
   SSL_CTX *ctx = NULL;
 
   if (role_ == SSL_CLIENT) {
-#ifdef HAVE_DTLS
     ctx = SSL_CTX_new(ssl_mode_ == SSL_MODE_DTLS ?
         DTLSv1_client_method() : TLSv1_client_method());
-#else
-    ctx = SSL_CTX_new(TLSv1_client_method());
-#endif
   } else {
-#ifdef HAVE_DTLS
     ctx = SSL_CTX_new(ssl_mode_ == SSL_MODE_DTLS ?
         DTLSv1_server_method() : TLSv1_server_method());
-#else
-    ctx = SSL_CTX_new(TLSv1_server_method());
-#endif
   }
   if (ctx == NULL)
     return NULL;
@@ -771,18 +727,6 @@ SSL_CTX* OpenSSLStreamAdapter::SetupSSLContext() {
     SSL_CTX_free(ctx);
     return NULL;
   }
-
-  if (!peer_certificate_) {  // traditional mode
-    // Add the root cert to the SSL context
-    if (!OpenSSLAdapter::ConfigureTrustedRootCertificates(ctx)) {
-      SSL_CTX_free(ctx);
-      return NULL;
-    }
-  }
-
-  if (peer_certificate_ && role_ == SSL_SERVER)
-    // we must specify which client cert to ask for
-    SSL_CTX_add_client_CA(ctx, peer_certificate_->x509());
 
 #ifdef _DEBUG
   SSL_CTX_set_info_callback(ctx, OpenSSLAdapter::SSLInfoCallback);
@@ -793,101 +737,50 @@ SSL_CTX* OpenSSLStreamAdapter::SetupSSLContext() {
   SSL_CTX_set_verify_depth(ctx, 4);
   SSL_CTX_set_cipher_list(ctx, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
 
-#ifdef HAVE_DTLS_SRTP
   if (!srtp_ciphers_.empty()) {
     if (SSL_CTX_set_tlsext_use_srtp(ctx, srtp_ciphers_.c_str())) {
       SSL_CTX_free(ctx);
       return NULL;
     }
   }
-#endif
 
   return ctx;
 }
 
 int OpenSSLStreamAdapter::SSLVerifyCallback(int ok, X509_STORE_CTX* store) {
-#if _DEBUG
-  if (!ok) {
-    char data[256];
-    X509* cert = X509_STORE_CTX_get_current_cert(store);
-    int depth = X509_STORE_CTX_get_error_depth(store);
-    int err = X509_STORE_CTX_get_error(store);
-
-    LOG(LS_INFO) << "Error with certificate at depth: " << depth;
-    X509_NAME_oneline(X509_get_issuer_name(cert), data, sizeof(data));
-    LOG(LS_INFO) << "  issuer  = " << data;
-    X509_NAME_oneline(X509_get_subject_name(cert), data, sizeof(data));
-    LOG(LS_INFO) << "  subject = " << data;
-    LOG(LS_INFO) << "  err     = " << err
-      << ":" << X509_verify_cert_error_string(err);
-  }
-#endif
-
   // Get our SSL structure from the store
   SSL* ssl = reinterpret_cast<SSL*>(X509_STORE_CTX_get_ex_data(
                                         store,
                                         SSL_get_ex_data_X509_STORE_CTX_idx()));
-
   OpenSSLStreamAdapter* stream =
     reinterpret_cast<OpenSSLStreamAdapter*>(SSL_get_app_data(ssl));
 
-  // In peer-to-peer mode, no root cert / certificate authority was
-  // specified, so the libraries knows of no certificate to accept,
-  // and therefore it will necessarily call here on the first cert it
-  // tries to verify.
-  if (!ok && stream->peer_certificate_) {
-    X509* cert = X509_STORE_CTX_get_current_cert(store);
-    int err = X509_STORE_CTX_get_error(store);
-    // peer-to-peer mode: allow the certificate to be self-signed,
-    // assuming it matches the cert that was specified.
-    if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT &&
-        X509_cmp(cert, stream->peer_certificate_->x509()) == 0) {
-      LOG(LS_INFO) << "Accepted self-signed peer certificate authority";
-      ok = 1;
-    }
-  } else if (!ok && !stream->peer_certificate_digest_algorithm_.empty()) {
-    X509* cert = X509_STORE_CTX_get_current_cert(store);
-    int err = X509_STORE_CTX_get_error(store);
-
-    // peer-to-peer mode: allow the certificate to be self-signed,
-    // assuming it matches the digest that was specified.
-    if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT) {
-      unsigned char digest[EVP_MAX_MD_SIZE];
-      std::size_t digest_length;
-
-      if (OpenSSLCertificate::
-         ComputeDigest(cert,
-                       stream->peer_certificate_digest_algorithm_,
-                       digest, sizeof(digest),
-                       &digest_length)) {
-        Buffer computed_digest(digest, digest_length);
-        if (computed_digest == stream->peer_certificate_digest_value_) {
-          LOG(LS_INFO) <<
-              "Accepted self-signed peer certificate authority";
-          ok = 1;
-
-          // Record the peer's certificate.
-          stream->peer_certificate_.reset(new OpenSSLCertificate(cert));
-        }
-      }
-    }
-  } else if (!ok && OpenSSLAdapter::custom_verify_callback_) {
-    // this applies only in traditional mode
-    void* cert =
-        reinterpret_cast<void*>(X509_STORE_CTX_get_current_cert(store));
-    if (OpenSSLAdapter::custom_verify_callback_(cert)) {
-      stream->custom_verification_succeeded_ = true;
-      LOG(LS_INFO) << "validated certificate using custom callback";
-      ok = 1;
-    }
+  if (stream->peer_certificate_digest_algorithm_.empty()) {
+    return 0;
   }
-
-  if (!ok && stream->ignore_bad_cert()) {
-    LOG(LS_WARNING) << "Ignoring cert error while verifying cert chain";
-    ok = 1;
+  X509* cert = X509_STORE_CTX_get_current_cert(store);
+  unsigned char digest[EVP_MAX_MD_SIZE];
+  std::size_t digest_length;
+  if (!OpenSSLCertificate::ComputeDigest(
+           cert,
+           stream->peer_certificate_digest_algorithm_,
+           digest, sizeof(digest),
+           &digest_length)) {
+    LOG(LS_WARNING) << "Failed to compute peer cert digest.";
+    return 0;
   }
-
-  return ok;
+  Buffer computed_digest(digest, digest_length);
+  if (computed_digest != stream->peer_certificate_digest_value_) {
+    LOG(LS_WARNING) << "Rejected peer certificate due to mismatched digest.";
+    return 0;
+  }
+  // Ignore any verification error if the digest matches, since there is no
+  // value in checking the validity of a self-signed cert issued by untrusted
+  // sources.
+  LOG(LS_INFO) << "Accepted peer certificate.";
+  // Record the peer's certificate.
+  stream->peer_certificate_.reset(new OpenSSLCertificate(cert));
+  return 1;
 }
 
 // This code is taken from the "Network Security with OpenSSL"
@@ -923,27 +816,15 @@ bool OpenSSLStreamAdapter::SSLPostConnectionCheck(SSL* ssl,
 }
 
 bool OpenSSLStreamAdapter::HaveDtls() {
-#ifdef HAVE_DTLS
   return true;
-#else
-  return false;
-#endif
 }
 
 bool OpenSSLStreamAdapter::HaveDtlsSrtp() {
-#ifdef HAVE_DTLS_SRTP
   return true;
-#else
-  return false;
-#endif
 }
 
 bool OpenSSLStreamAdapter::HaveExporter() {
-#ifdef HAVE_DTLS_SRTP
   return true;
-#else
-  return false;
-#endif
 }
 
 }  // namespace talk_base

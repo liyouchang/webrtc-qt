@@ -14,8 +14,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
-Debug:DESTDIR = ../Debug
-Release:DESTDIR = ../Release
+DESTDIR = $$PWD/../bin
 
 #unix {
 #    target.path = /usr/lib
@@ -59,6 +58,12 @@ HEADERS += \
 
 } else:mac {
 } else {
+    Debug:DEFINES +=_DEBUG
+
+    Release:DEFINES +=
+
+    DEFINES += POSIX
+
 }
 
 
