@@ -176,13 +176,12 @@ Port::Port(talk_base::Thread* thread, talk_base::PacketSocketFactory* factory,
       generation_(0),
       ice_username_fragment_(username_fragment),
       password_(password),
-      lifetime_(LT_PRESTART),
+      timeout_delay_(kPortTimeoutDelay),
       enable_port_packets_(false),
-      ice_protocol_(ICEPROTO_GOOGLE),
+      ice_protocol_(ICEPROTO_HYBRID),
       ice_role_(ICEROLE_UNKNOWN),
       tiebreaker_(0),
-      shared_socket_(true),
-      default_dscp_(talk_base::DSCP_NO_CHANGE) {
+      shared_socket_(true) {
   Construct();
 }
 
@@ -203,13 +202,12 @@ Port::Port(talk_base::Thread* thread, const std::string& type,
       generation_(0),
       ice_username_fragment_(username_fragment),
       password_(password),
-      lifetime_(LT_PRESTART),
+      timeout_delay_(kPortTimeoutDelay),
       enable_port_packets_(false),
-      ice_protocol_(ICEPROTO_GOOGLE),
+      ice_protocol_(ICEPROTO_HYBRID),
       ice_role_(ICEROLE_UNKNOWN),
       tiebreaker_(0),
-      shared_socket_(false),
-      default_dscp_(talk_base::DSCP_NO_CHANGE) {
+      shared_socket_(false) {
   ASSERT(factory_ != NULL);
   Construct();
 }
@@ -260,7 +258,7 @@ void Port::AddAddress(const talk_base::SocketAddress& address,
   c.set_type(type);
   c.set_protocol(protocol);
   c.set_address(address);
-  c.set_priority(c.GetPriority(type_preference));
+  c.set_priority(c.GetPriority(type_preference, network_->preference()));
   c.set_username(username_fragment());
   c.set_password(password_);
   c.set_network_name(network_->name());
@@ -341,6 +339,10 @@ bool Port::IsGoogleIce() const {
   return (ice_protocol_ == ICEPROTO_GOOGLE);
 }
 
+bool Port::IsHybridIce() const {
+  return (ice_protocol_ == ICEPROTO_HYBRID);
+}
+
 bool Port::GetStunMessage(const char* data, size_t size,
                           const talk_base::SocketAddress& addr,
                           IceMessage** out_msg, std::string* out_username) {
@@ -382,7 +384,9 @@ bool Port::GetStunMessage(const char* data, size_t size,
     // If the username is bad or unknown, fail with a 401 Unauthorized.
     std::string local_ufrag;
     std::string remote_ufrag;
-    if (!ParseStunUsername(stun_msg.get(), &local_ufrag, &remote_ufrag) ||
+    IceProtocolType remote_protocol_type;
+    if (!ParseStunUsername(stun_msg.get(), &local_ufrag, &remote_ufrag,
+                           &remote_protocol_type) ||
         local_ufrag != username_fragment()) {
       LOG_J(LS_ERROR, this) << "Received STUN request with bad local username "
                             << local_ufrag << " from "
@@ -390,6 +394,15 @@ bool Port::GetStunMessage(const char* data, size_t size,
       SendBindingErrorResponse(stun_msg.get(), addr, STUN_ERROR_UNAUTHORIZED,
                                STUN_ERROR_REASON_UNAUTHORIZED);
       return true;
+    }
+
+    // Port is initialized to GOOGLE-ICE protocol type. If pings from remote
+    // are received before the signal message, protocol type may be different.
+    // Based on the STUN username, we can determine what's the remote protocol.
+    // This also enables us to send the response back using the same protocol
+    // as the request.
+    if (IsHybridIce()) {
+      SetIceProtocolType(remote_protocol_type);
     }
 
     // If ICE, and the MESSAGE-INTEGRITY is bad, fail with a 401 Unauthorized
@@ -453,7 +466,8 @@ bool Port::IsCompatibleAddress(const talk_base::SocketAddress& addr) {
 
 bool Port::ParseStunUsername(const StunMessage* stun_msg,
                              std::string* local_ufrag,
-                             std::string* remote_ufrag) const {
+                             std::string* remote_ufrag,
+                             IceProtocolType* remote_protocol_type) const {
   // The packet must include a username that either begins or ends with our
   // fragment.  It should begin with our fragment if it is a request and it
   // should end with our fragment if it is a response.
@@ -465,8 +479,16 @@ bool Port::ParseStunUsername(const StunMessage* stun_msg,
     return false;
 
   const std::string username_attr_str = username_attr->GetString();
-  if (IsStandardIce()) {
-    size_t colon_pos = username_attr_str.find(":");
+  size_t colon_pos = username_attr_str.find(":");
+  // If we are in hybrid mode set the appropriate ice protocol type based on
+  // the username argument style.
+  if (IsHybridIce()) {
+    *remote_protocol_type = (colon_pos != std::string::npos) ?
+        ICEPROTO_RFC5245 : ICEPROTO_GOOGLE;
+  } else {
+    *remote_protocol_type = ice_protocol_;
+  }
+  if (*remote_protocol_type == ICEPROTO_RFC5245) {
     if (colon_pos != std::string::npos) {  // RFRAG:LFRAG
       *local_ufrag = username_attr_str.substr(0, colon_pos);
       *remote_ufrag = username_attr_str.substr(
@@ -474,7 +496,7 @@ bool Port::ParseStunUsername(const StunMessage* stun_msg,
     } else {
       return false;
     }
-  } else if (IsGoogleIce()) {
+  } else if (*remote_protocol_type == ICEPROTO_GOOGLE) {
     int remote_frag_len = static_cast<int>(username_attr_str.size());
     remote_frag_len -= static_cast<int>(username_fragment().size());
     if (remote_frag_len < 0)
@@ -608,7 +630,8 @@ void Port::SendBindingResponse(StunMessage* request,
   // Send the response message.
   talk_base::ByteBuffer buf;
   response.Write(&buf);
-  if (SendTo(buf.Data(), buf.Length(), addr, DefaultDscpValue(), false) < 0) {
+  talk_base::PacketOptions options(DefaultDscpValue());
+  if (SendTo(buf.Data(), buf.Length(), addr, options, false) < 0) {
     LOG_J(LS_ERROR, this) << "Failed to send STUN ping response to "
                           << addr.ToSensitiveString();
   }
@@ -662,15 +685,14 @@ void Port::SendBindingErrorResponse(StunMessage* request,
   // Send the response message.
   talk_base::ByteBuffer buf;
   response.Write(&buf);
-  SendTo(buf.Data(), buf.Length(), addr, DefaultDscpValue(), false);
+  talk_base::PacketOptions options(DefaultDscpValue());
+  SendTo(buf.Data(), buf.Length(), addr, options, false);
   LOG_J(LS_INFO, this) << "Sending STUN binding error: reason=" << reason
                        << " to " << addr.ToSensitiveString();
 }
 
 void Port::OnMessage(talk_base::Message *pmsg) {
   ASSERT(pmsg->message_id == MSG_CHECKTIMEOUT);
-  ASSERT(lifetime_ == LT_PRETIMEOUT);
-  lifetime_ = LT_POSTTIMEOUT;
   CheckTimeout();
 }
 
@@ -686,24 +708,18 @@ void Port::EnablePortPackets() {
   enable_port_packets_ = true;
 }
 
-void Port::Start() {
-  // The port sticks around for a minimum lifetime, after which
-  // we destroy it when it drops to zero connections.
-  if (lifetime_ == LT_PRESTART) {
-    lifetime_ = LT_PRETIMEOUT;
-    thread_->PostDelayed(kPortTimeoutDelay, this, MSG_CHECKTIMEOUT);
-  } else {
-    LOG_J(LS_WARNING, this) << "Port restart attempted";
-  }
-}
-
 void Port::OnConnectionDestroyed(Connection* conn) {
   AddressMap::iterator iter =
       connections_.find(conn->remote_candidate().address());
   ASSERT(iter != connections_.end());
   connections_.erase(iter);
 
-  CheckTimeout();
+  // On the controlled side, ports time out, but only after all connections
+  // fail.  Note: If a new connection is added after this message is posted,
+  // but it fails and is removed before kPortTimeoutDelay, then this message
+  //  will still cause the Port to be destroyed.
+  if (ice_role_ == ICEROLE_CONTROLLED)
+    thread_->PostDelayed(timeout_delay_, this, MSG_CHECKTIMEOUT);
 }
 
 void Port::Destroy() {
@@ -714,17 +730,17 @@ void Port::Destroy() {
 }
 
 void Port::CheckTimeout() {
+  ASSERT(ice_role_ == ICEROLE_CONTROLLED);
   // If this port has no connections, then there's no reason to keep it around.
   // When the connections time out (both read and write), they will delete
   // themselves, so if we have any connections, they are either readable or
   // writable (or still connecting).
-  if ((lifetime_ == LT_POSTTIMEOUT) && connections_.empty()) {
+  if (connections_.empty())
     Destroy();
-  }
 }
 
 const std::string Port::username_fragment() const {
-  if (IsGoogleIce() &&
+  if (!IsStandardIce() &&
       component_ == ICE_CANDIDATE_COMPONENT_RTCP) {
     // In GICE mode, we should adjust username fragment for rtcp component.
     return GetRtcpUfragFromRtpUfrag(ice_username_fragment_);
@@ -918,8 +934,9 @@ void Connection::set_use_candidate_attr(bool enable) {
 
 void Connection::OnSendStunPacket(const void* data, size_t size,
                                   StunRequest* req) {
+  talk_base::PacketOptions options(port_->DefaultDscpValue());
   if (port_->SendTo(data, size, remote_candidate_.address(),
-                    port_->DefaultDscpValue(), false) < 0) {
+                    options, false) < 0) {
     LOG_J(LS_WARNING, this) << "Failed to send STUN ping " << req->id();
   }
 }
@@ -1005,7 +1022,7 @@ void Connection::OnReadPacket(
       // id's match.
       case STUN_BINDING_RESPONSE:
       case STUN_BINDING_ERROR_RESPONSE:
-        if (port_->IceProtocol() == ICEPROTO_GOOGLE ||
+        if (port_->IsGoogleIce() ||
             msg->ValidateMessageIntegrity(
                 data, size, remote_candidate().password())) {
           requests_.CheckResponse(msg.get());
@@ -1394,12 +1411,13 @@ ProxyConnection::ProxyConnection(Port* port, size_t index,
 }
 
 int ProxyConnection::Send(const void* data, size_t size,
-                          talk_base::DiffServCodePoint dscp) {
+                          const talk_base::PacketOptions& options) {
   if (write_state_ == STATE_WRITE_INIT || write_state_ == STATE_WRITE_TIMEOUT) {
     error_ = EWOULDBLOCK;
     return SOCKET_ERROR;
   }
-  int sent = port_->SendTo(data, size, remote_candidate_.address(), dscp, true);
+  int sent = port_->SendTo(data, size, remote_candidate_.address(),
+                           options, true);
   if (sent <= 0) {
     ASSERT(sent < 0);
     error_ = port_->GetError();

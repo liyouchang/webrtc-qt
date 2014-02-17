@@ -167,7 +167,7 @@ P2PTransportChannel::P2PTransportChannel(const std::string& content_name,
     pending_best_connection_(NULL),
     sort_dirty_(false),
     was_writable_(false),
-    protocol_type_(ICEPROTO_GOOGLE),
+    protocol_type_(ICEPROTO_HYBRID),
     remote_ice_mode_(ICEMODE_FULL),
     ice_role_(ICEROLE_UNKNOWN),
     tiebreaker_(0),
@@ -235,6 +235,11 @@ void P2PTransportChannel::SetIceTiebreaker(uint64 tiebreaker) {
   }
 
   tiebreaker_ = tiebreaker;
+}
+
+bool P2PTransportChannel::GetIceProtocolType(IceProtocolType* type) const {
+  *type = protocol_type_;
+  return true;
 }
 
 void P2PTransportChannel::SetIceProtocolType(IceProtocolType type) {
@@ -467,7 +472,7 @@ void P2PTransportChannel::OnUnknownAddress(
     // Create a new candidate with this address.
 
     std::string type;
-    if (protocol_type_ == ICEPROTO_RFC5245) {
+    if (port->IceProtocol() == ICEPROTO_RFC5245) {
       type = PRFLX_PORT_TYPE;
     } else {
       // G-ICE doesn't support prflx candidate.
@@ -488,10 +493,11 @@ void P2PTransportChannel::OnUnknownAddress(
         port->Network()->name(), 0U,
         talk_base::ToString<uint32>(talk_base::ComputeCrc32(id)));
     new_remote_candidate.set_priority(
-        new_remote_candidate.GetPriority(ICE_TYPE_PREFERENCE_SRFLX));
+        new_remote_candidate.GetPriority(ICE_TYPE_PREFERENCE_SRFLX,
+                                         port->Network()->preference()));
   }
 
-  if (protocol_type_ == ICEPROTO_RFC5245) {
+  if (port->IceProtocol() == ICEPROTO_RFC5245) {
     // RFC 5245
     // If the source transport address of the request does not match any
     // existing remote candidates, it represents a new peer reflexive remote
@@ -789,7 +795,7 @@ int P2PTransportChannel::SetOption(talk_base::Socket::Option opt, int value) {
 
 // Send data to the other side, using our best connection.
 int P2PTransportChannel::SendPacket(const char *data, size_t len,
-                                    talk_base::DiffServCodePoint dscp,
+                                    const talk_base::PacketOptions& options,
                                     int flags) {
   ASSERT(worker_thread_ == talk_base::Thread::Current());
   if (flags != 0) {
@@ -801,7 +807,7 @@ int P2PTransportChannel::SendPacket(const char *data, size_t len,
     return -1;
   }
 
-  int sent = best_connection_->Send(data, len, dscp);
+  int sent = best_connection_->Send(data, len, options);
   if (sent <= 0) {
     ASSERT(sent < 0);
     error_ = best_connection_->GetError();
@@ -883,6 +889,15 @@ void P2PTransportChannel::SortConnections() {
   // Make sure the connection states are up-to-date since this affects how they
   // will be sorted.
   UpdateConnectionStates();
+
+  if (protocol_type_ == ICEPROTO_HYBRID) {
+    // If we are in hybrid mode, we are not sending any ping requests, so there
+    // is no point in sorting the connections. In hybrid state, ports can have
+    // different protocol than hybrid and protocol may differ from one another.
+    // Instead just update the state of this channel
+    UpdateChannelState();
+    return;
+  }
 
   // Any changes after this point will require a re-sort.
   sort_dirty_ = false;
@@ -995,8 +1010,10 @@ void P2PTransportChannel::UpdateChannelState() {
 
   bool readable = false;
   for (uint32 i = 0; i < connections_.size(); ++i) {
-    if (connections_[i]->read_state() == Connection::STATE_READABLE)
+    if (connections_[i]->read_state() == Connection::STATE_READABLE) {
       readable = true;
+      break;
+    }
   }
   set_readable(readable);
 }
@@ -1209,6 +1226,8 @@ void P2PTransportChannel::OnConnectionDestroyed(Connection* connection) {
     SwitchBestConnectionTo(NULL);
     RequestSort();
   }
+
+  SignalConnectionRemoved(this);
 }
 
 // When a port is destroyed remove it from our list of ports to use for

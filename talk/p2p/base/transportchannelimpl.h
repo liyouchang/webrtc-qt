@@ -53,7 +53,9 @@ class TransportChannelImpl : public TransportChannel {
   virtual IceRole GetIceRole() const = 0;
   virtual void SetIceRole(IceRole role) = 0;
   virtual void SetIceTiebreaker(uint64 tiebreaker) = 0;
+  virtual size_t GetConnectionCount() const = 0;
   // To toggle G-ICE/ICE.
+  virtual bool GetIceProtocolType(IceProtocolType* type) const = 0;
   virtual void SetIceProtocolType(IceProtocolType type) = 0;
   // SetIceCredentials only need to be implemented by the ICE
   // transport channels. Non-ICE transport channels can just ignore.
@@ -112,6 +114,10 @@ class TransportChannelImpl : public TransportChannel {
   // Invoked when there is conflict in the ICE role between local and remote
   // agents.
   sigslot::signal1<TransportChannelImpl*> SignalRoleConflict;
+
+  // Emitted whenever the number of connections available to the transport
+  // channel decreases.
+  sigslot::signal1<TransportChannelImpl*> SignalConnectionRemoved;
 
  private:
   DISALLOW_EVIL_CONSTRUCTORS(TransportChannelImpl);

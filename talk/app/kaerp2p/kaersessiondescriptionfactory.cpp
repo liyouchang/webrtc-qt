@@ -1,7 +1,7 @@
 #include "kaersessiondescriptionfactory.h"
 #include "KaerSession.h"
 #include "talk/app/webrtc/jsepsessiondescription.h"
-
+#include "talk/base/stringencode.h"
 namespace kaerp2p {
 
 static const uint64 kInitSessionVersion = 2;

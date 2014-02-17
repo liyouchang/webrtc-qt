@@ -153,7 +153,7 @@ class TurnEntry : public sigslot::has_slots<> {
   // Sends a packet to the given destination address.
   // This will wrap the packet in STUN if necessary.
   int Send(const void* data, size_t size, bool payload,
-           talk_base::DiffServCodePoint dscp);
+           const talk_base::PacketOptions& options);
 
   void OnCreatePermissionSuccess();
   void OnCreatePermissionError(StunMessage* response, int code);
@@ -194,6 +194,9 @@ TurnPort::~TurnPort() {
   // TODO(juberti): Should this even be necessary?
   while (!entries_.empty()) {
     DestroyEntry(entries_.front()->address());
+  }
+  if (resolver_) {
+    resolver_->Destroy(false);
   }
 }
 
@@ -301,14 +304,6 @@ Connection* TurnPort::CreateConnection(const Candidate& address,
 }
 
 int TurnPort::SetOption(talk_base::Socket::Option opt, int value) {
-  // DSCP option is not passed to the socket.
-  // TODO(mallinath) - After we have the support on socket,
-  // remove this specialization.
-  if (opt == talk_base::Socket::OPT_DSCP) {
-    SetDefaultDscpValue(static_cast<talk_base::DiffServCodePoint>(value));
-    return 0;
-  }
-
   if (!socket_) {
     // If socket is not created yet, these options will be applied during socket
     // creation.
@@ -319,8 +314,14 @@ int TurnPort::SetOption(talk_base::Socket::Option opt, int value) {
 }
 
 int TurnPort::GetOption(talk_base::Socket::Option opt, int* value) {
-  if (!socket_)
-    return -1;
+  if (!socket_) {
+    SocketOptionsMap::const_iterator it = socket_options_.find(opt);
+    if (it == socket_options_.end()) {
+      return -1;
+    }
+    *value = it->second;
+    return 0;
+  }
 
   return socket_->GetOption(opt, value);
 }
@@ -331,7 +332,7 @@ int TurnPort::GetError() {
 
 int TurnPort::SendTo(const void* data, size_t size,
                      const talk_base::SocketAddress& addr,
-                     talk_base::DiffServCodePoint dscp,
+                     const talk_base::PacketOptions& options,
                      bool payload) {
   // Try to find an entry for this specific address; we should have one.
   TurnEntry* entry = FindEntry(addr);
@@ -346,7 +347,7 @@ int TurnPort::SendTo(const void* data, size_t size,
   }
 
   // Send the actual contents to the server using the usual mechanism.
-  int sent = entry->Send(data, size, payload, dscp);
+  int sent = entry->Send(data, size, payload, options);
   if (sent <= 0) {
     return SOCKET_ERROR;
   }
@@ -420,7 +421,8 @@ void TurnPort::OnResolveResult(talk_base::AsyncResolverInterface* resolver) {
 
 void TurnPort::OnSendStunPacket(const void* data, size_t size,
                                 StunRequest* request) {
-  if (Send(data, size, DefaultDscpValue()) < 0) {
+  talk_base::PacketOptions options(DefaultDscpValue());
+  if (Send(data, size, options) < 0) {
     LOG_J(LS_ERROR, this) << "Failed to send TURN message, err="
                           << socket_->GetError();
   }
@@ -577,8 +579,8 @@ void TurnPort::AddRequestAuthInfo(StunMessage* msg) {
 }
 
 int TurnPort::Send(const void* data, size_t len,
-                   talk_base::DiffServCodePoint dscp) {
-  return socket_->SendTo(data, len, server_address_.address, dscp);
+                   const talk_base::PacketOptions& options) {
+  return socket_->SendTo(data, len, server_address_.address, options);
 }
 
 void TurnPort::UpdateHash() {
@@ -911,7 +913,7 @@ void TurnEntry::SendChannelBindRequest(int delay) {
 }
 
 int TurnEntry::Send(const void* data, size_t size, bool payload,
-                    talk_base::DiffServCodePoint dscp) {
+                    const talk_base::PacketOptions& options) {
   talk_base::ByteBuffer buf;
   if (state_ != STATE_BOUND) {
     // If we haven't bound the channel yet, we have to use a Send Indication.
@@ -936,7 +938,7 @@ int TurnEntry::Send(const void* data, size_t size, bool payload,
     buf.WriteUInt16(static_cast<uint16>(size));
     buf.WriteBytes(reinterpret_cast<const char*>(data), size);
   }
-  return port_->Send(buf.Data(), buf.Length(), dscp);
+  return port_->Send(buf.Data(), buf.Length(), options);
 }
 
 void TurnEntry::OnCreatePermissionSuccess() {

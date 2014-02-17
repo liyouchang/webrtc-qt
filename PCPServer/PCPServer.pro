@@ -16,8 +16,21 @@ TEMPLATE = app
 
 
 
-Debug:DESTDIR = $$PWD/../Debug
-Release:DESTDIR = $$PWD/../Release
+DESTDIR = $$PWD/../bin
+win32 {
+
+Debug:DEFINES +=_DEBUG
+Release:DEFINES +=
+DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
+
+
+} else:mac {
+} else {
+    Debug:DEFINES +=_DEBUG
+    Release:DEFINES +=
+    DEFINES += POSIX
+}
+
 
 INCLUDEPATH     += $$PWD/.. \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
@@ -25,10 +38,6 @@ INCLUDEPATH     += $$PWD/.. \
 DEFINES += JSONCPP_RELATIVE_PATH
 
 win32 {
-
-Debug:DEFINES +=_DEBUG
-
-Release:DEFINES +=
 
 DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 
@@ -39,7 +48,7 @@ LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -lu
 }
 
 
-LIBS += -L$$DESTDIR -L$$DESTDIR/lib \
+LIBS += -L$$DESTDIR  \
         -ljsoncpp -llibjingle -llibjingle_p2p -llibjingle_app
 
 

@@ -13,11 +13,9 @@ CONFIG += staticlib
 CONFIG -= app_bundle
 CONFIG -= qt
 
+DESTDIR = $$PWD/../bin
 
-Debug:DESTDIR = ../Debug
-Release:DESTDIR = ../Release
-
-INCLUDEPATH     += ..
+INCLUDEPATH += ..
 
 
 
@@ -32,6 +30,11 @@ DEFINES += _UNICODE UNICODE
 
 } else:mac {
 } else {
+    Debug:DEFINES +=_DEBUG
+
+    Release:DEFINES +=
+
+    DEFINES += POSIX
 }
 
 SOURCES += \

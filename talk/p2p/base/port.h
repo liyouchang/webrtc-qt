@@ -262,10 +262,6 @@ class Port : public PortInterface, public talk_base::MessageHandler,
 
   virtual void EnablePortPackets();
 
-  // Indicates to the port that its official use has now begun.  This will
-  // start the timer that checks to see if the port is being used.
-  void Start();
-
   // Called if the port has no connections and is no longer useful.
   void Destroy();
 
@@ -277,11 +273,15 @@ class Port : public PortInterface, public talk_base::MessageHandler,
   int min_port() { return min_port_; }
   int max_port() { return max_port_; }
 
+  // Timeout shortening function to speed up unit tests.
+  void set_timeout_delay(int delay) { timeout_delay_ = delay; }
+
   // This method will return local and remote username fragements from the
   // stun username attribute if present.
   bool ParseStunUsername(const StunMessage* stun_msg,
                          std::string* local_username,
-                         std::string* remote_username) const;
+                         std::string* remote_username,
+                         IceProtocolType* remote_protocol_type) const;
   void CreateStunUsername(const std::string& remote_username,
                           std::string* stun_username_attr_str) const;
 
@@ -302,10 +302,8 @@ class Port : public PortInterface, public talk_base::MessageHandler,
   // Returns if Google ICE protocol is used.
   bool IsGoogleIce() const;
 
-  // Returns default DSCP value.
-  talk_base::DiffServCodePoint DefaultDscpValue() const {
-    return default_dscp_;
-  }
+  // Returns if Hybrid ICE protocol is used.
+  bool IsHybridIce() const;
 
  protected:
   enum {
@@ -342,9 +340,10 @@ class Port : public PortInterface, public talk_base::MessageHandler,
   // Checks if the address in addr is compatible with the port's ip.
   bool IsCompatibleAddress(const talk_base::SocketAddress& addr);
 
-  // Default DSCP value for this port. Set by TransportChannel.
-  void SetDefaultDscpValue(talk_base::DiffServCodePoint dscp) {
-    default_dscp_ = dscp;
+  // Returns default DSCP value.
+  talk_base::DiffServCodePoint DefaultDscpValue() const {
+    // No change from what MediaChannel set.
+    return talk_base::DSCP_NO_CHANGE;
   }
 
  private:
@@ -379,15 +378,12 @@ class Port : public PortInterface, public talk_base::MessageHandler,
   std::string password_;
   std::vector<Candidate> candidates_;
   AddressMap connections_;
-  enum Lifetime { LT_PRESTART, LT_PRETIMEOUT, LT_POSTTIMEOUT } lifetime_;
+  int timeout_delay_;
   bool enable_port_packets_;
   IceProtocolType ice_protocol_;
   IceRole ice_role_;
   uint64 tiebreaker_;
   bool shared_socket_;
-  // DSCP value for ICE/STUN messages. Set by the P2PTransportChannel after
-  // port becomes ready.
-  talk_base::DiffServCodePoint default_dscp_;
   // Information to use when going through a proxy.
   std::string user_agent_;
   talk_base::ProxyInfo proxy_;
@@ -463,7 +459,7 @@ class Connection : public talk_base::MessageHandler,
   // the interface of AsyncPacketSocket, which may use UDP or TCP under the
   // covers.
   virtual int Send(const void* data, size_t size,
-                   talk_base::DiffServCodePoint dscp) = 0;
+                   const talk_base::PacketOptions& options) = 0;
 
   // Error if Send() returns < 0
   virtual int GetError() = 0;
@@ -595,7 +591,7 @@ class ProxyConnection : public Connection {
   ProxyConnection(Port* port, size_t index, const Candidate& candidate);
 
   virtual int Send(const void* data, size_t size,
-                   talk_base::DiffServCodePoint dscp);
+                   const talk_base::PacketOptions& options);
   virtual int GetError() { return error_; }
 
  private:

@@ -3,6 +3,7 @@
 #include "talk/app/kaerp2p/kaersessiondescriptionfactory.h"
 #include "talk/p2p/base/constants.h"
 #include "talk/p2p/base/sessiondescription.h"
+#include "talk/base/stringencode.h"
 
 using cricket::ContentInfo;
 using cricket::ContentInfos;
@@ -496,8 +497,9 @@ bool KaerSession::UpdateSessionState(KaerSession::Action action, cricket::Conten
     // If there's already a pending error then no state transition should happen.
     // But all call-sites should be verifying this before calling us!
     ASSERT(error() == cricket::BaseSession::ERROR_NONE);
+    std::string td_err;
     if (action == kOffer) {
-        if (!PushdownTransportDescription(source, cricket::CA_OFFER)) {
+        if (!PushdownTransportDescription(source, cricket::CA_OFFER,&td_err)) {
             return BadSdp(source, kPushDownOfferTDFailed, err_desc);
         }
         SetState(source == cricket::CS_LOCAL ?
@@ -506,7 +508,7 @@ bool KaerSession::UpdateSessionState(KaerSession::Action action, cricket::Conten
             return SetSessionStateFailed(source, error(), err_desc);
         }
     } else if (action == kPrAnswer) {
-        if (!PushdownTransportDescription(source, cricket::CA_PRANSWER)) {
+        if (!PushdownTransportDescription(source, cricket::CA_PRANSWER,&td_err)) {
             return BadSdp(source, kPushDownPranswerTDFailed, err_desc);
         }
         EnableChannels();
@@ -516,7 +518,7 @@ bool KaerSession::UpdateSessionState(KaerSession::Action action, cricket::Conten
             return SetSessionStateFailed(source, error(), err_desc);
         }
     } else if (action == kAnswer) {
-        if (!PushdownTransportDescription(source, cricket::CA_ANSWER)) {
+        if (!PushdownTransportDescription(source, cricket::CA_ANSWER,&td_err)) {
             return BadSdp(source, kPushDownAnswerTDFailed, err_desc);
         }
         MaybeEnableMuxingSupport();

@@ -2046,42 +2046,42 @@ static const StaticPayloadAudioCodec kStaticPayloadAudioCodecs[] = {
 //  }
 //}
 
-template <class C>
-static C* ParseContentDescription(const std::string& message,
-                                  const MediaType media_type,
-                                  int mline_index,
-                                  const std::string& protocol,
-                                  const std::vector<int>& codec_preference,
-                                  size_t* pos,
-                                  std::string* content_name,
-                                  TransportDescription* transport,
-                                  std::vector<JsepIceCandidate*>* candidates,
-                                  webrtc::SdpParseError* error) {
-    C* media_desc = new C();
-    switch (media_type) {
-    case cricket::MEDIA_TYPE_AUDIO:
-        *content_name = cricket::CN_AUDIO;
-        break;
-    case cricket::MEDIA_TYPE_VIDEO:
-        *content_name = cricket::CN_VIDEO;
-        break;
-    case cricket::MEDIA_TYPE_DATA:
-        *content_name = cricket::CN_DATA;
-        break;
-    default:
-        ASSERT(false);
-        break;
-    }
-    if (!ParseContent(message, media_type, mline_index, protocol,
-                      codec_preference, pos, content_name,
-                      media_desc, transport, candidates, error)) {
-        delete media_desc;
-        return NULL;
-    }
-    // Sort the codecs according to the m-line fmt list.
-    media_desc->SortCodecs();
-    return media_desc;
-}
+//template <class C>
+//static C* ParseContentDescription(const std::string& message,
+//                                  const MediaType media_type,
+//                                  int mline_index,
+//                                  const std::string& protocol,
+//                                  const std::vector<int>& codec_preference,
+//                                  size_t* pos,
+//                                  std::string* content_name,
+//                                  TransportDescription* transport,
+//                                  std::vector<JsepIceCandidate*>* candidates,
+//                                  webrtc::SdpParseError* error) {
+//    C* media_desc = new C();
+//    switch (media_type) {
+//    case cricket::MEDIA_TYPE_AUDIO:
+//        *content_name = cricket::CN_AUDIO;
+//        break;
+//    case cricket::MEDIA_TYPE_VIDEO:
+//        *content_name = cricket::CN_VIDEO;
+//        break;
+//    case cricket::MEDIA_TYPE_DATA:
+//        *content_name = cricket::CN_DATA;
+//        break;
+//    default:
+//        ASSERT(false);
+//        break;
+//    }
+//    if (!ParseContent(message, media_type, mline_index, protocol,
+//                      codec_preference, pos, content_name,
+//                      media_desc, transport, candidates, error)) {
+//        delete media_desc;
+//        return NULL;
+//    }
+//    // Sort the codecs according to the m-line fmt list.
+//    media_desc->SortCodecs();
+//    return media_desc;
+//}
 
 //bool ParseMediaDescription(const std::string& message,
 //                           const TransportDescription& session_td,

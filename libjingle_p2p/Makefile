@@ -12,7 +12,7 @@ MAKEFILE      = Makefile
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG
+DEFINES       = -DPOSIX -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG
 CFLAGS        = -pipe -g -fPIC -Wall -W $(DEFINES)
 CXXFLAGS      = -pipe -g -fPIC -Wall -W $(DEFINES)
 INCPATH       = -I../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++ -I. -I..
@@ -197,7 +197,7 @@ DIST          = ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		libjingle_p2p.pro \
 		libjingle_p2p.pro
 QMAKE_TARGET  = libjingle_p2p
-DESTDIR       = #avoid trailing-slash linebreak
+DESTDIR       = ../bin/#avoid trailing-slash linebreak
 TARGET        = liblibjingle_p2p.a
 
 
@@ -223,13 +223,16 @@ first: all
 
 ####### Build rules
 
-all: Makefile $(TARGET) 
+all: Makefile ../bin/$(TARGET) 
 
-staticlib: $(TARGET)
+staticlib: ../bin/$(TARGET)
 
-$(TARGET):  $(OBJECTS) $(OBJCOMP) 
+../bin/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
+	@test -d ../bin/ || mkdir -p ../bin/
 	-$(DEL_FILE) $(TARGET)
 	$(AR) $(TARGET) $(OBJECTS)
+	-$(DEL_FILE) ../bin/$(TARGET)
+	-$(MOVE) $(TARGET) ../bin/ 
 
 
 Makefile: libjingle_p2p.pro ../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++/qmake.conf ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
@@ -449,7 +452,7 @@ clean:compiler_clean
 ####### Sub-libraries
 
 distclean: clean
-	-$(DEL_FILE) $(TARGET) 
+	-$(DEL_FILE) ../bin/$(TARGET) 
 	-$(DEL_FILE) Makefile
 
 
@@ -752,7 +755,6 @@ portallocator.o: ../talk/p2p/base/portallocator.cc ../talk/p2p/base/portallocato
 		../talk/base/template_util.h \
 		../talk/base/sigslot.h \
 		../talk/p2p/base/portinterface.h \
-		../talk/base/dscp.h \
 		../talk/p2p/base/transport.h \
 		../talk/base/criticalsection.h \
 		../talk/base/messagequeue.h \
@@ -919,7 +921,6 @@ portallocatorsessionproxy.o: ../talk/p2p/base/portallocatorsessionproxy.cc ../ta
 		../talk/base/template_util.h \
 		../talk/base/sigslot.h \
 		../talk/p2p/base/portinterface.h \
-		../talk/base/dscp.h \
 		../talk/p2p/base/transport.h \
 		../talk/base/criticalsection.h \
 		../talk/base/messagequeue.h \
@@ -1159,7 +1160,6 @@ portproxy.o: ../talk/p2p/base/portproxy.cc ../talk/p2p/base/portproxy.h \
 		../talk/base/basictypes.h \
 		../talk/base/constructormagic.h \
 		../talk/p2p/base/portinterface.h \
-		../talk/base/dscp.h \
 		../talk/base/socketaddress.h \
 		../talk/base/ipaddress.h \
 		../talk/base/byteorder.h \
@@ -1440,7 +1440,8 @@ session.o: ../talk/p2p/base/session.cc ../talk/p2p/base/session.h \
 		../talk/p2p/base/transportchannelimpl.h \
 		../talk/p2p/base/transportchannel.h \
 		../talk/p2p/base/p2ptransport.h \
-		../talk/p2p/base/transportchannelproxy.h
+		../talk/p2p/base/transportchannelproxy.h \
+		../talk/base/stringencode.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o session.o ../talk/p2p/base/session.cc
 
 sessiondescription.o: ../talk/p2p/base/sessiondescription.cc ../talk/p2p/base/sessiondescription.h \

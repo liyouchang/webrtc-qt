@@ -14,12 +14,26 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
-DESTDIR = $$PWD/../bin
 
 #unix {
 #    target.path = /usr/lib
 #    INSTALLS += target
 #}
+
+DESTDIR = $$PWD/../bin
+win32 {
+
+Debug:DEFINES +=_DEBUG
+Release:DEFINES +=
+DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
+
+
+} else:mac {
+} else {
+    Debug:DEFINES +=_DEBUG
+    Release:DEFINES +=
+    DEFINES += POSIX
+}
 
 
 
@@ -29,13 +43,8 @@ INCLUDEPATH     += ../talk/.. \
 DEFINES += JSONCPP_RELATIVE_PATH
 
 
+#operating system depend files
 win32 {
-
-Debug:DEFINES +=_DEBUG
-
-Release:DEFINES +=
-
-DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 
 SOURCES += \
     ../talk/base/win32securityerrors.cc \
@@ -55,17 +64,9 @@ HEADERS += \
     ../talk/base/win32.h \
     ../talk/base/schanneladapter.h \
 
-
-} else:mac {
-} else {
-    Debug:DEFINES +=_DEBUG
-
-    Release:DEFINES +=
-
-    DEFINES += POSIX
+}else{
 
 }
-
 
 SOURCES += \
     ../talk/base/socketaddress.cc \
