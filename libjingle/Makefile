@@ -12,7 +12,7 @@ MAKEFILE      = Makefile
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DJSONCPP_RELATIVE_PATH -DPOSIX -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG
+DEFINES       = -DPOSIX -DJSONCPP_RELATIVE_PATH -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG
 CFLAGS        = -pipe -g -fPIC -Wall -W $(DEFINES)
 CXXFLAGS      = -pipe -g -fPIC -Wall -W $(DEFINES)
 INCPATH       = -I../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++ -I. -I.. -I../third_party/jsoncpp/overrides/include -I../third_party/jsoncpp/source/include
@@ -42,7 +42,11 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../talk/base/socketaddress.cc \
+SOURCES       = ../talk/base/posix.cc \
+		../talk/base/linux.cc \
+		../talk/base/linuxwindowpicker.cc \
+		../talk/base/linuxfdwalk.c \
+		../talk/base/socketaddress.cc \
 		../talk/base/ipaddress.cc \
 		../talk/base/nethelpers.cc \
 		../talk/base/signalthread.cc \
@@ -79,8 +83,13 @@ SOURCES       = ../talk/base/socketaddress.cc \
 		../talk/base/sslstreamadapter.cc \
 		../talk/base/json.cc \
 		../talk/base/stringutils.cc \
-		../talk/base/asynctcpsocket.cc 
-OBJECTS       = socketaddress.o \
+		../talk/base/asynctcpsocket.cc \
+		../talk/base/asyncfile.cc 
+OBJECTS       = posix.o \
+		linux.o \
+		linuxwindowpicker.o \
+		linuxfdwalk.o \
+		socketaddress.o \
 		ipaddress.o \
 		nethelpers.o \
 		signalthread.o \
@@ -117,7 +126,8 @@ OBJECTS       = socketaddress.o \
 		sslstreamadapter.o \
 		json.o \
 		stringutils.o \
-		asynctcpsocket.o
+		asynctcpsocket.o \
+		asyncfile.o
 DIST          = ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/common/shell-unix.conf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/common/unix.conf \
@@ -489,6 +499,65 @@ compiler_lex_clean:
 compiler_clean: 
 
 ####### Compile
+
+posix.o: ../talk/base/posix.cc ../talk/base/posix.h \
+		../talk/base/linuxfdwalk.h \
+		../talk/base/logging.h \
+		../talk/base/basictypes.h \
+		../talk/base/constructormagic.h \
+		../talk/base/criticalsection.h \
+		../talk/base/win32.h \
+		../talk/base/stringutils.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o posix.o ../talk/base/posix.cc
+
+linux.o: ../talk/base/linux.cc ../talk/base/linux.h \
+		../talk/base/scoped_ptr.h \
+		../talk/base/common.h \
+		../talk/base/basictypes.h \
+		../talk/base/constructormagic.h \
+		../talk/base/compile_assert.h \
+		../talk/base/move.h \
+		../talk/base/template_util.h \
+		../talk/base/stream.h \
+		../talk/base/buffer.h \
+		../talk/base/criticalsection.h \
+		../talk/base/win32.h \
+		../talk/base/stringutils.h \
+		../talk/base/logging.h \
+		../talk/base/messagehandler.h \
+		../talk/base/messagequeue.h \
+		../talk/base/scoped_ref_ptr.h \
+		../talk/base/sigslot.h \
+		../talk/base/socketserver.h \
+		../talk/base/socketfactory.h \
+		../talk/base/socket.h \
+		../talk/base/socketaddress.h \
+		../talk/base/ipaddress.h \
+		../talk/base/byteorder.h \
+		../talk/base/asyncsocket.h \
+		../talk/base/timeutils.h \
+		../talk/base/stringencode.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o linux.o ../talk/base/linux.cc
+
+linuxwindowpicker.o: ../talk/base/linuxwindowpicker.cc ../talk/base/linuxwindowpicker.h \
+		../talk/base/basictypes.h \
+		../talk/base/constructormagic.h \
+		../talk/base/scoped_ptr.h \
+		../talk/base/common.h \
+		../talk/base/compile_assert.h \
+		../talk/base/move.h \
+		../talk/base/template_util.h \
+		../talk/base/windowpicker.h \
+		../talk/base/window.h \
+		../talk/base/stringencode.h \
+		../talk/base/win32.h \
+		../talk/base/stringutils.h \
+		../talk/base/logging.h \
+		../talk/base/criticalsection.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o linuxwindowpicker.o ../talk/base/linuxwindowpicker.cc
+
+linuxfdwalk.o: ../talk/base/linuxfdwalk.c ../talk/base/linuxfdwalk.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o linuxfdwalk.o ../talk/base/linuxfdwalk.c
 
 socketaddress.o: ../talk/base/socketaddress.cc ../talk/base/socketaddress.h \
 		../talk/base/basictypes.h \
@@ -1279,6 +1348,14 @@ asynctcpsocket.o: ../talk/base/asynctcpsocket.cc ../talk/base/asynctcpsocket.h \
 		../talk/base/logging.h \
 		../talk/base/criticalsection.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o asynctcpsocket.o ../talk/base/asynctcpsocket.cc
+
+asyncfile.o: ../talk/base/asyncfile.cc ../talk/base/asyncfile.h \
+		../talk/base/sigslot.h \
+		../talk/base/win32.h \
+		../talk/base/stringutils.h \
+		../talk/base/basictypes.h \
+		../talk/base/constructormagic.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o asyncfile.o ../talk/base/asyncfile.cc
 
 ####### Install
 

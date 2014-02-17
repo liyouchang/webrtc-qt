@@ -24,63 +24,12 @@ SYMLINK       = ln -f -s
 DEL_DIR       = rmdir
 MOVE          = mv -f
 SUBTARGETS    =  \
-		sub-PCPServer \
-		sub-PCPClient \
 		sub-libjingle \
 		sub-libjingle_p2p \
-		sub-libjingle_app
+		sub-libjingle_app \
+		sub-PCPLinux
 
 
-sub-PCPServer-qmake_all:  FORCE
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile
-	cd PCPServer/ && $(MAKE) -f Makefile qmake_all
-sub-PCPServer: FORCE
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile
-sub-PCPServer-make_first: FORCE
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile 
-sub-PCPServer-all: FORCE
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile all
-sub-PCPServer-clean: FORCE
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile clean
-sub-PCPServer-distclean: FORCE
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile distclean
-sub-PCPServer-install_subtargets: FORCE
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile install
-sub-PCPServer-uninstall_subtargets: FORCE
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile uninstall
-sub-PCPClient-qmake_all:  FORCE
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile
-	cd PCPClient/ && $(MAKE) -f Makefile qmake_all
-sub-PCPClient: FORCE
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile
-sub-PCPClient-make_first: FORCE
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile 
-sub-PCPClient-all: FORCE
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile all
-sub-PCPClient-clean: FORCE
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile clean
-sub-PCPClient-distclean: FORCE
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile distclean
-sub-PCPClient-install_subtargets: FORCE
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile install
-sub-PCPClient-uninstall_subtargets: FORCE
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile uninstall
 sub-libjingle-qmake_all:  FORCE
 	@test -d libjingle/ || mkdir -p libjingle/
 	cd libjingle/ && $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile
@@ -156,6 +105,31 @@ sub-libjingle_app-install_subtargets: FORCE
 sub-libjingle_app-uninstall_subtargets: FORCE
 	@test -d libjingle_app/ || mkdir -p libjingle_app/
 	cd libjingle_app/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_app/libjingle_app.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile uninstall
+sub-PCPLinux-qmake_all:  FORCE
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile
+	cd PCPLinux/ && $(MAKE) -f Makefile qmake_all
+sub-PCPLinux: FORCE
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile
+sub-PCPLinux-make_first: FORCE
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile 
+sub-PCPLinux-all: FORCE
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile all
+sub-PCPLinux-clean: FORCE
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile clean
+sub-PCPLinux-distclean: FORCE
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile distclean
+sub-PCPLinux-install_subtargets: FORCE
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile install
+sub-PCPLinux-uninstall_subtargets: FORCE
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile uninstall
 
 Makefile: P2PSystem.pro ../../Qt/5.2.1/gcc_64/mkspecs/linux-g++/qmake.conf ../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../Qt/5.2.1/gcc_64/mkspecs/common/shell-unix.conf \
@@ -359,22 +333,16 @@ P2PSystem.pro:
 qmake: FORCE
 	@$(QMAKE) -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile P2PSystem.pro
 
-qmake_all: sub-PCPServer-qmake_all sub-PCPClient-qmake_all sub-libjingle-qmake_all sub-libjingle_p2p-qmake_all sub-libjingle_app-qmake_all FORCE
+qmake_all: sub-libjingle-qmake_all sub-libjingle_p2p-qmake_all sub-libjingle_app-qmake_all sub-PCPLinux-qmake_all FORCE
 
-make_first: sub-PCPServer-make_first sub-PCPClient-make_first sub-libjingle-make_first sub-libjingle_p2p-make_first sub-libjingle_app-make_first FORCE
-all: sub-PCPServer-all sub-PCPClient-all sub-libjingle-all sub-libjingle_p2p-all sub-libjingle_app-all FORCE
-clean: sub-PCPServer-clean sub-PCPClient-clean sub-libjingle-clean sub-libjingle_p2p-clean sub-libjingle_app-clean FORCE
-distclean: sub-PCPServer-distclean sub-PCPClient-distclean sub-libjingle-distclean sub-libjingle_p2p-distclean sub-libjingle_app-distclean FORCE
+make_first: sub-libjingle-make_first sub-libjingle_p2p-make_first sub-libjingle_app-make_first sub-PCPLinux-make_first FORCE
+all: sub-libjingle-all sub-libjingle_p2p-all sub-libjingle_app-all sub-PCPLinux-all FORCE
+clean: sub-libjingle-clean sub-libjingle_p2p-clean sub-libjingle_app-clean sub-PCPLinux-clean FORCE
+distclean: sub-libjingle-distclean sub-libjingle_p2p-distclean sub-libjingle_app-distclean sub-PCPLinux-distclean FORCE
 	-$(DEL_FILE) Makefile
-install_subtargets: sub-PCPServer-install_subtargets sub-PCPClient-install_subtargets sub-libjingle-install_subtargets sub-libjingle_p2p-install_subtargets sub-libjingle_app-install_subtargets FORCE
-uninstall_subtargets: sub-PCPServer-uninstall_subtargets sub-PCPClient-uninstall_subtargets sub-libjingle-uninstall_subtargets sub-libjingle_p2p-uninstall_subtargets sub-libjingle_app-uninstall_subtargets FORCE
+install_subtargets: sub-libjingle-install_subtargets sub-libjingle_p2p-install_subtargets sub-libjingle_app-install_subtargets sub-PCPLinux-install_subtargets FORCE
+uninstall_subtargets: sub-libjingle-uninstall_subtargets sub-libjingle_p2p-uninstall_subtargets sub-libjingle_app-uninstall_subtargets sub-PCPLinux-uninstall_subtargets FORCE
 
-sub-PCPServer-check:
-	@test -d PCPServer/ || mkdir -p PCPServer/
-	cd PCPServer/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPServer/PCPServer.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile check
-sub-PCPClient-check:
-	@test -d PCPClient/ || mkdir -p PCPClient/
-	cd PCPClient/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPClient/PCPClient.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile check
 sub-libjingle-check:
 	@test -d libjingle/ || mkdir -p libjingle/
 	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile check
@@ -384,7 +352,10 @@ sub-libjingle_p2p-check:
 sub-libjingle_app-check:
 	@test -d libjingle_app/ || mkdir -p libjingle_app/
 	cd libjingle_app/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_app/libjingle_app.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile check
-check: sub-PCPServer-check sub-PCPClient-check sub-libjingle-check sub-libjingle_p2p-check sub-libjingle_app-check
+sub-PCPLinux-check:
+	@test -d PCPLinux/ || mkdir -p PCPLinux/
+	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug CONFIG+=declarative_debug CONFIG+=qml_debug -o Makefile ) && $(MAKE) -f Makefile check
+check: sub-libjingle-check sub-libjingle_p2p-check sub-libjingle_app-check sub-PCPLinux-check
 install: install_subtargets  FORCE
 
 uninstall:  uninstall_subtargets FORCE

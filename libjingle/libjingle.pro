@@ -53,18 +53,33 @@ SOURCES += \
     ../talk/base/win32socketserver.cc \
     ../talk/base/win32window.cc \
     ../talk/base/schanneladapter.cc \
-    ../talk/base/win32socketserver.h \
-    ../talk/base/win32window.h \
     ../talk/base/win32.cc \
 
 
 HEADERS += \
+    ../talk/base/win32socketserver.h \
+    ../talk/base/win32window.h \
     ../talk/base/winping.h \
     ../talk/base/win32socketinit.h \
     ../talk/base/win32.h \
     ../talk/base/schanneladapter.h \
 
+
 }else{
+SOURCES += \
+    ../talk/base/posix.cc \
+    ../talk/base/linux.cc \
+    ../talk/base/linuxwindowpicker.cc \
+    ../talk/base/linuxfdwalk.c
+
+
+HEADERS += \
+    ../talk/base/posix.h \
+    ../talk/base/linux.h \
+    ../talk/base/linuxfdwalk.h \
+    ../talk/base/linuxwindowpicker.h
+
+
 
 }
 
@@ -107,6 +122,8 @@ SOURCES += \
     ../talk/base/json.cc \
     ../talk/base/stringutils.cc \
     ../talk/base/asynctcpsocket.cc \
+    ../talk/base/asyncfile.cc \
+
 
 
 HEADERS += \
@@ -149,3 +166,5 @@ HEADERS += \
     ../talk/base/sslstreamadapter.h \
     ../talk/base/json.h \
     ../talk/base/stringutils.h \
+    ../talk/base/asyncfile.h \
+

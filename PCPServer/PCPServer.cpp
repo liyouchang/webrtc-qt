@@ -3,8 +3,8 @@
 #include "talk/p2p/client/basicportallocator.h"
 
 #include "talk/app/kaerp2p/kaer_session_client.h"
-#include "talk/base/win32socketinit.h"
-#include "talk/base/win32socketserver.h"
+//#include "talk/base/win32socketinit.h"
+//#include "talk/base/win32socketserver.h"
 #include "talk/base/thread.h"
 
 #include "ServerConductor.h"
@@ -31,9 +31,9 @@ uint32 Loop(const std::vector<uint32>& ids) {
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    talk_base::EnsureWinsockInit();
-    talk_base::Win32Thread w32_thread;
-    talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
+//    talk_base::EnsureWinsockInit();
+//    talk_base::Win32Thread w32_thread;
+//    talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
 
     PeerConnectionClient client;
     talk_base::scoped_refptr<kaerp2p::ServerConductor> conductor(
