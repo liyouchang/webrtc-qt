@@ -375,7 +375,7 @@ void Conductor::OnSuccess(webrtc::SessionDescriptionInterface* desc) {
     talk_base::StreamInterface* stream = session_->GetStream();
     if(!fileProcess)
         fileProcess = new ClientFileProcess();
-    fileProcess->ProcessStream(stream,"test",false);
+    fileProcess->ProcessStream(stream,"test.txt",true);
 
 
     Json::StyledWriter writer;

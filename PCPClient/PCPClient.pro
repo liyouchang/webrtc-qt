@@ -12,8 +12,8 @@ TARGET = PCPClient
 TEMPLATE = app
 
 
-Debug:DESTDIR = $$PWD/../Debug
-Release:DESTDIR = $$PWD/../Release
+DESTDIR = $$PWD/../bin
+
 
 INCLUDEPATH     += $$PWD/.. \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
@@ -31,14 +31,15 @@ DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 
 LIBS += -lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -luser32
 
+
+LIBS += -L$$DESTDIR \
+           -ljsoncpp -ljingle -ljingle_p2p -ljingle_app
 } else:mac {
 } else {
 
 }
 
 
-LIBS += -L$$DESTDIR -L$$DESTDIR/lib \
-        -ljsoncpp -llibjingle -llibjingle_p2p -llibjingle_app
 
 
 
