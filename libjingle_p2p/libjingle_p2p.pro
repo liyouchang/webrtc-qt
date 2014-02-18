@@ -6,7 +6,7 @@
 
 QT       -= core gui
 
-TARGET = libjingle_p2p
+TARGET = jingle_p2p
 TEMPLATE = lib
 CONFIG += staticlib
 
@@ -30,11 +30,7 @@ DEFINES += _UNICODE UNICODE
 
 } else:mac {
 } else {
-    Debug:DEFINES +=_DEBUG
-
-    Release:DEFINES +=
-
-    DEFINES += POSIX
+    DEFINES += POSIX LOGGING=1
 }
 
 SOURCES += \

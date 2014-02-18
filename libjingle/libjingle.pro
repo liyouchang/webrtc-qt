@@ -6,7 +6,7 @@
 
 QT       -= core gui
 
-TARGET = libjingle
+TARGET = jingle
 TEMPLATE = lib
 CONFIG += staticlib
 
@@ -30,9 +30,7 @@ DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 
 } else:mac {
 } else {
-    Debug:DEFINES +=_DEBUG
-    Release:DEFINES +=
-    DEFINES += POSIX
+    DEFINES += POSIX LOGGING=1
 }
 
 
@@ -69,7 +67,6 @@ HEADERS += \
 SOURCES += \
     ../talk/base/posix.cc \
     ../talk/base/linux.cc \
-    ../talk/base/linuxwindowpicker.cc \
     ../talk/base/linuxfdwalk.c
 
 
@@ -77,7 +74,6 @@ HEADERS += \
     ../talk/base/posix.h \
     ../talk/base/linux.h \
     ../talk/base/linuxfdwalk.h \
-    ../talk/base/linuxwindowpicker.h
 
 
 
@@ -123,6 +119,7 @@ SOURCES += \
     ../talk/base/stringutils.cc \
     ../talk/base/asynctcpsocket.cc \
     ../talk/base/asyncfile.cc \
+    ../talk/base/sslfingerprint.cc
 
 
 
@@ -167,4 +164,5 @@ HEADERS += \
     ../talk/base/json.h \
     ../talk/base/stringutils.h \
     ../talk/base/asyncfile.h \
+    ../talk/base/sslfingerprint.h
 

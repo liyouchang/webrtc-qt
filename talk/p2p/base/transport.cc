@@ -897,16 +897,16 @@ void Transport::OnMessage(talk_base::Message* msg) {
 //  return true;
 //}
 
-//// We're GICE if the namespace is NS_GOOGLE_P2P, or if NS_JINGLE_ICE_UDP is
-//// used and the GICE ice-option is set.
-//TransportProtocol TransportProtocolFromDescription(
-//    const TransportDescription* desc) {
-//  ASSERT(desc != NULL);
-//  if (desc->transport_type == NS_JINGLE_ICE_UDP) {
-//    return (desc->HasOption(ICE_OPTION_GICE)) ?
-//        ICEPROTO_HYBRID : ICEPROTO_RFC5245;
-//  }
-//  return ICEPROTO_GOOGLE;
-//}
+// We're GICE if the namespace is NS_GOOGLE_P2P, or if NS_JINGLE_ICE_UDP is
+// used and the GICE ice-option is set.
+TransportProtocol TransportProtocolFromDescription(
+    const TransportDescription* desc) {
+  ASSERT(desc != NULL);
+  if (desc->transport_type == NS_JINGLE_ICE_UDP) {
+    return (desc->HasOption(ICE_OPTION_GICE)) ?
+        ICEPROTO_HYBRID : ICEPROTO_RFC5245;
+  }
+  return ICEPROTO_GOOGLE;
+}
 
 }  // namespace cricket
