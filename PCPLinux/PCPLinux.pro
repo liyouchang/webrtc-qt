@@ -12,12 +12,8 @@ Debug:DEFINES +=_DEBUG
 Release:DEFINES +=
 DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 
-
-} else:mac {
 } else {
-    Debug:DEFINES +=_DEBUG
-    Release:DEFINES +=
-    DEFINES += POSIX
+    DEFINES += POSIX LOGGING=1
 }
 
 
@@ -30,24 +26,30 @@ win32 {
 
 LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -luser32
 
-} else:mac {
 } else {
-    QMAKE_CXXFLAGS += -std=c++11
+    #QMAKE_CXXFLAGS += -std=c++11
     LIBS += -pthread
+
+    LIBS += -L$$DESTDIR  \
+         -ljingle_app -ljingle_p2p -ljingle -ljsoncpp
+
+
+    PRE_TARGETDEPS += $$DESTDIR/libjsoncpp.a $$DESTDIR/libjingle_p2p.a $$DESTDIR/libjingle.a $$DESTDIR/libjingle_app.a
+
 }
 
 
-LIBS += -L$$DESTDIR  \
-        -ljsoncpp -llibjingle -llibjingle_p2p -llibjingle_app
 
 
 
 SOURCES += \
     main.cpp \
     peer_connection_client.cc \
-    defaults.cc
+    defaults.cc \
+    ServerConductor.cpp
 
 HEADERS += \
     peer_connection_client.h \
-    defaults.h
+    defaults.h \
+    ServerConductor.h
 
