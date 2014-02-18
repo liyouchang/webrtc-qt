@@ -6,3 +6,9 @@ SUBDIRS += \
     libjingle_app \
     PCPLinux \
     jsoncpp
+
+
+win32 {
+    SUBDIRS += PCPClient \
+            PCPServer
+}
