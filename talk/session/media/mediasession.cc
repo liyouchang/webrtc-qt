@@ -41,7 +41,7 @@
 #include "talk/p2p/base/constants.h"
 #include "talk/session/media/channelmanager.h"
 #include "talk/session/media/srtpfilter.h"
-//#include "talk/xmpp/constants.h"
+#include "talk/xmpp/constants.h"
 
 #ifdef HAVE_SCTP
 #include "talk/media/sctp/sctpdataengine.h"
@@ -1022,6 +1022,25 @@ static bool IsDtlsActive(
     return false;
 
   return current_tdesc->secure();
+}
+
+std::string MediaTypeToString(MediaType type) {
+  std::string type_str;
+  switch (type) {
+    case MEDIA_TYPE_AUDIO:
+      type_str = "audio";
+      break;
+    case MEDIA_TYPE_VIDEO:
+      type_str = "video";
+      break;
+    case MEDIA_TYPE_DATA:
+      type_str = "data";
+      break;
+    default:
+      ASSERT(false);
+      break;
+  }
+  return type_str;
 }
 
 void MediaSessionOptions::AddStream(MediaType type,
