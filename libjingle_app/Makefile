@@ -161,7 +161,7 @@ DIST          = ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		libjingle_app.pro \
 		libjingle_app.pro
 QMAKE_TARGET  = jingle_app
-DESTDIR       = ../bin/#avoid trailing-slash linebreak
+DESTDIR       = ../lib/#avoid trailing-slash linebreak
 TARGET        = libjingle_app.a
 
 
@@ -187,16 +187,16 @@ first: all
 
 ####### Build rules
 
-all: Makefile ../bin/$(TARGET) 
+all: Makefile ../lib/$(TARGET) 
 
-staticlib: ../bin/$(TARGET)
+staticlib: ../lib/$(TARGET)
 
-../bin/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
-	@test -d ../bin/ || mkdir -p ../bin/
+../lib/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
+	@test -d ../lib/ || mkdir -p ../lib/
 	-$(DEL_FILE) $(TARGET)
 	$(AR) $(TARGET) $(OBJECTS)
-	-$(DEL_FILE) ../bin/$(TARGET)
-	-$(MOVE) $(TARGET) ../bin/ 
+	-$(DEL_FILE) ../lib/$(TARGET)
+	-$(MOVE) $(TARGET) ../lib/ 
 
 
 Makefile: libjingle_app.pro ../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++/qmake.conf ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
@@ -412,7 +412,7 @@ clean:compiler_clean
 ####### Sub-libraries
 
 distclean: clean
-	-$(DEL_FILE) ../bin/$(TARGET) 
+	-$(DEL_FILE) ../lib/$(TARGET) 
 	-$(DEL_FILE) Makefile
 
 
@@ -569,6 +569,7 @@ webrtcsdp.o: ../talk/app/webrtc/webrtcsdp.cc ../talk/app/webrtc/webrtcsdp.h \
 		../talk/base/bytebuffer.h \
 		../talk/p2p/base/stunrequest.h \
 		../talk/media/base/mediaengine.h \
+		../talk/base/fileutils.h \
 		../talk/base/sigslotrepeater.h \
 		../talk/media/base/mediacommon.h \
 		../talk/media/base/videocapturer.h \

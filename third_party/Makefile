@@ -24,7 +24,8 @@ SYMLINK       = ln -f -s
 DEL_DIR       = rmdir
 MOVE          = mv -f
 SUBTARGETS    =  \
-		sub-jsoncpp
+		sub-jsoncpp \
+		sub-libyuv
 
 
 sub-jsoncpp-qmake_all:  FORCE
@@ -52,6 +53,31 @@ sub-jsoncpp-install_subtargets: FORCE
 sub-jsoncpp-uninstall_subtargets: FORCE
 	@test -d jsoncpp/ || mkdir -p jsoncpp/
 	cd jsoncpp/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/jsoncpp/jsoncpp.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
+sub-libyuv-qmake_all:  FORCE
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile
+	cd libyuv/ && $(MAKE) -f Makefile qmake_all
+sub-libyuv: FORCE
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile
+sub-libyuv-make_first: FORCE
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile 
+sub-libyuv-all: FORCE
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile all
+sub-libyuv-clean: FORCE
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile clean
+sub-libyuv-distclean: FORCE
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile distclean
+sub-libyuv-install_subtargets: FORCE
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile install
+sub-libyuv-uninstall_subtargets: FORCE
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
 
 Makefile: third_party.pro ../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++/qmake.conf ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/common/shell-unix.conf \
@@ -251,20 +277,23 @@ third_party.pro:
 qmake: FORCE
 	@$(QMAKE) -spec linux-g++ CONFIG+=debug -o Makefile third_party.pro
 
-qmake_all: sub-jsoncpp-qmake_all FORCE
+qmake_all: sub-jsoncpp-qmake_all sub-libyuv-qmake_all FORCE
 
-make_first: sub-jsoncpp-make_first FORCE
-all: sub-jsoncpp-all FORCE
-clean: sub-jsoncpp-clean FORCE
-distclean: sub-jsoncpp-distclean FORCE
+make_first: sub-jsoncpp-make_first sub-libyuv-make_first FORCE
+all: sub-jsoncpp-all sub-libyuv-all FORCE
+clean: sub-jsoncpp-clean sub-libyuv-clean FORCE
+distclean: sub-jsoncpp-distclean sub-libyuv-distclean FORCE
 	-$(DEL_FILE) Makefile
-install_subtargets: sub-jsoncpp-install_subtargets FORCE
-uninstall_subtargets: sub-jsoncpp-uninstall_subtargets FORCE
+install_subtargets: sub-jsoncpp-install_subtargets sub-libyuv-install_subtargets FORCE
+uninstall_subtargets: sub-jsoncpp-uninstall_subtargets sub-libyuv-uninstall_subtargets FORCE
 
 sub-jsoncpp-check:
 	@test -d jsoncpp/ || mkdir -p jsoncpp/
 	cd jsoncpp/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/jsoncpp/jsoncpp.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
-check: sub-jsoncpp-check
+sub-libyuv-check:
+	@test -d libyuv/ || mkdir -p libyuv/
+	cd libyuv/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/libyuv/libyuv.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
+check: sub-jsoncpp-check sub-libyuv-check
 install: install_subtargets  FORCE
 
 uninstall:  uninstall_subtargets FORCE

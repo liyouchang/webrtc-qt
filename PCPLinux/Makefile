@@ -18,7 +18,7 @@ CXXFLAGS      = -pipe -g -Wall -W -fPIE $(DEFINES)
 INCPATH       = -I../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++ -I. -I../../P2PSystem -I../third_party/jsoncpp/overrides/include -I../third_party/jsoncpp/source/include
 LINK          = g++
 LFLAGS        = -Wl,-rpath,/home/lht/Qt/5.2.1/gcc_64
-LIBS          = $(SUBLIBS) -pthread -L/home/lht/workspace/P2PSystem/PCPLinux/../bin -ljingle_app -ljingle_p2p -ljingle -ljsoncpp 
+LIBS          = $(SUBLIBS) -pthread -L/home/lht/workspace/P2PSystem/PCPLinux/../lib -ljingle_app -ljingle_p2p -ljingle -ljsoncpp 
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /home/lht/Qt/5.2.1/gcc_64/bin/qmake
@@ -180,7 +180,7 @@ first: all
 
 all: Makefile $(TARGET)
 
-$(TARGET): /home/lht/workspace/P2PSystem/PCPLinux/../bin/libjsoncpp.a /home/lht/workspace/P2PSystem/PCPLinux/../bin/libjingle_p2p.a /home/lht/workspace/P2PSystem/PCPLinux/../bin/libjingle.a /home/lht/workspace/P2PSystem/PCPLinux/../bin/libjingle_app.a $(OBJECTS)  
+$(TARGET):  $(OBJECTS)  
 	@test -d ../bin/ || mkdir -p ../bin/
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 	{ test -n "$(DESTDIR)" && DESTDIR="$(DESTDIR)" || DESTDIR=.; } && test $$(gdb --version | sed -e 's,[^0-9][^0-9]*\([0-9]\)\.\([0-9]\).*,\1\2,;q') -gt 72 && gdb --nx --batch --quiet -ex 'set confirm off' -ex "save gdb-index $$DESTDIR" -ex quit '$(TARGET)' && test -f $(TARGET).gdb-index && objcopy --add-section '.gdb_index=$(TARGET).gdb-index' --set-section-flags '.gdb_index=readonly' '$(TARGET)' '$(TARGET)' && rm -f $(TARGET).gdb-index || true

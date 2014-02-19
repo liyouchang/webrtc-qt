@@ -195,7 +195,7 @@ DIST          = ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		libjingle_p2p.pro \
 		libjingle_p2p.pro
 QMAKE_TARGET  = jingle_p2p
-DESTDIR       = ../bin/#avoid trailing-slash linebreak
+DESTDIR       = ../lib/#avoid trailing-slash linebreak
 TARGET        = libjingle_p2p.a
 
 
@@ -221,16 +221,16 @@ first: all
 
 ####### Build rules
 
-all: Makefile ../bin/$(TARGET) 
+all: Makefile ../lib/$(TARGET) 
 
-staticlib: ../bin/$(TARGET)
+staticlib: ../lib/$(TARGET)
 
-../bin/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
-	@test -d ../bin/ || mkdir -p ../bin/
+../lib/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
+	@test -d ../lib/ || mkdir -p ../lib/
 	-$(DEL_FILE) $(TARGET)
 	$(AR) $(TARGET) $(OBJECTS)
-	-$(DEL_FILE) ../bin/$(TARGET)
-	-$(MOVE) $(TARGET) ../bin/ 
+	-$(DEL_FILE) ../lib/$(TARGET)
+	-$(MOVE) $(TARGET) ../lib/ 
 
 
 Makefile: libjingle_p2p.pro ../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++/qmake.conf ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
@@ -446,7 +446,7 @@ clean:compiler_clean
 ####### Sub-libraries
 
 distclean: clean
-	-$(DEL_FILE) ../bin/$(TARGET) 
+	-$(DEL_FILE) ../lib/$(TARGET) 
 	-$(DEL_FILE) Makefile
 
 
