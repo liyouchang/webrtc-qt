@@ -59,6 +59,27 @@ class FakeWebRtcVideoCaptureModule : public webrtc::VideoCaptureModule {
     id_ = id;
     return 0;
   }
+#if defined(USE_WEBRTC_DEV_BRANCH)
+  virtual void RegisterCaptureDataCallback(
+      webrtc::VideoCaptureDataCallback& callback) {
+    callback_ = &callback;
+  }
+  virtual void DeRegisterCaptureDataCallback() { callback_ = NULL; }
+  virtual void RegisterCaptureCallback(webrtc::VideoCaptureFeedBack& callback) {
+    // Not implemented.
+  }
+  virtual void DeRegisterCaptureCallback() {
+    // Not implemented.
+  }
+  virtual void SetCaptureDelay(int32_t delay) { delay_ = delay; }
+  virtual int32_t CaptureDelay() { return delay_; }
+  virtual void EnableFrameRateCallback(const bool enable) {
+    // not implemented
+  }
+  virtual void EnableNoPictureAlarm(const bool enable) {
+    // not implemented
+  }
+#else
   virtual int32_t RegisterCaptureDataCallback(
       webrtc::VideoCaptureDataCallback& callback) {
     callback_ = &callback;
@@ -75,6 +96,20 @@ class FakeWebRtcVideoCaptureModule : public webrtc::VideoCaptureModule {
   virtual int32_t DeRegisterCaptureCallback() {
     return 0;
   }
+  virtual int32_t SetCaptureDelay(int32_t delay) {
+    delay_ = delay;
+    return 0;
+  }
+  virtual int32_t CaptureDelay() {
+    return delay_;
+  }
+  virtual int32_t EnableFrameRateCallback(const bool enable) {
+    return -1;  // not implemented
+  }
+  virtual int32_t EnableNoPictureAlarm(const bool enable) {
+    return -1;  // not implemented
+  }
+#endif
   virtual int32_t StartCapture(
       const webrtc::VideoCaptureCapability& cap) {
     if (running_) return -1;
@@ -98,13 +133,7 @@ class FakeWebRtcVideoCaptureModule : public webrtc::VideoCaptureModule {
     settings = cap_;
     return 0;
   }
-  virtual int32_t SetCaptureDelay(int32_t delay) {
-    delay_ = delay;
-    return 0;
-  }
-  virtual int32_t CaptureDelay() {
-    return delay_;
-  }
+
   virtual int32_t SetCaptureRotation(
       webrtc::VideoCaptureRotation rotation) {
     return -1;  // not implemented
@@ -112,12 +141,6 @@ class FakeWebRtcVideoCaptureModule : public webrtc::VideoCaptureModule {
   virtual VideoCaptureEncodeInterface* GetEncodeInterface(
       const webrtc::VideoCodec& codec) {
     return NULL;  // not implemented
-  }
-  virtual int32_t EnableFrameRateCallback(const bool enable) {
-    return -1;  // not implemented
-  }
-  virtual int32_t EnableNoPictureAlarm(const bool enable) {
-    return -1;  // not implemented
   }
   virtual int32_t AddRef() {
     return 0;

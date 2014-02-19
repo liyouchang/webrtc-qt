@@ -183,9 +183,12 @@ bool HybridVideoMediaChannel::SetSendRtpHeaderExtensions(
       active_channel_->SetSendRtpHeaderExtensions(extensions);
 }
 
-bool HybridVideoMediaChannel::SetSendBandwidth(bool autobw, int bps) {
-  return active_channel_ &&
-      active_channel_->SetSendBandwidth(autobw, bps);
+bool HybridVideoMediaChannel::SetStartSendBandwidth(int bps) {
+  return active_channel_ && active_channel_->SetStartSendBandwidth(bps);
+}
+
+bool HybridVideoMediaChannel::SetMaxSendBandwidth(int bps) {
+  return active_channel_ && active_channel_->SetMaxSendBandwidth(bps);
 }
 
 bool HybridVideoMediaChannel::SetSend(bool send) {
@@ -270,10 +273,11 @@ bool HybridVideoMediaChannel::RequestIntraFrame() {
       active_channel_->RequestIntraFrame();
 }
 
-bool HybridVideoMediaChannel::GetStats(VideoMediaInfo* info) {
+bool HybridVideoMediaChannel::GetStats(
+    const StatsOptions& options, VideoMediaInfo* info) {
   // TODO(juberti): Ensure that returning no stats until SetSendCodecs is OK.
   return active_channel_ &&
-      active_channel_->GetStats(info);
+      active_channel_->GetStats(options, info);
 }
 
 void HybridVideoMediaChannel::OnPacketReceived(

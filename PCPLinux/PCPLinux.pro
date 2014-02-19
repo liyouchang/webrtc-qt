@@ -30,11 +30,11 @@ LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -lu
     #QMAKE_CXXFLAGS += -std=c++11
     LIBS += -pthread
 
-    LIBS += -L$$DESTDIR  \
+    LIBS += -L$$PWD/../lib  \
          -ljingle_app -ljingle_p2p -ljingle -ljsoncpp
 
 
-    PRE_TARGETDEPS += $$DESTDIR/libjsoncpp.a $$DESTDIR/libjingle_p2p.a $$DESTDIR/libjingle.a $$DESTDIR/libjingle_app.a
+    #PRE_TARGETDEPS += $$DESTDIR/libjsoncpp.a $$DESTDIR/libjingle_p2p.a $$DESTDIR/libjingle.a $$DESTDIR/libjingle_app.a
 
 }
 

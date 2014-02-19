@@ -13,7 +13,7 @@ CONFIG += staticlib
 CONFIG -= app_bundle
 CONFIG -= qt
 
-DESTDIR = $$PWD/../bin
+DESTDIR = $$PWD/../lib
 
 INCLUDEPATH     += ..
 

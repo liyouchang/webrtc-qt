@@ -36,9 +36,9 @@ namespace cricket {
 
 // TODO(fbarchard): Make downgrades settable
 static const int kMaxCpuDowngrades = 2;  // Downgrade at most 2 times for CPU.
-// The number of milliseconds of data to require before acting on cpu sampling
-// information.
-static const size_t kCpuLoadMinSampleTime = 5000;
+// The number of cpu samples to require before adapting. This value depends on
+// the cpu monitor sampling frequency being 2000ms.
+static const int kCpuLoadMinSamples = 3;
 // The amount of weight to give to each new cpu load sample. The lower the
 // value, the slower we'll adapt to changing cpu conditions.
 static const float kCpuLoadWeightCoefficient = 0.4f;
@@ -162,8 +162,9 @@ float VideoAdapter::FindLowerScale(int width, int height,
 VideoAdapter::VideoAdapter()
     : output_num_pixels_(INT_MAX),
       scale_third_(false),
-      frames_(0),
-      adapted_frames_(0),
+      frames_in_(0),
+      frames_out_(0),
+      frames_scaled_(0),
       adaption_changes_(0),
       previous_width_(0),
       previous_height_(0),
@@ -177,9 +178,14 @@ VideoAdapter::~VideoAdapter() {
 
 void VideoAdapter::SetInputFormat(const VideoFormat& format) {
   talk_base::CritScope cs(&critical_section_);
+  int64 old_input_interval = input_format_.interval;
   input_format_ = format;
   output_format_.interval = talk_base::_max(
       output_format_.interval, input_format_.interval);
+  if (old_input_interval != input_format_.interval) {
+    LOG(LS_INFO) << "VAdapt input interval changed from "
+      << old_input_interval << " to " << input_format_.interval;
+  }
 }
 
 void CoordinatedVideoAdapter::SetInputFormat(const VideoFormat& format) {
@@ -207,10 +213,15 @@ void CoordinatedVideoAdapter::SetInputFormat(const VideoFormat& format) {
 
 void VideoAdapter::SetOutputFormat(const VideoFormat& format) {
   talk_base::CritScope cs(&critical_section_);
+  int64 old_output_interval = output_format_.interval;
   output_format_ = format;
   output_num_pixels_ = output_format_.width * output_format_.height;
   output_format_.interval = talk_base::_max(
       output_format_.interval, input_format_.interval);
+  if (old_output_interval != output_format_.interval) {
+    LOG(LS_INFO) << "VAdapt output interval changed from "
+      << old_output_interval << " to " << output_format_.interval;
+  }
 }
 
 const VideoFormat& VideoAdapter::input_format() {
@@ -241,11 +252,11 @@ int VideoAdapter::GetOutputNumPixels() const {
 // not resolution.
 bool VideoAdapter::AdaptFrame(const VideoFrame* in_frame,
                               VideoFrame** out_frame) {
+  talk_base::CritScope cs(&critical_section_);
   if (!in_frame || !out_frame) {
     return false;
   }
-  talk_base::CritScope cs(&critical_section_);
-  ++frames_;
+  ++frames_in_;
 
   // Update input to actual frame dimensions.
   VideoFormat format(static_cast<int>(in_frame->GetWidth()),
@@ -273,6 +284,19 @@ bool VideoAdapter::AdaptFrame(const VideoFrame* in_frame,
     }
   }
   if (should_drop) {
+    // Show VAdapt log every 90 frames dropped. (3 seconds)
+    if ((frames_in_ - frames_out_) % 90 == 0) {
+      // TODO(fbarchard): Reduce to LS_VERBOSE when adapter info is not needed
+      // in default calls.
+      LOG(LS_INFO) << "VAdapt Drop Frame: scaled " << frames_scaled_
+                   << " / out " << frames_out_
+                   << " / in " << frames_in_
+                   << " Changes: " << adaption_changes_
+                   << " Input: " << in_frame->GetWidth()
+                   << "x" << in_frame->GetHeight()
+                   << " i" << input_format_.interval
+                   << " Output: i" << output_format_.interval;
+    }
     *out_frame = NULL;
     return true;
   }
@@ -289,19 +313,22 @@ bool VideoAdapter::AdaptFrame(const VideoFrame* in_frame,
   }
 
   if (!StretchToOutputFrame(in_frame)) {
+    LOG(LS_VERBOSE) << "VAdapt Stretch Failed.";
     return false;
   }
 
   *out_frame = output_frame_.get();
 
-  // Show VAdapt log every 300 frames. (10 seconds)
-  // TODO(fbarchard): Consider GetLogSeverity() to change interval to less
-  // for LS_VERBOSE and more for LS_INFO.
-  bool show = frames_ % 300 == 0;
+  ++frames_out_;
   if (in_frame->GetWidth() != (*out_frame)->GetWidth() ||
       in_frame->GetHeight() != (*out_frame)->GetHeight()) {
-    ++adapted_frames_;
+    ++frames_scaled_;
   }
+  // Show VAdapt log every 90 frames output. (3 seconds)
+  // TODO(fbarchard): Consider GetLogSeverity() to change interval to less
+  // for LS_VERBOSE and more for LS_INFO.
+  bool show = (frames_out_) % 90 == 0;
+
   // TODO(fbarchard): LOG the previous output resolution and track input
   // resolution changes as well.  Consider dropping the statistics into their
   // own class which could be queried publically.
@@ -315,14 +342,17 @@ bool VideoAdapter::AdaptFrame(const VideoFrame* in_frame,
   if (show) {
     // TODO(fbarchard): Reduce to LS_VERBOSE when adapter info is not needed
     // in default calls.
-    LOG(LS_INFO) << "VAdapt Frame: " << adapted_frames_
-                 << " / " << frames_
+    LOG(LS_INFO) << "VAdapt Frame: scaled " << frames_scaled_
+                 << " / out " << frames_out_
+                 << " / in " << frames_in_
                  << " Changes: " << adaption_changes_
                  << " Input: " << in_frame->GetWidth()
                  << "x" << in_frame->GetHeight()
+                 << " i" << input_format_.interval
                  << " Scale: " << scale
                  << " Output: " << (*out_frame)->GetWidth()
                  << "x" << (*out_frame)->GetHeight()
+                 << " i" << output_format_.interval
                  << " Changed: " << (changed ? "true" : "false");
   }
   previous_width_ = (*out_frame)->GetWidth();
@@ -382,7 +412,8 @@ CoordinatedVideoAdapter::CoordinatedVideoAdapter()
       view_adaptation_(true),
       view_switch_(false),
       cpu_downgrade_count_(0),
-      cpu_adapt_wait_time_(0),
+      cpu_load_min_samples_(kCpuLoadMinSamples),
+      cpu_load_num_samples_(0),
       high_system_threshold_(kHighSystemCpuThreshold),
       low_system_threshold_(kLowSystemCpuThreshold),
       process_threshold_(kProcessCpuThreshold),
@@ -552,22 +583,18 @@ void CoordinatedVideoAdapter::OnCpuLoadUpdated(
   // we'll still calculate this information, in case smoothing is later enabled.
   system_load_average_ = kCpuLoadWeightCoefficient * system_load +
       (1.0f - kCpuLoadWeightCoefficient) * system_load_average_;
+  ++cpu_load_num_samples_;
   if (cpu_smoothing_) {
     system_load = system_load_average_;
-  }
-  // If we haven't started taking samples yet, wait until we have at least
-  // the correct number of samples per the wait time.
-  if (cpu_adapt_wait_time_ == 0) {
-    cpu_adapt_wait_time_ = talk_base::TimeAfter(kCpuLoadMinSampleTime);
   }
   AdaptRequest request = FindCpuRequest(current_cpus, max_cpus,
                                         process_load, system_load);
   // Make sure we're not adapting too quickly.
   if (request != KEEP) {
-    if (talk_base::TimeIsLater(talk_base::Time(),
-                               cpu_adapt_wait_time_)) {
+    if (cpu_load_num_samples_ < cpu_load_min_samples_) {
       LOG(LS_VERBOSE) << "VAdapt CPU load high/low but do not adapt until "
-                      << talk_base::TimeUntil(cpu_adapt_wait_time_) << " ms";
+                      << (cpu_load_min_samples_ - cpu_load_num_samples_)
+                      << " more samples";
       request = KEEP;
     }
   }
@@ -688,7 +715,7 @@ bool CoordinatedVideoAdapter::AdaptToMinimumFormat(int* new_width,
   if (changed) {
     // When any adaptation occurs, historic CPU load levels are no longer
     // accurate. Clear out our state so we can re-learn at the new normal.
-    cpu_adapt_wait_time_ = talk_base::TimeAfter(kCpuLoadMinSampleTime);
+    cpu_load_num_samples_ = 0;
     system_load_average_ = kCpuLoadInitialAverage;
   }
 

@@ -20,7 +20,7 @@ CONFIG -= qt
 #    INSTALLS += target
 #}
 
-DESTDIR = $$PWD/../bin
+DESTDIR = $$PWD/../lib
 win32 {
 
 Debug:DEFINES +=_DEBUG

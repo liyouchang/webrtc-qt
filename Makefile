@@ -28,6 +28,7 @@ SUBTARGETS    =  \
 		sub-libjingle \
 		sub-libjingle_p2p \
 		sub-libjingle_app \
+		sub-third_party \
 		sub-PCPLinux
 
 
@@ -131,6 +132,31 @@ sub-libjingle_app-install_subtargets: FORCE
 sub-libjingle_app-uninstall_subtargets: FORCE
 	@test -d libjingle_app/ || mkdir -p libjingle_app/
 	cd libjingle_app/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_app/libjingle_app.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
+sub-third_party-qmake_all:  FORCE
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile
+	cd third_party/ && $(MAKE) -f Makefile qmake_all
+sub-third_party: FORCE
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile
+sub-third_party-make_first: FORCE
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile 
+sub-third_party-all: FORCE
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile all
+sub-third_party-clean: FORCE
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile clean
+sub-third_party-distclean: FORCE
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile distclean
+sub-third_party-install_subtargets: FORCE
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile install
+sub-third_party-uninstall_subtargets: FORCE
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
 sub-PCPLinux-qmake_all:  FORCE
 	@test -d PCPLinux/ || mkdir -p PCPLinux/
 	cd PCPLinux/ && $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile
@@ -355,15 +381,15 @@ P2PSystem.pro:
 qmake: FORCE
 	@$(QMAKE) -spec linux-g++ CONFIG+=debug -o Makefile P2PSystem.pro
 
-qmake_all: sub-jsoncpp-qmake_all sub-libjingle-qmake_all sub-libjingle_p2p-qmake_all sub-libjingle_app-qmake_all sub-PCPLinux-qmake_all FORCE
+qmake_all: sub-jsoncpp-qmake_all sub-libjingle-qmake_all sub-libjingle_p2p-qmake_all sub-libjingle_app-qmake_all sub-third_party-qmake_all sub-PCPLinux-qmake_all FORCE
 
-make_first: sub-jsoncpp-make_first sub-libjingle-make_first sub-libjingle_p2p-make_first sub-libjingle_app-make_first sub-PCPLinux-make_first FORCE
-all: sub-jsoncpp-all sub-libjingle-all sub-libjingle_p2p-all sub-libjingle_app-all sub-PCPLinux-all FORCE
-clean: sub-jsoncpp-clean sub-libjingle-clean sub-libjingle_p2p-clean sub-libjingle_app-clean sub-PCPLinux-clean FORCE
-distclean: sub-jsoncpp-distclean sub-libjingle-distclean sub-libjingle_p2p-distclean sub-libjingle_app-distclean sub-PCPLinux-distclean FORCE
+make_first: sub-jsoncpp-make_first sub-libjingle-make_first sub-libjingle_p2p-make_first sub-libjingle_app-make_first sub-third_party-make_first sub-PCPLinux-make_first FORCE
+all: sub-jsoncpp-all sub-libjingle-all sub-libjingle_p2p-all sub-libjingle_app-all sub-third_party-all sub-PCPLinux-all FORCE
+clean: sub-jsoncpp-clean sub-libjingle-clean sub-libjingle_p2p-clean sub-libjingle_app-clean sub-third_party-clean sub-PCPLinux-clean FORCE
+distclean: sub-jsoncpp-distclean sub-libjingle-distclean sub-libjingle_p2p-distclean sub-libjingle_app-distclean sub-third_party-distclean sub-PCPLinux-distclean FORCE
 	-$(DEL_FILE) Makefile
-install_subtargets: sub-jsoncpp-install_subtargets sub-libjingle-install_subtargets sub-libjingle_p2p-install_subtargets sub-libjingle_app-install_subtargets sub-PCPLinux-install_subtargets FORCE
-uninstall_subtargets: sub-jsoncpp-uninstall_subtargets sub-libjingle-uninstall_subtargets sub-libjingle_p2p-uninstall_subtargets sub-libjingle_app-uninstall_subtargets sub-PCPLinux-uninstall_subtargets FORCE
+install_subtargets: sub-jsoncpp-install_subtargets sub-libjingle-install_subtargets sub-libjingle_p2p-install_subtargets sub-libjingle_app-install_subtargets sub-third_party-install_subtargets sub-PCPLinux-install_subtargets FORCE
+uninstall_subtargets: sub-jsoncpp-uninstall_subtargets sub-libjingle-uninstall_subtargets sub-libjingle_p2p-uninstall_subtargets sub-libjingle_app-uninstall_subtargets sub-third_party-uninstall_subtargets sub-PCPLinux-uninstall_subtargets FORCE
 
 sub-jsoncpp-check:
 	@test -d jsoncpp/ || mkdir -p jsoncpp/
@@ -377,10 +403,13 @@ sub-libjingle_p2p-check:
 sub-libjingle_app-check:
 	@test -d libjingle_app/ || mkdir -p libjingle_app/
 	cd libjingle_app/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_app/libjingle_app.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
+sub-third_party-check:
+	@test -d third_party/ || mkdir -p third_party/
+	cd third_party/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/third_party/third_party.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
 sub-PCPLinux-check:
 	@test -d PCPLinux/ || mkdir -p PCPLinux/
 	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
-check: sub-jsoncpp-check sub-libjingle-check sub-libjingle_p2p-check sub-libjingle_app-check sub-PCPLinux-check
+check: sub-jsoncpp-check sub-libjingle-check sub-libjingle_p2p-check sub-libjingle_app-check sub-third_party-check sub-PCPLinux-check
 install: install_subtargets  FORCE
 
 uninstall:  uninstall_subtargets FORCE

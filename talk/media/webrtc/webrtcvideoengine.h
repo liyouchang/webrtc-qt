@@ -60,12 +60,13 @@ class CpuMonitor;
 
 namespace cricket {
 
+class CoordinatedVideoAdapter;
+class ViETraceWrapper;
+class ViEWrapper;
 class VideoCapturer;
 class VideoFrame;
 class VideoProcessor;
 class VideoRenderer;
-class ViETraceWrapper;
-class ViEWrapper;
 class VoiceMediaChannel;
 class WebRtcDecoderObserver;
 class WebRtcEncoderObserver;
@@ -227,10 +228,6 @@ class WebRtcVideoEngine : public sigslot::has_slots<>,
   int local_renderer_h_;
   VideoRenderer* local_renderer_;
 
-  // Critical section to protect the media processor register/unregister
-  // while processing a frame
-  talk_base::CriticalSection signal_media_critical_;
-
   talk_base::scoped_ptr<talk_base::CpuMonitor> cpu_monitor_;
 };
 
@@ -261,7 +258,7 @@ class WebRtcVideoMediaChannel : public talk_base::MessageHandler,
   virtual bool AddRecvStream(const StreamParams& sp);
   virtual bool RemoveRecvStream(uint32 ssrc);
   virtual bool SetRenderer(uint32 ssrc, VideoRenderer* renderer);
-  virtual bool GetStats(VideoMediaInfo* info);
+  virtual bool GetStats(const StatsOptions& options, VideoMediaInfo* info);
   virtual bool SetCapturer(uint32 ssrc, VideoCapturer* capturer);
   virtual bool SendIntraFrame();
   virtual bool RequestIntraFrame();
@@ -276,7 +273,8 @@ class WebRtcVideoMediaChannel : public talk_base::MessageHandler,
       const std::vector<RtpHeaderExtension>& extensions);
   virtual bool SetSendRtpHeaderExtensions(
       const std::vector<RtpHeaderExtension>& extensions);
-  virtual bool SetSendBandwidth(bool autobw, int bps);
+  virtual bool SetStartSendBandwidth(int bps);
+  virtual bool SetMaxSendBandwidth(int bps);
   virtual bool SetOptions(const VideoOptions &options);
   virtual bool GetOptions(VideoOptions *options) const {
     *options = options_;
@@ -288,6 +286,7 @@ class WebRtcVideoMediaChannel : public talk_base::MessageHandler,
   // Public functions for use by tests and other specialized code.
   uint32 send_ssrc() const { return 0; }
   bool GetRenderer(uint32 ssrc, VideoRenderer** renderer);
+  bool GetVideoAdapter(uint32 ssrc, CoordinatedVideoAdapter** video_adapter);
   void SendFrame(VideoCapturer* capturer, const VideoFrame* frame);
   bool SendFrame(WebRtcVideoChannelSendInfo* channel_info,
                  const VideoFrame* frame, bool is_screencast);

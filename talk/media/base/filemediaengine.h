@@ -133,7 +133,7 @@ class FileMediaEngine : public MediaEngineInterface {
   virtual bool FindVideoCodec(const VideoCodec& codec) { return true; }
   virtual void SetVoiceLogging(int min_sev, const char* filter) {}
   virtual void SetVideoLogging(int min_sev, const char* filter) {}
-  virtual bool StartAecDump(FILE* file) { return false; }
+  virtual bool StartAecDump(talk_base::PlatformFile) { return false; }
 
   virtual bool RegisterVideoProcessor(VideoProcessor* processor) {
     return true;
@@ -243,7 +243,8 @@ class FileVoiceChannel : public VoiceMediaChannel {
   virtual bool AddRecvStream(const StreamParams& sp) { return true; }
   virtual bool RemoveRecvStream(uint32 ssrc) { return true; }
   virtual bool MuteStream(uint32 ssrc, bool on) { return false; }
-  virtual bool SetSendBandwidth(bool autobw, int bps) { return true; }
+  virtual bool SetStartSendBandwidth(int bps) { return true; }
+  virtual bool SetMaxSendBandwidth(int bps) { return true; }
   virtual bool SetOptions(const AudioOptions& options) {
     options_ = options;
     return true;
@@ -296,7 +297,9 @@ class FileVideoChannel : public VideoMediaChannel {
   virtual bool SetCapturer(uint32 ssrc, VideoCapturer* capturer) {
     return false;
   }
-  virtual bool GetStats(VideoMediaInfo* info) { return true; }
+  virtual bool GetStats(const StatsOptions& options, VideoMediaInfo* info) {
+    return true;
+  }
   virtual bool SendIntraFrame() { return false; }
   virtual bool RequestIntraFrame() { return false; }
 
@@ -311,7 +314,8 @@ class FileVideoChannel : public VideoMediaChannel {
   virtual bool AddRecvStream(const StreamParams& sp) { return true; }
   virtual bool RemoveRecvStream(uint32 ssrc) { return true; }
   virtual bool MuteStream(uint32 ssrc, bool on) { return false; }
-  virtual bool SetSendBandwidth(bool autobw, int bps) { return true; }
+  virtual bool SetStartSendBandwidth(int bps) { return true; }
+  virtual bool SetMaxSendBandwidth(int bps) { return true; }
   virtual bool SetOptions(const VideoOptions& options) {
     options_ = options;
     return true;
