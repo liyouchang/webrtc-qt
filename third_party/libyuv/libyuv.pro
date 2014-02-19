@@ -13,6 +13,8 @@ CONFIG += staticlib
 
 DESTDIR = $$PWD/../../lib
 
+OBJECTS_DIR = ../../tmp
+
 INCLUDEPATH += $$PWD/include
 
 

@@ -6,7 +6,8 @@ SUBDIRS += \
     libjingle_p2p \
     libjingle_app \
     third_party \
-    libjingle_sound
+    talk
+
 
 
 

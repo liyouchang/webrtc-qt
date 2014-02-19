@@ -18,7 +18,6 @@ DESTDIR = $$PWD/../lib
 INCLUDEPATH     += ..
 
 
-
 win32 {
 
 Debug:DEFINES +=_DEBUG

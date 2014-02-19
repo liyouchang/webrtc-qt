@@ -164,5 +164,6 @@ HEADERS += \
     ../talk/base/json.h \
     ../talk/base/stringutils.h \
     ../talk/base/asyncfile.h \
-    ../talk/base/sslfingerprint.h
+    ../talk/base/sslfingerprint.h \
+    ../talk/base/sigslotrepeater.h
 

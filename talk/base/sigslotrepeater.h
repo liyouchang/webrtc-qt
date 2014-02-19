@@ -50,7 +50,7 @@ namespace sigslot {
     repeater0() { }
     repeater0(const this_type& s) : base_type(s) { }
 
-    void reemit() { signal0<mt_policy>::emit(); }
+    void reemit() { signal0<mt_policy>::emitting(); }
     void repeat(base_type &s) { s.connect(this, &this_type::reemit); }
     void stop(base_type &s) { s.disconnect(this); }
   };
@@ -66,7 +66,7 @@ namespace sigslot {
     repeater1() { }
     repeater1(const this_type& s) : base_type(s) { }
 
-    void reemit(arg1_type a1) { signal1<arg1_type, mt_policy>::emit(a1); }
+    void reemit(arg1_type a1) { signal1<arg1_type, mt_policy>::emitting(a1); }
     void repeat(base_type& s) { s.connect(this, &this_type::reemit); }
     void stop(base_type &s) { s.disconnect(this); }
   };
@@ -82,7 +82,7 @@ namespace sigslot {
     repeater2() { }
     repeater2(const this_type& s) : base_type(s) { }
 
-    void reemit(arg1_type a1, arg2_type a2) { signal2<arg1_type, arg2_type, mt_policy>::emit(a1,a2); }
+    void reemit(arg1_type a1, arg2_type a2) { signal2<arg1_type, arg2_type, mt_policy>::emitting(a1,a2); }
     void repeat(base_type& s) { s.connect(this, &this_type::reemit); }
     void stop(base_type &s) { s.disconnect(this); }
   };
@@ -100,7 +100,7 @@ namespace sigslot {
     repeater3(const this_type& s) : base_type(s) { }
 
     void reemit(arg1_type a1, arg2_type a2, arg3_type a3) {
-            signal3<arg1_type, arg2_type, arg3_type, mt_policy>::emit(a1,a2,a3);
+            signal3<arg1_type, arg2_type, arg3_type, mt_policy>::emitting(a1,a2,a3);
     }
     void repeat(base_type& s) { s.connect(this, &this_type::reemit); }
     void stop(base_type &s) { s.disconnect(this); }

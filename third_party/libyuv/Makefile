@@ -38,7 +38,7 @@ MKDIR         = mkdir -p
 
 ####### Output directory
 
-OBJECTS_DIR   = ./
+OBJECTS_DIR   = ../../tmp/
 
 ####### Files
 
@@ -72,36 +72,36 @@ SOURCES       = source/compare.cc \
 		source/scale_posix.cc \
 		source/scale_win.cc \
 		source/video_common.cc 
-OBJECTS       = compare.o \
-		compare_common.o \
-		compare_posix.o \
-		convert.o \
-		convert_argb.o \
-		convert_from.o \
-		convert_from_argb.o \
-		convert_jpeg.o \
-		convert_to_argb.o \
-		convert_to_i420.o \
-		cpu_id.o \
-		format_conversion.o \
-		mjpeg_decoder.o \
-		mjpeg_validate.o \
-		planar_functions.o \
-		rotate_argb.o \
-		rotate_mips.o \
-		rotate.o \
-		row_any.o \
-		row_common.o \
-		row_mips.o \
-		row_posix.o \
-		row_win.o \
-		scale.o \
-		scale_argb.o \
-		scale_common.o \
-		scale_mips.o \
-		scale_posix.o \
-		scale_win.o \
-		video_common.o
+OBJECTS       = ../../tmp/compare.o \
+		../../tmp/compare_common.o \
+		../../tmp/compare_posix.o \
+		../../tmp/convert.o \
+		../../tmp/convert_argb.o \
+		../../tmp/convert_from.o \
+		../../tmp/convert_from_argb.o \
+		../../tmp/convert_jpeg.o \
+		../../tmp/convert_to_argb.o \
+		../../tmp/convert_to_i420.o \
+		../../tmp/cpu_id.o \
+		../../tmp/format_conversion.o \
+		../../tmp/mjpeg_decoder.o \
+		../../tmp/mjpeg_validate.o \
+		../../tmp/planar_functions.o \
+		../../tmp/rotate_argb.o \
+		../../tmp/rotate_mips.o \
+		../../tmp/rotate.o \
+		../../tmp/row_any.o \
+		../../tmp/row_common.o \
+		../../tmp/row_mips.o \
+		../../tmp/row_posix.o \
+		../../tmp/row_win.o \
+		../../tmp/scale.o \
+		../../tmp/scale_argb.o \
+		../../tmp/scale_common.o \
+		../../tmp/scale_mips.o \
+		../../tmp/scale_posix.o \
+		../../tmp/scale_win.o \
+		../../tmp/video_common.o
 DIST          = ../../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../../Qt/5.2.1/gcc_64/mkspecs/common/shell-unix.conf \
 		../../../../Qt/5.2.1/gcc_64/mkspecs/common/unix.conf \
@@ -446,8 +446,8 @@ qmake: FORCE
 qmake_all: FORCE
 
 dist: 
-	@test -d .tmp/libyuv1.0.0 || mkdir -p .tmp/libyuv1.0.0
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) .tmp/libyuv1.0.0/ && (cd `dirname .tmp/libyuv1.0.0` && $(TAR) libyuv1.0.0.tar libyuv1.0.0 && $(COMPRESS) libyuv1.0.0.tar) && $(MOVE) `dirname .tmp/libyuv1.0.0`/libyuv1.0.0.tar.gz . && $(DEL_FILE) -r .tmp/libyuv1.0.0
+	@test -d ../../tmp/libyuv1.0.0 || mkdir -p ../../tmp/libyuv1.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) ../../tmp/libyuv1.0.0/ && (cd `dirname ../../tmp/libyuv1.0.0` && $(TAR) libyuv1.0.0.tar libyuv1.0.0 && $(COMPRESS) libyuv1.0.0.tar) && $(MOVE) `dirname ../../tmp/libyuv1.0.0`/libyuv1.0.0.tar.gz . && $(DEL_FILE) -r ../../tmp/libyuv1.0.0
 
 
 clean:compiler_clean 
@@ -474,20 +474,20 @@ compiler_clean:
 
 ####### Compile
 
-compare.o: source/compare.cc include/libyuv/compare.h \
+../../tmp/compare.o: source/compare.cc include/libyuv/compare.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o compare.o source/compare.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/compare.o source/compare.cc
 
-compare_common.o: source/compare_common.cc include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o compare_common.o source/compare_common.cc
+../../tmp/compare_common.o: source/compare_common.cc include/libyuv/basic_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/compare_common.o source/compare_common.cc
 
-compare_posix.o: source/compare_posix.cc include/libyuv/basic_types.h \
+../../tmp/compare_posix.o: source/compare_posix.cc include/libyuv/basic_types.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o compare_posix.o source/compare_posix.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/compare_posix.o source/compare_posix.cc
 
-convert.o: source/convert.cc include/libyuv/convert.h \
+../../tmp/convert.o: source/convert.cc include/libyuv/convert.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/convert_from.h \
 		include/libyuv/rotate.h \
@@ -496,9 +496,9 @@ convert.o: source/convert.cc include/libyuv/convert.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/scale.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o convert.o source/convert.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/convert.o source/convert.cc
 
-convert_argb.o: source/convert_argb.cc include/libyuv/convert_argb.h \
+../../tmp/convert_argb.o: source/convert_argb.cc include/libyuv/convert_argb.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/convert_from.h \
 		include/libyuv/rotate.h \
@@ -510,9 +510,9 @@ convert_argb.o: source/convert_argb.cc include/libyuv/convert_argb.h \
 		include/libyuv/rotate_argb.h \
 		include/libyuv/row.h \
 		include/libyuv/video_common.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o convert_argb.o source/convert_argb.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/convert_argb.o source/convert_argb.cc
 
-convert_from.o: source/convert_from.cc include/libyuv/convert_from.h \
+../../tmp/convert_from.o: source/convert_from.cc include/libyuv/convert_from.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/rotate.h \
 		include/libyuv/convert.h \
@@ -523,9 +523,9 @@ convert_from.o: source/convert_from.cc include/libyuv/convert_from.h \
 		include/libyuv/scale.h \
 		include/libyuv/video_common.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o convert_from.o source/convert_from.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/convert_from.o source/convert_from.cc
 
-convert_from_argb.o: source/convert_from_argb.cc include/libyuv/convert_from_argb.h \
+../../tmp/convert_from_argb.o: source/convert_from_argb.cc include/libyuv/convert_from_argb.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/format_conversion.h \
@@ -535,18 +535,18 @@ convert_from_argb.o: source/convert_from_argb.cc include/libyuv/convert_from_arg
 		include/libyuv/rotate.h \
 		include/libyuv/convert_argb.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o convert_from_argb.o source/convert_from_argb.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/convert_from_argb.o source/convert_from_argb.cc
 
-convert_jpeg.o: source/convert_jpeg.cc include/libyuv/convert.h \
+../../tmp/convert_jpeg.o: source/convert_jpeg.cc include/libyuv/convert.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/convert_from.h \
 		include/libyuv/rotate.h \
 		include/libyuv/planar_functions.h \
 		include/libyuv/convert_argb.h \
 		include/libyuv/mjpeg_decoder.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o convert_jpeg.o source/convert_jpeg.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/convert_jpeg.o source/convert_jpeg.cc
 
-convert_to_argb.o: source/convert_to_argb.cc include/libyuv/convert_argb.h \
+../../tmp/convert_to_argb.o: source/convert_to_argb.cc include/libyuv/convert_argb.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/convert_from.h \
 		include/libyuv/rotate.h \
@@ -558,9 +558,9 @@ convert_to_argb.o: source/convert_to_argb.cc include/libyuv/convert_argb.h \
 		include/libyuv/rotate_argb.h \
 		include/libyuv/row.h \
 		include/libyuv/video_common.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o convert_to_argb.o source/convert_to_argb.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/convert_to_argb.o source/convert_to_argb.cc
 
-convert_to_i420.o: source/convert_to_i420.cc include/libyuv/convert.h \
+../../tmp/convert_to_i420.o: source/convert_to_i420.cc include/libyuv/convert.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/convert_from.h \
 		include/libyuv/rotate.h \
@@ -568,33 +568,33 @@ convert_to_i420.o: source/convert_to_i420.cc include/libyuv/convert.h \
 		include/libyuv/convert_argb.h \
 		include/libyuv/format_conversion.h \
 		include/libyuv/video_common.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o convert_to_i420.o source/convert_to_i420.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/convert_to_i420.o source/convert_to_i420.cc
 
-cpu_id.o: source/cpu_id.cc include/libyuv/cpu_id.h \
+../../tmp/cpu_id.o: source/cpu_id.cc include/libyuv/cpu_id.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cpu_id.o source/cpu_id.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/cpu_id.o source/cpu_id.cc
 
-format_conversion.o: source/format_conversion.cc include/libyuv/format_conversion.h \
+../../tmp/format_conversion.o: source/format_conversion.cc include/libyuv/format_conversion.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/video_common.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o format_conversion.o source/format_conversion.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/format_conversion.o source/format_conversion.cc
 
-mjpeg_decoder.o: source/mjpeg_decoder.cc include/libyuv/mjpeg_decoder.h \
+../../tmp/mjpeg_decoder.o: source/mjpeg_decoder.cc include/libyuv/mjpeg_decoder.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/planar_functions.h \
 		include/libyuv/convert.h \
 		include/libyuv/convert_from.h \
 		include/libyuv/rotate.h \
 		include/libyuv/convert_argb.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mjpeg_decoder.o source/mjpeg_decoder.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/mjpeg_decoder.o source/mjpeg_decoder.cc
 
-mjpeg_validate.o: source/mjpeg_validate.cc include/libyuv/mjpeg_decoder.h \
+../../tmp/mjpeg_validate.o: source/mjpeg_validate.cc include/libyuv/mjpeg_decoder.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mjpeg_validate.o source/mjpeg_validate.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/mjpeg_validate.o source/mjpeg_validate.cc
 
-planar_functions.o: source/planar_functions.cc include/libyuv/planar_functions.h \
+../../tmp/planar_functions.o: source/planar_functions.cc include/libyuv/planar_functions.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/convert.h \
 		include/libyuv/convert_from.h \
@@ -603,9 +603,9 @@ planar_functions.o: source/planar_functions.cc include/libyuv/planar_functions.h
 		include/libyuv/cpu_id.h \
 		include/libyuv/mjpeg_decoder.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o planar_functions.o source/planar_functions.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/planar_functions.o source/planar_functions.cc
 
-rotate_argb.o: source/rotate_argb.cc include/libyuv/rotate.h \
+../../tmp/rotate_argb.o: source/rotate_argb.cc include/libyuv/rotate.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/convert.h \
@@ -613,13 +613,13 @@ rotate_argb.o: source/rotate_argb.cc include/libyuv/rotate.h \
 		include/libyuv/planar_functions.h \
 		include/libyuv/convert_argb.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o rotate_argb.o source/rotate_argb.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/rotate_argb.o source/rotate_argb.cc
 
-rotate_mips.o: source/rotate_mips.cc include/libyuv/row.h \
+../../tmp/rotate_mips.o: source/rotate_mips.cc include/libyuv/row.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o rotate_mips.o source/rotate_mips.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/rotate_mips.o source/rotate_mips.cc
 
-rotate.o: source/rotate.cc include/libyuv/rotate.h \
+../../tmp/rotate.o: source/rotate.cc include/libyuv/rotate.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/convert.h \
@@ -627,29 +627,29 @@ rotate.o: source/rotate.cc include/libyuv/rotate.h \
 		include/libyuv/planar_functions.h \
 		include/libyuv/convert_argb.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o rotate.o source/rotate.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/rotate.o source/rotate.cc
 
-row_any.o: source/row_any.cc include/libyuv/row.h \
+../../tmp/row_any.o: source/row_any.cc include/libyuv/row.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o row_any.o source/row_any.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/row_any.o source/row_any.cc
 
-row_common.o: source/row_common.cc include/libyuv/row.h \
+../../tmp/row_common.o: source/row_common.cc include/libyuv/row.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o row_common.o source/row_common.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/row_common.o source/row_common.cc
 
-row_mips.o: source/row_mips.cc include/libyuv/row.h \
+../../tmp/row_mips.o: source/row_mips.cc include/libyuv/row.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o row_mips.o source/row_mips.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/row_mips.o source/row_mips.cc
 
-row_posix.o: source/row_posix.cc include/libyuv/row.h \
+../../tmp/row_posix.o: source/row_posix.cc include/libyuv/row.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o row_posix.o source/row_posix.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/row_posix.o source/row_posix.cc
 
-row_win.o: source/row_win.cc include/libyuv/row.h \
+../../tmp/row_win.o: source/row_win.cc include/libyuv/row.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o row_win.o source/row_win.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/row_win.o source/row_win.cc
 
-scale.o: source/scale.cc include/libyuv/scale.h \
+../../tmp/scale.o: source/scale.cc include/libyuv/scale.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/planar_functions.h \
@@ -659,9 +659,9 @@ scale.o: source/scale.cc include/libyuv/scale.h \
 		include/libyuv/convert_argb.h \
 		include/libyuv/row.h \
 		include/libyuv/scale_row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o scale.o source/scale.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/scale.o source/scale.cc
 
-scale_argb.o: source/scale_argb.cc include/libyuv/scale.h \
+../../tmp/scale_argb.o: source/scale_argb.cc include/libyuv/scale.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/planar_functions.h \
@@ -671,9 +671,9 @@ scale_argb.o: source/scale_argb.cc include/libyuv/scale.h \
 		include/libyuv/convert_argb.h \
 		include/libyuv/row.h \
 		include/libyuv/scale_row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o scale_argb.o source/scale_argb.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/scale_argb.o source/scale_argb.cc
 
-scale_common.o: source/scale_common.cc include/libyuv/scale.h \
+../../tmp/scale_common.o: source/scale_common.cc include/libyuv/scale.h \
 		include/libyuv/basic_types.h \
 		include/libyuv/cpu_id.h \
 		include/libyuv/planar_functions.h \
@@ -683,23 +683,23 @@ scale_common.o: source/scale_common.cc include/libyuv/scale.h \
 		include/libyuv/convert_argb.h \
 		include/libyuv/row.h \
 		include/libyuv/scale_row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o scale_common.o source/scale_common.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/scale_common.o source/scale_common.cc
 
-scale_mips.o: source/scale_mips.cc include/libyuv/basic_types.h \
+../../tmp/scale_mips.o: source/scale_mips.cc include/libyuv/basic_types.h \
 		include/libyuv/row.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o scale_mips.o source/scale_mips.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/scale_mips.o source/scale_mips.cc
 
-scale_posix.o: source/scale_posix.cc include/libyuv/row.h \
+../../tmp/scale_posix.o: source/scale_posix.cc include/libyuv/row.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o scale_posix.o source/scale_posix.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/scale_posix.o source/scale_posix.cc
 
-scale_win.o: source/scale_win.cc include/libyuv/row.h \
+../../tmp/scale_win.o: source/scale_win.cc include/libyuv/row.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o scale_win.o source/scale_win.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/scale_win.o source/scale_win.cc
 
-video_common.o: source/video_common.cc include/libyuv/video_common.h \
+../../tmp/video_common.o: source/video_common.cc include/libyuv/video_common.h \
 		include/libyuv/basic_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o video_common.o source/video_common.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../../tmp/video_common.o source/video_common.cc
 
 ####### Install
 
