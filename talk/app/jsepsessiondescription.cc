@@ -28,7 +28,8 @@
 
 #include "talk/app/webrtc/webrtcsdp.h"
 #include "talk/base/stringencode.h"
-#include "talk/session/media/mediasession.h"
+//#include "talk/session/media/mediasession.h"
+#include "talk/p2p/base/sessiondescription.h"
 
 using talk_base::scoped_ptr;
 using cricket::SessionDescription;
@@ -118,6 +119,9 @@ bool JsepSessionDescription::AddCandidate(
   }
   if (mediasection_index >= number_of_mediasections())
     return false;
+  if (candidate_collection_[mediasection_index].HasCandidate(candidate)) {
+    return true;  // Silently ignore this candidate if we already have it.
+  }
   const std::string content_name =
       description_->contents()[mediasection_index].name;
   const cricket::TransportInfo* transport_info =
@@ -134,15 +138,10 @@ bool JsepSessionDescription::AddCandidate(
     updated_candidate.set_password(transport_info->description.ice_pwd);
   }
 
-  scoped_ptr<JsepIceCandidate> updated_candidate_wrapper(
-      new JsepIceCandidate(candidate->sdp_mid(),
-                           static_cast<int>(mediasection_index),
-                           updated_candidate));
-  if (!candidate_collection_[mediasection_index].HasCandidate(
-          updated_candidate_wrapper.get()))
-    candidate_collection_[mediasection_index].add(
-        updated_candidate_wrapper.release());
-
+  candidate_collection_[mediasection_index].add(
+       new JsepIceCandidate(candidate->sdp_mid(),
+                            static_cast<int>(mediasection_index),
+                            updated_candidate));
   return true;
 }
 

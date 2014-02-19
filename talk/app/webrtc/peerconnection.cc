@@ -32,6 +32,7 @@
 #include "talk/app/webrtc/dtmfsender.h"
 #include "talk/app/webrtc/jsepicecandidate.h"
 #include "talk/app/webrtc/jsepsessiondescription.h"
+#include "talk/app/webrtc/mediaconstraintsinterface.h"
 #include "talk/app/webrtc/mediastreamhandler.h"
 #include "talk/app/webrtc/streamcollection.h"
 #include "talk/base/logging.h"
@@ -359,11 +360,21 @@ bool PeerConnection::DoInitialize(
   observer_ = observer;
   port_allocator_.reset(
       allocator_factory->CreatePortAllocator(stun_config, turn_config));
+
   // To handle both internal and externally created port allocator, we will
-  // enable BUNDLE here. Also enabling TURN and disable legacy relay service.
-  port_allocator_->set_flags(cricket::PORTALLOCATOR_ENABLE_BUNDLE |
-                             cricket::PORTALLOCATOR_ENABLE_SHARED_UFRAG |
-                             cricket::PORTALLOCATOR_ENABLE_SHARED_SOCKET);
+  // enable BUNDLE here.
+  int portallocator_flags = cricket::PORTALLOCATOR_ENABLE_BUNDLE |
+                            cricket::PORTALLOCATOR_ENABLE_SHARED_UFRAG |
+                            cricket::PORTALLOCATOR_ENABLE_SHARED_SOCKET;
+  bool value;
+  if (FindConstraint(
+        constraints,
+        MediaConstraintsInterface::kEnableIPv6,
+        &value, NULL) && value) {
+    portallocator_flags |= cricket::PORTALLOCATOR_ENABLE_IPV6;
+  }
+
+  port_allocator_->set_flags(portallocator_flags);
   // No step delay is used while allocating ports.
   port_allocator_->set_step_delay(cricket::kMinimumStepDelay);
 
@@ -448,13 +459,19 @@ talk_base::scoped_refptr<DtmfSenderInterface> PeerConnection::CreateDtmfSender(
 }
 
 bool PeerConnection::GetStats(StatsObserver* observer,
-                              MediaStreamTrackInterface* track) {
+                              webrtc::MediaStreamTrackInterface* track) {
+  return GetStats(observer, track, kStatsOutputLevelStandard);
+}
+
+bool PeerConnection::GetStats(StatsObserver* observer,
+                              MediaStreamTrackInterface* track,
+                              StatsOutputLevel level) {
   if (!VERIFY(observer != NULL)) {
     LOG(LS_ERROR) << "GetStats - observer is NULL.";
     return false;
   }
 
-  stats_.UpdateStats();
+  stats_.UpdateStats(level);
   talk_base::scoped_ptr<GetStatsMsg> msg(new GetStatsMsg(observer));
   if (!stats_.GetStats(track, &(msg->reports))) {
     return false;
@@ -485,8 +502,12 @@ talk_base::scoped_refptr<DataChannelInterface>
 PeerConnection::CreateDataChannel(
     const std::string& label,
     const DataChannelInit* config) {
+  talk_base::scoped_ptr<InternalDataChannelInit> internal_config;
+  if (config) {
+    internal_config.reset(new InternalDataChannelInit(*config));
+  }
   talk_base::scoped_refptr<DataChannelInterface> channel(
-      session_->CreateDataChannel(label, config));
+      session_->CreateDataChannel(label, internal_config.get()));
   if (!channel.get())
     return NULL;
 
@@ -527,7 +548,7 @@ void PeerConnection::SetLocalDescription(
   }
   // Update stats here so that we have the most recent stats for tracks and
   // streams that might be removed by updating the session description.
-  stats_.UpdateStats();
+  stats_.UpdateStats(kStatsOutputLevelStandard);
   std::string error;
   if (!session_->SetLocalDescription(desc, &error)) {
     PostSetSessionDescriptionFailure(observer, error);
@@ -550,7 +571,7 @@ void PeerConnection::SetRemoteDescription(
   }
   // Update stats here so that we have the most recent stats for tracks and
   // streams that might be removed by updating the session description.
-  stats_.UpdateStats();
+  stats_.UpdateStats(kStatsOutputLevelStandard);
   std::string error;
   if (!session_->SetRemoteDescription(desc, &error)) {
     PostSetSessionDescriptionFailure(observer, error);
@@ -591,7 +612,7 @@ const SessionDescriptionInterface* PeerConnection::remote_description() const {
 void PeerConnection::Close() {
   // Update stats here so that we have the most recent stats for tracks and
   // streams before the channels are closed.
-  stats_.UpdateStats();
+  stats_.UpdateStats(kStatsOutputLevelStandard);
 
   session_->Terminate();
 }

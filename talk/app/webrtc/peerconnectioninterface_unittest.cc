@@ -32,6 +32,7 @@
 #include "talk/app/webrtc/mediastreaminterface.h"
 #include "talk/app/webrtc/peerconnectioninterface.h"
 #include "talk/app/webrtc/test/fakeconstraints.h"
+#include "talk/app/webrtc/test/fakedtlsidentityservice.h"
 #include "talk/app/webrtc/test/mockpeerconnectionobservers.h"
 #include "talk/app/webrtc/test/testsdpstrings.h"
 #include "talk/app/webrtc/videosource.h"
@@ -257,9 +258,20 @@ class PeerConnectionInterfaceTest : public testing::Test {
     servers.push_back(server);
 
     port_allocator_factory_ = FakePortAllocatorFactory::Create();
+
+    // TODO(jiayl): we should always pass a FakeIdentityService so that DTLS
+    // is enabled by default like in Chrome (issue 2838).
+    FakeIdentityService* dtls_service = NULL;
+    bool dtls;
+    if (FindConstraint(constraints,
+                       webrtc::MediaConstraintsInterface::kEnableDtlsSrtp,
+                       &dtls,
+                       NULL) && dtls) {
+      dtls_service = new FakeIdentityService();
+    }
     pc_ = pc_factory_->CreatePeerConnection(servers, constraints,
                                             port_allocator_factory_.get(),
-                                            NULL,
+                                            dtls_service,
                                             &observer_);
     ASSERT_TRUE(pc_.get() != NULL);
     observer_.SetPeerConnectionInterface(pc_.get());
@@ -496,6 +508,8 @@ class PeerConnectionInterfaceTest : public testing::Test {
 
     EXPECT_TRUE(DoSetLocalDescription(new_offer));
     EXPECT_EQ(PeerConnectionInterface::kHaveLocalOffer, observer_.state_);
+    // Wait for the ice_complete message, so that SDP will have candidates.
+    EXPECT_TRUE_WAIT(observer_.ice_complete_, kTimeout);
   }
 
   void CreateAnswerAsRemoteDescription(const std::string& offer) {
@@ -766,13 +780,7 @@ TEST_F(PeerConnectionInterfaceTest, GetStatsForInvalidTrack) {
 }
 
 // This test setup two RTP data channels in loop back.
-#ifdef WIN32
-// TODO(perkj): Investigate why the transport channel sometimes don't become
-// writable on Windows when we try to connect in loop back.
-TEST_F(PeerConnectionInterfaceTest, DISABLED_TestDataChannel) {
-#else
 TEST_F(PeerConnectionInterfaceTest, TestDataChannel) {
-#endif
   FakeConstraints constraints;
   constraints.SetAllowRtpDataChannels();
   CreatePeerConnection(&constraints);
@@ -819,13 +827,7 @@ TEST_F(PeerConnectionInterfaceTest, TestDataChannel) {
 
 // This test verifies that sendnig binary data over RTP data channels should
 // fail.
-#ifdef WIN32
-// TODO(perkj): Investigate why the transport channel sometimes don't become
-// writable on Windows when we try to connect in loop back.
-TEST_F(PeerConnectionInterfaceTest, DISABLED_TestSendBinaryOnRtpDataChannel) {
-#else
 TEST_F(PeerConnectionInterfaceTest, TestSendBinaryOnRtpDataChannel) {
-#endif
   FakeConstraints constraints;
   constraints.SetAllowRtpDataChannels();
   CreatePeerConnection(&constraints);
@@ -855,13 +857,7 @@ TEST_F(PeerConnectionInterfaceTest, TestSendBinaryOnRtpDataChannel) {
 
 // This test setup a RTP data channels in loop back and test that a channel is
 // opened even if the remote end answer with a zero SSRC.
-#ifdef WIN32
-// TODO(perkj): Investigate why the transport channel sometimes don't become
-// writable on Windows when we try to connect in loop back.
-TEST_F(PeerConnectionInterfaceTest, DISABLED_TestSendOnlyDataChannel) {
-#else
 TEST_F(PeerConnectionInterfaceTest, TestSendOnlyDataChannel) {
-#endif
   FakeConstraints constraints;
   constraints.SetAllowRtpDataChannels();
   CreatePeerConnection(&constraints);
@@ -1017,14 +1013,7 @@ TEST_F(PeerConnectionInterfaceTest,
 }
 
 // This test that a data channel closes when a PeerConnection is deleted/closed.
-#ifdef WIN32
-// TODO(perkj): Investigate why the transport channel sometimes don't become
-// writable on Windows when we try to connect in loop back.
-TEST_F(PeerConnectionInterfaceTest,
-       DISABLED_DataChannelCloseWhenPeerConnectionClose) {
-#else
 TEST_F(PeerConnectionInterfaceTest, DataChannelCloseWhenPeerConnectionClose) {
-#endif
   FakeConstraints constraints;
   constraints.SetAllowRtpDataChannels();
   CreatePeerConnection(&constraints);

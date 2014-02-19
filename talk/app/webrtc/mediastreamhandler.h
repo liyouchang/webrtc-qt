@@ -40,6 +40,7 @@
 #include "talk/app/webrtc/mediastreamprovider.h"
 #include "talk/app/webrtc/peerconnectioninterface.h"
 #include "talk/base/thread.h"
+#include "talk/media/base/audiorenderer.h"
 
 namespace webrtc {
 
@@ -67,6 +68,28 @@ class TrackHandler : public ObserverInterface {
   bool enabled_;
 };
 
+// LocalAudioSinkAdapter receives data callback as a sink to the local
+// AudioTrack, and passes the data to the sink of AudioRenderer.
+class LocalAudioSinkAdapter : public AudioTrackSinkInterface,
+                              public cricket::AudioRenderer {
+ public:
+  LocalAudioSinkAdapter();
+  virtual ~LocalAudioSinkAdapter();
+
+ private:
+  // AudioSinkInterface implementation.
+  virtual void OnData(const void* audio_data, int bits_per_sample,
+                      int sample_rate, int number_of_channels,
+                      int number_of_frames) OVERRIDE;
+
+  // cricket::AudioRenderer implementation.
+  virtual void SetSink(cricket::AudioRenderer::Sink* sink) OVERRIDE;
+
+  cricket::AudioRenderer::Sink* sink_;
+  // Critical section protecting |sink_|.
+  talk_base::CriticalSection lock_;
+};
+
 // LocalAudioTrackHandler listen to events on a local AudioTrack instance
 // connected to a PeerConnection and orders the |provider| to executes the
 // requested change.
@@ -86,12 +109,17 @@ class LocalAudioTrackHandler : public TrackHandler {
  private:
   AudioTrackInterface* audio_track_;
   AudioProviderInterface* provider_;
+
+  // Used to pass the data callback from the |audio_track_| to the other
+  // end of cricket::AudioRenderer.
+  talk_base::scoped_ptr<LocalAudioSinkAdapter> sink_adapter_;
 };
 
 // RemoteAudioTrackHandler listen to events on a remote AudioTrack instance
 // connected to a PeerConnection and orders the |provider| to executes the
 // requested change.
-class RemoteAudioTrackHandler : public TrackHandler {
+class RemoteAudioTrackHandler : public AudioSourceInterface::AudioObserver,
+                                public TrackHandler {
  public:
   RemoteAudioTrackHandler(AudioTrackInterface* track,
                           uint32 ssrc,
@@ -104,6 +132,9 @@ class RemoteAudioTrackHandler : public TrackHandler {
   virtual void OnEnabledChanged() OVERRIDE;
 
  private:
+  // AudioSourceInterface::AudioObserver implementation.
+  virtual void OnSetVolume(double volume) OVERRIDE;
+
   AudioTrackInterface* audio_track_;
   AudioProviderInterface* provider_;
 };

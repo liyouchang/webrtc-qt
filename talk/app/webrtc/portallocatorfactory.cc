@@ -41,10 +41,10 @@ using talk_base::scoped_ptr;
 
 talk_base::scoped_refptr<PortAllocatorFactoryInterface>
 PortAllocatorFactory::Create(
-        talk_base::Thread* worker_thread) {
-    talk_base::RefCountedObject<PortAllocatorFactory>* allocator =
-            new talk_base::RefCountedObject<PortAllocatorFactory>(worker_thread);
-    return allocator;
+    talk_base::Thread* worker_thread) {
+  talk_base::RefCountedObject<PortAllocatorFactory>* allocator =
+        new talk_base::RefCountedObject<PortAllocatorFactory>(worker_thread);
+  return allocator;
 }
 
 PortAllocatorFactory::PortAllocatorFactory(talk_base::Thread* worker_thread)
@@ -55,38 +55,38 @@ PortAllocatorFactory::PortAllocatorFactory(talk_base::Thread* worker_thread)
 PortAllocatorFactory::~PortAllocatorFactory() {}
 
 cricket::PortAllocator* PortAllocatorFactory::CreatePortAllocator(
-        const std::vector<StunConfiguration>& stun,
-        const std::vector<TurnConfiguration>& turn) {
-    std::vector<talk_base::SocketAddress> stun_hosts;
-    typedef std::vector<StunConfiguration>::const_iterator StunIt;
-    for (StunIt stun_it = stun.begin(); stun_it != stun.end(); ++stun_it) {
-        stun_hosts.push_back(stun_it->server);
-    }
+    const std::vector<StunConfiguration>& stun,
+    const std::vector<TurnConfiguration>& turn) {
+  std::vector<talk_base::SocketAddress> stun_hosts;
+  typedef std::vector<StunConfiguration>::const_iterator StunIt;
+  for (StunIt stun_it = stun.begin(); stun_it != stun.end(); ++stun_it) {
+    stun_hosts.push_back(stun_it->server);
+  }
 
-    talk_base::SocketAddress stun_addr;
-    if (!stun_hosts.empty()) {
-        stun_addr = stun_hosts.front();
-    }
-    scoped_ptr<cricket::BasicPortAllocator> allocator(
-                new cricket::BasicPortAllocator(
-                    network_manager_.get(), socket_factory_.get(), stun_addr));
+  talk_base::SocketAddress stun_addr;
+  if (!stun_hosts.empty()) {
+    stun_addr = stun_hosts.front();
+  }
+  scoped_ptr<cricket::BasicPortAllocator> allocator(
+      new cricket::BasicPortAllocator(
+          network_manager_.get(), socket_factory_.get(), stun_addr));
 
-    for (size_t i = 0; i < turn.size(); ++i) {
-        cricket::RelayCredentials credentials(turn[i].username, turn[i].password);
-        cricket::RelayServerConfig relay_server(cricket::RELAY_TURN);
-        cricket::ProtocolType protocol;
-        if (cricket::StringToProto(turn[i].transport_type.c_str(), &protocol)) {
-            relay_server.ports.push_back(cricket::ProtocolAddress(
-                                             turn[i].server, protocol, turn[i].secure));
-            relay_server.credentials = credentials;
-            allocator->AddRelay(relay_server);
-        } else {
-            LOG(LS_WARNING) << "Ignoring TURN server " << turn[i].server << ". "
-                            << "Reason= Incorrect " << turn[i].transport_type
-                            << " transport parameter.";
-        }
+  for (size_t i = 0; i < turn.size(); ++i) {
+    cricket::RelayCredentials credentials(turn[i].username, turn[i].password);
+    cricket::RelayServerConfig relay_server(cricket::RELAY_TURN);
+    cricket::ProtocolType protocol;
+    if (cricket::StringToProto(turn[i].transport_type.c_str(), &protocol)) {
+      relay_server.ports.push_back(cricket::ProtocolAddress(
+          turn[i].server, protocol, turn[i].secure));
+      relay_server.credentials = credentials;
+      allocator->AddRelay(relay_server);
+    } else {
+      LOG(LS_WARNING) << "Ignoring TURN server " << turn[i].server << ". "
+                      << "Reason= Incorrect " << turn[i].transport_type
+                      << " transport parameter.";
     }
-    return allocator.release();
+  }
+  return allocator.release();
 }
 
 }  // namespace webrtc

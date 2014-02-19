@@ -78,11 +78,14 @@ const char StatsReport::kStatsValueNameEchoReturnLossEnhancement[] =
 
 const char StatsReport::kStatsValueNameEncodeUsagePercent[] =
     "googEncodeUsagePercent";
+const char StatsReport::kStatsValueNameExpandRate[] = "googExpandRate";
 const char StatsReport::kStatsValueNameFingerprint[] = "googFingerprint";
 const char StatsReport::kStatsValueNameFingerprintAlgorithm[] =
     "googFingerprintAlgorithm";
 const char StatsReport::kStatsValueNameFirsReceived[] = "googFirsReceived";
 const char StatsReport::kStatsValueNameFirsSent[] = "googFirsSent";
+const char StatsReport::kStatsValueNameFrameHeightInput[] =
+    "googFrameHeightInput";
 const char StatsReport::kStatsValueNameFrameHeightReceived[] =
     "googFrameHeightReceived";
 const char StatsReport::kStatsValueNameFrameHeightSent[] =
@@ -104,6 +107,8 @@ const char StatsReport::kStatsValueNameRenderDelayMs[] = "googRenderDelayMs";
 
 const char StatsReport::kStatsValueNameFrameRateInput[] = "googFrameRateInput";
 const char StatsReport::kStatsValueNameFrameRateSent[] = "googFrameRateSent";
+const char StatsReport::kStatsValueNameFrameWidthInput[] =
+    "googFrameWidthInput";
 const char StatsReport::kStatsValueNameFrameWidthReceived[] =
     "googFrameWidthReceived";
 const char StatsReport::kStatsValueNameFrameWidthSent[] = "googFrameWidthSent";
@@ -121,6 +126,13 @@ const char StatsReport::kStatsValueNamePacketsReceived[] = "packetsReceived";
 const char StatsReport::kStatsValueNamePacketsSent[] = "packetsSent";
 const char StatsReport::kStatsValueNamePacketsLost[] = "packetsLost";
 const char StatsReport::kStatsValueNameReadable[] = "googReadable";
+const char StatsReport::kStatsValueNameRecvPacketGroupArrivalTimeDebug[] =
+    "googReceivedPacketGroupArrivalTimeDebug";
+const char StatsReport::kStatsValueNameRecvPacketGroupPropagationDeltaDebug[] =
+    "googReceivedPacketGroupPropagationDeltaDebug";
+const char
+StatsReport::kStatsValueNameRecvPacketGroupPropagationDeltaSumDebug[] =
+    "googReceivedPacketGroupPropagationDeltaSumDebug";
 const char StatsReport::kStatsValueNameRemoteAddress[] = "googRemoteAddress";
 const char StatsReport::kStatsValueNameRemoteCandidateType[] =
     "googRemoteCandidateType";
@@ -169,6 +181,20 @@ void StatsReport::AddValue(const std::string& name, int64 value) {
   AddValue(name, talk_base::ToString<int64>(value));
 }
 
+template <typename T>
+void StatsReport::AddValue(const std::string& name,
+                           const std::vector<T>& value) {
+  std::ostringstream oss;
+  oss << "[";
+  for (size_t i = 0; i < value.size(); ++i) {
+    oss << talk_base::ToString<T>(value[i]);
+    if (i != value.size() - 1)
+      oss << ", ";
+  }
+  oss << "]";
+  AddValue(name, oss.str());
+}
+
 void StatsReport::AddBoolean(const std::string& name, bool value) {
   AddValue(name, value ? "true" : "false");
 }
@@ -215,6 +241,8 @@ void ExtractStats(const cricket::VoiceReceiverInfo& info, StatsReport* report) {
                    info.bytes_rcvd);
   report->AddValue(StatsReport::kStatsValueNameJitterReceived,
                    info.jitter_ms);
+  report->AddValue(StatsReport::kStatsValueNameExpandRate,
+                   talk_base::ToString<float>(info.expand_rate));
   report->AddValue(StatsReport::kStatsValueNamePacketsReceived,
                    info.packets_rcvd);
   report->AddValue(StatsReport::kStatsValueNamePacketsLost,
@@ -295,10 +323,14 @@ void ExtractStats(const cricket::VideoSenderInfo& info, StatsReport* report) {
                    info.firs_rcvd);
   report->AddValue(StatsReport::kStatsValueNameNacksReceived,
                    info.nacks_rcvd);
+  report->AddValue(StatsReport::kStatsValueNameFrameWidthInput,
+                   info.input_frame_width);
+  report->AddValue(StatsReport::kStatsValueNameFrameHeightInput,
+                   info.input_frame_height);
   report->AddValue(StatsReport::kStatsValueNameFrameWidthSent,
-                   info.frame_width);
+                   info.send_frame_width);
   report->AddValue(StatsReport::kStatsValueNameFrameHeightSent,
-                   info.frame_height);
+                   info.send_frame_height);
   report->AddValue(StatsReport::kStatsValueNameFrameRateInput,
                    info.framerate_input);
   report->AddValue(StatsReport::kStatsValueNameFrameRateSent,
@@ -322,6 +354,7 @@ void ExtractStats(const cricket::VideoSenderInfo& info, StatsReport* report) {
 
 void ExtractStats(const cricket::BandwidthEstimationInfo& info,
                   double stats_gathering_started,
+                  PeerConnectionInterface::StatsOutputLevel level,
                   StatsReport* report) {
   report->id = StatsReport::kStatsReportVideoBweId;
   report->type = StatsReport::kStatsReportTypeBwe;
@@ -346,6 +379,19 @@ void ExtractStats(const cricket::BandwidthEstimationInfo& info,
                    info.transmit_bitrate);
   report->AddValue(StatsReport::kStatsValueNameBucketDelay,
                    info.bucket_delay);
+  if (level >= PeerConnectionInterface::kStatsOutputLevelDebug) {
+    report->AddValue(
+        StatsReport::kStatsValueNameRecvPacketGroupPropagationDeltaSumDebug,
+        info.total_received_propagation_delta_ms);
+    if (info.recent_received_propagation_delta_ms.size() > 0) {
+      report->AddValue(
+          StatsReport::kStatsValueNameRecvPacketGroupPropagationDeltaDebug,
+          info.recent_received_propagation_delta_ms);
+      report->AddValue(
+          StatsReport::kStatsValueNameRecvPacketGroupArrivalTimeDebug,
+          info.recent_received_packet_group_arrival_time_ms);
+    }
+  }
 }
 
 void ExtractRemoteStats(const cricket::MediaSenderInfo& info,
@@ -387,7 +433,7 @@ void ExtractStatsFromList(const std::vector<T>& data,
       ExtractRemoteStats(*it, report);
     }
   }
-};
+}
 
 }  // namespace
 
@@ -451,7 +497,8 @@ bool StatsCollector::GetStats(MediaStreamTrackInterface* track,
   return true;
 }
 
-void StatsCollector::UpdateStats() {
+void
+StatsCollector::UpdateStats(PeerConnectionInterface::StatsOutputLevel level) {
   double time_now = GetTimeNow();
   // Calls to UpdateStats() that occur less than kMinGatherStatsPeriod number of
   // ms apart will be ignored.
@@ -464,7 +511,7 @@ void StatsCollector::UpdateStats() {
   if (session_) {
     ExtractSessionInfo();
     ExtractVoiceInfo();
-    ExtractVideoInfo();
+    ExtractVideoInfo(level);
   }
 }
 
@@ -557,6 +604,14 @@ std::string StatsCollector::AddOneCertificateReport(
 
   talk_base::scoped_ptr<talk_base::SSLFingerprint> ssl_fingerprint(
       talk_base::SSLFingerprint::Create(digest_algorithm, cert));
+
+  // SSLFingerprint::Create can fail if the algorithm returned by
+  // SSLCertificate::GetSignatureDigestAlgorithm is not supported by the
+  // implementation of SSLCertificate::ComputeDigest.  This currently happens
+  // with MD5- and SHA-224-signed certificates when linked to libNSS.
+  if (!ssl_fingerprint)
+    return std::string();
+
   std::string fingerprint = ssl_fingerprint->GetRfc4572Fingerprint();
 
   talk_base::Buffer der_buffer;
@@ -725,12 +780,17 @@ void StatsCollector::ExtractVoiceInfo() {
   ExtractStatsFromList(voice_info.senders, transport_id, this);
 }
 
-void StatsCollector::ExtractVideoInfo() {
+void StatsCollector::ExtractVideoInfo(
+    PeerConnectionInterface::StatsOutputLevel level) {
   if (!session_->video_channel()) {
     return;
   }
+  cricket::StatsOptions options;
+  options.include_received_propagation_stats =
+      (level >= PeerConnectionInterface::kStatsOutputLevelDebug) ?
+          true : false;
   cricket::VideoMediaInfo video_info;
-  if (!session_->video_channel()->GetStats(&video_info)) {
+  if (!session_->video_channel()->GetStats(options, &video_info)) {
     LOG(LS_ERROR) << "Failed to get video channel stats.";
     return;
   }
@@ -748,7 +808,7 @@ void StatsCollector::ExtractVideoInfo() {
   } else {
     StatsReport* report = &reports_[StatsReport::kStatsReportVideoBweId];
     ExtractStats(
-        video_info.bw_estimations[0], stats_gathering_started_, report);
+        video_info.bw_estimations[0], stats_gathering_started_, level, report);
   }
 }
 

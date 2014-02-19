@@ -76,6 +76,7 @@
 #include "talk/app/webrtc/jsep.h"
 #include "talk/app/webrtc/mediastreaminterface.h"
 #include "talk/app/webrtc/statstypes.h"
+#include "talk/base/fileutils.h"
 #include "talk/base/socketaddress.h"
 
 namespace talk_base {
@@ -165,6 +166,15 @@ class PeerConnectionInterface : public talk_base::RefCountInterface {
   };
   typedef std::vector<IceServer> IceServers;
 
+  // Used by GetStats to decide which stats to include in the stats reports.
+  // |kStatsOutputLevelStandard| includes the standard stats for Javascript API;
+  // |kStatsOutputLevelDebug| includes both the standard stats and additional
+  // stats for debugging purposes.
+  enum StatsOutputLevel {
+    kStatsOutputLevelStandard,
+    kStatsOutputLevelDebug,
+  };
+
   // Accessor methods to active local streams.
   virtual talk_base::scoped_refptr<StreamCollectionInterface>
       local_streams() = 0;
@@ -189,8 +199,13 @@ class PeerConnectionInterface : public talk_base::RefCountInterface {
   virtual talk_base::scoped_refptr<DtmfSenderInterface> CreateDtmfSender(
       AudioTrackInterface* track) = 0;
 
+  // TODO(jiayl): remove the old API once all Chrome overrides are updated.
   virtual bool GetStats(StatsObserver* observer,
                         MediaStreamTrackInterface* track) = 0;
+
+  virtual bool GetStats(StatsObserver* observer,
+                        MediaStreamTrackInterface* track,
+                        StatsOutputLevel level) = 0;
 
   virtual talk_base::scoped_refptr<DataChannelInterface> CreateDataChannel(
       const std::string& label,
@@ -276,8 +291,8 @@ class PeerConnectionObserver {
   // TODO(perkj): Make pure virtual.
   virtual void OnDataChannel(DataChannelInterface* data_channel) {}
 
-  // Triggered when renegotation is needed, for example the ICE has restarted.
-  virtual void OnRenegotiationNeeded() {}
+  // Triggered when renegotiation is needed, for example the ICE has restarted.
+  virtual void OnRenegotiationNeeded() = 0;
 
   // Called any time the IceConnectionState changes
   virtual void OnIceConnectionChange(
@@ -442,9 +457,10 @@ class PeerConnectionFactoryInterface : public talk_base::RefCountInterface {
 
   // Starts AEC dump using existing file. Takes ownership of |file| and passes
   // it on to VoiceEngine (via other objects) immediately, which will take
-  // the ownerhip.
+  // the ownerhip. If the operation fails, the file will be closed.
   // TODO(grunell): Remove when Chromium has started to use AEC in each source.
-  virtual bool StartAecDump(FILE* file) = 0;
+  // http://crbug.com/264611.
+  virtual bool StartAecDump(talk_base::PlatformFile file) = 0;
 
  protected:
   // Dtor and ctor protected as objects shouldn't be created or deleted via

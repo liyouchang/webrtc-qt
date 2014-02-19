@@ -142,9 +142,36 @@ class VideoTrackInterface : public MediaStreamTrackInterface {
 
 // AudioSourceInterface is a reference counted source used for AudioTracks.
 // The same source can be used in multiple AudioTracks.
-// TODO(perkj): Extend this class with necessary methods to allow separate
-// sources for each audio track.
 class AudioSourceInterface : public MediaSourceInterface {
+ public:
+  class AudioObserver {
+   public:
+    virtual void OnSetVolume(double volume) = 0;
+
+   protected:
+    virtual ~AudioObserver() {}
+  };
+
+  // TODO(xians): Makes all the interface pure virtual after Chrome has their
+  // implementations.
+  // Sets the volume to the source. |volume| is in  the range of [0, 10].
+  virtual void SetVolume(double volume) {}
+
+  // Registers/unregisters observer to the audio source.
+  virtual void RegisterAudioObserver(AudioObserver* observer) {}
+  virtual void UnregisterAudioObserver(AudioObserver* observer) {}
+};
+
+// Interface for receiving audio data from a AudioTrack.
+class AudioTrackSinkInterface {
+ public:
+  virtual void OnData(const void* audio_data,
+                      int bits_per_sample,
+                      int sample_rate,
+                      int number_of_channels,
+                      int number_of_frames) = 0;
+ protected:
+  virtual ~AudioTrackSinkInterface() {}
 };
 
 class AudioTrackInterface : public MediaStreamTrackInterface {
@@ -152,10 +179,16 @@ class AudioTrackInterface : public MediaStreamTrackInterface {
   // TODO(xians): Figure out if the following interface should be const or not.
   virtual AudioSourceInterface* GetSource() const =  0;
 
+  // Adds/Removes a sink that will receive the audio data from the track.
+  // TODO(xians): Make them pure virtual after Chrome implements these
+  // interfaces.
+  virtual void AddSink(AudioTrackSinkInterface* sink) {}
+  virtual void RemoveSink(AudioTrackSinkInterface* sink) {}
+
   // Gets a pointer to the audio renderer of this AudioTrack.
   // The pointer is valid for the lifetime of this AudioTrack.
-  // TODO(xians): Make the following interface pure virtual once Chrome has its
-  // implementation.
+  // TODO(xians): Remove the following interface after Chrome switches to
+  // AddSink() and RemoveSink() interfaces.
   virtual cricket::AudioRenderer* GetRenderer() { return NULL; }
 
  protected:
