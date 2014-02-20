@@ -12,7 +12,7 @@ MAKEFILE      = Makefile.libjingle_sound
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DJSONCPP_RELATIVE_PATH -DLOGGING=1 -DPOSIX -DLINUX
+DEFINES       = -DJSONCPP_RELATIVE_PATH -DLOGGING=1 -DLIBPEERCONNECTION_LIB=1 -DUSE_WEBRTC_DEV_BRANCH -DPOSIX -DLINUX
 CFLAGS        = -pipe -g -fPIC -Wall -W -D_REENTRANT $(DEFINES)
 CXXFLAGS      = -pipe -g -fPIC -Wall -W -D_REENTRANT $(DEFINES)
 INCPATH       = -I../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++ -I. -I..
@@ -38,7 +38,7 @@ MKDIR         = mkdir -p
 
 ####### Output directory
 
-OBJECTS_DIR   = ../tmp/
+OBJECTS_DIR   = ../tmp/jingle_sound/
 
 ####### Files
 
@@ -53,17 +53,17 @@ SOURCES       = sound/nullsoundsystem.cc \
 		sound/linuxsoundsystem.cc \
 		sound/pulseaudiosoundsystem.cc \
 		sound/pulseaudiosymboltable.cc 
-OBJECTS       = ../tmp/nullsoundsystem.o \
-		../tmp/nullsoundsystemfactory.o \
-		../tmp/platformsoundsystem.o \
-		../tmp/soundsysteminterface.o \
-		../tmp/soundsystemproxy.o \
-		../tmp/platformsoundsystemfactory.o \
-		../tmp/alsasoundsystem.o \
-		../tmp/alsasymboltable.o \
-		../tmp/linuxsoundsystem.o \
-		../tmp/pulseaudiosoundsystem.o \
-		../tmp/pulseaudiosymboltable.o
+OBJECTS       = ../tmp/jingle_sound/nullsoundsystem.o \
+		../tmp/jingle_sound/nullsoundsystemfactory.o \
+		../tmp/jingle_sound/platformsoundsystem.o \
+		../tmp/jingle_sound/soundsysteminterface.o \
+		../tmp/jingle_sound/soundsystemproxy.o \
+		../tmp/jingle_sound/platformsoundsystemfactory.o \
+		../tmp/jingle_sound/alsasoundsystem.o \
+		../tmp/jingle_sound/alsasymboltable.o \
+		../tmp/jingle_sound/linuxsoundsystem.o \
+		../tmp/jingle_sound/pulseaudiosoundsystem.o \
+		../tmp/jingle_sound/pulseaudiosymboltable.o
 DIST          = ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/common/shell-unix.conf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/common/unix.conf \
@@ -166,7 +166,7 @@ DIST          = ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		libjingle_sound.pro \
 		libjingle_sound.pro
 QMAKE_TARGET  = jingle_sound
-DESTDIR       = ../lib/#avoid trailing-slash linebreak
+DESTDIR       = ../libs/#avoid trailing-slash linebreak
 TARGET        = libjingle_sound.a
 
 
@@ -192,16 +192,16 @@ first: all
 
 ####### Build rules
 
-all: Makefile.libjingle_sound ../lib/$(TARGET) 
+all: Makefile.libjingle_sound ../libs/$(TARGET) 
 
-staticlib: ../lib/$(TARGET)
+staticlib: ../libs/$(TARGET)
 
-../lib/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
-	@test -d ../lib/ || mkdir -p ../lib/
+../libs/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
+	@test -d ../libs/ || mkdir -p ../libs/
 	-$(DEL_FILE) $(TARGET)
 	$(AR) $(TARGET) $(OBJECTS)
-	-$(DEL_FILE) ../lib/$(TARGET)
-	-$(MOVE) $(TARGET) ../lib/ 
+	-$(DEL_FILE) ../libs/$(TARGET)
+	-$(MOVE) $(TARGET) ../libs/ 
 
 
 Makefile.libjingle_sound: libjingle_sound.pro ../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++/qmake.conf ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
@@ -411,8 +411,8 @@ qmake: FORCE
 qmake_all: FORCE
 
 dist: 
-	@test -d ../tmp/jingle_sound1.0.0 || mkdir -p ../tmp/jingle_sound1.0.0
-	$(COPY_FILE) --parents $(SOURCES) $(DIST) ../tmp/jingle_sound1.0.0/ && (cd `dirname ../tmp/jingle_sound1.0.0` && $(TAR) jingle_sound1.0.0.tar jingle_sound1.0.0 && $(COMPRESS) jingle_sound1.0.0.tar) && $(MOVE) `dirname ../tmp/jingle_sound1.0.0`/jingle_sound1.0.0.tar.gz . && $(DEL_FILE) -r ../tmp/jingle_sound1.0.0
+	@test -d ../tmp/jingle_sound/jingle_sound1.0.0 || mkdir -p ../tmp/jingle_sound/jingle_sound1.0.0
+	$(COPY_FILE) --parents $(SOURCES) $(DIST) ../tmp/jingle_sound/jingle_sound1.0.0/ && (cd `dirname ../tmp/jingle_sound/jingle_sound1.0.0` && $(TAR) jingle_sound1.0.0.tar jingle_sound1.0.0 && $(COMPRESS) jingle_sound1.0.0.tar) && $(MOVE) `dirname ../tmp/jingle_sound/jingle_sound1.0.0`/jingle_sound1.0.0.tar.gz . && $(DEL_FILE) -r ../tmp/jingle_sound/jingle_sound1.0.0
 
 
 clean:compiler_clean 
@@ -423,7 +423,7 @@ clean:compiler_clean
 ####### Sub-libraries
 
 distclean: clean
-	-$(DEL_FILE) ../lib/$(TARGET) 
+	-$(DEL_FILE) ../libs/$(TARGET) 
 	-$(DEL_FILE) Makefile.libjingle_sound
 
 
@@ -439,7 +439,7 @@ compiler_clean:
 
 ####### Compile
 
-../tmp/nullsoundsystem.o: sound/nullsoundsystem.cc ../talk/sound/nullsoundsystem.h \
+../tmp/jingle_sound/nullsoundsystem.o: sound/nullsoundsystem.cc ../talk/sound/nullsoundsystem.h \
 		../talk/sound/soundsysteminterface.h \
 		../talk/base/constructormagic.h \
 		../talk/base/logging.h \
@@ -451,9 +451,9 @@ compiler_clean:
 		../talk/sound/soundinputstreaminterface.h \
 		../talk/base/sigslot.h \
 		../talk/sound/soundoutputstreaminterface.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/nullsoundsystem.o sound/nullsoundsystem.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/nullsoundsystem.o sound/nullsoundsystem.cc
 
-../tmp/nullsoundsystemfactory.o: sound/nullsoundsystemfactory.cc ../talk/sound/nullsoundsystemfactory.h \
+../tmp/jingle_sound/nullsoundsystemfactory.o: sound/nullsoundsystemfactory.cc ../talk/sound/nullsoundsystemfactory.h \
 		../talk/sound/soundsystemfactory.h \
 		../talk/base/referencecountedsingletonfactory.h \
 		../talk/base/common.h \
@@ -469,9 +469,9 @@ compiler_clean:
 		../talk/base/template_util.h \
 		../talk/sound/nullsoundsystem.h \
 		../talk/sound/soundsysteminterface.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/nullsoundsystemfactory.o sound/nullsoundsystemfactory.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/nullsoundsystemfactory.o sound/nullsoundsystemfactory.cc
 
-../tmp/platformsoundsystem.o: sound/platformsoundsystem.cc ../talk/sound/platformsoundsystem.h \
+../tmp/jingle_sound/platformsoundsystem.o: sound/platformsoundsystem.cc ../talk/sound/platformsoundsystem.h \
 		../talk/base/common.h \
 		../talk/base/basictypes.h \
 		../talk/base/constructormagic.h \
@@ -488,20 +488,20 @@ compiler_clean:
 		../talk/sound/soundsysteminterface.h \
 		../talk/sound/soundsystemproxy.h \
 		../talk/sound/nullsoundsystem.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/platformsoundsystem.o sound/platformsoundsystem.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/platformsoundsystem.o sound/platformsoundsystem.cc
 
-../tmp/soundsysteminterface.o: sound/soundsysteminterface.cc ../talk/sound/soundsysteminterface.h \
+../tmp/jingle_sound/soundsysteminterface.o: sound/soundsysteminterface.cc ../talk/sound/soundsysteminterface.h \
 		../talk/base/constructormagic.h \
 		../talk/sound/sounddevicelocator.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/soundsysteminterface.o sound/soundsysteminterface.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/soundsysteminterface.o sound/soundsysteminterface.cc
 
-../tmp/soundsystemproxy.o: sound/soundsystemproxy.cc ../talk/sound/soundsystemproxy.h \
+../tmp/jingle_sound/soundsystemproxy.o: sound/soundsystemproxy.cc ../talk/sound/soundsystemproxy.h \
 		../talk/base/basictypes.h \
 		../talk/base/constructormagic.h \
 		../talk/sound/soundsysteminterface.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/soundsystemproxy.o sound/soundsystemproxy.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/soundsystemproxy.o sound/soundsystemproxy.cc
 
-../tmp/platformsoundsystemfactory.o: sound/platformsoundsystemfactory.cc ../talk/sound/platformsoundsystemfactory.h \
+../tmp/jingle_sound/platformsoundsystemfactory.o: sound/platformsoundsystemfactory.cc ../talk/sound/platformsoundsystemfactory.h \
 		../talk/sound/soundsystemfactory.h \
 		../talk/base/referencecountedsingletonfactory.h \
 		../talk/base/common.h \
@@ -517,9 +517,9 @@ compiler_clean:
 		../talk/base/template_util.h \
 		../talk/sound/platformsoundsystem.h \
 		../talk/sound/soundsysteminterface.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/platformsoundsystemfactory.o sound/platformsoundsystemfactory.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/platformsoundsystemfactory.o sound/platformsoundsystemfactory.cc
 
-../tmp/alsasoundsystem.o: sound/alsasoundsystem.cc ../talk/sound/alsasoundsystem.h \
+../tmp/jingle_sound/alsasoundsystem.o: sound/alsasoundsystem.cc ../talk/sound/alsasoundsystem.h \
 		../talk/base/constructormagic.h \
 		../talk/sound/alsasymboltable.h \
 		../talk/base/latebindingsymboltable.h \
@@ -542,17 +542,17 @@ compiler_clean:
 		../talk/sound/soundinputstreaminterface.h \
 		../talk/base/sigslot.h \
 		../talk/sound/soundoutputstreaminterface.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/alsasoundsystem.o sound/alsasoundsystem.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/alsasoundsystem.o sound/alsasoundsystem.cc
 
-../tmp/alsasymboltable.o: sound/alsasymboltable.cc ../talk/sound/alsasymboltable.h \
+../tmp/jingle_sound/alsasymboltable.o: sound/alsasymboltable.cc ../talk/sound/alsasymboltable.h \
 		../talk/base/latebindingsymboltable.h \
 		../talk/base/common.h \
 		../talk/base/basictypes.h \
 		../talk/base/constructormagic.h \
 		../talk/base/latebindingsymboltable.h.def
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/alsasymboltable.o sound/alsasymboltable.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/alsasymboltable.o sound/alsasymboltable.cc
 
-../tmp/linuxsoundsystem.o: sound/linuxsoundsystem.cc ../talk/sound/linuxsoundsystem.h \
+../tmp/jingle_sound/linuxsoundsystem.o: sound/linuxsoundsystem.cc ../talk/sound/linuxsoundsystem.h \
 		../talk/sound/automaticallychosensoundsystem.h \
 		../talk/base/common.h \
 		../talk/base/basictypes.h \
@@ -573,9 +573,9 @@ compiler_clean:
 		../talk/base/latebindingsymboltable.h.def \
 		../talk/sound/pulseaudiosoundsystem.h \
 		../talk/sound/pulseaudiosymboltable.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/linuxsoundsystem.o sound/linuxsoundsystem.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/linuxsoundsystem.o sound/linuxsoundsystem.cc
 
-../tmp/pulseaudiosoundsystem.o: sound/pulseaudiosoundsystem.cc ../talk/sound/pulseaudiosoundsystem.h \
+../tmp/jingle_sound/pulseaudiosoundsystem.o: sound/pulseaudiosoundsystem.cc ../talk/sound/pulseaudiosoundsystem.h \
 		../talk/base/constructormagic.h \
 		../talk/sound/pulseaudiosymboltable.h \
 		../talk/base/latebindingsymboltable.h \
@@ -599,15 +599,15 @@ compiler_clean:
 		../talk/sound/soundinputstreaminterface.h \
 		../talk/base/sigslot.h \
 		../talk/sound/soundoutputstreaminterface.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/pulseaudiosoundsystem.o sound/pulseaudiosoundsystem.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/pulseaudiosoundsystem.o sound/pulseaudiosoundsystem.cc
 
-../tmp/pulseaudiosymboltable.o: sound/pulseaudiosymboltable.cc ../talk/sound/pulseaudiosymboltable.h \
+../tmp/jingle_sound/pulseaudiosymboltable.o: sound/pulseaudiosymboltable.cc ../talk/sound/pulseaudiosymboltable.h \
 		../talk/base/latebindingsymboltable.h \
 		../talk/base/common.h \
 		../talk/base/basictypes.h \
 		../talk/base/constructormagic.h \
 		../talk/base/latebindingsymboltable.h.def
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/pulseaudiosymboltable.o sound/pulseaudiosymboltable.cc
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_sound/pulseaudiosymboltable.o sound/pulseaudiosymboltable.cc
 
 ####### Install
 

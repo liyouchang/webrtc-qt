@@ -3,7 +3,8 @@ TEMPLATE = subdirs
 SUBDIRS += \
     libjingle_app \
     third_party \
-    talk
+    talk \
+    peerconnection_client
 
 
 
@@ -11,9 +12,8 @@ SUBDIRS += \
 
 
 win32 {
-    SUBDIRS += PCPClient
+
 }
 else{
-   SUBDIRS += PCPLinux
 
 }

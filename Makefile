@@ -27,7 +27,7 @@ SUBTARGETS    =  \
 		sub-libjingle_app \
 		sub-third_party \
 		sub-talk \
-		sub-PCPLinux
+		sub-peerconnection_client
 
 
 sub-libjingle_app-qmake_all:  FORCE
@@ -105,31 +105,31 @@ sub-talk-install_subtargets: FORCE
 sub-talk-uninstall_subtargets: FORCE
 	@test -d talk/ || mkdir -p talk/
 	cd talk/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/talk/talk.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
-sub-PCPLinux-qmake_all:  FORCE
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile
-	cd PCPLinux/ && $(MAKE) -f Makefile qmake_all
-sub-PCPLinux: FORCE
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile
-sub-PCPLinux-make_first: FORCE
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile 
-sub-PCPLinux-all: FORCE
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile all
-sub-PCPLinux-clean: FORCE
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile clean
-sub-PCPLinux-distclean: FORCE
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile distclean
-sub-PCPLinux-install_subtargets: FORCE
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile install
-sub-PCPLinux-uninstall_subtargets: FORCE
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
+sub-peerconnection_client-qmake_all:  FORCE
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile
+	cd peerconnection_client/ && $(MAKE) -f Makefile qmake_all
+sub-peerconnection_client: FORCE
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile
+sub-peerconnection_client-make_first: FORCE
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile 
+sub-peerconnection_client-all: FORCE
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile all
+sub-peerconnection_client-clean: FORCE
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile clean
+sub-peerconnection_client-distclean: FORCE
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile distclean
+sub-peerconnection_client-install_subtargets: FORCE
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile install
+sub-peerconnection_client-uninstall_subtargets: FORCE
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
 
 Makefile: P2PSystem.pro ../../Qt/5.2.1/gcc_64/mkspecs/linux-g++/qmake.conf ../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../Qt/5.2.1/gcc_64/mkspecs/common/shell-unix.conf \
@@ -329,15 +329,15 @@ P2PSystem.pro:
 qmake: FORCE
 	@$(QMAKE) -spec linux-g++ CONFIG+=debug -o Makefile P2PSystem.pro
 
-qmake_all: sub-libjingle_app-qmake_all sub-third_party-qmake_all sub-talk-qmake_all sub-PCPLinux-qmake_all FORCE
+qmake_all: sub-libjingle_app-qmake_all sub-third_party-qmake_all sub-talk-qmake_all sub-peerconnection_client-qmake_all FORCE
 
-make_first: sub-libjingle_app-make_first sub-third_party-make_first sub-talk-make_first sub-PCPLinux-make_first FORCE
-all: sub-libjingle_app-all sub-third_party-all sub-talk-all sub-PCPLinux-all FORCE
-clean: sub-libjingle_app-clean sub-third_party-clean sub-talk-clean sub-PCPLinux-clean FORCE
-distclean: sub-libjingle_app-distclean sub-third_party-distclean sub-talk-distclean sub-PCPLinux-distclean FORCE
+make_first: sub-libjingle_app-make_first sub-third_party-make_first sub-talk-make_first sub-peerconnection_client-make_first FORCE
+all: sub-libjingle_app-all sub-third_party-all sub-talk-all sub-peerconnection_client-all FORCE
+clean: sub-libjingle_app-clean sub-third_party-clean sub-talk-clean sub-peerconnection_client-clean FORCE
+distclean: sub-libjingle_app-distclean sub-third_party-distclean sub-talk-distclean sub-peerconnection_client-distclean FORCE
 	-$(DEL_FILE) Makefile
-install_subtargets: sub-libjingle_app-install_subtargets sub-third_party-install_subtargets sub-talk-install_subtargets sub-PCPLinux-install_subtargets FORCE
-uninstall_subtargets: sub-libjingle_app-uninstall_subtargets sub-third_party-uninstall_subtargets sub-talk-uninstall_subtargets sub-PCPLinux-uninstall_subtargets FORCE
+install_subtargets: sub-libjingle_app-install_subtargets sub-third_party-install_subtargets sub-talk-install_subtargets sub-peerconnection_client-install_subtargets FORCE
+uninstall_subtargets: sub-libjingle_app-uninstall_subtargets sub-third_party-uninstall_subtargets sub-talk-uninstall_subtargets sub-peerconnection_client-uninstall_subtargets FORCE
 
 sub-libjingle_app-check:
 	@test -d libjingle_app/ || mkdir -p libjingle_app/
@@ -348,10 +348,10 @@ sub-third_party-check:
 sub-talk-check:
 	@test -d talk/ || mkdir -p talk/
 	cd talk/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/talk/talk.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
-sub-PCPLinux-check:
-	@test -d PCPLinux/ || mkdir -p PCPLinux/
-	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
-check: sub-libjingle_app-check sub-third_party-check sub-talk-check sub-PCPLinux-check
+sub-peerconnection_client-check:
+	@test -d peerconnection_client/ || mkdir -p peerconnection_client/
+	cd peerconnection_client/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/peerconnection_client/peerconnection_client.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
+check: sub-libjingle_app-check sub-third_party-check sub-talk-check sub-peerconnection_client-check
 install: install_subtargets  FORCE
 
 uninstall:  uninstall_subtargets FORCE

@@ -6,11 +6,11 @@
 
 QT       -= core gui
 
-TARGET = libjingle_peerconnection
+TARGET = jingle_peerconnection
 TEMPLATE = lib
 CONFIG += staticlib
 
-DESTDIR = $$PWD/../lib
+DESTDIR = $$PWD/../libs
 
 
 include (talk_common.pri)

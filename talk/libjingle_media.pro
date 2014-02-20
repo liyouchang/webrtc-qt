@@ -6,17 +6,21 @@
 
 QT       -= core gui
 
-TARGET = libjingle_media
+TARGET = jingle_media
 TEMPLATE = lib
 CONFIG += staticlib
 
 
-DESTDIR = $$PWD/../lib
+DESTDIR = $$PWD/../libs
 
 
 include(talk_common.pri)
 
-INCLUDEPATH  += ../third_party/libyuv/include  ../third_party/usrsctp
+
+#DEFINES += HAVE_WEBRTC_VIDEO HAVE_WEBRTC_VOICE
+
+INCLUDEPATH  += ../third_party/libyuv/include  ../third_party/usrsctp \
+    third_party/libudev
 
 
 
@@ -98,7 +102,6 @@ SOURCES += \
         'media/webrtc/webrtcpassthroughrender.cc'\
         'media/webrtc/webrtctexturevideoframe.cc'\
         'media/webrtc/webrtcvideocapturer.cc'\
-        'media/webrtc/webrtcvideoengine.cc'\
         'media/webrtc/webrtcvideoframe.cc'\
         'media/webrtc/webrtcvoiceengine.cc'\
 
@@ -108,14 +111,16 @@ unix {
 
 
 HEADERS += \
-            'media/devices/libudevsymboltable.h'\
             'media/devices/v4llookup.h'\
+    media/devices/linuxdevicemanager.h \
+    media/devices/libudevsymboltable.h
 
 
 SOURCES += \
-            'media/devices/libudevsymboltable.cc'\
-            'media/devices/linuxdeviceinfo.cc'\
             'media/devices/v4llookup.cc'\
+    media/devices/linuxdevicemanager.cc \
+    media/devices/linuxdeviceinfo.cc \
+    media/devices/libudevsymboltable.cc
 
 
 }

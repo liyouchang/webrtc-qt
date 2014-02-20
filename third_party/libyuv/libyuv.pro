@@ -6,12 +6,12 @@
 
 QT       -= core gui
 
-TARGET = libyuv
+TARGET = yuv
 TEMPLATE = lib
 CONFIG += staticlib
 
 
-DESTDIR = $$PWD/../../lib
+DESTDIR = $$PWD/../../libs
 
 OBJECTS_DIR = ../../tmp
 

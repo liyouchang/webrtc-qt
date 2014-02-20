@@ -149,7 +149,7 @@ DIST          = ../../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		jsoncpp.pro \
 		jsoncpp.pro
 QMAKE_TARGET  = jsoncpp
-DESTDIR       = ../../lib/#avoid trailing-slash linebreak
+DESTDIR       = ../../libs/#avoid trailing-slash linebreak
 TARGET        = libjsoncpp.a
 
 
@@ -175,16 +175,16 @@ first: all
 
 ####### Build rules
 
-all: Makefile ../../lib/$(TARGET) 
+all: Makefile ../../libs/$(TARGET) 
 
-staticlib: ../../lib/$(TARGET)
+staticlib: ../../libs/$(TARGET)
 
-../../lib/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
-	@test -d ../../lib/ || mkdir -p ../../lib/
+../../libs/$(TARGET):  $(OBJECTS) $(OBJCOMP) 
+	@test -d ../../libs/ || mkdir -p ../../libs/
 	-$(DEL_FILE) $(TARGET)
 	$(AR) $(TARGET) $(OBJECTS)
-	-$(DEL_FILE) ../../lib/$(TARGET)
-	-$(MOVE) $(TARGET) ../../lib/ 
+	-$(DEL_FILE) ../../libs/$(TARGET)
+	-$(MOVE) $(TARGET) ../../libs/ 
 
 
 Makefile: jsoncpp.pro ../../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++/qmake.conf ../../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
@@ -404,7 +404,7 @@ clean:compiler_clean
 ####### Sub-libraries
 
 distclean: clean
-	-$(DEL_FILE) ../../lib/$(TARGET) 
+	-$(DEL_FILE) ../../libs/$(TARGET) 
 	-$(DEL_FILE) Makefile
 
 

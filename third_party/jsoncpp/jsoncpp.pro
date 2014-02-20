@@ -11,7 +11,7 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 
-DESTDIR = $$PWD/../../lib
+DESTDIR = $$PWD/../../libs
 
 INCLUDEPATH     += \
     overrides/include \

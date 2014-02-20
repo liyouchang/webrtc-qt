@@ -13,10 +13,11 @@ CONFIG += staticlib
 CONFIG -= app_bundle
 CONFIG -= qt
 
-DESTDIR = $$PWD/../lib
+DESTDIR = $$PWD/../libs
 
 include(talk_common.pri)
 
+DEFINES += SSL_USE_SCHANNEL
 
 INCLUDEPATH     += ../third_party/jsoncpp/overrides/include \
                    ../third_party/jsoncpp/source/include
@@ -50,13 +51,15 @@ HEADERS += \
 SOURCES += \
     ../talk/base/posix.cc \
     ../talk/base/linux.cc \
-    ../talk/base/linuxfdwalk.c
+    ../talk/base/linuxfdwalk.c \
+    base/unixfilesystem.cc
 
 
 HEADERS += \
     ../talk/base/posix.h \
     ../talk/base/linux.h \
     ../talk/base/linuxfdwalk.h \
+    base/unixfilesystem.h
 
 
 
@@ -102,7 +105,17 @@ SOURCES += \
     ../talk/base/stringutils.cc \
     ../talk/base/asynctcpsocket.cc \
     ../talk/base/asyncfile.cc \
-    ../talk/base/sslfingerprint.cc
+    ../talk/base/sslfingerprint.cc \
+    base/flags.cc \
+    base/checks.cc \
+    base/timing.cc \
+    base/sslidentity.cc \
+    base/cpumonitor.cc \
+    base/fileutils.cc \
+    base/pathutils.cc \
+    base/systeminfo.cc \
+    base/urlencode.cc \
+    base/ratelimiter.cc
 
 
 
@@ -148,5 +161,16 @@ HEADERS += \
     ../talk/base/stringutils.h \
     ../talk/base/asyncfile.h \
     ../talk/base/sslfingerprint.h \
-    ../talk/base/sigslotrepeater.h
+    ../talk/base/sigslotrepeater.h \
+    base/flags.h \
+    base/asyncinvoker-inl.h \
+    base/checks.h \
+    base/timing.h \
+    base/sslidentity.h \
+    base/cpumonitor.h \
+    base/fileutils.h \
+    base/pathutils.h \
+    base/systeminfo.h \
+    base/urlencode.h \
+    base/ratelimiter.h
 

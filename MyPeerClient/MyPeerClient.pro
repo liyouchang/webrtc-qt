@@ -17,7 +17,6 @@ TEMPLATE = app
 INCLUDEPATH += .. ../talk ../third_party ../third_party/webrtc ../webrtc \
             ../third_party/wtl/include ../third_party/expat/files/lib \
             ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
-            $(VSInstallDir)\VC\atlmfc\include
 
 Debug:DESTDIR = ../Debug
 Release:DESTDIR = ../Release

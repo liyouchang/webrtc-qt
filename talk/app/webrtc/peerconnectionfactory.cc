@@ -42,7 +42,7 @@
 #include "talk/media/webrtc/webrtcvideodecoderfactory.h"
 #include "talk/media/webrtc/webrtcvideoencoderfactory.h"
 #include "webrtc/modules/audio_device/include/audio_device.h"
-
+#include "talk/media/base/fakemediaengine.h"
 using talk_base::scoped_refptr;
 
 namespace {
@@ -252,14 +252,17 @@ bool PeerConnectionFactory::Initialize_s() {
       new cricket::DummyDeviceManager());
   // TODO:  Need to make sure only one VoE is created inside
   // WebRtcMediaEngine.
-  cricket::WebRtcMediaEngine* webrtc_media_engine(
-      new cricket::WebRtcMediaEngine(default_adm_.get(),
-                                     NULL,  // No secondary adm.
-                                     video_encoder_factory_.get(),
-                                     video_decoder_factory_.get()));
+//  cricket::WebRtcMediaEngine* webrtc_media_engine(
+//      new cricket::WebRtcMediaEngine(default_adm_.get(),
+//                                     NULL,  // No secondary adm.
+//                                     video_encoder_factory_.get(),
+//                                     video_decoder_factory_.get()));
+  //lht
+      cricket::NullMediaEngine* webrtc_media_engine(
+          new cricket::NullMediaEngine());
 
-  channel_manager_.reset(new cricket::ChannelManager(
-      webrtc_media_engine, device_manager, worker_thread_));
+    channel_manager_.reset(new cricket::ChannelManager(
+        webrtc_media_engine, device_manager, worker_thread_));
   if (!channel_manager_->Init()) {
     return false;
   }

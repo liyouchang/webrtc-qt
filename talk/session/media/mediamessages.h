@@ -118,51 +118,51 @@ struct ViewRequest {
   StaticVideoViews static_video_views;
 };
 
-// If the parent element (usually <jingle>) is a jingle view.
-bool IsJingleViewRequest(const buzz::XmlElement* action_elem);
+//// If the parent element (usually <jingle>) is a jingle view.
+//bool IsJingleViewRequest(const buzz::XmlElement* action_elem);
 
-// Parses a view request from the parent element (usually
-// <jingle>). If it fails, it returns false and fills an error
-// message.
-bool ParseJingleViewRequest(const buzz::XmlElement* action_elem,
-                            ViewRequest* view_request,
-                            ParseError* error);
+//// Parses a view request from the parent element (usually
+//// <jingle>). If it fails, it returns false and fills an error
+//// message.
+//bool ParseJingleViewRequest(const buzz::XmlElement* action_elem,
+//                            ViewRequest* view_request,
+//                            ParseError* error);
 
-// Serializes a view request to XML.  If it fails, returns false and
-// fills in an error message.
-bool WriteJingleViewRequest(const std::string& content_name,
-                            const ViewRequest& view,
-                            XmlElements* elems,
-                            WriteError* error);
+//// Serializes a view request to XML.  If it fails, returns false and
+//// fills in an error message.
+//bool WriteJingleViewRequest(const std::string& content_name,
+//                            const ViewRequest& view,
+//                            XmlElements* elems,
+//                            WriteError* error);
 
-// TODO(pthatcher): Get rid of legacy source notify and replace with
-// description-info as soon as reflector is capable of sending it.
-bool IsSourcesNotify(const buzz::XmlElement* action_elem);
+//// TODO(pthatcher): Get rid of legacy source notify and replace with
+//// description-info as soon as reflector is capable of sending it.
+//bool IsSourcesNotify(const buzz::XmlElement* action_elem);
 
-// If the given elem has <streams>.
-bool HasJingleStreams(const buzz::XmlElement* desc_elem);
+//// If the given elem has <streams>.
+//bool HasJingleStreams(const buzz::XmlElement* desc_elem);
 
-// Parses streams from a jingle <description>.  If it fails, returns
-// false and fills an error message.
-bool ParseJingleStreams(const buzz::XmlElement* desc_elem,
-                        std::vector<StreamParams>* streams,
-                        ParseError* error);
+//// Parses streams from a jingle <description>.  If it fails, returns
+//// false and fills an error message.
+//bool ParseJingleStreams(const buzz::XmlElement* desc_elem,
+//                        std::vector<StreamParams>* streams,
+//                        ParseError* error);
 
-// Write a <streams> element to the parent_elem.
-void WriteJingleStreams(const std::vector<StreamParams>& streams,
-                        buzz::XmlElement* parent_elem);
+//// Write a <streams> element to the parent_elem.
+//void WriteJingleStreams(const std::vector<StreamParams>& streams,
+//                        buzz::XmlElement* parent_elem);
 
-// Parses rtp header extensions from a jingle <description>.  If it
-// fails, returns false and fills an error message.
-bool ParseJingleRtpHeaderExtensions(
-    const buzz::XmlElement* desc_elem,
-    std::vector<RtpHeaderExtension>* hdrexts,
-    ParseError* error);
+//// Parses rtp header extensions from a jingle <description>.  If it
+//// fails, returns false and fills an error message.
+//bool ParseJingleRtpHeaderExtensions(
+//    const buzz::XmlElement* desc_elem,
+//    std::vector<RtpHeaderExtension>* hdrexts,
+//    ParseError* error);
 
-// Writes <rtp-hdrext> elements to the parent_elem.
-void WriteJingleRtpHeaderExtensions(
-    const std::vector<RtpHeaderExtension>& hdrexts,
-    buzz::XmlElement* parent_elem);
+//// Writes <rtp-hdrext> elements to the parent_elem.
+//void WriteJingleRtpHeaderExtensions(
+//    const std::vector<RtpHeaderExtension>& hdrexts,
+//    buzz::XmlElement* parent_elem);
 
 }  // namespace cricket
 

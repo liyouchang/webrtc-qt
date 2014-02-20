@@ -41,7 +41,7 @@
 #include "talk/p2p/base/constants.h"
 #include "talk/session/media/channelmanager.h"
 #include "talk/session/media/srtpfilter.h"
-#include "talk/xmpp/constants.h"
+//#include "talk/xmpp/constants.h"
 
 #ifdef HAVE_SCTP
 #include "talk/media/sctp/sctpdataengine.h"
