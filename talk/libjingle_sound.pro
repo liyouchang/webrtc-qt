@@ -10,6 +10,7 @@ TARGET = jingle_sound
 TEMPLATE = lib
 CONFIG += staticlib
 
+DESTDIR = $$PWD/../lib
 
 include (talk_common.pri)
 

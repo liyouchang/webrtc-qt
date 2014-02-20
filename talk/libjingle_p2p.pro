@@ -13,6 +13,7 @@ CONFIG += staticlib
 CONFIG -= app_bundle
 CONFIG -= qt
 
+DESTDIR = $$PWD/../lib
 
 include (talk_common.pri)
 

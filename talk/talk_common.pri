@@ -1,6 +1,5 @@
 
 
-DESTDIR = $$PWD/../lib
 
 OBJECTS_DIR = ../tmp
 

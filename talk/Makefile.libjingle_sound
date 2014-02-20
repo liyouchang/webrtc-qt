@@ -12,7 +12,7 @@ MAKEFILE      = Makefile.libjingle_sound
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DPOSIX -DLOGGING=1
+DEFINES       = -DJSONCPP_RELATIVE_PATH -DLOGGING=1 -DPOSIX -DLINUX
 CFLAGS        = -pipe -g -fPIC -Wall -W -D_REENTRANT $(DEFINES)
 CXXFLAGS      = -pipe -g -fPIC -Wall -W -D_REENTRANT $(DEFINES)
 INCPATH       = -I../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++ -I. -I..
@@ -152,6 +152,7 @@ DIST          = ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_pre.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_post.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/default_pre.prf \
+		talk_common.pri \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/resolve_config.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/default_post.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/unix/gdb_dwarf_index.prf \
@@ -291,6 +292,7 @@ Makefile.libjingle_sound: libjingle_sound.pro ../../../Qt/5.2.1/gcc_64/mkspecs/l
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_post.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/exclusive_builds.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/default_pre.prf \
+		talk_common.pri \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/resolve_config.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/default_post.prf \
 		../../../Qt/5.2.1/gcc_64/mkspecs/features/unix/gdb_dwarf_index.prf \
@@ -391,6 +393,7 @@ Makefile.libjingle_sound: libjingle_sound.pro ../../../Qt/5.2.1/gcc_64/mkspecs/l
 ../../../Qt/5.2.1/gcc_64/mkspecs/features/spec_post.prf:
 ../../../Qt/5.2.1/gcc_64/mkspecs/features/exclusive_builds.prf:
 ../../../Qt/5.2.1/gcc_64/mkspecs/features/default_pre.prf:
+talk_common.pri:
 ../../../Qt/5.2.1/gcc_64/mkspecs/features/resolve_config.prf:
 ../../../Qt/5.2.1/gcc_64/mkspecs/features/default_post.prf:
 ../../../Qt/5.2.1/gcc_64/mkspecs/features/unix/gdb_dwarf_index.prf:
