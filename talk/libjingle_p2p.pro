@@ -13,25 +13,9 @@ CONFIG += staticlib
 CONFIG -= app_bundle
 CONFIG -= qt
 
-DESTDIR = $$PWD/../lib
 
-INCLUDEPATH += ..
+include (talk_common.pri)
 
-
-
-win32 {
-
-Debug:DEFINES +=_DEBUG
-
-Release:DEFINES +=
-
-DEFINES += _UNICODE UNICODE
-
-
-} else:mac {
-} else {
-    DEFINES += POSIX LOGGING=1
-}
 
 SOURCES += \
     ../talk/p2p/base/constants.cc \

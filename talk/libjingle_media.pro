@@ -11,22 +11,13 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 
-DESTDIR = $$PWD/../lib
-
-OBJECTS_DIR = ../tmp
-
-INCLUDEPATH  += ..   ../third_party/libyuv/include  ../third_party/usrsctp
 
 
-win32 {
+include(talk_common.pri)
 
-Debug:DEFINES +=_DEBUG
-Release:DEFINES +=
-DEFINES += _UNICODE UNICODE
+INCLUDEPATH  += ../third_party/libyuv/include  ../third_party/usrsctp
 
-} else {
-    DEFINES += POSIX LOGGING=1 LINUX
-}
+
 
 HEADERS += \
         'media/base/audioframe.h'\

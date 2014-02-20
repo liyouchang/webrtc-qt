@@ -14,31 +14,12 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
-
-#unix {
-#    target.path = /usr/lib
-#    INSTALLS += target
-#}
-
-DESTDIR = $$PWD/../lib
-win32 {
-
-Debug:DEFINES +=_DEBUG
-Release:DEFINES +=
-DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
+include(talk_common.pri)
 
 
-} else:mac {
-} else {
-    DEFINES += POSIX LOGGING=1
-}
+INCLUDEPATH     += ../third_party/jsoncpp/overrides/include \
+                   ../third_party/jsoncpp/source/include
 
-
-
-INCLUDEPATH     += ../talk/.. \
-    ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
-
-DEFINES += JSONCPP_RELATIVE_PATH
 
 
 #operating system depend files
@@ -64,6 +45,7 @@ HEADERS += \
 
 
 }else{
+
 SOURCES += \
     ../talk/base/posix.cc \
     ../talk/base/linux.cc \

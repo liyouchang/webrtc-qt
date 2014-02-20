@@ -627,27 +627,7 @@ webrtcsdp.o: ../talk/app/webrtc/webrtcsdp.cc ../talk/app/webrtc/webrtcsdp.h \
 		../talk/media/base/voiceprocessor.h \
 		../talk/media/base/audioframe.h \
 		../talk/session/media/mediasession.h \
-		../talk/p2p/base/transportdescriptionfactory.h \
-		../talk/session/media/mediasessionclient.h \
-		../talk/p2p/base/session.h \
-		../talk/p2p/base/portallocator.h \
-		../talk/session/media/call.h \
-		../talk/media/base/screencastid.h \
-		../talk/base/windowpicker.h \
-		../talk/p2p/client/socketmonitor.h \
-		../talk/p2p/base/transportchannel.h \
-		../talk/session/media/currentspeakermonitor.h \
-		../talk/session/media/mediamessages.h \
-		../talk/session/media/channelmanager.h \
-		../talk/media/base/capturemanager.h \
-		../talk/media/base/capturerenderadapter.h \
-		../talk/session/media/voicechannel.h \
-		../talk/session/media/channel.h \
-		../talk/base/asyncudpsocket.h \
-		../talk/session/media/mediamonitor.h \
-		../talk/session/media/rtcpmuxfilter.h \
-		../talk/session/media/srtpfilter.h \
-		../talk/session/media/ssrcmuxfilter.h
+		../talk/p2p/base/transportdescriptionfactory.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o webrtcsdp.o ../talk/app/webrtc/webrtcsdp.cc
 
 KaerSession.o: ../talk/app/kaerp2p/KaerSession.cpp ../talk/app/kaerp2p/KaerSession.h \

@@ -24,64 +24,12 @@ SYMLINK       = ln -f -s
 DEL_DIR       = rmdir
 MOVE          = mv -f
 SUBTARGETS    =  \
-		sub-libjingle \
-		sub-libjingle_p2p \
 		sub-libjingle_app \
 		sub-third_party \
 		sub-talk \
 		sub-PCPLinux
 
 
-sub-libjingle-qmake_all:  FORCE
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile
-	cd libjingle/ && $(MAKE) -f Makefile qmake_all
-sub-libjingle: FORCE
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile
-sub-libjingle-make_first: FORCE
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile 
-sub-libjingle-all: FORCE
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile all
-sub-libjingle-clean: FORCE
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile clean
-sub-libjingle-distclean: FORCE
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile distclean
-sub-libjingle-install_subtargets: FORCE
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile install
-sub-libjingle-uninstall_subtargets: FORCE
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
-sub-libjingle_p2p-qmake_all:  FORCE
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile
-	cd libjingle_p2p/ && $(MAKE) -f Makefile qmake_all
-sub-libjingle_p2p: FORCE
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile
-sub-libjingle_p2p-make_first: FORCE
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile 
-sub-libjingle_p2p-all: FORCE
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile all
-sub-libjingle_p2p-clean: FORCE
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile clean
-sub-libjingle_p2p-distclean: FORCE
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile distclean
-sub-libjingle_p2p-install_subtargets: FORCE
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile install
-sub-libjingle_p2p-uninstall_subtargets: FORCE
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile uninstall
 sub-libjingle_app-qmake_all:  FORCE
 	@test -d libjingle_app/ || mkdir -p libjingle_app/
 	cd libjingle_app/ && $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_app/libjingle_app.pro -spec linux-g++ CONFIG+=debug -o Makefile
@@ -381,22 +329,16 @@ P2PSystem.pro:
 qmake: FORCE
 	@$(QMAKE) -spec linux-g++ CONFIG+=debug -o Makefile P2PSystem.pro
 
-qmake_all: sub-libjingle-qmake_all sub-libjingle_p2p-qmake_all sub-libjingle_app-qmake_all sub-third_party-qmake_all sub-talk-qmake_all sub-PCPLinux-qmake_all FORCE
+qmake_all: sub-libjingle_app-qmake_all sub-third_party-qmake_all sub-talk-qmake_all sub-PCPLinux-qmake_all FORCE
 
-make_first: sub-libjingle-make_first sub-libjingle_p2p-make_first sub-libjingle_app-make_first sub-third_party-make_first sub-talk-make_first sub-PCPLinux-make_first FORCE
-all: sub-libjingle-all sub-libjingle_p2p-all sub-libjingle_app-all sub-third_party-all sub-talk-all sub-PCPLinux-all FORCE
-clean: sub-libjingle-clean sub-libjingle_p2p-clean sub-libjingle_app-clean sub-third_party-clean sub-talk-clean sub-PCPLinux-clean FORCE
-distclean: sub-libjingle-distclean sub-libjingle_p2p-distclean sub-libjingle_app-distclean sub-third_party-distclean sub-talk-distclean sub-PCPLinux-distclean FORCE
+make_first: sub-libjingle_app-make_first sub-third_party-make_first sub-talk-make_first sub-PCPLinux-make_first FORCE
+all: sub-libjingle_app-all sub-third_party-all sub-talk-all sub-PCPLinux-all FORCE
+clean: sub-libjingle_app-clean sub-third_party-clean sub-talk-clean sub-PCPLinux-clean FORCE
+distclean: sub-libjingle_app-distclean sub-third_party-distclean sub-talk-distclean sub-PCPLinux-distclean FORCE
 	-$(DEL_FILE) Makefile
-install_subtargets: sub-libjingle-install_subtargets sub-libjingle_p2p-install_subtargets sub-libjingle_app-install_subtargets sub-third_party-install_subtargets sub-talk-install_subtargets sub-PCPLinux-install_subtargets FORCE
-uninstall_subtargets: sub-libjingle-uninstall_subtargets sub-libjingle_p2p-uninstall_subtargets sub-libjingle_app-uninstall_subtargets sub-third_party-uninstall_subtargets sub-talk-uninstall_subtargets sub-PCPLinux-uninstall_subtargets FORCE
+install_subtargets: sub-libjingle_app-install_subtargets sub-third_party-install_subtargets sub-talk-install_subtargets sub-PCPLinux-install_subtargets FORCE
+uninstall_subtargets: sub-libjingle_app-uninstall_subtargets sub-third_party-uninstall_subtargets sub-talk-uninstall_subtargets sub-PCPLinux-uninstall_subtargets FORCE
 
-sub-libjingle-check:
-	@test -d libjingle/ || mkdir -p libjingle/
-	cd libjingle/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle/libjingle.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
-sub-libjingle_p2p-check:
-	@test -d libjingle_p2p/ || mkdir -p libjingle_p2p/
-	cd libjingle_p2p/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_p2p/libjingle_p2p.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
 sub-libjingle_app-check:
 	@test -d libjingle_app/ || mkdir -p libjingle_app/
 	cd libjingle_app/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/libjingle_app/libjingle_app.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
@@ -409,7 +351,7 @@ sub-talk-check:
 sub-PCPLinux-check:
 	@test -d PCPLinux/ || mkdir -p PCPLinux/
 	cd PCPLinux/ && ( test -e Makefile || $(QMAKE) /home/lht/workspace/P2PSystem/PCPLinux/PCPLinux.pro -spec linux-g++ CONFIG+=debug -o Makefile ) && $(MAKE) -f Makefile check
-check: sub-libjingle-check sub-libjingle_p2p-check sub-libjingle_app-check sub-third_party-check sub-talk-check sub-PCPLinux-check
+check: sub-libjingle_app-check sub-third_party-check sub-talk-check sub-PCPLinux-check
 install: install_subtargets  FORCE
 
 uninstall:  uninstall_subtargets FORCE

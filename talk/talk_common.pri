@@ -1,0 +1,33 @@
+
+
+DESTDIR = $$PWD/../lib
+
+OBJECTS_DIR = ../tmp
+
+
+INCLUDEPATH     += ..
+
+DEFINES += JSONCPP_RELATIVE_PATH LOGGING=1 
+
+#SRTP_RELATIVE_PATH HAVE_SRTP',
+#      'HAVE_WEBRTC_VIDEO',
+#      'HAVE_WEBRTC_VOICE',
+#USE_WEBRTC_DEV_BRANCH'
+#LIBPEERCONNECTION_LIB=1
+
+
+win32 {
+
+Debug:DEFINES +=_DEBUG
+Release:DEFINES +=
+DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
+
+} else:macx {
+} else {
+    DEFINES += POSIX LINUX
+}
+
+#unix {
+#    target.path = /usr/lib
+#    INSTALLS += target
+#}

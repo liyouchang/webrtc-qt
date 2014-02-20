@@ -11,22 +11,7 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 
-DESTDIR = $$PWD/../lib
-
-OBJECTS_DIR = ../tmp
-
-INCLUDEPATH  += ..
-
-
-win32 {
-
-Debug:DEFINES +=_DEBUG
-Release:DEFINES +=
-DEFINES += _UNICODE UNICODE
-
-} else {
-    DEFINES += POSIX LOGGING=1
-}
+include (talk_common.pri)
 
 HEADERS += \
         'sound/automaticallychosensoundsystem.h' \
