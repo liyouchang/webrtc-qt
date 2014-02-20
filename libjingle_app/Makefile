@@ -494,14 +494,61 @@ jsepsessiondescription.o: ../talk/app/webrtc/jsepsessiondescription.cc ../talk/a
 		../talk/base/template_util.h \
 		../talk/app/webrtc/webrtcsdp.h \
 		../talk/base/stringencode.h \
+		../talk/session/media/mediasession.h \
+		../talk/media/base/codec.h \
+		../talk/media/base/constants.h \
+		../talk/media/base/cryptoparams.h \
+		../talk/media/base/mediachannel.h \
+		../talk/base/buffer.h \
+		../talk/base/dscp.h \
+		../talk/base/logging.h \
+		../talk/base/sigslot.h \
+		../talk/base/socket.h \
+		../talk/base/window.h \
+		../talk/media/base/streamparams.h \
+		../talk/session/media/audiomonitor.h \
+		../talk/base/thread.h \
+		../talk/base/messagequeue.h \
+		../talk/base/messagehandler.h \
+		../talk/base/scoped_ref_ptr.h \
+		../talk/base/socketserver.h \
+		../talk/base/socketfactory.h \
+		../talk/base/asyncsocket.h \
+		../talk/base/timeutils.h \
+		../talk/p2p/base/port.h \
+		../talk/base/asyncpacketsocket.h \
+		../talk/base/network.h \
+		../talk/base/proxyinfo.h \
+		../talk/base/cryptstring.h \
+		../talk/base/linked_ptr.h \
+		../talk/base/ratetracker.h \
+		../talk/p2p/base/packetsocketfactory.h \
+		../talk/p2p/base/portinterface.h \
+		../talk/p2p/base/transport.h \
+		../talk/base/sslstreamadapter.h \
+		../talk/base/stream.h \
+		../talk/base/sslidentity.h \
+		../talk/base/messagedigest.h \
 		../talk/p2p/base/sessiondescription.h \
 		../talk/p2p/base/transportinfo.h \
 		../talk/base/helpers.h \
 		../talk/p2p/base/transportdescription.h \
 		../talk/base/sslfingerprint.h \
-		../talk/base/buffer.h \
-		../talk/base/sslidentity.h \
-		../talk/base/messagedigest.h
+		../talk/p2p/base/stun.h \
+		../talk/base/bytebuffer.h \
+		../talk/p2p/base/stunrequest.h \
+		../talk/media/base/mediaengine.h \
+		../talk/base/fileutils.h \
+		../talk/base/sigslotrepeater.h \
+		../talk/media/base/mediacommon.h \
+		../talk/media/base/videocapturer.h \
+		../talk/media/base/videocommon.h \
+		../talk/media/devices/devicemanager.h \
+		../talk/media/base/videoprocessor.h \
+		../talk/media/base/videoframe.h \
+		../talk/media/base/voiceprocessor.h \
+		../talk/media/base/audioframe.h \
+		../talk/p2p/base/transportdescriptionfactory.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o jsepsessiondescription.o ../talk/app/webrtc/jsepsessiondescription.cc
 
 webrtcsdp.o: ../talk/app/webrtc/webrtcsdp.cc ../talk/app/webrtc/webrtcsdp.h \
@@ -579,10 +626,28 @@ webrtcsdp.o: ../talk/app/webrtc/webrtcsdp.cc ../talk/app/webrtc/webrtcsdp.h \
 		../talk/media/base/videoframe.h \
 		../talk/media/base/voiceprocessor.h \
 		../talk/media/base/audioframe.h \
-		../talk/session/tunnel/tunnelsessionclient.h \
-		../talk/p2p/base/pseudotcp.h \
+		../talk/session/media/mediasession.h \
+		../talk/p2p/base/transportdescriptionfactory.h \
+		../talk/session/media/mediasessionclient.h \
 		../talk/p2p/base/session.h \
-		../talk/p2p/base/transportdescriptionfactory.h
+		../talk/p2p/base/portallocator.h \
+		../talk/session/media/call.h \
+		../talk/media/base/screencastid.h \
+		../talk/base/windowpicker.h \
+		../talk/p2p/client/socketmonitor.h \
+		../talk/p2p/base/transportchannel.h \
+		../talk/session/media/currentspeakermonitor.h \
+		../talk/session/media/mediamessages.h \
+		../talk/session/media/channelmanager.h \
+		../talk/media/base/capturemanager.h \
+		../talk/media/base/capturerenderadapter.h \
+		../talk/session/media/voicechannel.h \
+		../talk/session/media/channel.h \
+		../talk/base/asyncudpsocket.h \
+		../talk/session/media/mediamonitor.h \
+		../talk/session/media/rtcpmuxfilter.h \
+		../talk/session/media/srtpfilter.h \
+		../talk/session/media/ssrcmuxfilter.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o webrtcsdp.o ../talk/app/webrtc/webrtcsdp.cc
 
 KaerSession.o: ../talk/app/kaerp2p/KaerSession.cpp ../talk/app/kaerp2p/KaerSession.h \
@@ -638,6 +703,7 @@ KaerSession.o: ../talk/app/kaerp2p/KaerSession.cpp ../talk/app/kaerp2p/KaerSessi
 		../talk/p2p/base/stun.h \
 		../talk/base/bytebuffer.h \
 		../talk/p2p/base/stunrequest.h \
+		../talk/p2p/base/portallocator.h \
 		../talk/app/webrtc/jsep.h \
 		../talk/session/tunnel/pseudotcpchannel.h \
 		../talk/p2p/base/pseudotcp.h \
@@ -705,12 +771,12 @@ kaer_session_client.o: ../talk/app/kaerp2p/kaer_session_client.cpp ../talk/app/k
 		../talk/p2p/base/stun.h \
 		../talk/base/bytebuffer.h \
 		../talk/p2p/base/stunrequest.h \
+		../talk/p2p/base/portallocator.h \
 		../talk/app/webrtc/jsep.h \
 		../talk/session/tunnel/pseudotcpchannel.h \
 		../talk/p2p/base/pseudotcp.h \
 		../talk/session/tunnel/tunnelsessionclient.h \
-		../talk/p2p/client/basicportallocator.h \
-		../talk/p2p/base/portallocator.h
+		../talk/p2p/client/basicportallocator.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o kaer_session_client.o ../talk/app/kaerp2p/kaer_session_client.cpp
 
 pseudotcpchannel.o: ../talk/session/tunnel/pseudotcpchannel.cc ../talk/base/basictypes.h \
@@ -767,7 +833,8 @@ pseudotcpchannel.o: ../talk/session/tunnel/pseudotcpchannel.cc ../talk/base/basi
 		../talk/p2p/base/portinterface.h \
 		../talk/p2p/base/stun.h \
 		../talk/base/bytebuffer.h \
-		../talk/p2p/base/stunrequest.h
+		../talk/p2p/base/stunrequest.h \
+		../talk/p2p/base/portallocator.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o pseudotcpchannel.o ../talk/session/tunnel/pseudotcpchannel.cc
 
 tunnelsessionclient.o: ../talk/session/tunnel/tunnelsessionclient.cc ../talk/base/basicdefs.h \
@@ -826,6 +893,7 @@ tunnelsessionclient.o: ../talk/session/tunnel/tunnelsessionclient.cc ../talk/bas
 		../talk/p2p/base/stun.h \
 		../talk/base/bytebuffer.h \
 		../talk/p2p/base/stunrequest.h \
+		../talk/p2p/base/portallocator.h \
 		../talk/session/tunnel/tunnelsessionclient.h \
 		../talk/p2p/base/transportdescriptionfactory.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tunnelsessionclient.o ../talk/session/tunnel/tunnelsessionclient.cc
@@ -887,6 +955,7 @@ kaersessiondescriptionfactory.o: ../talk/app/kaerp2p/kaersessiondescriptionfacto
 		../talk/p2p/base/stun.h \
 		../talk/base/bytebuffer.h \
 		../talk/p2p/base/stunrequest.h \
+		../talk/p2p/base/portallocator.h \
 		../talk/session/tunnel/pseudotcpchannel.h \
 		../talk/p2p/base/pseudotcp.h \
 		../talk/session/tunnel/tunnelsessionclient.h \

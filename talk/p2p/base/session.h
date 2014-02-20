@@ -40,6 +40,7 @@
 #include "talk/p2p/base/port.h"
 //#include "talk/p2p/base/sessionmessages.h"
 #include "talk/p2p/base/transport.h"
+#include "talk/p2p/base/portallocator.h"
 
 namespace cricket {
 

@@ -38,10 +38,10 @@
 #include "talk/base/thread.h"
 #include "talk/media/base/cryptoparams.h"
 #include "talk/p2p/base/session.h"
-#include "talk/p2p/base/sessionclient.h"
+//#include "talk/p2p/base/sessionclient.h"
 #include "talk/p2p/base/sessiondescription.h"
-#include "talk/p2p/base/sessionmanager.h"
-#include "talk/session/media/call.h"
+//#include "talk/p2p/base/sessionmanager.h"
+//#include "talk/session/media/call.h"
 #include "talk/session/media/channelmanager.h"
 #include "talk/session/media/mediasession.h"
 

@@ -468,6 +468,7 @@ main.o: main.cpp ../../P2PSystem/talk/base/thread.h \
 		../../P2PSystem/talk/p2p/base/stun.h \
 		../../P2PSystem/talk/base/bytebuffer.h \
 		../../P2PSystem/talk/p2p/base/stunrequest.h \
+		../../P2PSystem/talk/p2p/base/portallocator.h \
 		../../P2PSystem/talk/app/webrtc/jsep.h \
 		../../P2PSystem/talk/session/tunnel/pseudotcpchannel.h \
 		../../P2PSystem/talk/p2p/base/pseudotcp.h \
@@ -574,6 +575,7 @@ ServerConductor.o: ServerConductor.cpp ServerConductor.h \
 		../../P2PSystem/talk/p2p/base/stun.h \
 		../../P2PSystem/talk/base/bytebuffer.h \
 		../../P2PSystem/talk/p2p/base/stunrequest.h \
+		../../P2PSystem/talk/p2p/base/portallocator.h \
 		../../P2PSystem/talk/app/webrtc/jsep.h \
 		../../P2PSystem/talk/session/tunnel/pseudotcpchannel.h \
 		../../P2PSystem/talk/p2p/base/pseudotcp.h \
@@ -585,7 +587,6 @@ ServerConductor.o: ServerConductor.cpp ServerConductor.h \
 		../../P2PSystem/talk/base/asyncfile.h \
 		defaults.h \
 		../../P2PSystem/talk/p2p/client/basicportallocator.h \
-		../../P2PSystem/talk/p2p/base/portallocator.h \
 		../../P2PSystem/talk/base/json.h \
 		../third_party/jsoncpp/source/include/json/json.h \
 		../third_party/jsoncpp/source/include/json/autolink.h \

@@ -47,7 +47,7 @@
 #include "talk/p2p/base/constants.h"
 #include "talk/p2p/base/port.h"
 #include "talk/session/media/mediasession.h"
-#include "talk/session/media/mediasessionclient.h"
+//#include "talk/session/media/mediasessionclient.h"
 
 using cricket::AudioContentDescription;
 using cricket::Candidate;

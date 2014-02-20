@@ -1428,6 +1428,7 @@ session.o: ../talk/p2p/base/session.cc ../talk/p2p/base/session.h \
 		../talk/p2p/base/stun.h \
 		../talk/base/bytebuffer.h \
 		../talk/p2p/base/stunrequest.h \
+		../talk/p2p/base/portallocator.h \
 		../talk/base/bind.h \
 		../talk/p2p/base/dtlstransport.h \
 		../talk/p2p/base/dtlstransportchannel.h \

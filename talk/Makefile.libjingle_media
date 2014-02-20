@@ -803,12 +803,12 @@ compiler_clean:
 		../webrtc/voice_engine/include/voe_video_sync.h \
 		../webrtc/voice_engine/include/voe_volume_control.h \
 		../talk/session/media/channel.h \
-		../talk/app/webrtc/datachannelinterface.h \
-		../talk/base/refcount.h \
 		../talk/base/asyncudpsocket.h \
 		../talk/media/base/screencastid.h \
 		../talk/base/windowpicker.h \
 		../talk/p2p/base/session.h \
+		../talk/base/refcount.h \
+		../talk/p2p/base/portallocator.h \
 		../talk/p2p/client/socketmonitor.h \
 		../talk/p2p/base/transportchannel.h \
 		../talk/session/media/mediamonitor.h \
@@ -1456,10 +1456,9 @@ compiler_clean:
 		../talk/base/win32.h \
 		../talk/base/stringutils.h \
 		../talk/session/media/channel.h \
-		../talk/app/webrtc/datachannelinterface.h \
-		../talk/base/buffer.h \
 		../talk/base/asyncudpsocket.h \
 		../talk/base/asyncpacketsocket.h \
+		../talk/base/buffer.h \
 		../talk/base/dscp.h \
 		../talk/base/sigslot.h \
 		../talk/base/socket.h \
@@ -1515,6 +1514,7 @@ compiler_clean:
 		../talk/media/base/screencastid.h \
 		../talk/base/windowpicker.h \
 		../talk/p2p/base/session.h \
+		../talk/p2p/base/portallocator.h \
 		../talk/p2p/client/socketmonitor.h \
 		../talk/p2p/base/transportchannel.h \
 		../talk/session/media/mediamonitor.h \
@@ -1683,8 +1683,6 @@ compiler_clean:
 		../webrtc/voice_engine/include/voe_video_sync.h \
 		../webrtc/voice_engine/include/voe_volume_control.h \
 		../talk/session/media/channel.h \
-		../talk/app/webrtc/datachannelinterface.h \
-		../talk/base/refcount.h \
 		../talk/base/asyncudpsocket.h \
 		../talk/base/asyncpacketsocket.h \
 		../talk/base/dscp.h \
@@ -1732,6 +1730,8 @@ compiler_clean:
 		../talk/media/base/screencastid.h \
 		../talk/base/windowpicker.h \
 		../talk/p2p/base/session.h \
+		../talk/base/refcount.h \
+		../talk/p2p/base/portallocator.h \
 		../talk/p2p/client/socketmonitor.h \
 		../talk/p2p/base/transportchannel.h \
 		../talk/session/media/mediamonitor.h \
