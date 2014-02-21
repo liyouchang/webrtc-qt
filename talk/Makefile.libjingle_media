@@ -12,10 +12,10 @@ MAKEFILE      = Makefile.libjingle_media
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DJSONCPP_RELATIVE_PATH -DLOGGING=1 -DLIBPEERCONNECTION_LIB=1 -DUSE_WEBRTC_DEV_BRANCH -DPOSIX -DLINUX
+DEFINES       = -DJSONCPP_RELATIVE_PATH -DLOGGING=1 -DLIBPEERCONNECTION_LIB=1 -DUSE_WEBRTC_DEV_BRANCH -DSRTP_RELATIVE_PATH -DHAVE_SRTP -DPOSIX -DLINUX -D_DEBUG
 CFLAGS        = -pipe -g -fPIC -Wall -W -D_REENTRANT $(DEFINES)
 CXXFLAGS      = -pipe -g -fPIC -Wall -W -D_REENTRANT $(DEFINES)
-INCPATH       = -I../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++ -I. -I.. -I../third_party/libyuv/include -I../third_party/usrsctp
+INCPATH       = -I../../../Qt/5.2.1/gcc_64/mkspecs/linux-g++ -I. -I.. -I../third_party/libyuv/include -I../third_party/usrsctp -Ithird_party/libudev
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /home/lht/Qt/5.2.1/gcc_64/bin/qmake
@@ -1649,6 +1649,7 @@ compiler_clean:
 		../talk/base/thread.h \
 		../talk/media/base/mediacommon.h \
 		../talk/media/devices/libudevsymboltable.h \
+		third_party/libudev/libudev.h \
 		../talk/base/latebindingsymboltable.h \
 		../talk/base/latebindingsymboltable.h.def \
 		../talk/media/devices/v4llookup.h \
@@ -1675,11 +1676,13 @@ compiler_clean:
 		../talk/media/base/videocommon.h \
 		../talk/base/timeutils.h \
 		../talk/media/devices/libudevsymboltable.h \
+		third_party/libudev/libudev.h \
 		../talk/base/latebindingsymboltable.h \
 		../talk/base/latebindingsymboltable.h.def
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../tmp/jingle_media/linuxdeviceinfo.o media/devices/linuxdeviceinfo.cc
 
 ../tmp/jingle_media/libudevsymboltable.o: media/devices/libudevsymboltable.cc ../talk/media/devices/libudevsymboltable.h \
+		third_party/libudev/libudev.h \
 		../talk/base/latebindingsymboltable.h \
 		../talk/base/common.h \
 		../talk/base/basictypes.h \

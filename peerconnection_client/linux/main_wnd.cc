@@ -26,13 +26,13 @@
  */
 
 
-#include "talk/examples/peerconnection/client/linux/main_wnd.h"
+#include "main_wnd.h"
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 #include <stddef.h>
 
-#include "talk/examples/peerconnection/client/defaults.h"
+#include "../defaults.h"
 #include "talk/base/common.h"
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"

@@ -27,10 +27,10 @@
 
 #include <gtk/gtk.h>
 
-#include "talk/examples/peerconnection/client/conductor.h"
-#include "talk/examples/peerconnection/client/flagdefs.h"
-#include "talk/examples/peerconnection/client/linux/main_wnd.h"
-#include "talk/examples/peerconnection/client/peer_connection_client.h"
+#include "../conductor.h"
+#include "../flagdefs.h"
+#include "main_wnd.h"
+#include "../peer_connection_client.h"
 
 #include "talk/base/ssladapter.h"
 #include "talk/base/thread.h"
@@ -73,6 +73,8 @@ int main(int argc, char* argv[]) {
   gtk_init(&argc, &argv);
   g_type_init();
   g_thread_init(NULL);
+
+  talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
 
   FlagList::SetFlagsFromCommandLine(&argc, argv, true);
   if (FLAG_help) {

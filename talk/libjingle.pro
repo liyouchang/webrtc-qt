@@ -52,14 +52,16 @@ SOURCES += \
     ../talk/base/posix.cc \
     ../talk/base/linux.cc \
     ../talk/base/linuxfdwalk.c \
-    base/unixfilesystem.cc
+    base/unixfilesystem.cc \
+    base/latebindingsymboltable.cc
 
 
 HEADERS += \
     ../talk/base/posix.h \
     ../talk/base/linux.h \
     ../talk/base/linuxfdwalk.h \
-    base/unixfilesystem.h
+    base/unixfilesystem.h \
+    base/latebindingsymboltable.h
 
 
 
@@ -115,7 +117,8 @@ SOURCES += \
     base/pathutils.cc \
     base/systeminfo.cc \
     base/urlencode.cc \
-    base/ratelimiter.cc
+    base/ratelimiter.cc \
+    base/worker.cc
 
 
 
@@ -172,5 +175,6 @@ HEADERS += \
     base/pathutils.h \
     base/systeminfo.h \
     base/urlencode.h \
-    base/ratelimiter.h
+    base/ratelimiter.h \
+    base/worker.h
 

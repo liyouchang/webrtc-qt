@@ -17,20 +17,29 @@ PKGCONFIG =  glib-2.0 gobject-2.0 gtk+-2.0 gthread-2.0
 win32 {
 }
 else {
-    LIBS += -ldl -lX11 -lXcomposite -lXext -lXrender  -lrt
+    LIBS += -lX11 -lXcomposite -lXext -lXrender  -lrt
 
-    LIBS += -L$$PWD/../libs -ljingle_peerconnection -ljingle_p2p -ljingle_media -ljingle_sound  -ljingle -ljsoncpp -lyuv
+    LIBS += -L$$PWD/../libs \
+        -ljingle_peerconnection -ljingle_p2p \
+        -ljingle_media -ljingle_sound  -ljingle \
+        -ljsoncpp -lyuv -lsrtp
+
+    LIBS += -ldl
+
 }
 HEADERS += \
     peer_connection_client.h \
     defaults.h \
     conductor.h \
+    ../talk/base/linuxwindowpicker.h \
+    flagdefs.h
 
 
 SOURCES += \
     peer_connection_client.cc \
     defaults.cc \
     conductor.cc \
+    ../talk/base/linuxwindowpicker.cc
 
 
 

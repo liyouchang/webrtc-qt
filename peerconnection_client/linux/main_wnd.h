@@ -29,8 +29,8 @@
 #ifndef PEERCONNECTION_SAMPLES_CLIENT_LINUX_MAIN_WND_H_
 #define PEERCONNECTION_SAMPLES_CLIENT_LINUX_MAIN_WND_H_
 
-#include "talk/examples/peerconnection/client/main_wnd.h"
-#include "talk/examples/peerconnection/client/peer_connection_client.h"
+#include "../main_wnd.h"
+#include "../peer_connection_client.h"
 
 // Forward declarations.
 typedef struct _GtkWidget GtkWidget;

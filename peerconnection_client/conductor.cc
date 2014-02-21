@@ -25,16 +25,19 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "talk/examples/peerconnection/client/conductor.h"
-
+#include "conductor.h"
+#include "defaults.h"
 #include <utility>
 
 #include "talk/app/webrtc/videosourceinterface.h"
 #include "talk/base/common.h"
 #include "talk/base/json.h"
 #include "talk/base/logging.h"
-#include "talk/examples/peerconnection/client/defaults.h"
+
 #include "talk/media/devices/devicemanager.h"
+
+
+#include "talk/media/devices/filevideocapturer.h"
 
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -342,6 +345,14 @@ cricket::VideoCapturer* Conductor::OpenVideoCaptureDevice() {
     LOG(LS_ERROR) << "Can't enumerate video devices";
     return NULL;
   }
+
+  //lht
+  const std::string test_file ="./captured-320x240-2s-48.frames";
+  cricket::Device file_device =
+      cricket::FileVideoCapturer::CreateFileVideoCapturerDevice(test_file);
+
+  devs.push_back(file_device);
+
   std::vector<cricket::Device>::iterator dev_it = devs.begin();
   cricket::VideoCapturer* capturer = NULL;
   for (; dev_it != devs.end(); ++dev_it) {
@@ -359,6 +370,7 @@ void Conductor::AddStreams() {
   talk_base::scoped_refptr<webrtc::AudioTrackInterface> audio_track(
       peer_connection_factory_->CreateAudioTrack(
           kAudioLabel, peer_connection_factory_->CreateAudioSource(NULL)));
+
 
   talk_base::scoped_refptr<webrtc::VideoTrackInterface> video_track(
       peer_connection_factory_->CreateVideoTrack(

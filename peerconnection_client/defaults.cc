@@ -25,7 +25,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "talk/examples/peerconnection/client/defaults.h"
+#include "defaults.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -61,7 +61,7 @@ std::string GetPeerConnectionString() {
 }
 
 std::string GetDefaultServerName() {
-  return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
+    return GetEnvVarOrDefault("WEBRTC_SERVER", "218.56.11.182");
 }
 
 std::string GetPeerName() {

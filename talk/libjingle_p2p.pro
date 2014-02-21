@@ -17,6 +17,37 @@ DESTDIR = $$PWD/../libs
 
 include (talk_common.pri)
 
+INCLUDEPATH     += ../third_party/libsrtp/srtp/include \
+            ../third_party/libsrtp/srtp/crypto/include \
+            ../third_party/libsrtp/config
+
+DEFINES +=  HAVE_STDLIB_H HAVE_STRING_H
+DEFINES += CPU_CISC
+
+win32 {
+
+DEFINES += INLINE=__inline \
+           HAVE_BYTESWAP_METHODS_H \
+           SIZEOF_UNSIGNED_LONG=4 \
+           SIZEOF_UNSIGNED_LONG_LONG=8
+
+} else {
+
+DEFINES += \
+    HAVE_INT16_T \
+    HAVE_INT32_T \
+    HAVE_INT8_T \
+    HAVE_UINT16_T \
+    HAVE_UINT32_T \
+    HAVE_UINT64_T \
+    HAVE_UINT8_T \
+    HAVE_STDINT_H \
+    HAVE_INTTYPES_H \
+    HAVE_NETINET_IN_H \
+    INLINE=inline
+
+}
+
 
 SOURCES += \
     ../talk/p2p/base/constants.cc \

@@ -220,7 +220,7 @@ pip-log.txt
 .svn
 *.o
 *.mk
-lib/
+libs/
 bin/
 tmp/
 Makefile*
