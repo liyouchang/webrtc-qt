@@ -13,11 +13,13 @@ CONFIG += staticlib
 
 DESTDIR = $$PWD/../../libs
 
+
+DEFINES += JSON_USE_EXCEPTION=0
+
 INCLUDEPATH     += \
     overrides/include \
     source/include \
     source/src/lib_json
-
 
 
 HEADERS += \

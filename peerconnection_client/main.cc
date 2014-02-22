@@ -45,7 +45,7 @@ int PASCAL wWinMain(HINSTANCE instance, HINSTANCE prev_instance,
     return -1;
   }
 
-  talk_base::InitializeSSL();
+  //talk_base::InitializeSSL();
   PeerConnectionClient client;
   talk_base::scoped_refptr<Conductor> conductor(
         new talk_base::RefCountedObject<Conductor>(&client, &wnd));
@@ -70,6 +70,6 @@ int PASCAL wWinMain(HINSTANCE instance, HINSTANCE prev_instance,
     }
   }
 
-  talk_base::CleanupSSL();
+  //talk_base::CleanupSSL();
   return 0;
 }

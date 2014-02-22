@@ -106,8 +106,15 @@ SOURCES += \
         'media/webrtc/webrtcvoiceengine.cc'\
 
 
+win32 {
+SOURCES += \
+            'media/devices/gdivideorenderer.cc' \
+            'media/devices/gdivideorenderer.h' \
+            'media/devices/win32deviceinfo.cc' \
+            'media/devices/win32devicemanager.cc' \
 
-unix {
+}
+else:unix {
 
 
 HEADERS += \

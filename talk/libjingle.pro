@@ -35,6 +35,8 @@ SOURCES += \
     ../talk/base/win32window.cc \
     ../talk/base/schanneladapter.cc \
     ../talk/base/win32.cc \
+    base/win32windowpicker.cc \
+    base/win32filesystem.cc
 
 
 HEADERS += \
@@ -44,6 +46,8 @@ HEADERS += \
     ../talk/base/win32socketinit.h \
     ../talk/base/win32.h \
     ../talk/base/schanneladapter.h \
+    base/win32filesystem.h \
+    base/win32windowpicker.h
 
 
 }else{
@@ -53,7 +57,7 @@ SOURCES += \
     ../talk/base/linux.cc \
     ../talk/base/linuxfdwalk.c \
     base/unixfilesystem.cc \
-    base/latebindingsymboltable.cc
+    base/latebindingsymboltable.cc \
 
 
 HEADERS += \
@@ -61,7 +65,7 @@ HEADERS += \
     ../talk/base/linux.h \
     ../talk/base/linuxfdwalk.h \
     base/unixfilesystem.h \
-    base/latebindingsymboltable.h
+    base/latebindingsymboltable.h \
 
 
 
@@ -117,7 +121,7 @@ SOURCES += \
     base/systeminfo.cc \
     base/urlencode.cc \
     base/ratelimiter.cc \
-    base/worker.cc
+    base/worker.cc \
 
 
 
@@ -174,5 +178,5 @@ HEADERS += \
     base/systeminfo.h \
     base/urlencode.h \
     base/ratelimiter.h \
-    base/worker.h
+    base/worker.h \
 
