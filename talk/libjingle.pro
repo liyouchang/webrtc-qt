@@ -86,7 +86,6 @@ SOURCES += \
     ../talk/base/virtualsocketserver.cc \
     ../talk/base/asyncudpsocket.cc \
     ../talk/base/helpers.cc \
-    ../talk/base/ssladapter.cc \
     ../talk/base/socketadapters.cc \
     ../talk/base/socketaddresspair.cc \
     ../talk/base/messagedigest.cc \
@@ -143,7 +142,6 @@ HEADERS += \
     ../talk/base/asyncudpsocket.h \
     ../talk/base/helpers.h \
     ../talk/base/asynctcpsocket.h \
-    ../talk/base/ssladapter.h \
     ../talk/base/socketadapters.h \
     ../talk/base/socketaddresspair.h \
     ../talk/base/messagedigest.h \

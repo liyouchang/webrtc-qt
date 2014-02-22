@@ -258,8 +258,8 @@ bool PeerConnectionFactory::Initialize_s() {
 //                                     video_encoder_factory_.get(),
 //                                     video_decoder_factory_.get()));
   //lht
-      cricket::NullMediaEngine* webrtc_media_engine(
-          new cricket::NullMediaEngine());
+      cricket::FakeMediaEngine* webrtc_media_engine(
+          new cricket::FakeMediaEngine());
 
     channel_manager_.reset(new cricket::ChannelManager(
         webrtc_media_engine, device_manager, worker_thread_));

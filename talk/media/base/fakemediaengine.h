@@ -748,7 +748,6 @@ class FakeVoiceEngine : public FakeBaseEngine {
     if (fail_create_channel_) {
       return NULL;
     }
-
     FakeVoiceMediaChannel* ch = new FakeVoiceMediaChannel(this);
     channels_.push_back(ch);
     return ch;

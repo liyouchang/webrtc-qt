@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
   CustomSocketServer socket_server(thread, &wnd);
   thread->set_socketserver(&socket_server);
 
-  talk_base::InitializeSSL();
+  //talk_base::InitializeSSL();
   // Must be constructed after we set the socketserver.
   PeerConnectionClient client;
   talk_base::scoped_refptr<Conductor> conductor(
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
   //while (gtk_events_pending()) {
   //  gtk_main_iteration();
   //}
-  talk_base::CleanupSSL();
+  //talk_base::CleanupSSL();
   return 0;
 }
 
