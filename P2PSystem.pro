@@ -3,7 +3,8 @@ TEMPLATE = subdirs
 SUBDIRS += \
     third_party \
     talk \
-    peerconnection_client
+    peerconnection_client \
+    webrtc
 
 
 
