@@ -224,11 +224,13 @@ void MainWnd::OnPaint() {
     AutoLock<VideoRenderer> local_lock(local_renderer);
     AutoLock<VideoRenderer> remote_lock(remote_renderer);
 
-    const BITMAPINFO& bmi = remote_renderer->bmi();
+    //const BITMAPINFO& bmi = remote_renderer->bmi();
+    const BITMAPINFO& bmi = local_renderer->bmi();
     int height = abs(bmi.bmiHeader.biHeight);
     int width = bmi.bmiHeader.biWidth;
 
-    const uint8* image = remote_renderer->image();
+    //const uint8* image = remote_renderer->image();
+    const uint8* image = local_renderer->image();
     if (image != NULL) {
       HDC dc_mem = ::CreateCompatibleDC(ps.hdc);
       ::SetStretchBltMode(dc_mem, HALFTONE);

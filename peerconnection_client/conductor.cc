@@ -349,14 +349,14 @@ cricket::VideoCapturer* Conductor::OpenVideoCaptureDevice() {
         return NULL;
     }
 
-    //lht
+    //lht,add a filedevice
     talk_base::Pathname test_file = talk_base::Filesystem::GetCurrentDirectory();
     test_file.SetFilename("captured-320x240-2s-48.frames");
-    //const std::string test_file ="./captured-320x240-2s-48.frames";
     cricket::Device file_device =
             cricket::FileVideoCapturer::CreateFileVideoCapturerDevice(test_file.pathname());
-
     devs.push_back(file_device);
+
+
 
     std::vector<cricket::Device>::iterator dev_it = devs.begin();
     cricket::VideoCapturer* capturer = NULL;
