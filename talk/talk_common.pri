@@ -13,7 +13,13 @@ DEFINES += JSONCPP_RELATIVE_PATH LOGGING=1  \
 #',
 #'    HAVE_WEBRTC_VIDEO HAVE_WEBRTC_VOICE \
 #
+debug {
+    DEFINES += _DEBUG
+}
 
+release {
+    DEFINES += _DEBUG
+}
 
 win32 {
 
@@ -22,8 +28,10 @@ Release:DEFINES +=
 DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 
 } else:macx {
-} else {
-    DEFINES += POSIX LINUX _DEBUG
+}
+
+linux {
+    DEFINES += POSIX LINUX
 }
 
 #unix {

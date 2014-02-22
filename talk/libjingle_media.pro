@@ -17,7 +17,7 @@ DESTDIR = $$PWD/../libs
 include(talk_common.pri)
 
 
-#DEFINES += HAVE_WEBRTC_VIDEO HAVE_WEBRTC_VOICE
+DEFINES += HAVE_WEBRTC_VIDEO HAVE_WEBRTC_VOICE
 
 INCLUDEPATH  += ../third_party/libyuv/include  ../third_party/usrsctp \
     third_party/libudev
@@ -104,6 +104,7 @@ SOURCES += \
         'media/webrtc/webrtcvideocapturer.cc'\
         'media/webrtc/webrtcvideoframe.cc'\
         'media/webrtc/webrtcvoiceengine.cc'\
+    media/webrtc/webrtcvideoengine.cc
 
 
 win32 {

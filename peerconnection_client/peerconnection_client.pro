@@ -13,6 +13,16 @@ INCLUDEPATH     += ../third_party/jsoncpp/overrides/include \
 
 CONFIG += link_pkgconfig
 
+debug{
+
+
+}
+
+release{
+
+}
+
+
 win32 {
 
 INCLUDEPATH += $(VSInstallDir)\VC\atlmfc\include
@@ -24,20 +34,24 @@ INCLUDEPATH += $(VSInstallDir)\VC\atlmfc\include
         -ljingle_media -ljingle_sound  -ljingle \
         -ljsoncpp -lyuv -lsrtp
 }
-else {
+
+linux {
 
     PKGCONFIG =  glib-2.0 gobject-2.0 gtk+-2.0 gthread-2.0
 
     LIBS += -lX11 -lXcomposite -lXext -lXrender  -lrt
 
-    LIBS += -L$$PWD/../libs \
-        -ljingle_peerconnection -ljingle_p2p \
-        -ljingle_media -ljingle_sound  -ljingle \
-        -ljsoncpp -lyuv -lsrtp
+LIBS += -L$$PWD/../libs \
+    -ljingle_peerconnection -ljingle_p2p \
+    -ljingle_media -ljingle_sound  -ljingle \
+    -ljsoncpp -lyuv -lsrtp -lcommon_video -lvideo_capture_module
+
 
     LIBS += -ldl
 
 }
+
+
 HEADERS += \
     peer_connection_client.h \
     defaults.h \
