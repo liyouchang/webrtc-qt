@@ -14,6 +14,7 @@ CONFIG += staticlib
 
 include (../webrtc_common.pri)
 
+DEFINES +=__STD_C __STDC_CONSTANT_MACROS __STDC_FORMAT_MACROS NOMINMAX
 #INCLUDEPATH += ../system_wrappers/interface
 
 #INCLUDEPATH += $$PWD/../../third_party/libyuv/include
@@ -22,7 +23,6 @@ SOURCES += \
         'channel.cc'\
         'channel_manager.cc'\
         'dtmf_inband.cc'\
-        'dtmf_inband.h'\
         'dtmf_inband_queue.cc'\
         'level_indicator.cc'\
         'monitor_module.cc'\
@@ -96,3 +96,4 @@ HEADERS += \
         'dtmf_inband_queue.h'\
         'channel_manager.h'\
         'voe_base_impl.h'\
+        'dtmf_inband.h'\

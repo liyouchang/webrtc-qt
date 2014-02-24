@@ -7,6 +7,7 @@ INCLUDEPATH += $$PWD/..
 
 
 win32 {
+DEFINES += WEBRTC_WIN
 }
 
 linux {
