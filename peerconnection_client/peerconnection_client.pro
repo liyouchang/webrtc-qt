@@ -42,9 +42,12 @@ linux {
     LIBS += -lX11 -lXcomposite -lXext -lXrender  -lrt
 
 LIBS += -L$$PWD/../libs \
-    -ljingle_peerconnection -ljingle_p2p \
-    -ljingle_media -ljingle_sound  -ljingle \
-    -ljsoncpp -lyuv -lsrtp -lcommon_video -lvideo_capture_module
+    -ljingle_peerconnection -ljingle_p2p -ljingle_media -ljingle_sound  -ljingle \
+    -lcommon_video -lvideo_capture_module -lvoice_engine -laudio_coding_module\
+    -lacm2 -lvideo_render -lvideo_engine_core -lsystem_wrappers -lvideo_capture_module\
+    -lcommon_audio -laudio_device\
+    -ljsoncpp -lyuv -lsrtp \
+
 
 
     LIBS += -ldl

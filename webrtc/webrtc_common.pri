@@ -3,7 +3,7 @@ DESTDIR = $$PWD/../libs
 
 OBJECTS_DIR = $$PWD/../tmp/$$TARGET
 
-INCLUDEPATH += $$PWD/..
+INCLUDEPATH += $$PWD/.. $$PWD
 
 
 win32 {

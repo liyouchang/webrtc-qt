@@ -14,7 +14,7 @@ CONFIG += staticlib
 
 include (../webrtc_common.pri)
 
-DEFINES +=__STD_C __STDC_CONSTANT_MACROS __STDC_FORMAT_MACROS NOMINMAX
+DEFINES += NOMINMAX
 #INCLUDEPATH += ../system_wrappers/interface
 
 #INCLUDEPATH += $$PWD/../../third_party/libyuv/include
