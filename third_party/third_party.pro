@@ -3,4 +3,5 @@ TEMPLATE = subdirs
 SUBDIRS += \
     jsoncpp \
     libyuv \
-    libsrtp
+    libsrtp \
+    libvpx

@@ -1,0 +1,1 @@
+cmd_out/Default/obj.target/third_party/libvpx/libvpx_asm_offsets_vp8.a := rm -f out/Default/obj.target/third_party/libvpx/libvpx_asm_offsets_vp8.a && ar crsT out/Default/obj.target/third_party/libvpx/libvpx_asm_offsets_vp8.a out/Default/obj.target/libvpx_asm_offsets_vp8/third_party/libvpx/source/libvpx/vp8/encoder/vp8_asm_enc_offsets.o

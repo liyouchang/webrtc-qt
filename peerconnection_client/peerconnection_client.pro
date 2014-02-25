@@ -39,18 +39,25 @@ linux {
 
     PKGCONFIG =  glib-2.0 gobject-2.0 gtk+-2.0 gthread-2.0
 
-    LIBS += -lX11 -lXcomposite -lXext -lXrender  -lrt
 
 LIBS += -L$$PWD/../libs \
     -ljingle_peerconnection -ljingle_p2p -ljingle_media -ljingle_sound  -ljingle \
-    -lcommon_video -lvideo_capture_module -lvoice_engine -laudio_coding_module\
-    -lacm2 -lvideo_render -lvideo_engine_core -lsystem_wrappers -lvideo_capture_module\
-    -lcommon_audio -laudio_device\
-    -ljsoncpp -lyuv -lsrtp \
+    -lvideo_engine_core -lwebrtc_video_coding -lvideo_capture_module  \
+    -lvoice_engine -laudio_coding_module\
+    -lwebrtc_vp8  -lacm2    -lvideo_capture_module\
+     -laudio_device -laudio_processing -lwebrtc_utility -lmedia_file\
+    -lrtp_rtcp -laudio_conference_mixer -laudio_coding_module -lG722 -lG711 -lCNG\
+    -liLBC -liSAC -lNetEq4 -lNetEq -lPCM16B \
+    -lvideo_processing  -lvideo_render -lcommon_video -lpaced_sender -lremote_bitrate_estimator -lvideo_coding_utility\
+    -lbitrate_controller  -lwebrtc_i420 -lcommon_audio -lsystem_wrappers\
+
+
+LIBS +=-lvpx  -ljsoncpp -lyuv -lsrtp  \
 
 
 
-    LIBS += -ldl
+    LIBS += -ldl -lm
+    LIBS += -lX11 -lXcomposite -lXext -lXrender  -lrt
 
 }
 

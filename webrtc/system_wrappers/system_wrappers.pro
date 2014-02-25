@@ -86,3 +86,6 @@ SOURCES += \
         'source/logcat_trace_context.cc'\
 
 }
+
+OTHER_FILES += \
+    source/system_wrappers.gyp

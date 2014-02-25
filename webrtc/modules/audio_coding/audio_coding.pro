@@ -70,5 +70,4 @@ HEADERS += \
     main/source/audio_coding_module_impl.h
 
 OTHER_FILES += \
-    main/source/audio_coding_module.gypi \
-    main/acm2/audio_coding_module.gypi
+    main/source/audio_coding_module.gypi

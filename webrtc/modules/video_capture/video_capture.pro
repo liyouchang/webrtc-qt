@@ -16,6 +16,7 @@ include (../../webrtc_common.pri)
 SOURCES += \
         'device_info_impl.cc'\
         'video_capture_factory.cc'\
+        'video_capture_impl.cc'\
 
 
 HEADERS += \
@@ -25,7 +26,6 @@ HEADERS += \
         'include/video_capture_factory.h'\
         'video_capture_config.h'\
         'video_capture_delay.h'\
-        'video_capture_impl.cc'\
         'video_capture_impl.h'\
 
 

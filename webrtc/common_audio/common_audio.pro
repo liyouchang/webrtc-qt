@@ -17,10 +17,6 @@ include (../webrtc_common.pri)
 
 SOURCES += \
     audio_util.cc \
-    resampler/sinc_resampler.cc \
-    resampler/resampler.cc \
-    resampler/push_sinc_resampler.cc \
-    resampler/push_resampler.cc \
         'signal_processing/auto_corr_to_refl_coef.c'\
         'signal_processing/auto_correlation.c'\
         'signal_processing/complex_fft.c'\
@@ -47,7 +43,6 @@ SOURCES += \
         'signal_processing/resample_48khz.c'\
         'signal_processing/resample_by_2.c'\
         'signal_processing/resample_by_2_internal.c'\
-        'signal_processing/resample_by_2_internal.h'\
         'signal_processing/resample_fractional.c'\
         'signal_processing/spl_init.c'\
         'signal_processing/spl_sqrt.c'\
@@ -61,6 +56,11 @@ SOURCES += \
         'vad/vad_filterbank.c'\
         'vad/vad_gmm.c'\
         'vad/vad_sp.c'\
+    resampler/sinc_resampler.cc \
+    resampler/resampler.cc \
+    resampler/push_sinc_resampler.cc \
+    resampler/push_resampler.cc \
+    resampler/sinc_resampler_sse.cc
 
 
 HEADERS += \

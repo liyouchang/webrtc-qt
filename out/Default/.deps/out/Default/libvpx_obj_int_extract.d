@@ -1,0 +1,1 @@
+cmd_out/Default/libvpx_obj_int_extract := g++   -o out/Default/libvpx_obj_int_extract -Wl,--start-group out/Default/obj.host/libvpx_obj_int_extract/third_party/libvpx/source/libvpx/build/make/obj_int_extract.o -Wl,--end-group 

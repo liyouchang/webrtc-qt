@@ -3,7 +3,9 @@ DESTDIR = $$PWD/../libs
 
 OBJECTS_DIR = $$PWD/../tmp/$$TARGET
 
-INCLUDEPATH += $$PWD/.. $$PWD
+webrtc_root = $$PWD/..
+
+INCLUDEPATH += $$webrtc_root $$PWD
 
 
 win32 {
