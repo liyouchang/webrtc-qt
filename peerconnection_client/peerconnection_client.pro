@@ -44,7 +44,7 @@ LIBS += -L$$PWD/../libs \
     -ljingle_peerconnection -ljingle_p2p -ljingle_media -ljingle_sound  -ljingle \
     -lvideo_engine_core -lwebrtc_video_coding -lvideo_capture_module  \
     -lvoice_engine -laudio_coding_module\
-    -lwebrtc_vp8  -lacm2    -lvideo_capture_module\
+      -lacm2    -lvideo_capture_module\
      -laudio_device -laudio_processing -lwebrtc_utility -lmedia_file\
     -lrtp_rtcp -laudio_conference_mixer -laudio_coding_module -lG722 -lG711 -lCNG\
     -liLBC -liSAC -lNetEq4 -lNetEq -lPCM16B \
@@ -52,7 +52,7 @@ LIBS += -L$$PWD/../libs \
     -lbitrate_controller  -lwebrtc_i420 -lcommon_audio -lsystem_wrappers\
 
 
-LIBS +=-lvpx  -ljsoncpp -lyuv -lsrtp  \
+LIBS +=  -ljsoncpp -lyuv -lsrtp  \
 
 
 

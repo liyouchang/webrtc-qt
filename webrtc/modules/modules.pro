@@ -20,5 +20,4 @@ SUBDIRS += \
     remote_bitrate_estimator \
     video_coding/utility/video_coding_utility.pro \
     bitrate_controller \
-    video_coding/codecs/vp8 \
     video_coding/codecs/i420

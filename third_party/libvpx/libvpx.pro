@@ -26,6 +26,27 @@ linux {
 INCLUDEPATH += $$PWD/source/libvpx  $$PWD/source/config
 
 
+ASM_SOURCES += \
+    source/libvpx/third_party/x86inc/x86inc.asm \
+    source/libvpx/vp9/common/x86/vp9_copy_sse2.asm \
+    source/libvpx/vp9/common/x86/vp9_intrapred_sse2.asm \
+    source/libvpx/vp9/common/x86/vp9_intrapred_ssse3.asm \
+    source/libvpx/vp9/common/x86/vp9_loopfilter_mmx.asm \
+    source/libvpx/vp9/common/x86/vp9_postproc_mmx.asm \
+    source/libvpx/vp9/common/x86/vp9_postproc_sse2.asm \
+    source/libvpx/vp9/common/x86/vp9_subpixel_8t_sse2.asm \
+    source/libvpx/vp9/common/x86/vp9_subpixel_8t_ssse3.asm \
+    source/libvpx/vpx_ports/emms.asm \
+    source/libvpx/vpx_ports/x86_abi_support.asm \
+    source/libvpx/vp8/common/x86/subpixel_ssse3.asm \
+    source/libvpx/vp8/common/x86/subpixel_sse2.asm
+
+YASM_INCLUDES = $$join(INCLUDEPATH,"-i","-i")
+yasmasm.output = ${QMAKE_FILE_BASE}.o
+yasmasm.commands = yasm -Xvc -f elf -o ${QMAKE_FILE_BASE}.o -g cv8 -rnasm -pnasm ${QMAKE_FILE_NAME}
+yasmasm.input = ASM_SOURCES
+
+
 SOURCES += \
     source/libvpx/vp9/decoder/vp9_decodeframe.c \
     source/libvpx/vp9/decoder/vp9_decodemv.c \
@@ -155,17 +176,7 @@ SOURCES += \
 
 
 
-#    source/libvpx/third_party/x86inc/x86inc.asm \
-#    source/libvpx/vp9/common/x86/vp9_copy_sse2.asm \
-#    source/libvpx/vp9/common/x86/vp9_intrapred_sse2.asm \
-#    source/libvpx/vp9/common/x86/vp9_intrapred_ssse3.asm \
-#    source/libvpx/vp9/common/x86/vp9_loopfilter_mmx.asm \
-#    source/libvpx/vp9/common/x86/vp9_postproc_mmx.asm \
-#    source/libvpx/vp9/common/x86/vp9_postproc_sse2.asm \
-#    source/libvpx/vp9/common/x86/vp9_subpixel_8t_sse2.asm \
-#    source/libvpx/vp9/common/x86/vp9_subpixel_8t_ssse3.asm \
-#    source/libvpx/vpx_ports/emms.asm \
-#    source/libvpx/vpx_ports/x86_abi_support.asm \
+
 
 
 HEADERS += \
@@ -294,3 +305,4 @@ OTHER_FILES += \
     copy_obj.py \
     ../yasm/yasm_compile.gypi \
     libvpx_srcs_x86_64_intrinsics.gypi \
+    $$ASM_SOURCES
