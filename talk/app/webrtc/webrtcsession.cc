@@ -501,16 +501,16 @@ bool WebRtcSession::Initialize(
         &value, NULL)) {
     dscp_enabled_ = value;
   }
-
-  const cricket::VideoCodec default_codec(
-      JsepSessionDescription::kDefaultVideoCodecId,
-      JsepSessionDescription::kDefaultVideoCodecName,
-      JsepSessionDescription::kMaxVideoCodecWidth,
-      JsepSessionDescription::kMaxVideoCodecHeight,
-      JsepSessionDescription::kDefaultVideoCodecFramerate,
-      JsepSessionDescription::kDefaultVideoCodecPreference);
-  channel_manager_->SetDefaultVideoEncoderConfig(
-      cricket::VideoEncoderConfig(default_codec));
+//lht
+//  const cricket::VideoCodec default_codec(
+//      JsepSessionDescription::kDefaultVideoCodecId,
+//      JsepSessionDescription::kDefaultVideoCodecName,
+//      JsepSessionDescription::kMaxVideoCodecWidth,
+//      JsepSessionDescription::kMaxVideoCodecHeight,
+//      JsepSessionDescription::kDefaultVideoCodecFramerate,
+//      JsepSessionDescription::kDefaultVideoCodecPreference);
+//  channel_manager_->SetDefaultVideoEncoderConfig(
+//      cricket::VideoEncoderConfig(default_codec));
 
   webrtc_session_desc_factory_.reset(new WebRtcSessionDescriptionFactory(
       signaling_thread(),

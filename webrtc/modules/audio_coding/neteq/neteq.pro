@@ -12,6 +12,7 @@ CONFIG += staticlib
 
 include (../../../webrtc_common.pri)
 
+DEFINES += NETEQ_VOICEENGINE_CODECS SCRATCH
 
 INCLUDEPATH += $$webrtc_root/webrtc/modules/audio_coding/codecs/cng/include \
     $$webrtc_root/webrtc/common_audio/signal_processing/include \
