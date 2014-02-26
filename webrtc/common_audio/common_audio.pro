@@ -13,6 +13,7 @@ CONFIG += staticlib
 
 include (../webrtc_common.pri)
 
+QMAKE_CXXFLAGS += -msse2
 
 
 SOURCES += \

@@ -44,7 +44,7 @@ HEADERS += \
 linux {
 
 QMAKE_CFLAGS += -msse2
-
+QMAKE_CXXFLAGS += -msse2
 SOURCES += \
     main/source/content_analysis_sse2.cc \
 

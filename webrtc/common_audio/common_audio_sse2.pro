@@ -13,8 +13,8 @@ CONFIG += staticlib
 
 include (../webrtc_common.pri)
 
-QMAKE_CFLAGS += -msse2
-
+QMAKE_CFLAGS += -msse2 -mmmx
+QMAKE_CXXFLAGS += -msse2
 SOURCES += \
             'resampler/sinc_resampler_sse.cc'
 
