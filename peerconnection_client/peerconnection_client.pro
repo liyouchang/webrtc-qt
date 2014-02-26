@@ -27,12 +27,31 @@ win32 {
 
 INCLUDEPATH += $(VSInstallDir)\VC\atlmfc\include
 
+
     LIBS += -lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -luser32
+
     LIBS += -lgdi32 -lStrmiids
-    LIBS += -L$$PWD/../libs \
-        -ljingle_peerconnection -ljingle_p2p \
-        -ljingle_media -ljingle_sound  -ljingle \
-        -ljsoncpp -lyuv -lsrtp
+    #for audio device dependence
+    LIBS += -ldmoguids -lwmcodecdspuuid -lamstrmid -lmsdmo
+
+    LIBS += -L$$PWD/../libs
+
+   LIBS +=  -lvideo_engine_core -lwebrtc_video_coding -lvideo_capture_module  \
+        -lvoice_engine -laudio_coding_module\
+      -lacm2    -lvideo_capture_module\
+     -laudio_device -laudio_processing -lwebrtc_utility -lmedia_file\
+    -lrtp_rtcp -laudio_conference_mixer -laudio_coding_module -lG722 -lG711 -lCNG\
+    -liLBC -liSAC -lNetEq4 -lNetEq -lPCM16B \
+    -lvideo_processing  -lvideo_render_module -lcommon_video -lpaced_sender \
+    -lremote_bitrate_estimator -lvideo_coding_utility\
+    -lbitrate_controller  -lwebrtc_i420 -lcommon_audio -lsystem_wrappers\
+
+
+    LIBS +=-ljingle_media -ljingle_peerconnection -ljingle_p2p  -ljingle_sound  -ljingle \
+
+
+    LIBS +=  -ljsoncpp -lyuv -lsrtp  -ldirectshow_baseclasses\
+
 }
 
 linux {
@@ -52,7 +71,7 @@ LIBS += -L$$PWD/../libs \
     -lbitrate_controller  -lwebrtc_i420 -lcommon_audio -lsystem_wrappers\
 
 
-LIBS +=  -ljsoncpp -lyuv -lsrtp  \
+    LIBS +=  -ljsoncpp -lyuv -lsrtp  \
 
 
 

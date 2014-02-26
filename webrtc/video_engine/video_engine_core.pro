@@ -14,8 +14,8 @@ CONFIG += staticlib
 
 include (../webrtc_common.pri)
 
-
-
+win32 {
+}
 
 SOURCES += \
         'call_stats.cc'\
@@ -92,4 +92,8 @@ HEADERS += \
         'vie_render_manager.h'\
         'vie_sender.h'\
         'vie_sync_module.h'\
+
+OTHER_FILES += \
+    video_engine.gyp \
+    video_engine_core.gypi
 

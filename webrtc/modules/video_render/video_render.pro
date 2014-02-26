@@ -6,7 +6,7 @@
 
 QT       -= core gui
 
-TARGET = video_render
+TARGET = video_render_module
 TEMPLATE = lib
 CONFIG += staticlib
 
@@ -18,18 +18,12 @@ SOURCES += \
     video_render_frames.cc \
     video_render_impl.cc \
     incoming_video_stream.cc \
-    linux/video_render_linux_impl.cc \
-    linux/video_x11_channel.cc \
-    linux/video_x11_render.cc \
     external/video_render_external_impl.cc
 
 HEADERS += \
     video_render_frames.h \
     video_render_impl.h \
     incoming_video_stream.h \
-    linux/video_render_linux_impl.h \
-    linux/video_x11_channel.h \
-    linux/video_x11_render.h \
     external/video_render_external_impl.h
 
 linux {
@@ -43,6 +37,17 @@ HEADERS += \
     linux/video_render_linux_impl.h \
     linux/video_x11_channel.h \
     linux/video_x11_render.h
+
+}
+
+msvc {
+
+INCLUDEPATH += $$quote( $$(DXSDK_DIR)include )
+
+
+SOURCES += \
+            'windows/video_render_direct3d9.cc'\
+            'windows/video_render_windows_impl.cc'\
 
 }
 OTHER_FILES += \

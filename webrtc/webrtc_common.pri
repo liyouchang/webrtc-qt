@@ -9,7 +9,9 @@ INCLUDEPATH += $$webrtc_root $$PWD
 
 
 win32 {
-DEFINES += WEBRTC_WIN
+DEFINES += WEBRTC_WIN NOMINMAX  _UNICODE
+
+
 }
 
 linux {

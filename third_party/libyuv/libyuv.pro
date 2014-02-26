@@ -13,7 +13,7 @@ CONFIG += staticlib
 
 DESTDIR = $$PWD/../../libs
 
-OBJECTS_DIR = ../../tmp
+OBJECTS_DIR = ../../tmp/$$TARGET
 
 INCLUDEPATH += $$PWD/include
 
@@ -51,7 +51,8 @@ SOURCES += \
     source/scale_mips.cc \
     source/scale_posix.cc \
     source/scale_win.cc \
-    source/video_common.cc
+    source/video_common.cc \
+    source/compare_win.cc
 
 HEADERS += \
     include/libyuv.h \
@@ -73,4 +74,8 @@ HEADERS += \
       'include/libyuv/scale_row.h' \
       'include/libyuv/version.h' \
       'include/libyuv/video_common.h'
+
+OTHER_FILES += \
+    libyuv.gyp \
+    libyuv.gypi
 

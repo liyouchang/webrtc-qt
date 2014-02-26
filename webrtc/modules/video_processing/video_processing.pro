@@ -41,7 +41,7 @@ HEADERS += \
 
 
 
-linux {
+linux || win32{
 
 QMAKE_CFLAGS += -msse2
 QMAKE_CXXFLAGS += -msse2
@@ -49,6 +49,7 @@ SOURCES += \
     main/source/content_analysis_sse2.cc \
 
 }
+
 OTHER_FILES += \
     main/source/video_processing.gypi \
     main/source/Android.mk

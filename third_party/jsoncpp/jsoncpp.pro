@@ -13,6 +13,8 @@ CONFIG += staticlib
 
 DESTDIR = $$PWD/../../libs
 
+OBJECTS_DIR = ../../tmp/$$TARGET
+
 
 DEFINES += JSON_USE_EXCEPTION=0
 

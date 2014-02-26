@@ -12,6 +12,8 @@ CONFIG += staticlib
 
 DESTDIR = $$PWD/../../libs
 
+OBJECTS_DIR = ../../tmp/$$TARGET
+
 INCLUDEPATH     += \
         ./config \
       'srtp/include' \

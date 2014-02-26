@@ -21,7 +21,8 @@ SOURCES += \
     audio_device_buffer.cc \
     audio_device_generic.cc \
     audio_device_impl.cc \
-    audio_device_utility.cc
+    audio_device_utility.cc \
+
 
 HEADERS += \
     dummy/audio_device_dummy.h \
@@ -30,7 +31,7 @@ HEADERS += \
     audio_device_generic.h \
     audio_device_impl.h \
     audio_device_utility.h \
-    audio_device_config.h
+    audio_device_config.h \
 
 
 linux {
@@ -50,6 +51,28 @@ SOURCES += \
                     'linux/audio_device_pulse_linux.cc'\
                     'linux/audio_mixer_manager_pulse_linux.cc'\
                     'linux/pulseaudiosymboltable_linux.cc'\
+
+
+}
+
+win32 {
+
+INCLUDEPATH += win
+
+
+HEADERS += \
+    win/audio_device_core_win.h \
+    win/audio_device_utility_win.h \
+    win/audio_device_wave_win.h \
+    win/audio_mixer_manager_win.h
+
+
+SOURCES += \
+    win/audio_device_core_win.cc \
+    win/audio_device_utility_win.cc \
+    win/audio_device_wave_win.cc \
+    win/audio_mixer_manager_win.cc
+
 
 
 }

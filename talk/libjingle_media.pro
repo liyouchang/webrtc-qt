@@ -7,6 +7,7 @@
 QT       -= core gui
 
 TARGET = jingle_media
+
 TEMPLATE = lib
 CONFIG += staticlib
 
@@ -104,18 +105,24 @@ SOURCES += \
         'media/webrtc/webrtcvideocapturer.cc'\
         'media/webrtc/webrtcvideoframe.cc'\
         'media/webrtc/webrtcvoiceengine.cc'\
-    media/webrtc/webrtcvideoengine.cc
+        media/webrtc/webrtcvideoengine.cc
 
 
 win32 {
 SOURCES += \
-            'media/devices/gdivideorenderer.cc' \
-            'media/devices/gdivideorenderer.h' \
-            'media/devices/win32deviceinfo.cc' \
-            'media/devices/win32devicemanager.cc' \
+            'media/devices/gdivideorenderer.cc'\
+            'media/devices/win32deviceinfo.cc'\
+            'media/devices/win32devicemanager.cc'\
+
+
+HEADERS += \
+            'media/devices/win32devicemanager.h'\
+            'media/devices/gdivideorenderer.h'\
+
 
 }
-else:unix {
+
+linux {
 
 
 HEADERS += \
@@ -132,3 +139,4 @@ SOURCES += \
 
 
 }
+
