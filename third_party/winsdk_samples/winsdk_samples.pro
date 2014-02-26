@@ -10,11 +10,7 @@ TARGET = directshow_baseclasses
 TEMPLATE = lib
 CONFIG += staticlib
 
-DESTDIR = $$PWD/../../libs
-
-OBJECTS_DIR = ../../tmp/$$TARGET
-
-DEFINES += UNICODE _UNICODE
+include( ../third_party.pri)
 
 baseclasses_dir = $$PWD/src/Samples/multimedia/directshow/baseclasses
 

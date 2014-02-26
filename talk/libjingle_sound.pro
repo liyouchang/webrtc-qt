@@ -10,9 +10,10 @@ TARGET = jingle_sound
 TEMPLATE = lib
 CONFIG += staticlib
 
-DESTDIR = $$PWD/../libs
 
 include (talk_common.pri)
+
+DESTDIR = $$output_dir/libs
 
 HEADERS += \
         'sound/automaticallychosensoundsystem.h' \

@@ -11,9 +11,7 @@ TEMPLATE = lib
 CONFIG += staticlib
 
 
-DESTDIR = $$PWD/../../libs
-
-OBJECTS_DIR = ../../tmp/$$TARGET
+include( ../third_party.pri)
 
 INCLUDEPATH += $$PWD/include
 

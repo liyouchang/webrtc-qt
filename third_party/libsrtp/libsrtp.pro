@@ -10,9 +10,8 @@ TARGET = srtp
 TEMPLATE = lib
 CONFIG += staticlib
 
-DESTDIR = $$PWD/../../libs
+include( ../third_party.pri)
 
-OBJECTS_DIR = ../../tmp/$$TARGET
 
 INCLUDEPATH     += \
         ./config \

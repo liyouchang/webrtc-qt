@@ -1,38 +1,37 @@
 
 
 
-OBJECTS_DIR = ../tmp/$$TARGET
 
 
-INCLUDEPATH     += ..
+
+INCLUDEPATH += ..
 
 DEFINES += JSONCPP_RELATIVE_PATH LOGGING=1  \
     LIBPEERCONNECTION_LIB=1  USE_WEBRTC_DEV_BRANCH \
     SRTP_RELATIVE_PATH HAVE_SRTP
 
-#',
-#'    HAVE_WEBRTC_VIDEO HAVE_WEBRTC_VOICE \
-#
-debug {
-    DEFINES += _DEBUG
-}
-
-release {
-    DEFINES += _DEBUG
-}
 
 win32 {
 
-Debug:DEFINES +=_DEBUG
-Release:DEFINES +=
 DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
+Debug {
+    DEFINES += _DEBUG
+    output_dir = $$PWD/../out/debug
+}
 
-} else:macx {
+Release {
+    output_dir = $$PWD/../out/release
+}
+
+
 }
 
 linux {
     DEFINES += POSIX LINUX
+    output_dir = $$PWD/../out
 }
+
+OBJECTS_DIR = $$output_dir/obj/$$TARGET
 
 #unix {
 #    target.path = /usr/lib

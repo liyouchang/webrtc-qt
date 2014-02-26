@@ -13,9 +13,11 @@ CONFIG += staticlib
 CONFIG -= app_bundle
 CONFIG -= qt
 
-DESTDIR = $$PWD/../libs
 
 include(talk_common.pri)
+
+DESTDIR = $$output_dir/libs
+
 
 DEFINES += SSL_USE_SCHANNEL
 

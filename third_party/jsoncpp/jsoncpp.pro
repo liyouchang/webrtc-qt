@@ -10,10 +10,8 @@ TARGET = jsoncpp
 TEMPLATE = lib
 CONFIG += staticlib
 
+include( ../third_party.pri)
 
-DESTDIR = $$PWD/../../libs
-
-OBJECTS_DIR = ../../tmp/$$TARGET
 
 
 DEFINES += JSON_USE_EXCEPTION=0

@@ -10,11 +10,11 @@ TARGET = jingle_peerconnection
 TEMPLATE = lib
 CONFIG += staticlib
 
-DESTDIR = $$PWD/../libs
 
 
 include (talk_common.pri)
 
+DESTDIR = $$output_dir/libs
 
 HEADERS += \
         'app/webrtc/audiotrack.h'\

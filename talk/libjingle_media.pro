@@ -11,11 +11,9 @@ TARGET = jingle_media
 TEMPLATE = lib
 CONFIG += staticlib
 
-
-DESTDIR = $$PWD/../libs
-
-
 include(talk_common.pri)
+
+DESTDIR = $$output_dir/libs
 
 
 DEFINES += HAVE_WEBRTC_VIDEO HAVE_WEBRTC_VOICE

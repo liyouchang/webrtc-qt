@@ -13,9 +13,10 @@ CONFIG += staticlib
 CONFIG -= app_bundle
 CONFIG -= qt
 
-DESTDIR = $$PWD/../libs
 
 include (talk_common.pri)
+
+DESTDIR = $$output_dir/libs
 
 INCLUDEPATH     += ../third_party/libsrtp/srtp/include \
             ../third_party/libsrtp/srtp/crypto/include \

@@ -39,6 +39,8 @@ int PASCAL wWinMain(HINSTANCE instance, HINSTANCE prev_instance,
   talk_base::Win32Thread w32_thread;
   talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
 
+  talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
+
   MainWnd wnd;
   if (!wnd.Create()) {
     ASSERT(false);

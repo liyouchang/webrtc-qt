@@ -224,3 +224,5 @@ libs/
 bin/
 tmp/
 Makefile*
+out/
+obj/

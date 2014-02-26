@@ -12,7 +12,6 @@ CONFIG += staticlib
 
 include (../../webrtc_common.pri)
 
-
 SOURCES += \
     rate_statistics.cc \
     rtp_to_ntp.cc \

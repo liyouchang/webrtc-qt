@@ -3,25 +3,16 @@ TEMPLATE = app
 CONFIG -= app_bundle
 CONFIG -= qt
 
-DESTDIR = $$PWD/../bin
-
 
 include (../talk/talk_common.pri)
+
+DESTDIR = $$output_dir
+
 
 INCLUDEPATH     += ../third_party/jsoncpp/overrides/include \
                    ../third_party/jsoncpp/source/include
 
 CONFIG += link_pkgconfig
-
-debug{
-
-
-}
-
-release{
-
-}
-
 
 win32 {
 
@@ -34,7 +25,7 @@ INCLUDEPATH += $(VSInstallDir)\VC\atlmfc\include
     #for audio device dependence
     LIBS += -ldmoguids -lwmcodecdspuuid -lamstrmid -lmsdmo
 
-    LIBS += -L$$PWD/../libs
+    LIBS += -L$$output_dir/libs
 
    LIBS +=  -lvideo_engine_core -lwebrtc_video_coding -lvideo_capture_module  \
         -lvoice_engine -laudio_coding_module\
@@ -59,7 +50,7 @@ linux {
     PKGCONFIG =  glib-2.0 gobject-2.0 gtk+-2.0 gthread-2.0
 
 
-LIBS += -L$$PWD/../libs \
+LIBS += -L$$output_dir/libs \
     -ljingle_peerconnection -ljingle_p2p -ljingle_media -ljingle_sound  -ljingle \
     -lvideo_engine_core -lwebrtc_video_coding -lvideo_capture_module  \
     -lvoice_engine -laudio_coding_module\
