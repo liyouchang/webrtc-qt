@@ -252,11 +252,11 @@ bool PeerConnectionFactory::Initialize_s() {
       new cricket::DummyDeviceManager());
   // TODO:  Need to make sure only one VoE is created inside
   // WebRtcMediaEngine.
-//  cricket::WebRtcMediaEngine* webrtc_media_engine(
-//      new cricket::WebRtcMediaEngine(default_adm_.get(),
-//                                     NULL,  // No secondary adm.
-//                                     video_encoder_factory_.get(),
-//                                     video_decoder_factory_.get()));
+  cricket::WebRtcMediaEngine* webrtc_media_engine(
+      new cricket::WebRtcMediaEngine(default_adm_.get(),
+                                     NULL,  // No secondary adm.
+                                     video_encoder_factory_.get(),
+                                     video_decoder_factory_.get()));
   //lht
 //      cricket::FakeMediaEngine* webrtc_media_engine(
 //          new cricket::FakeMediaEngine());
