@@ -1,33 +1,3 @@
-#################
-## Eclipse
-#################
-
-*.pydevproject
-.project
-.metadata
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.classpath
-.settings/
-.loadpath
-
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpath
-
 
 #################
 ## Visual Studio
@@ -214,15 +184,31 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-#############
-## Qt
-#############
-.svn
+
+# C++ objects and libs
+
+*.slo
+*.lo
 *.o
+*.a
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
+
+# Qt-es
+
+*.pro.user
+*.pro.user.*
+moc_*.cpp
+qrc_*.cpp
+Makefile*
+*-build-*
+
+.svn
 *.mk
 libs/
 bin/
 tmp/
-Makefile*
 out/
-obj/
