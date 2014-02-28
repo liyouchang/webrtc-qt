@@ -226,3 +226,4 @@ tmp/
 Makefile*
 out/
 obj/
+*.autosave
