@@ -32,7 +32,8 @@ HEADERS += \
     source/process_thread_impl.h \
     source/rtp_dump_impl.h \
     source/video_coder.h \
-    source/video_frames_queue.h
+    source/video_frames_queue.h \
+    interface/process_thread.h
 
 
 android {

@@ -261,8 +261,8 @@ bool PeerConnectionFactory::Initialize_s() {
 //      cricket::FakeMediaEngine* webrtc_media_engine(
 //          new cricket::FakeMediaEngine());
 
-  cricket::CompositeMediaEngine<cricket::WebRtcVoiceEngine, cricket::FakeVideoEngine>
-          *webrtc_media_engine = new cricket::CompositeMediaEngine<cricket::WebRtcVoiceEngine, cricket::FakeVideoEngine>();
+//  cricket::CompositeMediaEngine<cricket::WebRtcVoiceEngine, cricket::FakeVideoEngine>
+//          *webrtc_media_engine = new cricket::CompositeMediaEngine<cricket::WebRtcVoiceEngine, cricket::FakeVideoEngine>();
 
     channel_manager_.reset(new cricket::ChannelManager(
         webrtc_media_engine, device_manager, worker_thread_));

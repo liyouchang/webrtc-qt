@@ -778,10 +778,16 @@ class WebRtcVideoChannelSendInfo : public sigslot::has_slots<> {
   talk_base::CpuMonitor* cpu_monitor_;
   talk_base::scoped_ptr<WebRtcOveruseObserver> overuse_observer_;
 };
-
+//lht
+//const WebRtcVideoEngine::VideoCodecPref
+//    WebRtcVideoEngine::kVideoCodecPrefs[] = {
+//    {kVp8PayloadName, 100, -1, 0},
+//    {kRedPayloadName, 116, -1, 1},
+//    {kFecPayloadName, 117, -1, 2},
+//    {kRtxCodecName, 96, 100, 3},
+//};
 const WebRtcVideoEngine::VideoCodecPref
     WebRtcVideoEngine::kVideoCodecPrefs[] = {
-    {kVp8PayloadName, 100, -1, 0},
     {kRedPayloadName, 116, -1, 1},
     {kFecPayloadName, 117, -1, 2},
     {kRtxCodecName, 96, 100, 3},

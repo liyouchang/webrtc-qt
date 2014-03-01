@@ -19,7 +19,7 @@ DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 
 linux {
     DEFINES += POSIX LINUX
-    output_dir = $$PWD/../out/bin
+    output_dir = $$PWD/../out
 }
 
 DESTDIR = $$output_dir/libs
