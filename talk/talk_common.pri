@@ -29,6 +29,7 @@ Release {
 linux {
     DEFINES += POSIX LINUX
     output_dir = $$PWD/../out
+
 }
 
 OBJECTS_DIR = $$output_dir/obj/$$TARGET
