@@ -19,7 +19,7 @@ win32 {
 
 linux {
     DEFINES += WEBRTC_LINUX
-    output_dir = $$webrtc_root/out/bin
+    output_dir = $$webrtc_root/out
 }
 
 DESTDIR = $$output_dir/libs

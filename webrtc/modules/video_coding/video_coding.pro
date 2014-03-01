@@ -66,7 +66,8 @@ HEADERS += \
     main/source/timestamp_extrapolator.h \
     main/source/timestamp_map.h \
     main/source/timing.h \
-    main/source/video_coding_impl.h
+    main/source/video_coding_impl.h \
+    codecs/interface/video_codec_interface.h
 
 OTHER_FILES += \
     main/source/video_coding.gypi

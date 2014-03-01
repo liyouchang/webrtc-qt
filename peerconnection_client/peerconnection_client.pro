@@ -58,7 +58,7 @@ LIBS += -L$$output_dir/libs \
      -laudio_device -laudio_processing -lwebrtc_utility -lmedia_file\
     -lrtp_rtcp -laudio_conference_mixer -laudio_coding_module -lG722 -lG711 -lCNG\
     -liLBC -liSAC -lNetEq4 -lNetEq -lPCM16B \
-    -lvideo_processing  -lvideo_render -lcommon_video -lpaced_sender -lremote_bitrate_estimator -lvideo_coding_utility\
+    -lvideo_processing  -lvideo_render_module -lcommon_video -lpaced_sender -lremote_bitrate_estimator -lvideo_coding_utility\
     -lbitrate_controller  -lwebrtc_i420 -lcommon_audio -lsystem_wrappers\
 
 
