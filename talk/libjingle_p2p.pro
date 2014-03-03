@@ -88,7 +88,9 @@ SOURCES += \
     session/media/ssrcmuxfilter.cc \
     session/media/audiomonitor.cc \
     session/media/typingmonitor.cc \
-    session/media/soundclip.cc
+    session/media/soundclip.cc \
+    session/tunnel/tunnelsessionclient.cc \
+    session/tunnel/pseudotcpchannel.cc \
 
 
 
@@ -132,5 +134,7 @@ HEADERS += \
     session/media/audiomonitor.h \
     session/media/ssrcmuxfilter.h \
     session/media/typingmonitor.h \
-    session/media/soundclip.h
+    session/media/soundclip.h \
+    session/tunnel/tunnelsessionclient.h \
+    session/tunnel/pseudotcpchannel.h
 

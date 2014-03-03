@@ -64,6 +64,9 @@ bool FindTunnelContent(const cricket::SessionDescription* sdesc,
                        std::string* name,
                        const TunnelContentDescription** content);
 
+const ContentInfo* GetFirstTunnelContent(const SessionDescription* sdesc);
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // TunnelSessionClient
 ///////////////////////////////////////////////////////////////////////////////

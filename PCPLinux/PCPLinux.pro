@@ -4,23 +4,12 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
-DESTDIR = $$PWD/../bin
 
-win32 {
+include (../talk/talk_common.pri)
 
-Debug:DEFINES +=_DEBUG
-Release:DEFINES +=
-DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
-
-} else {
-    DEFINES += POSIX LOGGING=1
-}
-
-
-INCLUDEPATH     += $$PWD/.. \
+INCLUDEPATH     +=  \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
 
-DEFINES += JSONCPP_RELATIVE_PATH
 
 win32 {
 
@@ -28,11 +17,15 @@ LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -lu
 
 } else {
     #QMAKE_CXXFLAGS += -std=c++11
-    LIBS += -pthread
 
-    LIBS += -L$$PWD/../lib  \
-         -ljingle_app -ljingle_p2p -ljingle -ljsoncpp
+    LIBS += -L$$output_dir/libs
 
+
+
+    LIBS +=  -ljingle_peerconnection -ljingle_app  -ljingle_p2p -ljingle_media_base -ljingle
+    LIBS += -ljsoncpp -lsrtp -lyuv
+
+    LIBS += -pthread -ldl
 
     #PRE_TARGETDEPS += $$DESTDIR/libjsoncpp.a $$DESTDIR/libjingle_p2p.a $$DESTDIR/libjingle.a $$DESTDIR/libjingle_app.a
 
