@@ -201,14 +201,16 @@ void ServerConductor::OnSuccess(SessionDescriptionInterface *desc)
     desc->ToString(&sdp);
     jmessage[kSessionDescriptionSdpName] = sdp;
 
-    talk_base::StreamInterface* stream = session_->GetStream();
-    if(!fileProcess)
-        fileProcess = new ServerFileProcess();
+//    talk_base::StreamInterface* stream = session_->GetStream();
+//    if(!fileProcess)
+//        fileProcess = new ServerFileProcess();
 
-    fileProcess->ProcessStream(stream,"PeerClientTest",false);
+//    fileProcess->ProcessStream(stream,"PeerClientTest",false);
 
-    LOG(INFO) <<"session sdp is " << sdp;
     std::string* msg = new std::string(writer.write(jmessage));
+
+    LOG(INFO) <<"session sdp is " << *msg;
+
     this->UIThreadCallback(SEND_MESSAGE_TO_PEER,msg);
 }
 
@@ -256,9 +258,9 @@ void ServerConductor::OnPeerConnected(int id, const std::string &name)
     LOG(INFO) << __FUNCTION__;
     LOG(INFO) << "peer id = "<<id<<" ; peer name = "<<name;
 
-    //    if(peer_id_ == -1 && client_->id() < id ){
-    //        ConnectToPeer(id);
-    //    }
+        if(peer_id_ == -1 && client_->id() < id ){
+            ConnectToPeer(id);
+        }
 }
 
 void ServerConductor::OnPeerDisconnected(int peer_id)

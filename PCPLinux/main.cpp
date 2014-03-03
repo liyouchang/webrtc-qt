@@ -31,7 +31,7 @@ int main()
     talk_base::scoped_refptr<kaerp2p::ServerConductor> conductor(
                 new talk_base::RefCountedObject<kaerp2p::ServerConductor>(&client));
 
-    std::string serverIp = "218.56.11.182";
+    std::string serverIp = "192.168.40.195";
     conductor->StartLogin(serverIp,8888);
     std::cout<<"connect end"<<std::endl;
 
