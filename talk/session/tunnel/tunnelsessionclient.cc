@@ -382,6 +382,15 @@ void TunnelSession::OnChannelClosed(PseudoTcpChannel* channel) {
   //session_->Terminate();
 }
 
+const ContentInfo *GetFirstTunnelContent(const SessionDescription *sdesc)
+{
+    if(sdesc == NULL)
+        return NULL;
+
+    const ContentInfo* cinfo = sdesc->FirstContentByType(NS_TUNNEL);
+    return cinfo;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 } // namespace cricket

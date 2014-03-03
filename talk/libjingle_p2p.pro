@@ -25,6 +25,11 @@ INCLUDEPATH     += ../third_party/libsrtp/srtp/include \
 DEFINES +=  HAVE_STDLIB_H HAVE_STRING_H
 DEFINES += CPU_CISC
 
+
+#for no webrtc build
+
+DEFINES += DISABLE_MEDIA_ENGINE_FACTORY
+
 win32 {
 
 DEFINES += INLINE=__inline \
@@ -89,7 +94,8 @@ SOURCES += \
     session/media/audiomonitor.cc \
     session/media/typingmonitor.cc \
     session/media/soundclip.cc \
-    session/tunnel/pseudotcpchannel.cc
+    session/tunnel/tunnelsessionclient.cc \
+    session/tunnel/pseudotcpchannel.cc \
 
 
 
@@ -134,5 +140,6 @@ HEADERS += \
     session/media/ssrcmuxfilter.h \
     session/media/typingmonitor.h \
     session/media/soundclip.h \
+    session/tunnel/tunnelsessionclient.h \
     session/tunnel/pseudotcpchannel.h
 

@@ -5,7 +5,9 @@ SUBDIRS += \
     talk \
     webrtc\
     peerconnection_client \
-
+    libjingle_app \
+    PCPLinux \
+    jingle_media_base
 
 
 
