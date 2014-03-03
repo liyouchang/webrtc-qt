@@ -59,13 +59,15 @@ struct TunnelContentDescription : public ContentDescription {
     return new TunnelContentDescription(*this);
   }
 };
-
+//lht add for sdp  use
 bool FindTunnelContent(const cricket::SessionDescription* sdesc,
                        std::string* name,
                        const TunnelContentDescription** content);
 
 const ContentInfo* GetFirstTunnelContent(const SessionDescription* sdesc);
 
+extern const char NS_TUNNEL[];
+extern const char CN_TUNNEL[];
 
 ///////////////////////////////////////////////////////////////////////////////
 // TunnelSessionClient

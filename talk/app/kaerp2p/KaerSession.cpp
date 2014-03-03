@@ -366,9 +366,9 @@ bool KaerSession::SetRemoteDescription(SessionDescriptionInterface *desc,
     talk_base::scoped_ptr<SessionDescriptionInterface> desc_temp(desc);
 
     // Validate SDP.
-//    if (!ValidateSessionDescription(desc, cricket::CS_REMOTE, err_desc)) {
-//        return false;
-//    }
+    if (!ValidateSessionDescription(desc, cricket::CS_REMOTE, err_desc)) {
+        return false;
+    }
 
     // Transport and Media channels will be created only when offer is set.
     Action action = GetAction(desc->type());
@@ -704,19 +704,19 @@ bool KaerSession::ValidateSessionDescription(
         return BadSdp(source, kSdpWithoutIceUfragPwd, error_desc);
     }
 
-    //    if (!ValidateBundleSettings(sdesc->description())) {
-    //      return BadSdp(source, kBundleWithoutRtcpMux, error_desc);
-    //    }
+//        if (!ValidateBundleSettings(sdesc->description())) {
+//          return BadSdp(source, kBundleWithoutRtcpMux, error_desc);
+//        }
 
     // Verify m-lines in Answer when compared against Offer.
-    //    if (action == kAnswer) {
-    //      const cricket::SessionDescription* offer_desc =
-    //          (source == cricket::CS_LOCAL) ? remote_description()->description() :
-    //              local_description()->description();
-    //      if (!VerifyMediaDescriptions(sdesc->description(), offer_desc)) {
-    //        return BadSdp(source, kMlineMismatch, error_desc);
-    //      }
-    //    }
+        if (action == kAnswer) {
+          const cricket::SessionDescription* offer_desc =
+              (source == cricket::CS_LOCAL) ? remote_desc_->description() :
+                  local_desc_->description();
+          if (!VerifyMediaDescriptions(sdesc->description(), offer_desc)) {
+            return BadSdp(source, kMlineMismatch, error_desc);
+          }
+        }
 
     return true;
 }

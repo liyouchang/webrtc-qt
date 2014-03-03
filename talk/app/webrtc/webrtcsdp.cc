@@ -160,6 +160,7 @@ static const char kAttributeRtcpFb[] = "rtcp-fb";
 static const char kAttributeSendRecv[] = "sendrecv";
 static const char kAttributeInactive[] = "inactive";
 
+
 // Experimental flags
 static const char kAttributeXGoogleFlag[] = "x-google-flag";
 static const char kValueConference[] = "conference";
@@ -215,6 +216,11 @@ static const int kIsacSwbDefaultRate = 56000;  // From acm_common_defs.h
 
 static const int kDefaultSctpFmt = 5000;
 static const char kDefaultSctpmapProtocol[] = "webrtc-datachannel";
+
+
+//lht add attribute for tunnel
+static const char kAttributeTunnelDescription[] = "tunnel-desc";
+static const char kMediaTypeTunnel[] = "tunnel";
 
 struct SsrcInfo {
     SsrcInfo()
@@ -813,8 +819,8 @@ std::string SdpSerialize(const JsepSessionDescription& jdesc) {
 }
 //lht add
 void BuildTunnelDescription(const ContentInfo* content_info,
-                           const TransportInfo* transport_info,
-                           std::string* message) {
+                            const TransportInfo* transport_info,
+                            std::string* message) {
     ASSERT(message != NULL);
     if (content_info == NULL || message == NULL) {
         return;
@@ -823,15 +829,16 @@ void BuildTunnelDescription(const ContentInfo* content_info,
     std::ostringstream os;
     const cricket::TunnelContentDescription* tunnel_desc =
             static_cast<const cricket::TunnelContentDescription*>(
-        content_info->description);
+                content_info->description);
 
     ASSERT(tunnel_desc != NULL);
 
     // RFC 4566
     // m=<media> <port> <proto> <fmt>
     // fmt is a list of payload type numbers that MAY be used in the session.
-    const char* type = "tunnel";
+    const char* type = cricket::CN_TUNNEL;
 
+    std::string fmt = " 0";
 
     // The port number in the m line will be updated later when associate with
     // the candidates.
@@ -845,7 +852,7 @@ void BuildTunnelDescription(const ContentInfo* content_info,
 
     InitLine(kLineTypeMedia, type, &os);
     //os << " " << port << " " << media_desc->protocol() << fmt;
-    os << " " << port ;
+    os << " " << port  << " " << "tcp" << fmt;
     AddLine(os.str(), message);
 
     // Use the transport_info to build the media level ice-ufrag and ice-pwd.
@@ -898,6 +905,12 @@ void BuildTunnelDescription(const ContentInfo* content_info,
     InitAttrLine(kAttributeMid, &os);
     os << kSdpDelimiterColon << content_info->name;
     AddLine(os.str(), message);
+
+
+    InitAttrLine(kAttributeTunnelDescription, &os);
+    os << kSdpDelimiterColon << tunnel_desc->description;
+    AddLine(os.str(), message);
+
 
 }//lht add end
 std::string SdpSerializeSessionDescription(
@@ -2144,6 +2157,94 @@ static C* ParseContentDescription(const std::string& message,
     media_desc->SortCodecs();
     return media_desc;
 }
+//lht add for tunnel
+bool ParseTunnelContent(
+        const std::string& message,
+        int mline_index,
+        size_t* pos,
+        std::string* content_name,
+        std::string * tunnel_desc,
+        TransportDescription* transport,
+        std::vector<JsepIceCandidate*>* candidates,
+        SdpParseError* error) {
+    ASSERT(content_name != NULL);
+    ASSERT(transport != NULL);
+
+    // The media level "ice-ufrag" and "ice-pwd".
+    // The candidates before update the media level "ice-pwd" and "ice-ufrag".
+    Candidates candidates_orig;
+    std::string line;
+    std::string mline_id;
+
+
+    // Loop until the next m line
+    while (!IsLineType(message, kLineTypeMedia, *pos)) {
+        if (!GetLine(message, pos, &line)) {
+            if (*pos >= message.size()) {
+                break;  // Done parsing
+            } else {
+                return ParseFailed(message, *pos, "Invalid SDP line.", error);
+            }
+        }
+
+        if (!IsLineType(line, kLineTypeAttributes)) {
+            // TODO: Handle other lines if needed.
+            LOG(LS_INFO) << "Ignored line: " << line;
+            continue;
+        }
+
+        // Handle attributes common to SCTP and RTP.
+        if (HasAttribute(line, kAttributeMid)) {
+            // RFC 3388
+            // mid-attribute      = "a=mid:" identification-tag
+            // identification-tag = token
+            // Use the mid identification-tag as the content name.
+            if (!GetValue(line, kAttributeMid, &mline_id, error)) {
+                return false;
+            }
+            *content_name = mline_id;
+        } else if (HasAttribute(line, kAttributeCandidate)) {
+            Candidate candidate;
+            if (!ParseCandidate(line, &candidate, error, false)) {
+                return false;
+            }
+            candidates_orig.push_back(candidate);
+        } else if (HasAttribute(line, kAttributeIceUfrag)) {
+            if (!GetValue(line, kAttributeIceUfrag, &transport->ice_ufrag, error)) {
+                return false;
+            }
+        } else if (HasAttribute(line, kAttributeIcePwd)) {
+            if (!GetValue(line, kAttributeIcePwd, &transport->ice_pwd, error)) {
+                return false;
+            }
+        } else if (HasAttribute(line, kAttributeIceOption)) {
+            if (!ParseIceOptions(line, &transport->transport_options, error)) {
+                return false;
+            }
+        }else if (HasAttribute(line, kAttributeTunnelDescription)) {
+            if (!GetValue(line, kAttributeTunnelDescription, tunnel_desc, error)) {
+                return false;
+            }
+        } else {
+            // Only parse lines that we are interested of.
+            LOG(LS_INFO) << "Ignored line: " << line;
+            continue;
+        }
+    }
+
+    // RFC 5245
+    // Update the candidates with the media level "ice-pwd" and "ice-ufrag".
+    for (Candidates::iterator it = candidates_orig.begin();
+         it != candidates_orig.end(); ++it) {
+        ASSERT((*it).username().empty());
+        (*it).set_username(transport->ice_ufrag);
+        ASSERT((*it).password().empty());
+        (*it).set_password(transport->ice_pwd);
+        candidates->push_back(
+                    new JsepIceCandidate(mline_id, mline_index, *it));
+    }
+    return true;
+}
 
 bool ParseMediaDescription(const std::string& message,
                            const TransportDescription& session_td,
@@ -2243,7 +2344,33 @@ bool ParseMediaDescription(const std::string& message,
             if (content.get() && !support_dc_sdp_bandwidth_temporarily) {
                 content->set_bandwidth(cricket::kAutoBandwidth);
             }
-        } else {
+        } else if(HasAttribute(line, kMediaTypeTunnel)) { //lht add for tunnel
+            std::string tunnel_desc;
+            content_name = cricket::CN_TUNNEL;
+            bool parsed = ParseTunnelContent(
+                message, mline_index,pos, &content_name,&tunnel_desc,
+                &transport, candidates, error);
+
+            if(!parsed){
+                return false;
+            }
+            talk_base::scoped_ptr<cricket::TunnelContentDescription> tunnel_content;
+            tunnel_content.reset(new  cricket::TunnelContentDescription(tunnel_desc));
+            desc->AddContent(content_name,cricket::NS_TUNNEL,tunnel_content.release());
+
+            // Create TransportInfo with the media level "ice-pwd" and "ice-ufrag".
+            TransportInfo transport_info(content_name, transport);
+
+            if (!desc->AddTransportInfo(transport_info)) {
+                std::ostringstream description;
+                description << "Failed to AddTransportInfo with content name: "
+                            << content_name;
+                return ParseFailed("", description.str(), error);
+            }
+            LOG(INFO) <<"create tunnel: "<<line;
+            continue;
+
+        }else {
             LOG(LS_WARNING) << "Unsupported media type: " << line;
             continue;
         }
