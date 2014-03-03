@@ -25,6 +25,11 @@ INCLUDEPATH     += ../third_party/libsrtp/srtp/include \
 DEFINES +=  HAVE_STDLIB_H HAVE_STRING_H
 DEFINES += CPU_CISC
 
+
+#for no webrtc build
+
+DEFINES += DISABLE_MEDIA_ENGINE_FACTORY
+
 win32 {
 
 DEFINES += INLINE=__inline \

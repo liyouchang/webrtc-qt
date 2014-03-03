@@ -14,6 +14,9 @@ CONFIG += staticlib
 include (../talk/talk_common.pri)
 DESTDIR = $$output_dir/libs
 
+DEFINES -= LINUX
+
+
 INCLUDEPATH  += ../third_party/libyuv/include  ../third_party/usrsctp \
     third_party/libudev
 
@@ -35,7 +38,14 @@ SOURCES += \
     ../talk/media/base/mediaengine.cc \
     ../talk/media/base/capturemanager.cc \
     ../talk/media/base/capturerenderadapter.cc \
-    ../talk/media/base/cpuid.cc
+    ../talk/media/base/cpuid.cc \
+    ../talk/media/devices/devicemanager.cc \
+    ../talk/media/devices/yuvframescapturer.cc \
+    ../talk/media/devices/filevideocapturer.cc \
+    ../talk/media/devices/libudevsymboltable.cc \
+    ../talk/media/devices/linuxdeviceinfo.cc
+
+
 
 HEADERS += \
     ../talk/media/base/constants.h \
@@ -74,5 +84,9 @@ HEADERS += \
     ../talk/media/base/fakenetworkinterface.h \
     ../talk/media/base/fakertp.h \
     ../talk/media/base/fakevideocapturer.h \
-    ../talk/media/base/fakevideorenderer.h
+    ../talk/media/base/fakevideorenderer.h \
+    ../talk/media/devices/devicemanager.h \
+    ../talk/media/devices/yuvframescapturer.h \
+    ../talk/media/devices/filevideocapturer.h \
+    ../talk/media/devices/libudevsymboltable.h
 
