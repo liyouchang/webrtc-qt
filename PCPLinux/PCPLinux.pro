@@ -1,7 +1,6 @@
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
-CONFIG -= qt
 
 
 
@@ -41,10 +40,14 @@ SOURCES += \
     main.cpp \
     peer_connection_client.cc \
     defaults.cc \
-    ServerConductor.cpp
+    ServerConductor.cpp \
+    p2pthread.cpp \
+    streamprocess.cpp
 
 HEADERS += \
     peer_connection_client.h \
     defaults.h \
-    ServerConductor.h
+    ServerConductor.h \
+    p2pthread.h \
+    streamprocess.h
 

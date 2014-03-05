@@ -4,6 +4,8 @@
 #include "talk/app/kaerp2p/KaerSession.h"
 #include "peer_connection_client.h"
 #include <iostream>
+#include "streamprocess.h"
+
 namespace kaerp2p {
 
 class ServerFileProcess;
@@ -41,7 +43,7 @@ protected:
     talk_base::BasicNetworkManager network_manager_;
     //talk_base::scoped_ptr<cricket::PortAllocator> allocator_;
     cricket::PortAllocator * allocator_;
-    ServerFileProcess * fileProcess;
+    StreamProcess * streamprocess_;
     // CreateSessionDescriptionObserver interface
 public:
     void OnSuccess(SessionDescriptionInterface *desc);

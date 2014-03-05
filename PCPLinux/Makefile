@@ -12,13 +12,13 @@ MAKEFILE      = Makefile
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DJSONCPP_RELATIVE_PATH -DLOGGING=1 -DLIBPEERCONNECTION_LIB=1 -DUSE_WEBRTC_DEV_BRANCH -DSRTP_RELATIVE_PATH -DHAVE_SRTP -DPOSIX -DLINUX
-CFLAGS        = -m64 -pipe -g -Wall -W -fPIE $(DEFINES)
-CXXFLAGS      = -m64 -pipe -g -Wall -W -fPIE $(DEFINES)
-INCPATH       = -I/usr/local/Qt5-static-gcc_64/mkspecs/linux-g++-64 -I. -I.. -I../third_party/jsoncpp/overrides/include -I../third_party/jsoncpp/source/include
+DEFINES       = -DJSONCPP_RELATIVE_PATH -DLOGGING=1 -DLIBPEERCONNECTION_LIB=1 -DUSE_WEBRTC_DEV_BRANCH -DSRTP_RELATIVE_PATH -DHAVE_SRTP -DPOSIX -DLINUX -DQT_GUI_LIB -DQT_CORE_LIB
+CFLAGS        = -m64 -pipe -g -Wall -W -D_REENTRANT -fPIE $(DEFINES)
+CXXFLAGS      = -m64 -pipe -g -Wall -W -D_REENTRANT -fPIE $(DEFINES)
+INCPATH       = -I/usr/local/Qt5-static-gcc_64/mkspecs/linux-g++-64 -I. -I.. -I../third_party/jsoncpp/overrides/include -I../third_party/jsoncpp/source/include -I/usr/local/Qt5-static-gcc_64/include -I/usr/local/Qt5-static-gcc_64/include/QtGui -I/usr/local/Qt5-static-gcc_64/include/QtCore -I.
 LINK          = g++
 LFLAGS        = -m64
-LIBS          = $(SUBLIBS) -L/home/lht/workspace/P2PSystem/talk/../out/libs -ljingle_peerconnection -ljingle_app -ljingle_p2p -ljingle_media_base -ljingle -ljsoncpp -lsrtp -lyuv -pthread -ldl 
+LIBS          = $(SUBLIBS) -L/usr/X11R6/lib64 -L/home/lht/workspace/P2PSystem/talk/../out/libs -ljingle_peerconnection -ljingle_app -ljingle_p2p -ljingle_media_base -ljingle -ljsoncpp -lsrtp -lyuv -L/usr/local/Qt5-static-gcc_64/lib -L/usr/local/Qt5-static-gcc_64/plugins/platforms -lqxcb -lX11-xcb -lXi -lxcb-render-util -lSM -lICE -lxcb-glx -lxcb-render -ldbus-1 -lxcb -lxcb-image -lxcb-icccm -lxcb-sync -lxcb-xfixes -lxcb-shm -lxcb-randr -lxcb-shape -lxcb-keysyms -lQt5PlatformSupport -lfontconfig -lfreetype -lXrender -lXext -lX11 -ludev -lQt5DBus -lQt5Gui -ljpeg -lpng -lQt5Core -lz -lm -ldl -pthread -lgthread-2.0 -lglib-2.0 -lrt -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 QMAKE         = /usr/local/Qt5-static-gcc_64/bin/qmake
@@ -48,11 +48,18 @@ OBJECTS_DIR   = ../out/obj/PCPLinux/
 SOURCES       = main.cpp \
 		peer_connection_client.cc \
 		defaults.cc \
-		ServerConductor.cpp 
+		ServerConductor.cpp \
+		p2pthread.cpp \
+		streamprocess.cpp \
+		pcplinux_plugin_import.cpp moc_p2pthread.cpp
 OBJECTS       = ../out/obj/PCPLinux/main.o \
 		../out/obj/PCPLinux/peer_connection_client.o \
 		../out/obj/PCPLinux/defaults.o \
-		../out/obj/PCPLinux/ServerConductor.o
+		../out/obj/PCPLinux/ServerConductor.o \
+		../out/obj/PCPLinux/p2pthread.o \
+		../out/obj/PCPLinux/streamprocess.o \
+		../out/obj/PCPLinux/pcplinux_plugin_import.o \
+		../out/obj/PCPLinux/moc_p2pthread.o
 DIST          = /usr/local/Qt5-static-gcc_64/mkspecs/features/spec_pre.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/common/shell-unix.conf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/common/unix.conf \
@@ -187,6 +194,11 @@ DIST          = /usr/local/Qt5-static-gcc_64/mkspecs/features/spec_pre.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/resolve_config.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/default_post.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/warn_on.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/qt.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/resources.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/moc.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/unix/opengl.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/unix/thread.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/testcase_targets.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/exceptions.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/yacc.prf \
@@ -194,7 +206,10 @@ DIST          = /usr/local/Qt5-static-gcc_64/mkspecs/features/spec_pre.prf \
 		PCPLinux.pro main.cpp \
 		peer_connection_client.cc \
 		defaults.cc \
-		ServerConductor.cpp
+		ServerConductor.cpp \
+		p2pthread.cpp \
+		streamprocess.cpp \
+		pcplinux_plugin_import.cpp
 QMAKE_TARGET  = PCPLinux
 DESTDIR       = ../out/#avoid trailing-slash linebreak
 TARGET        = ../out/PCPLinux
@@ -224,7 +239,7 @@ first: all
 
 all: Makefile $(TARGET)
 
-$(TARGET):  $(OBJECTS)  
+$(TARGET): /usr/local/Qt5-static-gcc_64/lib/libQt5Gui.a /usr/local/Qt5-static-gcc_64/lib/libQt5Core.a $(OBJECTS)  
 	@test -d ../out/ || mkdir -p ../out/
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
@@ -362,11 +377,21 @@ Makefile: PCPLinux.pro /usr/local/Qt5-static-gcc_64/mkspecs/linux-g++-64/qmake.c
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/resolve_config.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/default_post.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/warn_on.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/qt.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/resources.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/moc.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/unix/opengl.prf \
+		/usr/local/Qt5-static-gcc_64/mkspecs/features/unix/thread.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/testcase_targets.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/exceptions.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/yacc.prf \
 		/usr/local/Qt5-static-gcc_64/mkspecs/features/lex.prf \
-		PCPLinux.pro
+		PCPLinux.pro \
+		/usr/local/Qt5-static-gcc_64/lib/libQt5Gui.prl \
+		/usr/local/Qt5-static-gcc_64/lib/libQt5Core.prl \
+		/usr/local/Qt5-static-gcc_64/plugins/platforms/libqxcb.prl \
+		/usr/local/Qt5-static-gcc_64/lib/libQt5PlatformSupport.prl \
+		/usr/local/Qt5-static-gcc_64/lib/libQt5DBus.prl
 	$(QMAKE) -spec linux-g++-64 -o Makefile PCPLinux.pro
 /usr/local/Qt5-static-gcc_64/mkspecs/features/spec_pre.prf:
 /usr/local/Qt5-static-gcc_64/mkspecs/common/shell-unix.conf:
@@ -502,11 +527,21 @@ Makefile: PCPLinux.pro /usr/local/Qt5-static-gcc_64/mkspecs/linux-g++-64/qmake.c
 /usr/local/Qt5-static-gcc_64/mkspecs/features/resolve_config.prf:
 /usr/local/Qt5-static-gcc_64/mkspecs/features/default_post.prf:
 /usr/local/Qt5-static-gcc_64/mkspecs/features/warn_on.prf:
+/usr/local/Qt5-static-gcc_64/mkspecs/features/qt.prf:
+/usr/local/Qt5-static-gcc_64/mkspecs/features/resources.prf:
+/usr/local/Qt5-static-gcc_64/mkspecs/features/moc.prf:
+/usr/local/Qt5-static-gcc_64/mkspecs/features/unix/opengl.prf:
+/usr/local/Qt5-static-gcc_64/mkspecs/features/unix/thread.prf:
 /usr/local/Qt5-static-gcc_64/mkspecs/features/testcase_targets.prf:
 /usr/local/Qt5-static-gcc_64/mkspecs/features/exceptions.prf:
 /usr/local/Qt5-static-gcc_64/mkspecs/features/yacc.prf:
 /usr/local/Qt5-static-gcc_64/mkspecs/features/lex.prf:
 PCPLinux.pro:
+/usr/local/Qt5-static-gcc_64/lib/libQt5Gui.prl:
+/usr/local/Qt5-static-gcc_64/lib/libQt5Core.prl:
+/usr/local/Qt5-static-gcc_64/plugins/platforms/libqxcb.prl:
+/usr/local/Qt5-static-gcc_64/lib/libQt5PlatformSupport.prl:
+/usr/local/Qt5-static-gcc_64/lib/libQt5DBus.prl:
 qmake: FORCE
 	@$(QMAKE) -spec linux-g++-64 -o Makefile PCPLinux.pro
 
@@ -514,7 +549,7 @@ qmake_all: FORCE
 
 dist: 
 	@test -d ../out/obj/PCPLinux/PCPLinux1.0.0 || mkdir -p ../out/obj/PCPLinux/PCPLinux1.0.0
-	$(COPY_FILE) --parents $(DIST) ../out/obj/PCPLinux/PCPLinux1.0.0/ && (cd `dirname ../out/obj/PCPLinux/PCPLinux1.0.0` && $(TAR) PCPLinux1.0.0.tar PCPLinux1.0.0 && $(COMPRESS) PCPLinux1.0.0.tar) && $(MOVE) `dirname ../out/obj/PCPLinux/PCPLinux1.0.0`/PCPLinux1.0.0.tar.gz . && $(DEL_FILE) -r ../out/obj/PCPLinux/PCPLinux1.0.0
+	$(COPY_FILE) --parents $(DIST) ../out/obj/PCPLinux/PCPLinux1.0.0/ && $(COPY_FILE) --parents peer_connection_client.h defaults.h ServerConductor.h p2pthread.h streamprocess.h ../out/obj/PCPLinux/PCPLinux1.0.0/ && $(COPY_FILE) --parents main.cpp peer_connection_client.cc defaults.cc ServerConductor.cpp p2pthread.cpp streamprocess.cpp pcplinux_plugin_import.cpp ../out/obj/PCPLinux/PCPLinux1.0.0/ && (cd `dirname ../out/obj/PCPLinux/PCPLinux1.0.0` && $(TAR) PCPLinux1.0.0.tar PCPLinux1.0.0 && $(COMPRESS) PCPLinux1.0.0.tar) && $(MOVE) `dirname ../out/obj/PCPLinux/PCPLinux1.0.0`/PCPLinux1.0.0.tar.gz . && $(DEL_FILE) -r ../out/obj/PCPLinux/PCPLinux1.0.0
 
 
 clean:compiler_clean 
@@ -524,87 +559,142 @@ clean:compiler_clean
 
 distclean: clean 
 	-$(DEL_FILE) ../out/$(TARGET) 
+	-$(DEL_FILE) /home/lht/workspace/P2PSystem/PCPLinux/pcplinux_plugin_import.cpp
 	-$(DEL_FILE) Makefile
 
 
 ####### Sub-libraries
 
+mocclean: compiler_moc_header_clean compiler_moc_source_clean
+
+mocables: compiler_moc_header_make_all compiler_moc_source_make_all
+
 check: first
 
+compiler_rcc_make_all:
+compiler_rcc_clean:
+compiler_moc_header_make_all: moc_p2pthread.cpp
+compiler_moc_header_clean:
+	-$(DEL_FILE) moc_p2pthread.cpp
+moc_p2pthread.cpp: /usr/local/Qt5-static-gcc_64/include/QtCore/QThread \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qthread.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobject.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobjectdefs.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qnamespace.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qglobal.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qconfig.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qfeatures.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsystemdetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qprocessordetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcompilerdetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qtypeinfo.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qtypetraits.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsysinfo.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qlogging.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qflags.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qbasicatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qgenericatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_msvc.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv7.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv6.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv5.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_ia64.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_mips.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_x86.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_cxx11.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_gcc.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_unix.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qglobalstatic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qmutex.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qnumeric.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qstring.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qchar.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qbytearray.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qrefcount.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qarraydata.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qstringbuilder.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qlist.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qalgorithms.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qiterator.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcoreevent.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qscopedpointer.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qmetatype.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qvarlengtharray.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcontainerfwd.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qisenum.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobject_impl.h \
+		p2pthread.h
+	/usr/local/Qt5-static-gcc_64/bin/moc $(DEFINES) -I/usr/local/Qt5-static-gcc_64/mkspecs/linux-g++-64 -I/home/lht/workspace/P2PSystem/PCPLinux -I/home/lht/workspace/P2PSystem -I/home/lht/workspace/P2PSystem/third_party/jsoncpp/overrides/include -I/home/lht/workspace/P2PSystem/third_party/jsoncpp/source/include -I/usr/local/Qt5-static-gcc_64/include -I/usr/local/Qt5-static-gcc_64/include/QtGui -I/usr/local/Qt5-static-gcc_64/include/QtCore -I/usr/include/c++/4.8 -I/usr/include/x86_64-linux-gnu/c++/4.8 -I/usr/include/c++/4.8/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.8/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include p2pthread.h -o moc_p2pthread.cpp
+
+compiler_moc_source_make_all:
+compiler_moc_source_clean:
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
 compiler_yacc_impl_make_all:
 compiler_yacc_impl_clean:
 compiler_lex_make_all:
 compiler_lex_clean:
-compiler_clean: 
+compiler_clean: compiler_moc_header_clean 
 
 ####### Compile
 
-../out/obj/PCPLinux/main.o: main.cpp ../talk/base/thread.h \
-		../talk/base/constructormagic.h \
-		../talk/base/messagequeue.h \
-		../talk/base/basictypes.h \
-		../talk/base/criticalsection.h \
-		../talk/base/win32.h \
-		../talk/base/stringutils.h \
-		../talk/base/messagehandler.h \
-		../talk/base/scoped_ptr.h \
-		../talk/base/common.h \
-		../talk/base/compile_assert.h \
-		../talk/base/move.h \
-		../talk/base/template_util.h \
-		../talk/base/scoped_ref_ptr.h \
-		../talk/base/sigslot.h \
-		../talk/base/socketserver.h \
-		../talk/base/socketfactory.h \
-		../talk/base/socket.h \
-		../talk/base/socketaddress.h \
-		../talk/base/ipaddress.h \
-		../talk/base/byteorder.h \
-		../talk/base/asyncsocket.h \
-		../talk/base/timeutils.h \
-		ServerConductor.h \
-		../talk/app/kaerp2p/KaerSession.h \
-		../talk/p2p/base/session.h \
-		../talk/base/refcount.h \
-		../talk/p2p/base/port.h \
-		../talk/base/asyncpacketsocket.h \
-		../talk/base/buffer.h \
-		../talk/base/dscp.h \
-		../talk/base/network.h \
-		../talk/base/proxyinfo.h \
-		../talk/base/cryptstring.h \
-		../talk/base/linked_ptr.h \
-		../talk/base/ratetracker.h \
-		../talk/p2p/base/candidate.h \
-		../talk/p2p/base/constants.h \
-		../talk/p2p/base/packetsocketfactory.h \
-		../talk/p2p/base/portinterface.h \
-		../talk/p2p/base/transport.h \
-		../talk/base/sslstreamadapter.h \
-		../talk/base/stream.h \
-		../talk/base/logging.h \
-		../talk/base/sslidentity.h \
-		../talk/base/messagedigest.h \
-		../talk/p2p/base/sessiondescription.h \
-		../talk/p2p/base/transportinfo.h \
-		../talk/base/helpers.h \
-		../talk/p2p/base/transportdescription.h \
-		../talk/base/sslfingerprint.h \
-		../talk/p2p/base/stun.h \
-		../talk/base/bytebuffer.h \
-		../talk/p2p/base/stunrequest.h \
-		../talk/p2p/base/portallocator.h \
-		../talk/app/webrtc/jsep.h \
-		../talk/session/tunnel/pseudotcpchannel.h \
-		../talk/p2p/base/pseudotcp.h \
-		peer_connection_client.h \
-		../talk/base/nethelpers.h \
-		../talk/base/asyncresolverinterface.h \
-		../talk/base/signalthread.h \
-		../talk/base/physicalsocketserver.h \
-		../talk/base/asyncfile.h
+../out/obj/PCPLinux/main.o: main.cpp /usr/local/Qt5-static-gcc_64/include/QtCore/QCoreApplication \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcoreapplication.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qglobal.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qconfig.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qfeatures.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsystemdetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qprocessordetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcompilerdetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qtypeinfo.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qtypetraits.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsysinfo.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qlogging.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qflags.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qbasicatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qgenericatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_msvc.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv7.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv6.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv5.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_ia64.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_mips.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_x86.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_cxx11.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_gcc.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_unix.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qglobalstatic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qmutex.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qnumeric.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qstring.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qchar.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qbytearray.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qrefcount.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qnamespace.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qarraydata.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qstringbuilder.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobject.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobjectdefs.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qlist.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qalgorithms.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qiterator.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcoreevent.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qscopedpointer.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qmetatype.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qvarlengtharray.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcontainerfwd.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qisenum.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobject_impl.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qeventloop.h \
+		p2pthread.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/QThread \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qthread.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../out/obj/PCPLinux/main.o main.cpp
 
 ../out/obj/PCPLinux/peer_connection_client.o: peer_connection_client.cc peer_connection_client.h \
@@ -712,6 +802,7 @@ compiler_clean:
 		../talk/base/signalthread.h \
 		../talk/base/physicalsocketserver.h \
 		../talk/base/asyncfile.h \
+		streamprocess.h \
 		defaults.h \
 		../talk/p2p/client/basicportallocator.h \
 		../talk/base/json.h \
@@ -724,6 +815,247 @@ compiler_clean:
 		../third_party/jsoncpp/source/include/json/features.h \
 		../third_party/jsoncpp/source/include/json/writer.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../out/obj/PCPLinux/ServerConductor.o ServerConductor.cpp
+
+../out/obj/PCPLinux/p2pthread.o: p2pthread.cpp p2pthread.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/QThread \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qthread.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobject.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobjectdefs.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qnamespace.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qglobal.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qconfig.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qfeatures.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsystemdetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qprocessordetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcompilerdetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qtypeinfo.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qtypetraits.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsysinfo.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qlogging.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qflags.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qbasicatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qgenericatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_msvc.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv7.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv6.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv5.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_ia64.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_mips.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_x86.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_cxx11.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_gcc.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_unix.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qglobalstatic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qmutex.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qnumeric.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qstring.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qchar.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qbytearray.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qrefcount.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qarraydata.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qstringbuilder.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qlist.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qalgorithms.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qiterator.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcoreevent.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qscopedpointer.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qmetatype.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qvarlengtharray.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcontainerfwd.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qisenum.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobject_impl.h \
+		../talk/base/thread.h \
+		../talk/base/constructormagic.h \
+		../talk/base/messagequeue.h \
+		../talk/base/basictypes.h \
+		../talk/base/criticalsection.h \
+		../talk/base/win32.h \
+		../talk/base/stringutils.h \
+		../talk/base/messagehandler.h \
+		../talk/base/scoped_ptr.h \
+		../talk/base/common.h \
+		../talk/base/compile_assert.h \
+		../talk/base/move.h \
+		../talk/base/template_util.h \
+		../talk/base/scoped_ref_ptr.h \
+		../talk/base/sigslot.h \
+		../talk/base/socketserver.h \
+		../talk/base/socketfactory.h \
+		../talk/base/socket.h \
+		../talk/base/socketaddress.h \
+		../talk/base/ipaddress.h \
+		../talk/base/byteorder.h \
+		../talk/base/asyncsocket.h \
+		../talk/base/timeutils.h \
+		ServerConductor.h \
+		../talk/app/kaerp2p/KaerSession.h \
+		../talk/p2p/base/session.h \
+		../talk/base/refcount.h \
+		../talk/p2p/base/port.h \
+		../talk/base/asyncpacketsocket.h \
+		../talk/base/buffer.h \
+		../talk/base/dscp.h \
+		../talk/base/network.h \
+		../talk/base/proxyinfo.h \
+		../talk/base/cryptstring.h \
+		../talk/base/linked_ptr.h \
+		../talk/base/ratetracker.h \
+		../talk/p2p/base/candidate.h \
+		../talk/p2p/base/constants.h \
+		../talk/p2p/base/packetsocketfactory.h \
+		../talk/p2p/base/portinterface.h \
+		../talk/p2p/base/transport.h \
+		../talk/base/sslstreamadapter.h \
+		../talk/base/stream.h \
+		../talk/base/logging.h \
+		../talk/base/sslidentity.h \
+		../talk/base/messagedigest.h \
+		../talk/p2p/base/sessiondescription.h \
+		../talk/p2p/base/transportinfo.h \
+		../talk/base/helpers.h \
+		../talk/p2p/base/transportdescription.h \
+		../talk/base/sslfingerprint.h \
+		../talk/p2p/base/stun.h \
+		../talk/base/bytebuffer.h \
+		../talk/p2p/base/stunrequest.h \
+		../talk/p2p/base/portallocator.h \
+		../talk/app/webrtc/jsep.h \
+		../talk/session/tunnel/pseudotcpchannel.h \
+		../talk/p2p/base/pseudotcp.h \
+		peer_connection_client.h \
+		../talk/base/nethelpers.h \
+		../talk/base/asyncresolverinterface.h \
+		../talk/base/signalthread.h \
+		../talk/base/physicalsocketserver.h \
+		../talk/base/asyncfile.h \
+		streamprocess.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../out/obj/PCPLinux/p2pthread.o p2pthread.cpp
+
+../out/obj/PCPLinux/streamprocess.o: streamprocess.cpp streamprocess.h \
+		../talk/app/kaerp2p/KaerSession.h \
+		../talk/p2p/base/session.h \
+		../talk/base/refcount.h \
+		../talk/base/criticalsection.h \
+		../talk/base/constructormagic.h \
+		../talk/base/win32.h \
+		../talk/base/stringutils.h \
+		../talk/base/basictypes.h \
+		../talk/base/scoped_ptr.h \
+		../talk/base/common.h \
+		../talk/base/compile_assert.h \
+		../talk/base/move.h \
+		../talk/base/template_util.h \
+		../talk/base/scoped_ref_ptr.h \
+		../talk/base/socketaddress.h \
+		../talk/base/ipaddress.h \
+		../talk/base/byteorder.h \
+		../talk/p2p/base/port.h \
+		../talk/base/asyncpacketsocket.h \
+		../talk/base/buffer.h \
+		../talk/base/dscp.h \
+		../talk/base/sigslot.h \
+		../talk/base/socket.h \
+		../talk/base/timeutils.h \
+		../talk/base/network.h \
+		../talk/base/messagehandler.h \
+		../talk/base/proxyinfo.h \
+		../talk/base/cryptstring.h \
+		../talk/base/linked_ptr.h \
+		../talk/base/ratetracker.h \
+		../talk/base/thread.h \
+		../talk/base/messagequeue.h \
+		../talk/base/socketserver.h \
+		../talk/base/socketfactory.h \
+		../talk/base/asyncsocket.h \
+		../talk/p2p/base/candidate.h \
+		../talk/p2p/base/constants.h \
+		../talk/p2p/base/packetsocketfactory.h \
+		../talk/p2p/base/portinterface.h \
+		../talk/p2p/base/transport.h \
+		../talk/base/sslstreamadapter.h \
+		../talk/base/stream.h \
+		../talk/base/logging.h \
+		../talk/base/sslidentity.h \
+		../talk/base/messagedigest.h \
+		../talk/p2p/base/sessiondescription.h \
+		../talk/p2p/base/transportinfo.h \
+		../talk/base/helpers.h \
+		../talk/p2p/base/transportdescription.h \
+		../talk/base/sslfingerprint.h \
+		../talk/p2p/base/stun.h \
+		../talk/base/bytebuffer.h \
+		../talk/p2p/base/stunrequest.h \
+		../talk/p2p/base/portallocator.h \
+		../talk/app/webrtc/jsep.h \
+		../talk/session/tunnel/pseudotcpchannel.h \
+		../talk/p2p/base/pseudotcp.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../out/obj/PCPLinux/streamprocess.o streamprocess.cpp
+
+../out/obj/PCPLinux/pcplinux_plugin_import.o: pcplinux_plugin_import.cpp /usr/local/Qt5-static-gcc_64/include/QtCore/QtPlugin \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qplugin.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobject.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobjectdefs.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qnamespace.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qglobal.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qconfig.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qfeatures.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsystemdetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qprocessordetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcompilerdetection.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qtypeinfo.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qtypetraits.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsysinfo.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qlogging.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qflags.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qbasicatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_bootstrap.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qgenericatomic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_msvc.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv7.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv6.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_armv5.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_ia64.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_mips.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_x86.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_cxx11.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_gcc.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qatomic_unix.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qglobalstatic.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qmutex.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qnumeric.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobjectdefs_impl.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qstring.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qchar.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qbytearray.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qrefcount.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qarraydata.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qstringbuilder.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qlist.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qalgorithms.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qiterator.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcoreevent.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qscopedpointer.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qmetatype.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qvarlengtharray.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qcontainerfwd.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qisenum.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qobject_impl.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qpointer.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsharedpointer.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qshareddata.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qsharedpointer_impl.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qhash.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qpair.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qjsonobject.h \
+		/usr/local/Qt5-static-gcc_64/include/QtCore/qjsonvalue.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../out/obj/PCPLinux/pcplinux_plugin_import.o pcplinux_plugin_import.cpp
+
+../out/obj/PCPLinux/moc_p2pthread.o: moc_p2pthread.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ../out/obj/PCPLinux/moc_p2pthread.o moc_p2pthread.cpp
 
 ####### Install
 

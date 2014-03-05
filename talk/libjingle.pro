@@ -181,4 +181,5 @@ HEADERS += \
     base/urlencode.h \
     base/ratelimiter.h \
     base/worker.h \
+    base/buffer.h
 

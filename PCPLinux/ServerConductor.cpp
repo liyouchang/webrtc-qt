@@ -28,7 +28,7 @@ talk_base::SocketAddress stun_addr("stun.l.google.com", 19302);
 ServerConductor::ServerConductor(PeerConnectionClient *client):
     peer_id_(-1),
     client_(client),
-    fileProcess(NULL)
+    streamprocess_(NULL)
 {
     client_->RegisterObserver(this);
 
@@ -201,14 +201,15 @@ void ServerConductor::OnSuccess(SessionDescriptionInterface *desc)
     desc->ToString(&sdp);
     jmessage[kSessionDescriptionSdpName] = sdp;
 
-//    talk_base::StreamInterface* stream = session_->GetStream();
-//    if(!fileProcess)
-//        fileProcess = new ServerFileProcess();
+    talk_base::StreamInterface* stream = session_->GetStream();
+    if(!streamprocess_)
+        streamprocess_ = new StreamProcess();
 
-//    fileProcess->ProcessStream(stream,"PeerClientTest",false);
+    streamprocess_->ProcessStream(stream);
 
     std::string* msg = new std::string(writer.write(jmessage));
 
+    streamprocess_->WriteData(msg->c_str(),msg->length());
     LOG(INFO) <<"session sdp is " << *msg;
 
     this->UIThreadCallback(SEND_MESSAGE_TO_PEER,msg);
