@@ -82,6 +82,14 @@ void P2PThread::OnMessage(talk_base::Message *msg)
         StreamProcess * stream = conductor_->GetStreamProcess();
         stream->WriteData(data.c_str(),data.length());
     }
+    case MSG_WRITE_BUFFER:
+    {
+        talk_base::TypedMessageData<talk_base::Buffer> *msgData =
+                static_cast< talk_base::TypedMessageData<talk_base::Buffer> *>(msg->pdata);
+
+        StreamProcess * stream = conductor_->GetStreamProcess();
+        stream->WriteBuffer(msgData->data());
+    }
         break;
     default:
         break;

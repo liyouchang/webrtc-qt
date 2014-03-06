@@ -19,7 +19,7 @@ public:
     bool ProcessStream(talk_base::StreamInterface* stream);
 
     bool WriteData(const char * data,int len);
-
+    bool WriteBuffer(const talk_base::Buffer &buffer);
     void Cleanup();
 protected:
     virtual void OnReadBuffer(talk_base::Buffer &buffer);
