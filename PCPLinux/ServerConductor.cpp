@@ -98,6 +98,11 @@ void ServerConductor::DisconnectFromCurrentPeer()
     //        main_wnd_->SwitchToPeerList(client_->peers());
 }
 
+StreamProcess *ServerConductor::GetStreamProcess()
+{
+    return streamprocess_;
+}
+
 void ServerConductor::UIThreadCallback(int msg_id, void *data)
 {
     switch (msg_id) {
@@ -205,13 +210,14 @@ void ServerConductor::OnSuccess(SessionDescriptionInterface *desc)
     if(!streamprocess_)
         streamprocess_ = new StreamProcess();
 
-    streamprocess_->ProcessStream(stream);
+    if(!streamprocess_->ProcessStream(stream)){
+        //talk_base::Thread::Current()->Post(NULL,kaerp2p::MSG_DONE);
+        LOG(WARNING)<<"stream process faild";
+        return;
+    }
 
     std::string* msg = new std::string(writer.write(jmessage));
-
-    streamprocess_->WriteData(msg->c_str(),msg->length());
     LOG(INFO) <<"session sdp is " << *msg;
-
     this->UIThreadCallback(SEND_MESSAGE_TO_PEER,msg);
 }
 
@@ -259,9 +265,9 @@ void ServerConductor::OnPeerConnected(int id, const std::string &name)
     LOG(INFO) << __FUNCTION__;
     LOG(INFO) << "peer id = "<<id<<" ; peer name = "<<name;
 
-        if(peer_id_ == -1 && client_->id() < id ){
-            ConnectToPeer(id);
-        }
+//        if(peer_id_ == -1 && client_->id() < id ){
+//            ConnectToPeer(id);
+//        }
 }
 
 void ServerConductor::OnPeerDisconnected(int peer_id)

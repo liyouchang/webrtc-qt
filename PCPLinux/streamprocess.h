@@ -6,6 +6,8 @@
 #include <queue>
 #include "talk/base/bytebuffer.h"
 
+namespace kaerp2p {
+
 class StreamProcess:public sigslot::has_slots<>,public talk_base::MessageHandler
 {
 public:
@@ -15,24 +17,25 @@ public:
     StreamProcess();
 
     bool ProcessStream(talk_base::StreamInterface* stream);
-    void OnStreamEvent(talk_base::StreamInterface* stream, int events,
-                       int error);
-    void Cleanup(talk_base::StreamInterface* stream, bool delay = false);
+
     bool WriteData(const char * data,int len);
 
+    void Cleanup();
 protected:
-    //maybe change the buffer in case buffer is not sent all
-    bool WriteBuffer(talk_base::ByteBuffer &buffer);
+    virtual void OnReadBuffer(talk_base::Buffer &buffer);
 
-    char buffer_[1024 * 64];
-    size_t buffer_len_;
+
+    void Cleanup(talk_base::StreamInterface* stream, bool delay = false);
+    void OnStreamEvent(talk_base::StreamInterface* stream, int events,
+                       int error);
 
     talk_base::StreamInterface *stream_;
     std::queue<talk_base::Buffer> writeQueue_;
     talk_base::Thread * workThread_;
     // MessageHandler interface
 public:
-    void OnMessage(talk_base::Message *msg);
+    virtual void OnMessage(talk_base::Message *msg);
 };
 
+}
 #endif // STREAMPROCESS_H

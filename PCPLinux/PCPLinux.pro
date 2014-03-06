@@ -1,7 +1,9 @@
+QT -= gui
+QT += core
+
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
-
 
 
 include (../talk/talk_common.pri)

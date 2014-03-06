@@ -1,5 +1,8 @@
 #include "streamprocess.h"
 #include <iostream>
+
+namespace kaerp2p {
+
 StreamProcess::StreamProcess()
 {
     stream_ = NULL;
@@ -106,8 +109,7 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
             }
             if(buffer_len > 0){
                 readBuf.AppendData(buffer,buffer_len);
-                LOG(INFO) << "read data "<<readBuf.length();
-
+                OnReadBuffer(readBuf);
             }else{
                 break;
             }
@@ -134,47 +136,26 @@ bool StreamProcess::WriteData(const char *data, int len)
             new talk_base::TypedMessageData<talk_base::Buffer>(buffer);
 
     workThread_->Post(this,MSG_DATAWRITE,msgData);
-
-    //    talk_base::StreamResult result;
-    //    size_t count;
-    //    size_t write_pos = 0;
-    //    while (write_pos < len){
-    //        result = stream_->Write(data+write_pos, len- write_pos,&count, &error);
-    //        if (result == talk_base::SR_SUCCESS) {
-    //            write_pos += count;
-    //            continue;
-    //        }
-    //        if (result == talk_base::SR_BLOCK) {
-    //            toWrite = len - write_pos;
-    //            talk_base::ByteBuffer aBuff(data + write_pos, toWrite);
-    //            writeQueue_.push(aBuff);
-    //            LOG(LS_VERBOSE) << "Tunnel write block";
-    //            return true;
-    //        }
-    //        if (result == talk_base::SR_EOS) {
-    //            std::cout << "Tunnel closed unexpectedly on write" << std::endl;
-    //        } else {
-    //            std::cout << "Tunnel write error: " << error << std::endl;
-    //        }
-    //        Cleanup(stream_);
-    //        return false;
-    //    }
     return true;
 }
 
-bool StreamProcess::WriteBuffer(talk_base::ByteBuffer & buffer)
+void StreamProcess::Cleanup()
 {
-    if (stream_ == NULL)
-        return -1;
-    if (stream_->GetState() != talk_base::SS_OPEN) {
-        return false;
-    }
+    Cleanup(stream_);
+}
+
+void StreamProcess::OnReadBuffer(talk_base::Buffer &buffer)
+{
+    std::string readStr(buffer.data(),buffer.length());
+    LOG(INFO) << "read data : "<<readStr;
+
 
 }
 
 void StreamProcess::OnMessage(talk_base::Message *msg)
 {
-    if(msg->message_id == MSG_DATAWRITE)
+    switch (msg->message_id) {
+    case MSG_DATAWRITE:
     {
         talk_base::TypedMessageData<talk_base::Buffer> *msgData =
                 static_cast< talk_base::TypedMessageData<talk_base::Buffer> *>(msg->pdata);
@@ -183,4 +164,11 @@ void StreamProcess::OnMessage(talk_base::Message *msg)
             OnStreamEvent(stream_,talk_base::SE_WRITE, 0);
         }
     }
+        break;
+    default:
+        break;
+    }
+
+}
+
 }
