@@ -33,6 +33,7 @@ void P2PThread::Run()
 {
     talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
 #ifdef WIN32
+    talk_base::EnsureWinsockInit();
         talk_base::Win32Thread w32_thread;
         talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
 #endif

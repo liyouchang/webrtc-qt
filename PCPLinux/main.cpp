@@ -26,7 +26,6 @@ int main(int argc,char *argv[])
 {
 
     //QCoreApplication a(argc,argv);
-    talk_base::EnsureWinsockInit();
 //    talk_base::Win32Thread w32_thread;
 //    talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
 
