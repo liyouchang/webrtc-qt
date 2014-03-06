@@ -33,6 +33,7 @@ protected:
     std::queue<talk_base::Buffer> writeQueue_;
     talk_base::Thread * workThread_;
     // MessageHandler interface
+    size_t totalread;
 public:
     virtual void OnMessage(talk_base::Message *msg);
 };

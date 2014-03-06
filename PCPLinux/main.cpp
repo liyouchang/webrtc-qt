@@ -2,8 +2,6 @@
 
 #include "p2pthread.h"
 #include <iostream>
-#include "talk/base/win32socketinit.h"
-#include "talk/base/win32socketserver.h"
 
 
 // Split the message into two parts by the first delimiter.

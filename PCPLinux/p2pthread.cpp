@@ -4,7 +4,6 @@
 #include "talk/base/thread.h"
 #include "peer_connection_client.h"
 #include "talk/base/logging.h"
-#include "talk/base/win32socketserver.h"
 
 namespace  kaerp2p {
 
@@ -32,11 +31,11 @@ uint32 Loop(const std::vector<uint32>& ids) {
 void P2PThread::Run()
 {
     talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
-#ifdef WIN32
-    talk_base::EnsureWinsockInit();
-        talk_base::Win32Thread w32_thread;
-        talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
-#endif
+//#ifdef WIN32
+//    talk_base::EnsureWinsockInit();
+//        talk_base::Win32Thread w32_thread;
+//        talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
+//#endif
 
     PeerConnectionClient client;
     talk_base::scoped_refptr<kaerp2p::ServerConductor> conductor(
@@ -89,6 +88,7 @@ void P2PThread::OnMessage(talk_base::Message *msg)
         StreamProcess * stream = conductor_->GetStreamProcess();
         stream->WriteData(data.c_str(),data.length());
     }
+        break;
     case MSG_WRITE_BUFFER:
     {
         talk_base::TypedMessageData<talk_base::Buffer> *msgData =

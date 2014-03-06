@@ -5,6 +5,11 @@
 #include "talk/base/thread.h"
 #include "ServerConductor.h"
 
+#ifdef WIN32
+#include "talk/base/win32socketinit.h"
+#include "talk/base/win32socketserver.h"
+#endif
+
 namespace  kaerp2p {
 
 
@@ -18,7 +23,8 @@ enum {
 };
 
 
-class P2PThread : public talk_base::Thread,public talk_base::MessageHandler
+class P2PThread : public talk_base::MessageHandler,
+        public talk_base::Thread
 {
 public:
     explicit P2PThread();

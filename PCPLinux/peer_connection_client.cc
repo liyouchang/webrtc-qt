@@ -48,9 +48,13 @@ const int kReconnectDelay = 2000;
 
 talk_base::AsyncSocket* CreateClientSocket(int family) {
 #ifdef WIN32
-    talk_base::Win32Socket* sock = new talk_base::Win32Socket();
-    sock->CreateT(family, SOCK_STREAM);
-    return sock;
+//    talk_base::Win32Socket* sock = new talk_base::Win32Socket();
+//    sock->CreateT(family, SOCK_STREAM);
+//    return sock;
+    talk_base::Thread* thread = talk_base::Thread::Current();
+    ASSERT(thread != NULL);
+    return thread->socketserver()->CreateAsyncSocket(family, SOCK_STREAM);
+
 #elif defined(POSIX)
     talk_base::Thread* thread = talk_base::Thread::Current();
     ASSERT(thread != NULL);
