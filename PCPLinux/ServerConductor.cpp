@@ -28,7 +28,7 @@ talk_base::SocketAddress stun_addr("stun.l.google.com", 19302);
 ServerConductor::ServerConductor(PeerConnectionClient *client):
     peer_id_(-1),
     client_(client),
-    fileProcess(NULL)
+    streamprocess_(NULL)
 {
     client_->RegisterObserver(this);
 
@@ -96,6 +96,11 @@ void ServerConductor::DisconnectFromCurrentPeer()
 
     //    if (main_wnd_->IsWindow())
     //        main_wnd_->SwitchToPeerList(client_->peers());
+}
+
+StreamProcess *ServerConductor::GetStreamProcess()
+{
+    return streamprocess_;
 }
 
 void ServerConductor::UIThreadCallback(int msg_id, void *data)
@@ -201,16 +206,18 @@ void ServerConductor::OnSuccess(SessionDescriptionInterface *desc)
     desc->ToString(&sdp);
     jmessage[kSessionDescriptionSdpName] = sdp;
 
-//    talk_base::StreamInterface* stream = session_->GetStream();
-//    if(!fileProcess)
-//        fileProcess = new ServerFileProcess();
+    talk_base::StreamInterface* stream = session_->GetStream();
+    if(!streamprocess_)
+        streamprocess_ = new StreamProcess();
 
-//    fileProcess->ProcessStream(stream,"PeerClientTest",false);
+    if(!streamprocess_->ProcessStream(stream)){
+        //talk_base::Thread::Current()->Post(NULL,kaerp2p::MSG_DONE);
+        LOG(WARNING)<<"stream process faild";
+        return;
+    }
 
     std::string* msg = new std::string(writer.write(jmessage));
-
     LOG(INFO) <<"session sdp is " << *msg;
-
     this->UIThreadCallback(SEND_MESSAGE_TO_PEER,msg);
 }
 
@@ -258,9 +265,9 @@ void ServerConductor::OnPeerConnected(int id, const std::string &name)
     LOG(INFO) << __FUNCTION__;
     LOG(INFO) << "peer id = "<<id<<" ; peer name = "<<name;
 
-        if(peer_id_ == -1 && client_->id() < id ){
-            ConnectToPeer(id);
-        }
+//        if(peer_id_ == -1 && client_->id() < id ){
+//            ConnectToPeer(id);
+//        }
 }
 
 void ServerConductor::OnPeerDisconnected(int peer_id)
