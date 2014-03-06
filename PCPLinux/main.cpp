@@ -2,6 +2,8 @@
 
 #include "p2pthread.h"
 #include <iostream>
+#include "talk/base/win32socketinit.h"
+#include "talk/base/win32socketserver.h"
 
 
 // Split the message into two parts by the first delimiter.
@@ -24,6 +26,12 @@ int main(int argc,char *argv[])
 {
 
     //QCoreApplication a(argc,argv);
+    talk_base::EnsureWinsockInit();
+//    talk_base::Win32Thread w32_thread;
+//    talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
+
+    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
+
     kaerp2p::P2PThread p2p;
     p2p.Start();
     while(true){

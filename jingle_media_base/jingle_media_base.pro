@@ -42,8 +42,6 @@ SOURCES += \
     ../talk/media/devices/devicemanager.cc \
     ../talk/media/devices/yuvframescapturer.cc \
     ../talk/media/devices/filevideocapturer.cc \
-    ../talk/media/devices/libudevsymboltable.cc \
-    ../talk/media/devices/linuxdeviceinfo.cc
 
 
 
@@ -88,5 +86,29 @@ HEADERS += \
     ../talk/media/devices/devicemanager.h \
     ../talk/media/devices/yuvframescapturer.h \
     ../talk/media/devices/filevideocapturer.h \
+
+
+
+win32 {
+
+SOURCES += \
+            '../talk/media/devices/win32deviceinfo.cc'\
+            '../talk/media/devices/win32devicemanager.cc'\
+
+
+
+HEADERS += \
+            '../talk/media/devices/win32devicemanager.h'\
+
+
+}
+
+linux {
+SOURCES += \
+    ../talk/media/devices/libudevsymboltable.cc \
+    ../talk/media/devices/linuxdeviceinfo.cc
+
+HEADERS += \
     ../talk/media/devices/libudevsymboltable.h
 
+}

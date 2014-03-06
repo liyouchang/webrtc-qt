@@ -17,6 +17,13 @@ INCLUDEPATH     +=  \
 win32 {
 
 LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -luser32
+LIBS += -lStrmiids
+
+    LIBS += -L$$output_dir/libs
+    LIBS +=  -ljingle_peerconnection -ljingle_app  -ljingle_p2p -ljingle_media_base -ljingle
+    LIBS += -ljsoncpp -lsrtp -lyuv
+
+
 
 } else {
     #QMAKE_CXXFLAGS += -std=c++11
