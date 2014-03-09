@@ -4,7 +4,8 @@
 #include "talk/p2p/base/constants.h"
 #include "talk/p2p/base/sessiondescription.h"
 #include "talk/base/stringencode.h"
-
+#include "talk/session/tunnel/tunnelsessionclient.h"
+#include "talk/base/bind.h"
 using cricket::ContentInfo;
 using cricket::ContentInfos;
 using cricket::SessionDescription;
@@ -239,14 +240,14 @@ private:
 
 KaerSession::KaerSession(talk_base::Thread* signaling_thread,
                          talk_base::Thread* worker_thread,
-                         cricket::PortAllocator* port_allocator,
-                         const std::string& content_type):
+                         talk_base::Thread* stream_thread,
+                         cricket::PortAllocator* port_allocator):
     cricket::BaseSession(signaling_thread,
                          worker_thread,
                          port_allocator,
                          talk_base::ToString(talk_base::CreateRandomId64() &
                                              LLONG_MAX),
-                         content_type,
+                         cricket::NS_TUNNEL,
                          false),
     ice_connection_state_(IceObserver::kIceConnectionNew),
     ice_observer_(NULL),
@@ -254,7 +255,8 @@ KaerSession::KaerSession(talk_base::Thread* signaling_thread,
 {
         kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
                                              this->signaling_thread(),this,id()));
-        channel_ = new cricket::PseudoTcpChannel(this->signaling_thread(), this);
+
+        channel_ = new cricket::PseudoTcpChannel(stream_thread, this);
 
 }
 
@@ -478,8 +480,24 @@ bool KaerSession::CreateChannels(const cricket::SessionDescription *desc)
     const ContentInfo* cinfo = desc->FirstContentByType(NS_TUNNEL);
 
     //if(cinfo)
-    channel_->Connect(CN_TUNNEL,"tcp", 1);
+    return this->signaling_thread()->Invoke<bool>(
+                talk_base::Bind(&KaerSession::CreatePseudoTcpChannel_s,this));
 
+//    channel_->Connect(CN_TUNNEL,"tcp", 1);
+//    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,1024*1024);
+//    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,1024*1024);
+
+//    LOG(INFO)<<"channel option set";
+//    return true;
+}
+
+bool KaerSession::CreatePseudoTcpChannel_s()
+{
+    channel_->Connect(CN_TUNNEL,"tcp", 1);
+    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,1024*1024);
+    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,1024*1024);
+
+    LOG(INFO)<<"channel option set";
     return true;
 }
 

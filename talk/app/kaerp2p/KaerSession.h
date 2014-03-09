@@ -55,9 +55,8 @@ class KaerSession:public cricket::BaseSession
 {
 public:
     KaerSession(talk_base::Thread *signaling_thread,
-                talk_base::Thread *worker_thread,
-                cricket::PortAllocator *port_allocator,
-                const std::string& content_type);
+                talk_base::Thread *worker_thread, talk_base::Thread *stream_thread,
+                cricket::PortAllocator *port_allocator);
     virtual ~KaerSession();
 
     bool Initialize();
@@ -85,7 +84,7 @@ public:
 
 protected:
     bool CreateChannels(const cricket::SessionDescription* desc);
-
+    bool CreatePseudoTcpChannel_s();
 
 private:
     enum Action  {

@@ -3,15 +3,16 @@
 #include "talk/base/timeutils.h"
 namespace kaerp2p {
 
-StreamProcess::StreamProcess()
+StreamProcess::StreamProcess(    talk_base::Thread * stream_thread)
 {
     stream_ = NULL;
-    this->workThread_ = talk_base::Thread::Current();
+    this->stream_thread_ = stream_thread;
     totalread = 0;
 }
 
 bool StreamProcess::ProcessStream(talk_base::StreamInterface *stream)
 {
+
     stream->SignalEvent.connect(this, &StreamProcess::OnStreamEvent);
     if (stream->GetState() == talk_base::SS_CLOSED) {
         std::cerr << "Failed to establish P2P tunnel" << std::endl;
@@ -143,7 +144,7 @@ bool StreamProcess::WriteData(const char *data, int len)
     talk_base::TypedMessageData<talk_base::Buffer> *msgData =
             new talk_base::TypedMessageData<talk_base::Buffer>(buffer);
 
-    workThread_->Post(this,MSG_DATAWRITE,msgData);
+    stream_thread_->Post(this,MSG_DATAWRITE,msgData);
     return true;
 }
 
@@ -158,7 +159,7 @@ bool StreamProcess::WriteBuffer(const talk_base::Buffer &buffer)
     talk_base::TypedMessageData<talk_base::Buffer> *msgData =
             new talk_base::TypedMessageData<talk_base::Buffer>(buffer);
 
-    workThread_->Post(this,MSG_DATAWRITE,msgData);
+    stream_thread_->Post(this,MSG_DATAWRITE,msgData);
     return true;
 }
 

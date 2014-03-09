@@ -34,7 +34,7 @@
 #include "talk/p2p/base/candidate.h"
 #include "talk/p2p/base/transportchannel.h"
 #include "pseudotcpchannel.h"
-
+#include "talk/base/bind.h"
 using namespace talk_base;
 
 namespace cricket {
@@ -131,19 +131,10 @@ bool PseudoTcpChannel::Connect(const std::string& content_name,
   ASSERT(session_ != NULL);
   worker_thread_ = session_->worker_thread();
   content_name_ = content_name;
-  channel_ = session_->CreateChannel(
-      content_name, channel_name, component);
-  channel_name_ = channel_name;
-  channel_->SetOption(Socket::OPT_DONTFRAGMENT, 1);
-
-  channel_->SignalDestroyed.connect(this,
-    &PseudoTcpChannel::OnChannelDestroyed);
-  channel_->SignalWritableState.connect(this,
-    &PseudoTcpChannel::OnChannelWritableState);
-  channel_->SignalReadPacket.connect(this,
-    &PseudoTcpChannel::OnChannelRead);
-  channel_->SignalRouteChange.connect(this,
-    &PseudoTcpChannel::OnChannelConnectionChanged);
+  //lht
+ worker_thread_->Invoke<void>(
+              talk_base::Bind(&PseudoTcpChannel::CreateChannel_w,this,
+                              content_name, channel_name, component));
 
   ASSERT(tcp_ == NULL);
   tcp_ = new PseudoTcp(this, 0);
@@ -221,6 +212,24 @@ void PseudoTcpChannel::SetOption(PseudoTcp::Option opt, int value) {
   CritScope lock(&cs_);
   ASSERT(tcp_ != NULL);
   tcp_->SetOption(opt, value);
+}
+
+void PseudoTcpChannel::CreateChannel_w(const std::string &content_name, const std::string &channel_name, int component)
+{
+      channel_ = session_->CreateChannel(
+          content_name, channel_name, component);
+      channel_name_ = channel_name;
+      channel_->SetOption(Socket::OPT_DONTFRAGMENT, 1);
+
+      channel_->SignalDestroyed.connect(this,
+        &PseudoTcpChannel::OnChannelDestroyed);
+      channel_->SignalWritableState.connect(this,
+        &PseudoTcpChannel::OnChannelWritableState);
+      channel_->SignalReadPacket.connect(this,
+        &PseudoTcpChannel::OnChannelRead);
+      channel_->SignalRouteChange.connect(this,
+        &PseudoTcpChannel::OnChannelConnectionChanged);
+
 }
 
 //

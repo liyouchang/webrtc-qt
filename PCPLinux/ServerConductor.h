@@ -6,15 +6,15 @@
 #include <iostream>
 #include "streamprocess.h"
 #include <list>
-
+#include "peertunnel.h"
 namespace kaerp2p {
 
-class ServerFileProcess;
 
 
 class ServerConductor:
         public webrtc::CreateSessionDescriptionObserver,
-        public IceObserver,public PeerConnectionClientObserver
+        public PeerTunnelObserver,
+        public PeerConnectionClientObserver
 {
 public:
     enum CallbackID {
@@ -43,24 +43,17 @@ protected:
     PeerConnectionClient* client_;
     std::deque<std::string*> pending_messages_;
     std::string server_;
-    talk_base::scoped_ptr<KaerSession> session_;
-    talk_base::BasicNetworkManager network_manager_;
-    //talk_base::scoped_ptr<cricket::PortAllocator> allocator_;
-    cricket::PortAllocator * allocator_;
+    talk_base::scoped_refptr<PeerTunnelInterface> peer_connection_;
+
     StreamProcess * streamprocess_;
     std::list<int> other_peer_id_list_;
+    talk_base::Thread * stream_thread_;
     // CreateSessionDescriptionObserver interface
 public:
-    void OnSuccess(SessionDescriptionInterface *desc);
+    void OnSuccess(webrtc::SessionDescriptionInterface* desc);
     void OnFailure(const std::string &error);
 
-    // IceObserver interface
 public:
-    void OnIceConnectionChange(IceConnectionState new_state){};
-    void OnIceGatheringChange(IceGatheringState new_state){};
-    void OnIceCandidate(const IceCandidateInterface *candidate);
-    void OnIceComplete(){};
-
     void OnSignedIn();
     void OnDisconnected();
     void OnPeerConnected(int id, const std::string &name);
@@ -70,6 +63,13 @@ public:
     void OnServerConnectionFailure();
 
     void UIThreadCallback(int msg_id, void* data);
+
+
+    // PeerTunnelObserver interface
+public:
+    void OnError();
+    void OnRenegotiationNeeded(){}
+    void OnIceCandidate(const IceCandidateInterface *candidate);
 
 };
 

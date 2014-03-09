@@ -3,7 +3,7 @@
 #include "defaults.h"
 #include "talk/p2p/client/basicportallocator.h"
 #include "talk/base/json.h"
-
+#include "talk/base/bind.h"
 namespace kaerp2p {
 
 // Names used for a IceCandidate JSON object.
@@ -15,15 +15,31 @@ const char kCandidateSdpName[] = "candidate";
 const char kSessionDescriptionTypeName[] = "type";
 const char kSessionDescriptionSdpName[] = "sdp";
 
-struct IceServer {
-    std::string uri;
-    std::string username;
-    std::string password;
-};
-typedef std::vector<IceServer> IceServers;
+
 
 talk_base::SocketAddress stun_addr("stun.l.google.com", 19302);
 
+
+
+
+class DummySetSessionDescriptionObserver
+        : public webrtc::SetSessionDescriptionObserver {
+public:
+    static DummySetSessionDescriptionObserver* Create() {
+        return
+                new talk_base::RefCountedObject<DummySetSessionDescriptionObserver>();
+    }
+    virtual void OnSuccess() {
+        LOG(INFO) << __FUNCTION__;
+    }
+    virtual void OnFailure(const std::string& error) {
+        LOG(INFO) << __FUNCTION__ << " " << error;
+    }
+
+protected:
+    DummySetSessionDescriptionObserver() {}
+    ~DummySetSessionDescriptionObserver() {}
+};
 
 ServerConductor::ServerConductor(PeerConnectionClient *client):
     peer_id_(-1),
@@ -32,23 +48,22 @@ ServerConductor::ServerConductor(PeerConnectionClient *client):
 {
     client_->RegisterObserver(this);
 
-    allocator_ = new cricket::BasicPortAllocator(
-                &network_manager_, stun_addr, talk_base::SocketAddress(),
-                talk_base::SocketAddress(), talk_base::SocketAddress());
+//    allocator_ = new cricket::BasicPortAllocator(
+//                &network_manager_, stun_addr, talk_base::SocketAddress(),
+//                talk_base::SocketAddress(), talk_base::SocketAddress());
     //    allocator_.reset(new cricket::BasicPortAllocator(
     //                         &network_manager_, stun_addr, talk_base::SocketAddress(),
     //                         talk_base::SocketAddress(), talk_base::SocketAddress()));
 
-    allocator_->set_flags(cricket::PORTALLOCATOR_ENABLE_BUNDLE |
-                          cricket::PORTALLOCATOR_ENABLE_SHARED_UFRAG |
-                          cricket::PORTALLOCATOR_ENABLE_SHARED_SOCKET);
+//    allocator_->set_flags(cricket::PORTALLOCATOR_ENABLE_BUNDLE |
+//                          cricket::PORTALLOCATOR_ENABLE_SHARED_UFRAG |
+//                          cricket::PORTALLOCATOR_ENABLE_SHARED_SOCKET);
 
 
 }
 
 ServerConductor::~ServerConductor()
 {
-    delete allocator_;
 }
 
 void ServerConductor::StartLogin(const std::string &server, int port)
@@ -70,7 +85,7 @@ void ServerConductor::ConnectToPeer(int peer_id)
     ASSERT(peer_id_ == -1);
     ASSERT(peer_id != -1);
 
-    if (session_.get()) {
+    if (peer_connection_.get()) {
         //        main_wnd_->ShowMessageBox("Error",
         //                                  "We only support connecting to one peer at a time", true);
         LOG(LS_INFO) <<"error";
@@ -79,7 +94,7 @@ void ServerConductor::ConnectToPeer(int peer_id)
 
     if (InitializePeerConnection()) {
         peer_id_ = peer_id;
-        session_->CreateOffer(this);
+        peer_connection_->CreateOffer(this);
     } else {
         LOG(LS_INFO) <<"error";
         //main_wnd_->ShowMessageBox("Error", "Failed to initialize PeerConnection", true);
@@ -89,7 +104,7 @@ void ServerConductor::ConnectToPeer(int peer_id)
 void ServerConductor::DisconnectFromCurrentPeer()
 {
     LOG(INFO) << __FUNCTION__;
-    if (session_.get()) {
+    if (peer_connection_.get()) {
         client_->SendHangUp(peer_id_);
         DeletePeerConnection();
     }
@@ -143,7 +158,7 @@ void ServerConductor::UIThreadCallback(int msg_id, void *data)
             delete msg;
         }
 
-        if (!session_.get())
+        if (!peer_connection_.get())
             peer_id_ = -1;
 
         break;
@@ -167,26 +182,37 @@ void ServerConductor::UIThreadCallback(int msg_id, void *data)
     }
 }
 
+void ServerConductor::OnError()
+{
+    LOG(LS_ERROR) << __FUNCTION__;
+    this->UIThreadCallback(PEER_CONNECTION_ERROR, NULL);
+
+}
+
+
+
 bool ServerConductor::InitializePeerConnection()
 {
-    IceServers servers;
-    IceServer server;
+    PeerTunnelInterface::IceServers servers;
+    PeerTunnelInterface::IceServer server;
     server.uri = GetPeerConnectionString();
     servers.push_back(server);
 
 
-    session_.reset( new KaerSession(talk_base::Thread::Current(),
-                                    talk_base::Thread::Current(),
-                                    allocator_,
-                                    "http://www.google.com/talk/tunnel")    );
-    session_->RegisterIceObserver(this);
+    talk_base::scoped_refptr<PeerTunnel> pt (new talk_base::RefCountedObject<PeerTunnel>());
+    stream_thread_ = talk_base::Thread::Current();
+    if(!pt->Initialize(servers,this,stream_thread_)){
+        return false;
+    }
+
+    peer_connection_ = PeerTunnelProxy::Create(pt->signaling_thread(), pt);
 
     return true;
 }
 
 void ServerConductor::DeletePeerConnection()
 {
-    session_.release();
+    peer_connection_.release();
     //active_streams_.clear();
     //main_wnd_->StopLocalRenderer();
     //main_wnd_->StopRemoteRenderer();
@@ -194,11 +220,11 @@ void ServerConductor::DeletePeerConnection()
     peer_id_ = -1;
 }
 
-void ServerConductor::OnSuccess(SessionDescriptionInterface *desc)
+void ServerConductor::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {
     LOG(INFO) << __FUNCTION__;
 
-    session_->SetLocalDescription(desc,NULL);
+    peer_connection_->SetLocalDescription(DummySetSessionDescriptionObserver::Create(),desc);
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage[kSessionDescriptionTypeName] = desc->type();
@@ -206,15 +232,25 @@ void ServerConductor::OnSuccess(SessionDescriptionInterface *desc)
     desc->ToString(&sdp);
     jmessage[kSessionDescriptionSdpName] = sdp;
 
-    talk_base::StreamInterface* stream = session_->GetStream();
-    if(!streamprocess_)
-        streamprocess_ = new StreamProcess();
+//    talk_base::StreamInterface* stream = peer_connection_->GetStream();
+//    if(!streamprocess_)
+//        streamprocess_ = new StreamProcess(stream_thread_);
 
-    if(!streamprocess_->ProcessStream(stream)){
-        //talk_base::Thread::Current()->Post(NULL,kaerp2p::MSG_DONE);
-        LOG(WARNING)<<"stream process faild";
-        return;
-    }
+//    bool result = stream_thread_->Invoke<bool>(
+//                talk_base::Bind(&StreamProcess::ProcessStream,streamprocess_,stream));
+
+//    if(!result){
+//        LOG(WARNING)<<"stream process faild";
+//        return;
+//    }
+
+
+//    if(!streamprocess_->ProcessStream(stream)){
+//        //talk_base::Thread::Current()->Post(NULL,kaerp2p::MSG_DONE);
+//        LOG(WARNING)<<"stream process faild";
+//        return;
+//    }
+
 
     std::string* msg = new std::string(writer.write(jmessage));
     LOG(INFO) <<"session sdp is " << *msg;
@@ -281,10 +317,11 @@ void ServerConductor::OnPeerDisconnected(int peer_id)
 
 void ServerConductor::OnMessageFromPeer(int peer_id, const std::string &message)
 {
+      LOG(INFO) << __FUNCTION__;
     ASSERT(peer_id_ == peer_id || peer_id_ == -1);
     ASSERT(!message.empty());
 
-    if (!session_.get()) {
+    if (!peer_connection_.get()) {
         ASSERT(peer_id_ == -1);
         peer_id_ = peer_id;
 
@@ -323,10 +360,10 @@ void ServerConductor::OnMessageFromPeer(int peer_id, const std::string &message)
             return;
         }
         LOG(INFO) << " Received session description :" << message;
-        session_->SetRemoteDescription( session_description,NULL);
+        peer_connection_->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(),session_description);
         if (session_description->type() ==
                 webrtc::SessionDescriptionInterface::kOffer) {
-            session_->CreateAnswer(this);
+            peer_connection_->CreateAnswer(this);
         }
         return;
     } else {
@@ -348,7 +385,7 @@ void ServerConductor::OnMessageFromPeer(int peer_id, const std::string &message)
         }
         LOG(INFO) << " Received candidate :" << message;
 
-        if (!session_->ProcessIceMessage(candidate.get())) {
+        if (!peer_connection_->AddIceCandidate(candidate.get())) {
             LOG(WARNING) << "Failed to apply the received candidate";
             return;
         }

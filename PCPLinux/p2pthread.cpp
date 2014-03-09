@@ -42,7 +42,7 @@ void P2PThread::Run()
                 new talk_base::RefCountedObject<kaerp2p::ServerConductor>(&client));
 
     this->conductor_ = conductor;
-    std::string serverIp = "222.174.213.185";
+    std::string serverIp = "192.168.40.195";
     conductor->StartLogin(serverIp,8888);
     LOG(INFO)<<"connectting";
 
@@ -58,7 +58,7 @@ void P2PThread::Run()
                 break;
             }
             std::cout << "orphaned message: " << msg.message_id;
-            continue;
+            //continue;
         }
         talk_base::Thread::Current()->Dispatch(&msg);
     }

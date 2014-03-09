@@ -14,7 +14,7 @@ public:
     enum{
         MSG_DATAWRITE
     };
-    StreamProcess();
+    StreamProcess(talk_base::Thread *stream_thread);
 
     bool ProcessStream(talk_base::StreamInterface* stream);
 
@@ -31,7 +31,7 @@ protected:
 
     talk_base::StreamInterface *stream_;
     std::queue<talk_base::Buffer> writeQueue_;
-    talk_base::Thread * workThread_;
+    talk_base::Thread * stream_thread_;
     // MessageHandler interface
     size_t totalread;
 public:

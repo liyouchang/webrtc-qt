@@ -88,6 +88,10 @@ public:
 
     //lht
     const std::string& content_name() { return content_name_; }
+    void CreateChannel_w(const std::string& content_name,
+                         const std::string& channel_name,
+                         int component);
+    //lht add end
 private:
     class InternalStream;
     friend class InternalStream;
