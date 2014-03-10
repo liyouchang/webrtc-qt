@@ -47,17 +47,18 @@ ServerConductor::ServerConductor(PeerConnectionClient *client):
     streamprocess_(NULL)
 {
     client_->RegisterObserver(this);
+    stream_thread_ = talk_base::Thread::Current();
 
-//    allocator_ = new cricket::BasicPortAllocator(
-//                &network_manager_, stun_addr, talk_base::SocketAddress(),
-//                talk_base::SocketAddress(), talk_base::SocketAddress());
+    //    allocator_ = new cricket::BasicPortAllocator(
+    //                &network_manager_, stun_addr, talk_base::SocketAddress(),
+    //                talk_base::SocketAddress(), talk_base::SocketAddress());
     //    allocator_.reset(new cricket::BasicPortAllocator(
     //                         &network_manager_, stun_addr, talk_base::SocketAddress(),
     //                         talk_base::SocketAddress(), talk_base::SocketAddress()));
 
-//    allocator_->set_flags(cricket::PORTALLOCATOR_ENABLE_BUNDLE |
-//                          cricket::PORTALLOCATOR_ENABLE_SHARED_UFRAG |
-//                          cricket::PORTALLOCATOR_ENABLE_SHARED_SOCKET);
+    //    allocator_->set_flags(cricket::PORTALLOCATOR_ENABLE_BUNDLE |
+    //                          cricket::PORTALLOCATOR_ENABLE_SHARED_UFRAG |
+    //                          cricket::PORTALLOCATOR_ENABLE_SHARED_SOCKET);
 
 
 }
@@ -139,27 +140,32 @@ void ServerConductor::UIThreadCallback(int msg_id, void *data)
 
     case SEND_MESSAGE_TO_PEER: {
         LOG(INFO) << "SEND_MESSAGE_TO_PEER";
+
+        talk_base::TypedMessageData<std::string *> * msgData = NULL;
+
         std::string* msg = reinterpret_cast<std::string*>(data);
         if (msg) {
             // For convenience, we always run the message through the queue.
             // This way we can be sure that messages are sent to the server
             // in the same order they were signaled without much hassle.
-            pending_messages_.push_back(msg);
+            //pending_messages_.push_back(msg);
+            msgData = new talk_base::TypedMessageData<std::string *>(msg);
         }
+        stream_thread_->Post(this,SEND_MESSAGE_TO_PEER,msgData);
+//        if (!pending_messages_.empty() && !client_->IsSendingMessage()) {
+//            msg = pending_messages_.front();
+//            pending_messages_.pop_front();
 
-        if (!pending_messages_.empty() && !client_->IsSendingMessage()) {
-            msg = pending_messages_.front();
-            pending_messages_.pop_front();
+//            if (!client_->SendToPeer(peer_id_, *msg) && peer_id_ != -1) {
+//                LOG(LS_ERROR) << "SendToPeer failed";
+//                DisconnectFromServer();
+//            }
+//            std::cout<<"send msg : "<< *msg <<std::endl;
+//            delete msg;
+//        }
 
-            if (!client_->SendToPeer(peer_id_, *msg) && peer_id_ != -1) {
-                LOG(LS_ERROR) << "SendToPeer failed";
-                DisconnectFromServer();
-            }
-            delete msg;
-        }
-
-        if (!peer_connection_.get())
-            peer_id_ = -1;
+//        if (!peer_connection_.get())
+//            peer_id_ = -1;
 
         break;
     }
@@ -200,7 +206,6 @@ bool ServerConductor::InitializePeerConnection()
 
 
     talk_base::scoped_refptr<PeerTunnel> pt (new talk_base::RefCountedObject<PeerTunnel>());
-    stream_thread_ = talk_base::Thread::Current();
     if(!pt->Initialize(servers,this,stream_thread_)){
         return false;
     }
@@ -232,24 +237,24 @@ void ServerConductor::OnSuccess(webrtc::SessionDescriptionInterface* desc)
     desc->ToString(&sdp);
     jmessage[kSessionDescriptionSdpName] = sdp;
 
-//    talk_base::StreamInterface* stream = peer_connection_->GetStream();
-//    if(!streamprocess_)
-//        streamprocess_ = new StreamProcess(stream_thread_);
+        talk_base::StreamInterface* stream = peer_connection_->GetStream();
+        if(!streamprocess_)
+            streamprocess_ = new StreamProcess(stream_thread_);
 
-//    bool result = stream_thread_->Invoke<bool>(
-//                talk_base::Bind(&StreamProcess::ProcessStream,streamprocess_,stream));
+        bool result = stream_thread_->Invoke<bool>(
+                    talk_base::Bind(&StreamProcess::ProcessStream,streamprocess_,stream));
 
-//    if(!result){
-//        LOG(WARNING)<<"stream process faild";
-//        return;
-//    }
+        if(!result){
+            LOG(WARNING)<<"stream process faild";
+            return;
+        }
 
 
-//    if(!streamprocess_->ProcessStream(stream)){
-//        //talk_base::Thread::Current()->Post(NULL,kaerp2p::MSG_DONE);
-//        LOG(WARNING)<<"stream process faild";
-//        return;
-//    }
+//        if(!streamprocess_->ProcessStream(stream)){
+//            //talk_base::Thread::Current()->Post(NULL,kaerp2p::MSG_DONE);
+//            LOG(WARNING)<<"stream process faild";
+//            return;
+//        }
 
 
     std::string* msg = new std::string(writer.write(jmessage));
@@ -283,6 +288,74 @@ void ServerConductor::OnIceCandidate(const IceCandidateInterface *candidate)
     this->UIThreadCallback(SEND_MESSAGE_TO_PEER,msg);
 }
 
+void ServerConductor::OnMessage(talk_base::Message *msg)
+{
+    switch (msg->message_id) {
+    case PEER_CONNECTION_CLOSED:
+        LOG(INFO) << "PEER_CONNECTION_CLOSED";
+        DeletePeerConnection();
+
+        //ASSERT(active_streams_.empty());
+        //        if (main_wnd_->IsWindow()) {
+        //            if (client_->is_connected()) {
+        //                main_wnd_->SwitchToPeerList(client_->peers());
+        //            } else {
+        //                main_wnd_->SwitchToConnectUI();
+        //            }
+        //        } else {
+        //            DisconnectFromServer();
+        //        }
+        break;
+
+    case SEND_MESSAGE_TO_PEER: {
+        LOG(INFO) << "SEND_MESSAGE_TO_PEER";
+
+        //std::string* msg = reinterpret_cast<std::string*>(data);
+        talk_base::TypedMessageData<std::string *> *msgData =
+                static_cast< talk_base::TypedMessageData<std::string *> *>(msg->pdata);
+        if (msgData) {
+            // For convenience, we always run the message through the queue.
+            // This way we can be sure that messages are sent to the server
+            // in the same order they were signaled without much hassle.
+            pending_messages_.push_back(msgData->data());
+        }
+        std::string* msgStr ;
+        if (!pending_messages_.empty() && !client_->IsSendingMessage()) {
+            msgStr = pending_messages_.front();
+            pending_messages_.pop_front();
+
+            if (!client_->SendToPeer(peer_id_, *msgStr) && peer_id_ != -1) {
+                LOG(LS_ERROR) << "SendToPeer failed";
+                DisconnectFromServer();
+            }
+            std::cout<<"send msg : "<< *msgStr <<std::endl;
+            delete msgStr;
+        }
+
+        if (!peer_connection_.get())
+            peer_id_ = -1;
+
+        break;
+    }
+
+    case PEER_CONNECTION_ERROR:
+        LOG(INFO)<<"Error an unknown error occurred";
+        break;
+
+    case NEW_STREAM_ADDED: {
+        break;
+    }
+
+    case STREAM_REMOVED: {
+        break;
+    }
+
+    default:
+        ASSERT(false);
+        break;
+    }
+}
+
 void ServerConductor::OnSignedIn()
 {
     LOG(INFO) << __FUNCTION__;
@@ -301,9 +374,9 @@ void ServerConductor::OnPeerConnected(int id, const std::string &name)
     LOG(INFO) << __FUNCTION__;
     LOG(INFO) << "peer id = "<<id<<" ; peer name = "<<name;
 
-//        if(peer_id_ == -1 && client_->id() < id ){
-//            ConnectToPeer(id);
-//        }
+    //        if(peer_id_ == -1 && client_->id() < id ){
+    //            ConnectToPeer(id);
+    //        }
 }
 
 void ServerConductor::OnPeerDisconnected(int peer_id)
@@ -317,7 +390,7 @@ void ServerConductor::OnPeerDisconnected(int peer_id)
 
 void ServerConductor::OnMessageFromPeer(int peer_id, const std::string &message)
 {
-      LOG(INFO) << __FUNCTION__;
+    LOG(INFO) << __FUNCTION__;
     ASSERT(peer_id_ == peer_id || peer_id_ == -1);
     ASSERT(!message.empty());
 

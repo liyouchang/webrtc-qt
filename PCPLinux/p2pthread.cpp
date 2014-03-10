@@ -38,6 +38,7 @@ void P2PThread::Run()
 //#endif
 
     PeerConnectionClient client;
+    this->client_ = &client;
     talk_base::scoped_refptr<kaerp2p::ServerConductor> conductor(
                 new talk_base::RefCountedObject<kaerp2p::ServerConductor>(&client));
 
@@ -98,6 +99,16 @@ void P2PThread::OnMessage(talk_base::Message *msg)
         stream->WriteBuffer(msgData->data());
     }
         break;
+    case MSG_SEND_TO_PEER:
+    {
+        talk_base::TypedMessageData<std::string> *msgData =
+                static_cast< talk_base::TypedMessageData<std::string> *>(msg->pdata);
+
+         conductor_->UIThreadCallback(ServerConductor::SEND_MESSAGE_TO_PEER,&msgData->data());
+
+
+        break;
+    }
     default:
         break;
     }

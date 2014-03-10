@@ -19,7 +19,8 @@ enum {
     MSG_DONE,
     MSG_CONNECT_TO_PEER,
     MSG_SEND_STRING,
-    MSG_WRITE_BUFFER
+    MSG_WRITE_BUFFER,
+    MSG_SEND_TO_PEER
 };
 
 
@@ -29,6 +30,8 @@ class P2PThread : public talk_base::MessageHandler,
 public:
     explicit P2PThread();
     talk_base::scoped_refptr<kaerp2p::ServerConductor> conductor_;
+    PeerConnectionClient * client_;
+
 public:
     virtual void Run();
 

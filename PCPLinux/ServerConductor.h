@@ -14,7 +14,9 @@ namespace kaerp2p {
 class ServerConductor:
         public webrtc::CreateSessionDescriptionObserver,
         public PeerTunnelObserver,
-        public PeerConnectionClientObserver
+        public PeerConnectionClientObserver,
+        public talk_base::MessageHandler
+
 {
 public:
     enum CallbackID {
@@ -71,6 +73,12 @@ public:
     void OnRenegotiationNeeded(){}
     void OnIceCandidate(const IceCandidateInterface *candidate);
 
+
+    // PeerTunnelObserver interface
+
+    // MessageHandler interface
+public:
+    void OnMessage(talk_base::Message *msg);
 };
 
 

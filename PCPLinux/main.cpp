@@ -94,7 +94,12 @@ int main(int argc,char *argv[])
                 }
                 LOG(INFO)<<"read file end";
             }
-            else{
+            else if(cmd.compare("sendtopeer")==0){
+                talk_base::TypedMessageData<std::string> *msgData =
+                        new  talk_base::TypedMessageData<std::string>(data);
+                p2p.Post(&p2p,kaerp2p::MSG_SEND_TO_PEER,msgData);
+
+            }else{
 
                 std::cout << "not support cmd";
             }
