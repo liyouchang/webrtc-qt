@@ -83,19 +83,8 @@ SOURCES += \
     ../talk/p2p/base/dtlstransportchannel.cc \
     ../talk/p2p/base/transportdescriptionfactory.cc \
     ../talk/p2p/client/basicportallocator.cc \
-    session/media/channelmanager.cc \
-    session/media/mediasession.cc \
-    session/media/channel.cc \
-    session/media/srtpfilter.cc \
-    session/media/mediamonitor.cc \
-    session/media/rtcpmuxfilter.cc \
     p2p/client/socketmonitor.cc \
-    session/media/ssrcmuxfilter.cc \
-    session/media/audiomonitor.cc \
-    session/media/typingmonitor.cc \
-    session/media/soundclip.cc \
-    session/tunnel/tunnelsessionclient.cc \
-    session/tunnel/pseudotcpchannel.cc \
+
 
 
 
@@ -129,17 +118,5 @@ HEADERS += \
     ../talk/p2p/base/dtlstransport.h \
     ../talk/p2p/base/dtlstransportchannel.h \
     ../talk/p2p/base/transportdescriptionfactory.h \
-    session/media/channelmanager.h \
-    session/media/mediasession.h \
-    session/media/channel.h \
-    session/media/srtpfilter.h \
-    session/media/mediamonitor.h \
-    session/media/rtcpmuxfilter.h \
     p2p/client/socketmonitor.h \
-    session/media/audiomonitor.h \
-    session/media/ssrcmuxfilter.h \
-    session/media/typingmonitor.h \
-    session/media/soundclip.h \
-    session/tunnel/tunnelsessionclient.h \
-    session/tunnel/pseudotcpchannel.h
 

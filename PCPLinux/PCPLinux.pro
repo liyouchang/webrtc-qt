@@ -32,8 +32,8 @@ LIBS += -lStrmiids -lshell32
 
 
 
-    LIBS +=  -ljingle_peerconnection -ljingle_app  -ljingle_p2p -ljingle_media_base -ljingle
-    LIBS += -ljsoncpp -lsrtp -lyuv
+    LIBS +=   -ljingle_app  -ljingle_p2p  -ljingle
+    LIBS += -ljsoncpp
 
     LIBS += -pthread -ldl
 
