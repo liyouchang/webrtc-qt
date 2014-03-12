@@ -1,0 +1,8 @@
+libzmq_la-pgm_sender.lo: pgm_sender.cpp /usr/include/stdc-predef.h \
+ /usr/include/x86_64-linux-gnu/bits/predefs.h platform.hpp
+
+/usr/include/stdc-predef.h:
+
+/usr/include/x86_64-linux-gnu/bits/predefs.h:
+
+platform.hpp:

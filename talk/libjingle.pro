@@ -52,14 +52,15 @@ HEADERS += \
     base/win32windowpicker.h
 
 
-}else{
+}
+
+linux{
 
 SOURCES += \
     ../talk/base/posix.cc \
     ../talk/base/linux.cc \
     ../talk/base/linuxfdwalk.c \
     base/unixfilesystem.cc \
-    base/latebindingsymboltable.cc \
 
 
 HEADERS += \
@@ -67,12 +68,18 @@ HEADERS += \
     ../talk/base/linux.h \
     ../talk/base/linuxfdwalk.h \
     base/unixfilesystem.h \
-    base/latebindingsymboltable.h \
-
-
 
 }
 
+
+!linux:arm {
+SOURCES += \
+    base/latebindingsymboltable.cc \
+
+HEADERS += \
+    base/latebindingsymboltable.h \
+
+}
 SOURCES += \
     ../talk/base/socketaddress.cc \
     ../talk/base/ipaddress.cc \

@@ -103,10 +103,7 @@ void P2PThread::OnMessage(talk_base::Message *msg)
     {
         talk_base::TypedMessageData<std::string> *msgData =
                 static_cast< talk_base::TypedMessageData<std::string> *>(msg->pdata);
-
          conductor_->UIThreadCallback(ServerConductor::SEND_MESSAGE_TO_PEER,&msgData->data());
-
-
         break;
     }
     default:

@@ -99,6 +99,28 @@ int main(int argc,char *argv[])
                         new  talk_base::TypedMessageData<std::string>(data);
                 p2p.Post(&p2p,kaerp2p::MSG_SEND_TO_PEER,msgData);
 
+            }else if(cmd.compare("sendstream")==0){
+
+                std::string strPackSize = data;
+                int buffer_len = atoi(strPackSize.c_str());
+                if(buffer_len == 0){
+                    buffer_len= 1024;
+                }
+                std::cout<<"send "<<buffer_len<<" bytes per 40ms"<<std::endl;
+                char * buffer = new char[buffer_len];
+                for(int i=0;i<buffer_len;i++){
+                    buffer[i] = static_cast<char>(rand());
+                }
+                while(true){
+                    talk_base::Buffer sendBuffer(buffer,buffer_len);
+                    talk_base::TypedMessageData<talk_base::Buffer> *msgData =
+                            new  talk_base::TypedMessageData<talk_base::Buffer>(sendBuffer);
+                    p2p.Post(&p2p,kaerp2p::MSG_WRITE_BUFFER,msgData);
+
+                    talk_base::Thread::SleepMs(40);
+                }
+
+
             }else{
 
                 std::cout << "not support cmd";

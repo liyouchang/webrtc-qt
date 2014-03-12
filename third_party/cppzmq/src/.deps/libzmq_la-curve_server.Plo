@@ -1,0 +1,8 @@
+libzmq_la-curve_server.lo: curve_server.cpp /usr/include/stdc-predef.h \
+ /usr/include/x86_64-linux-gnu/bits/predefs.h platform.hpp
+
+/usr/include/stdc-predef.h:
+
+/usr/include/x86_64-linux-gnu/bits/predefs.h:
+
+platform.hpp:

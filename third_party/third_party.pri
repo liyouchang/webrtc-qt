@@ -22,5 +22,13 @@ linux {
     output_dir = $$PWD/../out
 }
 
+
+#CONFIG += arm
+
+arm {
+    DEFINES += ARM
+    output_dir = $$PWD/../out/arm
+}
+
 DESTDIR = $$output_dir/libs
 OBJECTS_DIR = $$output_dir/obj/$$TARGET

@@ -4,7 +4,7 @@ SUBDIRS += \
     jsoncpp \
     libyuv \
     libsrtp \
-
+    cppzmq
 
 
 win32 {
