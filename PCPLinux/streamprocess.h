@@ -6,32 +6,27 @@
 #include <queue>
 #include "talk/base/bytebuffer.h"
 #include "talk/base/stream.h"
+
 namespace kaerp2p {
 
-class P2PStreamNotify
-{
-public:
-    virtual void OnReadData(StreamProcess * stream,size_t readable_bytes);
 
-};
-
-class StreamProcess:public sigslot::has_slots<>,public talk_base::MessageHandler
+class StreamProcess:public sigslot::has_slots<>
 {
 public:
     enum{
         MSG_DATAWRITE
     };
-    StreamProcess(talk_base::Thread *stream_thread,P2PStreamNotify * notify);
+    StreamProcess(talk_base::Thread *stream_thread);
 
     bool ProcessStream(talk_base::StreamInterface* stream);
 
-    bool WriteData(const char * data,int len);
-    bool WriteBuffer(const talk_base::Buffer &buffer);
     void Cleanup();
     bool WriteStream(const char * data,int len);
     bool ReadStream(void *buffer, size_t bytes, size_t *bytes_read);
+
+    sigslot::signal2<StreamProcess*, size_t> SignalReadData;
+
 protected:
-    virtual void OnReadBuffer(talk_base::Buffer &buffer);
 
 
     void Cleanup(talk_base::StreamInterface* stream, bool delay = false);
@@ -46,7 +41,6 @@ protected:
     size_t totalread;
     talk_base::FifoBuffer read_buf_;
     talk_base::FifoBuffer write_buf_;
-    P2PStreamNotify * notify_;
 };
 
 }

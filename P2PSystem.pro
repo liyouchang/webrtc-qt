@@ -7,7 +7,8 @@ SUBDIRS += \
     libjingle_app \
     PCPLinux \
     jingle_media_base \
-    tests
+    tests \
+    zmqclient
 
 
 

@@ -87,7 +87,7 @@ void P2PThread::OnMessage(talk_base::Message *msg)
 
         std::string data = msgData->data();
         StreamProcess * stream = conductor_->GetStreamProcess();
-        stream->WriteData(data.c_str(),data.length());
+        //stream->WriteData(data.c_str(),data.length());
     }
         break;
     case MSG_WRITE_BUFFER:
@@ -96,7 +96,7 @@ void P2PThread::OnMessage(talk_base::Message *msg)
                 static_cast< talk_base::TypedMessageData<talk_base::Buffer> *>(msg->pdata));
 
         StreamProcess * stream = conductor_->GetStreamProcess();
-        stream->WriteBuffer(msgData->data());
+        //stream->WriteBuffer(msgData->data());
     }
         break;
     case MSG_SEND_TO_PEER:
@@ -118,7 +118,7 @@ void P2PThread::OnMessage(talk_base::Message *msg)
         talk_base::Buffer sendBuffer(buffer,buffer_len);
         StreamProcess * stream = conductor_->GetStreamProcess();
 
-        stream->WriteBuffer(sendBuffer);
+       // stream->WriteBuffer(sendBuffer);
         this->PostDelayed(10,this,MSG_SEND_STREAM,msgData);
     }
         break;

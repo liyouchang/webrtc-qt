@@ -133,6 +133,7 @@ public:
     virtual IceGatheringState ice_gathering_state() ;
 
 protected:
+    virtual ~PeerTunnel(){}
 
     void PostSetSessionDescriptionFailure(SetSessionDescriptionObserver* observer,
                                           const std::string& error);

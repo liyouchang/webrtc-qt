@@ -250,16 +250,16 @@ KaerSession::KaerSession(talk_base::Thread* signaling_thread,
                          false),
     ice_connection_state_(IceObserver::kIceConnectionNew),
     ice_observer_(NULL),
-    ice_restart_latch_(new IceRestartAnswerLatch)
+    ice_restart_latch_(new IceRestartAnswerLatch),
+    channel_(NULL)
 {
-    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
-                                         this->signaling_thread(),this,id()));
-    //channel_ = new cricket::PseudoTcpChannel(stream_thread, this);
-    channel_ = new cricket::PseudoTcpChannel(worker_thread, this);
+//    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
+//                                         this->signaling_thread(),this,id()));
 }
 
 KaerSession::~KaerSession()
 {
+    Terminate();
     for (size_t i = 0; i < saved_candidates_.size(); ++i) {
         delete saved_candidates_[i];
     }
@@ -268,17 +268,23 @@ KaerSession::~KaerSession()
 
 bool KaerSession::Initialize()
 {
-    //    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
-    //                                         signaling_thread(),this,id()));
+    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
+                                         signaling_thread(),this,id()));
+
+    channel_ = new cricket::PseudoTcpChannel(this->worker_thread(), this);
     return true;
 }
 
 void KaerSession::Terminate()
 {
     SetState(STATE_RECEIVEDTERMINATE);
-    const std::string content_name = channel_->content_name();
-    DestroyTransportProxy(content_name);
-
+    if(channel_ != NULL){
+        const std::string content_name = channel_->content_name();
+        DestroyTransportProxy(content_name);
+    }
+    //channel will destroy when transport destroyed
+    //no need to call OnSessionTerminate
+    //channel_->OnSessionTerminate(this);
 }
 
 talk_base::StreamInterface *KaerSession::GetStream()
@@ -494,6 +500,7 @@ bool KaerSession::CreatePseudoTcpChannel_s()
     channel_->Connect(CN_TUNNEL,"tcp", 1);
     channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,1024*1024);
     channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,1024*1024);
+    //    channel_->SignalChannelClosed.connect(this, &TunnelSession::OnChannelClosed);
 
     LOG(INFO)<<"channel option set";
     return true;

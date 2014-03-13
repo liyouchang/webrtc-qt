@@ -63,6 +63,7 @@ public:
     void Terminate();
 
     virtual talk_base::StreamInterface* GetStream();
+    cricket::PseudoTcpChannel * GetChannel();
 
     void RegisterIceObserver(IceObserver* observer);
 

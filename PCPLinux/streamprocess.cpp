@@ -3,13 +3,12 @@
 #include "talk/base/timeutils.h"
 namespace kaerp2p {
 
-StreamProcess::StreamProcess(talk_base::Thread * stream_thread, P2PStreamNotify *notify):
+StreamProcess::StreamProcess(talk_base::Thread * stream_thread):
     read_buf_(128*1024),write_buf_(512*1024)
 {
     stream_ = NULL;
     this->stream_thread_ = stream_thread;
     totalread = 0;
-    this->notify_ = notify;
 }
 
 bool StreamProcess::ProcessStream(talk_base::StreamInterface *stream)
@@ -17,7 +16,7 @@ bool StreamProcess::ProcessStream(talk_base::StreamInterface *stream)
     ASSERT(stream_thread_->IsCurrent());
     stream->SignalEvent.connect(this, &StreamProcess::OnStreamEvent);
     if (stream->GetState() == talk_base::SS_CLOSED) {
-        LOG(ERROR) << "Failed to establish P2P tunnel";
+        LOG(LS_ERROR) << "Failed to establish P2P tunnel";
         return false;
     }
     stream_ = stream;
@@ -66,9 +65,9 @@ void StreamProcess::ReadStreamInternel()
         talk_base::StreamResult result = stream_->Read(buffer,toRead,&read,&error);
         if(read > 0){
             this->read_buf_.ConsumeWriteBuffer(read);
-            int allRead = 0;
+            size_t allRead = 0;
             read_buf_.GetBuffered(&allRead);
-            notify_->OnReadData(this,allRead);
+            this->SignalReadData(this,allRead);
         }
     }
 
@@ -79,7 +78,7 @@ void StreamProcess::WriteStreamInternel()
     size_t toWrite = 0;
     size_t written = 0;
     talk_base::StreamResult result;
-    void * buffer = this->write_buf_.GetReadData(&toWrite);
+    const void * buffer = this->write_buf_.GetReadData(&toWrite);
     if(buffer != NULL && toWrite > 0){
         int error;
         result = stream_->WriteAll(buffer,toWrite,&written,&error);
@@ -88,7 +87,7 @@ void StreamProcess::WriteStreamInternel()
         }
         if(result == talk_base::SR_SUCCESS ){
             //still have something to write
-            int leftWrite =0 ;
+            size_t leftWrite =0 ;
             write_buf_.GetBuffered(&leftWrite);
             if(leftWrite > 0 ){
                 stream_->PostEvent(talk_base::SE_WRITE, 0);
@@ -102,37 +101,6 @@ void StreamProcess::Cleanup(talk_base::StreamInterface *stream, bool delay) {
     stream->Close();
 }
 
-bool StreamProcess::WriteData(const char *data, int len)
-{
-    if(stream_ == NULL)
-        return false;
-
-    //    if (stream_->GetState() == talk_base::SS_CLOSED) {
-    //        return false;
-    //    }
-    talk_base::Buffer buffer(data,len);
-    talk_base::TypedMessageData<talk_base::Buffer> *msgData =
-            new talk_base::TypedMessageData<talk_base::Buffer>(buffer);
-
-    stream_thread_->Post(this,MSG_DATAWRITE,msgData);
-    return true;
-}
-
-bool StreamProcess::WriteBuffer(const talk_base::Buffer &buffer)
-{
-    if(stream_ == NULL)
-        return false;
-
-    //    if (stream_->GetState() == talk_base::SS_CLOSED) {
-    //        return false;
-    //    }
-    talk_base::TypedMessageData<talk_base::Buffer> *msgData =
-            new talk_base::TypedMessageData<talk_base::Buffer>(buffer);
-
-    stream_thread_->Post(this,MSG_DATAWRITE,msgData);
-    return true;
-}
-
 void StreamProcess::Cleanup()
 {
     Cleanup(stream_);
@@ -140,7 +108,7 @@ void StreamProcess::Cleanup()
 
 bool StreamProcess::WriteStream(const char *data, int len)
 {
-    int wlen =0 ;
+    size_t wlen =0 ;
     int error;
     write_buf_.GetWriteRemaining(&wlen);
     if(len > wlen){
@@ -167,21 +135,6 @@ bool StreamProcess::ReadStream(void *buffer, size_t bytes, size_t *bytes_read)
         return false;
     }
     return true;
-}
-
-void StreamProcess::OnReadBuffer(talk_base::Buffer &buffer)
-{
-    //    std::string readStr(buffer.data(),buffer.length());
-    //    LOG(INFO) << "read data : "<<readStr;
-
-    if(buffer.length() == 0){
-        LOG(INFO)<<"get zero length";
-    }
-    else{
-        totalread += buffer.length();
-        LOG(INFO)<<"read length "<<totalread  ;
-    }
-
 }
 
 
