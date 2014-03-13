@@ -52,7 +52,8 @@ SOURCES += \
     ServerConductor.cpp \
     p2pthread.cpp \
     streamprocess.cpp \
-    peertunnel.cpp
+    peertunnel.cpp \
+    p2pconductor.cpp
 
 HEADERS += \
     peer_connection_client.h \
@@ -60,5 +61,6 @@ HEADERS += \
     ServerConductor.h \
     p2pthread.h \
     streamprocess.h \
-    peertunnel.h
+    peertunnel.h \
+    p2pconductor.h
 

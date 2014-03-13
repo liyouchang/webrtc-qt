@@ -3,19 +3,21 @@
 #include "talk/base/timeutils.h"
 namespace kaerp2p {
 
-StreamProcess::StreamProcess(    talk_base::Thread * stream_thread)
+StreamProcess::StreamProcess(talk_base::Thread * stream_thread, P2PStreamNotify *notify):
+    read_buf_(128*1024),write_buf_(512*1024)
 {
     stream_ = NULL;
     this->stream_thread_ = stream_thread;
     totalread = 0;
+    this->notify_ = notify;
 }
 
 bool StreamProcess::ProcessStream(talk_base::StreamInterface *stream)
 {
-
+    ASSERT(stream_thread_->IsCurrent());
     stream->SignalEvent.connect(this, &StreamProcess::OnStreamEvent);
     if (stream->GetState() == talk_base::SS_CLOSED) {
-        std::cerr << "Failed to establish P2P tunnel" << std::endl;
+        LOG(ERROR) << "Failed to establish P2P tunnel";
         return false;
     }
     stream_ = stream;
@@ -28,6 +30,9 @@ bool StreamProcess::ProcessStream(talk_base::StreamInterface *stream)
 
 void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
                                   int events, int error) {
+    ASSERT(stream==stream_);
+    ASSERT(stream_thread_->IsCurrent());
+
     if (events & talk_base::SE_CLOSE) {
         if (error == 0) {
             std::cout << "Tunnel closed normally" << std::endl;
@@ -41,95 +46,54 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
         //std::cout << "Tunnel connected" << std::endl;
         LOG(INFO)<<__FUNCTION__<<"Tunnel Connected";
     }
-    talk_base::StreamResult result;
     size_t count;
     if (events & talk_base::SE_WRITE) {
-        //LOG(LS_VERBOSE) << "Tunnel SE_WRITE";
-        //LOG(LS_INFO) << "Tunnel SE_WRITE writeQueue_ size "<<writeQueue_.size();
-
-        if (!this->writeQueue_.empty()) {
-            talk_base::Buffer  & writeBuf = this->writeQueue_.front();
-            size_t write_pos = 0;
-            const char * buffer = writeBuf.data();
-            size_t buffer_len = writeBuf.length();
-            static size_t totalWrite = 0;
-            while (write_pos < buffer_len) {
-                result = stream->Write(buffer + write_pos, buffer_len - write_pos,
-                                       &count, &error);
-                if (result == talk_base::SR_SUCCESS) {
-                    write_pos += count;
-                    totalWrite += count;
-                    //LOG(LS_INFO) << "Tunnel write continue count  "<<count;
-
-                    continue;
-                }
-                if (result == talk_base::SR_BLOCK) {
-                    talk_base::Buffer leftBuf(buffer + write_pos, buffer_len - write_pos);
-                    writeBuf = leftBuf;
-                    static size_t totalLeft = 0;
-                    totalLeft += buffer_len - write_pos;
-                    LOG(LS_VERBOSE) << "Tunnel write block";
-                    //LOG(LS_INFO) << "Tunnel write block left size "<<leftBuf.length()<<" total left"<<totalLeft;
-                    break;
-                }
-                if (result == talk_base::SR_EOS) {
-                    std::cout << "Tunnel closed unexpectedly on write" << std::endl;
-                } else {
-                    std::cout << "Tunnel write error: " << error << std::endl;
-                }
-                Cleanup(stream);
-                //write failed
-                return;
-            }
-            if(write_pos == buffer_len){
-                //LOG(INFO)<<"total write success len "<< totalWrite;
-                this->writeQueue_.pop();
-            }else{//write blocked
-            }
-        }
-        if(!this->writeQueue_.empty()){
-            stream_->PostEvent(talk_base::SE_WRITE, 0);
-        }
-        //LOG(LS_INFO) << "Tunnel SE_WRITE end writeQueue_ size "<<writeQueue_.size();
-
+        WriteStreamInternel();
     }
     if ( events & talk_base::SE_READ) {
         //LOG(LS_VERBOSE) << "Tunnel SE_READ";
-        talk_base::Buffer readBuf;
-        char buffer[2048];
-        while (true) {
-            size_t buffer_len = 0;
-            while (buffer_len < sizeof(buffer)) {
-                result = stream->Read(buffer + buffer_len,
-                                      sizeof(buffer) - buffer_len,
-                                      &count, &error);
-                if (result == talk_base::SR_SUCCESS) {
-                    buffer_len += count;
-                    continue;
-                }
-                if (result == talk_base::SR_BLOCK) {
-                    LOG(LS_VERBOSE) << "Tunnel read block";
-                    break;
-                }
-                if (result == talk_base::SR_EOS) {
-                    std::cout << "Tunnel closed unexpectedly on read" << std::endl;
-                } else {
-                    std::cout << "Tunnel read error: " << error << std::endl;
-                }
-                Cleanup(stream);
-                break;
-            }
-            if(buffer_len > 0){
-                readBuf.AppendData(buffer,buffer_len);
-                //LOG(INFO)<<"total read "<<totalRead;
-                //
-            }else{
-                break;
+        this->ReadStreamInternel();
+    }
+}
+
+void StreamProcess::ReadStreamInternel()
+{
+    size_t toRead = 0;
+    void * buffer = this->read_buf_.GetWriteBuffer(&toRead);
+    if(buffer != NULL && toRead > 0){
+        size_t read = 0;
+        int error;
+        talk_base::StreamResult result = stream_->Read(buffer,toRead,&read,&error);
+        if(read > 0){
+            this->read_buf_.ConsumeWriteBuffer(read);
+            int allRead = 0;
+            read_buf_.GetBuffered(&allRead);
+            notify_->OnReadData(this,allRead);
+        }
+    }
+
+}
+
+void StreamProcess::WriteStreamInternel()
+{
+    size_t toWrite = 0;
+    size_t written = 0;
+    talk_base::StreamResult result;
+    void * buffer = this->write_buf_.GetReadData(&toWrite);
+    if(buffer != NULL && toWrite > 0){
+        int error;
+        result = stream_->WriteAll(buffer,toWrite,&written,&error);
+        if(written > 0){
+            this->write_buf_.ConsumeReadData(written);
+        }
+        if(result == talk_base::SR_SUCCESS ){
+            //still have something to write
+            int leftWrite =0 ;
+            write_buf_.GetBuffered(&leftWrite);
+            if(leftWrite > 0 ){
+                stream_->PostEvent(talk_base::SE_WRITE, 0);
             }
         }
-        if(readBuf.length() > 0)
-            OnReadBuffer(readBuf);
-
     }
 }
 
@@ -143,9 +107,9 @@ bool StreamProcess::WriteData(const char *data, int len)
     if(stream_ == NULL)
         return false;
 
-//    if (stream_->GetState() == talk_base::SS_CLOSED) {
-//        return false;
-//    }
+    //    if (stream_->GetState() == talk_base::SS_CLOSED) {
+    //        return false;
+    //    }
     talk_base::Buffer buffer(data,len);
     talk_base::TypedMessageData<talk_base::Buffer> *msgData =
             new talk_base::TypedMessageData<talk_base::Buffer>(buffer);
@@ -159,9 +123,9 @@ bool StreamProcess::WriteBuffer(const talk_base::Buffer &buffer)
     if(stream_ == NULL)
         return false;
 
-//    if (stream_->GetState() == talk_base::SS_CLOSED) {
-//        return false;
-//    }
+    //    if (stream_->GetState() == talk_base::SS_CLOSED) {
+    //        return false;
+    //    }
     talk_base::TypedMessageData<talk_base::Buffer> *msgData =
             new talk_base::TypedMessageData<talk_base::Buffer>(buffer);
 
@@ -174,38 +138,51 @@ void StreamProcess::Cleanup()
     Cleanup(stream_);
 }
 
+bool StreamProcess::WriteStream(const char *data, int len)
+{
+    int wlen =0 ;
+    int error;
+    write_buf_.GetWriteRemaining(&wlen);
+    if(len > wlen){
+        LOG(INFO) << __FUNCTION__<< "not enough space to write, write len" << len
+                  << " ,remainning "<<wlen;
+        return false;
+    }
+
+    talk_base::StreamResult result = write_buf_.Write(data,len,&wlen,&error);
+    if(result != talk_base::SR_SUCCESS){
+        LOG(INFO) << __FUNCTION__<< "write_buf_ write buf error ";
+        return false;
+    }
+    stream_->PostEvent(stream_thread_,talk_base::SE_WRITE, 0);
+    return true;
+}
+
+bool StreamProcess::ReadStream(void *buffer, size_t bytes, size_t *bytes_read)
+{
+    int error;
+    talk_base::StreamResult result =  read_buf_.Read(buffer,bytes,bytes_read ,&error);
+    if(result != talk_base::SR_SUCCESS)
+    {
+        return false;
+    }
+    return true;
+}
+
 void StreamProcess::OnReadBuffer(talk_base::Buffer &buffer)
 {
-//    std::string readStr(buffer.data(),buffer.length());
-//    LOG(INFO) << "read data : "<<readStr;
+    //    std::string readStr(buffer.data(),buffer.length());
+    //    LOG(INFO) << "read data : "<<readStr;
 
     if(buffer.length() == 0){
         LOG(INFO)<<"get zero length";
     }
     else{
-       totalread += buffer.length();
+        totalread += buffer.length();
         LOG(INFO)<<"read length "<<totalread  ;
-}
-
-}
-
-void StreamProcess::OnMessage(talk_base::Message *msg)
-{
-    switch (msg->message_id) {
-    case MSG_DATAWRITE:
-    {
-        talk_base::TypedMessageData<talk_base::Buffer> *msgData =
-                static_cast< talk_base::TypedMessageData<talk_base::Buffer> *>(msg->pdata);
-        writeQueue_.push(msgData->data());
-        if(stream_->GetState() == talk_base::SS_OPEN && writeQueue_.size()==1){
-            OnStreamEvent(stream_,talk_base::SE_WRITE, 0);
-        }
-    }
-        break;
-    default:
-        break;
     }
 
 }
+
 
 }
