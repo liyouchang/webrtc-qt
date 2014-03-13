@@ -47,8 +47,8 @@ ServerConductor::ServerConductor(PeerConnectionClient *client):
     streamprocess_(NULL)
 {
     client_->RegisterObserver(this);
-    stream_thread_ = talk_base::Thread::Current();
-
+    //stream_thread_ = talk_base::Thread::Current();
+    client_thread_ = talk_base::Thread::Current();
     //    allocator_ = new cricket::BasicPortAllocator(
     //                &network_manager_, stun_addr, talk_base::SocketAddress(),
     //                talk_base::SocketAddress(), talk_base::SocketAddress());
@@ -151,7 +151,8 @@ void ServerConductor::UIThreadCallback(int msg_id, void *data)
             //pending_messages_.push_back(msg);
             msgData = new talk_base::TypedMessageData<std::string *>(msg);
         }
-        stream_thread_->Post(this,SEND_MESSAGE_TO_PEER,msgData);
+        //stream_thread_->Post(this,SEND_MESSAGE_TO_PEER,msgData);
+        client_thread_->Post(this,SEND_MESSAGE_TO_PEER,msgData);
 //        if (!pending_messages_.empty() && !client_->IsSendingMessage()) {
 //            msg = pending_messages_.front();
 //            pending_messages_.pop_front();
@@ -204,9 +205,12 @@ bool ServerConductor::InitializePeerConnection()
     server.uri = GetPeerConnectionString();
     servers.push_back(server);
 
+    stream_thread_ =  new talk_base::Thread();
+    stream_thread_->Start();
 
-    talk_base::scoped_refptr<PeerTunnel> pt (new talk_base::RefCountedObject<PeerTunnel>());
-    if(!pt->Initialize(servers,this,stream_thread_)){
+    talk_base::scoped_refptr<PeerTunnel> pt (
+                new talk_base::RefCountedObject<PeerTunnel>(client_thread_,stream_thread_));
+    if(!pt->Initialize(servers,this)){
         return false;
     }
 

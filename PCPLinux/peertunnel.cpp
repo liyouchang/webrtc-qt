@@ -60,13 +60,11 @@ struct SetSessionDescriptionMsg : public talk_base::MessageData {
 };
 struct CreateSessionParams : public talk_base::MessageData {
   CreateSessionParams(
-      talk_base::Thread * stream_thread,
       cricket::PortAllocator * port_allocator)
-      : stream_thread(stream_thread),
+      :
         port_allocator(port_allocator),
         result(true)
         {}
-  talk_base::Thread * stream_thread;
   cricket::PortAllocator * port_allocator;
   bool result;
 };
@@ -288,8 +286,7 @@ bool ParseIceServers(const PeerTunnelInterface::IceServers& configuration,
 }
 
 bool PeerTunnel::Initialize(const IceServers &configuration,
-                            PeerTunnelObserver *observer,
-                            talk_base::Thread * stream_thread)
+                            PeerTunnelObserver *observer)
 {
     std::vector<PortAllocatorFactoryInterface::StunConfiguration> stun_config;
     std::vector<PortAllocatorFactoryInterface::TurnConfiguration> turn_config;
@@ -320,7 +317,7 @@ bool PeerTunnel::Initialize(const IceServers &configuration,
     port_allocator_->set_step_delay(cricket::kMinimumStepDelay);
 
 
-    CreateSessionParams params(stream_thread, port_allocator_.get());
+    CreateSessionParams params( port_allocator_.get());
     signaling_thread_->Send(this, MSG_CREATE_SESSION, &params);
     return params.result;
 }
@@ -463,7 +460,6 @@ void PeerTunnel::OnMessage(talk_base::Message *msg)
 
         session_.reset(new KaerSession(this->signaling_thread_,
                                         this->worker_thread_,
-                                       params->stream_thread,
                                          params->port_allocator));
 
         // Initialize the WebRtcSession. It creates transport channels etc.

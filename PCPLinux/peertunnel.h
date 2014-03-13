@@ -98,8 +98,7 @@ public:
 
     virtual talk_base::StreamInterface* GetStream();
 
-    bool Initialize(const IceServers& configuration,PeerTunnelObserver* observer,
-                    talk_base::Thread * stream_thread);
+    bool Initialize(const IceServers& configuration,PeerTunnelObserver* observer);
     talk_base::Thread* signaling_thread() const {
         return signaling_thread_;
     }

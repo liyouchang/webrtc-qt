@@ -55,7 +55,7 @@ class KaerSession:public cricket::BaseSession
 {
 public:
     KaerSession(talk_base::Thread *signaling_thread,
-                talk_base::Thread *worker_thread, talk_base::Thread *stream_thread,
+                talk_base::Thread *worker_thread,
                 cricket::PortAllocator *port_allocator);
     virtual ~KaerSession();
 

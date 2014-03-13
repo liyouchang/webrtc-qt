@@ -515,11 +515,15 @@ IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket(
     ASSERT(tcp == tcp_);
     ASSERT(NULL != channel_);
 
+
     //lht work on worker thread
-    return worker_thread_->Invoke<IPseudoTcpNotify::WriteResult>(
+    //LOG(INFO) << "PseudoTcpChannel::TcpWritePacket";
+
+    IPseudoTcpNotify::WriteResult result =
+            worker_thread_->Invoke<IPseudoTcpNotify::WriteResult>(
                 talk_base::Bind(&PseudoTcpChannel::TcpWritePacket_w,this,
                                 buffer, len));
-
+    return result;
     //    talk_base::PacketOptions packet_options;
     //    int sent = channel_->SendPacket(buffer, len, packet_options);
     //    if (sent > 0) {
@@ -543,7 +547,7 @@ IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket_w(const char *buf
     talk_base::PacketOptions packet_options;
     int sent = channel_->SendPacket(buffer, len, packet_options);
     if (sent > 0) {
-        //LOG_F(LS_VERBOSE) << "(" << sent << ") Sent";
+        LOG_F(LS_VERBOSE) << "(" << sent << ") Sent";
         return IPseudoTcpNotify::WR_SUCCESS;
     } else if (IsBlockingError(channel_->GetError())) {
         LOG_F(LS_VERBOSE) << "Blocking";

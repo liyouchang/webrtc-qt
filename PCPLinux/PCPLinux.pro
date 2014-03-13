@@ -20,8 +20,8 @@ LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -lu
 LIBS += -lStrmiids -lshell32
 
     LIBS += -L$$output_dir/libs
-    LIBS +=  -ljingle_peerconnection -ljingle_app  -ljingle_p2p -ljingle_media_base -ljingle
-    LIBS += -ljsoncpp -lsrtp -lyuv
+    LIBS +=   -ljingle_app  -ljingle_p2p  -ljingle
+    LIBS += -ljsoncpp
 
 
 

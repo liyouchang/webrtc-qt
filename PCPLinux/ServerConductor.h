@@ -50,6 +50,8 @@ protected:
     StreamProcess * streamprocess_;
     std::list<int> other_peer_id_list_;
     talk_base::Thread * stream_thread_;
+    talk_base::Thread * client_thread_;
+
     // CreateSessionDescriptionObserver interface
 public:
     void OnSuccess(webrtc::SessionDescriptionInterface* desc);

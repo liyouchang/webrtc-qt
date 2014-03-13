@@ -92,8 +92,8 @@ void P2PThread::OnMessage(talk_base::Message *msg)
         break;
     case MSG_WRITE_BUFFER:
     {
-        talk_base::TypedMessageData<talk_base::Buffer> *msgData =
-                static_cast< talk_base::TypedMessageData<talk_base::Buffer> *>(msg->pdata);
+        talk_base::scoped_ptr<talk_base::TypedMessageData<talk_base::Buffer> >msgData (
+                static_cast< talk_base::TypedMessageData<talk_base::Buffer> *>(msg->pdata));
 
         StreamProcess * stream = conductor_->GetStreamProcess();
         stream->WriteBuffer(msgData->data());
@@ -101,11 +101,27 @@ void P2PThread::OnMessage(talk_base::Message *msg)
         break;
     case MSG_SEND_TO_PEER:
     {
-        talk_base::TypedMessageData<std::string> *msgData =
-                static_cast< talk_base::TypedMessageData<std::string> *>(msg->pdata);
+        talk_base::scoped_ptr<talk_base::TypedMessageData<std::string> >msgData (
+                static_cast< talk_base::TypedMessageData<std::string> *>(msg->pdata));
          conductor_->UIThreadCallback(ServerConductor::SEND_MESSAGE_TO_PEER,&msgData->data());
         break;
     }
+    case MSG_SEND_STREAM:
+    {
+        talk_base::TypedMessageData<int> *msgData =
+                static_cast< talk_base::TypedMessageData<int> *>(msg->pdata);
+        int buffer_len = msgData->data();
+        char * buffer = new char[buffer_len];
+        for(int i=0;i<buffer_len;i++){
+            buffer[i] = static_cast<char>(rand());
+        }
+        talk_base::Buffer sendBuffer(buffer,buffer_len);
+        StreamProcess * stream = conductor_->GetStreamProcess();
+
+        stream->WriteBuffer(sendBuffer);
+        this->PostDelayed(10,this,MSG_SEND_STREAM,msgData);
+    }
+        break;
     default:
         break;
     }

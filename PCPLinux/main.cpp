@@ -27,7 +27,7 @@ int main(int argc,char *argv[])
 //    talk_base::Win32Thread w32_thread;
 //    talk_base::ThreadManager::Instance()->SetCurrentThread(&w32_thread);
 
-    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
+    talk_base::LogMessage::ConfigureLogging("tstamp thread verbose debug",NULL);
 
     kaerp2p::P2PThread p2p;
     p2p.Start();
@@ -107,18 +107,22 @@ int main(int argc,char *argv[])
                     buffer_len= 1024;
                 }
                 std::cout<<"send "<<buffer_len<<" bytes per 40ms"<<std::endl;
-                char * buffer = new char[buffer_len];
-                for(int i=0;i<buffer_len;i++){
-                    buffer[i] = static_cast<char>(rand());
-                }
-                while(true){
-                    talk_base::Buffer sendBuffer(buffer,buffer_len);
-                    talk_base::TypedMessageData<talk_base::Buffer> *msgData =
-                            new  talk_base::TypedMessageData<talk_base::Buffer>(sendBuffer);
-                    p2p.Post(&p2p,kaerp2p::MSG_WRITE_BUFFER,msgData);
+                talk_base::TypedMessageData<int> *msgData =
+                        new  talk_base::TypedMessageData<int>(buffer_len);
+                p2p.Post(&p2p,kaerp2p::MSG_SEND_STREAM,msgData);
 
-                    talk_base::Thread::SleepMs(40);
-                }
+//                char * buffer = new char[buffer_len];
+//                for(int i=0;i<buffer_len;i++){
+//                    buffer[i] = static_cast<char>(rand());
+//                }
+//                while(true){
+//                    talk_base::Buffer sendBuffer(buffer,buffer_len);
+//                    talk_base::TypedMessageData<talk_base::Buffer> *msgData =
+//                            new  talk_base::TypedMessageData<talk_base::Buffer>(sendBuffer);
+//                    p2p.Post(&p2p,kaerp2p::MSG_WRITE_BUFFER,msgData);
+
+//                    talk_base::Thread::SleepMs(40);
+//                }
 
 
             }else{

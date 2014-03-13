@@ -240,7 +240,6 @@ private:
 
 KaerSession::KaerSession(talk_base::Thread* signaling_thread,
                          talk_base::Thread* worker_thread,
-                         talk_base::Thread* stream_thread,
                          cricket::PortAllocator* port_allocator):
     cricket::BaseSession(signaling_thread,
                          worker_thread,
@@ -253,11 +252,10 @@ KaerSession::KaerSession(talk_base::Thread* signaling_thread,
     ice_observer_(NULL),
     ice_restart_latch_(new IceRestartAnswerLatch)
 {
-        kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
-                                             this->signaling_thread(),this,id()));
-
-        channel_ = new cricket::PseudoTcpChannel(stream_thread, this);
-
+    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
+                                         this->signaling_thread(),this,id()));
+    //channel_ = new cricket::PseudoTcpChannel(stream_thread, this);
+    channel_ = new cricket::PseudoTcpChannel(worker_thread, this);
 }
 
 KaerSession::~KaerSession()
@@ -270,8 +268,8 @@ KaerSession::~KaerSession()
 
 bool KaerSession::Initialize()
 {
-//    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
-//                                         signaling_thread(),this,id()));
+    //    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
+    //                                         signaling_thread(),this,id()));
     return true;
 }
 
@@ -423,30 +421,30 @@ bool KaerSession::SetRemoteDescription(SessionDescriptionInterface *desc,
 bool KaerSession::ProcessIceMessage(const IceCandidateInterface *candidate)
 {
     if (state() == STATE_INIT) {
-       LOG(LS_ERROR) << "ProcessIceMessage: ICE candidates can't be added "
-                     << "without any offer (local or remote) "
-                     << "session description.";
-       return false;
+        LOG(LS_ERROR) << "ProcessIceMessage: ICE candidates can't be added "
+                      << "without any offer (local or remote) "
+                      << "session description.";
+        return false;
     }
 
     if (!candidate) {
-      LOG(LS_ERROR) << "ProcessIceMessage: Candidate is NULL";
-      return false;
+        LOG(LS_ERROR) << "ProcessIceMessage: Candidate is NULL";
+        return false;
     }
 
     if (!local_description() || !remote_description()) {
-      LOG(LS_INFO) << "ProcessIceMessage: Remote description not set, "
-                   << "save the candidate for later use.";
-      saved_candidates_.push_back(
-          new JsepIceCandidate(candidate->sdp_mid(), candidate->sdp_mline_index(),
-                               candidate->candidate()));
-      return true;
+        LOG(LS_INFO) << "ProcessIceMessage: Remote description not set, "
+                     << "save the candidate for later use.";
+        saved_candidates_.push_back(
+                    new JsepIceCandidate(candidate->sdp_mid(), candidate->sdp_mline_index(),
+                                         candidate->candidate()));
+        return true;
     }
 
     // Add this candidate to the remote session description.
     if (!remote_desc_->AddCandidate(candidate)) {
-      LOG(LS_ERROR) << "ProcessIceMessage: Candidate cannot be used";
-      return false;
+        LOG(LS_ERROR) << "ProcessIceMessage: Candidate cannot be used";
+        return false;
     }
 
     return UseCandidatesInSessionDescription(remote_desc_.get());
@@ -483,12 +481,12 @@ bool KaerSession::CreateChannels(const cricket::SessionDescription *desc)
     return this->signaling_thread()->Invoke<bool>(
                 talk_base::Bind(&KaerSession::CreatePseudoTcpChannel_s,this));
 
-//    channel_->Connect(CN_TUNNEL,"tcp", 1);
-//    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,1024*1024);
-//    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,1024*1024);
+    //    channel_->Connect(CN_TUNNEL,"tcp", 1);
+    //    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,1024*1024);
+    //    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,1024*1024);
 
-//    LOG(INFO)<<"channel option set";
-//    return true;
+    //    LOG(INFO)<<"channel option set";
+    //    return true;
 }
 
 bool KaerSession::CreatePseudoTcpChannel_s()
@@ -722,19 +720,19 @@ bool KaerSession::ValidateSessionDescription(
         return BadSdp(source, kSdpWithoutIceUfragPwd, error_desc);
     }
 
-//        if (!ValidateBundleSettings(sdesc->description())) {
-//          return BadSdp(source, kBundleWithoutRtcpMux, error_desc);
-//        }
+    //        if (!ValidateBundleSettings(sdesc->description())) {
+    //          return BadSdp(source, kBundleWithoutRtcpMux, error_desc);
+    //        }
 
     // Verify m-lines in Answer when compared against Offer.
-        if (action == kAnswer) {
-          const cricket::SessionDescription* offer_desc =
-              (source == cricket::CS_LOCAL) ? remote_desc_->description() :
-                  local_desc_->description();
-          if (!VerifyMediaDescriptions(sdesc->description(), offer_desc)) {
+    if (action == kAnswer) {
+        const cricket::SessionDescription* offer_desc =
+                (source == cricket::CS_LOCAL) ? remote_desc_->description() :
+                                                local_desc_->description();
+        if (!VerifyMediaDescriptions(sdesc->description(), offer_desc)) {
             return BadSdp(source, kMlineMismatch, error_desc);
-          }
         }
+    }
 
     return true;
 }
@@ -809,37 +807,37 @@ void KaerSession::ProcessNewLocalCandidate(const std::string &content_name,
 {
     int sdp_mline_index;
     if (!GetLocalCandidateMediaIndex(content_name, &sdp_mline_index)) {
-      LOG(LS_ERROR) << "ProcessNewLocalCandidate: content name "
-                    << content_name << " not found";
-      return;
+        LOG(LS_ERROR) << "ProcessNewLocalCandidate: content name "
+                      << content_name << " not found";
+        return;
     }
 
     for (cricket::Candidates::const_iterator citer = candidates.begin();
-        citer != candidates.end(); ++citer) {
-      // Use content_name as the candidate media id.
-      JsepIceCandidate candidate(content_name, sdp_mline_index, *citer);
-      if (ice_observer_) {
-        ice_observer_->OnIceCandidate(&candidate);
-      }
-      if (local_desc_) {
-        local_desc_->AddCandidate(&candidate);
-      }
+         citer != candidates.end(); ++citer) {
+        // Use content_name as the candidate media id.
+        JsepIceCandidate candidate(content_name, sdp_mline_index, *citer);
+        if (ice_observer_) {
+            ice_observer_->OnIceCandidate(&candidate);
+        }
+        if (local_desc_) {
+            local_desc_->AddCandidate(&candidate);
+        }
     }
 }
 
 bool KaerSession::GetLocalCandidateMediaIndex(const std::string &content_name, int *sdp_mline_index)
 {
     if (!BaseSession::local_description() || !sdp_mline_index)
-      return false;
+        return false;
 
     bool content_found = false;
     const ContentInfos& contents = BaseSession::local_description()->contents();
     for (size_t index = 0; index < contents.size(); ++index) {
-      if (contents[index].name == content_name) {
-        *sdp_mline_index = static_cast<int>(index);
-        content_found = true;
-        break;
-      }
+        if (contents[index].name == content_name) {
+            *sdp_mline_index = static_cast<int>(index);
+            content_found = true;
+            break;
+        }
     }
     return content_found;
 }
