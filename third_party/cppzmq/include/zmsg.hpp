@@ -38,10 +38,11 @@
 #include <string>
 #include <stdarg.h>
 
+namespace zmq {
 class zmsg {
 public:
-    typedef std::basic_string<unsigned char> ustring;
-
+    //typedef std::basic_string<unsigned char> ustring;
+    typedef std::string ustring;
     zmsg() {
     }
 
@@ -81,7 +82,7 @@ public:
        m_part_data.clear();
    }
 
-   void set_part(size_t part_nbr, unsigned char *data) {
+   void set_part(size_t part_nbr,  char *data) {
        if (part_nbr < m_part_data.size() && part_nbr >= 0) {
            m_part_data[part_nbr] = data;
        }
@@ -99,7 +100,7 @@ public:
             std::cout << "E: " << error.what() << std::endl;
             return false;
          }
-         ustring data = (unsigned char*) message.data();
+         ustring data = (char*) message.data();
          //std::cerr << "recv: \"" << (unsigned char*) message.data() << "\", size " << message.size() << std::endl;
          if (message.size() == 17 && ((unsigned char *)message.data())[0] == 0) {
             char *uuidstr = encode_uuid((unsigned char*) message.data());
@@ -174,15 +175,26 @@ public:
        else
            return 0;
    }
-
+   ustring GetBody ()
+   {
+       if (m_part_data.size())
+           return m_part_data [m_part_data.size() - 1];
+       else
+           return 0;
+   }
    // zmsg_push
    void push_front(char *part) {
-      m_part_data.insert(m_part_data.begin(), (unsigned char*)part);
+      m_part_data.insert(m_part_data.begin(), (char*)part);
    }
-
+   void push_front(const ustring & part) {
+      m_part_data.insert(m_part_data.begin(), part);
+   }
    // zmsg_append
    void push_back(char *part) {
-      m_part_data.push_back((unsigned char*)part);
+      m_part_data.push_back(part);
+   }
+   void push_back(const ustring & part) {
+      m_part_data.push_back(part);
    }
 
    //  --------------------------------------------------------------------------
@@ -254,6 +266,10 @@ public:
        assert (part);
        push_back((char*)part);
    }
+   void append (ustring part)
+   {
+       push_back(part);
+   }
 
    char *address() {
       if (m_part_data.size()>0) {
@@ -263,11 +279,26 @@ public:
       }
    }
 
+   ustring GetAddress(){
+       if (m_part_data.size()>0) {
+          return m_part_data[0];
+       } else {
+          return 0;
+       }
+   }
+
    void wrap(const char *address, const char *delim) {
       if (delim) {
          push_front((char*)delim);
       }
       push_front((char*)address);
+   }
+
+   void wrap(const std::string & address, const std::string & delim) {
+      if (!delim.empty()) {
+         push_front(delim);
+      }
+      push_front(address);
    }
 
    char * unwrap() {
@@ -279,6 +310,17 @@ public:
          pop_front();
       }
       return addr;
+   }
+
+   ustring Unwrap() {
+       if (m_part_data.size() == 0) {
+          return NULL;
+       }
+       ustring addr = pop_front();
+       if (address() && *address() == 0) {
+          pop_front();
+       }
+       return addr;
    }
 
    void dump() {
@@ -387,5 +429,5 @@ public:
 private:
    std::vector<ustring> m_part_data;
 };
-
+}
 #endif /* ZMSG_H_ */

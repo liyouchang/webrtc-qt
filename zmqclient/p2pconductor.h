@@ -2,51 +2,12 @@
 #define P2PCONDUCTOR_H
 
 #include "talk/app/kaerp2p/KaerSession.h"
-#include "peer_connection_client.h"
 #include <iostream>
 #include "streamprocess.h"
 #include <list>
 #include "peertunnel.h"
-
-
+#include "PeerConnectionClinetInterface.h"
 namespace kaerp2p {
-
-
-struct PeerConnectionClientObserver {
-  virtual void OnSignedIn() = 0;  // Called when we're logged on.
-  virtual void OnDisconnected() = 0;
-  virtual void OnPeerConnected(int id, const std::string& name) = 0;
-  virtual void OnPeerDisconnected(const std::string& peer_id) = 0;
-  virtual void OnMessageFromPeer(const std::string& peer_id, const std::string& message) = 0;
-  virtual void OnMessageSent(int err) = 0;
-  virtual void OnServerConnectionFailure() = 0;
-
- protected:
-  virtual ~PeerConnectionClientObserver() {}
-};
-
-class PeerConnectionClientInterface
-{
-public:
-    virtual bool SendToPeer(std::string peer_id, const std::string& message) =0;
-    virtual bool SendHangUp(std::string peer_id) =0;
-    virtual bool IsSendingMessage() = 0;
-    virtual void OnReadPeerData(void * buffer,size_t len) = 0;
-    virtual void OnP2PMessage(int msg_id) = 0;
-    virtual void RegisterObserver(PeerConnectionClientObserver * callback){
-        ASSERT(!callback_);
-        callback_ = callback;
-    }
-    virtual const std::string & id() const {return my_id_;}
-
-
-protected:
-    std::string my_id_;
-
-    PeerConnectionClientObserver* callback_;
-    virtual ~PeerConnectionClientInterface() {}
-
-};
 
 
 class P2PConductor:

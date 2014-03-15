@@ -40,5 +40,20 @@ LIBS += -lStrmiids -lshell32
 
 }
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    asyndealer.cpp \
+    defaults.cc \
+    p2pconductor.cpp \
+    peertunnel.cpp \
+    streamprocess.cpp \
+    peerconnectionclientdealer.cpp
+
+HEADERS += \
+    asyndealer.h \
+    defaults.h \
+    p2pconductor.h \
+    peertunnel.h \
+    streamprocess.h \
+    PeerConnectionClinetInterface.h \
+    peerconnectionclientdealer.h
 

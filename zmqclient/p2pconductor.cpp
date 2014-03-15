@@ -60,7 +60,11 @@ void P2PConductor::ConnectToPeer(const std::string &peer_id)
 
 void P2PConductor::DisconnectFromCurrentPeer()
 {
-
+    LOG(INFO) << __FUNCTION__;
+    if (peer_connection_.get()) {
+        client_->SendHangUp(peer_id_);
+        DeletePeerConnection();
+    }
 }
 
 StreamProcess *P2PConductor::GetStreamProcess()
