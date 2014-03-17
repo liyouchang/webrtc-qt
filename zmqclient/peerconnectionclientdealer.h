@@ -14,7 +14,7 @@ public:
 
 private:
     AsynDealer * dealer;
-
+    std::string peer_id_;
     // PeerConnectionClientInterface interface
 public:
     //router
