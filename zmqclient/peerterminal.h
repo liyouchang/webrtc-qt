@@ -17,6 +17,7 @@ public:
     virtual void CloseTunnel();
     int SendByRouter(const std::string & peer_id,const std::string & data);
     int SendByTunnel(const std::string & data);
+    int SendByTunnel(const char *data,size_t len);
 
 
 protected:

@@ -43,6 +43,14 @@ int PeerTerminal::SendByTunnel(const std::string &data)
     return 0;
 }
 
+int PeerTerminal::SendByTunnel(const char *data, size_t len)
+{
+    ASSERT(tunnelStream_);
+    tunnelStream_->WriteStream(data,len);
+    return 0;
+
+}
+
 void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *tunnel)
 {
     LOG(INFO)<< __FUNCTION__;
@@ -52,9 +60,10 @@ void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *tunnel)
 
 void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *tunnel, size_t len)
 {
-    LOG(INFO)<< __FUNCTION__ << " read " << len;
+    //LOG(INFO)<< __FUNCTION__ << " read " << len;
     char  * buffer = new char[len];
     size_t readLen;
     tunnel->ReadStream(buffer,len,&readLen);
-    LOG(INFO) <<"read len "<<readLen << "  buffer "<< buffer;
+    //LOG(INFO) <<"read len "<<readLen << "  buffer "<< buffer;
+    delete buffer;
 }

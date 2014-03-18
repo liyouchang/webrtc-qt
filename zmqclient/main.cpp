@@ -44,7 +44,8 @@ public:
         CONNECT_TO_PEER,
         CLIENT_SEND,
         TUNNEL_CLOSE,
-        TUNNEL_SEND
+        TUNNEL_SEND,
+        TUNNEL_STREAM
     };
     Controller(talk_base::Thread * control_thread){
         control_thread_ = control_thread;
@@ -96,6 +97,21 @@ public:
             terminal_->SendByTunnel(msgData->data());
             break;
         }
+        case TUNNEL_STREAM:{
+            talk_base::TypedMessageData<int> *msgData =
+                    static_cast< talk_base::TypedMessageData<int> *>(msg->pdata);
+
+            int buffer_len = msgData->data();
+            char * buffer = new char[buffer_len];
+            for(int i=0;i<buffer_len;i++){
+                buffer[i] = static_cast<char>(rand());
+            }
+
+            terminal_->SendByTunnel(buffer,buffer_len);
+            control_thread_->PostDelayed(40,this,TUNNEL_STREAM,msgData);
+            delete [] buffer;
+            break;
+        }
         default:
             break;
         }
@@ -139,8 +155,17 @@ int main()
                 control_thread->Post(controll,Controller::TUNNEL_CLOSE,msgData);
 
             }else if(cmd.compare("sendstream")==0){
+                std::string strPackSize = data;
+                int buffer_len = atoi(strPackSize.c_str());
+                if(buffer_len == 0){
+                    buffer_len= 1024;
+                }
+                std::cout<<"send "<<buffer_len<<" bytes per 40ms"<<std::endl;
 
+                talk_base::TypedMessageData<int> *msgData =
+                        new  talk_base::TypedMessageData<int>(buffer_len);
 
+                control_thread->Post(controll,Controller::TUNNEL_STREAM,msgData);
 
             }else{
 
