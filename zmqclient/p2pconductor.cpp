@@ -314,7 +314,7 @@ void P2PConductor::OnPeerDisconnected(const std::string& peer_id)
 void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
 {
     LOG(INFO) << __FUNCTION__;
-    ASSERT(peer_id_ == peer_id || peer_id_ == -1);
+    ASSERT(peer_id_ == peer_id || peer_id_.empty());
     ASSERT(!message.empty());
 
     Json::Reader reader;
@@ -325,7 +325,7 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
     }
 
     if (!peer_connection_.get()) {
-        ASSERT(peer_id_ == -1);
+        ASSERT(peer_id_.empty());
         peer_id_ = peer_id;
 
         if (!InitializePeerConnection()) {
@@ -334,7 +334,7 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
             return;
         }
     } else if (peer_id != peer_id_) {
-        ASSERT(peer_id_ != -1);
+        ASSERT(!peer_id_.empty());
         LOG(WARNING) << "Received a message from unknown peer while already in a "
                         "conversation with a different peer.";
         return;

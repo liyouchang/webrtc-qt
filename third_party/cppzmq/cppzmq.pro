@@ -19,7 +19,7 @@ INCLUDEPATH   +=    include
 
 win32 {
 
-DEFINES += ZMQ_HAVE_WINDOWS
+DEFINES += ZMQ_HAVE_WINDOWS ZMQ_STATIC
 
 
 }
@@ -28,7 +28,12 @@ macx {
 }
 
 linux {
-    DEFINES += ZMQ_HAVE_LINUX
+    DEFINES += ZMQ_HAVE_LINUX HAVE_FORK ZMQ_HAVE_UIO ZMQ_HAVE_SOCK_CLOEXEC \
+HAVE_CLOCK_GETTIME HAVE_INTTYPES_H HAVE_NETINET_IN_H HAVE_STDINT_H \
+HAVE_STDLIB_H HAVE_STRING_H HAVE_SYS_TYPES_H \
+
+
+
 }
 
 
@@ -200,15 +205,4 @@ HEADERS += \
     include/zmq.hpp \
     include/zhelpers.hpp \
     include/zmsg.hpp
-
-OTHER_FILES += \
-    src/libzmq.pc \
-    src/libzmq.pc.in \
-    src/libzmq.vers \
-    src/Makefile \
-    src/Makefile.am \
-    src/Makefile.in \
-    src/platform.hpp.in \
-    src/platform.hpp.in~ \
-    src/stamp-h1
 
