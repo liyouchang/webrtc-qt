@@ -39,13 +39,14 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
             std::cout << "Tunnel closed with error: " << error << std::endl;
         }
         Cleanup(stream);
-        SignalOpened();
+        SignalClosed();
+
         return;
     }
     if (events & talk_base::SE_OPEN) {
-        //std::cout << "Tunnel connected" << std::endl;
         LOG(INFO)<<__FUNCTION__<<"Tunnel Connected";
-        SignalClosed();
+        SignalOpened();
+
     }
     size_t count;
     if (events & talk_base::SE_WRITE) {
@@ -71,6 +72,7 @@ void StreamProcess::ReadStreamInternel()
             read_buf_.GetBuffered(&allRead);
             this->SignalReadData(this,allRead);
         }
+        //LOG(INFO)<<"read " << read <<" bytes";
     }
 
 }

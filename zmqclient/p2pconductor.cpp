@@ -43,7 +43,7 @@ P2PConductor::P2PConductor(PeerConnectionClientInterface * client):
 {
     client_->RegisterObserver(this);
     client_thread_ = talk_base::Thread::Current();
-
+    tunnelEstablished_ = false;
 }
 
 P2PConductor::~P2PConductor()
@@ -77,6 +77,7 @@ void P2PConductor::DisconnectFromCurrentPeer()
     }
 }
 
+
 StreamProcess *P2PConductor::GetStreamProcess()
 {
     return streamprocess_;
@@ -86,6 +87,7 @@ void P2PConductor::OnTunnelEstablished()
 {
     LOG(INFO) << __FUNCTION__;
     SignalStreamOpened(this->streamprocess_);
+    tunnelEstablished_ = true;
 }
 
 

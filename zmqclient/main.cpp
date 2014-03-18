@@ -43,7 +43,8 @@ public:
         CONTROL_INIT,
         CONNECT_TO_PEER,
         CLIENT_SEND,
-        TUNNEL_CLOSE
+        TUNNEL_CLOSE,
+        TUNNEL_SEND
     };
     Controller(talk_base::Thread * control_thread){
         control_thread_ = control_thread;
@@ -60,23 +61,20 @@ public:
 public:
     void OnMessage(talk_base::Message *msg){
         switch(msg->message_id){
-        case CONTROL_INIT:
-        {
+        case CONTROL_INIT:{
             talk_base::scoped_ptr<StringMsg> msgData(static_cast<StringMsg*>(msg->pdata));
             terminal_.reset(new PeerTerminal());
             terminal_->Initialize(msgData->data());
         }
             break;
-        case CONNECT_TO_PEER:
-        {
+        case CONNECT_TO_PEER:{
             talk_base::scoped_ptr<StringMsg> msgData(
                         static_cast<StringMsg*>(msg->pdata));
             terminal_->ConnectToPeer(msgData->data());
 
         }
             break;
-        case CLIENT_SEND:
-        {
+        case CLIENT_SEND:{
             talk_base::scoped_ptr<StringMsg> msgData(
                         static_cast<StringMsg*>(msg->pdata));
 
@@ -88,11 +86,16 @@ public:
             terminal_->SendByRouter(id,msg);
         }
             break;
-        case TUNNEL_CLOSE:
-        {
-
-        }
+        case TUNNEL_CLOSE:{
+            terminal_->CloseTunnel();
             break;
+        }
+        case TUNNEL_SEND:{
+            talk_base::scoped_ptr<StringMsg> msgData(
+                        static_cast<StringMsg*>(msg->pdata));
+            terminal_->SendByTunnel(msgData->data());
+            break;
+        }
         default:
             break;
         }
@@ -126,10 +129,10 @@ int main()
                 StringMsg *msgData = new  StringMsg(data);
                 control_thread->Post(controll,Controller::CONNECT_TO_PEER,msgData);
             }else if(cmd.compare("send")==0){
-                //                talk_base::TypedMessageData<std::string> *msgData =
-                //                        new  talk_base::TypedMessageData<std::string>(data);
-                //                p2p.Post(&p2p,kaerp2p::MSG_SEND_STRING,msgData);
+                StringMsg *msgData = new  StringMsg(data);
+                control_thread->Post(controll,Controller::TUNNEL_SEND,msgData);
             }else if(cmd.compare("send_router")==0){
+
             }
             else if(cmd.compare("close_tunnel")==0){
                 StringMsg *msgData = new  StringMsg(data);

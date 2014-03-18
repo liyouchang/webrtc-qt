@@ -47,6 +47,7 @@ protected:
     talk_base::Thread * client_thread_;
     StreamProcess * streamprocess_;
     std::string peer_id_;
+    bool tunnelEstablished_;
     // CreateSessionDescriptionObserver interface
 public:
     void OnSuccess(SessionDescriptionInterface *desc);

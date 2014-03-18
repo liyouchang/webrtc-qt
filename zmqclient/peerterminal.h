@@ -15,12 +15,14 @@ public:
 //    void CheckPeer();
     virtual void ConnectToPeer(const std::string &peer_id);
     virtual void CloseTunnel();
-//    virtual int SendStream();
     int SendByRouter(const std::string & peer_id,const std::string & data);
-//    virtual int SendByTunnel();
+    int SendByTunnel(const std::string & data);
 
 
 protected:
+    void OnTunnelOpened(kaerp2p::StreamProcess * tunnel);
+    void OnTunnelReadData(kaerp2p::StreamProcess * tunnel,size_t len);
+    kaerp2p::StreamProcess * tunnelStream_;
     talk_base::scoped_ptr<PeerConnectionClientDealer> client_;
     talk_base::scoped_refptr<kaerp2p::P2PConductor> conductor_;
 
