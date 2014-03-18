@@ -46,7 +46,8 @@ SOURCES += main.cpp \
     p2pconductor.cpp \
     peertunnel.cpp \
     streamprocess.cpp \
-    peerconnectionclientdealer.cpp
+    peerconnectionclientdealer.cpp \
+    peerterminal.cpp
 
 HEADERS += \
     asyndealer.h \
@@ -55,5 +56,6 @@ HEADERS += \
     peertunnel.h \
     streamprocess.h \
     PeerConnectionClinetInterface.h \
-    peerconnectionclientdealer.h
+    peerconnectionclientdealer.h \
+    peerterminal.h
 

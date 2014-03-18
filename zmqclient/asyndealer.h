@@ -26,6 +26,7 @@ public:
     void terminate();
     int send(const std::string & addr,const std::string & data);
     void AsynSend(const std::string & addr,const std::string & data);
+    std::string id(){return id_;}
     sigslot::signal2<const std::string &,const std::string &> SignalReadData;
     sigslot::signal0<> SignalSent;
 

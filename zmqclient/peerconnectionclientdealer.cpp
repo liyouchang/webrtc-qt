@@ -13,10 +13,10 @@ PeerConnectionClientDealer::PeerConnectionClientDealer()
 
 int PeerConnectionClientDealer::Connect(const std::string &router, const std::string &id)
 {
-    dealer = new AsynDealer();
-    dealer->SignalReadData.connect(this,&PeerConnectionClientDealer::OnMessageFromPeer);
-    dealer->SignalSent.connect(this,&PeerConnectionClientDealer::OnMessageSent);
-    int ret = dealer->initialize(id,router);
+    dealer_.reset(new AsynDealer());
+    dealer_->SignalReadData.connect(this,&PeerConnectionClientDealer::OnMessageFromPeer);
+    dealer_->SignalSent.connect(this,&PeerConnectionClientDealer::OnMessageSent);
+    int ret = dealer_->initialize(id,router);
     return ret;
 }
 
@@ -26,19 +26,24 @@ void PeerConnectionClientDealer::StartLogin(const std::string &serverURL, const 
 
 }
 
+void PeerConnectionClientDealer::SendEcho(const std::string &data)
+{
+    dealer_->AsynSend(dealer_->id(),data);
+}
+
 bool PeerConnectionClientDealer::SendToPeer(const std::string &peer_id, const std::string &message)
 {
-    ASSERT(dealer != NULL);
-    dealer->AsynSend(peer_id,message);
+    ASSERT(dealer_ != NULL);
+    dealer_->AsynSend(peer_id,message);
     return true;
 }
 
 bool PeerConnectionClientDealer::SendHangUp(const std::string &peer_id)
 {
-    ASSERT(dealer != NULL);
+    ASSERT(dealer_ != NULL);
 
     std::string message = kByeMessage;
-    dealer->AsynSend(peer_id,message);
+    dealer_->AsynSend(peer_id,message);
     return  true;
 }
 

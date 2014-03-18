@@ -29,10 +29,12 @@ public:
 
 
     P2PConductor(PeerConnectionClientInterface * client);
-
+    ~P2PConductor();
     virtual void ConnectToPeer(const std::string & peer_id);
     virtual void DisconnectFromCurrentPeer();
     virtual StreamProcess *GetStreamProcess();
+    void OnTunnelEstablished();
+    sigslot::signal1<StreamProcess *> SignalStreamOpened;
 protected:
     bool InitializePeerConnection();
     void DeletePeerConnection();
@@ -53,7 +55,7 @@ public:
     // PeerTunnelObserver interface
 public:
     void OnError();
-    void OnRenegotiationNeeded(){};
+    void OnRenegotiationNeeded();
     void OnIceCandidate(const IceCandidateInterface *candidate);
 
     // MessageHandler interface

@@ -139,6 +139,7 @@ s_dump (zmq::socket_t & socket)
 inline std::string
 s_set_id (zmq::socket_t & socket)
 {
+    srand(reinterpret_cast<long>(&socket));
     std::stringstream ss;
     ss << std::hex << std::uppercase
        << std::setw(4) << std::setfill('0') << within (0x10000) << "-"

@@ -68,6 +68,7 @@ int AsynDealer::initialize_z(const std::string &id, const std::string &router)
             socket_->setsockopt(ZMQ_IDENTITY,id.c_str(),id.length());
             id_ = id;
         }
+        LOG(INFO) << "dealer id is "<<id_;
         socket_->connect(router.c_str());
         this->router_ = router;
         zmq_thread_->PostDelayed(10,this,MSG_TOREAD);
