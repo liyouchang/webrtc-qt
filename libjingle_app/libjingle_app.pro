@@ -16,25 +16,32 @@ CONFIG -= qt
 
 include (../talk/talk_common.pri)
 
+INCLUDEPATH     +=  \
+    ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
+
+
+
 DESTDIR = $$output_dir/libs
 
 
 
 SOURCES += \
     ../talk/app/kaerp2p/KaerSession.cpp \
-    ../talk/app/kaerp2p/kaer_session_client.cpp \
     ../talk/app/kaerp2p/kaersessiondescriptionfactory.cpp \
     ../talk/session/tunnel/tunnelsessionclient.cc \
     ../talk/session/tunnel/pseudotcpchannel.cc \
     ../talk/app/webrtc/jsepicecandidate.cc \
     ../talk/app/webrtc/jsepsessiondescription.cc \
     ../talk/app/webrtc/portallocatorfactory.cc \
-    tunnelsdp.cpp
+    tunnelsdp.cpp \
+    ../talk/app/kaerp2p/peertunnel.cpp \
+    p2pconductor.cpp \
+    streamprocess.cpp \
+    ../talk/app/kaerp2p/kaer_session_client.cpp
 
 
 HEADERS += \
     ../talk/app/kaerp2p/KaerSession.h \
-    ../talk/app/kaerp2p/kaer_session_client.h \
     ../talk/app/kaerp2p/kaersessiondescriptionfactory.h \
     ../talk/session/tunnel/tunnelsessionclient.h \
     ../talk/session/tunnel/pseudotcpchannel.h \
@@ -42,6 +49,11 @@ HEADERS += \
     ../talk/app/webrtc/jsep.h \
     ../talk/app/webrtc/jsepsessiondescription.h \
     ../talk/app/webrtc/webrtcsdp.h \
-    ../talk/app/webrtc/portallocatorfactory.h
+    ../talk/app/webrtc/portallocatorfactory.h \
+    ../talk/app/kaerp2p/peertunnel.h \
+    p2pconductor.h \
+    streamprocess.h \
+    ../talk/app/kaerp2p/kaer_session_client.h \
+    PeerConnectionClinetInterface.h
 
 

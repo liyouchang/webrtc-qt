@@ -23,7 +23,6 @@ linux {
 }
 
 
-#CONFIG += arm
 
 arm {
     DEFINES += ARM

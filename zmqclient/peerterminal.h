@@ -3,11 +3,22 @@
 
 
 #include "peerconnectionclientdealer.h"
-#include "p2pconductor.h"
+#include "../libjingle_app/p2pconductor.h"
+#include "talk/app/webrtc/proxy.h"
 
 //one terminal contains one PeerConnectionClient and some P2PConductor
 
-class PeerTerminal:public sigslot::has_slots<>
+class PeerTerminalInterface{
+    virtual int Initialize(const std::string & router) = 0;
+    virtual void ConnectToPeer(const std::string &peer_id) = 0;
+    virtual void CloseTunnel() = 0;
+    virtual bool SendByRouter(const std::string & peer_id,const std::string & data) =0;
+    virtual bool SendByTunnel(const std::string & data) =0;
+    virtual bool SendByTunnel(const char *data,size_t len) =0 ;
+
+};
+
+class PeerTerminal:public PeerTerminalInterface,public sigslot::has_slots<>
 {
 public:
     PeerTerminal();
@@ -15,15 +26,15 @@ public:
 //    void CheckPeer();
     virtual void ConnectToPeer(const std::string &peer_id);
     virtual void CloseTunnel();
-    int SendByRouter(const std::string & peer_id,const std::string & data);
-    int SendByTunnel(const std::string & data);
-    int SendByTunnel(const char *data,size_t len);
+    virtual bool SendByRouter(const std::string & peer_id,const std::string & data);
+    virtual bool SendByTunnel(const std::string & data);
+    virtual bool SendByTunnel(const char *data,size_t len);
 
 
 protected:
     void OnTunnelOpened(kaerp2p::StreamProcess * tunnel);
     void OnTunnelReadData(kaerp2p::StreamProcess * tunnel,size_t len);
-    kaerp2p::StreamProcess * tunnelStream_;
+    kaerp2p::StreamProcess * tunnel_stream_;
     talk_base::scoped_ptr<PeerConnectionClientDealer> client_;
     talk_base::scoped_refptr<kaerp2p::P2PConductor> conductor_;
 

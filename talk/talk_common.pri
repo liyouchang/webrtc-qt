@@ -31,7 +31,6 @@ linux {
     output_dir = $$PWD/../out
 
 }
-#CONFIG += arm
 
 arm {
     DEFINES += ARM

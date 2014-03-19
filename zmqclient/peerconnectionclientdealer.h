@@ -2,7 +2,7 @@
 #define PEERCONNECTIONCLIENTDEALER_H
 
 
-#include "PeerConnectionClinetInterface.h"
+#include "../libjingle_app/PeerConnectionClinetInterface.h"
 #include "asyndealer.h"
 #include <map>
 

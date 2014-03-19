@@ -47,19 +47,11 @@ LIBS +=  -lcppzmq
 
 SOURCES += main.cpp \
     asyndealer.cpp \
-    defaults.cc \
-    p2pconductor.cpp \
-    peertunnel.cpp \
-    streamprocess.cpp \
     peerconnectionclientdealer.cpp \
     peerterminal.cpp
 
 HEADERS += \
     asyndealer.h \
-    defaults.h \
-    p2pconductor.h \
-    peertunnel.h \
-    streamprocess.h \
     PeerConnectionClinetInterface.h \
     peerconnectionclientdealer.h \
     peerterminal.h

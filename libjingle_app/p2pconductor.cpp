@@ -1,12 +1,35 @@
 #include "p2pconductor.h"
 
-#include "defaults.h"
+//#include "defaults.h"
 #include "talk/p2p/client/basicportallocator.h"
 #include "talk/base/json.h"
 #include "talk/base/bind.h"
 
 namespace  kaerp2p {
 
+
+
+std::string GetEnvVarOrDefault(const char* env_var_name,
+                               const char* default_value) {
+  std::string value;
+  const char* env_var = getenv(env_var_name);
+  if (env_var)
+    value = env_var;
+
+  if (value.empty())
+    value = default_value;
+
+  return value;
+}
+
+std::string GetPeerConnectionString() {
+  return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
+}
+
+std::string GetDefaultServerName() {
+  //return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
+    return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
+}
 
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -39,18 +62,18 @@ protected:
 };
 
 P2PConductor::P2PConductor(PeerConnectionClientInterface * client):
-    client_(client),stream_thread_(NULL)
+    client_(client),stream_thread_(NULL),signal_thread_(NULL)
 {
     client_->RegisterObserver(this);
-    client_thread_ = talk_base::Thread::Current();
-    tunnelEstablished_ = false;
+    tunnel_established_ = false;
 }
 
 P2PConductor::~P2PConductor()
 {
     if(stream_thread_)
         delete stream_thread_;
-
+    if(signal_thread_)
+        delete signal_thread_;
 }
 
 
@@ -80,14 +103,15 @@ void P2PConductor::DisconnectFromCurrentPeer()
 
 StreamProcess *P2PConductor::GetStreamProcess()
 {
-    return streamprocess_;
+    return stream_process_;
 }
 
 void P2PConductor::OnTunnelEstablished()
 {
     LOG(INFO) << __FUNCTION__;
-    SignalStreamOpened(this->streamprocess_);
-    tunnelEstablished_ = true;
+    ASSERT(stream_process_);
+    SignalStreamOpened(this->stream_process_);
+    tunnel_established_ = true;
 }
 
 
@@ -99,10 +123,15 @@ bool P2PConductor::InitializePeerConnection()
     servers.push_back(server);
 
     stream_thread_ =  new talk_base::Thread();
-    stream_thread_->Start();
+    bool result = stream_thread_->Start();
+    ASSERT(result);
+
+    signal_thread_ = new talk_base::Thread();
+    result = signal_thread_->Start();
+    ASSERT(result);
 
     talk_base::scoped_refptr<PeerTunnel> pt (
-                new talk_base::RefCountedObject<PeerTunnel>(client_thread_,stream_thread_));
+                new talk_base::RefCountedObject<PeerTunnel>(signal_thread_,stream_thread_));
     if(!pt->Initialize(servers,this)){
         return false;
     }
@@ -120,72 +149,37 @@ void P2PConductor::DeletePeerConnection()
 
 }
 
-void P2PConductor::ClientThreadCallback(int msg_id, void *data)
-{
-    switch (msg_id) {
-    case PEER_CONNECTION_CLOSED:
-        LOG(INFO) << "PEER_CONNECTION_CLOSED";
-        DeletePeerConnection();
-        break;
-
-    case SEND_MESSAGE_TO_PEER: {
-        //LOG(INFO) << "SEND_MESSAGE_TO_PEER";
-
-        talk_base::TypedMessageData<std::string *> * msgData = NULL;
-
-        std::string* msg = reinterpret_cast<std::string*>(data);
-        if (msg) {
-            msgData = new talk_base::TypedMessageData<std::string *>(msg);
-        }
-        client_thread_->Post(this,SEND_MESSAGE_TO_PEER,msgData);
-        break;
-    }
-
-    case PEER_CONNECTION_ERROR:
-        LOG(INFO)<<"Error an unknown error occurred";
-        break;
-
-    case NEW_STREAM_ADDED: {
-        break;
-    }
-
-    case STREAM_REMOVED: {
-        break;
-    }
-
-    default:
-        ASSERT(false);
-        break;
-    }
-}
-
 void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
 {
     LOG(INFO) << __FUNCTION__;
 
     peer_connection_->SetLocalDescription(DummySetSessionDescriptionObserver::Create(),desc);
+
+
+    //get stream process
+    talk_base::StreamInterface* stream = peer_connection_->GetStream();
+    if(!stream_process_){
+        stream_process_ = new StreamProcess(stream_thread_);
+        stream_process_->SignalOpened.connect(this,&P2PConductor::OnTunnelEstablished);
+    }
+    bool result = stream_thread_->Invoke<bool>(
+                talk_base::Bind(&StreamProcess::ProcessStream,stream_process_,stream));
+    if(!result){
+        LOG(WARNING)<<"stream process faild";
+        return;
+    }
+
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage[kSessionDescriptionTypeName] = desc->type();
     std::string sdp;
     desc->ToString(&sdp);
     jmessage[kSessionDescriptionSdpName] = sdp;
+    std::string msg = writer.write(jmessage);
+    LOG(INFO) <<"session sdp is " << msg;
 
-    talk_base::StreamInterface* stream = peer_connection_->GetStream();
-    if(!streamprocess_){
-        streamprocess_ = new StreamProcess(stream_thread_);
-        streamprocess_->SignalOpened.connect(this,&P2PConductor::OnTunnelEstablished);
-    }
-    bool result = stream_thread_->Invoke<bool>(
-                talk_base::Bind(&StreamProcess::ProcessStream,streamprocess_,stream));
-    if(!result){
-        LOG(WARNING)<<"stream process faild";
-        return;
-    }
+    client_->SendToPeer(peer_id_, msg);
 
-    std::string* msg = new std::string(writer.write(jmessage));
-    LOG(INFO) <<"session sdp is " << *msg;
-    this->ClientThreadCallback(SEND_MESSAGE_TO_PEER,msg);
 }
 
 void P2PConductor::OnFailure(const std::string &error)
@@ -220,65 +214,9 @@ void P2PConductor::OnIceCandidate(const IceCandidateInterface *candidate)
     }
     jmessage[kCandidateSdpName] = sdp;
 
-    std::string* msg = new std::string(writer.write(jmessage));
-    this->ClientThreadCallback(SEND_MESSAGE_TO_PEER,msg);
-}
+    std::string msg = writer.write(jmessage);
 
-void P2PConductor::OnMessage(talk_base::Message *msg)
-{
-    switch (msg->message_id) {
-    case PEER_CONNECTION_CLOSED:
-        LOG(INFO) << "PEER_CONNECTION_CLOSED";
-        DeletePeerConnection();
-        break;
-
-    case SEND_MESSAGE_TO_PEER: {
-        //LOG(INFO) << "SEND_MESSAGE_TO_PEER";
-
-        //std::string* msg = reinterpret_cast<std::string*>(data);
-        talk_base::TypedMessageData<std::string *> *msgData =
-                static_cast< talk_base::TypedMessageData<std::string *> *>(msg->pdata);
-        if (msgData) {
-            // For convenience, we always run the message through the queue.
-            // This way we can be sure that messages are sent to the server
-            // in the same order they were signaled without much hassle.
-            pending_messages_.push_back(msgData->data());
-            delete msgData;
-        }
-        std::string* msgStr ;
-        if (!pending_messages_.empty() && !client_->IsSendingMessage()) {
-            msgStr = pending_messages_.front();
-            pending_messages_.pop_front();
-
-            if (!client_->SendToPeer(peer_id_, *msgStr) && !peer_id_.empty()) {
-                LOG(LS_ERROR) << "SendToPeer failed";
-            }
-            std::cout<<"send msg : "<< *msgStr <<std::endl;
-            delete msgStr;
-        }
-
-        if (!peer_connection_.get())
-            peer_id_ = -1;
-
-        break;
-    }
-
-    case PEER_CONNECTION_ERROR:
-        LOG(INFO)<<"Error an unknown error occurred";
-        break;
-
-    case NEW_STREAM_ADDED: {
-        break;
-    }
-
-    case STREAM_REMOVED: {
-        break;
-    }
-
-    default:
-        ASSERT(false);
-        break;
-    }
+    client_->SendToPeer(peer_id_,msg);
 }
 
 void P2PConductor::OnSignedIn()
@@ -290,9 +228,7 @@ void P2PConductor::OnSignedIn()
 void P2PConductor::OnDisconnected()
 {
     LOG(INFO) << __FUNCTION__ << "disconnect from server";
-
     DeletePeerConnection();
-
 }
 
 void P2PConductor::OnPeerConnected(const std::string& id, const std::string &name)
@@ -314,9 +250,11 @@ void P2PConductor::OnPeerDisconnected(const std::string& peer_id)
 void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
 {
     LOG(INFO) << __FUNCTION__;
-    ASSERT(peer_id_ == peer_id || peer_id_.empty());
+    //ASSERT(peer_id_ == peer_id || peer_id_.empty());
     ASSERT(!message.empty());
-
+    if(peer_id != peer_id_ && !peer_id_.empty()){
+        return;
+    }
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(message, jmessage)) {
@@ -392,9 +330,6 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
 void P2PConductor::OnMessageSent(int err)
 {
     LOG(INFO) <<__FUNCTION__ << err;
-
-    this->ClientThreadCallback(SEND_MESSAGE_TO_PEER, 0);
-
 }
 
 void P2PConductor::OnServerConnectionFailure()

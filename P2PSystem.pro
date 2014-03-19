@@ -8,7 +8,8 @@ SUBDIRS += \
     PCPLinux \
     jingle_media_base \
     tests \
-    zmqclient
+    zmqclient \
+    ZmqPeerTeminal
 
 
 

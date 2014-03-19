@@ -9,11 +9,11 @@ int PeerTerminal::Initialize(const std::string &router)
     client_.reset(new PeerConnectionClientDealer());
     int ret = client_->Connect(router,"");
 
-    client_->SendEcho("hello me");
+    //client_->SendEcho("hello me");
     //a new conductor is created at here
     conductor_ = new talk_base::RefCountedObject<kaerp2p::P2PConductor>(client_.get());
     conductor_->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
-    this->tunnelStream_ = NULL;
+    this->tunnel_stream_ = NULL;
     return ret;
 }
 
@@ -27,7 +27,7 @@ void PeerTerminal::ConnectToPeer(const std::string & peer_id)
 void PeerTerminal::CloseTunnel()
 {
     conductor_->DisconnectFromCurrentPeer();
-    this->tunnelStream_ = NULL;
+    this->tunnel_stream_ = NULL;
 }
 
 int PeerTerminal::SendByRouter(const std::string &peer_id, const std::string &data)
@@ -38,24 +38,23 @@ int PeerTerminal::SendByRouter(const std::string &peer_id, const std::string &da
 
 int PeerTerminal::SendByTunnel(const std::string &data)
 {
-    ASSERT(tunnelStream_);
-    tunnelStream_->WriteStream(data.c_str(),data.length());
+    ASSERT(tunnel_stream_);
+    tunnel_stream_->WriteStream(data.c_str(),data.length());
     return 0;
 }
 
 int PeerTerminal::SendByTunnel(const char *data, size_t len)
 {
-    ASSERT(tunnelStream_);
-    tunnelStream_->WriteStream(data,len);
+    ASSERT(tunnel_stream_);
+    tunnel_stream_->WriteStream(data,len);
     return 0;
-
 }
 
 void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *tunnel)
 {
     LOG(INFO)<< __FUNCTION__;
-    this->tunnelStream_ = tunnel;
-    tunnelStream_->SignalReadData.connect(this,&PeerTerminal::OnTunnelReadData);
+    this->tunnel_stream_ = tunnel;
+    tunnel_stream_->SignalReadData.connect(this,&PeerTerminal::OnTunnelReadData);
 }
 
 void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *tunnel, size_t len)

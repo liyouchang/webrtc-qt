@@ -5,7 +5,7 @@
 #include <iostream>
 #include "streamprocess.h"
 #include <list>
-#include "peertunnel.h"
+#include "talk/app/kaerp2p/peertunnel.h"
 #include "PeerConnectionClinetInterface.h"
 namespace kaerp2p {
 
@@ -13,8 +13,7 @@ namespace kaerp2p {
 class P2PConductor:
         public webrtc::CreateSessionDescriptionObserver,
         public PeerTunnelObserver,
-        public PeerConnectionClientObserver,
-        public talk_base::MessageHandler
+        public PeerConnectionClientObserver
 {
 public:
 
@@ -38,16 +37,17 @@ public:
 protected:
     bool InitializePeerConnection();
     void DeletePeerConnection();
-    void ClientThreadCallback(int msg_id, void* data);
 
     talk_base::scoped_refptr<PeerTunnelInterface> peer_connection_;
     PeerConnectionClientInterface * client_;
-    std::deque<std::string*> pending_messages_;
     talk_base::Thread * stream_thread_;
-    talk_base::Thread * client_thread_;
-    StreamProcess * streamprocess_;
+    talk_base::Thread * signal_thread_;
+    StreamProcess * stream_process_;
+    bool tunnel_established_;
+
+    //maybe conflict
     std::string peer_id_;
-    bool tunnelEstablished_;
+
     // CreateSessionDescriptionObserver interface
 public:
     void OnSuccess(SessionDescriptionInterface *desc);
@@ -59,9 +59,6 @@ public:
     void OnRenegotiationNeeded();
     void OnIceCandidate(const IceCandidateInterface *candidate);
 
-    // MessageHandler interface
-public:
-    void OnMessage(talk_base::Message *msg);
 
     // PeerConnectionClientObserver interface
 public:

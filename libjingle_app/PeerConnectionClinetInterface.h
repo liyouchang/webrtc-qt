@@ -23,6 +23,7 @@ struct PeerConnectionClientObserver :public sigslot::has_slots<>{
 class PeerConnectionClientInterface
 {
 public:
+    //send message to peer, it should be thread safe
     virtual bool SendToPeer(const std::string &peer_id, const std::string& message) =0;
     virtual bool SendHangUp(const std::string& peer_id) =0;
     virtual bool IsSendingMessage() = 0;
