@@ -9,7 +9,8 @@ SUBDIRS += \
     jingle_media_base \
     tests \
     zmqclient \
-    ZmqPeerTeminal
+    ZmqPeerTeminal \
+    TunnelClientUI
 
 
 
