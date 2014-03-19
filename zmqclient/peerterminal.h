@@ -12,9 +12,9 @@ class PeerTerminalInterface{
     virtual int Initialize(const std::string & router) = 0;
     virtual void ConnectToPeer(const std::string &peer_id) = 0;
     virtual void CloseTunnel() = 0;
-    virtual bool SendByRouter(const std::string & peer_id,const std::string & data) =0;
-    virtual bool SendByTunnel(const std::string & data) =0;
-    virtual bool SendByTunnel(const char *data,size_t len) =0 ;
+    virtual int SendByRouter(const std::string & peer_id,const std::string & data) =0;
+    virtual int SendByTunnel(const std::string & data) =0;
+    virtual int SendByTunnel(const char *data,size_t len) =0 ;
 
 };
 
@@ -26,9 +26,9 @@ public:
 //    void CheckPeer();
     virtual void ConnectToPeer(const std::string &peer_id);
     virtual void CloseTunnel();
-    virtual bool SendByRouter(const std::string & peer_id,const std::string & data);
-    virtual bool SendByTunnel(const std::string & data);
-    virtual bool SendByTunnel(const char *data,size_t len);
+    virtual int SendByRouter(const std::string & peer_id,const std::string & data);
+    virtual int SendByTunnel(const std::string & data);
+    virtual int SendByTunnel(const char *data,size_t len);
 
 
 protected:
