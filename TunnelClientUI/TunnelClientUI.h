@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include "../zmqclient/peerterminal.h"
+#include "KeMsgProcessClient.h"
+
 namespace Ui {
 class TunnelClientUI;
 }
@@ -26,10 +28,9 @@ private slots:
 private:
     Ui::TunnelClientUI *ui;
     PeerTerminal * terminal_;
-
+    KeMsgProcessClient * msg_processer_;
     // PeerTerminalObserver interface
 public:
-    void OnTunnelReadData(const char *peer_id, char *data, int len);
 };
 
 #endif // TUNNELCLIENTUI_H

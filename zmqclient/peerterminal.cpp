@@ -100,7 +100,7 @@ void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *tunnel, size_t len)
         return ;
     }
 
-    this->ExtractMessage(buffer,readLen);
+//    this->ExtractMessage(buffer,readLen);
 
 
     talk_base::Buffer data(buffer,readLen);

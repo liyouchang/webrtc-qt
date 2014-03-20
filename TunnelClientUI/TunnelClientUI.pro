@@ -51,18 +51,20 @@ LIBS += -lStrmiids -lshell32 -lrpcrt4
 
 include(./KePlayView/KePlayView.pri)
 
-SOURCES += main.cpp\
+SOURCES +=\
     TunnelClientUI.cpp \
     ../zmqclient/asyndealer.cpp \
     ../zmqclient/peerconnectionclientdealer.cpp \
-    ../zmqclient/peerterminal.cpp
+    ../zmqclient/peerterminal.cpp \
+    KeMsgProcessClient.cpp
 
 HEADERS  += \
     TunnelClientUI.h \
     ../zmqclient/asyndealer.h \
     ../zmqclient/peerconnectionclientdealer.h \
     ../zmqclient/peerterminal.h \
-    ../zmqclient/KeMessage.h
+    ../zmqclient/KeMessage.h \
+    KeMsgProcessClient.h
 
 FORMS += \
     TunnelClientUI.ui
