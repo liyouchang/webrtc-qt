@@ -48,11 +48,13 @@ LIBS +=  -lcppzmq
 SOURCES += main.cpp \
     asyndealer.cpp \
     peerconnectionclientdealer.cpp \
-    peerterminal.cpp
+    peerterminal.cpp \
+    KeVideoSimulator.cpp
 
 HEADERS += \
     asyndealer.h \
     PeerConnectionClinetInterface.h \
     peerconnectionclientdealer.h \
-    peerterminal.h
+    peerterminal.h \
+    KeVideoSimulator.h
 
