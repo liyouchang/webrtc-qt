@@ -103,14 +103,14 @@ void P2PConductor::DisconnectFromCurrentPeer()
 
 StreamProcess *P2PConductor::GetStreamProcess()
 {
-    return stream_process_;
+    return stream_process_.get();
 }
 
 void P2PConductor::OnTunnelEstablished()
 {
     LOG(INFO) << __FUNCTION__;
     ASSERT(stream_process_);
-    SignalStreamOpened(this->stream_process_);
+    SignalStreamOpened(this->GetStreamProcess());
     tunnel_established_ = true;
 }
 
@@ -158,12 +158,13 @@ void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
 
     //get stream process
     talk_base::StreamInterface* stream = peer_connection_->GetStream();
-    if(!stream_process_){
-        stream_process_ = new StreamProcess(stream_thread_);
+    if(!stream_process_)
+    {
+        stream_process_.reset( new StreamProcess(stream_thread_));
         stream_process_->SignalOpened.connect(this,&P2PConductor::OnTunnelEstablished);
     }
     bool result = stream_thread_->Invoke<bool>(
-                talk_base::Bind(&StreamProcess::ProcessStream,stream_process_,stream));
+                talk_base::Bind(&StreamProcess::ProcessStream,this->GetStreamProcess(),stream));
     if(!result){
         LOG(WARNING)<<"stream process faild";
         return;

@@ -9,15 +9,14 @@ namespace kaerp2p {
 
 struct PeerConnectionClientObserver :public sigslot::has_slots<>{
     virtual void OnSignedIn() {}  // Called when we're logged on.
-  virtual void OnDisconnected() {}
-  virtual void OnPeerConnected(const std::string& id, const std::string& name){}
-  virtual void OnPeerDisconnected(const std::string& peer_id){}
-  virtual void OnMessageFromPeer(const std::string& peer_id, const std::string& message){}
-  virtual void OnMessageSent(int err){}
-  virtual void OnServerConnectionFailure(){}
-
- protected:
-  virtual ~PeerConnectionClientObserver() {}
+    virtual void OnDisconnected() {}
+    virtual void OnPeerConnected(const std::string& id, const std::string& name){}
+    virtual void OnPeerDisconnected(const std::string& peer_id){}
+    virtual void OnMessageFromPeer(const std::string& peer_id, const std::string& message){}
+    virtual void OnMessageSent(int err){}
+    virtual void OnServerConnectionFailure(){}
+protected:
+    virtual ~PeerConnectionClientObserver() {}
 };
 
 class PeerConnectionClientInterface
@@ -42,8 +41,10 @@ public:
                     callback,&PeerConnectionClientObserver::OnMessageSent);
         this->SignalServerConnectionFailure.connect(
                     callback,&PeerConnectionClientObserver::OnServerConnectionFailure);
-
+        callback_ = callback;
     }
+    virtual  void OnMessageFromPeer(const std::string& peer_id, const std::string& message) = 0;
+
     virtual const std::string & id() const {return my_id_;}
     sigslot::signal0<> SignalSignedIn;
     sigslot::signal0<> SignalDisconnected;

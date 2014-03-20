@@ -85,7 +85,6 @@ void AsynDealer::terminate_z()
 {
     ASSERT(zmq_thread_->IsCurrent());
     ASSERT(beInit);
-    delete zmq_thread_;
     delete socket_;
     beInit = false;
 }

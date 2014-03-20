@@ -44,7 +44,7 @@ int main()
 
     talk_base::scoped_ptr<PeerTerminal> terminal;
     terminal.reset(new PeerTerminal());
-    terminal->Initialize("tcp://192.168.0.182:5555");
+    terminal->Initialize("tcp://192.168.0.182:5555","");
 
 
     while(true){
