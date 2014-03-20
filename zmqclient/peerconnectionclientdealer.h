@@ -29,9 +29,10 @@ public:
     bool SendToPeer(const std::string &peer_id, const std::string &message);
     bool SendHangUp(const std::string &peer_id);
     bool IsSendingMessage();
+    void OnMessageFromPeer(const std::string& peer_id, const std::string& message);
+
 protected:
     //message is use client to get and send
-    void OnMessageFromPeer(const std::string& peer_id, const std::string& message);
     void OnMessageSent();
 };
 

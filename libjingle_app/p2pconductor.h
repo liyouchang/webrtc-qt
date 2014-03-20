@@ -33,6 +33,8 @@ public:
     virtual void DisconnectFromCurrentPeer();
     virtual StreamProcess *GetStreamProcess();
     void OnTunnelEstablished();
+    virtual std::string GetPeerID(){ return peer_id_;}
+
     sigslot::signal1<StreamProcess *> SignalStreamOpened;
 protected:
     bool InitializePeerConnection();
@@ -42,7 +44,7 @@ protected:
     PeerConnectionClientInterface * client_;
     talk_base::Thread * stream_thread_;
     talk_base::Thread * signal_thread_;
-    StreamProcess * stream_process_;
+    talk_base::scoped_ptr<StreamProcess> stream_process_;
     bool tunnel_established_;
 
     //maybe conflict

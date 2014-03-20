@@ -17,6 +17,7 @@ int PeerConnectionClientDealer::Connect(const std::string &router, const std::st
     dealer_->SignalReadData.connect(this,&PeerConnectionClientDealer::OnMessageFromPeer);
     dealer_->SignalSent.connect(this,&PeerConnectionClientDealer::OnMessageSent);
     int ret = dealer_->initialize(id,router);
+    this->my_id_ = dealer_->id();
     return ret;
 }
 
@@ -59,6 +60,7 @@ void PeerConnectionClientDealer::OnMessageFromPeer(const std::string &peer_id, c
             message.compare(kByeMessage) == 0){
         SignalPeerDisConnected(peer_id);
     }else{
+        //callback_->OnMessageFromPeer(peer_id,message);
         SignalMessageFromPeer(peer_id,message);
     }
 }
