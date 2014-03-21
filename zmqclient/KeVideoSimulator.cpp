@@ -72,6 +72,8 @@ void KeVideoSimulator::OnTunnelOpend(PeerTerminalInterface *t, const std::string
 void KeVideoSimulator::OnSendVideo()
 {
     if(!startSend){
+        LOG(INFO)<<"Start send video";
+
         file_thread_->Post(this,MSG_SENDFILEVIDEO);
         startSend = true;
     }
@@ -157,6 +159,7 @@ void KeVideoSimulator::OnMessageRespond(talk_base::Buffer &msgData)
 void KeVideoSimulator::OnMessage(talk_base::Message *msg)
 {
     if(msg->message_id = MSG_SENDFILEVIDEO){
+        LOG(INFO)<<"read a frame";
         static int fileBufPos = 0;
         static int lastFrameNo = 0;
         if(fileBufPos > video_data_.length()){
