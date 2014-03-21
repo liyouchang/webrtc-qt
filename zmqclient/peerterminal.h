@@ -19,7 +19,7 @@ public:
     virtual int SendByRouter(const std::string & peer_id,const std::string & data) =0;
     virtual int SendByTunnel(const std::string & data) =0;
     virtual int SendByTunnel(const char *data,size_t len) =0 ;
-    sigslot::signal1<const std::string &> SignalTunnelOpened;
+    sigslot::signal2<PeerTerminalInterface *,const std::string &> SignalTunnelOpened;
     sigslot::signal2<const std::string &,talk_base::Buffer &> SignalTunnelMessage;
 
 };

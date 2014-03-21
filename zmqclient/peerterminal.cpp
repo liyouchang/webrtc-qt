@@ -1,5 +1,5 @@
 #include "peerterminal.h"
-
+#include "KeMessage.h"
 PeerTerminal::PeerTerminal()
 {
 }
@@ -85,7 +85,7 @@ void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *tunnel)
     this->tunnel_stream_ = tunnel;
     tunnel_stream_->SignalReadData.connect(this,&PeerTerminal::OnTunnelReadData);
 
-    this->SignalTunnelOpened(conductor_->GetPeerID());
+    this->SignalTunnelOpened(this,conductor_->GetPeerID());
 }
 
 void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *tunnel, size_t len)

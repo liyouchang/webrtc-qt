@@ -6,6 +6,7 @@
 #include "asyndealer.h"
 #include "talk/base/thread.h"
 #include "peerterminal.h"
+#include "KeVideoSimulator.h"
 using namespace std;
 
 
@@ -44,60 +45,68 @@ int main()
 
     talk_base::scoped_ptr<PeerTerminal> terminal;
     terminal.reset(new PeerTerminal());
-    terminal->Initialize("tcp://192.168.0.182:5555","");
+    terminal->Initialize("tcp://192.168.0.182:5555","123456");
 
 
-    while(true){
-        std::string msg;
-        std::cout<<"input command"<<std::endl;
-        std::cin>>msg;
+    KeVideoSimulator * simulator = new KeVideoSimulator();
+    simulator->ReadVideoData("video.h264");
 
-        std::string cmd;
-        std::string data;
-        if(!SplitByDelimiter(msg,':',&cmd,&data)){
-            std::cout<<msg<<std::endl;
-        }
-        else{
-            if(cmd.compare("stop")==0){
-                //p2p.Post(NULL,kaerp2p::MSG_DONE);
-            }else if(cmd.compare("connect")==0){
-                terminal->ConnectToPeer(data);
-            }else if(cmd.compare("send")==0){
-                terminal->SendByTunnel(data);
-            }else if(cmd.compare("send_router")==0){
-
-            }
-            else if(cmd.compare("close_tunnel")==0){
-                terminal->CloseTunnel();
-            }else if(cmd.compare("sendstream")==0){
-                std::string strPackSize = data;
-                int buffer_len = atoi(strPackSize.c_str());
-                if(buffer_len == 0){
-                    buffer_len= 1024;
-                }
-                char * buffer = new char[buffer_len];
-                for(int i=0;i<buffer_len;i++){
-                    buffer[i] = static_cast<char>(rand());
-                }
-                std::cout<<"send "<<buffer_len<<" bytes per 40ms"<<std::endl;
-
-                for(int i=0 ;i< 99999999;i++){
-                    terminal->SendByTunnel(buffer,buffer_len);
-                    talk_base::Thread::SleepMs(40);
-                }
-                delete [] buffer;
+    terminal->SignalTunnelOpened.connect(simulator,&KeVideoSimulator::OnTunnelOpend);
+    terminal->SignalTunnelMessage.connect(simulator,&KeVideoSimulator::OnTunnelMessage);
 
 
-            }else{
-                //StringMsg *msgData = new  StringMsg(data);
-                //control_thread->Post(controll,Controller::CONNECT_TO_PEER,msgData);
+    talk_base::Thread::Current()->Run();
+//    while(true){
+//        std::string msg;
+//        std::cout<<"input command"<<std::endl;
+//        std::cin>>msg;
 
-                std::cout << "not support cmd";
-            }
-        }
+//        std::string cmd;
+//        std::string data;
+//        if(!SplitByDelimiter(msg,':',&cmd,&data)){
+//            std::cout<<msg<<std::endl;
+//        }
+//        else{
+//            if(cmd.compare("stop")==0){
+//                //p2p.Post(NULL,kaerp2p::MSG_DONE);
+//            }else if(cmd.compare("connect")==0){
+//                terminal->ConnectToPeer(data);
+//            }else if(cmd.compare("send")==0){
+//                terminal->SendByTunnel(data);
+//            }else if(cmd.compare("send_router")==0){
 
-        talk_base::Thread::SleepMs(10);
-    }
+//            }
+//            else if(cmd.compare("close_tunnel")==0){
+//                terminal->CloseTunnel();
+//            }else if(cmd.compare("sendstream")==0){
+//                std::string strPackSize = data;
+//                int buffer_len = atoi(strPackSize.c_str());
+//                if(buffer_len == 0){
+//                    buffer_len= 1024;
+//                }
+//                char * buffer = new char[buffer_len];
+//                for(int i=0;i<buffer_len;i++){
+//                    buffer[i] = static_cast<char>(rand());
+//                }
+//                std::cout<<"send "<<buffer_len<<" bytes per 40ms"<<std::endl;
+
+//                for(int i=0 ;i< 99999999;i++){
+//                    terminal->SendByTunnel(buffer,buffer_len);
+//                    talk_base::Thread::SleepMs(40);
+//                }
+//                delete [] buffer;
+
+
+//            }else{
+//                //StringMsg *msgData = new  StringMsg(data);
+//                //control_thread->Post(controll,Controller::CONNECT_TO_PEER,msgData);
+
+//                std::cout << "not support cmd";
+//            }
+//        }
+
+//        talk_base::Thread::SleepMs(10);
+//    }
 
     return 0;
 }
