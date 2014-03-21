@@ -5,7 +5,7 @@ KeVideoSimulator::KeVideoSimulator()
     file_thread_ = new talk_base::Thread();
     file_thread_->Start();
 
-startSend = false;
+    startSend = false;
 }
 
 KeVideoSimulator::~KeVideoSimulator()
@@ -67,6 +67,28 @@ void KeVideoSimulator::OnTunnelMessage(const std::string &peer_id, talk_base::Bu
 void KeVideoSimulator::OnTunnelOpend(PeerTerminalInterface *t, const std::string &peer_id)
 {
     this->SetTerminal(peer_id,t);
+}
+
+void KeVideoSimulator::SendMediaMsg(const char * data,int len)
+{
+   talk_base::Buffer msgSend;
+   int msgLen = sizeof(KERTStreamHead);
+   msgSend.SetLength(msgLen);
+   msgSend.AppendData(data,len);
+
+   KEFrameHead * pFrame = (KEFrameHead *)data;
+   int mediaFormat = pFrame->frameType & 0x7f;
+   //int currentFrameNo = pFrame->frameNo;
+   KERTStreamHead * pReqMsg = (KERTStreamHead *)msgSend.data();
+   pReqMsg->protocal = PROTOCOL_HEAD;
+   pReqMsg->msgType = mediaFormat <30 ?KEMSG_TYPE_VIDEOSTREAM:KEMSG_TYPE_AUDIOSTREAM;
+   pReqMsg->msgLength = msgSend.length();
+   pReqMsg->channelNo = 1;
+   pReqMsg->videoID = 0;
+
+   terminal_->SendByTunnel(msgSend.data(),msgSend.length());
+
+
 }
 
 void KeVideoSimulator::OnSendVideo()
@@ -158,8 +180,7 @@ void KeVideoSimulator::OnMessageRespond(talk_base::Buffer &msgData)
 
 void KeVideoSimulator::OnMessage(talk_base::Message *msg)
 {
-    if(msg->message_id = MSG_SENDFILEVIDEO){
-        LOG(INFO)<<"read a frame";
+    if(msg->message_id == MSG_SENDFILEVIDEO){
         static int fileBufPos = 0;
         static int lastFrameNo = 0;
         if(fileBufPos > video_data_.length()){
@@ -167,8 +188,8 @@ void KeVideoSimulator::OnMessage(talk_base::Message *msg)
         }
         KEFrameHead * pHead = (KEFrameHead *)(video_data_.data() + fileBufPos);
         int frameLen = pHead->frameLen + sizeof(KEFrameHead);
-
-        terminal_->SendByTunnel(video_data_.data() + bufPos,frameLen);
+        //send media
+        this->SendMediaMsg(video_data_.data() + fileBufPos,frameLen);
         fileBufPos += frameLen;
 
         if(lastFrameNo == 0){
@@ -177,9 +198,12 @@ void KeVideoSimulator::OnMessage(talk_base::Message *msg)
 
         if(startSend){
             if(lastFrameNo != pHead->frameNo){
+                LOG(INFO)<<"read next frame";
+                lastFrameNo = pHead->frameNo;
                 file_thread_->PostDelayed(40,this ,MSG_SENDFILEVIDEO);
             }
             else{
+                LOG(INFO)<<"read same frame";
                 file_thread_->Post(this,MSG_SENDFILEVIDEO);
             }
         }

@@ -19,7 +19,7 @@ public:
     void OnTunnelMessage(const std::string & peer_id,talk_base::Buffer & msg);
     void OnTunnelOpend(PeerTerminalInterface * t,const std::string & peer_id);
     sigslot::signal0<> SignalRecvAskVideoMsg;
-
+    void SendMediaMsg(const char *data, int len);
     void OnSendVideo();
 protected:
     void ExtractMessage(talk_base::Buffer & allBytes);
