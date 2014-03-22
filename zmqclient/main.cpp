@@ -50,8 +50,9 @@ int main()
 
     KeVideoSimulator * simulator = new KeVideoSimulator();
     simulator->ReadVideoData("video.h264");
-
     terminal->SignalTunnelOpened.connect(simulator,&KeVideoSimulator::OnTunnelOpend);
+
+
 
 
     talk_base::Thread::Current()->Run();

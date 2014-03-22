@@ -49,12 +49,16 @@ SOURCES += main.cpp \
     asyndealer.cpp \
     peerconnectionclientdealer.cpp \
     peerterminal.cpp \
-    KeVideoSimulator.cpp
+    KeVideoSimulator.cpp \
+    KeMessageProcessCamera.cpp \
+    HisiMediaDevice.cpp
 
 HEADERS += \
     asyndealer.h \
     PeerConnectionClinetInterface.h \
     peerconnectionclientdealer.h \
     peerterminal.h \
-    KeVideoSimulator.h
+    KeVideoSimulator.h \
+    KeMessageProcessCamera.h \
+    HisiMediaDevice.h
 
