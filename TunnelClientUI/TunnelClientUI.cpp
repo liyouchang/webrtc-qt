@@ -34,8 +34,8 @@ TunnelClientUI::~TunnelClientUI()
 
 void TunnelClientUI::on_btn_init_clicked()
 {
-    terminal_->Initialize("tcp://192.168.0.182:5555","");
-
+    //terminal_->Initialize("tcp://192.168.0.182:5555","");
+terminal_->Initialize("tcp://218.56.11.182:5555","");
 }
 
 void TunnelClientUI::on_btn_connect_clicked()
@@ -53,3 +53,8 @@ void TunnelClientUI::on_btn_video_clicked()
     msg_processer_->AskVideo();
 }
 
+
+void TunnelClientUI::on_btn_disconnect_clicked()
+{
+    terminal_->CloseTunnel();
+}

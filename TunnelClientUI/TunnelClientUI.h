@@ -25,6 +25,8 @@ private slots:
 
     void on_btn_video_clicked();
 
+    void on_btn_disconnect_clicked();
+
 private:
     Ui::TunnelClientUI *ui;
     PeerTerminal * terminal_;
