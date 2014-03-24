@@ -119,7 +119,8 @@ void KeMessageProcessCamera::SendMediaMsg(int type,const char *data, int len)
     head->protocal = PROTOCOL_HEAD;
     head->msgType = type;
     head->msgLength = msgLen;
-
+    head->channelNo = 1;
+    head->videoID = 0;
     memcpy(sendBuf.data() + sizeof(KERTStreamHead),data,len);
 
     terminal_->SendByTunnel(sendBuf.data(),sendBuf.length());

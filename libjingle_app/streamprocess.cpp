@@ -39,7 +39,6 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
             std::cout << "Tunnel closed with error: " << error << std::endl;
         }
         Cleanup(stream);
-        SignalClosed();
 
         return;
     }
@@ -103,6 +102,7 @@ void StreamProcess::WriteStreamInternel()
 void StreamProcess::Cleanup(talk_base::StreamInterface *stream, bool delay) {
     LOG(INFO) << "Closing";
     stream->Close();
+    SignalClosed(this);
 }
 
 void StreamProcess::Cleanup()

@@ -19,6 +19,8 @@ public:
     virtual int SendByTunnel(const std::string & data) =0;
     virtual int SendByTunnel(const char *data,size_t len) =0 ;
     sigslot::signal2<PeerTerminalInterface *,const std::string &> SignalTunnelOpened;
+    sigslot::signal2<PeerTerminalInterface *,const std::string &> SignalTunnelClosed;
+
     sigslot::signal2<const std::string &,talk_base::Buffer &> SignalTunnelMessage;
 
 };
@@ -42,6 +44,7 @@ public:
     int AskTunnelVideo();
 protected:
     void OnTunnelOpened(kaerp2p::StreamProcess * tunnel);
+    void OnTunnelClosed(kaerp2p::StreamProcess * tunnel);
     void OnTunnelReadData(kaerp2p::StreamProcess * tunnel,size_t len);
 
     bool ExtractMessage(const char * data,size_t len);

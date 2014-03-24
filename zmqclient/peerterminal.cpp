@@ -84,8 +84,15 @@ void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *tunnel)
     LOG(INFO)<< __FUNCTION__;
     this->tunnel_stream_ = tunnel;
     tunnel_stream_->SignalReadData.connect(this,&PeerTerminal::OnTunnelReadData);
-
+    tunnel_stream_->SignalClosed.connect(this,&PeerTerminal::OnTunnelClosed);
     this->SignalTunnelOpened(this,conductor_->GetPeerID());
+}
+
+void PeerTerminal::OnTunnelClosed(kaerp2p::StreamProcess *tunnel)
+{
+    LOG(INFO)<< __FUNCTION__;
+    this->SignalTunnelClosed(this,conductor_->GetPeerID());
+    this->tunnel_stream_ = NULL;
 }
 
 void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *tunnel, size_t len)

@@ -46,23 +46,24 @@ win32 {
 SOURCES += main.cpp \
     asyndealer.cpp \
     peerconnectionclientdealer.cpp \
-    peerterminal.cpp
+    peerterminal.cpp \
+    KeMessageProcessCamera.cpp
+
 
 HEADERS += \
     asyndealer.h \
     PeerConnectionClinetInterface.h \
     peerconnectionclientdealer.h \
-    peerterminal.h
+    peerterminal.h \
+    KeMessageProcessCamera.h
+
 
 arm{
 
-    SOURCES +=  KeMessageProcessCamera.cpp \
-                HisiMediaDevice.cpp
+    SOURCES += HisiMediaDevice.cpp
+    HEADERS += HisiMediaDevice.h
 
-    HEADERS +=  KeMessageProcessCamera.h \
-                HisiMediaDevice.h
-
-    LIBS += -lkeapi
+    LIBS += -lkeapi -lstore -lexfat
 
 
 }else {

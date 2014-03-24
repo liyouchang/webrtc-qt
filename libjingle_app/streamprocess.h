@@ -21,7 +21,7 @@ public:
     bool ReadStream(void *buffer, size_t bytes, size_t *bytes_read = 0);
     sigslot::signal2<StreamProcess*, size_t> SignalReadData;
     sigslot::signal0<> SignalOpened;
-    sigslot::signal0<> SignalClosed;
+    sigslot::signal1<StreamProcess *> SignalClosed;
 protected:
 
 

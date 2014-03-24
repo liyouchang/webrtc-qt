@@ -130,6 +130,9 @@ bool P2PConductor::InitializePeerConnection()
     result = signal_thread_->Start();
     ASSERT(result);
 
+    stream_process_.reset( new StreamProcess(stream_thread_));
+    stream_process_->SignalOpened.connect(this,&P2PConductor::OnTunnelEstablished);
+
     talk_base::scoped_refptr<PeerTunnel> pt (
                 new talk_base::RefCountedObject<PeerTunnel>(signal_thread_,stream_thread_));
     if(!pt->Initialize(servers,this)){
@@ -146,6 +149,7 @@ void P2PConductor::DeletePeerConnection()
     peer_connection_->Close();
     peer_connection_.release();
     peer_id_.clear();
+    stream_process_.reset();
 
 }
 
@@ -160,8 +164,7 @@ void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
     talk_base::StreamInterface* stream = peer_connection_->GetStream();
     if(!stream_process_)
     {
-        stream_process_.reset( new StreamProcess(stream_thread_));
-        stream_process_->SignalOpened.connect(this,&P2PConductor::OnTunnelEstablished);
+        return ;
     }
     bool result = stream_thread_->Invoke<bool>(
                 talk_base::Bind(&StreamProcess::ProcessStream,this->GetStreamProcess(),stream));

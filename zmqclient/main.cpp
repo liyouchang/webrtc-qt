@@ -56,7 +56,7 @@ int main()
 #ifndef ARM
     KeVideoSimulator * simulator = new KeVideoSimulator();
     simulator->ReadVideoData("video.h264");
-    terminal->SignalTunnelOpened.connect(simulator,&KeVideoSimulator::OnTunnelOpend);
+    terminal->SignalTunnelOpened.connect(simulator,&KeVideoSimulator::OnTunnelOpened);
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
     terminal->SignalTunnelOpened.connect(device,&HisiMediaDevice::OnTunnelOpend);
