@@ -16,18 +16,16 @@ INCLUDEPATH     +=  \
 
 
 win32 {
+    #for zmqhelper
+    DEFINES += __WINDOWS__ ZMQ_STATIC
 
-
-#for zmqhelper
-DEFINES += __WINDOWS__ ZMQ_STATIC
-
-LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -luser32
-LIBS += -lStrmiids -lshell32 -lrpcrt4
+    LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -luser32
+    LIBS += -lStrmiids -lshell32 -lrpcrt4
 
     LIBS += -L$$output_dir/libs
     LIBS += -ljsoncpp
     LIBS += -ljingle_app  -ljingle_p2p  -ljingle
-LIBS +=  -lcppzmq
+    LIBS +=  -lcppzmq
 
 
 
@@ -48,17 +46,27 @@ LIBS +=  -lcppzmq
 SOURCES += main.cpp \
     asyndealer.cpp \
     peerconnectionclientdealer.cpp \
-    peerterminal.cpp \
-    KeVideoSimulator.cpp \
-    KeMessageProcessCamera.cpp \
-    HisiMediaDevice.cpp
+    peerterminal.cpp
 
 HEADERS += \
     asyndealer.h \
     PeerConnectionClinetInterface.h \
     peerconnectionclientdealer.h \
-    peerterminal.h \
-    KeVideoSimulator.h \
-    KeMessageProcessCamera.h \
-    HisiMediaDevice.h
+    peerterminal.h
 
+arm{
+
+    SOURCES +=  KeMessageProcessCamera.cpp \
+                HisiMediaDevice.cpp
+
+    HEADERS +=  KeMessageProcessCamera.h \
+                HisiMediaDevice.h
+
+    LIBS += -lkeapi
+
+
+}else {
+    SOURCES +=  KeVideoSimulator.cpp
+    HEADERS +=  KeVideoSimulator.h
+
+}

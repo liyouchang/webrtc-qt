@@ -27,7 +27,7 @@ void KeMessageProcessCamera::ExtractMessage(talk_base::Buffer &allBytes)
             }
             unsigned char  protocal = headBuf[0];
             int msgLen = *((int*)&headBuf[2]);
-            if (protocal != PROTOCOL_HEAD||  msgLen>msgMaxLen)
+            if (protocal != PROTOCOL_HEAD ||  msgLen > msgMaxLen)
             {
                 LOG(WARNING)<<"The message Protocal Head error, Clear the recv buffer!\r\n";
                 msgRecv.SetLength(0);
@@ -75,11 +75,20 @@ void KeMessageProcessCamera::OnMessageRespond(talk_base::Buffer &msgData)
     char msgType = msgData.data()[1];
     switch(msgType){
     case KEMSG_TYPE_VIDEOSERVER:
-        //send stream
-        LOG(INFO)<< __FUNCTION__<<"receive message video server msg";
-        SignalRecvAskVideoMsg();
+        RecvAskMediaMsg(msgData);
         break;
     }
+
+}
+
+void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
+{
+    //send stream
+    LOG(INFO)<< __FUNCTION__<<"receive message video server msg";
+    KEVideoServerReq * msg = (KEVideoServerReq *)msgData.data();
+    int video = msg->video;
+    int audio = msg->listen;
+    SignalRecvAskMediaMsg(video,audio);
 
 }
 
@@ -90,7 +99,7 @@ void KeMessageProcessCamera::SetTerminal(std::string peer_id, PeerTerminalInterf
     msgRecv.SetLength(0);
     bufPos = 0;
     toRead = 0;
-    terminal_->SignalTunnelMessage.connect(this,&KeVideoSimulator::OnTunnelMessage);
+    terminal_->SignalTunnelMessage.connect(this,&KeMessageProcessCamera::OnTunnelMessage);
 }
 
 void KeMessageProcessCamera::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg)
@@ -99,4 +108,19 @@ void KeMessageProcessCamera::OnTunnelMessage(const std::string &peer_id, talk_ba
     ASSERT(msg.length() > 0);
     this->ExtractMessage(msg);
 
+}
+
+void KeMessageProcessCamera::SendMediaMsg(int type,const char *data, int len)
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KERTStreamHead)  + len;
+    sendBuf.SetLength(msgLen);
+    KERTStreamHead * head = (KERTStreamHead *)sendBuf.data();
+    head->protocal = PROTOCOL_HEAD;
+    head->msgType = type;
+    head->msgLength = msgLen;
+
+    memcpy(sendBuf.data() + sizeof(KERTStreamHead),data,len);
+
+    terminal_->SendByTunnel(sendBuf.data(),sendBuf.length());
 }

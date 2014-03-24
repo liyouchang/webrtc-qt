@@ -1,5 +1,6 @@
 #include "KeVideoSimulator.h"
 #include "talk/base/pathutils.h"
+#include "KeMessage.h"
 KeVideoSimulator::KeVideoSimulator()
 {
     file_thread_ = new talk_base::Thread();

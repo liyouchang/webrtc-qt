@@ -6,7 +6,7 @@
 extern "C" {               
 #endif
 
-#define VIDEO_NUM           	"video_num"          	//	Ö§³ÖÊÓÆµÁ÷¸öÊı 
+#define VIDEO_NUM           	"video_num"          	//	æ”¯æŒè§†é¢‘æµä¸ªæ•° 
 
 
 #define VIDEO1_MAKE_IFRAME       	"video1_makeIframe"	
@@ -17,10 +17,10 @@ extern "C" {
 #define VIDEO1_CODEC 			"video1_codec"      	// 	0:H264, 1:MJPG   
 #define VIDEO1_BITRATECTRL 		"video1_control"		// 	0:CBR,  1:VBR
 #define VIDEO1_BITRATE 			"video1_bitrate"		// 
-#define VIDEO1_QUALITY 			"video1_quality"		// 	5:ÆÕÍ¨,7:½ÏºÃ,9:×îºÃ
+#define VIDEO1_QUALITY 			"video1_quality"		// 	5:æ™®é€š,7:è¾ƒå¥½,9:æœ€å¥½
 #define VIDEO1_FRAMERATE 		"video1_framerate"		//	1,5,10,15,20,25,30
 #define VIDEO1_IFRAMEINTERVAL 	"video1_int"			// 	1,4,20,100,200
-#define VIDEO1_DEINTERLACE 		"video1_deint"			// 	0:close,1:open·´½»´í 
+#define VIDEO1_DEINTERLACE 		"video1_deint"			// 	0:close,1:openåäº¤é”™ 
 #define VIDEO1_RESOLUTION 		"video1_resolution"		// 	176x144, 352x288, 320x240 640x480 1280x720
 
 #define VIDEO2_ENABLE 			"video2_enable"			// 	0:disable 1:enable
@@ -28,7 +28,7 @@ extern "C" {
 #define VIDEO2_CODEC			"video2_codec"			// 	0:H264, 1:MJPG 0:
 #define VIDEO2_BITRATECTRL		"video2_control"		// 	0:CBR,  1:VBR
 #define VIDEO2_BITRATE 		 	"video2_bitrate"		//
-#define VIDEO2_QUALITY 		 	"video2_quality"     	// 	5:ÆÕÍ¨,7:½ÏºÃ,9:×îºÃ
+#define VIDEO2_QUALITY 		 	"video2_quality"     	// 	5:æ™®é€š,7:è¾ƒå¥½,9:æœ€å¥½
 #define VIDEO2_FRAMERATE		"video2_framerate"		//	1,5,10,15,20,25,30,
 #define VIDEO2_IFRAMEINTERVAL	"video2_int"			//	1,4,20,100,200
 #define VIDEO2_RESOLUTION		"video2_resolution"		//	176x144, 352x288, 320x240 640x480
@@ -38,7 +38,7 @@ extern "C" {
 #define VIDEO3_CODEC 			"video3_codec"      	// 	0:H264, 1:MJPG   
 #define VIDEO3_BITRATECTRL 		"video3_control"		// 	0:CBR,  1:VBR
 #define VIDEO3_BITRATE 			"video3_bitrate"		// 
-#define VIDEO3_QUALITY 			"video3_quality"		// 	5:ÆÕÍ¨,7:½ÏºÃ,9:×îºÃ
+#define VIDEO3_QUALITY 			"video3_quality"		// 	5:æ™®é€š,7:è¾ƒå¥½,9:æœ€å¥½
 #define VIDEO3_FRAMERATE 		"video3_framerate"		//	1,5,10,15,20,25,30
 #define VIDEO3_IFRAMEINTERVAL 	"video3_int"			// 	1,4,20,100,200
 #define VIDEO3_RESOLUTION 		"video3_resolution"		// 	176x144, 352x288, 320x240 640x480 1280x720
@@ -48,7 +48,7 @@ extern "C" {
 #define VIDEO4_CODEC			"video4_codec"			// 	0:H264, 1:MJPG 0:
 #define VIDEO4_BITRATECTRL		"video4_control"		// 	0:CBR,  1:VBR
 #define VIDEO4_BITRATE 		 	"video4_bitrate"		//
-#define VIDEO4_QUALITY 		 	"video4_quality"     	// 	5:ÆÕÍ¨,7:½ÏºÃ,9:×îºÃ
+#define VIDEO4_QUALITY 		 	"video4_quality"     	// 	5:æ™®é€š,7:è¾ƒå¥½,9:æœ€å¥½
 #define VIDEO4_FRAMERATE		"video4_framerate"		//	1,5,10,15,20,25,30,
 #define VIDEO4_IFRAMEINTERVAL	"video4_int"			//	1,4,20,100,200
 #define VIDEO4_RESOLUTION		"video4_resolution"		//	176x144, 352x288, 320x240 640x480
@@ -57,13 +57,13 @@ extern "C" {
 
 
 
-#define VIDEO_DIRECTION 		"ipc_install_direction"	// 0:Õı×°   1:·´×° 
+#define VIDEO_DIRECTION 		"ipc_install_direction"	// 0:æ­£è£…   1:åè£… 
 
 #define VIDEO_BRIGHTNESS        "video_brightness"
 #define VIDEO_CONTRAST          "video_contrast"
 #define VIDEO_SATURATION        "video_saturation"
 
-#define AUDIO_NUM 				"audio_num"				// Ö§³ÖÒôÆµµÄ¸öÊı
+#define AUDIO_NUM 				"audio_num"				// æ”¯æŒéŸ³é¢‘çš„ä¸ªæ•°
 
 #define AUDIO1_DATA				"audio_data"
 #define RAWAUDIO1_DATA			"rawaudio_data"
@@ -76,18 +76,18 @@ extern "C" {
 
 
 #define WAN_IP_ASSIGNMENT 	 	"wan_ip_assignment"		//0:static IP, 1:DHCP, 2:PPPoE
-#define WAN_IP 				   	"wan_ip"				//IPµØÖ·
-#define WAN_GATEWAY			   	"wan_gateway"			//Íø¹Ø
-#define WAN_NETMASK    		 	"wan_netmask"			//×ÓÍøÑÚÂë
-#define WAN_MTU    			 	"wan_mtu"				//×î´ó¿É·¢ËÍµÄÊı¾İ°üµÄ×Ö½ÚÊı 512~1500 £¨Static IPºÍDHCP½ÓÈë·½Ê½£©
-#define WAN_PPPOEMTU    	 	"wan_pppoeMtu"			//PPPoE²¦ºÅÊ±×î´ó¿É·¢ËÍµÄÊı¾İ°üµÄ×Ö½ÚÊı
-#define WAN_MRU    			 	"wan_mru"				//PPPoE²¦ºÅÊ±²¦ºÅÊ±×î´ó¿É½ÓÊÕµÄÊı¾İ°üµÄ×Ö½ÚÊı
-#define WAN_AUTODNS    		 	"wan_autodns"			//0£ºÊÖ¶¯ÉèÖÃ 1£º×Ô¶¯ÉèÖÃ
+#define WAN_IP 				   	"wan_ip"				//IPåœ°å€
+#define WAN_GATEWAY			   	"wan_gateway"			//ç½‘å…³
+#define WAN_NETMASK    		 	"wan_netmask"			//å­ç½‘æ©ç 
+#define WAN_MTU    			 	"wan_mtu"				//æœ€å¤§å¯å‘é€çš„æ•°æ®åŒ…çš„å­—èŠ‚æ•° 512~1500 ï¼ˆStatic IPå’ŒDHCPæ¥å…¥æ–¹å¼ï¼‰
+#define WAN_PPPOEMTU    	 	"wan_pppoeMtu"			//PPPoEæ‹¨å·æ—¶æœ€å¤§å¯å‘é€çš„æ•°æ®åŒ…çš„å­—èŠ‚æ•°
+#define WAN_MRU    			 	"wan_mru"				//PPPoEæ‹¨å·æ—¶æ‹¨å·æ—¶æœ€å¤§å¯æ¥æ”¶çš„æ•°æ®åŒ…çš„å­—èŠ‚æ•°
+#define WAN_AUTODNS    		 	"wan_autodns"			//0ï¼šæ‰‹åŠ¨è®¾ç½® 1ï¼šè‡ªåŠ¨è®¾ç½®
 #define WAN_DNS1    			"wan_dns1"				//
 #define WAN_DNS2    		 	"wan_dns2"				//
-#define WAN_PPPOE_PWSD		 	"wan_pppoe_password"	//pppoeÓÃ»§Ãû
-#define WAN_PPPOE_USER		 	"wan_pppoe_username"	//pppoeÃÜÂë
-#define WAN_DDNS_PROTOCOL	 	"ddns_protocol"			//0:raycomm, 1:»¨Éú¿ÇĞ­Òé, 2;½ûÓÃDDNS
+#define WAN_PPPOE_PWSD		 	"wan_pppoe_password"	//pppoeç”¨æˆ·å
+#define WAN_PPPOE_USER		 	"wan_pppoe_username"	//pppoeå¯†ç 
+#define WAN_DDNS_PROTOCOL	 	"ddns_protocol"			//0:raycomm, 1:èŠ±ç”Ÿå£³åè®®, 2;ç¦ç”¨DDNS
 
 #define DDNS_USERNAME	 		"ddns_username"			//
 #define DDNS_PWSD		 		"ddns_password"			//
@@ -95,32 +95,32 @@ extern "C" {
 #define DDNS_PERIOD		 		"ddns_period"			//
 #define DDNS_SERVER_PORT	 	"ddns_server_port"		//
 
-#define DATE_TIME_ZONE		 	"date_time_zone"		//ÊÇ·ñ×Ô¶¯ÓëInternetÊ±¼ä·şÎñÆ÷Í¬²½ 0:½ûÓÃ, 1:ÆôÓÃ
+#define DATE_TIME_ZONE		 	"date_time_zone"		//æ˜¯å¦è‡ªåŠ¨ä¸Internetæ—¶é—´æœåŠ¡å™¨åŒæ­¥ 0:ç¦ç”¨, 1:å¯ç”¨
 #define DATE_TIME_SERVER	 	"date_time_server"		//
 #define DATE_TIME_PERIOD	 	"date_time_period"		//	
 #define DATE_TIME_AUTO		 	"date_time_auto"		//
 
-#define UPDATE_AUTO		 		"update_auto"			//ÊÇ·ñ×Ô¶¯¸üĞÂ¹Ì¼ş 0 ½ûÓÃ£¬ 1 ÆôÓÃ
+#define UPDATE_AUTO		 		"update_auto"			//æ˜¯å¦è‡ªåŠ¨æ›´æ–°å›ºä»¶ 0 ç¦ç”¨ï¼Œ 1 å¯ç”¨
 #define UPDATE_SERVER			"update_server"			//
 #define UPDATE_INT				"update_int"			//
 
-#define WIFI_MODE				"wifi_mode"  			//ÎŞÏß¹¦ÄÜ   0 ½ûÓÃ  1 ÆôÓÃ
+#define WIFI_MODE				"wifi_mode"  			//æ— çº¿åŠŸèƒ½   0 ç¦ç”¨  1 å¯ç”¨
 #define WIFI_SSID				"wifi_ssid" 			//=Raycomm
 #define WIFI_PWSD				"wifi_passwd"			//
-#define WIFI_AUTH_TYPE			"wifi_auth_type"		//0£ºNONE 1£ºWEP 2£ºWPA-PSK 3£ºWPA2-PAK
-#define WIFI_WEP_ENCRYPT_PROTCL		"wifi_wep_encrypt_protocol"		//0£ºOPEN¿ª·ÅÏµÍ³ 1£ºSHARED¹²ÏíÃÜÔ¿
-#define WIFI_PSK_ENCRYPT_PROTCL		"wifi_psk_encrypt_protocol"		//0£ºTKIP 1£ºAES
+#define WIFI_AUTH_TYPE			"wifi_auth_type"		//0ï¼šNONE 1ï¼šWEP 2ï¼šWPA-PSK 3ï¼šWPA2-PAK
+#define WIFI_WEP_ENCRYPT_PROTCL		"wifi_wep_encrypt_protocol"		//0ï¼šOPENå¼€æ”¾ç³»ç»Ÿ 1ï¼šSHAREDå…±äº«å¯†é’¥
+#define WIFI_PSK_ENCRYPT_PROTCL		"wifi_psk_encrypt_protocol"		//0ï¼šTKIP 1ï¼šAES
 
-#define UPNP_ENABLE				"upnp_enable"			//0£º½ûÓÃUPNP 1£ºÆôÓÃUPNP			
+#define UPNP_ENABLE				"upnp_enable"			//0ï¼šç¦ç”¨UPNP 1ï¼šå¯ç”¨UPNP			
 #define UPNP_UPDATE_CYCLE		"upnp_update_cycle"		//
 
-#define RTSP_ENABLE        		"rtsp_enable"			//0 ½ûÓÃ 1 ÆôÓÃ
-#define RTSP_PORT				"rtsp_port"				//rtsp¶Ë¿Ú
-#define RTSP_PROTCL				"rtsp_protocol"			//Á÷Ã½Ìå·şÎñĞ­Òé 0£ºTCP 1£ºUDP
+#define RTSP_ENABLE        		"rtsp_enable"			//0 ç¦ç”¨ 1 å¯ç”¨
+#define RTSP_PORT				"rtsp_port"				//rtspç«¯å£
+#define RTSP_PROTCL				"rtsp_protocol"			//æµåª’ä½“æœåŠ¡åè®® 0ï¼šTCP 1ï¼šUDP
 
 #define WEB_ENABLE				"web_enable"
 #define WEB_PORT				"web_port"				//
-#define WEB_MEIDA_PORT			"web_meida_port"		//RTMP¶Ë¿Ú
+#define WEB_MEIDA_PORT			"web_meida_port"		//RTMPç«¯å£
 	
 
 #define STORAGE_STATUS			"storage_status"		    //0:no storageDev , 1:have storageDev
@@ -151,10 +151,10 @@ extern "C" {
 #define OSD_HEIGHT2				"osd_height2"			//
 
 #define PTZ_PROTOCOL 		"ptz_protocol"				// 0:PELCOD , 1:PELCOP , 2:raycomm, 3: disable
-#define PTZ_SPEED 			"ptz_speed"					// 0~4,¶ÔÓ¦ 1µ½5µµ
-#define PTZ_PORT			"ptz_port"					// ptz·şÎñÆ÷¶Ë¿Ú
+#define PTZ_SPEED 			"ptz_speed"					// 0~4,å¯¹åº” 1åˆ°5æ¡£
+#define PTZ_PORT			"ptz_port"					// ptzæœåŠ¡å™¨ç«¯å£
 #define PTZ_BAUDRATE		"ptz_baudrate"				// 
-#define PTZ_ADDRESS			"ptz_address"				// ptz·şÎñÆ÷ipµØÖ·
+#define PTZ_ADDRESS			"ptz_address"				// ptzæœåŠ¡å™¨ipåœ°å€
 
 
 #define USER_NUM     	 	"user_num"					//
@@ -179,7 +179,7 @@ extern "C" {
 
 #define SYSTEM_REBOOT       "system_reboot"
 #define WS_DISCOVERY_ENABLE       "ws_discovery_enable"
-#define MOTION_DETECTION    "alarm_0_enable"			//¶¯Ì¬Õì²â ¿ªÆô1  ¹Ø±Õ0
+#define MOTION_DETECTION    "alarm_0_enable"			//åŠ¨æ€ä¾¦æµ‹ å¼€å¯1  å…³é—­0
 
 
 
@@ -247,8 +247,8 @@ int Raycomm_SetWifi(pt_WIFI_PARAM params);
 int Raycomm_GetWifiList(int* pCount, pt_WIFI_INFO wifi);
 //************************************
 // Method:    Raycomm_InitParam
-// Returns:   ·µ»Ø´íÎóÂë 0 ³É¹¦ -1 Ê§°Ü
-// Description: »ñÈ¡²ÎÊı³õÊ¼»¯
+// Returns:   è¿”å›é”™è¯¯ç  0 æˆåŠŸ -1 å¤±è´¥
+// Description: è·å–å‚æ•°åˆå§‹åŒ–
 // Parameter: [in]void
 //************************************
 int	Raycomm_InitParam();
@@ -257,8 +257,8 @@ int	Raycomm_InitParam();
 
 //************************************
 // Method:    Raycomm_UnInitParam
-// Returns:   ·µ»Ø´íÎóÂë 0 ³É¹¦ -1 Ê§°Ü
-// Description: ÊÍ·Å³õÊ¼»¯×ÊÔ´
+// Returns:   è¿”å›é”™è¯¯ç  0 æˆåŠŸ -1 å¤±è´¥
+// Description: é‡Šæ”¾åˆå§‹åŒ–èµ„æº
 // Parameter: [in]void
 //************************************
 int Raycomm_UnInitParam();
@@ -267,10 +267,10 @@ int Raycomm_UnInitParam();
 
 //************************************
 // Method:    Raycomm_GetParam
-// Returns:   ·µ»Ø´íÎóÂë 0 ³É¹¦ -1 Ê§°Ü
-// Description: ¸ù¾İ¹Ø¼ü×Ö »ñÈ¡²ÎÊı
-// Parameter: [in]char *keyword    	¹Ø¼ü×Ö
-// Parameter: [out]char *buf		·µ»Ø²ÎÊı×Ö·û´®
+// Returns:   è¿”å›é”™è¯¯ç  0 æˆåŠŸ -1 å¤±è´¥
+// Description: æ ¹æ®å…³é”®å­— è·å–å‚æ•°
+// Parameter: [in]char *keyword    	å…³é”®å­—
+// Parameter: [out]char *buf		è¿”å›å‚æ•°å­—ç¬¦ä¸²
 //************************************
 int Raycomm_GetParam(char *keyword, char *buf, int cam_id);
 
@@ -279,9 +279,9 @@ int Raycomm_GetParam(char *keyword, char *buf, int cam_id);
 
 //************************************
 // Method:    Raycomm_SetParam
-// Returns:   ·µ»Ø´íÎóÂë 0 ³É¹¦ -1 Ê§°Ü
-// Description: ¸ù¾İÃüÁî ÉèÖÃ²ÎÊı
-// Parameter: [in]char *command    	¹Ø¼ü×Ö×éºÏµÄÃüÁî×Ö·û´®
+// Returns:   è¿”å›é”™è¯¯ç  0 æˆåŠŸ -1 å¤±è´¥
+// Description: æ ¹æ®å‘½ä»¤ è®¾ç½®å‚æ•°
+// Parameter: [in]char *command    	å…³é”®å­—ç»„åˆçš„å‘½ä»¤å­—ç¬¦ä¸²
 //************************************
 int Raycomm_SetParam(char *command, int cam_id);
 

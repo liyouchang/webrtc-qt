@@ -6,7 +6,13 @@
 #include "asyndealer.h"
 #include "talk/base/thread.h"
 #include "peerterminal.h"
+
+#ifndef ARM
 #include "KeVideoSimulator.h"
+#else
+#include "HisiMediaDevice.h"
+
+#endif//arm
 using namespace std;
 
 
@@ -47,11 +53,16 @@ int main()
     terminal.reset(new PeerTerminal());
     terminal->Initialize("tcp://192.168.0.182:5555","123456");
 
-
+#ifndef ARM
     KeVideoSimulator * simulator = new KeVideoSimulator();
     simulator->ReadVideoData("video.h264");
     terminal->SignalTunnelOpened.connect(simulator,&KeVideoSimulator::OnTunnelOpend);
+#else
+    HisiMediaDevice * device = new HisiMediaDevice();
+    terminal->SignalTunnelOpened.connect(device,&HisiMediaDevice::OnTunnelOpend);
 
+
+#endif //arm
 
 
 
