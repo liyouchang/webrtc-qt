@@ -30,7 +30,7 @@ private slots:
 private:
     Ui::TunnelClientUI *ui;
     PeerTerminal * terminal_;
-    KeMsgProcessClient * msg_processer_;
+    talk_base::scoped_ptr<KeMsgProcessClient> msg_processer_;
     // PeerTerminalObserver interface
 public:
 };

@@ -42,9 +42,9 @@ void TunnelClientUI::on_btn_connect_clicked()
 {
     std::string peer_id = ui->edit_peer_id->text().toStdString();
     terminal_->ConnectToPeer(peer_id);
-    msg_processer_ = new KeMsgProcessClient();
+    msg_processer_.reset( new KeMsgProcessClient());
     msg_processer_->SetTerminal(peer_id,terminal_);
-    QObject::connect(msg_processer_,&KeMsgProcessClient::SigRecvMediaData,
+    QObject::connect(msg_processer_.get(),&KeMsgProcessClient::SigRecvMediaData,
                      ui->videoWall,&VideoWall::OnRecvMediaData);
 }
 
