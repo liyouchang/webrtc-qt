@@ -60,7 +60,7 @@ int main()
     terminal->SignalTunnelClosed.connect(simulator,&KeVideoSimulator::OnTunnelClosed);
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
-    terminal->SignalTunnelOpened.connect(device,&HisiMediaDevice::OnTunnelOpend);
+    terminal->SignalTunnelOpened.connect(device,&HisiMediaDevice::OnTunnelOpened);
     terminal->SignalTunnelClosed.connect(device,&HisiMediaDevice::OnTunnelClosed);
 
 

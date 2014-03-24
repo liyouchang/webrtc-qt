@@ -25,7 +25,6 @@ HisiMediaDevice::~HisiMediaDevice()
 {
     Raycomm_MediaDataUnInit();
     delete media_thread_;
-    delete process_;
 }
 
 void HisiMediaDevice::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
