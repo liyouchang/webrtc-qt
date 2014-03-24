@@ -50,6 +50,7 @@ bool KeVideoSimulator::ReadVideoData(std::string file_name)
 
 void KeVideoSimulator::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
+    LOG(INFO)<<__FUNCTION__;
     process_.reset(new KeMessageProcessCamera());
     process_->SetTerminal(peer_id,t);
     process_->SignalRecvAskMediaMsg.connect(this,&KeVideoSimulator::OnMediaRequest);
@@ -57,6 +58,7 @@ void KeVideoSimulator::OnTunnelOpened(PeerTerminalInterface *t, const std::strin
 
 void KeVideoSimulator::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
 {
+    LOG(INFO)<<__FUNCTION__;
     startSend = false;
     process_.reset();
 }
