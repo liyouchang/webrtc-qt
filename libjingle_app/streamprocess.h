@@ -2,7 +2,7 @@
 #define STREAMPROCESS_H
 
 #include "talk/base/stream.h"
-
+#include "talk/base/thread.h"
 namespace kaerp2p {
 
 

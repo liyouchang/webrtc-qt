@@ -146,6 +146,7 @@ bool P2PConductor::InitializePeerConnection()
 
 void P2PConductor::DeletePeerConnection()
 {
+    LOG(INFO) << __FUNCTION__;
     peer_connection_->Close();
     peer_connection_.release();
     peer_id_.clear();

@@ -14,7 +14,6 @@ typedef talk_base::ScopedMessageData<MediaRequest> MediaRequestMessage;
 
 HisiMediaDevice::HisiMediaDevice()
 {
-    process_ = new KeMessageProcessCamera();
     process_->SignalRecvAskMediaMsg.connect(this,&HisiMediaDevice::OnMediaRequest);
     media_thread_ = new talk_base::Thread();
     media_thread_->Start();
@@ -29,9 +28,17 @@ HisiMediaDevice::~HisiMediaDevice()
     delete process_;
 }
 
-void HisiMediaDevice::OnTunnelOpend(PeerTerminalInterface *t, const std::string &peer_id)
+void HisiMediaDevice::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
+    process_.reset(new KeMessageProcessCamera());
     process_->SetTerminal(peer_id,t);
+
+}
+
+void HisiMediaDevice::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
+{
+    OnMediaRequest(1,1);
+    process_.reset();
 
 }
 
@@ -63,7 +70,7 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         unsigned int timespan;
         int media_len;
         media_len = Raycomm_GetMediaData(video_handle_,media_buffer_,MEDIA_BUFFER_LENGTH,&timespan);
-        if(media_len > 0){
+        if(media_len > 0 && process_){
             process_->SendMediaMsg(KEMSG_TYPE_VIDEOSTREAM,media_buffer_,media_len);
             media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO);
         }

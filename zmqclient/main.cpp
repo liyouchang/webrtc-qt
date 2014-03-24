@@ -57,9 +57,11 @@ int main()
     KeVideoSimulator * simulator = new KeVideoSimulator();
     simulator->ReadVideoData("video.h264");
     terminal->SignalTunnelOpened.connect(simulator,&KeVideoSimulator::OnTunnelOpened);
+    terminal->SignalTunnelClosed.connect(simulator,&KeVideoSimulator::OnTunnelClosed);
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
     terminal->SignalTunnelOpened.connect(device,&HisiMediaDevice::OnTunnelOpend);
+    terminal->SignalTunnelClosed.connect(device,&HisiMediaDevice::OnTunnelClosed);
 
 
 #endif //arm
