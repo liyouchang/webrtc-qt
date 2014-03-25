@@ -26,7 +26,7 @@ protected:
     int bufPos; //witch
     char headBuf[11];
     int toRead;
-    static const int msgMaxLen = 8192;
+    static const int msgMaxLen = 512*1024;
 
 };
 

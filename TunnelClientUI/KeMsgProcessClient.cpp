@@ -65,10 +65,11 @@ void KeMsgProcessClient::ExtractMessage(QByteArray &allBytes)
                 break;
             }
             unsigned char  protocal = headBuf[0];
-            int msgLen = *((int*)&headBuf[2]);
+            int msgLen;
+            memcpy(&msgLen,&headBuf[2],4);
             if (protocal != PROTOCOL_HEAD||  msgLen>msgMaxLen)
             {
-                qWarning()<<"The message Protocal Head error, Clear the recv buffer!\r\n";
+                qWarning()<<"The message Protocal Head error"<<msgLen <<" protocal:"<<protocal;
                 msgRecv.clear();
                 break;
             }
