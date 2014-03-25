@@ -26,6 +26,7 @@ public:
 
 private:
     int MediaControl_m(int video,int audio);
+    void SendFrame(int type,const char *data, int len);
     talk_base::Thread * media_thread_;
 
     talk_base::scoped_ptr<KeMessageProcessCamera> process_;

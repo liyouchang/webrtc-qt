@@ -3,6 +3,7 @@
 #include "keapi/keapi.h"
 #include "talk/base/bind.h"
 #include "talk/base/thread.h"
+#include "talk/base/timeutils.h"
 #define VIDEO1_DATA				"video1_data"
 
 struct MediaRequest{
@@ -67,6 +68,23 @@ int HisiMediaDevice::MediaControl_m(int video, int audio)
     }
 }
 
+void HisiMediaDevice::SendFrame(int type, const char *data, int len)
+{
+    static short frameNo = 0;
+    KEFrameHead frameHead;
+    frameHead.frameNo = frameNo++;
+    frameHead.piecesNo = 1;
+    int ams = talk_base::Time();
+    frameHead.second = ams/1000;
+    frameHead.millisecond = (ams%1000)/10;
+    frameHead.frameLen = len;
+    frameHead.frameType = 2;
+    talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
+    frameBuf.AppendData(data,len);
+    process_->SendMediaMsg(type,frameBuf.data(),frameBuf.length());
+
+}
+
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)
 {
     switch (msg->message_id) {
@@ -78,7 +96,9 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         int media_len;
         media_len = Raycomm_GetMediaData(video_handle_,media_buffer_,MEDIA_BUFFER_LENGTH,&timespan);
         if(media_len > 0 && process_){
-            process_->SendMediaMsg(KEMSG_TYPE_VIDEOSTREAM,media_buffer_,media_len);
+            LOG(LS_VERBOSE)<<"read media len = "<<media_len;
+            //LOG(INFO)<<"read media len = "<<media_len<< " time "<<timespan;
+            this->SendFrame(KEMSG_TYPE_VIDEOSTREAM,media_buffer_,media_len);
             media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO);
         }
         else{
