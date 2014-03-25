@@ -63,7 +63,6 @@ int main()
     terminal->SignalTunnelOpened.connect(device,&HisiMediaDevice::OnTunnelOpened);
     terminal->SignalTunnelClosed.connect(device,&HisiMediaDevice::OnTunnelClosed);
 
-
 #endif //arm
 
 

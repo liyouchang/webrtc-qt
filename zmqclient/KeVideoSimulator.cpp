@@ -123,12 +123,12 @@ void KeVideoSimulator::OnMessage(talk_base::Message *msg)
 
         if(startSend){
             if(lastFrameNo != pHead->frameNo){
-                LOG(INFO)<<"read next frame";
+                //LOG(INFO)<<"read next frame";
                 lastFrameNo = pHead->frameNo;
                 media_thread_->PostDelayed(40,this ,MSG_SENDFILEVIDEO);
             }
             else{
-                LOG(INFO)<<"read same frame";
+                //LOG(INFO)<<"read same frame";
                 media_thread_->Post(this,MSG_SENDFILEVIDEO);
             }
         }

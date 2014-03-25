@@ -2,6 +2,9 @@
 
 KeMessageProcessCamera::KeMessageProcessCamera()
 {
+    bufPos = 0;
+    toRead = 0;
+
 }
 
 void KeMessageProcessCamera::ExtractMessage(talk_base::Buffer &allBytes)
@@ -26,10 +29,13 @@ void KeMessageProcessCamera::ExtractMessage(talk_base::Buffer &allBytes)
                 break;
             }
             unsigned char  protocal = headBuf[0];
-            int msgLen = *((int*)&headBuf[2]);
+            //int msgLen= *((int*)&headBuf[2]); //arm will failed with this
+            int msgLen;
+            memcpy(&msgLen,&headBuf[2],4);
             if (protocal != PROTOCOL_HEAD ||  msgLen > msgMaxLen)
             {
-                LOG(WARNING)<<"The message Protocal Head error, Clear the recv buffer!\r\n";
+                LOG(WARNING)<<"The message Protocal Head "<< read_bytes <<" error, msg len "
+                             <<msgLen<<" ,Clear the recv buffer!\r\n";
                 msgRecv.SetLength(0);
                 break;
             }

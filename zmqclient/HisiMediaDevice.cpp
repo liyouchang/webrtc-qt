@@ -14,10 +14,15 @@ typedef talk_base::ScopedMessageData<MediaRequest> MediaRequestMessage;
 
 HisiMediaDevice::HisiMediaDevice()
 {
-    process_->SignalRecvAskMediaMsg.connect(this,&HisiMediaDevice::OnMediaRequest);
+
     media_thread_ = new talk_base::Thread();
     media_thread_->Start();
-    Raycomm_MediaDataInit();
+    int ret = Raycomm_InitParam();
+    LOG(INFO)<<"Raycomm_InitParam : "<<ret;
+
+    ret = Raycomm_MediaDataInit();
+    LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
+
     video_handle_ = 0;
 }
 
@@ -30,6 +35,7 @@ HisiMediaDevice::~HisiMediaDevice()
 void HisiMediaDevice::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
     process_.reset(new KeMessageProcessCamera());
+    process_->SignalRecvAskMediaMsg.connect(this,&HisiMediaDevice::OnMediaRequest);
     process_->SetTerminal(peer_id,t);
 
 }
@@ -51,10 +57,12 @@ int HisiMediaDevice::MediaControl_m(int video, int audio)
 {
     if(video == 0 && video_handle_ == 0){
         video_handle_ =  Raycomm_ConnectMedia(VIDEO1_DATA,0);
+        LOG(INFO)<<"start video";
         media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO);
     }
     else{
         Raycomm_DisConnectMedia(video_handle_);
+        LOG(INFO)<<"stop video";
         video_handle_ = 0;
     }
 }
