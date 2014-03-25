@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include "../zmqclient/peerterminal.h"
 #include "KeMsgProcessClient.h"
-
+#include <QFile>
 namespace Ui {
 class TunnelClientUI;
 }
@@ -26,11 +26,16 @@ private slots:
     void on_btn_video_clicked();
 
     void on_btn_disconnect_clicked();
+    //save to file
+    void OnRecvMediaData(int cameraID,int dataType,QByteArray data);
 
 private:
     Ui::TunnelClientUI *ui;
     PeerTerminal * terminal_;
     talk_base::scoped_ptr<KeMsgProcessClient> msg_processer_;
+
+    QFile * recordFile;
+
     // PeerTerminalObserver interface
 public:
 };
