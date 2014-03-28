@@ -199,7 +199,7 @@
 /* #undef ZMQ_HAVE_HPUX */
 
 /* Have ifaddrs.h header. */
-#define ZMQ_HAVE_IFADDRS 1
+//#define ZMQ_HAVE_IFADDRS 1
 
 /* Have Linux OS */
 //lht delete

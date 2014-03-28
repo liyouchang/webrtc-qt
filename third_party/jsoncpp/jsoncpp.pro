@@ -41,4 +41,8 @@ SOURCES += \
     overrides/src/lib_json/json_value.cpp \
     source/src/lib_json/json_writer.cpp
 
+OTHER_FILES += \
+    jsoncpp.gyp \
+    jsoncpp.gypi
+
 

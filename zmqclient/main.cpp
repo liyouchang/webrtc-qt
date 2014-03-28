@@ -6,6 +6,7 @@
 #include "asyndealer.h"
 #include "talk/base/thread.h"
 #include "peerterminal.h"
+#include "peerconnectionclientdealer.h"
 
 #ifndef ARM
 #include "KeVideoSimulator.h"
@@ -48,16 +49,17 @@ int main()
 
     talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
 
+    PeerConnectionClientDealer client;
+
 
     talk_base::scoped_ptr<PeerTerminal> terminal;
-    terminal.reset(new PeerTerminal());
+    terminal.reset(new PeerTerminal(&client));
     terminal->Initialize("tcp://192.168.0.182:5555","123456");
 
 #ifndef ARM
     KeVideoSimulator * simulator = new KeVideoSimulator();
+    simulator->SetTerminal(terminal.get());
     simulator->ReadVideoData("video.h264");
-    terminal->SignalTunnelOpened.connect(simulator,&KeVideoSimulator::OnTunnelOpened);
-    terminal->SignalTunnelClosed.connect(simulator,&KeVideoSimulator::OnTunnelClosed);
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
     terminal->SignalTunnelOpened.connect(device,&HisiMediaDevice::OnTunnelOpened);

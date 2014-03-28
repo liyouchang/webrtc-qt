@@ -6,12 +6,21 @@ KeVideoSimulator::KeVideoSimulator()
 {
     media_thread_ = new talk_base::Thread();
     media_thread_->Start();
-    startSend = false;
 }
 
 KeVideoSimulator::~KeVideoSimulator()
 {
     delete media_thread_;
+}
+
+void KeVideoSimulator::SetTerminal(PeerTerminalInterface *t)
+{
+    this->terminal_ = t;
+    t->SignalTunnelOpened.connect(this,&KeVideoSimulator::OnTunnelOpened);
+    t->SignalTunnelClosed.connect(this,&KeVideoSimulator::OnTunnelClosed);
+    t->SignalTunnelMessage.connect(this,&KeVideoSimulator::OnTunnelMessage);
+
+
 }
 
 bool KeVideoSimulator::ReadVideoData(std::string file_name)
@@ -43,6 +52,9 @@ bool KeVideoSimulator::ReadVideoData(std::string file_name)
     if(sr != talk_base::SR_SUCCESS){
         return false;
     }
+    //start read file cycle
+    media_thread_->Post(this,MSG_SENDFILEVIDEO);
+
     return true;
 }
 
@@ -50,61 +62,100 @@ bool KeVideoSimulator::ReadVideoData(std::string file_name)
 
 void KeVideoSimulator::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
+    ASSERT(terminal_ == t);
     LOG(INFO)<<__FUNCTION__;
-    process_.reset(new KeMessageProcessCamera());
-    process_->SetTerminal(peer_id,t);
-    process_->SignalRecvAskMediaMsg.connect(this,&KeVideoSimulator::OnMediaRequest);
+
+    KeMessageProcessCamera *process = new KeMessageProcessCamera(peer_id);
+    //process->SetTerminal(peer_id,t);
+    process->SignalRecvAskMediaMsg.connect(this,&KeVideoSimulator::OnProcessMediaRequest);
+    processes_.push_back(process);
 }
 
 void KeVideoSimulator::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
 {
+    ASSERT(terminal_ == t);
     LOG(INFO)<<__FUNCTION__;
-    startSend = false;
-    process_.reset();
+
+    std::vector<KeMessageProcessCamera *>::iterator it = processes_.begin();
+    for (; it != processes_.end(); ++it) {
+      if ((*it)->GetPeerID() == peer_id) {
+        break;
+      }
+    }
+    if (it == processes_.end()){
+        LOG(WARNING)<< "peer id "<< peer_id<<" not found";
+      return ;
+    }
+
+    delete (*it);
+    processes_.erase(it);
+}
+
+void KeVideoSimulator::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg)
+{
+    KeMessageProcessCamera * process = this->GetProcess(peer_id);
+    if(process == NULL){
+        LOG(WARNING)<< "peer id "<< peer_id<<" not found";
+        return;
+    }
+    process->OnTunnelMessage(peer_id,msg);
+}
+
+void KeVideoSimulator::OnRouterMessage(const std::string &peer_id, const std::string &msg)
+{
+    LOG(INFO)<<__FUNCTION__<<"---- peer_id = "<<peer_id<<" msg = "<<msg;
 }
 
 void KeVideoSimulator::SendMediaMsg(const char * data,int len)
 {
-
     KEFrameHead * pFrame = (KEFrameHead *)data;
     int mediaFormat = pFrame->frameType & 0x7f;
-    int msgType = mediaFormat <30 ?KEMSG_TYPE_VIDEOSTREAM:KEMSG_TYPE_AUDIOSTREAM;
 
-    if(process_){
-        process_->SendMediaMsg(msgType,data,len);
+    if(mediaFormat <30 ){
+        this->SignalVideoData(data,len);
+    }else {
+        this->SignalAudioData(data,len);
     }
 }
 
-void KeVideoSimulator::OnMediaRequest(int video,int audio)
+void KeVideoSimulator::OnProcessMediaRequest(KeMessageProcessCamera * process,int video,int audio)
 {
+    if(video == 0 ){
+        this->SignalVideoData.connect(process , &KeMessageProcessCamera::OnVideoData);
+    }else{
+        this->SignalVideoData.disconnect(process);
+    }
 
-    media_thread_->Invoke<int>(
-                talk_base::Bind(&KeVideoSimulator::MediaRequest_m,this,video,audio));
+    if(audio == 0 ){
+        this->SignalAudioData.connect(process,&KeMessageProcessCamera::OnAudioData);
+    }else{
+        this->SignalAudioData.disconnect(process);
+    }
 
 }
 
-int KeVideoSimulator::MediaRequest_m(int video, int audio)
+KeMessageProcessCamera *KeVideoSimulator::GetProcess(const std::string &peer_id)
 {
-    if(!startSend && video==0){
-        LOG(INFO)<<"Start send video";
-
-        media_thread_->Post(this,MSG_SENDFILEVIDEO);
-        startSend = true;
+    std::vector<KeMessageProcessCamera *>::iterator it = processes_.begin();
+    for (; it != processes_.end(); ++it) {
+      if ((*it)->GetPeerID() == peer_id) {
+        break;
+      }
     }
+    if (it == processes_.end())
+      return NULL;
+    return *it;
 
-    if(video == 1){
-        startSend = false;
-    }
+}
 
+void KeVideoSimulator::OnProcessNeedSend(const std::string &peer_id, const char *data, int len)
+{
+    terminal_->SendByTunnel(peer_id,data,len);
 }
 
 void KeVideoSimulator::OnMessage(talk_base::Message *msg)
 {
     if(msg->message_id == MSG_SENDFILEVIDEO){
-
-        if(!startSend){
-            return;
-        }
         static int fileBufPos = 0;
         static int lastFrameNo = 0;
         if(fileBufPos > video_data_.length()){
@@ -121,16 +172,12 @@ void KeVideoSimulator::OnMessage(talk_base::Message *msg)
             lastFrameNo = pHead->frameNo;
         }
 
-        if(startSend){
-            if(lastFrameNo != pHead->frameNo){
-                //LOG(INFO)<<"read next frame";
-                lastFrameNo = pHead->frameNo;
-                media_thread_->PostDelayed(40,this ,MSG_SENDFILEVIDEO);
-            }
-            else{
-                //LOG(INFO)<<"read same frame";
-                media_thread_->Post(this,MSG_SENDFILEVIDEO);
-            }
+        if(lastFrameNo != pHead->frameNo){
+            lastFrameNo = pHead->frameNo;
+            media_thread_->PostDelayed(40,this ,MSG_SENDFILEVIDEO);
+        }
+        else{
+            media_thread_->Post(this,MSG_SENDFILEVIDEO);
         }
     }
 }

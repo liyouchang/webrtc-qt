@@ -190,3 +190,6 @@ HEADERS += \
     base/worker.h \
     base/buffer.h
 
+OTHER_FILES += \
+    libjingle.gyp
+

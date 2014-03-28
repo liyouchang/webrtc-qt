@@ -11,23 +11,23 @@ namespace  kaerp2p {
 
 std::string GetEnvVarOrDefault(const char* env_var_name,
                                const char* default_value) {
-  std::string value;
-  const char* env_var = getenv(env_var_name);
-  if (env_var)
-    value = env_var;
+    std::string value;
+    const char* env_var = getenv(env_var_name);
+    if (env_var)
+        value = env_var;
 
-  if (value.empty())
-    value = default_value;
+    if (value.empty())
+        value = default_value;
 
-  return value;
+    return value;
 }
 
 std::string GetPeerConnectionString() {
-  return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
+    return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
 }
 
 std::string GetDefaultServerName() {
-  //return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
+    //return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
     return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
 }
 
@@ -40,6 +40,7 @@ const char kCandidateSdpName[] = "candidate";
 const char kSessionDescriptionTypeName[] = "type";
 const char kSessionDescriptionSdpName[] = "sdp";
 
+const char kByeMessage[] = "BYE";
 
 
 class DummySetSessionDescriptionObserver
@@ -61,10 +62,9 @@ protected:
     ~DummySetSessionDescriptionObserver() {}
 };
 
-P2PConductor::P2PConductor(PeerConnectionClientInterface * client):
-    client_(client),stream_thread_(NULL),signal_thread_(NULL)
+P2PConductor::P2PConductor():
+    stream_thread_(NULL),signal_thread_(NULL)
 {
-    client_->RegisterObserver(this);
     tunnel_established_ = false;
 }
 
@@ -77,25 +77,27 @@ P2PConductor::~P2PConductor()
 }
 
 
-void P2PConductor::ConnectToPeer(const std::string &peer_id)
+int P2PConductor::ConnectToPeer(const std::string &peer_id)
 {
     if (peer_connection_.get()) {
         LOG(LS_INFO) <<"peer connection all ready connect";
-        return;
+        return -2;
     }
     if (InitializePeerConnection()) {
         peer_id_ = peer_id;
         peer_connection_->CreateOffer(this);
     } else {
         LOG(LS_INFO) <<"initialize connection error";
+        return -3;
     }
+    return 0;
 }
 
 void P2PConductor::DisconnectFromCurrentPeer()
 {
     LOG(INFO) << __FUNCTION__;
     if (peer_connection_.get()) {
-        client_->SendHangUp(peer_id_);
+        SignalNeedSendToPeer(peer_id_,kByeMessage);
         DeletePeerConnection();
     }
 }
@@ -183,7 +185,8 @@ void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
     std::string msg = writer.write(jmessage);
     LOG(INFO) <<"session sdp is " << msg;
 
-    client_->SendToPeer(peer_id_, msg);
+    //client_->SendToPeer(peer_id_, msg);
+    SignalNeedSendToPeer(peer_id_,msg);
 
 }
 
@@ -221,35 +224,8 @@ void P2PConductor::OnIceCandidate(const IceCandidateInterface *candidate)
 
     std::string msg = writer.write(jmessage);
 
-    client_->SendToPeer(peer_id_,msg);
-}
-
-void P2PConductor::OnSignedIn()
-{
-    LOG(INFO) << __FUNCTION__;
-    LOG(INFO) << "current id is "<<client_->id();
-}
-
-void P2PConductor::OnDisconnected()
-{
-    LOG(INFO) << __FUNCTION__ << "disconnect from server";
-    DeletePeerConnection();
-}
-
-void P2PConductor::OnPeerConnected(const std::string& id, const std::string &name)
-{
-    LOG(INFO) << __FUNCTION__ << " a peer connected server";
-    LOG(INFO) << "peer id = "<<id<<" ; peer name = "<<name;
-
-}
-
-void P2PConductor::OnPeerDisconnected(const std::string& peer_id)
-{
-    LOG(INFO) << __FUNCTION__ << " a peer disconnected server";
-    LOG(INFO) << "peer id = "<<peer_id;
-    if (peer_id == peer_id_) {
-        DeletePeerConnection();
-    }
+    //client_->SendToPeer(peer_id_,msg);
+    SignalNeedSendToPeer(peer_id_,msg);
 }
 
 void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
@@ -258,19 +234,20 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
     //ASSERT(peer_id_ == peer_id || peer_id_.empty());
     ASSERT(!message.empty());
     if(peer_id != peer_id_ && !peer_id_.empty()){
+        LOG(WARNING)<<"peer id is wrong";
         return;
     }
-    Json::Reader reader;
-    Json::Value jmessage;
-    if (!reader.parse(message, jmessage)) {
-        LOG(WARNING) << "Received unknown message. " << message;
+    if(message.length() == (sizeof(kByeMessage) - 1) &&
+            message.compare(kByeMessage) == 0){
+        if (peer_id == peer_id_ && peer_connection_.get()) {
+            DeletePeerConnection();
+        }
         return;
     }
 
     if (!peer_connection_.get()) {
         ASSERT(peer_id_.empty());
         peer_id_ = peer_id;
-
         if (!InitializePeerConnection()) {
             LOG(LS_ERROR) << "Failed to initialize our PeerConnection instance";
             //client_->SignOut();
@@ -282,8 +259,15 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
                         "conversation with a different peer.";
         return;
     }
+
+    Json::Reader reader;
+    Json::Value jmessage;
+    if (!reader.parse(message, jmessage)) {
+        LOG(WARNING) << "Received unknown message. " << message;
+        return;
+    }
     std::string type;
-    std::string json_object;
+    //std::string json_object;
 
     GetStringFromJsonObject(jmessage, kSessionDescriptionTypeName, &type);
     if (!type.empty()) {
@@ -330,17 +314,6 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
         }
         return;
     }
-}
-
-void P2PConductor::OnMessageSent(int err)
-{
-    LOG(INFO) <<__FUNCTION__ << err;
-}
-
-void P2PConductor::OnServerConnectionFailure()
-{
-    LOG(INFO) <<__FUNCTION__ ;
-
 }
 
 }

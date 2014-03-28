@@ -18,7 +18,7 @@ include (talk_common.pri)
 
 DESTDIR = $$output_dir/libs
 
-INCLUDEPATH     += ../third_party/libsrtp/srtp/include \
+INCLUDEPATH += ../third_party/libsrtp/srtp/include \
             ../third_party/libsrtp/srtp/crypto/include \
             ../third_party/libsrtp/config
 

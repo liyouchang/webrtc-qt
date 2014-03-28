@@ -55,14 +55,7 @@ bool PeerConnectionClientDealer::IsSendingMessage()
 
 void PeerConnectionClientDealer::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
 {
-//TODO:message dispath
-    if(message.length() == (sizeof(kByeMessage) - 1) &&
-            message.compare(kByeMessage) == 0){
-        SignalPeerDisConnected(peer_id);
-    }else{
-        //callback_->OnMessageFromPeer(peer_id,message);
-        SignalMessageFromPeer(peer_id,message);
-    }
+    SignalMessageFromPeer(peer_id,message);
 }
 
 void PeerConnectionClientDealer::OnMessageSent()

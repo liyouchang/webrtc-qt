@@ -29,5 +29,10 @@ arm {
     output_dir = $$PWD/../out/arm
 }
 
+android{
+    output_dir = $$PWD/../out/android
+
+}
+
 DESTDIR = $$output_dir/libs
 OBJECTS_DIR = $$output_dir/obj/$$TARGET

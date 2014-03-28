@@ -1,39 +1,56 @@
 #include "peerterminal.h"
 #include "KeMessage.h"
-PeerTerminal::PeerTerminal()
+#include "talk/base/json.h"
+
+PeerTerminal::PeerTerminal(kaerp2p::PeerConnectionClientInterface * client):
+    client_(client)
 {
+
 }
 
 int PeerTerminal::Initialize(const std::string &router, const std::string &id)
 {
-    client_.reset(new PeerConnectionClientDealer());
+    max_tunnel_num_ = 4;
+
     int ret = client_->Connect(router,id);
+    client_->SignalMessageFromPeer.connect(this,&PeerTerminal::OnRouterReadData);
 
     //a new conductor is created at here
-    conductor_ = new talk_base::RefCountedObject<kaerp2p::P2PConductor>(client_.get());
-    conductor_->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
-    this->tunnel_stream_ = NULL;
+//    conductor_ = new talk_base::RefCountedObject<kaerp2p::P2PConductor>(client_.get());
+//    conductor_->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
+//    this->tunnel_stream_ = NULL;
     return ret;
 }
 
 
-void PeerTerminal::ConnectToPeer(const std::string & peer_id)
+int PeerTerminal::ConnectToPeer(const std::string & peer_id)
 {
-    conductor_->ConnectToPeer(peer_id);
-
-
+    ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
+    if(aTunnel== NULL){
+        LOG(WARNING)<< "not avaliable tunnel";
+        return -1;
+    }
+    bool ret = aTunnel->ConnectToPeer(peer_id);
+    return ret;
+    //conductor_->ConnectToPeer(peer_id);
 }
 
-void PeerTerminal::CloseTunnel()
+int PeerTerminal::CloseTunnel(const std::string &peer_id)
 {
-    conductor_->DisconnectFromCurrentPeer();
-    this->tunnel_stream_ = NULL;
+    ScopedTunnel aTunnel = this->GetTunnel(peer_id);
+    if(aTunnel == NULL){
+        return -1;
+    }
+    aTunnel->DisconnectFromCurrentPeer();
+    return 0;
+//    conductor_->DisconnectFromCurrentPeer(true);
+//    this->tunnel_stream_ = NULL;
 }
 
-bool PeerTerminal::TunnelOpened()
-{
-    return (this->tunnel_stream_ != NULL);
-}
+//bool PeerTerminal::TunnelOpened()
+//{
+//    return (this->tunnel_stream_ != NULL);
+//}
 
 int PeerTerminal::SendByRouter(const std::string &peer_id, const std::string &data)
 {
@@ -41,156 +58,194 @@ int PeerTerminal::SendByRouter(const std::string &peer_id, const std::string &da
     return 0;
 }
 
-int PeerTerminal::SendByTunnel(const std::string &data)
+int PeerTerminal::SendByTunnel(const std::string &peer_id,const std::string &data)
 {
-    ASSERT(tunnel_stream_);
-    tunnel_stream_->WriteStream(data.c_str(),data.length());
+//    ASSERT(tunnel_stream_);
+    ScopedTunnel aTunnel = this->GetTunnel(peer_id);
+    if(aTunnel == NULL){
+        return -1;
+    }
+    aTunnel->GetStreamProcess()->WriteStream(data.c_str(),data.length());
     return 0;
 }
 
-int PeerTerminal::SendByTunnel(const char *data, size_t len)
+int PeerTerminal::SendByTunnel(const std::string &peer_id,
+                               const char *data, size_t len)
 {
-    ASSERT(tunnel_stream_);
-    tunnel_stream_->WriteStream(data,len);
+    ScopedTunnel aTunnel = this->GetTunnel(peer_id);
+    if(aTunnel == NULL){
+        return -1;
+    }
+    aTunnel->GetStreamProcess()->WriteStream(data,len);
     return 0;
 }
 
-int PeerTerminal::AskTunnelVideo()
+//int PeerTerminal::AskTunnelVideo()
+//{
+//    talk_base::Buffer msgSend;
+//    int msgLen = sizeof(KEVideoServerReq);
+//    msgSend.SetLength(msgLen);
+//    KEVideoServerReq * pReqMsg;
+//    pReqMsg = (KEVideoServerReq *)msgSend.data();
+//    pReqMsg->protocal = PROTOCOL_HEAD;
+//    pReqMsg->msgType = KEMSG_TYPE_VIDEOSERVER;
+//    pReqMsg->msgLength = msgLen;
+//    pReqMsg->clientID = 0;
+//    pReqMsg->channelNo = 1;
+//    pReqMsg->videoID = 0;
+//    pReqMsg->video = 0;
+//    pReqMsg->listen = 0;
+//    pReqMsg->talk = 0;
+//    pReqMsg->protocalType = 0;
+//    pReqMsg->transSvrIp = 0;
+//    return this->SendByTunnel(msgSend.data(),msgSend.length());
+
+//}
+
+
+void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *stream)
 {
-    talk_base::Buffer msgSend;
-    int msgLen = sizeof(KEVideoServerReq);
-    msgSend.SetLength(msgLen);
-    KEVideoServerReq * pReqMsg;
-    pReqMsg = (KEVideoServerReq *)msgSend.data();
-    pReqMsg->protocal = PROTOCOL_HEAD;
-    pReqMsg->msgType = KEMSG_TYPE_VIDEOSERVER;
-    pReqMsg->msgLength = msgLen;
-    pReqMsg->clientID = 0;
-    pReqMsg->channelNo = 1;
-    pReqMsg->videoID = 0;
-    pReqMsg->video = 0;
-    pReqMsg->listen = 0;
-    pReqMsg->talk = 0;
-    pReqMsg->protocalType = 0;
-    pReqMsg->transSvrIp = 0;
-    return this->SendByTunnel(msgSend.data(),msgSend.length());
-
-}
-
-
-void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *tunnel)
-{
-    ASSERT(tunnel == conductor_->GetStreamProcess());
+    //ASSERT(tunnel == conductor_->GetStreamProcess());
     LOG(INFO)<< __FUNCTION__;
-    this->tunnel_stream_ = tunnel;
-    tunnel_stream_->SignalReadData.connect(this,&PeerTerminal::OnTunnelReadData);
-    tunnel_stream_->SignalClosed.connect(this,&PeerTerminal::OnTunnelClosed);
-    this->SignalTunnelOpened(this,conductor_->GetPeerID());
+    ScopedTunnel aTunnel = this->GetTunnel(stream);
+    if(aTunnel == NULL){
+        LOG(WARNING)<<"cannot get tunnel by stream";
+        return ;
+    }
+    //this->tunnel_stream_ = tunnel;
+    stream->SignalReadData.connect(this,&PeerTerminal::OnTunnelReadData);
+    stream->SignalClosed.connect(this,&PeerTerminal::OnTunnelClosed);
+    this->SignalTunnelOpened(this,aTunnel->GetPeerID());
 }
 
-void PeerTerminal::OnTunnelClosed(kaerp2p::StreamProcess *tunnel)
+void PeerTerminal::OnTunnelClosed(kaerp2p::StreamProcess *stream)
 {
     LOG(INFO)<< __FUNCTION__;
-    this->SignalTunnelClosed(this,conductor_->GetPeerID());
-    this->tunnel_stream_ = NULL;
+    ScopedTunnel aTunnel = this->GetTunnel(stream);
+    if(aTunnel == NULL){
+        LOG(WARNING)<<"cannot get tunnel by stream";
+        return ;
+    }
+
+    this->SignalTunnelClosed(this,aTunnel->GetPeerID());
 }
 
-void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *tunnel, size_t len)
+void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
 {
-    ASSERT(tunnel == conductor_->GetStreamProcess());
+    //ASSERT(tunnel == conductor_->GetStreamProcess());
     //LOG(INFO)<< __FUNCTION__ << " read " << len;
+    ScopedTunnel aTunnel = this->GetTunnel(stream);
+    if(aTunnel == NULL){
+        LOG(WARNING)<<"cannot get tunnel by stream";
+        return ;
+    }
+
     char  * buffer = new char[len];
     size_t readLen;
-    bool result = tunnel->ReadStream(buffer,len,&readLen);
+    bool result = stream->ReadStream(buffer,len,&readLen);
     if(!result){
         LOG(WARNING)<<__FUNCTION__<<"--read stream error";
         return ;
     }
-
-//    this->ExtractMessage(buffer,readLen);
-
-
     talk_base::Buffer data(buffer,readLen);
     delete buffer;
-    this->SignalTunnelMessage(conductor_->GetPeerID(),data);
+    this->SignalTunnelMessage(aTunnel->GetPeerID(),data);
 }
 
-bool PeerTerminal::ExtractMessage(const char *data, size_t len)
+void PeerTerminal::OnRouterReadData(const std::string & peer_id, const std::string & msg)
 {
-    int nRead= 0;
-    talk_base::MemoryStream buffer(data,len);
-    const int headLen = 10;
-    talk_base::StreamResult result;
-    size_t read_bytes;
-    int error;
-    static int bufPos = 0;          //bufPos is msgRecv's write position
-    static int toRead = 0;
-    static const int msgMaxLen = 8192;
-
-    while(true)
-    {
-        if (msgRecv.length() == 0)//上一个消息已经读取完成
-        {
-            result = buffer.Read(headBuf+bufPos,headLen-bufPos,&read_bytes,&error);
-            if(result == talk_base::SR_EOS){
-                break;
-            }
-            if(read_bytes < headLen-bufPos)//消息头在最后几个字节，记录读取的字节，下次继续读取。
-            {
-                LOG(INFO)<<"Continue Read head in new package\r\n ";
-                bufPos = read_bytes;
-                break;
-            }
-            unsigned char  protocal = headBuf[0];
-            int msgLen = *((int*)&headBuf[2]);
-            if (protocal != PROTOCOL_HEAD||  msgLen>msgMaxLen)
-            {
-                LOG(WARNING)<<"The message Protocal Head error, Clear the recv buffer!\r\n";
-                msgRecv.SetLength(0);
-                break;
-            }
-            msgRecv.SetLength(msgLen);
-            bufPos = 0;
-            memcpy(msgRecv.data(),headBuf,headLen);
-            bufPos += headLen;
-            toRead =  msgLen-headLen;
-            if (toRead != 0)//防止 headLen 越界
-            {
-                result = buffer.Read(msgRecv.data()+bufPos,toRead,&read_bytes,&error);
-                if(result == talk_base::SR_EOS){
-                    break;
-                }
-                bufPos += read_bytes;
-                toRead -= read_bytes;
-            }
-        }
-        else//上一个消息未完成读取
-        {
-            result = buffer.Read(msgRecv.data()+bufPos,toRead,&read_bytes,&error);
-            if(result == talk_base::SR_EOS){
-                break;
-            }
-            if (read_bytes < toRead){
-                LOG(INFO)<<"to read more and more!";
-            }
-            bufPos += read_bytes;
-            toRead -= read_bytes;
-        }
-        if(toRead == 0 && bufPos == msgRecv.length())//全部读取
-        {
-            this->OnMessageRespond(msgRecv);
-            msgRecv.SetLength(0);
-            bufPos = 0;
-        }
+    Json::Reader reader;
+    Json::Value jmessage;
+    if (!reader.parse(msg, jmessage)) {
+        LOG(WARNING) << "Received unknown message. " << msg;
+        return;
     }
-    return true;
+    std::string type;
+    GetStringFromJsonObject(jmessage, "type", &type);
+    if(type.compare("p2p") == 0){
+        ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
+        if(aTunnel == NULL){
+            return;
+        }
+        std::string peerMsg;
+        GetStringFromJsonObject(jmessage, "msg", &peerMsg);
+        aTunnel->OnMessageFromPeer(peer_id,peerMsg);
+    }
+    else{
+        //TODO: other message dispatch
+        SignalRouterMessage(peer_id,msg);
+    }
+
 }
 
-void PeerTerminal::OnMessageRespond(talk_base::Buffer &msg)
+void PeerTerminal::OnTunnelNeedSend(const std::string &peer_id, const std::string &msg)
 {
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] = "p2p";
+    jmessage["msg"] = msg;
+    std::string data = writer.write(jmessage);
+    this->SendByRouter(peer_id,data);
 
 }
 
+ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
+{
+    std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
+    for (; it != tunnels_.end(); ++it) {
+      if ((*it)->GetPeerID().compare(peer_id) == 0) {
+        break;
+      }
+    }
+    if (it == tunnels_.end())
+      return NULL;
+    return *it;
+}
+
+ScopedTunnel PeerTerminal::GetTunnel(kaerp2p::StreamProcess *stream)
+{
+    std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
+    for (; it != tunnels_.end(); ++it) {
+      if ((*it)->GetStreamProcess() == stream) {
+        break;
+      }
+    }
+    if (it == tunnels_.end())
+      return NULL;
+    return *it;
+
+}
+
+int PeerTerminal::CountAvailableTunnels()
+{
+    int notUsedNum = max_tunnel_num_ - tunnels_.size();
+    std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
+    for (; it != tunnels_.end(); ++it) {
+      if ((*it)->GetPeerID().empty()) {
+        notUsedNum++;
+        break;
+      }
+    }
+
+    return notUsedNum;
+
+}
+
+ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
+{
+    ScopedTunnel aTunnel = this->GetTunnel(peer_id);
+    if(aTunnel == NULL && tunnels_.size() <= max_tunnel_num_){
+        //    conductor_ = new talk_base::RefCountedObject<kaerp2p::P2PConductor>(client_.get());
+
+        aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
+        aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
+        aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
+    }
+    else{
+        aTunnel = this->GetTunnel("");
+    }
+    return aTunnel;
+}
 
 
 
