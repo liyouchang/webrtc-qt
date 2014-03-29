@@ -69,6 +69,7 @@ int PeerTerminal::SendByTunnel(const std::string &peer_id,
 {
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
+
         return -1;
     }
     aTunnel->GetStreamProcess()->WriteStream(data,len);
@@ -128,7 +129,7 @@ void PeerTerminal::OnTunnelClosed(kaerp2p::StreamProcess *stream)
 void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
 {
     //ASSERT(tunnel == conductor_->GetStreamProcess());
-    //LOG(INFO)<< __FUNCTION__ << " read " << len;
+    LOG(INFO)<< __FUNCTION__ << " read " << len;
     ScopedTunnel aTunnel = this->GetTunnel(stream);
     if(aTunnel == NULL){
         LOG(WARNING)<<"cannot get tunnel by stream";
@@ -160,6 +161,7 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id, const std::stri
     if(type.compare("p2p") == 0){
         ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
         if(aTunnel == NULL){
+            LOG(WARNING)<<"read  p2p msg from unknown peer "<<peer_id;
             return;
         }
         std::string peerMsg;
@@ -229,14 +231,12 @@ int PeerTerminal::CountAvailableTunnels()
 ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
 {
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
-    if(aTunnel == NULL && tunnels_.size() <= max_tunnel_num_){
-        //    conductor_ = new talk_base::RefCountedObject<kaerp2p::P2PConductor>(client_.get());
-
-
+    if(aTunnel){
+        return aTunnel;
+    }else if(tunnels_.size() <= max_tunnel_num_){
         aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
         aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
         aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
-
         tunnels_.push_back(aTunnel);
     }
     else{

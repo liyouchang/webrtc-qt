@@ -51,10 +51,10 @@ int main()
 
     PeerConnectionClientDealer client;
 
-
+    client.Connect("tcp://192.168.0.182:5555","123456");
     talk_base::scoped_ptr<PeerTerminal> terminal;
-    terminal.reset(new PeerTerminal(&client));
-    terminal->Initialize("tcp://192.168.0.182:5555","123456");
+    terminal.reset(new PeerTerminal());
+    terminal->Initialize(&client);
 
 #ifndef ARM
     KeVideoSimulator * simulator = new KeVideoSimulator();

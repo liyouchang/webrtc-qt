@@ -150,7 +150,10 @@ KeMessageProcessCamera *KeVideoSimulator::GetProcess(const std::string &peer_id)
 
 void KeVideoSimulator::OnProcessNeedSend(const std::string &peer_id, const char *data, int len)
 {
-    terminal_->SendByTunnel(peer_id,data,len);
+    int ret = terminal_->SendByTunnel(peer_id,data,len);
+    if(ret != 0){
+        LOG(WARNING)<<"Send to tunnel failed";
+    }
 }
 
 void KeVideoSimulator::OnMessage(talk_base::Message *msg)
@@ -158,11 +161,16 @@ void KeVideoSimulator::OnMessage(talk_base::Message *msg)
     if(msg->message_id == MSG_SENDFILEVIDEO){
         static int fileBufPos = 0;
         static int lastFrameNo = 0;
-        if(fileBufPos > video_data_.length()){
+        if(fileBufPos > (video_data_.length() - sizeof(KEFrameHead))){
             fileBufPos = 0;
         }
         KEFrameHead * pHead = (KEFrameHead *)(video_data_.data() + fileBufPos);
         int frameLen = pHead->frameLen + sizeof(KEFrameHead);
+        if( frameLen < 0 || fileBufPos + frameLen > video_data_.length()  ){
+            fileBufPos = 0;
+            media_thread_->Post(this,MSG_SENDFILEVIDEO);
+            return;
+        }
         //send media
         this->SendMediaMsg(video_data_.data() + fileBufPos,frameLen);
 
