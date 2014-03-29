@@ -2,24 +2,19 @@
 #include "KeMessage.h"
 #include "talk/base/json.h"
 
-PeerTerminal::PeerTerminal(kaerp2p::PeerConnectionClientInterface * client):
-    client_(client)
+PeerTerminal::PeerTerminal():
+    client_(0)
 {
 
 }
 
-int PeerTerminal::Initialize(const std::string &router, const std::string &id)
+int PeerTerminal::Initialize(kaerp2p::PeerConnectionClientInterface * client)
 {
     max_tunnel_num_ = 4;
-
-    int ret = client_->Connect(router,id);
+    this->client_ = client;
+    //int ret = client_->Connect(router,id);
     client_->SignalMessageFromPeer.connect(this,&PeerTerminal::OnRouterReadData);
-
-    //a new conductor is created at here
-//    conductor_ = new talk_base::RefCountedObject<kaerp2p::P2PConductor>(client_.get());
-//    conductor_->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
-//    this->tunnel_stream_ = NULL;
-    return ret;
+    return 0;
 }
 
 
@@ -237,9 +232,12 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
     if(aTunnel == NULL && tunnels_.size() <= max_tunnel_num_){
         //    conductor_ = new talk_base::RefCountedObject<kaerp2p::P2PConductor>(client_.get());
 
+
         aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
         aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
         aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
+
+        tunnels_.push_back(aTunnel);
     }
     else{
         aTunnel = this->GetTunnel("");

@@ -21,6 +21,7 @@ TunnelClientUI::TunnelClientUI(QWidget *parent) :
     ui(new Ui::TunnelClientUI)
 {
     ui->setupUi(this);
+    client_ = new   PeerConnectionClientDealer();
     terminal_ = new PeerTerminal();
     //terminal_->RegisterObserver(this);
 }
@@ -34,9 +35,11 @@ TunnelClientUI::~TunnelClientUI()
 
 void TunnelClientUI::on_btn_init_clicked()
 {
+
+    client_->Connect("tcp://192.168.0.182:5555","");
     //terminal_->Initialize("tcp://192.168.0.182:5555","");
 
-    terminal_->Initialize("tcp://218.56.11.182:5555","");
+    terminal_->Initialize(client_);
 }
 
 void TunnelClientUI::on_btn_connect_clicked()
@@ -60,7 +63,9 @@ void TunnelClientUI::on_btn_video_clicked()
 
 void TunnelClientUI::on_btn_disconnect_clicked()
 {
-    terminal_->CloseTunnel();
+    std::string peer_id = ui->edit_peer_id->text().toStdString();
+
+    terminal_->CloseTunnel(peer_id);
 }
 
 void TunnelClientUI::OnRecvMediaData(int cameraID, int dataType, QByteArray data)

@@ -35,7 +35,8 @@ int KeMsgProcessClient::AskVideo()
     pReqMsg->talk = 0;
     pReqMsg->protocalType = 0;
     pReqMsg->transSvrIp = 0;
-    return terminal_->SendByTunnel(msgSend.data(),msgSend.length());
+
+    return terminal_->SendByTunnel(this->peer_id_,msgSend.data(),msgSend.length());
 }
 
 void KeMsgProcessClient::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg)

@@ -31,8 +31,9 @@ typedef talk_base::scoped_refptr<kaerp2p::P2PConductor> ScopedTunnel;
 class PeerTerminal:public PeerTerminalInterface, public sigslot::has_slots<>
 {
 public:
-    PeerTerminal(kaerp2p::PeerConnectionClientInterface * client);
-    int Initialize(const std::string &router, const std::string &id);
+    PeerTerminal();
+    //need a client that has been login
+    int Initialize(kaerp2p::PeerConnectionClientInterface * client);
 
     virtual int ConnectToPeer(const std::string &peer_id);
     virtual int CloseTunnel(const std::string &peer_id);
