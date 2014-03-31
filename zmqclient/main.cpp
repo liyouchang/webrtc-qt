@@ -5,9 +5,9 @@
 #include "zhelpers.hpp"
 #include "asyndealer.h"
 #include "talk/base/thread.h"
-#include "peerterminal.h"
-#include "peerconnectionclientdealer.h"
 
+#include "peerconnectionclientdealer.h"
+#include "CameraClient.h"
 #ifndef ARM
 #include "KeVideoSimulator.h"
 #else
@@ -49,16 +49,18 @@ int main()
 
     talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
 
-    PeerConnectionClientDealer client;
+    CameraClient client;
 
     client.Connect("tcp://192.168.0.182:5555","123456");
+    client.Login();
+
     talk_base::scoped_ptr<PeerTerminal> terminal;
     terminal.reset(new PeerTerminal());
     terminal->Initialize(&client);
 
 #ifndef ARM
     KeVideoSimulator * simulator = new KeVideoSimulator();
-    simulator->SetTerminal(terminal.get());
+    simulator->Initialize(terminal.get());
     simulator->ReadVideoData("video.h264");
 #else
     HisiMediaDevice * device = new HisiMediaDevice();

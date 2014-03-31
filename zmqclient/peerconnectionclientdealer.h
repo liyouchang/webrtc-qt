@@ -22,12 +22,9 @@ public:
     //router
     int Connect(const std::string & router,const std::string & id);
     //server
-    void StartLogin(const std::string& serverURL,const std::string& client_name);
-
     void SendEcho(const std::string & data);
     //peer
     bool SendToPeer(const std::string &peer_id, const std::string &message);
-    bool SendHangUp(const std::string &peer_id);
     bool IsSendingMessage();
     void OnMessageFromPeer(const std::string& peer_id, const std::string& message);
 

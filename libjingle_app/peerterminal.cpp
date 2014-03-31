@@ -27,7 +27,6 @@ int PeerTerminal::ConnectToPeer(const std::string & peer_id)
     }
     bool ret = aTunnel->ConnectToPeer(peer_id);
     return ret;
-    //conductor_->ConnectToPeer(peer_id);
 }
 
 int PeerTerminal::CloseTunnel(const std::string &peer_id)
@@ -38,14 +37,8 @@ int PeerTerminal::CloseTunnel(const std::string &peer_id)
     }
     aTunnel->DisconnectFromCurrentPeer();
     return 0;
-//    conductor_->DisconnectFromCurrentPeer(true);
-//    this->tunnel_stream_ = NULL;
 }
 
-//bool PeerTerminal::TunnelOpened()
-//{
-//    return (this->tunnel_stream_ != NULL);
-//}
 
 int PeerTerminal::SendByRouter(const std::string &peer_id, const std::string &data)
 {
@@ -75,28 +68,6 @@ int PeerTerminal::SendByTunnel(const std::string &peer_id,
     aTunnel->GetStreamProcess()->WriteStream(data,len);
     return 0;
 }
-
-//int PeerTerminal::AskTunnelVideo()
-//{
-//    talk_base::Buffer msgSend;
-//    int msgLen = sizeof(KEVideoServerReq);
-//    msgSend.SetLength(msgLen);
-//    KEVideoServerReq * pReqMsg;
-//    pReqMsg = (KEVideoServerReq *)msgSend.data();
-//    pReqMsg->protocal = PROTOCOL_HEAD;
-//    pReqMsg->msgType = KEMSG_TYPE_VIDEOSERVER;
-//    pReqMsg->msgLength = msgLen;
-//    pReqMsg->clientID = 0;
-//    pReqMsg->channelNo = 1;
-//    pReqMsg->videoID = 0;
-//    pReqMsg->video = 0;
-//    pReqMsg->listen = 0;
-//    pReqMsg->talk = 0;
-//    pReqMsg->protocalType = 0;
-//    pReqMsg->transSvrIp = 0;
-//    return this->SendByTunnel(msgSend.data(),msgSend.length());
-
-//}
 
 
 void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *stream)

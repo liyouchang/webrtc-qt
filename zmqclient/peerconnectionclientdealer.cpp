@@ -21,11 +21,6 @@ int PeerConnectionClientDealer::Connect(const std::string &router, const std::st
     return ret;
 }
 
-void PeerConnectionClientDealer::StartLogin(const std::string &serverURL, const std::string &client_name)
-{
-    //TODO:add login message to server
-
-}
 
 void PeerConnectionClientDealer::SendEcho(const std::string &data)
 {
@@ -39,14 +34,6 @@ bool PeerConnectionClientDealer::SendToPeer(const std::string &peer_id, const st
     return true;
 }
 
-bool PeerConnectionClientDealer::SendHangUp(const std::string &peer_id)
-{
-    ASSERT(dealer_ != NULL);
-
-    std::string message = kByeMessage;
-    dealer_->AsynSend(peer_id,message);
-    return  true;
-}
 
 bool PeerConnectionClientDealer::IsSendingMessage()
 {

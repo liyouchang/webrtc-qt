@@ -46,16 +46,13 @@ win32 {
 SOURCES += main.cpp \
     asyndealer.cpp \
     peerconnectionclientdealer.cpp \
-    peerterminal.cpp \
-    KeMessageProcessCamera.cpp
+    CameraClient.cpp
 
 
 HEADERS += \
     asyndealer.h \
-    PeerConnectionClinetInterface.h \
     peerconnectionclientdealer.h \
-    peerterminal.h \
-    KeMessageProcessCamera.h
+    CameraClient.h
 
 
 arm{

@@ -37,7 +37,10 @@ SOURCES += \
     ../talk/app/kaerp2p/peertunnel.cpp \
     p2pconductor.cpp \
     streamprocess.cpp \
-    ../talk/app/kaerp2p/kaer_session_client.cpp
+    ../talk/app/kaerp2p/kaer_session_client.cpp \
+    peerterminal.cpp \
+    KeMsgProcess.cpp \
+    KeMsgProcessContainer.cpp
 
 
 HEADERS += \
@@ -54,6 +57,10 @@ HEADERS += \
     p2pconductor.h \
     streamprocess.h \
     ../talk/app/kaerp2p/kaer_session_client.h \
-    PeerConnectionClinetInterface.h
+    PeerConnectionClinetInterface.h \
+    KeMessage.h \
+    peerterminal.h \
+    KeMsgProcess.h \
+    KeMsgProcessContainer.h
 
 

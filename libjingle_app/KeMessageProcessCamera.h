@@ -1,0 +1,7 @@
+#ifndef KEMESSAGEPROCESSCAMERA_H
+#define KEMESSAGEPROCESSCAMERA_H
+
+#include "KeMsgProcess.h"
+
+
+#endif // KEMESSAGEPROCESSCAMERA_H

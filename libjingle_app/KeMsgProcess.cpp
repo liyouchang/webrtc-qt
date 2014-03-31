@@ -1,14 +1,21 @@
-#include "KeMessageProcessCamera.h"
+#include "KeMsgProcess.h"
+#include "talk/base/stream.h"
 
-KeMessageProcessCamera::KeMessageProcessCamera(std::string peer_id):
-    peer_id_(peer_id),start_video_(false)
+KeMsgProcess::KeMsgProcess(std::string peer_id):
+    peer_id_(peer_id),msgMaxLen(8192)
 {
     bufPos = 0;
     toRead = 0;
-
 }
 
-void KeMessageProcessCamera::ExtractMessage(talk_base::Buffer &allBytes)
+void KeMsgProcess::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg)
+{
+    ASSERT(this->peer_id_ == peer_id);
+    ASSERT(msg.length() > 0);
+    this->ExtractMessage(msg);
+}
+
+void KeMsgProcess::ExtractMessage(talk_base::Buffer &allBytes)
 {
     talk_base::MemoryStream buffer(allBytes.data(),allBytes.length());
     const int headLen = 10;
@@ -77,6 +84,18 @@ void KeMessageProcessCamera::ExtractMessage(talk_base::Buffer &allBytes)
 
 }
 
+void KeMsgProcess::OnMessageRespond(talk_base::Buffer &msgData)
+{
+
+}
+
+
+KeMessageProcessCamera::KeMessageProcessCamera(std::string peer_id):
+    KeMsgProcess(peer_id),start_video_(false)
+{
+}
+
+
 void KeMessageProcessCamera::OnMessageRespond(talk_base::Buffer &msgData)
 {
     char msgType = msgData.data()[1];
@@ -101,24 +120,6 @@ void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
 
     int audio = msg->listen;
     SignalRecvAskMediaMsg(this,video,audio);
-
-}
-
-//void KeMessageProcessCamera::SetTerminal(std::string peer_id, PeerTerminalInterface *t)
-//{
-//    this->peer_id_ = peer_id;
-//    terminal_ = t;
-//    msgRecv.SetLength(0);
-//    bufPos = 0;
-//    toRead = 0;
-//    terminal_->SignalTunnelMessage.connect(this,&KeMessageProcessCamera::OnTunnelMessage);
-//}
-
-void KeMessageProcessCamera::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg)
-{
-    ASSERT(this->peer_id_ == peer_id);
-    ASSERT(msg.length() > 0);
-    this->ExtractMessage(msg);
 
 }
 
@@ -156,23 +157,3 @@ void KeMessageProcessCamera::OnAudioData(const char *data, int len)
 
 }
 
-//void KeMessageProcessCamera::SendMediaMsg(int type,const char *data, int len)
-//{
-//    if(!start_video_){
-//        return ;
-//    }
-//    talk_base::Buffer sendBuf;
-//    int msgLen = sizeof(KERTStreamHead)  + len;
-//    sendBuf.SetLength(msgLen);
-//    KERTStreamHead * head = (KERTStreamHead *)sendBuf.data();
-//    head->protocal = PROTOCOL_HEAD;
-//    head->msgType = type;
-//    head->msgLength = msgLen;
-//    head->channelNo = 1;
-//    head->videoID = 0;
-//    memcpy(sendBuf.data() + sizeof(KERTStreamHead),data,len);
-
-//    SignalNeedSendData(this->peer_id_,sendBuf.data(),sendBuf.length());
-//    //terminal_->SendByTunnel(this->peer_id_,sendBuf.data(),sendBuf.length());
-
-//}

@@ -1,6 +1,5 @@
 #include "KeVideoSimulator.h"
 #include "talk/base/pathutils.h"
-#include "KeMessage.h"
 #include "talk/base/bind.h"
 KeVideoSimulator::KeVideoSimulator()
 {
@@ -13,15 +12,6 @@ KeVideoSimulator::~KeVideoSimulator()
     delete media_thread_;
 }
 
-void KeVideoSimulator::SetTerminal(PeerTerminalInterface *t)
-{
-    this->terminal_ = t;
-    t->SignalTunnelOpened.connect(this,&KeVideoSimulator::OnTunnelOpened);
-    t->SignalTunnelClosed.connect(this,&KeVideoSimulator::OnTunnelClosed);
-    t->SignalTunnelMessage.connect(this,&KeVideoSimulator::OnTunnelMessage);
-
-
-}
 
 bool KeVideoSimulator::ReadVideoData(std::string file_name)
 {
@@ -64,47 +54,13 @@ void KeVideoSimulator::OnTunnelOpened(PeerTerminalInterface *t, const std::strin
 {
     ASSERT(terminal_ == t);
     LOG(INFO)<<__FUNCTION__;
-
     KeMessageProcessCamera *process = new KeMessageProcessCamera(peer_id);
-    //process->SetTerminal(peer_id,t);
     process->SignalRecvAskMediaMsg.connect(this,&KeVideoSimulator::OnProcessMediaRequest);
-    processes_.push_back(process);
+    this->AddMsgProcess(process);
 }
 
-void KeVideoSimulator::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
-{
-    ASSERT(terminal_ == t);
-    LOG(INFO)<<__FUNCTION__;
 
-    std::vector<KeMessageProcessCamera *>::iterator it = processes_.begin();
-    for (; it != processes_.end(); ++it) {
-      if ((*it)->GetPeerID() == peer_id) {
-        break;
-      }
-    }
-    if (it == processes_.end()){
-        LOG(WARNING)<< "peer id "<< peer_id<<" not found";
-      return ;
-    }
 
-    delete (*it);
-    processes_.erase(it);
-}
-
-void KeVideoSimulator::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg)
-{
-    KeMessageProcessCamera * process = this->GetProcess(peer_id);
-    if(process == NULL){
-        LOG(WARNING)<< "peer id "<< peer_id<<" not found";
-        return;
-    }
-    process->OnTunnelMessage(peer_id,msg);
-}
-
-void KeVideoSimulator::OnRouterMessage(const std::string &peer_id, const std::string &msg)
-{
-    LOG(INFO)<<__FUNCTION__<<"---- peer_id = "<<peer_id<<" msg = "<<msg;
-}
 
 void KeVideoSimulator::SendMediaMsg(const char * data,int len)
 {
@@ -134,27 +90,7 @@ void KeVideoSimulator::OnProcessMediaRequest(KeMessageProcessCamera * process,in
 
 }
 
-KeMessageProcessCamera *KeVideoSimulator::GetProcess(const std::string &peer_id)
-{
-    std::vector<KeMessageProcessCamera *>::iterator it = processes_.begin();
-    for (; it != processes_.end(); ++it) {
-      if ((*it)->GetPeerID() == peer_id) {
-        break;
-      }
-    }
-    if (it == processes_.end())
-      return NULL;
-    return *it;
 
-}
-
-void KeVideoSimulator::OnProcessNeedSend(const std::string &peer_id, const char *data, int len)
-{
-    int ret = terminal_->SendByTunnel(peer_id,data,len);
-    if(ret != 0){
-        LOG(WARNING)<<"Send to tunnel failed";
-    }
-}
 
 void KeVideoSimulator::OnMessage(talk_base::Message *msg)
 {
