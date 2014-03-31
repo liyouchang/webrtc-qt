@@ -53,4 +53,7 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id, const std::stri
         }
 
     }
+    else{
+        SignalMessageFromPeer(peer_id,message);
+    }
 }

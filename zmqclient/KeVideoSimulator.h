@@ -29,9 +29,7 @@ protected:
     talk_base::Thread * media_thread_;
     talk_base::Buffer video_data_;
     std::vector<KeMessageProcessCamera *> processes_;
-    //bool startSend;
 
-    PeerTerminalInterface * terminal_;
     // MessageHandler interface
 public:
     void OnMessage(talk_base::Message *msg);

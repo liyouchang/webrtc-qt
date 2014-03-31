@@ -100,7 +100,7 @@ void PeerTerminal::OnTunnelClosed(kaerp2p::StreamProcess *stream)
 void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
 {
     //ASSERT(tunnel == conductor_->GetStreamProcess());
-    LOG(INFO)<< __FUNCTION__ << " read " << len;
+    //LOG(INFO)<< __FUNCTION__ << " read " << len;
     ScopedTunnel aTunnel = this->GetTunnel(stream);
     if(aTunnel == NULL){
         LOG(WARNING)<<"cannot get tunnel by stream";

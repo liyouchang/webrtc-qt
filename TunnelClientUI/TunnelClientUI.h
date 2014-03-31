@@ -2,10 +2,9 @@
 #define TUNNELCLIENTUI_H
 
 #include <QMainWindow>
-#include "../zmqclient/peerterminal.h"
-#include "KeMsgProcessClient.h"
 #include "../zmqclient/peerconnectionclientdealer.h"
 #include <QFile>
+#include "KeQtTunnelClient.h"
 namespace Ui {
 class TunnelClientUI;
 }
@@ -33,7 +32,7 @@ private slots:
 private:
     Ui::TunnelClientUI *ui;
     PeerTerminal * terminal_;
-    talk_base::scoped_ptr<KeMsgProcessClient> msg_processer_;
+    talk_base::scoped_ptr<KeQtTunnelClient> msg_processer_;
     PeerConnectionClientDealer *client_;
 
     QFile * recordFile;

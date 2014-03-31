@@ -55,16 +55,13 @@ SOURCES +=\
     TunnelClientUI.cpp \
     ../zmqclient/asyndealer.cpp \
     ../zmqclient/peerconnectionclientdealer.cpp \
-    ../zmqclient/peerterminal.cpp \
-    KeMsgProcessClient.cpp
+    KeQtTunnelClient.cpp
 
 HEADERS  += \
     TunnelClientUI.h \
     ../zmqclient/asyndealer.h \
     ../zmqclient/peerconnectionclientdealer.h \
-    ../zmqclient/peerterminal.h \
-    ../zmqclient/KeMessage.h \
-    KeMsgProcessClient.h
+    KeQtTunnelClient.h
 
 FORMS += \
     TunnelClientUI.ui

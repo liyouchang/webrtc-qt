@@ -46,7 +46,7 @@ public slots:
     void deleteItem();
     void showfullScreenWall();
     void showNormalScreenWall();
-    void OnRecvMediaData(int cameraID,int dataType,QByteArray data);
+    void OnRecvMediaData(QString peer_id, QByteArray data);
 
 protected:
     AVService * playSource;
