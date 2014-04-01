@@ -162,7 +162,7 @@ void VideoWall::showNormalScreenWall()
     this->showNormal();
 }
 
-void VideoWall::OnRecvMediaData(int cameraID, int dataType, QByteArray data)
+void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
 {
     if(!playSource->IsPlaying()){
         if(playSource->OpenStream()!=0)

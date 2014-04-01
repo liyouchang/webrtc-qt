@@ -46,18 +46,22 @@ void TunnelClientUI::on_btn_connect_clicked()
 {
     std::string peer_id = ui->edit_peer_id->text().toStdString();
     terminal_->ConnectToPeer(peer_id);
-    msg_processer_.reset( new KeMsgProcessClient());
-    msg_processer_->SetTerminal(peer_id,terminal_);
-    QObject::connect(msg_processer_.get(),&KeMsgProcessClient::SigRecvMediaData,
+    msg_processer_.reset( new KeQtTunnelClient());
+    msg_processer_->Initialize(terminal_);
+    QObject::connect(msg_processer_.get(),&KeQtTunnelClient::SigRecvVideoData,
                      ui->videoWall,&VideoWall::OnRecvMediaData);
-    QObject::connect(msg_processer_.get(),&KeMsgProcessClient::SigRecvMediaData,
-                     this,&TunnelClientUI::OnRecvMediaData);
+    QObject::connect(msg_processer_.get(),&KeQtTunnelClient::SigRecvAudioData,
+                     ui->videoWall,&VideoWall::OnRecvMediaData);
+
+//    QObject::connect(msg_processer_.get(),&KeQtTunnelContainer::SigRecvMediaData,
+//                     this,&TunnelClientUI::OnRecvMediaData);
 
 }
 
 void TunnelClientUI::on_btn_video_clicked()
 {
-    msg_processer_->AskVideo();
+    std::string peer_id = ui->edit_peer_id->text().toStdString();
+    msg_processer_->AskPeerVideo(peer_id);
 }
 
 

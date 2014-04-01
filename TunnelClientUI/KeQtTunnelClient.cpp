@@ -1,0 +1,125 @@
+#include "KeQtTunnelClient.h"
+#include <QBuffer>
+#include <QDebug>
+KeQtTunnelClient::KeQtTunnelClient(QObject *parent) :
+    QObject(parent)
+{
+    terminal_ = NULL;
+}
+
+int KeQtTunnelClient::AskPeerVideo(std::string peer_id)
+{
+    KeMessageProcessClient * process =dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
+    if(process == NULL){
+        LOG(WARNING) << "process not found "<<peer_id;
+        return -1;
+    }
+    process->AskVideo();
+    return 0;
+}
+
+void KeQtTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *data, int len)
+{
+    //qDebug()<<__FUNCTION__;
+    QByteArray mediaData(data,len);
+    emit SigRecvAudioData(peer_id.c_str(),mediaData);
+}
+
+void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *data, int len)
+{
+    //qDebug()<<__FUNCTION__;
+    QByteArray mediaData(data,len);
+    emit SigRecvVideoData(peer_id.c_str(),mediaData);
+}
+
+void KeQtTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
+{
+    ASSERT(this->terminal_ == t);
+    KeMessageProcessClient * process = new KeMessageProcessClient(peer_id);
+    process->SignalRecvAudioData.connect(this,&KeQtTunnelClient::OnRecvAudioData);
+    process->SignalRecvVideoData.connect(this,&KeQtTunnelClient::OnRecvVideoData);
+    this->AddMsgProcess(process);
+}
+
+
+
+
+//void KeQtTunnelClient::ExtractMessage(QByteArray &allBytes)
+//{
+//    int nRead= 0;
+//    QBuffer buffer(&allBytes);
+//    buffer.open(QIODevice::ReadOnly);
+//    const int headLen = 10;
+//    while(!buffer.atEnd())
+//    {
+//        if (msgRecv.isEmpty())//上一个消息已经读取完成
+//        {
+//            nRead = buffer.read(headBuf+bufPos,headLen-bufPos);
+//            if(nRead < headLen-bufPos)//消息头在最后几个字节，记录读取的字节，下次继续读取。
+//            {
+//                qDebug()<<"Continue Read head in new package\r\n ";
+//                bufPos = nRead;
+//                break;
+//            }
+//            unsigned char  protocal = headBuf[0];
+//            int msgLen;
+//            memcpy(&msgLen,&headBuf[2],4);
+//            if (protocal != PROTOCOL_HEAD||  msgLen>msgMaxLen)
+//            {
+//                qWarning()<<"The message Protocal Head error"<<msgLen <<" protocal:"<<protocal;
+//                msgRecv.clear();
+//                break;
+//            }
+//            msgRecv.resize(msgLen);
+//            bufPos = 0;
+//            memcpy(msgRecv.data(),headBuf,headLen);
+//            bufPos += headLen;
+//            toRead =  msgLen-headLen;
+//            if (toRead != 0)//防止 headLen 越界
+//            {
+//                nRead = buffer.read(msgRecv.data()+bufPos, toRead);
+//                bufPos += nRead;
+//                toRead -= nRead;
+//            }
+//        }
+//        else//上一个消息未完成读取
+//        {
+//            nRead = buffer.read(msgRecv.data()+bufPos,toRead);
+//            if (nRead < toRead){
+//                qDebug()<<"to read more and more!";
+//            }
+//            bufPos += nRead;
+//            toRead -= nRead;
+//        }
+//        if(toRead == 0 && bufPos == msgRecv.size())//全部读取
+//        {
+//            this->OnMessageRespond(msgRecv);
+//            msgRecv.clear();
+//            bufPos = 0;
+//        }
+//    }
+//}
+
+//void KeQtTunnelClient::OnMessageRespond(QByteArray &msgData)
+//{
+//    unsigned char  msgType = msgData[1];
+//    switch(msgType)
+//    {
+//    case KEMSG_TYPE_VIDEOSERVER:
+//        break;
+//    case KEMSG_TYPE_MEDIATRANS:
+//        break;
+//    case KEMSG_TYPE_VIDEOSTREAM:
+//    case KEMSG_TYPE_AUDIOSTREAM:{
+//        KERTStreamHead * pMsg = (KERTStreamHead *)msgData.data();
+//        int cameraID = CreateCameraID(pMsg->videoID, pMsg->channelNo);
+//        const int sendStartPos = 11;
+//        QByteArray data = msgData.right(pMsg->msgLength-sendStartPos);
+//        emit this->SigRecvMediaData(cameraID,msgType,data);
+//        break;
+//    }
+//    default:
+//        qDebug("Receive unkown message: %d ",msgType);
+//        break;
+//    }
+//}

@@ -13,6 +13,7 @@ void KeMsgProcess::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer
 {
     ASSERT(this->peer_id_ == peer_id);
     ASSERT(msg.length() > 0);
+
     this->ExtractMessage(msg);
 }
 
@@ -87,6 +88,7 @@ void KeMsgProcess::ExtractMessage(talk_base::Buffer &allBytes)
 
 void KeMsgProcess::OnMessageRespond(talk_base::Buffer &msgData)
 {
+    LOG(INFO)<<__FUNCTION__;
 
 }
 
@@ -158,3 +160,61 @@ void KeMessageProcessCamera::OnAudioData(const char *data, int len)
 
 }
 
+
+
+KeMessageProcessClient::KeMessageProcessClient(std::string peer_id):
+    KeMsgProcess(peer_id)
+{
+
+}
+
+void KeMessageProcessClient::AskVideo()
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KEVideoServerReq);
+    sendBuf.SetLength(msgLen);
+    KEVideoServerReq * pReqMsg;
+    pReqMsg = (KEVideoServerReq *)sendBuf.data();
+    pReqMsg->protocal = PROTOCOL_HEAD;
+    pReqMsg->msgType = KEMSG_TYPE_VIDEOSERVER;
+    pReqMsg->msgLength = msgLen;
+    pReqMsg->clientID = 0;
+    pReqMsg->channelNo = 1;
+    pReqMsg->videoID = 0;
+    pReqMsg->video = 0;
+    pReqMsg->listen = 0;
+    pReqMsg->talk = 0;
+    pReqMsg->protocalType = 0;
+    pReqMsg->transSvrIp = 0;
+
+    SignalNeedSendData(this->peer_id_,sendBuf.data(),sendBuf.length());
+
+}
+
+void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
+{
+    char msgType = msgData.data()[1];
+    switch(msgType)
+    {
+    case KEMSG_TYPE_VIDEOSERVER:
+        break;
+    case KEMSG_TYPE_MEDIATRANS:
+        break;
+    case KEMSG_TYPE_AUDIOSTREAM:
+    case KEMSG_TYPE_VIDEOSTREAM:{
+        KERTStreamHead * pMsg = (KERTStreamHead *)msgData.data();
+        const int sendStartPos = 11;
+        int mediaDataLen = msgData.length() - sendStartPos;
+        if(msgType == KEMSG_TYPE_VIDEOSTREAM){
+            SignalRecvVideoData(this->peer_id_,msgData.data() + sendStartPos,mediaDataLen);
+        }else if(msgType == KEMSG_TYPE_AUDIOSTREAM){
+            SignalRecvAudioData(this->peer_id_,msgData.data() + sendStartPos,mediaDataLen);
+        }
+        break;
+    }
+    default:
+        LOG(INFO)<<"Receive unkown message: "<<msgType;
+        break;
+    }
+
+}

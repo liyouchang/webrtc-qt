@@ -42,5 +42,20 @@ protected:
     bool start_video_;
 };
 
+class KeMessageProcessClient: public KeMsgProcess
+{
+public:
+    KeMessageProcessClient(std::string peer_id);
+
+    void AskVideo();
+
+    sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
+    sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
+protected:
+    virtual void OnMessageRespond(talk_base::Buffer & msgData);
+
+};
+
+
 
 #endif // KEMSGPROCESS_H
