@@ -8,6 +8,7 @@
 
 #include "peerconnectionclientdealer.h"
 #include "CameraClient.h"
+#include "talk/base/logging.h"
 #ifndef ARM
 #include "KeVideoSimulator.h"
 #else
@@ -54,13 +55,13 @@ int main()
     client.Connect("tcp://192.168.0.182:5555","123456");
     client.Login();
 
-    talk_base::scoped_ptr<PeerTerminal> terminal;
-    terminal.reset(new PeerTerminal());
-    terminal->Initialize(&client);
+//    talk_base::scoped_ptr<PeerTerminal> terminal;
+//    terminal.reset(new PeerTerminal());
+//    terminal->Initialize(&client);
 
 #ifndef ARM
     KeVideoSimulator * simulator = new KeVideoSimulator();
-    simulator->Initialize(terminal.get());
+    simulator->Initialize(&client);
     simulator->ReadVideoData("video.h264");
 #else
     HisiMediaDevice * device = new HisiMediaDevice();

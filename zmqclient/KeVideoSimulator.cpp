@@ -1,6 +1,9 @@
 #include "KeVideoSimulator.h"
 #include "talk/base/pathutils.h"
 #include "talk/base/bind.h"
+#include "talk/base/logging.h"
+#include "talk/base/stream.h"
+#include "../libjingle_app/KeMessage.h"
 KeVideoSimulator::KeVideoSimulator()
 {
     media_thread_ = new talk_base::Thread();

@@ -4,6 +4,8 @@
 #include "PeerTerminalInterface.h"
 #include "KeMsgProcess.h"
 #include "PeerConnectionClinetInterface.h"
+#include <vector>
+
 class KeMsgProcessContainer:public sigslot::has_slots<>
 {
 public:
