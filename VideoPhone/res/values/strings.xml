@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">视频监控</string>
+    <string name="app_version">版本: V1.0.1</string>
+    <string name="company_website">公司网址：www.kaer.cn</string>
+    <string name="company_phone">公司电话：4006080787</string>
+    <string name="copyright">版权所有：山东卡尔电气股份有限公司</string>
+    
+    <string name="login">登录</string>
+    <string name="logout">注销</string>
+    <string name="register">注册账号</string>
+    <string name="submit">提交</string>
+    <string name="hint_user">用户名</string>
+    <string name="hint_pwd">密码</string>
+    <string name="hint_repwd">确认密码</string>
+    <string name="hint_email">邮箱</string>
+    <string name="remember_pwd">自动登录</string>
+    <string name="forget_pwd">忘记密码？</string>
+    <string name="old_pwd">请输入旧密码</string>
+    <string name="new_pwd">请输入新密码</string>
+    <string name="new_repwd">请再次输入新密码</string>
+    
+    <string name="btn_ok">确定</string>
+    <string name="btn_back">返回</string>
+    <string name="add">添加</string>
+    <string name="more">更多</string>
+    
+    <string name="modify_pwd">修改密码</string>
+    <string name="help">帮助</string>
+    <string name="about">关于</string>
+    <string name="about_software">关于软件</string>
+    <string name="about_kaer">关于卡尔</string>
+    
+    <string name="add_new_device">添加设备</string>
+    <string name="hint_device_id">设备ID</string>
+    <string name="hint_device_name">设备名称</string>
+    <string name="scan_qr">扫描二维码</string>
+    
+    <string name="local_video">本地录像</string>
+    <string name="local_picture">抓拍图片</string>
+    <string name="alert_msg">告警消息</string>
+    <string name="system_msg">系统消息</string>
+    <string name="image_view">图片查看</string>
+    
+    <string name="about_kaer_content">山东卡尔电气股份有限公司主要从事通信终端、安防视频终端的研究、开发、生产与销售，是集科工贸为一体的科研型高科技股份制企业。公司已通过ISO9001国际质量管理体系认证、ISO14001环境管理体系认证和国家强制性产品认证(CCC)，所有产品均获得国家工信部进网许可证书及CMC证书，DVR、IPC系列产品已通过公安部检测，DVS系列产品2007年被安防行业权威媒体“慧聪网”评为“十大创新品牌”之一。
+\n\n公司将现代化的管理模式融于产品的研发、生产和销售之中，建立完善的售后服务管理体系，确保用户在使用高质量产品的同时能够得到更好的售后服务。
+\n\n卡尔电气拥有雄厚的技术力量、卓越的产品基础和一流的服务理念，愿为社会各行业提供领先、专业、优质的技术支持和产品服务，为客户持续创造更大的价值，同时愿与客户真诚合作，共同创业。</string>
+
+</resources>

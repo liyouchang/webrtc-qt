@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <!-- 报警橙色 -->
+    <color name="alert_red">#ff0000</color> 
+    <!-- 白色 -->
+    <color name="white">#FFFFFF</color>
+    <!-- 黑色 -->
+    <color name="black">#000000</color>
+    <!-- 浅黑 -->
+    <color name="light_black">#696969</color>
+    <!-- 海绿色 -->
+    <color name="sea_green">#43CD80</color>
+    <!-- 橙色 -->
+    <color name="orange">#ee8c23</color>
+    <!-- 蓝色 -->
+    <color name="blue">#188ab5</color>
+    <!-- TAB下文字颜色#5face7 -->
+    <color name="tab_text_color">#4584cd</color>
+    <!-- 标题背景#002e3e -->
+    <color name="title_bg_black">#414445</color>
+    <!-- 背景颜色 -->
+    <color name="page_bg_grey">#D3D3D3</color>
+    <!-- 扫描二维码颜色 -->
+    <color name="possible_result_points">#c0ffff00</color>
+    <color name="result_view">#b0000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="viewfinder_frame">#ff000000</color>
+    <color name="viewfinder_laser">#ffff0000</color>
+    <color name="viewfinder_mask">#60000000</color>
+    
+</resources>

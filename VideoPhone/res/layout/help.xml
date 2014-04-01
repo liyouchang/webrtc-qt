@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager_help"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="40.0dip"
+        android:orientation="horizontal" >
+
+        <ImageView
+            android:id="@+id/iv_help1"
+            android:layout_width="10.0dip"
+            android:layout_height="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:scaleType="fitXY"
+            android:background="@drawable/image_focused"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/iv_help2"
+            android:layout_width="10.0dip"
+            android:layout_height="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:scaleType="fitXY"
+            android:background="@drawable/image_unfocused"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/iv_help3"
+            android:layout_width="10.0dip"
+            android:layout_height="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:scaleType="fitXY"
+            android:background="@drawable/image_unfocused"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/iv_help4"
+            android:layout_width="10.0dip"
+            android:layout_height="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:scaleType="fitXY"
+            android:background="@drawable/image_unfocused"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/iv_help5"
+            android:layout_width="10.0dip"
+            android:layout_height="10.0dip"
+            android:scaleType="fitXY"
+            android:background="@drawable/image_unfocused"
+            android:contentDescription="@null" />
+    </LinearLayout>
+
+</FrameLayout>
