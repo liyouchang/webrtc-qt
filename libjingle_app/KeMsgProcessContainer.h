@@ -3,7 +3,7 @@
 
 #include "PeerTerminalInterface.h"
 #include "KeMsgProcess.h"
-
+#include "PeerConnectionClinetInterface.h"
 class KeMsgProcessContainer:public sigslot::has_slots<>
 {
 public:

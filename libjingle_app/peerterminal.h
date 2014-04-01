@@ -4,8 +4,8 @@
 
 #include "../libjingle_app/p2pconductor.h"
 //#include "talk/app/webrtc/proxy.h"
-#include "talk/base/buffer.h"
-#include "../libjingle_app/PeerConnectionClinetInterface.h"
+#include "PeerTerminalInterface.h"
+#include "PeerConnectionClinetInterface.h"
 #include <vector>
 //one terminal contains one PeerConnectionClient and some P2PConductor
 
