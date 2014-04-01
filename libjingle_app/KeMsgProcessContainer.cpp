@@ -1,19 +1,34 @@
 #include "KeMsgProcessContainer.h"
-
+#include "peerterminal.h"
 KeMsgProcessContainer::KeMsgProcessContainer()
 {
     this->terminal_ = 0;
-
+    has_terminal = false;
 }
 
-void KeMsgProcessContainer::Initialize(PeerTerminalInterface *t)
+KeMsgProcessContainer::~KeMsgProcessContainer()
+{
+    if(has_terminal){
+        delete this->terminal_;
+    }
+}
+
+int KeMsgProcessContainer::Initialize(PeerTerminalInterface *t)
 {
     this->terminal_ = t;
     t->SignalTunnelOpened.connect(this,&KeMsgProcessContainer::OnTunnelOpened);
     t->SignalTunnelClosed.connect(this,&KeMsgProcessContainer::OnTunnelClosed);
     t->SignalTunnelMessage.connect(this,&KeMsgProcessContainer::OnTunnelMessage);
     t->SignalRouterMessage.connect(this,&KeMsgProcessContainer::OnRouterMessage);
+    return 0;
+}
 
+int KeMsgProcessContainer::Initialize(kaerp2p::PeerConnectionClientInterface *client)
+{
+    PeerTerminal * t = new PeerTerminal();
+    t->Initialize(client);
+    this->has_terminal = true;
+    return this->Initialize(t);
 }
 
 void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)

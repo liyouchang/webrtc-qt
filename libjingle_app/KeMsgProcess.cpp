@@ -1,5 +1,6 @@
 #include "KeMsgProcess.h"
 #include "talk/base/stream.h"
+#include "KeMessage.h"
 
 KeMsgProcess::KeMsgProcess(std::string peer_id):
     peer_id_(peer_id),msgMaxLen(8192)

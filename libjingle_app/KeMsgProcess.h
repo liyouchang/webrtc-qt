@@ -1,7 +1,6 @@
 #ifndef KEMSGPROCESS_H
 #define KEMSGPROCESS_H
 
-#include "KeMessage.h"
 #include "talk/base/buffer.h"
 #include <string>
 #include "talk/base/sigslot.h"

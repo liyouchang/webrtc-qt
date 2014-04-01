@@ -61,6 +61,7 @@ HEADERS += \
     KeMessage.h \
     peerterminal.h \
     KeMsgProcess.h \
-    KeMsgProcessContainer.h
+    KeMsgProcessContainer.h \
+    PeerTerminalInterface.h
 
 
