@@ -61,6 +61,7 @@ SOURCES += \
     ../talk/base/linux.cc \
     ../talk/base/linuxfdwalk.c \
     base/unixfilesystem.cc \
+    base/ifaddrs-android.cc
 
 
 HEADERS += \
@@ -68,6 +69,7 @@ HEADERS += \
     ../talk/base/linux.h \
     ../talk/base/linuxfdwalk.h \
     base/unixfilesystem.h \
+    base/ifaddrs-android.h
 
 }
 
@@ -188,7 +190,7 @@ HEADERS += \
     base/urlencode.h \
     base/ratelimiter.h \
     base/worker.h \
-    base/buffer.h
+    base/buffer.h \
 
 OTHER_FILES += \
     libjingle.gyp

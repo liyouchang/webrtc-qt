@@ -11,6 +11,10 @@ KeMsgProcessContainer::~KeMsgProcessContainer()
     if(has_terminal){
         delete this->terminal_;
     }
+
+    for(int i =0 ;i< processes_.size();i++){
+        delete processes_[i];
+    }
 }
 
 int KeMsgProcessContainer::Initialize(PeerTerminalInterface *t)
@@ -29,6 +33,16 @@ int KeMsgProcessContainer::Initialize(kaerp2p::PeerConnectionClientInterface *cl
     t->Initialize(client);
     this->has_terminal = true;
     return this->Initialize(t);
+}
+
+int KeMsgProcessContainer::ConnectToPeer(const std::string &peer_id)
+{
+    return terminal_->ConnectToPeer(peer_id);
+}
+
+int KeMsgProcessContainer::CloseTunnel(const std::string &peer_id)
+{
+    return terminal_->CloseTunnel(peer_id);
 }
 
 void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
@@ -104,4 +118,41 @@ void KeMsgProcessContainer::OnProcessNeedSend(const std::string &peer_id, const 
         LOG(WARNING)<<"Send to tunnel failed";
     }
 
+}
+
+
+KeTunnelClient::KeTunnelClient()
+{
+
+}
+
+int KeTunnelClient::AskPeerVideo(std::string peer_id)
+{
+    KeMessageProcessClient * process =dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
+    if(process == NULL){
+        LOG(WARNING) << "process not found "<<peer_id;
+        return -1;
+    }
+    process->AskVideo();
+    return 0;
+}
+
+void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
+{
+    ASSERT(this->terminal_ == t);
+    KeMessageProcessClient * process = new KeMessageProcessClient(peer_id);
+    process->SignalRecvAudioData.connect(this,&KeTunnelClient::OnRecvAudioData);
+    process->SignalRecvVideoData.connect(this,&KeTunnelClient::OnRecvVideoData);
+    this->AddMsgProcess(process);
+
+}
+
+void KeTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *data, int len)
+{
+    LOG(INFO)<<__FUNCTION__;
+}
+
+void KeTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *data, int len)
+{
+    LOG(INFO)<<__FUNCTION__;
 }
