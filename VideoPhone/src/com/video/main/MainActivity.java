@@ -1,27 +1,19 @@
 package com.video.main;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.ViewPager.LayoutParams;
 import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
@@ -31,7 +23,6 @@ import com.video.R;
 import com.video.service.BackstageService;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
-import com.video.utils.PopupWindowAdapter;
 import com.video.utils.TabFactory;
 import com.video.utils.Utils;
 
@@ -39,8 +30,8 @@ public class MainActivity extends FragmentActivity {
 	
 	private Context mContext;
 	private TabHost mTabHost;
-	private PopupWindow mPopupWindow;
-	private boolean isOpenPopupWindow = false;
+	private TextView app_exit;
+	private boolean isTextViewShow = false;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -61,6 +52,17 @@ public class MainActivity extends FragmentActivity {
         System.out.println("MyDebug: 【进入应用软件】");
         ZmqCtrl.getInstance().init();
         
+        app_exit = (TextView) this.findViewById(R.id.tv_exit_application);
+        app_exit.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
+		    	HandlerApplication.getInstance().stopService(intent);
+		    	System.out.println("MyDebug: 【退出应用软件】");
+		    	finish();
+			}
+		});
 	}
 	
 	private void initView() {
@@ -169,63 +171,33 @@ public class MainActivity extends FragmentActivity {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
-    	HandlerApplication.getInstance().stopService(intent);
-    	System.out.println("MyDebug: 【退出应用软件】");
-	}
+	}	
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			
-		} else if (keyCode == KeyEvent.KEYCODE_MENU) {
-			if (isOpenPopupWindow == false) {
-				isOpenPopupWindow = true;
-				showPopupWindow(mTabHost);
+		// TODO Auto-generated method stub
+		if (keyCode == KeyEvent.KEYCODE_MENU  && event.getRepeatCount() == 0) {
+			if (isTextViewShow == false) {
+				isTextViewShow = true;
+				app_exit.setVisibility(View.VISIBLE);
+				Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_in);  
+				app_exit.startAnimation(animation); 
 			} else {
-				isOpenPopupWindow = false;
-				if (mPopupWindow.isShowing()) {
-					mPopupWindow.dismiss();
-				}
+				isTextViewShow = false;
+				app_exit.setVisibility(View.INVISIBLE);
+				Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_out);  
+				app_exit.startAnimation(animation); 
+			}
+		} else if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
+			if (isTextViewShow) {
+				isTextViewShow = false;
+				app_exit.setVisibility(View.INVISIBLE);
+				Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_out);  
+				app_exit.startAnimation(animation); 
+				return true;
 			}
 		}
 		return super.onKeyDown(keyCode, event);
-	}	
-	
-	private void showPopupWindow(View view) {
-		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View pop_view = inflater.inflate(R.layout.pop_exit_main, null);
-		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
-		
-		List<String> item_list = new ArrayList<String>();
-		item_list.add("退出应用");
-		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mContext, item_list);
-		pop_listView.setAdapter(popAdapter);
-		
-		mPopupWindow = new PopupWindow(pop_view, LayoutParams.FILL_PARENT, 190, true);
-		mPopupWindow.setHeight(LayoutParams.WRAP_CONTENT); 
-		mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
-		mPopupWindow.setOutsideTouchable(true);
-		
-		mPopupWindow.setAnimationStyle(R.style.PopupAnimationBottom);
-		mPopupWindow.showAtLocation(view, Gravity.BOTTOM, 0, 0);
-		mPopupWindow.update();
-
-		pop_listView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				switch (position) {
-					case 0:
-						if (mPopupWindow.isShowing()) {
-							mPopupWindow.dismiss();
-						}
-						Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
-				    	HandlerApplication.getInstance().stopService(intent);
-						break;
-					default : break;
-				}
-			}
-		});
 	}
 }
 

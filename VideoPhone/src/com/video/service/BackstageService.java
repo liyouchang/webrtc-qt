@@ -1,6 +1,7 @@
 package com.video.service;
 
 import com.video.R;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqThread;
 
 import android.app.Service;
@@ -23,6 +24,7 @@ public class BackstageService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// TODO Auto-generated method stub
+		HandlerApplication.getInstance().setMyHandler(ZmqThread.zmqThreadHandler);
 		isRun = true;
 		thread = new BackstageThread();
 		thread.start();
@@ -54,7 +56,7 @@ public class BackstageService extends Service {
 	public void sendHandlerMsg(int what) {
 		Message msg = new Message();
 		msg.what = what;
-		Handler handler = ZmqThread.zmqThreadHandler;
+		Handler handler = HandlerApplication.getInstance().getMyHandler();
 		handler.sendMessage(msg);
 	}
 	

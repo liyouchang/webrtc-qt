@@ -25,6 +25,7 @@
     <string name="btn_back">返回</string>
     <string name="add">添加</string>
     <string name="more">更多</string>
+    <string name="app_exit">退出应用</string>
     
     <string name="modify_pwd">修改密码</string>
     <string name="help">帮助</string>
@@ -42,6 +43,15 @@
     <string name="alert_msg">告警消息</string>
     <string name="system_msg">系统消息</string>
     <string name="image_view">图片查看</string>
+    
+    <string name="device_item_name">名称: 门口摄像头</string>
+    <string name="device_item_mac">ID: 009B684850022</string>
+    <string name="pull_to_refresh_pull_label">下拉刷新</string>
+    <string name="pull_to_refresh_release_label">松开后刷新</string>
+    <string name="pull_to_refresh_refreshing_label">刷新中\u2026</string>
+    <string name="pull_to_refresh_footer_release_label">松开后加载</string>
+    <string name="pull_to_refresh_footer_pull_label">上拉加载更多</string>
+    <string name="pull_to_refresh_footer_refreshing_label">加载中\u2026</string>
     
     <string name="about_kaer_content">山东卡尔电气股份有限公司主要从事通信终端、安防视频终端的研究、开发、生产与销售，是集科工贸为一体的科研型高科技股份制企业。公司已通过ISO9001国际质量管理体系认证、ISO14001环境管理体系认证和国家强制性产品认证(CCC)，所有产品均获得国家工信部进网许可证书及CMC证书，DVR、IPC系列产品已通过公安部检测，DVS系列产品2007年被安防行业权威媒体“慧聪网”评为“十大创新品牌”之一。
 \n\n公司将现代化的管理模式融于产品的研发、生产和销售之中，建立完善的售后服务管理体系，确保用户在使用高质量产品的同时能够得到更好的售后服务。

@@ -22,14 +22,14 @@
             android:background="@drawable/title_more_xml"
             android:contentDescription="@null"
             android:gravity="center_vertical|center_horizontal"
-            android:src="@drawable/btn_title_back_unselected" />
+            android:src="@drawable/btn_title_back_selected" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/add_new_device"
-            android:textColor="@color/white"
+            android:textColor="@color/orange"
             android:textSize="@dimen/title_text_size" />
 
         <ImageButton
@@ -39,7 +39,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="@drawable/title_more_xml"
-            android:src="@drawable/title_more_unselected"
+            android:src="@drawable/title_more_selected"
             android:gravity="center_vertical|center_horizontal"
             android:contentDescription="@null" />
     </RelativeLayout>

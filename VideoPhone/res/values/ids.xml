@@ -36,7 +36,10 @@
     <!-- 修改密码 -->
     <item name="modify_pwd_id" type="id"/>
     
-    <!-- 添加设备 -->
+    <!-- 添加终端 -->
     <item name="add_device_id" type="id"/>
+    
+    <!-- 请求终端列表 -->
+    <item name="request_terminal_list_id" type="id"/>
 
 </resources>

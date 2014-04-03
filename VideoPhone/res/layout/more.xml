@@ -11,7 +11,7 @@
         android:background="@color/title_bg_black"
         android:gravity="center_horizontal|center_vertical"
         android:text="@string/more"
-        android:textColor="@color/white"
+        android:textColor="@color/orange"
         android:textSize="@dimen/title_text_size" />
     
     
@@ -67,6 +67,18 @@
         android:text="@string/about"
         android:textColor="@color/title_bg_black"
         android:textSize="18dp" />
+    
+    <Button
+        android:id="@+id/btn_test_login"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_style"
+        android:text="@string/login"
+        android:textColor="@color/white"
+        android:textSize="20dp" />
     
     <Button
         android:id="@+id/btn_logout"

@@ -1,7 +1,7 @@
 <TabHost xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/tabhost"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="match_parent"
     android:background="@color/light_black" >
 
     <FrameLayout
@@ -19,6 +19,19 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:gravity="center_horizontal|center_vertical" />
+
+        <TextView
+            android:id="@+id/tv_exit_application"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignTop="@android:id/tabs"
+            android:background="@color/title_bg_black"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/app_exit"
+            android:textColor="@color/orange"
+            android:textSize="25dp"
+            android:visibility="invisible" />
     </RelativeLayout>
 
 </TabHost>

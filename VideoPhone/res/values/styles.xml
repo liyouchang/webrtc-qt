@@ -22,7 +22,7 @@
     </style>
     
 	<style name="PopupAnimationBottom" parent="android:Animation" mce_bogus="1">        
-	    <item name="android:windowEnterAnimation">@anim/popupwindow_exit</item>    
-        <item name="android:windowExitAnimation">@anim/popupwindow_enter</item>  
+	    <item name="android:windowEnterAnimation">@anim/popupwindow_menu_in</item>    
+        <item name="android:windowExitAnimation">@anim/popupwindow_menu_out</item>  
     </style> 
 </resources>

@@ -18,19 +18,20 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager.LayoutParams;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.qrcode.view.CaptureActivity;
 import com.video.R;
@@ -38,10 +39,9 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
-import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
-public class AddDeviceActivity extends Activity implements OnClickListener, OnTouchListener {
+public class AddDeviceActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
 	private PreferData preferData = null;
@@ -73,7 +73,6 @@ public class AddDeviceActivity extends Activity implements OnClickListener, OnTo
 		add_title = (RelativeLayout) this.findViewById(R.id.add_device_title);
 		button_title_more = (ImageButton) this.findViewById(R.id.btn_add_device_more);
 		button_title_more.setOnClickListener(this);
-		button_title_more.setOnTouchListener(this);
 		
 		ImageButton button_back = (ImageButton) this.findViewById(R.id.btn_add_device_back);
 		button_back.setOnClickListener(this);
@@ -263,6 +262,9 @@ public class AddDeviceActivity extends Activity implements OnClickListener, OnTo
 		return resultFlag;
 	}
 	
+	/**
+	 * 添加设备的弹出对话框
+	 */
 	private void showPopupWindow() {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View pop_view = inflater.inflate(R.layout.pop_main, null);
@@ -271,7 +273,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener, OnTo
 		List<String> item_list = new ArrayList<String>();
 		item_list.add("扫描二维码");
 		item_list.add("搜索设备");
-		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mContext, item_list);
+		AddPopupWindowAdapter popAdapter = new AddPopupWindowAdapter(mContext, item_list);
 		pop_listView.setAdapter(popAdapter);
 		
 		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
@@ -306,6 +308,55 @@ public class AddDeviceActivity extends Activity implements OnClickListener, OnTo
 			}
 		});
 	}
+	
+	/**
+	 * 添加设备的适配器
+	 */
+	private class AddPopupWindowAdapter extends BaseAdapter {
+
+		private Context context;
+		private List<String> list;
+
+		public AddPopupWindowAdapter(Context context, List<String> list) {
+			this.context = context;
+			this.list = list;
+		}
+
+		@Override
+		public int getCount() {
+			return list.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return list.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup viewGroup) {
+			ViewHolder holder;
+
+			if (convertView == null) {
+				convertView = LayoutInflater.from(context).inflate(R.layout.pop_item, null);
+				holder = new ViewHolder();
+				convertView.setTag(holder);
+				holder.pop_textView = (TextView) convertView.findViewById(R.id.pop_text);
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+			holder.pop_textView.setText(list.get(position));
+			return convertView;
+		}
+
+		class ViewHolder {
+			TextView pop_textView;
+		}
+	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -315,20 +366,5 @@ public class AddDeviceActivity extends Activity implements OnClickListener, OnTo
 			String qrcode_string = bundle.getString("qrcode");
 			et_id.setText(qrcode_string);
 		}
-	}
-
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-		// TODO Auto-generated method stub
-		switch (v.getId()) {
-		case R.id.btn_add_device_more:
-			if (MotionEvent.ACTION_DOWN == event.getAction()) {
-				button_title_more.setImageResource(R.drawable.title_more_selected);
-			} else if (MotionEvent.ACTION_UP == event.getAction()) {
-				button_title_more.setImageResource(R.drawable.title_more_unselected);
-			}
-			break;
-		}
-		return false;
 	}
 }

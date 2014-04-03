@@ -41,7 +41,7 @@ public class PopupWindowAdapter extends BaseAdapter {
 		ViewHolder holder;
 
 		if (convertView == null) {
-			convertView = LayoutInflater.from(context).inflate(R.layout.pop_item, null);
+			convertView = LayoutInflater.from(context).inflate(R.layout.pop_event_item, null);
 			holder = new ViewHolder();
 			convertView.setTag(holder);
 			holder.pop_textView = (TextView) convertView.findViewById(R.id.pop_text);

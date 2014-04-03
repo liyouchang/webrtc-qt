@@ -17,4 +17,9 @@ public class Value {
 	 * 请求超时时间
 	 */
 	public final static int requestTimeout = 5000;
+	
+	/**
+	 * 是否需要向服务器请求终端列表
+	 */
+	public static boolean isNeedReqTermListFlag = true;
 }

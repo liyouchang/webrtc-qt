@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/page_bg_grey"
@@ -17,9 +18,9 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/app_name"
-            android:textColor="@color/white"
+            android:textColor="@color/orange"
             android:textSize="@dimen/title_text_size" />
-        
+
         <ImageButton
             android:id="@+id/btn_add_device"
             android:layout_width="60dp"
@@ -27,33 +28,27 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="@drawable/title_more_xml"
-            android:src="@drawable/imagebutton_add_unselected"
+            android:contentDescription="@null"
             android:gravity="center_vertical|center_horizontal"
-            android:contentDescription="@null" />
+            android:src="@drawable/imagebutton_add_selected" />
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/btn_test_login"
+    <com.video.main.PullToRefreshView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/main_pull_refresh_view"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/button_style"
-        android:text="@string/login"
-        android:textColor="@color/white"
-        android:textSize="20dp" />
+        android:layout_height="fill_parent"
+        android:background="@color/page_bg_grey"
+        android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/btn_test_register"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/button_style"
-        android:text="@string/register"
-        android:textColor="@color/white"
-        android:textSize="20dp" />
+        <ListView
+            android:id="@+id/device_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="65dp"
+            android:cacheColorHint="#00000000"
+            android:divider="@color/orange"
+            android:dividerHeight="1dp" />
+    </com.video.main.PullToRefreshView>
 
 </LinearLayout>

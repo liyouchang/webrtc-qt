@@ -14,6 +14,7 @@ import android.widget.Button;
 
 import com.video.R;
 import com.video.data.PreferData;
+import com.video.data.Value;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
 
@@ -56,6 +57,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		
 		button_logout = (Button)mView.findViewById(R.id.btn_logout);
 		button_logout.setOnClickListener(this);
+		
+		Button button_login = (Button)mView.findViewById(R.id.btn_test_login);
+		button_login.setOnClickListener(this);
  	}
 	
 	private void initData() {
@@ -65,6 +69,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	/**
 	 * 显示操作的提示
 	 */
+	@SuppressWarnings("unused")
 	private void showHandleDialog() {
 		AlertDialog aboutDialog = new AlertDialog.Builder(mActivity)
 				.setTitle("温馨提示")
@@ -113,7 +118,14 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				startActivity(new Intent(mActivity, AboutActivity.class));
 				break;
 			case R.id.btn_logout:
-				showHandleDialog();
+//				showHandleDialog();
+				if (Value.isNeedReqTermListFlag) 
+					Value.isNeedReqTermListFlag = false;
+				else 
+					Value.isNeedReqTermListFlag = true;
+				break;
+			case R.id.btn_test_login:
+				startActivity(new Intent(mActivity, LoginActivity.class));
 				break;
 		}
 	}
