@@ -71,11 +71,15 @@ jint JNI_OnLoad(JavaVM * pVm ,void * reserved){
 	}
 
 	JNINativeMethod nm[] = {
-
+			{"naInitialize","(Ljava/lang/String;)I",(void*)naInitialize},
+			{"naTerminate","()I",(void*)naTerminate},
+			{"naOpenTunnel","(Ljava/lang/String;)I",(void*)naOpenTunnel},
+			{"naCloseTunnel","(Ljava/lang/String;)I",(void*)naCloseTunnel},
+			{"naAskMediaData","(Ljava/lang/String;)I",(void*)naAskMediaData}
 	};
 
 
-	jclass cls = env->FindClass("com/h264/VView");
+	jclass cls = env->FindClass("com/video/play/TunnelCommunication");
 	env->RegisterNatives(cls,nm,NELEM(nm));
 
 	JniUtil::GetInstance()->g_vm_ = pVm;
