@@ -21,5 +21,5 @@ public class Value {
 	/**
 	 * 是否需要向服务器请求终端列表
 	 */
-	public static boolean isNeedReqTermListFlag = true;
+	public static boolean isNeedReqTermListFlag = false;
 }

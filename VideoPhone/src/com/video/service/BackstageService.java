@@ -57,7 +57,14 @@ public class BackstageService extends Service {
 		Message msg = new Message();
 		msg.what = what;
 		Handler handler = HandlerApplication.getInstance().getMyHandler();
-		handler.sendMessage(msg);
+		if (handler != null) {
+			handler.sendMessage(msg);
+		} else {
+			if (thread != null) {
+				isRun = false;
+				thread = null;
+			}
+		}
 	}
 	
 	/**

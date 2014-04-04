@@ -211,7 +211,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * @return true:注册信息格式正确  false:注册信息格式错误
+	 * @return true:修改密码格式正确  false:修改密码格式错误
 	 */
 	private boolean checkModifyPwdData() {
 		boolean resultFlag = false;

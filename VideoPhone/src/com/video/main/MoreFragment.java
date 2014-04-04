@@ -15,6 +15,7 @@ import android.widget.Button;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.play.TunnelCommunication;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
 
@@ -25,7 +26,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	
 	Button button_logout;
 	private PreferData preferData = null;
-
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -123,6 +124,13 @@ public class MoreFragment extends Fragment implements OnClickListener {
 					Value.isNeedReqTermListFlag = false;
 				else 
 					Value.isNeedReqTermListFlag = true;
+				
+				TunnelCommunication.tunnelInitialize("com/video/play/TunnelCommunication");
+				TunnelCommunication.openTunnel("123456");
+//				TunnelCommunication.askMediaData("123456");
+				TunnelCommunication.closeTunnel("123456");
+//				TunnelCommunication.tunnelTerminate();
+				
 				break;
 			case R.id.btn_test_login:
 				startActivity(new Intent(mActivity, LoginActivity.class));
