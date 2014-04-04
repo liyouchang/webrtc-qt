@@ -31,6 +31,8 @@ int PeerTerminal::ConnectToPeer(const std::string & peer_id)
 
 int PeerTerminal::CloseTunnel(const std::string &peer_id)
 {
+    LOG(INFO)<< __FUNCTION__;
+
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
         return -1;

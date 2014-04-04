@@ -30,7 +30,7 @@ public:
 
 protected:
     //message is use client to get and send
-    void OnMessageSent();
+    //void OnMessageSent();
 };
 
 

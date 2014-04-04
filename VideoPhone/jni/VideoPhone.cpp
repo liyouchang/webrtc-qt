@@ -6,14 +6,15 @@
 #include "KeJniTunnelClient.h"
 #include "JniUtil.h"
 
+#include "talk/base/logging.h"
+
 KeJniTunnelClient * client = NULL;
 JniPeerConnection * jniPeer = NULL;
 
 jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
 	LOGI("1. naInitialize()");
 	JniUtil::GetInstance()->g_env_ = env;
-	JniUtil::GetInstance()->call_class_name_ = env->GetStringUTFChars(cbClass,
-			NULL);
+	JniUtil::GetInstance()->call_class_name_ = env->GetStringUTFChars(cbClass,NULL);
 
 	jniPeer = new JniPeerConnection();
 	client = new KeJniTunnelClient();
@@ -67,6 +68,8 @@ jint naAskMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
 #endif
 
 jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
+    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
+
 	JNIEnv * env;
 	if (pVm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
 		return -1;

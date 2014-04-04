@@ -13,8 +13,7 @@ LOCAL_LDLIBS := -llog  -landroid  \
 	$(P2P_LIB_PATH)/libjingle.a \
  	$(P2P_LIB_PATH)/libjsoncpp.a 
  		
- LOCAL_CFLAGS := -DPOSIX  
- 		
+LOCAL_CFLAGS := -DPOSIX  
 
 LOCAL_C_INCLUDES := $(CURDIR)/..
 

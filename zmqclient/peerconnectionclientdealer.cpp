@@ -15,7 +15,7 @@ int PeerConnectionClientDealer::Connect(const std::string &router, const std::st
 {
     dealer_.reset(new AsynDealer());
     dealer_->SignalReadData.connect(this,&PeerConnectionClientDealer::OnMessageFromPeer);
-    dealer_->SignalSent.connect(this,&PeerConnectionClientDealer::OnMessageSent);
+    //dealer_->SignalSent.connect(this,&PeerConnectionClientDealer::OnMessageSent);
     int ret = dealer_->initialize(id,router);
     this->my_id_ = dealer_->id();
     return ret;
@@ -45,8 +45,8 @@ void PeerConnectionClientDealer::OnMessageFromPeer(const std::string &peer_id, c
     SignalMessageFromPeer(peer_id,message);
 }
 
-void PeerConnectionClientDealer::OnMessageSent()
-{
-    this->SignalMessageSent(0);
-}
+//void PeerConnectionClientDealer::OnMessageSent()
+//{
+//    this->SignalMessageSent(0);
+//}
 

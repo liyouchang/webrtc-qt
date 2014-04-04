@@ -73,6 +73,7 @@ public:
     void OnError();
     void OnRenegotiationNeeded();
     void OnIceCandidate(const IceCandidateInterface *candidate);
+    void OnIceGatheringChange(IceObserver::IceGatheringState new_state);
 
 };
 

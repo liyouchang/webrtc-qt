@@ -85,6 +85,7 @@ int P2PConductor::ConnectToPeer(const std::string &peer_id)
     }
     if (InitializePeerConnection()) {
         peer_id_ = peer_id;
+        tunnel_established_ = false;
         peer_connection_->CreateOffer(this);
     } else {
         LOG(LS_INFO) <<"initialize connection error";
@@ -95,7 +96,11 @@ int P2PConductor::ConnectToPeer(const std::string &peer_id)
 
 void P2PConductor::DisconnectFromCurrentPeer()
 {
+
     LOG(INFO) << __FUNCTION__;
+    if(!tunnel_established_){
+        LOG(WARNING) << "the tunnel is not established, it maybe crash by two thread conflict";
+    }
     if (peer_connection_.get()) {
         SignalNeedSendToPeer(peer_id_,kByeMessage);
         DeletePeerConnection();
@@ -226,6 +231,12 @@ void P2PConductor::OnIceCandidate(const IceCandidateInterface *candidate)
 
     //client_->SendToPeer(peer_id_,msg);
     SignalNeedSendToPeer(peer_id_,msg);
+}
+
+void P2PConductor::OnIceGatheringChange(IceObserver::IceGatheringState new_state)
+{
+    LOG(INFO) << __FUNCTION__ <<"-----------"<<new_state;
+
 }
 
 void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
