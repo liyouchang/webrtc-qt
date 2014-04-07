@@ -18,13 +18,21 @@ JniPeerConnection::~JniPeerConnection() {
 
 bool JniPeerConnection::SendToPeer(const std::string& peer_id,
 		const std::string& message) {
-	return jni_thread->Invoke<bool>(
-			talk_base::Bind(&JniPeerConnection::SendToPeer_jni, this,peer_id,message));
+	LOGI("JniPeerConnection::SendToPeer");
 
+//	bool ret =  jni_thread->Invoke<bool>(
+//			talk_base::Bind(&JniPeerConnection::SendToPeer_jni, this,peer_id,message));
+	bool ret =  JniUtil::GetInstance()->JniSendToPeer(peer_id.c_str(),message.c_str());
+
+	LOGI("jni invoke %d",ret);
+
+	return ret;
 }
 
 bool JniPeerConnection::SendToPeer_jni(const std::string& peer_id,
 		const std::string& message) {
+	LOGI("JniPeerConnection::SendToPeer_jni");
+
 	return JniUtil::GetInstance()->JniSendToPeer(peer_id.c_str(),message.c_str());
 }
 
