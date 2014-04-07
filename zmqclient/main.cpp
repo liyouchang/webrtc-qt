@@ -71,8 +71,8 @@ int main()
 #endif //arm
 
 
-    simulator->ConnectToPeer("444444");
-    simulator->CloseTunnel("444444");
+    //simulator->ConnectToPeer("444444");
+    //simulator->CloseTunnel("444444");
 
     talk_base::Thread::Current()->Run();
 //    while(true){

@@ -23,8 +23,8 @@ void CameraClient::OnMessage(talk_base::Message *msg)
 {
     switch (msg->message_id) {
     case MSG_LOGIN_TIMEOUT:{
-        LOG(INFO)<<"Log in timeout,relogin";
-        this->Login();
+        //LOG(INFO)<<"Log in timeout,relogin";
+        //this->Login();
         break;
     }
     default:

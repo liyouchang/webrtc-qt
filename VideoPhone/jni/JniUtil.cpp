@@ -52,25 +52,40 @@ jboolean JniUtil::getIntField(JNIEnv* env, jobject obj, const char* fieldName,
 }
 
 bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
-	jclass callBackCls = g_env_->FindClass(call_class_name_.c_str());
+	LOGI("JniUtil::JniSendToPeer 1");
+	JNIEnv *p_env;
+
+
+	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
+	if(status != JNI_OK){
+		LOGI("g_vm GetEnv error %d", status);
+		status = g_vm_->AttachCurrentThread(&p_env,NULL);
+		if(status != JNI_OK){
+			LOGE("g_vm AttachCurrentThread error %d", status);
+			return false ;
+		}
+	}
+	jclass callBackCls = p_env->FindClass(call_class_name_.c_str());
 	if (!callBackCls) {
 		LOGE("Get class %s error", call_class_name_.c_str());
 		return false;
 	}
-	jmethodID mid = g_env_->GetStaticMethodID(callBackCls, "SendToPeer",
+	LOGI("JniUtil::JniSendToPeer 2");
+
+	jmethodID mid = p_env->GetStaticMethodID(callBackCls, "SendToPeer",
 			"(Ljava/lang/String;Ljava/lang/String;)V");
 	if (!mid) {
 		LOGE("get method SendToPeer error");
 		return false;
 	}
-	jstring jni_pid = g_env_->NewStringUTF(peer_id);
-	jstring jni_msg = g_env_->NewStringUTF(message);
+	jstring jni_pid = p_env->NewStringUTF(peer_id);
+	jstring jni_msg = p_env->NewStringUTF(message);
 
 	LOGI("message: %s", message);
-	const char * msg1 = g_env_->GetStringUTFChars(jni_msg,NULL);
+	const char * msg1 = p_env->GetStringUTFChars(jni_msg,NULL);
 	LOGI("msg1: %s", msg1);
 
-	g_env_->CallStaticVoidMethod(callBackCls, mid, jni_pid, jni_msg);
+	p_env->CallStaticVoidMethod(callBackCls, mid, jni_pid, jni_msg);
 	return true;
 }
 

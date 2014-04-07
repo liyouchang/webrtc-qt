@@ -161,7 +161,7 @@ void KeTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *dat
 void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
-    LOG(INFO)<<__FUNCTION__;
+    LOG(INFO)<<__FUNCTION__<<"---------"<<peer_id;
     KeMessageProcessCamera *process = new KeMessageProcessCamera(peer_id);
     process->SignalRecvAskMediaMsg.connect(this,&KeTunnelCamera::OnProcessMediaRequest);
     this->AddMsgProcess(process);
