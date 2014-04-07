@@ -1,0 +1,15 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins\@kaer.com/trivial,version=3.0]
+"Path"="E:\\workspace\\qt\\qt-solutions-qt-solutions\\qtbrowserplugin\\examples\\trivial\\debug\\nptrivial.dll"
+"GeckoVersion"="1.00"
+"Version"="3.0"
+"Vendor"="kaer"
+"Description"="kaertest"
+"ProductName"="trivial"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins\@kaer.com/trivial,version=3.0\MimeTypes]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins\@kaer.com/trivial,version=3.0\MimeTypes\trivial/very]

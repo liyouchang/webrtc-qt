@@ -3,7 +3,7 @@
 #include "KeMessage.h"
 
 KeMsgProcess::KeMsgProcess(std::string peer_id):
-    peer_id_(peer_id),msgMaxLen(8192)
+    peer_id_(peer_id),msgMaxLen(512*1024)
 {
     bufPos = 0;
     toRead = 0;
