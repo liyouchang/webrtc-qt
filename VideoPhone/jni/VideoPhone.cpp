@@ -44,7 +44,16 @@ jint naOpenTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
 	const char * pid = env->GetStringUTFChars(peer_id, NULL);
 	return client->ConnectToPeer(pid);
 }
+jint naMessageFromPeer(JNIEnv *env, jobject thiz, jstring peer_id, jstring message){
+		if (jniPeer == NULL) {
+			return -1;
+		}
+		const char * pid = env->GetStringUTFChars(peer_id, NULL);
+		const char * pMsg = env->GetStringUTFChars(message,NULL);
+		jniPeer->OnMessageFromPeer(pid,pMsg);
+		return 0;
 
+}
 jint naCloseTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
 	LOGI("4. naCloseTunnel()");
 	if (client == NULL) {
