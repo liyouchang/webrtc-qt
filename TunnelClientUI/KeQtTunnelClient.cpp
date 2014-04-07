@@ -4,18 +4,6 @@
 KeQtTunnelClient::KeQtTunnelClient(QObject *parent) :
     QObject(parent)
 {
-    terminal_ = NULL;
-}
-
-int KeQtTunnelClient::AskPeerVideo(std::string peer_id)
-{
-    KeMessageProcessClient * process =dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
-    if(process == NULL){
-        LOG(WARNING) << "process not found "<<peer_id;
-        return -1;
-    }
-    process->AskVideo();
-    return 0;
 }
 
 void KeQtTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *data, int len)
@@ -32,14 +20,7 @@ void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *d
     emit SigRecvVideoData(peer_id.c_str(),mediaData);
 }
 
-void KeQtTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
-{
-    ASSERT(this->terminal_ == t);
-    KeMessageProcessClient * process = new KeMessageProcessClient(peer_id);
-    process->SignalRecvAudioData.connect(this,&KeQtTunnelClient::OnRecvAudioData);
-    process->SignalRecvVideoData.connect(this,&KeQtTunnelClient::OnRecvVideoData);
-    this->AddMsgProcess(process);
-}
+
 
 
 
