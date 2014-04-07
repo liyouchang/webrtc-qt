@@ -1,5 +1,7 @@
 package com.video.socket;
 
+import java.util.HashMap;
+
 import org.zeromq.ZMQ;
 
 import android.os.Handler;
@@ -8,6 +10,7 @@ import android.os.Message;
 
 import com.video.R;
 import com.video.data.Value;
+import com.video.play.TunnelCommunication;
 
 public class ZmqThread extends Thread {
 	
@@ -35,6 +38,18 @@ public class ZmqThread extends Thread {
         return result;
 	}
 	
+	private boolean sendZmqData(String peerId, String data) {
+		boolean result = false;
+		String requestContentString = data+" ";  
+        byte[] requestContentByteArray = requestContentString.getBytes();  
+        requestContentByteArray[requestContentByteArray.length-1] = 0;  
+        
+        result = zmq_socket.send(peerId, ZMQ.SNDMORE); 
+        result = zmq_socket.send(requestContentByteArray, 0);
+        
+        return result;
+	}
+	
 	/**
 	 * ZMQ从Backstage接收数据
 	 * @return null:接收不成功，否则返回接收到的数据
@@ -53,6 +68,10 @@ public class ZmqThread extends Thread {
 			String message_str2 = new String(message_byte2);
 			if (message_str1.equals(Value.BackstageName)) {
 				result = message_str2;
+			} 
+			else if (message_str1.equals("123456")) {
+				System.out.println("MyDebug: 收到的Peer数据1: " + message_str1);
+				TunnelCommunication.messageFromPeer("123456", message_str2);
 			}
         }
 		return result;
@@ -79,6 +98,7 @@ public class ZmqThread extends Thread {
 		
 		Looper.prepare();
 		zmqThreadHandler = new Handler() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
@@ -100,6 +120,18 @@ public class ZmqThread extends Thread {
 						System.out.println("MyDebug: 发送的数据: "+(String)msg.obj);
 						if (zmqThreadHandler.hasMessages(R.id.zmq_send_data_id)) {
 							zmqThreadHandler.removeMessages(R.id.zmq_send_data_id);
+						}
+						break;
+					//发送对等端数据
+					case R.id.send_to_peer_id:
+						HashMap<String, String> mapData = (HashMap<String, String>)msg.obj;
+						String peerId = mapData.get("peerId");
+						String peerData = mapData.get("peerData");
+						sendZmqData(peerId, peerData);
+						System.out.println("MyDebug: \n");
+						System.out.println("MyDebug: 发送的Peer数据: " + peerData);
+						if (zmqThreadHandler.hasMessages(R.id.send_to_peer_id)) {
+							zmqThreadHandler.removeMessages(R.id.send_to_peer_id);
 						}
 						break;
 					//关闭ZMQ Socket

@@ -44,13 +44,11 @@ public class MainActivity extends FragmentActivity {
 	
 	private void initData() {
 		mContext = MainActivity.this;
+		ZmqCtrl.getInstance().init();
 		DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         Utils.screenWidth = dm.widthPixels;
         Utils.screenHeight = dm.heightPixels;
-        
-        System.out.println("MyDebug: 【进入应用软件】");
-        ZmqCtrl.getInstance().init();
         
         app_exit = (TextView) this.findViewById(R.id.tv_exit_application);
         app_exit.setOnClickListener(new OnClickListener() {
@@ -99,7 +97,7 @@ public class MainActivity extends FragmentActivity {
 		TabWidget tabWidget = mTabHost.getTabWidget();  
 		tabWidget.setStripEnabled(false);
         for (int i = 0; i < tabWidget.getChildCount(); i++) { 
-        	tabWidget.getChildAt(i).setBackgroundDrawable(getResources().getDrawable(R.color.title_bg_black));
+        	tabWidget.getChildAt(i).setBackground(getResources().getDrawable(R.color.title_bg_black));
             TextView tv = (TextView) tabWidget.getChildAt(i).findViewById(android.R.id.title);  
             ImageView iv = (ImageView) tabWidget.getChildAt(i).findViewById(android.R.id.icon);  
   
@@ -196,6 +194,8 @@ public class MainActivity extends FragmentActivity {
 				app_exit.startAnimation(animation); 
 				return true;
 			}
+		} else if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
+			MainActivity.this.finish();
 		}
 		return super.onKeyDown(keyCode, event);
 	}

@@ -1,6 +1,7 @@
 package com.video.service;
 
 import com.video.R;
+import com.video.data.Value;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqThread;
 
@@ -47,6 +48,7 @@ public class BackstageService extends Service {
 			thread = null;
 		}
 		sendHandlerMsg(R.id.close_zmq_socket_id);
+		Value.isNeedReqTermListFlag = true;
 		System.out.println("MyDebug: 【关闭服务】");
 	}
 	
@@ -64,6 +66,7 @@ public class BackstageService extends Service {
 				isRun = false;
 				thread = null;
 			}
+			System.out.println("MyDebug: 【后台服务中 handler = null】");
 		}
 	}
 	

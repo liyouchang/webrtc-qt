@@ -5,18 +5,27 @@ import java.util.List;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.video.R;
+import com.video.data.PreferData;
+import com.video.user.LoginActivity;
 import com.video.utils.ViewPagerAdapter;
 
 public class HelpActivity extends Activity implements OnPageChangeListener  {
 
+	private PreferData preferData = null;
+	private boolean appFirstTime = true;
+	
 	private ViewPager mViewPager = null;
 	private List<View> pageList = null;
 	private static View help_page1;
@@ -81,6 +90,26 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 		mViewPager.setAdapter(new ViewPagerAdapter(pageList));
 		mViewPager.setOnPageChangeListener(this);
 		mViewPager.setCurrentItem(0);
+		
+		preferData = new PreferData(HelpActivity.this);
+		Button useNow = (Button) help_page5.findViewById(R.id.btn_use_now);
+		if (preferData.isExist("AppFirstTime")) {
+			appFirstTime = preferData.readBoolean("AppFirstTime");
+		}
+		if (appFirstTime) {
+			useNow.setVisibility(View.VISIBLE);
+		} else {
+			useNow.setVisibility(View.INVISIBLE);
+		}
+		useNow.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				appFirstTime = false;
+	    		preferData.writeData("AppFirstTime", appFirstTime);
+				startActivity(new Intent(HelpActivity.this, LoginActivity.class));
+				HelpActivity.this.finish();
+			}
+		});
 	}
 
 	@Override
@@ -135,5 +164,18 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 			mViewPager.removeAllViews();
 			mViewPager = null;
 		}
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
+			if (!appFirstTime) {
+				HelpActivity.this.finish();
+			} else {
+				return false;
+			}
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 }

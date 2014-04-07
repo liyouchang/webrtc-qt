@@ -57,6 +57,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private PopupWindow mPopupWindow;
 	private ProgressDialog progressDialog;
 	
+	private static ArrayList<HashMap<String, String>> deviceList = null;
 	private DeviceItemAdapter deviceAdapter = null;
 	private ListView lv_list;
 	private PullToRefreshView mPullToRefreshView;
@@ -113,11 +114,11 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		}
 		//初始化终端列表的显示
 		if (Value.isNeedReqTermListFlag) {
-			clickReqTermListEvent();
+			reqTermListEvent();
 		}
-		ArrayList<HashMap<String, String>> list = xmlData.readXml();
-		if (list != null) {
-			deviceAdapter = new DeviceItemAdapter(mActivity, list);
+		deviceList = xmlData.readXml();
+		if (deviceList != null) {
+			deviceAdapter = new DeviceItemAdapter(mActivity, deviceList);
 			lv_list.setAdapter(deviceAdapter);
 		}
 	}
@@ -190,6 +191,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
+					Value.isNeedReqTermListFlag = false;
 					Toast.makeText(mActivity, "请求终端列表失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.request_terminal_list_id:
@@ -199,12 +201,12 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						if (resultCode == 0) {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							ArrayList<HashMap<String, String>> list = (ArrayList<HashMap<String, String>>) msg.obj;
-							if (list != null) {
+							deviceList = (ArrayList<HashMap<String, String>>) msg.obj;
+							if (deviceList != null) {
 								Value.isNeedReqTermListFlag = false;
-								deviceAdapter = new DeviceItemAdapter(mActivity, list);
+								deviceAdapter = new DeviceItemAdapter(mActivity, deviceList);
 								lv_list.setAdapter(deviceAdapter);
-								xmlData.updateList(list);
+								xmlData.updateList(deviceList);
 							}
 						} else {
 							if (progressDialog != null)
@@ -239,7 +241,10 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		handler.sendMessage(msg);
 	}
 	
-	public void clickReqTermListEvent() {
+	/**
+	 * 请求终端列表的网络操作
+	 */
+	public void reqTermListEvent() {
 		if (Utils.isNetworkAvailable(mActivity)) {
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqTermListJson();

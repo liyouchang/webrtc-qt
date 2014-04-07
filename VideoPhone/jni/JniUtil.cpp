@@ -66,6 +66,10 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
 	jstring jni_pid = g_env_->NewStringUTF(peer_id);
 	jstring jni_msg = g_env_->NewStringUTF(message);
 
+	LOGI("message: %s", message);
+	const char * msg1 = g_env_->GetStringUTFChars(jni_msg,NULL);
+	LOGI("msg1: %s", msg1);
+
 	g_env_->CallStaticVoidMethod(callBackCls, mid, jni_pid, jni_msg);
 	return true;
 }

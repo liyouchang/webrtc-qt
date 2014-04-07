@@ -67,7 +67,7 @@
         android:text="@string/about"
         android:textColor="@color/title_bg_black"
         android:textSize="18dp" />
-    
+    <!-- 
     <Button
         android:id="@+id/btn_test_login"
         android:layout_width="fill_parent"
@@ -79,7 +79,7 @@
         android:text="@string/login"
         android:textColor="@color/white"
         android:textSize="20dp" />
-    
+     -->
     <Button
         android:id="@+id/btn_logout"
         android:layout_width="fill_parent"

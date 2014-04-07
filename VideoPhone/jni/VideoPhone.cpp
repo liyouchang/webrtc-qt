@@ -88,7 +88,9 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
 							 { "naTerminate", "()I", (void*) naTerminate },
 							 { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
 							 { "naCloseTunnel", "(Ljava/lang/String;)I", (void*) naCloseTunnel },
-							 { "naAskMediaData", "(Ljava/lang/String;)I", (void*) naAskMediaData } };
+							 { "naAskMediaData", "(Ljava/lang/String;)I", (void*) naAskMediaData },
+							 { "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I", (void*) naMessageFromPeer }
+	};
 
 	jclass cls = env->FindClass("com/video/play/TunnelCommunication");
 	env->RegisterNatives(cls, nm, NELEM(nm));

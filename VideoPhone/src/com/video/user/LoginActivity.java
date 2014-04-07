@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.main.MainActivity;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
@@ -79,10 +80,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 		ZmqHandler.setHandler(handler);
 		preferData = new PreferData(mContext);
 		
-		if (preferData.isExist("AutoLogin")) {
-			isAutoLogin = preferData.readBoolean("AutoLogin");
-		}
-		
 		if (isAutoLogin) {
 			cb_auto_login.setChecked(true);
 		} else {
@@ -97,6 +94,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 		if (preferData.isExist("UserPwd")) {
 			userPwd = preferData.readString("UserPwd");
 			et_pwd.setText(userPwd);
+		}
+		
+		if (preferData.isExist("AutoLogin")) {
+			isAutoLogin = preferData.readBoolean("AutoLogin");
+		}
+		if (isAutoLogin) {
+			clickLoginEvent();
 		}
 	}
 	
@@ -171,7 +175,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 						if (resultCode == 0) {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							showHandleDialog("恭喜您，登录成功！");
+							startActivity(new Intent(mContext, MainActivity.class));
+							LoginActivity.this.finish();
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
@@ -204,6 +209,12 @@ public class LoginActivity extends Activity implements OnClickListener {
 		msg.obj = obj;
 		handler.sendMessage(msg);
 	}
+	private void sendHandlerMsg(Handler handler, int what,  String obj, int timeout) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
+		handler.sendMessageDelayed(msg, timeout);
+	}
 	
 	private class onCheckedChangeListenerImpl implements OnCheckedChangeListener {
 
@@ -234,7 +245,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 				String data = generateLoginJson(userName, userPwd);
 				sendHandlerMsg(IS_LOGINNING);
 				sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
-				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+				if (isAutoLogin) {
+					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data, 1000);
+				} else {
+					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+				}
 			}
 		} else {
 			showHandleDialog("没有可用的网络连接，请确认后重试！");

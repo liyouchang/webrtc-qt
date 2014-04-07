@@ -3,10 +3,11 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical" >
-    
-	<ImageView 
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:contentDescription="@null"
-	    android:src="@drawable/introduce1" />
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:contentDescription="@null"
+        android:src="@drawable/introduce1" />
+
 </LinearLayout>

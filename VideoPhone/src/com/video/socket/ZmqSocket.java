@@ -27,7 +27,6 @@ public class ZmqSocket {
 		if (zmqThread == null) {
         	zmqThread = new ZmqThread(zmq_socket);
         	zmqThread.start();
-        	System.out.println("MyDebug: 【ZmqThread线程运行】");
         	Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
         	HandlerApplication.getInstance().startService(intent);
         }

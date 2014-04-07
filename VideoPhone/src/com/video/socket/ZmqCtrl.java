@@ -11,7 +11,6 @@ public class ZmqCtrl {
 	synchronized public static ZmqCtrl getInstance() {
 		if (zmqCtrlInstance == null) {
 			zmqCtrlInstance = new ZmqCtrl();
-			System.out.println("MyDebug: 【实例化ZmqCtrl对象】");
 		}
 		return zmqCtrlInstance;
 	}

@@ -14,7 +14,6 @@ import android.widget.Button;
 
 import com.video.R;
 import com.video.data.PreferData;
-import com.video.data.Value;
 import com.video.play.TunnelCommunication;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
@@ -27,11 +26,12 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	Button button_logout;
 	private PreferData preferData = null;
 	
+	private boolean appFirstTime = true;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
-		
 		return inflater.inflate(R.layout.more, container, false);
 	}
 
@@ -58,13 +58,14 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		
 		button_logout = (Button)mView.findViewById(R.id.btn_logout);
 		button_logout.setOnClickListener(this);
-		
-		Button button_login = (Button)mView.findViewById(R.id.btn_test_login);
-		button_login.setOnClickListener(this);
  	}
 	
 	private void initData() {
 		preferData = new PreferData(mActivity);
+		
+		if (preferData.isExist("AppFirstTime")) {
+			appFirstTime = preferData.readBoolean("AppFirstTime");
+		}
 	}
 	
 	/**
@@ -97,12 +98,13 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	 */
 	private void ExitLogoutAPP() {
 		if (preferData.isExist("UserPwd")) {
-			preferData.deleteItem("UserPwd");
+//			preferData.deleteItem("UserPwd");
 		}
 		if (preferData.isExist("AutoLogin")) {
 			preferData.deleteItem("AutoLogin");
 		}
 		startActivity(new Intent(mActivity, LoginActivity.class));
+		mActivity.finish();
 	}
 
 	@Override
@@ -120,20 +122,25 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				break;
 			case R.id.btn_logout:
 //				showHandleDialog();
-				if (Value.isNeedReqTermListFlag) 
-					Value.isNeedReqTermListFlag = false;
-				else 
-					Value.isNeedReqTermListFlag = true;
+//				if (Value.isNeedReqTermListFlag) 
+//					Value.isNeedReqTermListFlag = false;
+//				else 
+//					Value.isNeedReqTermListFlag = true;
+				
+//				if (appFirstTime) {
+//					appFirstTime = false;
+//					preferData.deleteItem("AppFirstTime");
+//				} else {
+//					appFirstTime = true;
+//					preferData.deleteItem("AppFirstTime");
+//				}
+//				ExitLogoutAPP();
 				
 				TunnelCommunication.tunnelInitialize("com/video/play/TunnelCommunication");
 				TunnelCommunication.openTunnel("123456");
 //				TunnelCommunication.askMediaData("123456");
-				TunnelCommunication.closeTunnel("123456");
+//				TunnelCommunication.closeTunnel("123456");
 //				TunnelCommunication.tunnelTerminate();
-				
-				break;
-			case R.id.btn_test_login:
-				startActivity(new Intent(mActivity, LoginActivity.class));
 				break;
 		}
 	}

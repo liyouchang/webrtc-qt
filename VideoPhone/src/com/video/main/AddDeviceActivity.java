@@ -276,14 +276,12 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		AddPopupWindowAdapter popAdapter = new AddPopupWindowAdapter(mContext, item_list);
 		pop_listView.setAdapter(popAdapter);
 		
-		WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-		int screenWidth = windowManager.getDefaultDisplay().getWidth();
-		final PopupWindow mPopupWindow = new PopupWindow(pop_view, screenWidth/2, 190, true);
+		final PopupWindow mPopupWindow = new PopupWindow(pop_view, Utils.screenWidth/2, 190, true);
 		mPopupWindow.setHeight(LayoutParams.WRAP_CONTENT); 
 		mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
 		mPopupWindow.setOutsideTouchable(true);
 		
-		int X_position = screenWidth - mPopupWindow.getWidth() - 10;
+		int X_position = Utils.screenWidth - mPopupWindow.getWidth() - 10;
 		mPopupWindow.setAnimationStyle(R.style.PopupAnimationTop);
 		mPopupWindow.showAsDropDown(add_title, X_position, 0);
 		mPopupWindow.update();

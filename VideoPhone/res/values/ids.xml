@@ -18,6 +18,9 @@
     <!-- 发送数据 -->
     <item name="zmq_send_data_id" type="id"/>
     
+    <!-- 发送数据 -->
+    <item name="send_to_peer_id" type="id"/>
+    
     <!-- 接收数据 -->
     <item name="zmq_recv_data_id" type="id"/>
     
