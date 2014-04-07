@@ -51,7 +51,6 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id, const std::stri
                 comm_thread_->Clear(this,MSG_LOGIN_TIMEOUT);
             }
         }
-
     }
     else{
         SignalMessageFromPeer(peer_id,message);

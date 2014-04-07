@@ -156,3 +156,30 @@ void KeTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *dat
 {
     LOG(INFO)<<__FUNCTION__;
 }
+
+
+void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
+{
+    ASSERT(terminal_ == t);
+    LOG(INFO)<<__FUNCTION__;
+    KeMessageProcessCamera *process = new KeMessageProcessCamera(peer_id);
+    process->SignalRecvAskMediaMsg.connect(this,&KeTunnelCamera::OnProcessMediaRequest);
+    this->AddMsgProcess(process);
+
+}
+
+void KeTunnelCamera::OnProcessMediaRequest(KeMessageProcessCamera *process, int video, int audio)
+{
+    if(video == 0 ){
+        this->SignalVideoData.connect(process , &KeMessageProcessCamera::OnVideoData);
+    }else{
+        this->SignalVideoData.disconnect(process);
+    }
+
+    if(audio == 0 ){
+        this->SignalAudioData.connect(process,&KeMessageProcessCamera::OnAudioData);
+    }else{
+        this->SignalAudioData.disconnect(process);
+    }
+
+}

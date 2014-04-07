@@ -43,4 +43,14 @@ protected:
     virtual void OnRecvVideoData(const std::string & peer_id,const char * data,int len);
 };
 
+class KeTunnelCamera:public KeMsgProcessContainer{
+public:
+    virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
+protected:
+    void OnProcessMediaRequest(KeMessageProcessCamera * process,int video,int audio);
+    sigslot::signal2<const char *, int > SignalVideoData;
+    sigslot::signal2<const char *, int > SignalAudioData;
+
+};
+
 #endif // KEMSGPROCESSCONTAINER_H

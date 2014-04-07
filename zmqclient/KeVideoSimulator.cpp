@@ -51,20 +51,6 @@ bool KeVideoSimulator::ReadVideoData(std::string file_name)
     return true;
 }
 
-
-
-void KeVideoSimulator::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
-{
-    ASSERT(terminal_ == t);
-    LOG(INFO)<<__FUNCTION__;
-    KeMessageProcessCamera *process = new KeMessageProcessCamera(peer_id);
-    process->SignalRecvAskMediaMsg.connect(this,&KeVideoSimulator::OnProcessMediaRequest);
-    this->AddMsgProcess(process);
-}
-
-
-
-
 void KeVideoSimulator::SendMediaMsg(const char * data,int len)
 {
     KEFrameHead * pFrame = (KEFrameHead *)data;
@@ -76,24 +62,6 @@ void KeVideoSimulator::SendMediaMsg(const char * data,int len)
         this->SignalAudioData(data,len);
     }
 }
-
-void KeVideoSimulator::OnProcessMediaRequest(KeMessageProcessCamera * process,int video,int audio)
-{
-    if(video == 0 ){
-        this->SignalVideoData.connect(process , &KeMessageProcessCamera::OnVideoData);
-    }else{
-        this->SignalVideoData.disconnect(process);
-    }
-
-    if(audio == 0 ){
-        this->SignalAudioData.connect(process,&KeMessageProcessCamera::OnAudioData);
-    }else{
-        this->SignalAudioData.disconnect(process);
-    }
-
-}
-
-
 
 void KeVideoSimulator::OnMessage(talk_base::Message *msg)
 {
