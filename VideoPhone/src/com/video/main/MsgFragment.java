@@ -112,11 +112,11 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			case R.id.btn_test3:
 				TunnelCommunication.openTunnel("123456");
 //				TunnelCommunication.askMediaData("123456");
-//				TunnelCommunication.closeTunnel("123456");
+
 //				TunnelCommunication.tunnelTerminate();	
 				break;
 			case R.id.btn_test4:
-				
+				TunnelCommunication.closeTunnel("123456");				
 				break;
 		}
 	}

@@ -122,6 +122,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
+        <!-- 修改终端名称 -->
+        <activity
+            android:name=".main.ModifyDeviceNameActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
     </application>
 
 </manifest>

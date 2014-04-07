@@ -22,6 +22,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -35,6 +37,7 @@ import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlData;
+import com.video.local.ViewLocalImageActivity;
 import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
 import com.video.socket.HandlerApplication;
@@ -53,9 +56,6 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private String userName = null;
 	private String list_refresh_time = null;
 	private String list_refresh_terminal = null;
-	//修改终端名称
-	private String mDeviceName = null;
-	private String mDeviceId = null;
 	
 	private ImageButton button_add;
 	private PopupWindow mPopupWindow;
@@ -159,23 +159,6 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		try {
 			jsonObj.put("type", "Client_ReqTermList");
 			jsonObj.put("UserName", userName);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		result = jsonObj.toString();
-		return result;
-	}
-	
-	/**
-	 * 生成JSON的生成终端名字字符串
-	 */
-	private String generateModifyTermNameJson() {
-		String result = "";
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "Client_ModifyTerm");
-			jsonObj.put("TermName", mDeviceName);
-			jsonObj.put("MAC", mDeviceId);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -364,9 +347,13 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 				switch (position) {
 					case 0:
 						HashMap<String, String> item = deviceList.get(position);
-						mDeviceName = item.get("deviceName");
-						mDeviceId = item.get("deviceID");
-						
+						String deviceName = item.get("deviceName");
+						String deviceId = item.get("deviceID");
+						Intent intent = new Intent(mActivity, ModifyDeviceNameActivity.class);
+						intent.putExtra("deviceName", deviceName);
+						intent.putExtra("deviceID", deviceId);
+						mActivity.startActivity(intent);
+						mActivity.overridePendingTransition(R.anim.down_in, 0);
 						break;
 					default : break;
 				}

@@ -207,10 +207,11 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
-			case R.id.btn_add_device_back:
+			case R.id.btn_modify_device_back:
 				finish();
+				overridePendingTransition(R.anim.down_out, 0);
 				break;
-			case R.id.btn_add_device_ok:
+			case R.id.btn_modify_device_ok:
 				clickAddDeviceEvent();
 				break;
 		}

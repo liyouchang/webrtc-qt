@@ -38,6 +38,7 @@
     <string name="hint_device_id">设备ID</string>
     <string name="hint_device_name">设备名称</string>
     <string name="scan_qr">扫描二维码</string>
+    <string name="modify_device_name">修改终端名称</string>
     
     <string name="local_video">本地录像</string>
     <string name="local_picture">抓拍图片</string>
