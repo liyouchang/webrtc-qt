@@ -14,7 +14,6 @@ import android.widget.Button;
 
 import com.video.R;
 import com.video.data.PreferData;
-import com.video.play.TunnelCommunication;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
 
@@ -25,8 +24,6 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	
 	Button button_logout;
 	private PreferData preferData = null;
-	
-	private boolean appFirstTime = true;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,16 +59,11 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	
 	private void initData() {
 		preferData = new PreferData(mActivity);
-		
-		if (preferData.isExist("AppFirstTime")) {
-			appFirstTime = preferData.readBoolean("AppFirstTime");
-		}
 	}
 	
 	/**
 	 * 显示操作的提示
 	 */
-	@SuppressWarnings("unused")
 	private void showHandleDialog() {
 		AlertDialog aboutDialog = new AlertDialog.Builder(mActivity)
 				.setTitle("温馨提示")
@@ -98,7 +90,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	 */
 	private void ExitLogoutAPP() {
 		if (preferData.isExist("UserPwd")) {
-//			preferData.deleteItem("UserPwd");
+			preferData.deleteItem("UserPwd");
 		}
 		if (preferData.isExist("AutoLogin")) {
 			preferData.deleteItem("AutoLogin");
@@ -121,26 +113,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				startActivity(new Intent(mActivity, AboutActivity.class));
 				break;
 			case R.id.btn_logout:
-//				showHandleDialog();
-//				if (Value.isNeedReqTermListFlag) 
-//					Value.isNeedReqTermListFlag = false;
-//				else 
-//					Value.isNeedReqTermListFlag = true;
-				
-//				if (appFirstTime) {
-//					appFirstTime = false;
-//					preferData.deleteItem("AppFirstTime");
-//				} else {
-//					appFirstTime = true;
-//					preferData.deleteItem("AppFirstTime");
-//				}
-//				ExitLogoutAPP();
-				
-				TunnelCommunication.tunnelInitialize("com/video/play/TunnelCommunication");
-				TunnelCommunication.openTunnel("123456");
-//				TunnelCommunication.askMediaData("123456");
-//				TunnelCommunication.closeTunnel("123456");
-//				TunnelCommunication.tunnelTerminate();
+				showHandleDialog();
 				break;
 		}
 	}

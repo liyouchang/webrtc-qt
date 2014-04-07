@@ -11,6 +11,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.BaseAdapter;
 import android.widget.Gallery;
 
+@SuppressWarnings("deprecation")
 public class GalleryAdapter extends BaseAdapter {
 
 	private Context context;

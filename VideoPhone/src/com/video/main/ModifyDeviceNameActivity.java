@@ -31,24 +31,23 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.qrcode.view.CaptureActivity;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
-public class AddDeviceActivity extends Activity implements OnClickListener {
+public class ModifyDeviceNameActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
 	private PreferData preferData = null;
 	
-	private ImageButton button_title_more;
 	private EditText et_name;
-	private EditText et_id;
-	private RelativeLayout add_title;
 	private ProgressDialog progressDialog;
 	
 	private String userName = "";
@@ -62,28 +61,23 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.add);
+		setContentView(R.layout.modify_device_name);
 		
 		initView();
 		initData();
 	}
 
 	private void initView() {
-		add_title = (RelativeLayout) this.findViewById(R.id.add_device_title);
-		button_title_more = (ImageButton) this.findViewById(R.id.btn_add_device_more);
-		button_title_more.setOnClickListener(this);
-		
-		ImageButton button_back = (ImageButton) this.findViewById(R.id.btn_add_device_back);
+		ImageButton button_back = (ImageButton) this.findViewById(R.id.btn_modify_device_back);
 		button_back.setOnClickListener(this);
-		Button button_ok = (Button) this.findViewById(R.id.btn_add_device_ok);
+		Button button_ok = (Button) this.findViewById(R.id.btn_modify_device_ok);
 		button_ok.setOnClickListener(this);
 		
-		et_id = (EditText) this.findViewById(R.id.et_add_device_id);
-		et_name = (EditText) this.findViewById(R.id.et_add_device_name);
+		et_name = (EditText) this.findViewById(R.id.et_modify_device_name);
 	}
 	
 	private void initData() {
-		mContext = AddDeviceActivity.this;
+		mContext = ModifyDeviceNameActivity.this;
 		ZmqHandler.setHandler(handler);
 		preferData = new PreferData(mContext);
 		
@@ -93,16 +87,15 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * 生成JSON的登录字符串
+	 * 生成JSON的生成终端名字字符串
 	 */
-	private String generateAddDeviceJson(String username, String mac, String termname) {
+	private String generateModifyTermNameJson(String mDeviceName, String mDeviceId) {
 		String result = "";
 		JSONObject jsonObj = new JSONObject();
 		try {
-			jsonObj.put("type", "Client_AddTerm");
-			jsonObj.put("UserName", username);
-			jsonObj.put("MAC", mac);
-			jsonObj.put("TermName", termname);
+			jsonObj.put("type", "Client_ModifyTerm");
+			jsonObj.put("TermName", mDeviceName);
+			jsonObj.put("MAC", mDeviceId);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -200,15 +193,13 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	
 	public void clickAddDeviceEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
-			if (checkAddDeviceData()) {
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
-				String data = generateAddDeviceJson(userName, termMac, termName);
-				sendHandlerMsg(IS_ADDING);
-				sendHandlerMsg(ADD_TIMEOUT, Value.requestTimeout);
-				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
-			}
+//			Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+//			String data = generateModifyTermNameJson();
+//			sendHandlerMsg(IS_REQUESTING, "正在提交修改...");
+//			sendHandlerMsg(REQUEST_TIMEOUT, "修改终端名称失败", Value.requestTimeout);
+//			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		} else {
-			showHandleDialog("没有可用的网络连接，请确认后重试！");
+			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -219,9 +210,6 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 			case R.id.btn_add_device_back:
 				finish();
 				break;
-			case R.id.btn_add_device_more:
-				showPopupWindow();
-				break;
 			case R.id.btn_add_device_ok:
 				clickAddDeviceEvent();
 				break;
@@ -231,12 +219,11 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	/**
 	 * @return true:注册信息格式正确  false:注册信息格式错误
 	 */
-	private boolean checkAddDeviceData() {
+	private boolean checkModifyDeviceData() {
 		boolean resultFlag = false;
 		
 		//获取EditText输入框的字符串
 		termName = et_name.getText().toString().trim();
-		termMac = et_id.getText().toString().trim();
 		
 		if (termName.equals("")) {
 			resultFlag = false;
@@ -247,122 +234,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 			et_name.setError("设备名称长度范围2~20！");
 		} else {
 			resultFlag = true;
-			if (termMac.equals("")) {
-				resultFlag = false;
-				et_id.setError("请输入设备ID，您可以通过扫描二维码或搜索设备输入设备ID！");
-			}
-			else if ((termMac.length()<6) || (termMac.length()>20)) {
-				resultFlag = false;
-				et_id.setError("设备ID长度范围6~20！");
-			} else {
-				resultFlag = true;
-			}
 		}
 		return resultFlag;
-	}
-	
-	/**
-	 * 添加设备的弹出对话框
-	 */
-	@SuppressWarnings("deprecation")
-	private void showPopupWindow() {
-		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View pop_view = inflater.inflate(R.layout.pop_main, null);
-		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
-		
-		List<String> item_list = new ArrayList<String>();
-		item_list.add("扫描二维码");
-		item_list.add("搜索设备");
-		AddPopupWindowAdapter popAdapter = new AddPopupWindowAdapter(mContext, item_list);
-		pop_listView.setAdapter(popAdapter);
-		
-		final PopupWindow mPopupWindow = new PopupWindow(pop_view, Utils.screenWidth/2, 190, true);
-		mPopupWindow.setHeight(LayoutParams.WRAP_CONTENT); 
-		mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
-		mPopupWindow.setOutsideTouchable(true);
-		
-		int X_position = Utils.screenWidth - mPopupWindow.getWidth() - 10;
-		mPopupWindow.setAnimationStyle(R.style.PopupAnimationTop);
-		mPopupWindow.showAsDropDown(add_title, X_position, 0);
-		mPopupWindow.update();
-
-		pop_listView.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				switch (position) {
-					case 0:
-						if (mPopupWindow.isShowing()) {
-							mPopupWindow.dismiss();
-						}
-						startActivityForResult(new Intent(AddDeviceActivity.this, CaptureActivity.class), 0);
-						break;
-					case 1:
-						if (mPopupWindow.isShowing()) {
-							mPopupWindow.dismiss();
-						}
-						break;
-					default : break;
-				}
-			}
-		});
-	}
-	
-	/**
-	 * 添加设备的适配器
-	 */
-	private class AddPopupWindowAdapter extends BaseAdapter {
-
-		private Context context;
-		private List<String> list;
-
-		public AddPopupWindowAdapter(Context context, List<String> list) {
-			this.context = context;
-			this.list = list;
-		}
-
-		@Override
-		public int getCount() {
-			return list.size();
-		}
-
-		@Override
-		public Object getItem(int position) {
-			return list.get(position);
-		}
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup viewGroup) {
-			ViewHolder holder;
-
-			if (convertView == null) {
-				convertView = LayoutInflater.from(context).inflate(R.layout.pop_item, null);
-				holder = new ViewHolder();
-				convertView.setTag(holder);
-				holder.pop_textView = (TextView) convertView.findViewById(R.id.pop_text);
-			} else {
-				holder = (ViewHolder) convertView.getTag();
-			}
-			holder.pop_textView.setText(list.get(position));
-			return convertView;
-		}
-
-		class ViewHolder {
-			TextView pop_textView;
-		}
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
-		if (resultCode == RESULT_OK) {
-			Bundle bundle = data.getExtras();
-			String qrcode_string = bundle.getString("qrcode");
-			et_id.setText(qrcode_string);
-		}
 	}
 }

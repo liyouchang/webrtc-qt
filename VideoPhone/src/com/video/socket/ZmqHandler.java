@@ -91,7 +91,7 @@ public class ZmqHandler extends Handler {
 						JSONArray jsonArray = obj.getJSONArray("Terminal");
 						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, getReqTermList(jsonArray)).sendToTarget();
 					} else {
-						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0).sendToTarget();
+						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, "«Î«Û÷’∂À¡–±Ì ß∞‹").sendToTarget();
 					}
 				}
 			}

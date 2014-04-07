@@ -37,6 +37,7 @@ import com.video.data.Value;
 import com.video.data.XmlData;
 import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.DeviceItemAdapter;
@@ -52,6 +53,9 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private String userName = null;
 	private String list_refresh_time = null;
 	private String list_refresh_terminal = null;
+	//修改终端名称
+	private String mDeviceName = null;
+	private String mDeviceId = null;
 	
 	private ImageButton button_add;
 	private PopupWindow mPopupWindow;
@@ -163,6 +167,23 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	}
 	
 	/**
+	 * 生成JSON的生成终端名字字符串
+	 */
+	private String generateModifyTermNameJson() {
+		String result = "";
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_ModifyTerm");
+			jsonObj.put("TermName", mDeviceName);
+			jsonObj.put("MAC", mDeviceId);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		result = jsonObj.toString();
+		return result;
+	}
+	
+	/**
 	 * 显示操作的进度条
 	 */
 	private void showProgressDialog(String info) {
@@ -183,7 +204,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					showProgressDialog("正在请求终端列表... ");
+					showProgressDialog((String) msg.obj);
 					break;
 				case REQUEST_TIMEOUT:
 					if (progressDialog != null)
@@ -192,7 +213,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
 					Value.isNeedReqTermListFlag = false;
-					Toast.makeText(mActivity, "请求终端列表失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mActivity, msg.obj+"，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.request_terminal_list_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
@@ -211,7 +232,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							Toast.makeText(mActivity, "请求终端列表失败，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.request_terminal_list_id);
@@ -224,14 +245,16 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	/**
 	 * 发送Handler消息
 	 */
-	private void sendHandlerMsg(int what) {
+	private void sendHandlerMsg(int what, String obj) {
 		Message msg = new Message();
 		msg.what = what;
+		msg.obj = obj;
 		handler.sendMessage(msg);
 	}
-	private void sendHandlerMsg(int what, int timeout) {
+	private void sendHandlerMsg(int what, String obj, int timeout) {
 		Message msg = new Message();
 		msg.what = what;
+		msg.obj = obj;
 		handler.sendMessageDelayed(msg, timeout);
 	}
 	private void sendHandlerMsg(Handler handler, int what, String obj) {
@@ -248,8 +271,8 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		if (Utils.isNetworkAvailable(mActivity)) {
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqTermListJson();
-			sendHandlerMsg(IS_REQUESTING);
-			sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+			sendHandlerMsg(IS_REQUESTING, "正在请求终端列表...");
+			sendHandlerMsg(REQUEST_TIMEOUT, "请求终端课表失败", Value.requestTimeout);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		} else {
 			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
@@ -273,7 +296,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 			// TODO Auto-generated method stub
-			showPopupWindow(mPullToRefreshView);
+			showPopupWindow(mPullToRefreshView, position);
 			return false;
 		}
 	}
@@ -307,24 +330,13 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 				mPullToRefreshView.onHeaderRefreshComplete(list_refresh_time, list_refresh_terminal);
 			}
 		}, 1500);
-	} 
-	
-	private void testXml() {
-		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
-		HashMap<String, String> item = null;
-		item = getDeviceItem(true, "摄像头1", "111111111111111", "dealer1");
-		list.add(item);
-		item = getDeviceItem(false, "摄像头2", "222222222222222", "dealer2");
-		list.add(item);
-		item = getDeviceItem(false, "摄像头3", "333333333333333", "dealer3");
-		list.add(item);
-		xmlData.updateList(list);
 	}
-	
+
 	/**
 	 * 设备项ListView的长按键的PopupWindow选项
 	 */
-	public void showPopupWindow(View view) {
+	@SuppressWarnings("deprecation")
+	public void showPopupWindow(View view, int position) {
 		LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View pop_view = inflater.inflate(R.layout.pop_event_main, null);
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
@@ -337,7 +349,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mActivity, item_list);
 		pop_listView.setAdapter(popAdapter);
 		
-		mPopupWindow = new PopupWindow(pop_view, LayoutParams.FILL_PARENT, 190, true);
+		mPopupWindow = new PopupWindow(pop_view, Utils.screenWidth, 200, true);
 		mPopupWindow.setHeight(LayoutParams.WRAP_CONTENT); 
 		mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
 		mPopupWindow.setOutsideTouchable(true);
@@ -351,7 +363,10 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				switch (position) {
 					case 0:
-						testXml();
+						HashMap<String, String> item = deviceList.get(position);
+						mDeviceName = item.get("deviceName");
+						mDeviceId = item.get("deviceID");
+						
 						break;
 					default : break;
 				}

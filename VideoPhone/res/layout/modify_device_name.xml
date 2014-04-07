@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_bg_grey"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/add_device_title"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/title_height_size"
+        android:background="@color/title_bg_black"
+        android:orientation="horizontal" >
+        
+        <ImageButton
+            android:id="@+id/btn_modify_device_back"
+            android:layout_width="60dp"
+            android:layout_height="@dimen/title_height_size"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/title_more_xml"
+            android:contentDescription="@null"
+            android:gravity="center_vertical|center_horizontal"
+            android:src="@drawable/btn_title_back_selected" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/add_new_device"
+            android:textColor="@color/orange"
+            android:textSize="@dimen/title_text_size" />
+    </RelativeLayout>
+
+    <EditText
+        android:id="@+id/et_modify_device_name"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/edittext_style"
+        android:hint="@string/hint_device_name"
+        android:paddingLeft="10dp"
+        android:textColor="@color/light_black"
+        android:textCursorDrawable="@null"
+        android:textSize="20dp" />
+
+    <Button
+        android:id="@+id/btn_modify_device_ok"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_style"
+        android:text="@string/btn_ok"
+        android:textColor="@color/white"
+        android:textSize="18dp" />
+
+</LinearLayout>

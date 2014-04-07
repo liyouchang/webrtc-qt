@@ -19,6 +19,7 @@ import android.widget.RelativeLayout;
 import com.video.R;
 import com.video.utils.Utils;
 
+@SuppressWarnings("deprecation")
 public class ViewLocalImageActivity extends Activity implements OnClickListener {
 
 	public static Context mContext;

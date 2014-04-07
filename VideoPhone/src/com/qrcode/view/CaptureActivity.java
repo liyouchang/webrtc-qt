@@ -51,6 +51,7 @@ public class CaptureActivity extends Activity implements Callback {
 		inactivityTimer = new InactivityTimer(this);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onResume() {
 		super.onResume();
