@@ -112,9 +112,10 @@ int AsynDealer::recv_z()
     if(items[0].revents & ZMQ_POLLIN){
         zmq::zmsg msg;
         msg.recv(*socket_);
-        std::cout <<"Client "<<this->id_ << " :Receive "<<msg.body() <<std::endl;
         std::string addr = msg.GetAddress();
         std::string data = msg.GetBody();
+        LOG(INFO) <<"Client "<<this->id_ << " :Receive "<<addr<<data;
+
         SignalReadData(addr,data);
     }
     return 0;

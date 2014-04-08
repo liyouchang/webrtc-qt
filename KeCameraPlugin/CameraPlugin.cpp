@@ -1,7 +1,7 @@
 #include "CameraPlugin.h"
 
 
-#include "mythread.h"
+//#include "mythread.h"
 
 
 CameraPlugin::CameraPlugin(QWidget *parent) :

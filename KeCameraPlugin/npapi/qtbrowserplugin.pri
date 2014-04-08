@@ -4,8 +4,8 @@ win32 {
   # Uncomment the following line to build a plugin that can be used also in 
   # Internet Explorer, through ActiveX.
   #lht:Uncommented ,changed for qt5 -- QT += axserver
-  #CONFIG += axserver
-  #QT += axserver
+  CONFIG += axserver
+  QT += axserver
 } else {
   CONFIG += plugin
 }

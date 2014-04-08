@@ -100,7 +100,7 @@ public:
                 std::cout << "E: " << error.what() << std::endl;
                 return false;
             }
-            ustring data = (char*) message.data();
+
             //std::cerr << "recv: \"" << (unsigned char*) message.data() << "\", size " << message.size() << std::endl;
             if (message.size() == 17 && ((unsigned char *)message.data())[0] == 0) {
                 char *uuidstr = encode_uuid((unsigned char*) message.data());
@@ -108,8 +108,9 @@ public:
                 delete[] uuidstr;
             }
             else {
-                data.resize(message.size()+10,0);
-                data[message.size()] = 0;
+                //data.resize(message.size()+1,0);
+                //data[message.size()] = 0;
+                ustring data( (char*) message.data(),message.size());
                 push_back(data);
             }
             int64_t more = 0;

@@ -54,7 +54,7 @@ void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t, const std::
 void KeMsgProcessContainer::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
-    LOG(INFO)<<__FUNCTION__;
+    LOG(INFO)<<"KeMsgProcessContainer::OnTunnelClosed";
 
     std::vector<KeMsgProcess *>::iterator it = processes_.begin();
     for (; it != processes_.end(); ++it) {

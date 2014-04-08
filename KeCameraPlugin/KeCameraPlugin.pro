@@ -29,4 +29,5 @@ win32 {
 
 
 include(npapi/qtbrowserplugin.pri)
-include(../KeClientCommon/keClientCommon.pri)
+include(../TunnelClientUI/QtUICommon.pri)
+#include(../KeClientCommon/keClientCommon.pri)

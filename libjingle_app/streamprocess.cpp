@@ -100,7 +100,7 @@ void StreamProcess::WriteStreamInternel()
 }
 
 void StreamProcess::Cleanup(talk_base::StreamInterface *stream, bool delay) {
-    LOG(INFO) << "Closing";
+    LOG(INFO) << "StreamProcess::Cleanup";
     stream->Close();
     SignalClosed(this);
 }

@@ -153,7 +153,7 @@ bool P2PConductor::InitializePeerConnection()
 
 void P2PConductor::DeletePeerConnection()
 {
-    LOG(INFO) << __FUNCTION__;
+    LOG(INFO) << "P2PConductor::DeletePeerConnection";
     peer_connection_->Close();
     peer_connection_.release();
     peer_id_.clear();
@@ -250,6 +250,7 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
     }
     if(message.length() == (sizeof(kByeMessage) - 1) &&
             message.compare(kByeMessage) == 0){
+        LOG(INFO)<<"receiv bye message from "<<peer_id;
         if (peer_id == peer_id_ && peer_connection_.get()) {
             DeletePeerConnection();
         }

@@ -35,6 +35,7 @@ int PeerTerminal::CloseTunnel(const std::string &peer_id)
 
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
+        LOG(WARNING)<< "PeerTerminal::CloseTunnel-----tunnel not get "<< peer_id;
         return -1;
     }
     aTunnel->DisconnectFromCurrentPeer();
@@ -92,7 +93,7 @@ void PeerTerminal::OnTunnelClosed(kaerp2p::StreamProcess *stream)
     LOG(INFO)<< __FUNCTION__;
     ScopedTunnel aTunnel = this->GetTunnel(stream);
     if(aTunnel == NULL){
-        LOG(WARNING)<<"cannot get tunnel by stream";
+        LOG(WARNING)<<"PeerTerminal::OnTunnelClosed-----cannot get tunnel by stream";
         return ;
     }
 
