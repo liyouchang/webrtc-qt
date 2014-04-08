@@ -83,8 +83,8 @@ public class XmlMessage {
 		try {
 			serializer.setOutput(writer);
 			serializer.startDocument("UTF-8", true);
-			serializer.startTag("", "DeviceList");
-			serializer.endTag("", "DeviceList");
+			serializer.startTag("", "MessageList");
+			serializer.endTag("", "MessageList");
 			serializer.endDocument();
 			OutputStream os = new FileOutputStream(file);
 			OutputStreamWriter ow = new OutputStreamWriter(os);
@@ -142,24 +142,28 @@ public class XmlMessage {
 		try {
 			Document document = loadInit(filePath);
 			Element itemElement = (Element) document.createElement("item");
-			Element nameElement = (Element) document.createElement("name");
-			Element idElement = (Element) document.createElement("id");
+			Element timeElement = (Element) document.createElement("time");
+			Element macElement = (Element) document.createElement("mac");
 			Element stateElement = (Element) document.createElement("state");
-			Element dealerNameElement = (Element) document.createElement("dealer");
+			Element textElement = (Element) document.createElement("text");
+			Element urlElement = (Element) document.createElement("url");
 			
-			Text nameText = document.createTextNode(map.get("deviceName"));
-			nameElement.appendChild(nameText);
-			Text idText = document.createTextNode(map.get("deviceID"));
-			idElement.appendChild(idText);
-			Text stateText = document.createTextNode(map.get("isOnline"));
+			Text timeText = document.createTextNode(map.get("msgTime"));
+			timeElement.appendChild(timeText);
+			Text macText = document.createTextNode(map.get("msgMAC"));
+			macElement.appendChild(macText);
+			Text stateText = document.createTextNode(map.get("isReaded"));
 			stateElement.appendChild(stateText);
-			Text dealerNameText = document.createTextNode(map.get("dealerName"));
-			dealerNameElement.appendChild(dealerNameText);
+			Text textText = document.createTextNode(map.get("msgText"));
+			textElement.appendChild(textText);
+			Text urlText = document.createTextNode(map.get("imageURL"));
+			urlElement.appendChild(urlText);
 			
-			itemElement.appendChild(nameElement);
-			itemElement.appendChild(idElement);
+			itemElement.appendChild(timeElement);
+			itemElement.appendChild(macElement);
 			itemElement.appendChild(stateElement);
-			itemElement.appendChild(dealerNameElement);
+			itemElement.appendChild(textElement);
+			itemElement.appendChild(urlElement);
 			Element rootElement = (Element) document.getDocumentElement();
 			rootElement.appendChild(itemElement);
 			writeXML(document, filePath);

@@ -22,9 +22,9 @@ public class ZmqThread extends Thread {
 	}
 	
 	/**
-	 * ZMQ�������
-	 * @param data Ҫ���͵����
-	 * @return true:���ͳɹ�  false:����ʧ��
+	 * ZMQ锟斤拷锟斤拷锟斤拷锟�
+	 * @param data 要锟斤拷锟酵碉拷锟斤拷锟�
+	 * @return true:锟斤拷锟酵成癸拷  false:锟斤拷锟斤拷失锟斤拷
 	 */
 	private boolean sendZmqData(String data) {
 		boolean result = false;
@@ -51,8 +51,8 @@ public class ZmqThread extends Thread {
 	}
 	
 	/**
-	 * ZMQ��Backstage�������
-	 * @return null:���ղ��ɹ������򷵻ؽ��յ������
+	 * ZMQ锟斤拷Backstage锟斤拷锟斤拷锟斤拷锟�
+	 * @return null:锟斤拷锟秸诧拷锟缴癸拷锟斤拷锟斤拷锟津返回斤拷锟秸碉拷锟斤拷锟斤拷锟�
 	 */
 	private String recvZmqData() {
 		String result = null;
@@ -70,7 +70,7 @@ public class ZmqThread extends Thread {
 				result = message_str2;
 			} 
 			else if (message_str1.equals("123456")) {
-				System.out.println("MyDebug: �յ���Peer���1: " + message_str1);
+				System.out.println("MyDebug: 锟秸碉拷锟斤拷Peer锟斤拷锟�: " + message_str1);
 				TunnelCommunication.Instance().messageFromPeer("123456", message_str2);
 			}
         }
@@ -78,7 +78,7 @@ public class ZmqThread extends Thread {
 	}
 	
 	/**
-	 * ����Handler��Ϣ
+	 * 锟斤拷锟斤拷Handler锟斤拷息
 	 */
 	public void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -102,39 +102,39 @@ public class ZmqThread extends Thread {
 			@Override
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
-					//�������
+					//锟斤拷锟斤拷锟斤拷锟�
 					case R.id.zmq_recv_data_id:
 						String result = recvZmqData();
 						if (result != null) {
 							sendHandlerMsg(result);
-							System.out.println("MyDebug: �յ������: "+result);
+							System.out.println("MyDebug: 锟秸碉拷锟斤拷锟斤拷锟� "+result);
 						}
 						if (zmqThreadHandler.hasMessages(R.id.zmq_recv_data_id)) {
 							zmqThreadHandler.removeMessages(R.id.zmq_recv_data_id);
 						}
 						break;
-					//�������
+					//锟斤拷锟斤拷锟斤拷锟�
 					case R.id.zmq_send_data_id:
 						sendZmqData((String)msg.obj);
 						System.out.println("MyDebug: \n");
-						System.out.println("MyDebug: ���͵����: "+(String)msg.obj);
+						System.out.println("MyDebug: 锟斤拷锟酵碉拷锟斤拷锟� "+(String)msg.obj);
 						if (zmqThreadHandler.hasMessages(R.id.zmq_send_data_id)) {
 							zmqThreadHandler.removeMessages(R.id.zmq_send_data_id);
 						}
 						break;
-					//���ͶԵȶ����
+					//锟斤拷锟酵对等讹拷锟斤拷锟�
 					case R.id.send_to_peer_id:
 						HashMap<String, String> mapData = (HashMap<String, String>)msg.obj;
 						String peerId = mapData.get("peerId");
 						String peerData = mapData.get("peerData");
 						sendZmqData(peerId, peerData);
 						System.out.println("MyDebug: \n");
-						System.out.println("MyDebug: ���͵�Peer���: " + peerData);
+						System.out.println("MyDebug: 锟斤拷锟酵碉拷Peer锟斤拷锟� " + peerData);
 						if (zmqThreadHandler.hasMessages(R.id.send_to_peer_id)) {
 							zmqThreadHandler.removeMessages(R.id.send_to_peer_id);
 						}
 						break;
-					//�ر�ZMQ Socket
+					//锟截憋拷ZMQ Socket
 					case R.id.close_zmq_socket_id:
 						zmq_socket.close();
 						ZmqCtrl.getInstance().exit();

@@ -52,5 +52,17 @@
         android:text="关闭通道"
         android:textColor="@color/white"
         android:textSize="20dp" />
+    
+    <Button
+        android:id="@+id/btn_test5"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_style"
+        android:text="测试视频"
+        android:textColor="@color/white"
+        android:textSize="20dp" />
 
 </LinearLayout>

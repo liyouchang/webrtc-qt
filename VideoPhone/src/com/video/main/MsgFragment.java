@@ -104,6 +104,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		
 		Button test4 = (Button)mView.findViewById(R.id.btn_test4);
 		test4.setOnClickListener(this);
+		
+		Button test5 = (Button)mView.findViewById(R.id.btn_test5);
+		test5.setOnClickListener(this);
 	}
 	
 	private void initData() {
@@ -179,6 +182,10 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			case R.id.btn_test4:
 				System.out.println("close tunnel test");
 				TunnelCommunication.Instance().closeTunnel("123456");				
+				break;
+			case R.id.btn_test5:
+				System.out.println("close tunnel test");
+				TunnelCommunication.Instance().askMediaData("123456");	
 				break;
 		}
 	}
