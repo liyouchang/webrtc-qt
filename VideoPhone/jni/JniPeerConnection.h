@@ -11,7 +11,7 @@
 #include "libjingle_app/PeerConnectionClinetInterface.h"
 #include "talk/base/thread.h"
 #include "talk/base/messagehandler.h"
-class JniPeerConnection : public kaerp2p::PeerConnectionClientInterface ,public talk_base::MessageHandler{
+class JniPeerConnection : public kaerp2p::PeerConnectionClientInterface{
 public:
 	enum{
 		MSG_SENDTOPEER
@@ -20,10 +20,6 @@ public:
 	virtual ~JniPeerConnection();
 
     virtual bool SendToPeer(const std::string &peer_id, const std::string& message);
-protected:
-    bool SendToPeer_jni(const std::string &peer_id, const std::string& message);
-    //talk_base::Thread * jni_thread;
-    virtual void OnMessage(talk_base::Message * msg);
 };
 
 #endif /* JNIPEERCONNECTION_H_ */

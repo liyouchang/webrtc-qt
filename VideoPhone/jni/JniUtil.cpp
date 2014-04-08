@@ -49,11 +49,12 @@ jboolean JniUtil::getIntField(JNIEnv* env, jobject obj, const char* fieldName,
 }
 
 bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
-	JNIEnv *p_env;
+
 	if(g_vm_ == 0){
 		LOGE("g_vm is null");
 		return false;
 	}
+	JNIEnv *p_env;
 	bool attached = false;
 	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
 	if(status != JNI_OK){
@@ -65,7 +66,7 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
 		}
 		attached = true;
 	}
-//	jclass callBackCls = p_env->FindClass(call_class_name_.c_str());
+
 	jclass callBackCls = p_env->GetObjectClass(g_obj_);
 	if (!callBackCls) {
 		LOGE("Get class %s error", call_class_name_.c_str());
@@ -93,28 +94,50 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
 }
 
 bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
-//	jclass callBackCls = g_env_->FindClass(call_class_name_.c_str());
-//	if (!callBackCls) {
-//		LOGE("Get class %s error", call_class_name_.c_str());
-//		return false;
-//	}
-//	jmethodID mid = g_env_->GetMethodID(callBackCls, "RecvVideoData",
-//			"(Ljava/lang/String;[B)V");
-//	if (!mid) {
-//		LOGE("get method RecvVideoData error");
-//		return false;
-//	}
-//	jstring jni_pid = g_env_->NewStringUTF(peer_id);
-//
-//	jbyteArray byteArr = g_env_->NewByteArray(len);
-//	jboolean isCopy;
-//	void *rd = g_env_->GetPrimitiveArrayCritical((jarray) byteArr, &isCopy);
-//	memcpy(rd, data, len);
-//
-//	g_env_->CallVoidMethod(callBackCls, mid, jni_pid, byteArr);
-//
-//	g_env_->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
-//	g_env_->DeleteLocalRef(byteArr);
+
+	if(g_vm_ == 0){
+		LOGE("g_vm is null");
+		return false;
+	}
+	JNIEnv *p_env;
+	bool attached = false;
+	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
+	if(status != JNI_OK){
+		LOGI("g_vm GetEnv error %d", status);
+		status = g_vm_->AttachCurrentThread(&p_env,NULL);
+		if(status != JNI_OK){
+			LOGE("g_vm AttachCurrentThread error %d", status);
+			return false ;
+		}
+		attached = true;
+	}
+
+	jclass callBackCls = p_env->GetObjectClass(g_obj_);
+	if (!callBackCls) {
+		LOGE("Get class %s error", call_class_name_.c_str());
+		return false;
+	}
+
+	jmethodID mid = p_env->GetStaticMethodID(callBackCls, "RecvVideoData",
+			"(Ljava/lang/String;[B)V");
+	if (!mid) {
+		LOGE("get method RecvVideoData error");
+		return false;
+	}
+	jstring jni_pid = p_env->NewStringUTF(peer_id);
+	jbyteArray byteArr = p_env->NewByteArray(len);
+	jboolean isCopy;
+	void *rd = p_env->GetPrimitiveArrayCritical((jarray) byteArr, &isCopy);
+	memcpy(rd, data, len);
+
+	p_env->CallStaticVoidMethod(callBackCls, mid, jni_pid, byteArr);
+
+	p_env->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
+	p_env->DeleteLocalRef(byteArr);
+
+	if(attached){
+		g_vm_->DetachCurrentThread();
+	}
 	return true;
 
 }
@@ -122,28 +145,51 @@ bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
 
 
 bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
-//	jclass callBackCls = g_env_->FindClass(call_class_name_.c_str());
-//	if (!callBackCls) {
-//		LOGE("Get class %s error", call_class_name_.c_str());
-//		return false;
-//	}
-//	jmethodID mid = g_env_->GetMethodID(callBackCls, "RecvAudioData",
-//			"(Ljava/lang/String;[B)V");
-//	if (!mid) {
-//		LOGE("get method RecvAudioData error");
-//		return false;
-//	}
-//	jstring jni_pid = g_env_->NewStringUTF(peer_id);
-//
-//	jbyteArray byteArr = g_env_->NewByteArray(len);
-//	jboolean isCopy;
-//	void *rd = g_env_->GetPrimitiveArrayCritical((jarray) byteArr, &isCopy);
-//	memcpy(rd, data, len);
-//
-//	g_env_->CallVoidMethod(callBackCls, mid, jni_pid, byteArr);
-//
-//	g_env_->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
-//	g_env_->DeleteLocalRef(byteArr);
+
+	if(g_vm_ == 0){
+		LOGE("g_vm is null");
+		return false;
+	}
+	JNIEnv *p_env;
+	bool attached = false;
+	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
+	if(status != JNI_OK){
+		LOGI("g_vm GetEnv error %d", status);
+		status = g_vm_->AttachCurrentThread(&p_env,NULL);
+		if(status != JNI_OK){
+			LOGE("g_vm AttachCurrentThread error %d", status);
+			return false ;
+		}
+		attached = true;
+	}
+
+	jclass callBackCls = p_env->GetObjectClass(g_obj_);
+	if (!callBackCls) {
+		LOGE("Get class %s error", call_class_name_.c_str());
+		return false;
+	}
+
+	jmethodID mid = p_env->GetStaticMethodID(callBackCls, "RecvAudioData",
+			"(Ljava/lang/String;[B)V");
+	if (!mid) {
+		LOGE("get method RecvVideoData error");
+		return false;
+	}
+	jstring jni_pid = p_env->NewStringUTF(peer_id);
+	jbyteArray byteArr = p_env->NewByteArray(len);
+	jboolean isCopy;
+	void *rd = p_env->GetPrimitiveArrayCritical((jarray) byteArr, &isCopy);
+	memcpy(rd, data, len);
+
+	p_env->CallStaticVoidMethod(callBackCls, mid, jni_pid, byteArr);
+
+	p_env->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
+	p_env->DeleteLocalRef(byteArr);
+
+	if(attached){
+		g_vm_->DetachCurrentThread();
+	}
+
 	return true;
 }
 

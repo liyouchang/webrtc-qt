@@ -3,23 +3,23 @@ package com.video.data;
 public class Value {
 
 	/**
-	 * ·þÎñÆ÷ºóÌ¨Ãû³Æ
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¨ï¿½ï¿½ï¿½
 	 */
 	public final static String BackstageName = "Backstage";
 	
 	/**
-	 * ·þÎñÆ÷IPºÍPort
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½IPï¿½ï¿½Port
 	 */
-//	public final static String BackstageIPPort = "tcp://192.168.40.191:5555";
-	public final static String BackstageIPPort = "tcp://218.56.11.182:5555";
+	public final static String BackstageIPPort = "tcp://192.168.40.191:5555";
+//	public final static String BackstageIPPort = "tcp://218.56.11.182:5555";
 	
 	/**
-	 * ÇëÇó³¬Ê±Ê±¼ä
+	 * ï¿½ï¿½ï¿½ï¿½Ê±Ê±ï¿½ï¿½
 	 */
 	public final static int requestTimeout = 5000;
 	
 	/**
-	 * ÊÇ·ñÐèÒªÏò·þÎñÆ÷ÇëÇóÖÕ¶ËÁÐ±í
+	 * ï¿½Ç·ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¶ï¿½ï¿½Ð±ï¿½
 	 */
 	public static boolean isNeedReqTermListFlag = true;
 }

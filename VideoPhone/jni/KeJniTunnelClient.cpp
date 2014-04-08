@@ -18,25 +18,11 @@ KeJniTunnelClient::~KeJniTunnelClient() {
 
 void KeJniTunnelClient::OnRecvAudioData(const std::string& peer_id,
 		const char* data, int len) {
-	//jni_thread->Invoke<void>(
-	//		talk_base::Bind(&KeJniTunnelClient::RecvAudioData_jni, this,peer_id,data,len));
-
-}
-
-void KeJniTunnelClient::OnRecvVideoData(const std::string& peer_id,
-		const char* data, int len) {
-	//jni_thread->Invoke<void>(
-	//		talk_base::Bind(&KeJniTunnelClient::RecvVideoData_jni, this,peer_id,data,len));
-
-}
-
-void KeJniTunnelClient::RecvAudioData_jni(const std::string& peer_id,
-		const char* data, int len) {
 	 JniUtil::GetInstance()->JniRecvAudioData(peer_id.c_str(),data,len);
 
 }
 
-void KeJniTunnelClient::RecvVideoData_jni(const std::string& peer_id,
+void KeJniTunnelClient::OnRecvVideoData(const std::string& peer_id,
 		const char* data, int len) {
 	 JniUtil::GetInstance()->JniRecvVideoData(peer_id.c_str(),data,len);
 

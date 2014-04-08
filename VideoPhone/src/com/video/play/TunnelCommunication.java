@@ -101,11 +101,11 @@ public class TunnelCommunication {
 		sendHandlerMsg(handler, R.id.send_to_peer_id, map);
 	}
 
-	public static void RecvVideoData(String arg1) {
+	public static void RecvVideoData(String peerID,byte [] data) {
 		System.out.println("MyDebug: 2��RecvVideoData()");
 	}
 	
-	public static void RecvAudioData(String arg1) {
+	public static void RecvAudioData(String peerID,byte [] data) {
 		System.out.println("MyDebug: 3��RecvAudioData()");
 	}
 	
