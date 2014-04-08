@@ -58,7 +58,7 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
 	bool attached = false;
 	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
 	if(status != JNI_OK){
-		LOGI("g_vm GetEnv error %d", status);
+		//LOGI("g_vm GetEnv error %d", status);
 		status = g_vm_->AttachCurrentThread(&p_env,NULL);
 		if(status != JNI_OK){
 			LOGE("g_vm AttachCurrentThread error %d", status);
@@ -103,7 +103,7 @@ bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
 	bool attached = false;
 	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
 	if(status != JNI_OK){
-		LOGI("g_vm GetEnv error %d", status);
+		//LOGI("g_vm GetEnv error %d", status);
 		status = g_vm_->AttachCurrentThread(&p_env,NULL);
 		if(status != JNI_OK){
 			LOGE("g_vm AttachCurrentThread error %d", status);
@@ -154,7 +154,7 @@ bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
 	bool attached = false;
 	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
 	if(status != JNI_OK){
-		LOGI("g_vm GetEnv error %d", status);
+		//LOGI("g_vm GetEnv error %d", status);
 		status = g_vm_->AttachCurrentThread(&p_env,NULL);
 		if(status != JNI_OK){
 			LOGE("g_vm AttachCurrentThread error %d", status);
