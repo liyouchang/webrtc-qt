@@ -37,7 +37,8 @@ TunnelClientUI::~TunnelClientUI()
 void TunnelClientUI::on_btn_init_clicked()
 {
 
-    connection_->Connect("tcp://192.168.0.182:5555","");
+    //connection_->Connect("tcp://192.168.0.182:5555","");
+    connection_->Connect("tcp://192.168.40.191:5555","");
     tunnel_->Initialize(connection_.get());
 }
 
