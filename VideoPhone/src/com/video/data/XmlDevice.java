@@ -29,7 +29,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.util.Xml;
 
-public class XmlData {
+public class XmlDevice {
 
 	private String filePath = "";
 	public Context context;
@@ -38,7 +38,7 @@ public class XmlData {
 	File currentFile;
 	File[] currentFiles;
 
-	public XmlData (Context context) {
+	public XmlDevice (Context context) {
 		this.context = context;
 		init();
 	}
@@ -246,6 +246,31 @@ public class XmlData {
 		try {
 			deleteAllItem();
 			addList(list);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: updateItem()异常！");
+		}
+		return false;
+	}
+	
+	/**
+	 * 更新一个Item节点的名称
+	 * @return true: 更新成功  false: 更新失败
+	 */
+	public boolean updateItemName(String mac, String newName) {
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			for (int i=0; i<len; i++) {
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (id.equals(mac)) {
+					document.getElementsByTagName("name").item(i).getFirstChild().setNodeValue(newName);
+					break;
+				}
+			}
+			writeXML(document, filePath);
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("MyDebug: updateItem()异常！");

@@ -4,53 +4,23 @@
     android:layout_height="match_parent"
     android:background="@color/page_bg_grey"
     android:orientation="vertical" >
-
-    <Button
-        android:id="@+id/btn_test1"
+    
+    <com.video.main.PullToRefreshView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/main_pull_refresh_view"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/button_style"
-        android:text="@string/login"
-        android:textColor="@color/white"
-        android:textSize="20dp" />
+        android:layout_height="fill_parent"
+        android:background="@color/page_bg_grey"
+        android:orientation="vertical" >
 
-    <Button
-        android:id="@+id/btn_test2"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/button_style"
-        android:text="初始化通道"
-        android:textColor="@color/white"
-        android:textSize="20dp" />
-
-    <Button
-        android:id="@+id/btn_test3"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/button_style"
-        android:text="打开通道"
-        android:textColor="@color/white"
-        android:textSize="20dp" />
-
-    <Button
-        android:id="@+id/btn_test4"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/button_style"
-        android:text="关闭通道"
-        android:textColor="@color/white"
-        android:textSize="20dp" />
+        <ListView
+            android:id="@+id/msg_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="65dp"
+            android:cacheColorHint="#00000000"
+            android:divider="@color/orange"
+            android:dividerHeight="1dp" />
+    </com.video.main.PullToRefreshView>
 
 </LinearLayout>

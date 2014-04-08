@@ -97,7 +97,7 @@ public class MainActivity extends FragmentActivity {
 		TabWidget tabWidget = mTabHost.getTabWidget();  
 		tabWidget.setStripEnabled(false);
         for (int i = 0; i < tabWidget.getChildCount(); i++) { 
-        	tabWidget.getChildAt(i).setBackground(getResources().getDrawable(R.color.title_bg_black));
+        	tabWidget.getChildAt(i).setBackgroundDrawable(getResources().getDrawable(R.color.title_bg_black));
             TextView tv = (TextView) tabWidget.getChildAt(i).findViewById(android.R.id.title);  
             ImageView iv = (ImageView) tabWidget.getChildAt(i).findViewById(android.R.id.icon);  
   

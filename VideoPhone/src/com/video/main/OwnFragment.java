@@ -22,8 +22,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -36,11 +34,9 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
-import com.video.data.XmlData;
-import com.video.local.ViewLocalImageActivity;
+import com.video.data.XmlDevice;
 import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
-import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.DeviceItemAdapter;
@@ -51,11 +47,15 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	
 	private FragmentActivity mActivity;
 	private View mView;
-	private XmlData xmlData;
+	private XmlDevice xmlData;
 	private PreferData preferData = null;
 	private String userName = null;
 	private String list_refresh_time = null;
 	private String list_refresh_terminal = null;
+	//终端列表项
+	private String mDeviceName = null;
+	private String mDeviceId = null;
+	private int listPosition = -1;
 	
 	private ImageButton button_add;
 	private PopupWindow mPopupWindow;
@@ -84,6 +84,12 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		mView = getView();
 		
 		initView();
+	}
+	
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
 		initData();
 	}
 	
@@ -101,7 +107,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private void initData() {
 		//初始化Activity要使用的参数
 		ZmqHandler.setHandler(handler);
-		xmlData = new XmlData(mActivity);
+		xmlData = new XmlDevice(mActivity);
 		preferData = new PreferData(mActivity);
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
@@ -134,6 +140,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 * @param deviceID 设备的MAC
 	 * @return 返回一个设备项Item
 	 */
+	@SuppressWarnings("unused")
 	private HashMap<String, String> getDeviceItem(boolean isOnline, String deviceName, String deviceID, String dealerName) {
 		
 		HashMap<String, String> item = new HashMap<String, String>();
@@ -159,6 +166,22 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		try {
 			jsonObj.put("type", "Client_ReqTermList");
 			jsonObj.put("UserName", userName);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		result = jsonObj.toString();
+		return result;
+	}
+	
+	/**
+	 * 生成JSON的删除终端绑定字符串
+	 */
+	private String generateDelTermItemJson(String mac) {
+		String result = "";
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_DelTerm");
+			jsonObj.put("MAC", mac);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -196,15 +219,16 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
 					Value.isNeedReqTermListFlag = false;
-					Toast.makeText(mActivity, msg.obj+"，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mActivity, ""+msg.obj, Toast.LENGTH_SHORT).show();
 					break;
+				//请求终端列表
 				case R.id.request_terminal_list_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
+						if (progressDialog != null)
+							progressDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							if (progressDialog != null)
-								progressDialog.dismiss();
 							deviceList = (ArrayList<HashMap<String, String>>) msg.obj;
 							if (deviceList != null) {
 								Value.isNeedReqTermListFlag = false;
@@ -213,9 +237,26 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 								xmlData.updateList(deviceList);
 							}
 						} else {
-							if (progressDialog != null)
-								progressDialog.dismiss();
 							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
+						}
+					} else {
+						handler.removeMessages(R.id.request_terminal_list_id);
+					}
+					break;
+				//删除终端绑定
+				case R.id.delete_device_item_id:
+					if (handler.hasMessages(REQUEST_TIMEOUT)) {
+						handler.removeMessages(REQUEST_TIMEOUT);
+						if (progressDialog != null)
+							progressDialog.dismiss();
+						int resultCode = msg.arg1;
+						if (resultCode == 0) {
+							Toast.makeText(mActivity, "删除终端绑定成功！", Toast.LENGTH_SHORT).show();
+							xmlData.deleteItem(mDeviceId);
+							deviceList.remove(listPosition);
+							deviceAdapter.notifyDataSetChanged();
+						} else {
+							Toast.makeText(mActivity, "删除终端绑定失败，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.request_terminal_list_id);
@@ -255,7 +296,22 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqTermListJson();
 			sendHandlerMsg(IS_REQUESTING, "正在请求终端列表...");
-			sendHandlerMsg(REQUEST_TIMEOUT, "请求终端课表失败", Value.requestTimeout);
+			sendHandlerMsg(REQUEST_TIMEOUT, "请求终端课表失败，网络超时！", Value.requestTimeout);
+			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+		} else {
+			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	/**
+	 * 删除终端绑定的网络操作
+	 */
+	public void delTermItemEvent(String id) {
+		if (Utils.isNetworkAvailable(mActivity)) {
+			Handler sendHandler = ZmqThread.zmqThreadHandler;
+			String data = generateDelTermItemJson(id);
+			sendHandlerMsg(IS_REQUESTING, "正在删除终端绑定...");
+			sendHandlerMsg(REQUEST_TIMEOUT, "删除终端绑定失败，网络超时！", Value.requestTimeout);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		} else {
 			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
@@ -279,7 +335,8 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 			// TODO Auto-generated method stub
-			showPopupWindow(mPullToRefreshView, position);
+			listPosition = position;
+			showPopupWindow(mPullToRefreshView);
 			return false;
 		}
 	}
@@ -319,7 +376,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 * 设备项ListView的长按键的PopupWindow选项
 	 */
 	@SuppressWarnings("deprecation")
-	public void showPopupWindow(View view, int position) {
+	public void showPopupWindow(View view) {
 		LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View pop_view = inflater.inflate(R.layout.pop_event_main, null);
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
@@ -344,18 +401,20 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		pop_listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				HashMap<String, String> item = deviceList.get(listPosition);
+				mDeviceName = item.get("deviceName");
+				mDeviceId = item.get("deviceID");
 				switch (position) {
 					case 0:
-						HashMap<String, String> item = deviceList.get(position);
-						String deviceName = item.get("deviceName");
-						String deviceId = item.get("deviceID");
 						Intent intent = new Intent(mActivity, ModifyDeviceNameActivity.class);
-						intent.putExtra("deviceName", deviceName);
-						intent.putExtra("deviceID", deviceId);
-						mActivity.startActivity(intent);
+						intent.putExtra("deviceName", mDeviceName);
+						intent.putExtra("deviceID", mDeviceId);
+						startActivity(intent);
 						mActivity.overridePendingTransition(R.anim.down_in, 0);
 						break;
-					default : break;
+					case 1:
+						delTermItemEvent(mDeviceId);
+						break;
 				}
 				if (mPopupWindow.isShowing()) {
 					mPopupWindow.dismiss();

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -11,21 +12,26 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.video.R;
+import com.video.data.PreferData;
+import com.video.main.PullToRefreshView.OnFooterRefreshListener;
+import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
 import com.video.play.TunnelCommunication;
 import com.video.user.LoginActivity;
+import com.video.utils.Utils;
 import com.video.utils.ViewPagerAdapter;
 
-public class MsgFragment extends Fragment implements OnClickListener, OnPageChangeListener  {
+public class MsgFragment extends Fragment implements OnClickListener, OnPageChangeListener, OnHeaderRefreshListener, OnFooterRefreshListener {
 
 	private FragmentActivity mActivity;
 	private View mView;
-	
+	private PreferData preferData = null;
 	private TextView viewpage_alert;
 	private TextView viewpage_system;
 	
@@ -33,6 +39,11 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	private List<View> pageList;
 	private View alert_page;
 	private View system_page;
+	
+	private ListView lv_list;
+	private PullToRefreshView mPullToRefreshView;
+	private String msg_refresh_time = null;
+	private String msg_refresh_terminal = null;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,6 +86,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		viewpage_alert.setOnClickListener(this);
 		viewpage_system.setOnClickListener(this);
 		
+		//告警消息
+		lv_list = (ListView) mView.findViewById(R.id.msg_list);
+		mPullToRefreshView = (PullToRefreshView) mView.findViewById(R.id.main_pull_refresh_view);
+		mPullToRefreshView.setOnHeaderRefreshListener(this);
+        mPullToRefreshView.setOnFooterRefreshListener(this);
+        
+        //系统消息
 		Button test1 = (Button)mView.findViewById(R.id.btn_test1);
 		test1.setOnClickListener(this);
 		
@@ -83,10 +101,54 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		
 		Button test3 = (Button)mView.findViewById(R.id.btn_test3);
 		test3.setOnClickListener(this);
+		
+		Button test4 = (Button)mView.findViewById(R.id.btn_test4);
+		test4.setOnClickListener(this);
 	}
 	
 	private void initData() {
-		
+		preferData = new PreferData(mActivity);
+		//初始化下拉刷新的显示
+		if (preferData.isExist("msgRefreshTime")) {
+			msg_refresh_time = preferData.readString("msgRefreshTime");
+		}
+		if (preferData.isExist("msgRefreshTerminal")) {
+			msg_refresh_terminal = preferData.readString("msgRefreshTerminal");
+		}
+		if ((msg_refresh_time != null) && (msg_refresh_terminal != null)) {
+			mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
+		}
+	}
+	
+	/**
+	 * 上拖刷新
+	 */
+	@Override
+	public void onFooterRefresh(PullToRefreshView view) {
+		// TODO Auto-generated method stub
+		mPullToRefreshView.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				mPullToRefreshView.onFooterRefreshComplete();
+			}
+		}, 1000);
+	}
+	
+	/**
+	 * 下拉刷新
+	 */
+	@Override
+	public void onHeaderRefresh(PullToRefreshView view) {
+		mPullToRefreshView.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				msg_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd hh:mm:ss");
+				msg_refresh_terminal = "终端: "+Build.MODEL;
+				preferData.writeData("listRefreshTime", msg_refresh_time);
+				preferData.writeData("listRefreshTerminal", msg_refresh_terminal);
+				mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
+			}
+		}, 1500);
 	}
 	
 	@Override
@@ -112,7 +174,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			case R.id.btn_test3:
 				TunnelCommunication.openTunnel("123456");
 //				TunnelCommunication.askMediaData("123456");
-
 //				TunnelCommunication.tunnelTerminate();	
 				break;
 			case R.id.btn_test4:

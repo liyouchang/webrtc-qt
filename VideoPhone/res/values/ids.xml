@@ -44,5 +44,11 @@
     
     <!-- 请求终端列表 -->
     <item name="request_terminal_list_id" type="id"/>
+    
+    <!-- 修改终端名称 -->
+    <item name="modify_device_name_id" type="id"/>
+    
+    <!-- 删除终端绑定 -->
+    <item name="delete_device_item_id" type="id"/>
 
 </resources>

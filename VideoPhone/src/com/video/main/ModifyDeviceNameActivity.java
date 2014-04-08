@@ -1,61 +1,41 @@
 package com.video.main;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.view.ViewPager.LayoutParams;
-import android.view.LayoutInflater;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListView;
-import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.qrcode.view.CaptureActivity;
 import com.video.R;
-import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.data.XmlDevice;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
 public class ModifyDeviceNameActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
-	private PreferData preferData = null;
-	
+	private XmlDevice xmlData;
 	private EditText et_name;
 	private ProgressDialog progressDialog;
 	
-	private String userName = "";
-	private String termMac = "";
-	private String termName = "";
+	private String mDeviceName = "";
+	private String mDeviceId = "";
 	
-	private final int IS_ADDING = 1;
-	private final int ADD_TIMEOUT = 2;
+	private final int IS_REQUESTING = 1;
+	private final int REQUEST_TIMEOUT = 2;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,17 +59,18 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	private void initData() {
 		mContext = ModifyDeviceNameActivity.this;
 		ZmqHandler.setHandler(handler);
-		preferData = new PreferData(mContext);
+		xmlData = new XmlDevice(mContext);
 		
-		if (preferData.isExist("UserName")) {
-			userName = preferData.readString("UserName");
-		}
+		Bundle bundle = this.getIntent().getExtras();
+		mDeviceName = bundle.getString("deviceName");
+		et_name.setText(mDeviceName);
+		mDeviceId = bundle.getString("deviceID");
 	}
 	
 	/**
 	 * 生成JSON的生成终端名字字符串
 	 */
-	private String generateModifyTermNameJson(String mDeviceName, String mDeviceId) {
+	private String generateModifyTermNameJson() {
 		String result = "";
 		JSONObject jsonObj = new JSONObject();
 		try {
@@ -115,56 +96,42 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
         progressDialog.show(); 
 	}
 	
-	/**
-	 * 显示操作的提示
-	 */
-	private void showHandleDialog(String info) {
-		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-				.setTitle("温馨提示")
-				.setMessage(info)
-				.setCancelable(false)
-				.setPositiveButton("确定",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								dialog.dismiss();
-							}
-						}).create();
-		aboutDialog.show();
-	}
-	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
 			// TODO Auto-generated method stub
 			super.handleMessage(msg);
 			switch (msg.what) {
-				case IS_ADDING:
-					showProgressDialog("正在添加... ");
+				case IS_REQUESTING:
+					showProgressDialog((String) msg.obj);
 					break;
-				case ADD_TIMEOUT:
+				case REQUEST_TIMEOUT:
 					if (progressDialog != null)
 						progressDialog.dismiss();
-					showHandleDialog("添加终端失败，网络超时！");
-					if (handler.hasMessages(ADD_TIMEOUT)) {
-						handler.removeMessages(ADD_TIMEOUT);
+					if (handler.hasMessages(REQUEST_TIMEOUT)) {
+						handler.removeMessages(REQUEST_TIMEOUT);
 					}
+					Value.isNeedReqTermListFlag = false;
+					Toast.makeText(mContext, msg.obj+"，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
-				case R.id.add_device_id:
-					if (handler.hasMessages(ADD_TIMEOUT)) {
-						handler.removeMessages(ADD_TIMEOUT);
+				case R.id.modify_device_name_id:
+					if (handler.hasMessages(REQUEST_TIMEOUT)) {
+						handler.removeMessages(REQUEST_TIMEOUT);
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							String dealerName = (String)msg.obj;
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							showHandleDialog("恭喜您，添加终端成功！\n代理地址: "+dealerName);
+							Toast.makeText(mContext, "修改终端名称成功！", Toast.LENGTH_SHORT).show();
+							xmlData.updateItemName(mDeviceId, mDeviceName);
+							finish();
+							overridePendingTransition(0, R.anim.down_out);
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							showHandleDialog("添加终端失败，"+Utils.getErrorReason(resultCode));
+							Toast.makeText(mContext, msg.obj+"，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
 						}
 					} else {
-						handler.removeMessages(R.id.add_device_id);
+						handler.removeMessages(R.id.modify_device_name_id);
 					}
 					break;
 			}
@@ -174,14 +141,16 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	/**
 	 * 发送Handler消息
 	 */
-	private void sendHandlerMsg(int what) {
+	private void sendHandlerMsg(int what, String obj) {
 		Message msg = new Message();
 		msg.what = what;
+		msg.obj = obj;
 		handler.sendMessage(msg);
 	}
-	private void sendHandlerMsg(int what, int timeout) {
+	private void sendHandlerMsg(int what, String obj, int timeout) {
 		Message msg = new Message();
 		msg.what = what;
+		msg.obj = obj;
 		handler.sendMessageDelayed(msg, timeout);
 	}
 	private void sendHandlerMsg(Handler handler, int what, String obj) {
@@ -193,11 +162,13 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	
 	public void clickAddDeviceEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
-//			Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
-//			String data = generateModifyTermNameJson();
-//			sendHandlerMsg(IS_REQUESTING, "正在提交修改...");
-//			sendHandlerMsg(REQUEST_TIMEOUT, "修改终端名称失败", Value.requestTimeout);
-//			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+			if (checkModifyDeviceData()) {
+				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+				String data = generateModifyTermNameJson();
+				sendHandlerMsg(IS_REQUESTING, "正在提交修改...");
+				sendHandlerMsg(REQUEST_TIMEOUT, "修改终端名称失败", Value.requestTimeout);
+				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+			}
 		} else {
 			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
@@ -209,7 +180,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		switch (v.getId()) {
 			case R.id.btn_modify_device_back:
 				finish();
-				overridePendingTransition(R.anim.down_out, 0);
+				overridePendingTransition(0, R.anim.down_out);
 				break;
 			case R.id.btn_modify_device_ok:
 				clickAddDeviceEvent();
@@ -224,18 +195,30 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		boolean resultFlag = false;
 		
 		//获取EditText输入框的字符串
-		termName = et_name.getText().toString().trim();
+		String newDeviceName = et_name.getText().toString().trim();
 		
-		if (termName.equals("")) {
+		if (newDeviceName.equals("")) {
 			resultFlag = false;
 			et_name.setError("请输入设备名称！");
 		}
-		else if ((userName.length()<2) || (userName.length()>20)) {
+		else if ((newDeviceName.length()<2) || (newDeviceName.length()>20)) {
 			resultFlag = false;
 			et_name.setError("设备名称长度范围2~20！");
 		} else {
 			resultFlag = true;
+			mDeviceName = newDeviceName;
 		}
 		return resultFlag;
 	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
+			ModifyDeviceNameActivity.this.finish();
+			overridePendingTransition(0, R.anim.down_out);
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
 }

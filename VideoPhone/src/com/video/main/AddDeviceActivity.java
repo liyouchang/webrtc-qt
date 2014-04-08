@@ -1,16 +1,15 @@
 package com.video.main;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -31,11 +30,13 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.qrcode.view.CaptureActivity;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.data.XmlDevice;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
@@ -43,6 +44,7 @@ import com.video.utils.Utils;
 public class AddDeviceActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
+	private XmlDevice xmlData;
 	private PreferData preferData = null;
 	
 	private ImageButton button_title_more;
@@ -50,6 +52,9 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	private EditText et_id;
 	private RelativeLayout add_title;
 	private ProgressDialog progressDialog;
+	//终端列表项
+	private String mDeviceName = null;
+	private String mDeviceId = null;
 	
 	private String userName = "";
 	private String termMac = "";
@@ -85,6 +90,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	private void initData() {
 		mContext = AddDeviceActivity.this;
 		ZmqHandler.setHandler(handler);
+		xmlData = new XmlDevice(mContext);
 		preferData = new PreferData(mContext);
 		
 		if (preferData.isExist("UserName")) {
@@ -122,23 +128,6 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
         progressDialog.show(); 
 	}
 	
-	/**
-	 * 显示操作的提示
-	 */
-	private void showHandleDialog(String info) {
-		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-				.setTitle("温馨提示")
-				.setMessage(info)
-				.setCancelable(false)
-				.setPositiveButton("确定",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								dialog.dismiss();
-							}
-						}).create();
-		aboutDialog.show();
-	}
-	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -151,7 +140,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				case ADD_TIMEOUT:
 					if (progressDialog != null)
 						progressDialog.dismiss();
-					showHandleDialog("添加终端失败，网络超时！");
+					Toast.makeText(mContext, "添加终端失败，网络超时！", Toast.LENGTH_SHORT).show();
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
 					}
@@ -159,16 +148,16 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				case R.id.add_device_id:
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
+						if (progressDialog != null)
+							progressDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
 							String dealerName = (String)msg.obj;
-							if (progressDialog != null)
-								progressDialog.dismiss();
-							showHandleDialog("恭喜您，添加终端成功！\n代理地址: "+dealerName);
+							xmlData.addItem(getDeviceItem(mDeviceName, mDeviceId, dealerName));
+							Toast.makeText(mContext, "添加终端成功！", Toast.LENGTH_SHORT).show();
+							AddDeviceActivity.this.finish();
 						} else {
-							if (progressDialog != null)
-								progressDialog.dismiss();
-							showHandleDialog("添加终端失败，"+Utils.getErrorReason(resultCode));
+							Toast.makeText(mContext, "添加终端失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.add_device_id);
@@ -208,7 +197,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			showHandleDialog("没有可用的网络连接，请确认后重试！");
+			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -242,11 +231,12 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 			resultFlag = false;
 			et_name.setError("请输入设备名称！");
 		}
-		else if ((userName.length()<2) || (userName.length()>20)) {
+		else if ((termName.length()<2) || (termName.length()>20)) {
 			resultFlag = false;
 			et_name.setError("设备名称长度范围2~20！");
 		} else {
 			resultFlag = true;
+			mDeviceName = termName;
 			if (termMac.equals("")) {
 				resultFlag = false;
 				et_id.setError("请输入设备ID，您可以通过扫描二维码或搜索设备输入设备ID！");
@@ -256,15 +246,30 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				et_id.setError("设备ID长度范围6~20！");
 			} else {
 				resultFlag = true;
+				mDeviceId = termMac;
 			}
 		}
 		return resultFlag;
 	}
 	
 	/**
+	 * 获得一个设备项Item
+	 * @param deviceName 设备名称
+	 * @param deviceID 设备的MAC
+	 * @return 返回一个设备项Item
+	 */
+	private HashMap<String, String> getDeviceItem(String deviceName, String deviceId, String dealerName) {
+		HashMap<String, String> item = new HashMap<String, String>();
+		item.put("isOnline", "false");
+		item.put("deviceName", deviceName);
+		item.put("deviceID", deviceId);
+		item.put("dealerName", dealerName);
+		return item;
+	}
+	
+	/**
 	 * 添加设备的弹出对话框
 	 */
-	@SuppressWarnings("deprecation")
 	private void showPopupWindow() {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View pop_view = inflater.inflate(R.layout.pop_main, null);
@@ -301,10 +306,19 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 							mPopupWindow.dismiss();
 						}
 						break;
-					default : break;
 				}
 			}
 		});
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		if (resultCode == RESULT_OK) {
+			Bundle bundle = data.getExtras();
+			String qrcode_string = bundle.getString("qrcode");
+			et_id.setText(qrcode_string);
+		}
 	}
 	
 	/**
@@ -353,16 +367,6 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 
 		class ViewHolder {
 			TextView pop_textView;
-		}
-	}
-
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		// TODO Auto-generated method stub
-		if (resultCode == RESULT_OK) {
-			Bundle bundle = data.getExtras();
-			String qrcode_string = bundle.getString("qrcode");
-			et_id.setText(qrcode_string);
 		}
 	}
 }

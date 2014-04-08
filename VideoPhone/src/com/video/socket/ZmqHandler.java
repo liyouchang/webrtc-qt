@@ -94,6 +94,16 @@ public class ZmqHandler extends Handler {
 						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, "«Î«Û÷’∂À¡–±Ì ß∞‹").sendToTarget();
 					}
 				}
+				//–ﬁ∏ƒ÷’∂À√˚≥∆
+				else if (type.equals("Client_ModifyTerm")) {
+					int resultCode = obj.getInt("Result");
+					mHandler.obtainMessage(R.id.modify_device_name_id, resultCode, 0).sendToTarget();
+				}
+				//…æ≥˝÷’∂À∞Û∂®
+				else if (type.equals("Client_DelTerm")) {
+					int resultCode = obj.getInt("Result");
+					mHandler.obtainMessage(R.id.delete_device_item_id, resultCode, 0).sendToTarget();
+				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
