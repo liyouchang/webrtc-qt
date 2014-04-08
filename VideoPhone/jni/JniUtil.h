@@ -14,6 +14,7 @@
 #define LOGI(...) __android_log_print(4,LOG_TAG, __VA_ARGS__);
 #define LOGE(...) __android_log_print(6,LOG_TAG, __VA_ARGS__);
 
+
 class JniUtil {
 public:
 	JniUtil();
@@ -25,8 +26,11 @@ public:
 	bool JniSendToPeer(const char * peer_id,const char * message);
 	bool JniRecvVideoData(const char * peer_id,const char* data, int len);
 	bool JniRecvAudioData(const char * peer_id,const char* data, int len);
-	JNIEnv *g_env_;
-	JavaVM *g_vm_;
+	bool getSendToPeerMethod(JNIEnv *env, jobject obj);
+	JavaVM * g_vm_;
+	jobject g_obj_;
+	jclass callBackCls;
+	jmethodID SendToPeer_mid;
 	std::string call_class_name_;
 protected:
 };

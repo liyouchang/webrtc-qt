@@ -22,7 +22,7 @@ public:
     virtual bool SendToPeer(const std::string &peer_id, const std::string& message);
 protected:
     bool SendToPeer_jni(const std::string &peer_id, const std::string& message);
-    talk_base::Thread * jni_thread;
+    //talk_base::Thread * jni_thread;
     virtual void OnMessage(talk_base::Message * msg);
 };
 

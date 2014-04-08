@@ -22,7 +22,7 @@ protected:
     void RecvVideoData_jni(const std::string & peer_id,const char * data,int len);
 private:
 
-    talk_base::Thread *jni_thread;
+    //talk_base::Thread *jni_thread;
 };
 
 #endif /* KEJNITUNNELCLIENT_H_ */

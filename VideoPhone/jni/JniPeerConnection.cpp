@@ -9,7 +9,7 @@
 #include "talk/base/bind.h"
 #include "JniUtil.h"
 JniPeerConnection::JniPeerConnection() {
-	jni_thread = talk_base::Thread::Current();
+	//jni_thread = talk_base::Thread::Current();
 }
 
 JniPeerConnection::~JniPeerConnection() {
@@ -28,12 +28,12 @@ bool JniPeerConnection::SendToPeer(const std::string& peer_id,
 
 //	bool ret =  jni_thread->Invoke<bool>(
 //			talk_base::Bind(&JniPeerConnection::SendToPeer_jni, this,peer_id,message));
-//	bool ret =  JniUtil::GetInstance()->JniSendToPeer(peer_id.c_str(),message.c_str());
+	bool ret =  JniUtil::GetInstance()->JniSendToPeer(peer_id.c_str(),message.c_str());
 
-	jni_thread->Post(this,MSG_SENDTOPEER,new SendToPeerData(peer_id,message));
+//	jni_thread->Post(this,MSG_SENDTOPEER,new SendToPeerData(peer_id,message));
 	//LOGI("jni invoke %d",ret);
 
-	return true;
+	return ret;
 }
 
 bool JniPeerConnection::SendToPeer_jni(const std::string& peer_id,

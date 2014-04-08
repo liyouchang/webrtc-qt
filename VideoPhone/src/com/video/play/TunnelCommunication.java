@@ -4,27 +4,83 @@ import java.util.HashMap;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.video.R;
 import com.video.socket.HandlerApplication;
+import com.video.socket.ZmqCtrl;
 
 public class TunnelCommunication {
 
-	//ÉùÃ÷±¾µØ½Ó¿Ú
-	private static native int naInitialize(String classPath);
-	private static native int naTerminate();
-	private static native int naOpenTunnel(String peerId);
-	private static native int naCloseTunnel(String peerId);
-	private static native int naMessageFromPeer(String peerId, String msg);
-	private static native int naAskMediaData(String peerId);
-
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø½Ó¿ï¿½
+	private  native int naInitialize(String classPath);
+	private  native int naTerminate();
+	private  native int naOpenTunnel(String peerId);
+	private  native int naCloseTunnel(String peerId);
+	private  native int naMessageFromPeer(String peerId, String msg);
+	private  native int naAskMediaData(String peerId);
+	public TunnelCommunication(){
+		Log.i("construction","");
+	}
 	static {
+		new TunnelCommunication();
 		System.loadLibrary("gnustl_shared");
 		System.loadLibrary("VideoPhone");
 	}
 	
+	private static TunnelCommunication tunnel = null;
+
+	synchronized public static TunnelCommunication Instance() {
+		if (tunnel == null) {
+			tunnel = new TunnelCommunication();
+		}
+		return tunnel;
+	}
+
 	/**
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * ï¿½ï¿½Ê¼ï¿½ï¿½Í¨ï¿½ï¿½
+	 */
+	public  int tunnelInitialize(String classPath) {
+		return naInitialize(classPath);
+	}
+
+	/**
+	 * ï¿½ï¿½Ö¹Ê¹ï¿½ï¿½Í¨ï¿½ï¿½
+	 */
+	public  int tunnelTerminate() {
+		return naTerminate();
+	}
+
+	/**
+	 * ï¿½ï¿½Í¨ï¿½ï¿½
+	 */
+	public  int openTunnel(String peerId) {
+		return naOpenTunnel(peerId);
+	}
+
+	/**
+	 * ï¿½Ø±ï¿½Í¨ï¿½ï¿½
+	 */
+	public  int closeTunnel(String peerId) {
+		return naCloseTunnel(peerId);
+	}
+	
+	/**
+	 * ï¿½ï¿½ï¿½Ô¶ÔµÈ¶Ëµï¿½ï¿½ï¿½ï¿½
+	 */
+	public  int messageFromPeer(String peerId, String msg) {
+		return naMessageFromPeer(peerId, msg);
+	}
+
+	/**
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 */
+	public  int askMediaData(String peerId) {
+		return naAskMediaData(peerId);
+	}
+	
+	/**
+	 * ï¿½ï¿½ï¿½ï¿½Handlerï¿½ï¿½Ï¢
 	 */
 	private static void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
 		Message msg = new Message();
@@ -32,54 +88,11 @@ public class TunnelCommunication {
 		msg.obj = obj;
 		handler.sendMessage(msg);
 	}
-
 	/**
-	 * ³õÊ¼»¯Í¨µÀ
-	 */
-	public static int tunnelInitialize(String classPath) {
-		return naInitialize(classPath);
-	}
-
-	/**
-	 * ÖÕÖ¹Ê¹ÓÃÍ¨µÀ
-	 */
-	public static int tunnelTerminate() {
-		return naTerminate();
-	}
-
-	/**
-	 * ´ò¿ªÍ¨µÀ
-	 */
-	public static int openTunnel(String peerId) {
-		return naOpenTunnel(peerId);
-	}
-
-	/**
-	 * ¹Ø±ÕÍ¨µÀ
-	 */
-	public static int closeTunnel(String peerId) {
-		return naCloseTunnel(peerId);
-	}
-	
-	/**
-	 * À´×Ô¶ÔµÈ¶ËµÄÊý¾Ý
-	 */
-	public static int messageFromPeer(String peerId, String msg) {
-		return naMessageFromPeer(peerId, msg);
-	}
-
-	/**
-	 * ÇëÇó¶àÃ½ÌåÊý¾Ý
-	 */
-	public static int askMediaData(String peerId) {
-		return naAskMediaData(peerId);
-	}
-
-	/**
-	 * Ïò¶ÔµÈ¶Ë·¢ËÍÊý¾Ý
+	 * ï¿½ï¿½ÔµÈ¶Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 */
 	public static void SendToPeer(String peerId, String data) {
-		System.out.print("MyDebug: 1¡¢SendToPeer(): "+data);
+		System.out.print("MyDebug: 1ï¿½ï¿½SendToPeer(): "+data);
 		
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", peerId);
@@ -89,10 +102,15 @@ public class TunnelCommunication {
 	}
 
 	public static void RecvVideoData(String arg1) {
-		System.out.println("MyDebug: 2¡¢RecvVideoData()");
+		System.out.println("MyDebug: 2ï¿½ï¿½RecvVideoData()");
 	}
 	
 	public static void RecvAudioData(String arg1) {
-		System.out.println("MyDebug: 3¡¢RecvAudioData()");
+		System.out.println("MyDebug: 3ï¿½ï¿½RecvAudioData()");
+	}
+	
+	public static void fromJNI(int i)
+	{
+		Log.w("Java------>", ""+i);
 	}
 }

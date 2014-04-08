@@ -9,7 +9,7 @@
 #include "talk/base/bind.h"
 #include "JniUtil.h"
 KeJniTunnelClient::KeJniTunnelClient() {
-	jni_thread = talk_base::Thread::Current();
+	//jni_thread = talk_base::Thread::Current();
 }
 
 KeJniTunnelClient::~KeJniTunnelClient() {
@@ -18,15 +18,15 @@ KeJniTunnelClient::~KeJniTunnelClient() {
 
 void KeJniTunnelClient::OnRecvAudioData(const std::string& peer_id,
 		const char* data, int len) {
-	jni_thread->Invoke<void>(
-			talk_base::Bind(&KeJniTunnelClient::RecvAudioData_jni, this,peer_id,data,len));
+	//jni_thread->Invoke<void>(
+	//		talk_base::Bind(&KeJniTunnelClient::RecvAudioData_jni, this,peer_id,data,len));
 
 }
 
 void KeJniTunnelClient::OnRecvVideoData(const std::string& peer_id,
 		const char* data, int len) {
-	jni_thread->Invoke<void>(
-			talk_base::Bind(&KeJniTunnelClient::RecvVideoData_jni, this,peer_id,data,len));
+	//jni_thread->Invoke<void>(
+	//		talk_base::Bind(&KeJniTunnelClient::RecvVideoData_jni, this,peer_id,data,len));
 
 }
 
