@@ -52,7 +52,8 @@ int main()
 
     CameraClient client;
 
-    client.Connect("tcp://192.168.0.182:5555","123456");
+    //client.Connect("tcp://192.168.0.182:5555","123456");
+    client.Connect("tcp://192.168.40.191:5555","123456");
     client.Login();
 
 //    talk_base::scoped_ptr<PeerTerminal> terminal;

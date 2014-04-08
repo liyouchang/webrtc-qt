@@ -18,11 +18,9 @@ public:
 protected:
     virtual void OnRecvAudioData(const std::string & peer_id,const char * data,int len);
     virtual void OnRecvVideoData(const std::string & peer_id,const char * data,int len);
-    void RecvAudioData_jni(const std::string & peer_id,const char * data,int len);
-    void RecvVideoData_jni(const std::string & peer_id,const char * data,int len);
 private:
 
-    talk_base::Thread *jni_thread;
+    //talk_base::Thread *jni_thread;
 };
 
 #endif /* KEJNITUNNELCLIENT_H_ */

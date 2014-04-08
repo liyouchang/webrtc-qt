@@ -66,7 +66,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * ³õÊ¼»¯¸Ã½çÃæÏÂÒª»¬¶¯µÄÒ³Ãæ
+	 * ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò³ï¿½ï¿½
 	 */
 	private void initViewPageView() {
 		mViewPager = (ViewPager)mView.findViewById(R.id.msg_viewpager);
@@ -169,15 +169,16 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 				startActivity(new Intent(mActivity, LoginActivity.class));
 				break;
 			case R.id.btn_test2:
-				TunnelCommunication.tunnelInitialize("com/video/play/TunnelCommunication");
+				TunnelCommunication.Instance().tunnelInitialize("com/video/play/TunnelCommunication");
 				break;
 			case R.id.btn_test3:
-				TunnelCommunication.openTunnel("123456");
+				TunnelCommunication.Instance().openTunnel("123456");
 //				TunnelCommunication.askMediaData("123456");
 //				TunnelCommunication.tunnelTerminate();	
 				break;
 			case R.id.btn_test4:
-				TunnelCommunication.closeTunnel("123456");				
+				System.out.println("close tunnel test");
+				TunnelCommunication.Instance().closeTunnel("123456");				
 				break;
 		}
 	}
