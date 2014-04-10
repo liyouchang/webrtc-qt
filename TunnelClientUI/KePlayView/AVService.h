@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include<Windows.h>
+#include <qwindowdefs.h>
+
 
 class AVService : public QObject
 {
@@ -11,14 +13,14 @@ public:
     explicit AVService(QObject *parent = 0);
 
     void SetPlayWnd(HWND hWnd);
-    int OpenStream();
+    int OpenStream(WId playWnd);
     int OpenSound();
     int CloseSound();
     int InputStream(const char * data, int dataLen);
     int CloseStream();
     bool IsPlaying();
     int CapPic(const char * fileName);
-    int PlayFile(const char * fileName,int fileSize = 0);
+    int PlayFile(const char * fileName,int fileSize,WId playWnd);
 
     enum PlayStatus
     {

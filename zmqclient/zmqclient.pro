@@ -43,10 +43,11 @@ win32 {
 
 }
 
-SOURCES += main.cpp \
+SOURCES += \
     asyndealer.cpp \
     peerconnectionclientdealer.cpp \
-    CameraClient.cpp
+    CameraClient.cpp \
+    zmqclient.cpp
 
 
 HEADERS += \

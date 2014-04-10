@@ -8,14 +8,12 @@ KeQtTunnelClient::KeQtTunnelClient(QObject *parent) :
 
 void KeQtTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *data, int len)
 {
-    //qDebug()<<__FUNCTION__;
     QByteArray mediaData(data,len);
     emit SigRecvAudioData(peer_id.c_str(),mediaData);
 }
 
 void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *data, int len)
 {
-    //qDebug()<<__FUNCTION__;
     QByteArray mediaData(data,len);
     emit SigRecvVideoData(peer_id.c_str(),mediaData);
 }

@@ -20,19 +20,22 @@ AVService::AVService(QObject *parent) :
 
 void AVService::SetPlayWnd(HWND hWnd)
 {
-    m_hPlayWnd = hWnd;
-    if (IsPlaying())
-    {
-        int ret = AV_ReInitViewHandle(m_lPlayHandle,m_hPlayWnd);
-        if (ret != 0)
-        {
-            qWarning("AV_ReInitViewHandle error!");
-        }
-    }
+//    m_hPlayWnd = hWnd;
+//    if (IsPlaying())
+//    {
+//        int ret = AV_ReInitViewHandle(m_lPlayHandle,m_hPlayWnd);
+//        if (ret != 0)
+//        {
+//            qWarning("AV_ReInitViewHandle error!");
+//        }
+//    }
 }
 
-int AVService::OpenStream()
+int AVService::OpenStream(WId playWnd)
 {
+    if(playWnd != 0){
+        m_hPlayWnd = reinterpret_cast<HWND>(playWnd);
+    }
     int iRet = AV_OpenStream_Ex(m_lPlayHandle);
     if (iRet != 0)
     {
@@ -74,11 +77,19 @@ int AVService::CapPic(const char * fileName)
 {
     return AV_CapPic_Ex(m_lPlayHandle,fileName);
 }
-
-int AVService::PlayFile(const char *fileName, int fileSize)
+/**
+ * @brief AVService::PlayFile
+ * @param fileName
+ * @param fileSize : set to 0 by default
+ * @param playWnd
+ * @return
+ */
+int AVService::PlayFile(const char *fileName, int fileSize, WId playWnd)
 {
     int playHandle = 65;  //回放句柄范围  65~96
-
+    if(playWnd != 0){
+        m_hPlayWnd = reinterpret_cast<HWND>(playWnd);
+    }
     long lRet = AV_OpenFile_Ex(playHandle,(char *)fileName,fileSize);
     if (lRet == 0)
     {

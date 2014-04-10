@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!-- scripting.qdoc -->
+<head>
+  <title>KePlayerPlugin</title>
+  <link href="classic.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+
+<input type="button" value="About..." OnClick="KePlayer.about();"/>
+<p>
+  <object id="KePlayer" TYPE=application/keplayer-plugin   WIDTH=600 HEIGHT=400 text="Very Scriptable!"> 
+  	[Object not available! Did you forget to build and register the server?]
+
+  </object>
+<p/>
+  <script language=JavaScript>
+  
+  var KePlayer = document.getElementById('KePlayer');
+  KePlayer.text = 'This is some text'
+
+  var oldText
+  KePlayer.testSignal = function()
+  {
+    alert("test signal");
+  }
+
+  KePlayer.mouseMove = function(x, y)
+  {
+    ScriptableObject.text = 'Mouse at ' + x + ',' + y
+  }
+
+  KePlayer.mouseUp = function()
+  {
+    KePlayer.text = oldText
+  }
+  
+   function PlayFile(){
+		var retStr = KePlayer.PlayLocalFile();
+		//alert(retStr);
+		
+   }
+   function Initilize(){
+		
+   }
+   function ConnectToPeer(){
+   }
+   function SetDivision()
+{
+	if (divisionNum.value != " ")
+	{
+		player.SetDivision(divisionNum.value);
+	}
+}
+  </script>
+
+  <!-- Special hookup code required for Internet Explorer -->
+  <!--[if IE]>
+  <script language=JScript>
+  function ScriptableObject::mouseDown() { ScriptableObject.mouseDown() }
+  function ScriptableObject::mouseMove(x, y) { ScriptableObject.mouseMove(x, y) }
+  function ScriptableObject::mouseUp() { ScriptableObject.mouseUp() }
+  </script>
+  <![endif]-->
+
+  	Division Number: <INPUT TYPE ="text" NAME="divisionNum" VALUE=" 1">
+    <input type="button" value="Set Devision" OnClick="KePlayer.SetDivision(divisionNum.value);"/>
+	<p/>
+        router url :<INPUT TYPE ="text" NAME="routerUrl" VALUE="tcp://192.168.40.191:5555">
+  <input type="button" value="Initilize" OnClick="KePlayer.Initialize(routerUrl.value);"/>
+  <p/>
+Peer ID:<INPUT TYPE ="text" NAME="PeerID" VALUE="1234567">
+  <input type="button" value="Connect to Peer"" OnClick="KePlayer.Connect(PeerID.value);"/>
+  <p/>
+    <input type="button" value="Start Video" OnClick="KePlayer.StartVideo(PeerID.value)"/>
+    <input type="button" value="Connect to Peer" OnClick="ConnectToPeer()"/>
+
+
+</body>
+</html>

@@ -1087,7 +1087,6 @@ NPP_SetWindow(NPP instance, NPWindow* window)
     This->qt.widget->raise();
     qtns_setGeometry(This, This->geometry, clipRect);
     This->qt.widget->show();
-
     return NPERR_NO_ERROR;
 }
 

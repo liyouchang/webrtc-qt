@@ -1,9 +1,5 @@
 
 
-
-
-
-
 INCLUDEPATH += $$PWD/..
 
 

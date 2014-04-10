@@ -31,11 +31,17 @@ VideoWall::VideoWall(QWidget *parent) :
     SetDivision(ScreenDivision_Six);
 
     playSource = new AVService(this);
-    playSource->SetPlayWnd((HWND)this->players[0]->winId());
+
+    //with winID it will
+   // playSource->SetPlayWnd((HWND)this->winId());
+    qDebug()<<this->players[0]->effectiveWinId();
+    //playSource->SetPlayWnd((HWND)this->players[0]->effectiveWinId());
 }
 
 VideoWall::~VideoWall()
 {
+    qDebug()<<this->players[0]->effectiveWinId();
+
     AVService::Cleanup();
 }
 
@@ -124,8 +130,8 @@ void VideoWall::PlayLocalFile()
                 "Video files (*.h264 *.264);;All files(*.*)");
     if (!filename.isNull()) { //用户选择了文件
         qDebug()<<QDir::currentPath();
-        //int ret = player->PlayFile(filename.toLatin1().constData());
-        // qDebug()<<"play result:"<<ret;
+        int ret = playSource->PlayFile(filename.toLatin1().constData(),0,this->players[0]->effectiveWinId());
+         qDebug()<<"play result:"<<ret;
         //   QMessageBox::information(this, "Document", "No document", QMessageBox::Ok | QMessageBox::Cancel);
 
     } else // 用户取消选择
@@ -165,7 +171,8 @@ void VideoWall::showNormalScreenWall()
 void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
 {
     if(!playSource->IsPlaying()){
-        if(playSource->OpenStream()!=0)
+        WId playWId = this->players[0]->winId();
+        if(playSource->OpenStream(playWId)!=0)
             return;
     }
     playSource->InputStream(data.constData(),data.length());
@@ -190,11 +197,15 @@ void VideoWall::createMenus()
 
 void VideoWall::paintEvent(QPaintEvent *)
 {  
-    QPainter p(this);
-    QRect r(rect());
-    p.setPen(Qt::black);
-    r.adjust(0, 0, -1, -1);
-    p.drawRect(r);
+//    qDebug()<<"VideoWall::paintEvent---player0 > "<<this->players[0]->effectiveWinId();
+//    qDebug()<<"VideoWall::paintEvent---player1 > "<<this->players[1]->winId();
+//    qDebug()<<"VideoWall::paintEvent---player2 > "<<this->players[2]->winId();
+
+//    QPainter p(this);
+//    QRect r(rect());
+//    p.setPen(Qt::black);
+//    r.adjust(0, 0, -1, -1);
+//    p.drawRect(r);
 }
 
 void VideoWall::keyPressEvent(QKeyEvent *e)

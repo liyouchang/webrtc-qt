@@ -48,6 +48,8 @@
 
 #include "qtnpapi.h"
 
+#include <QGuiApplication>
+//#include  <qpa/qplatformnativeinterface.h>
 
 #if QT_VERSION >= 0x050000
 #define QT_WA(unicode, ansi) unicode
@@ -235,21 +237,44 @@ extern "C" void qtns_shutdown()
 
     showBox = false;
 }
+//static QWindow* windowForWidget(const QWidget* widget)
+//{
+// QWindow* window = widget->windowHandle();
+// if (window)
+//  return window;
+// const QWidget* nativeParent = widget->nativeParentWidget();
+// if (nativeParent)
+//  return nativeParent->windowHandle();
+// return 0;
+//}
+
+//HWND getHWNDForWidget(const QWidget* widget)
+//{
+// QWindow* window = ::windowForWidget(widget);
+// if (window && window->handle())
+// {
+//  QPlatformNativeInterface* interface = QGuiApplication::platformNativeInterface();
+//  return static_cast<HWND>(interface->nativeResourceForWindow(QByteArrayLiteral("handle"), window));
+// }
+// return 0;
+//}
 
 extern "C" void qtns_embed(QtNPInstance *This)
 {
+
     Q_ASSERT(qobject_cast<QWidget*>(This->qt.object));
 
+     qDebug()<<"qtns_embed--> effectiveWinId "<<This->qt.widget->internalWinId();
     LONG oldLong = GetWindowLong(This->window, GWL_STYLE);
     ::SetWindowLong(This->window, GWL_STYLE, oldLong | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
     ::SetWindowLong((HWND)This->qt.widget->winId(), GWL_STYLE, WS_CHILD | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
     ::SetParent((HWND)This->qt.widget->winId(), This->window);
-
+    //qDebug()<<"qtns_embed-->"<<getHWNDForWidget(This->qt.widget);
     //开启qt事件循环
-//    QDialog box(This->qt.widget);
-//    box.setGeometry(-100,-100,0,0);//dismiss the dialog
-//    QTimer::singleShot(0,&box,SLOT(accept()));
-//    box.exec();
+    QDialog box(This->qt.widget);
+    box.setGeometry(-100,-100,0,0);//dismiss the dialog
+    QTimer::singleShot(0,&box,SLOT(accept()));
+    box.exec();
 
 }
 
@@ -258,7 +283,6 @@ extern "C" void qtns_setGeometry(QtNPInstance *This, const QRect &rect, const QR
     Q_ASSERT(qobject_cast<QWidget*>(This->qt.object));
     This->qt.widget->setGeometry(0,0,rect.width(),rect.height());
     //lht:change
-
 
 //    This->qt.widget->resize(rect.width(),rect.height());
 //    QRect frameRect = This->qt.widget->frameGeometry();
