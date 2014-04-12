@@ -19,12 +19,13 @@ KePlayerPlugin::~KePlayerPlugin()
 
 void KePlayerPlugin::about()
 {
-    qDebug()<<"about";
     QMessageBox::aboutQt(this);
 }
 
 void KePlayerPlugin::SetDivision(int num)
 {
+    qDebug("to emit closed");
+    emit TunnelClosed("ddd");
     this->videoWall->SetDivision(num);
 }
 
@@ -46,6 +47,12 @@ int KePlayerPlugin::Initialize(QString routerUrl)
                      this->videoWall,&VideoWall::OnRecvMediaData);
     QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvAudioData,
                      this->videoWall,&VideoWall::OnRecvMediaData);
+    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigTunnelOpened,
+                     this,&KePlayerPlugin::TunnelOpened);
+    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigTunnelClosed,
+                     this,&KePlayerPlugin::TunnelClosed);
+
+
 
     return 0;
 }
@@ -57,10 +64,22 @@ int KePlayerPlugin::StartVideo(QString peer_id)
     return 0;
 }
 
-int KePlayerPlugin::Connect(QString peer_id)
+void KePlayerPlugin::paintEvent(QPaintEvent *)
+{
+    qDebug()<<"KePlayerPlugin::paintEvent";
+}
+
+int KePlayerPlugin::OpenTunnel(QString peer_id)
 {
     std::string str_id = peer_id.toStdString();
-    int ret = tunnel_->ConnectToPeer(str_id);
+    int ret = tunnel_->OpenTunnel(str_id);
+    return ret;
+}
+
+int KePlayerPlugin::CloseTunnel(QString peer_id)
+{
+    std::string str_id = peer_id.toStdString();
+    int ret = tunnel_->CloseTunnel(str_id);
     return ret;
 }
 

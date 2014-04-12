@@ -18,7 +18,7 @@ int PeerTerminal::Initialize(kaerp2p::PeerConnectionClientInterface * client)
 }
 
 
-int PeerTerminal::ConnectToPeer(const std::string & peer_id)
+int PeerTerminal::OpenTunnel(const std::string & peer_id)
 {
     ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
     if(aTunnel== NULL){

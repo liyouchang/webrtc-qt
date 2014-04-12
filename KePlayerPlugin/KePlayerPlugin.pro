@@ -30,4 +30,6 @@ HEADERS  += KePlayerPlugin.h
 
 OTHER_FILES += \
     KePlayerPlugin.rc \
-    pluginTest/KePlayerPlugin.html
+    pluginTest/KePlayerPlugin.html \
+    pluginTest/js/jquery-1.11.0.js \
+    pluginTest/js/keplayer.js

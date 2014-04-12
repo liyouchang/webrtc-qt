@@ -21,7 +21,7 @@ public:
     //need a client that has been login
     int Initialize(kaerp2p::PeerConnectionClientInterface * client);
 
-    virtual int ConnectToPeer(const std::string &peer_id);
+    virtual int OpenTunnel(const std::string &peer_id);
     virtual int CloseTunnel(const std::string &peer_id);
     //virtual bool TunnelOpened();
 

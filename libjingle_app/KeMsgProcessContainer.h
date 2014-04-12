@@ -14,7 +14,7 @@ public:
 
     virtual int Initialize(PeerTerminalInterface *t);
     virtual int Initialize(kaerp2p::PeerConnectionClientInterface * client);
-    virtual int ConnectToPeer(const std::string &peer_id);
+    virtual int OpenTunnel(const std::string &peer_id);
     virtual int CloseTunnel(const std::string &peer_id);
 
     virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);

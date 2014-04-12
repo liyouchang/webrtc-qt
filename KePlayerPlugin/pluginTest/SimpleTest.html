@@ -11,51 +11,43 @@
 
 <input type="button" value="About..." OnClick="ScriptableObject.about();"/>
 <p>
-  <object id="QSimpleAX" CLASSID="CLSID:DF16845C-92CD-4AAB-A982-EB9840E74669"
+  <object id="QSimpleAX" CLASSID="CLSID:EBF9056F-2E44-4460-93C9-0837E28AB5D8"
  WIDTH=600 HEIGHT=400 text="Very Scriptable!"> 
   <PARAM NAME="text" VALUE="A simple control" />
     <PARAM NAME="value" VALUE="1" />
 	[Object not available! Did you forget to build and register the server?]
 	</object>
 
-  <script language=JavaScript>
-  
-  var ScriptableObject = document.getElementById('ScriptableObject');
-  ScriptableObject.text = 'This is some text'
+<FORM>
+    <INPUT TYPE="BUTTON" VALUE="About..." onClick="QSimpleAX.about()" />
+</FORM>
 
-  var oldText
-  ScriptableObject.testSignal = function()
-  {
-    alert("test signal");
-  }
+<SCRIPT LANGUAGE="JavaScript">
+function QSimpleAX::ValueChanged( Newvalue )
+{
+	alert("sdfdf");
+    //Calendar.Day = Newvalue;
+}
+function QSimpleAX::someSignal()
+{
+	alert("sdfdf");
+}
+</SCRIPT>
+<object ID="OldAx" CLASSID="CLSID:DF16845C-92CD-4AAB-A982-EB9840E74669" WIDTH=200 HEIGHT=100 >
+[Standard Calendar control not available!]
+   <PARAM NAME="value" VALUE="1" />
+</object>
 
-  ScriptableObject.mouseMove = function(x, y)
-  {
-    ScriptableObject.text = 'Mouse at ' + x + ',' + y
-  }
-
-  ScriptableObject.mouseUp = function()
-  {
-    ScriptableObject.text = oldText
-  }
-  
-   function PlayFile(){
-		var retStr = ScriptableObject.PlayLocalFile();
-		//alert(retStr);
-		
-   }
-  </script>
-
-  <!-- Special hookup code required for Internet Explorer -->
-  <!--[if IE]>
-  <script language=JScript>
-  function ScriptableObject::mouseDown() { ScriptableObject.mouseDown() }
-  function ScriptableObject::mouseMove(x, y) { ScriptableObject.mouseMove(x, y) }
-  function ScriptableObject::mouseUp() { ScriptableObject.mouseUp() }
-  </script>
-  <![endif]-->
-
-  
-  <input type="button" value="Play video File" OnClick="PlayFile()"/>
+<SCRIPT LANGUAGE="JavaScript">
+function OldAx::ValueChanged( Newvalue )
+{
+	alert("sdfdf");
+    //Calendar.Day = Newvalue;
+}
+function OldAx::someSignal()
+{
+	alert("sdfdf");
+}
+</SCRIPT>
 </body>
 </html>

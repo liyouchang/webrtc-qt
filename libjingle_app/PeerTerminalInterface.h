@@ -7,7 +7,7 @@
 
 class PeerTerminalInterface{
 public:
-    virtual int ConnectToPeer(const std::string &peer_id) = 0;
+    virtual int OpenTunnel(const std::string &peer_id) = 0;
     virtual int CloseTunnel(const std::string &peer_id) = 0;
     virtual int SendByRouter(const std::string & peer_id,const std::string & data) =0;
     virtual int SendByTunnel(const std::string &peer_id,const std::string & data) =0;

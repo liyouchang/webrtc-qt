@@ -18,6 +18,20 @@ void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *d
     emit SigRecvVideoData(peer_id.c_str(),mediaData);
 }
 
+void KeQtTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
+{
+    qDebug()<<"KeQtTunnelClient::OnTunnelOpened";
+    KeTunnelClient::OnTunnelOpened(t,peer_id);
+    emit SigTunnelOpened(peer_id.c_str());
+}
+
+void KeQtTunnelClient::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
+{
+    qDebug()<<"KeQtTunnelClient::OnTunnelClosed";
+    KeTunnelClient::OnTunnelClosed(t,peer_id);
+    emit SigTunnelClosed(peer_id.c_str());
+}
+
 
 
 

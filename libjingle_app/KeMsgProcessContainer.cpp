@@ -35,9 +35,9 @@ int KeMsgProcessContainer::Initialize(kaerp2p::PeerConnectionClientInterface *cl
     return this->Initialize(t);
 }
 
-int KeMsgProcessContainer::ConnectToPeer(const std::string &peer_id)
+int KeMsgProcessContainer::OpenTunnel(const std::string &peer_id)
 {
-    return terminal_->ConnectToPeer(peer_id);
+    return terminal_->OpenTunnel(peer_id);
 }
 
 int KeMsgProcessContainer::CloseTunnel(const std::string &peer_id)
