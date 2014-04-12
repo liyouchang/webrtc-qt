@@ -22,9 +22,9 @@ public class ZmqThread extends Thread {
 	}
 	
 	/**
-	 * ZMQé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
-	 * @param data è¦é”Ÿæ–¤æ‹·é”Ÿé…µç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
-	 * @return true:é”Ÿæ–¤æ‹·é”Ÿé…µæˆç™¸æ‹·  false:é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·å¤±é”Ÿæ–¤æ‹·
+	 * ZMQ·¢ËÍÊı¾İ
+	 * @param data Òª·¢ËÍµÄÊı¾İ
+	 * @return true:·¢ËÍ³É¹¦  false:·¢ËÍÊ§°Ü
 	 */
 	private boolean sendZmqData(String data) {
 		boolean result = false;
@@ -38,6 +38,12 @@ public class ZmqThread extends Thread {
         return result;
 	}
 	
+	/**
+	 * ZMQÏòÖÕ¶Ë·¢ËÍÊı¾İ
+	 * @param peerId ÖÕ¶ËID
+	 * @param data Òª·¢ËÍµÄÊı¾İ
+	 * @return true:·¢ËÍ³É¹¦  false:·¢ËÍÊ§°Ü
+	 */
 	private boolean sendZmqData(String peerId, String data) {
 		boolean result = false;
 		String requestContentString = data+" ";  
@@ -51,8 +57,8 @@ public class ZmqThread extends Thread {
 	}
 	
 	/**
-	 * ZMQé”Ÿæ–¤æ‹·Backstageé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
-	 * @return null:é”Ÿæ–¤æ‹·é”Ÿç§¸è¯§æ‹·é”Ÿç¼´ç™¸æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ´¥è¿”å›æ–¤æ‹·é”Ÿç§¸ç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
+	 * ZMQ½ÓÊÕÊı¾İ
+	 * @return null:Ã»ÓĞÊı¾İ·ñÔò½ÓÊÕµ½Êı¾İ
 	 */
 	private String recvZmqData() {
 		String result = null;
@@ -70,15 +76,15 @@ public class ZmqThread extends Thread {
 				result = message_str2;
 			} 
 			else if (message_str1.equals("123456")) {
-				System.out.println("MyDebug: é”Ÿç§¸ç¢‰æ‹·é”Ÿæ–¤æ‹·Peeré”Ÿæ–¤æ‹·é”Ÿï¿½: " + message_str1);
-				TunnelCommunication.Instance().messageFromPeer("123456", message_str2);
+				System.out.println("MyDebug:  " + message_str1);
+				TunnelCommunication.getInstance().messageFromPeer("123456", message_str2);
 			}
         }
 		return result;
 	}
 	
 	/**
-	 * é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·Handleré”Ÿæ–¤æ‹·æ¯
+	 * ·¢ËÍhandlerÏûÏ¢
 	 */
 	public void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -102,39 +108,39 @@ public class ZmqThread extends Thread {
 			@Override
 			public void handleMessage(Message msg) {
 				switch (msg.what) {
-					//é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
+					//ZMQ½ÓÊÕÊı¾İ
 					case R.id.zmq_recv_data_id:
 						String result = recvZmqData();
 						if (result != null) {
 							sendHandlerMsg(result);
-							System.out.println("MyDebug: é”Ÿç§¸ç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½ "+result);
+							System.out.println("MyDebug:  "+result);
 						}
 						if (zmqThreadHandler.hasMessages(R.id.zmq_recv_data_id)) {
 							zmqThreadHandler.removeMessages(R.id.zmq_recv_data_id);
 						}
-						break;
-					//é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
+						break; 
+					//ZMQ·¢ËÍÊı¾İ
 					case R.id.zmq_send_data_id:
 						sendZmqData((String)msg.obj);
 						System.out.println("MyDebug: \n");
-						System.out.println("MyDebug: é”Ÿæ–¤æ‹·é”Ÿé…µç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½ "+(String)msg.obj);
+						System.out.println("MyDebug:  "+(String)msg.obj);
 						if (zmqThreadHandler.hasMessages(R.id.zmq_send_data_id)) {
 							zmqThreadHandler.removeMessages(R.id.zmq_send_data_id);
 						}
 						break;
-					//é”Ÿæ–¤æ‹·é”Ÿé…µå¯¹ç­‰è®¹æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½
+					//ZMQÏòÖÕ¶Ë·¢ËÍÊı¾İ
 					case R.id.send_to_peer_id:
 						HashMap<String, String> mapData = (HashMap<String, String>)msg.obj;
 						String peerId = mapData.get("peerId");
 						String peerData = mapData.get("peerData");
 						sendZmqData(peerId, peerData);
 						System.out.println("MyDebug: \n");
-						System.out.println("MyDebug: é”Ÿæ–¤æ‹·é”Ÿé…µç¢‰æ‹·Peeré”Ÿæ–¤æ‹·é”Ÿï¿½ " + peerData);
+						System.out.println("MyDebug: " + peerData);
 						if (zmqThreadHandler.hasMessages(R.id.send_to_peer_id)) {
 							zmqThreadHandler.removeMessages(R.id.send_to_peer_id);
 						}
 						break;
-					//é”Ÿæˆªæ†‹æ‹·ZMQ Socket
+					//¹Ø±ÕZMQ Socket
 					case R.id.close_zmq_socket_id:
 						zmq_socket.close();
 						ZmqCtrl.getInstance().exit();

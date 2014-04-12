@@ -48,6 +48,10 @@
     
     <string name="device_item_name">名称: 门口摄像头</string>
     <string name="device_item_mac">ID: 009B684850022</string>
+    <string name="msg_item_event">事件: 发生移动侦测</string>
+    <string name="msg_item_mac">来自: 0090B0000020</string>
+    <string name="msg_item_time"><![CDATA[时间: 2014-04-08 15:32:10]]></string>
+    
     <string name="pull_to_refresh_pull_label">下拉刷新</string>
     <string name="pull_to_refresh_release_label">松开后刷新</string>
     <string name="pull_to_refresh_refreshing_label">刷新中\u2026</string>

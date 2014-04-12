@@ -1,36 +1,43 @@
 package com.video.play;
 
+import java.io.File;
 import java.util.HashMap;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.video.R;
+import com.video.data.ByteCache;
 import com.video.socket.HandlerApplication;
-import com.video.socket.ZmqCtrl;
+import com.video.utils.Tools;
 
 public class TunnelCommunication {
 
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø½Ó¿ï¿½
-	private  native int naInitialize(String classPath);
-	private  native int naTerminate();
-	private  native int naOpenTunnel(String peerId);
-	private  native int naCloseTunnel(String peerId);
-	private  native int naMessageFromPeer(String peerId, String msg);
-	private  native int naAskMediaData(String peerId);
-	public TunnelCommunication(){
-		Log.i("construction","");
-	}
-	static {
-		new TunnelCommunication();
-		System.loadLibrary("gnustl_shared");
-		System.loadLibrary("VideoPhone");
-	}
+	private static TunnelCommunication tunnel = null; //¸ÃÀàµ¥Àý¶ÔÏó
 	
-	private static TunnelCommunication tunnel = null;
+	public static int width = 1280; 
+	public static int height = 720;
+	
+	public static byte frameType; //Ö¡ÀàÐÍ
+	public static ByteCache videoDataCache = null; //»º´æÍ¼ÏñÊý¾Ý¶ÔÏó
+	private static byte[] naluData = new byte[width*height*3]; //Òª»º´æµÄÊý¾Ý
+	private static int naluDataLen = 4; //Òª»º´æµÄÊý¾Ý´óÐ¡
+	
+	//P2PÍ¨Ñ¶¿âJNI½Ó¿Ú
+	private native int naInitialize(String classPath);
+	private native int naTerminate();
+	private native int naOpenTunnel(String peerId);
+	private native int naCloseTunnel(String peerId);
+	private native int naMessageFromPeer(String peerId, String msg);
+	private native int naAskMediaData(String peerId);
+	
+	static 
+	{
+		System.loadLibrary("gnustl_shared");
+		System.loadLibrary("p2p");
+	}
 
-	synchronized public static TunnelCommunication Instance() {
+	synchronized public static TunnelCommunication getInstance() {
 		if (tunnel == null) {
 			tunnel = new TunnelCommunication();
 		}
@@ -38,49 +45,55 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * ï¿½ï¿½Ê¼ï¿½ï¿½Í¨ï¿½ï¿½
+	 * Í¨µÀ³õÊ¼»¯
 	 */
-	public  int tunnelInitialize(String classPath) {
+	public int tunnelInitialize(String classPath) {
 		return naInitialize(classPath);
 	}
 
 	/**
-	 * ï¿½ï¿½Ö¹Ê¹ï¿½ï¿½Í¨ï¿½ï¿½
+	 * Í¨µÀÖÕÖ¹
 	 */
-	public  int tunnelTerminate() {
+	public int tunnelTerminate() {
 		return naTerminate();
 	}
 
 	/**
-	 * ï¿½ï¿½Í¨ï¿½ï¿½
+	 * ´ò¿ªÍ¨µÀ
 	 */
-	public  int openTunnel(String peerId) {
+	public int openTunnel(String peerId) {
 		return naOpenTunnel(peerId);
 	}
 
+	private static File myData = null;
+	
 	/**
-	 * ï¿½Ø±ï¿½Í¨ï¿½ï¿½
+	 * ¹Ø±ÕÍ¨µÀ
 	 */
-	public  int closeTunnel(String peerId) {
+	public int closeTunnel(String peerId) {
+		if (videoDataCache != null) {
+			videoDataCache.clearBuffer();
+		}
 		return naCloseTunnel(peerId);
 	}
 	
-	/**
-	 * ï¿½ï¿½ï¿½Ô¶ÔµÈ¶Ëµï¿½ï¿½ï¿½ï¿½
-	 */
-	public  int messageFromPeer(String peerId, String msg) {
+	public int messageFromPeer(String peerId, String msg) {
 		return naMessageFromPeer(peerId, msg);
 	}
 
 	/**
-	 * ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * ÇëÇóÊÓÆµÊý¾Ý
 	 */
-	public  int askMediaData(String peerId) {
+	public int askMediaData(String peerId) {
+		if (videoDataCache == null) {
+			videoDataCache = new ByteCache();
+			videoDataCache.setBufferLen(1024*1024*3);
+		}
 		return naAskMediaData(peerId);
 	}
 	
 	/**
-	 * ï¿½ï¿½ï¿½ï¿½Handlerï¿½ï¿½Ï¢
+	 * ·¢ËÍhandlerÏûÏ¢
 	 */
 	private static void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
 		Message msg = new Message();
@@ -88,29 +101,54 @@ public class TunnelCommunication {
 		msg.obj = obj;
 		handler.sendMessage(msg);
 	}
+	
 	/**
-	 * ï¿½ï¿½ÔµÈ¶Ë·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * ×ª·¢¸øÖÕ¶ËÊý¾Ý
 	 */
-	public static void SendToPeer(String peerId, String data) {
-		System.out.print("MyDebug: 1ï¿½ï¿½SendToPeer(): "+data);
+	public void SendToPeer(String peerId, String data) {
+		System.out.print("MyDebug: 1¡¢SendToPeer(): "+data);
 		
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", peerId);
 		map.put("peerData", data);
 		Handler handler = HandlerApplication.getInstance().getMyHandler();
-		sendHandlerMsg(handler, R.id.send_to_peer_id, map);
+		sendHandlerMsg(handler, R.id.send_to_peer_id, map); 
 	}
 
-	public static void RecvVideoData(String peerID,byte [] data) {
-		System.out.println("MyDebug: 2ï¿½ï¿½RecvVideoData()");
+	/**
+	 * ÊÕµ½ÊÓÆµÊý¾Ý
+	 */
+	public void RecvVideoData(String peerID, byte[] data) {
+		int dataLen = data.length;
+		frameType = (byte)(data[9]);
+		
+		if ((frameType & 0x5F) < 30) {
+			int pushPosition = 10;
+			int frameLen = Tools.getWordValue(data, pushPosition);
+			pushPosition += 2;
+			if (frameLen == (dataLen - pushPosition)) {
+				if ((byte)(frameType & 0x80) != 0) {
+					pushPosition += 4;
+				} else {
+					if(naluDataLen > 4 ){
+						Tools.setIntValue(naluData, 0, naluDataLen-4);
+						if (videoDataCache.push(naluData, naluDataLen) != 0) {
+							videoDataCache.clearBuffer();
+						}
+						naluDataLen = 4;
+					}
+				}
+				int naluLen = dataLen - pushPosition;
+				Tools.CopyByteArray(naluData, naluDataLen, data, pushPosition, naluLen);
+				naluDataLen += naluLen;
+			}
+		}
 	}
 	
-	public static void RecvAudioData(String peerID,byte [] data) {
-		System.out.println("MyDebug: 3ï¿½ï¿½RecvAudioData()");
-	}
-	
-	public static void fromJNI(int i)
-	{
-		Log.w("Java------>", ""+i);
+	/**
+	 * ÊÕµ½ÒôÆµÊý¾Ý
+	 */
+	public void RecvAudioData(String peerID,byte [] data) {
+		
 	}
 }

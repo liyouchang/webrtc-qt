@@ -49,7 +49,6 @@ public class XmlMessage {
 	public void init() {
 		if (Utils.checkSDCard()) {
 			SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
-			
 			filePath = SD_path + File.separator + "KaerVideo" + File.separator + "MessageList.xml";
 			File file = new File(filePath);
 			if (!file.exists()) {
@@ -145,7 +144,7 @@ public class XmlMessage {
 			Element timeElement = (Element) document.createElement("time");
 			Element macElement = (Element) document.createElement("mac");
 			Element stateElement = (Element) document.createElement("state");
-			Element textElement = (Element) document.createElement("text");
+			Element eventElement = (Element) document.createElement("event");
 			Element urlElement = (Element) document.createElement("url");
 			
 			Text timeText = document.createTextNode(map.get("msgTime"));
@@ -154,15 +153,15 @@ public class XmlMessage {
 			macElement.appendChild(macText);
 			Text stateText = document.createTextNode(map.get("isReaded"));
 			stateElement.appendChild(stateText);
-			Text textText = document.createTextNode(map.get("msgText"));
-			textElement.appendChild(textText);
+			Text eventText = document.createTextNode(map.get("msgEvent"));
+			eventElement.appendChild(eventText);
 			Text urlText = document.createTextNode(map.get("imageURL"));
 			urlElement.appendChild(urlText);
 			
 			itemElement.appendChild(timeElement);
 			itemElement.appendChild(macElement);
 			itemElement.appendChild(stateElement);
-			itemElement.appendChild(textElement);
+			itemElement.appendChild(eventElement);
 			itemElement.appendChild(urlElement);
 			Element rootElement = (Element) document.getDocumentElement();
 			rootElement.appendChild(itemElement);
@@ -186,7 +185,7 @@ public class XmlMessage {
 			NodeList nodeList = document.getElementsByTagName("item");
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
-				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				String id = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
 				if (id.equals(deviceID)) {
 					return true;
 				}
@@ -209,7 +208,7 @@ public class XmlMessage {
 			NodeList nodeList = document.getElementsByTagName("item");
 			int len = nodeList.getLength();
 			for (int i = 0; i < len; i++) {
-				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				String id = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
 				if (id.equals(deviceID)) {
 					Node node = nodeList.item(i);
 					node.getParentNode().removeChild(node);
@@ -258,18 +257,18 @@ public class XmlMessage {
 	}
 	
 	/**
-	 * 更新一个Item节点的名称
+	 * 更新一个Item节点的状态
 	 * @return true: 更新成功  false: 更新失败
 	 */
-	public boolean updateItemName(String mac, String newName) {
+	public boolean updateItemState(String mac, String newName) {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName("item");
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
-				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				String id = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
 				if (id.equals(mac)) {
-					document.getElementsByTagName("name").item(i).getFirstChild().setNodeValue(newName);
+					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(newName);
 					break;
 				}
 			}
@@ -292,11 +291,12 @@ public class XmlMessage {
 			NodeList nodeList = document.getElementsByTagName("item");
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
-				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
-				if (id.equals(map.get("deviceID"))) {
-					document.getElementsByTagName("name").item(i).getFirstChild().setNodeValue(map.get("deviceName"));
-					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(map.get("isOnline"));
-					document.getElementsByTagName("dealer").item(i).getFirstChild().setNodeValue(map.get("dealerName"));
+				String id = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
+				if (id.equals(map.get("msgMAC"))) {
+					document.getElementsByTagName("time").item(i).getFirstChild().setNodeValue(map.get("msgTime"));
+					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(map.get("isReaded"));
+					document.getElementsByTagName("event").item(i).getFirstChild().setNodeValue(map.get("msgEvent"));
+					document.getElementsByTagName("url").item(i).getFirstChild().setNodeValue(map.get("imageURL"));
 					break;
 				}
 			}
@@ -340,14 +340,16 @@ public class XmlMessage {
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				HashMap<String, String> item = new HashMap<String, String>();
-				String name = document.getElementsByTagName("name").item(i).getFirstChild().getNodeValue();
-				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				String time = document.getElementsByTagName("time").item(i).getFirstChild().getNodeValue();
+				String mac = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
 				String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
-				String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
-				item.put("deviceName", name);
-				item.put("deviceID", id);
-				item.put("isOnline", state);
-				item.put("dealerName", dealer);
+				String event = document.getElementsByTagName("event").item(i).getFirstChild().getNodeValue();
+				String url = document.getElementsByTagName("url").item(i).getFirstChild().getNodeValue();
+				item.put("msgTime", time);
+				item.put("msgMAC", mac);
+				item.put("isReaded", state);
+				item.put("msgEvent", event);
+				item.put("imageURL", url);
 				list.add(item);
 			}
 			return list;

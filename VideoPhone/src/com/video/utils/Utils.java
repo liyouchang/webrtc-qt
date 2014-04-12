@@ -50,6 +50,9 @@ public class Utils {
 			case 7:
 				result = "账号和邮箱不匹配！";
 				break;
+			case 9:
+				result = "未登录请求设备列表！";
+				break;
 			default: 
 				result = "不明原因！";
 				break;
