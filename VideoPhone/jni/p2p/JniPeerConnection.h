@@ -8,9 +8,10 @@
 #ifndef JNIPEERCONNECTION_H_
 #define JNIPEERCONNECTION_H_
 
-#include "libjingle_app/PeerConnectionClinetInterface.h"
 #include "talk/base/thread.h"
+#include "libjingle_app/PeerConnectionClinetInterface.h"
 #include "talk/base/messagehandler.h"
+
 class JniPeerConnection : public kaerp2p::PeerConnectionClientInterface{
 public:
 	enum{

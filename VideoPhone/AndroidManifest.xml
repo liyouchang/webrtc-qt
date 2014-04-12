@@ -128,6 +128,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
+        <!-- 视频播放 -->
+        <activity
+            android:name=".play.VideoPlayActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeFullscreen" >
+        </activity>
     </application>
 
 </manifest>

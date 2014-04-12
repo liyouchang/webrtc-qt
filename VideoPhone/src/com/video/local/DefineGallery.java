@@ -15,7 +15,6 @@ import android.widget.Gallery;
 import com.video.R;
 import com.video.utils.Utils;
 
-@SuppressWarnings("deprecation")
 public class DefineGallery extends Gallery {
 	
 	private GestureDetector gestureDetector;

@@ -237,7 +237,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 								xmlData.updateList(deviceList);
 							}
 						} else {
-							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.request_terminal_list_id);
@@ -256,7 +256,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 							deviceList.remove(listPosition);
 							deviceAdapter.notifyDataSetChanged();
 						} else {
-							Toast.makeText(mActivity, "删除终端绑定失败，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, "删除终端绑定失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.request_terminal_list_id);
@@ -375,7 +375,6 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 	/**
 	 * 设备项ListView的长按键的PopupWindow选项
 	 */
-	@SuppressWarnings("deprecation")
 	public void showPopupWindow(View view) {
 		LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View pop_view = inflater.inflate(R.layout.pop_event_main, null);

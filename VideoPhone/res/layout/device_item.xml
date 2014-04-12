@@ -17,7 +17,8 @@
             android:id="@+id/iv_device_icon"
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:background="@drawable/icon_device_default"
+            android:padding="5dp"
+            android:background="@drawable/videoplay_selector"
             android:contentDescription="@null"
             android:scaleType="fitXY" />
 

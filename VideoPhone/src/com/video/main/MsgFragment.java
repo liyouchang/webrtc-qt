@@ -1,11 +1,14 @@
 package com.video.main;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
@@ -23,7 +26,9 @@ import com.video.data.PreferData;
 import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
 import com.video.play.TunnelCommunication;
+import com.video.play.VideoPlayActivity;
 import com.video.user.LoginActivity;
+import com.video.utils.MessageItemAdapter;
 import com.video.utils.Utils;
 import com.video.utils.ViewPagerAdapter;
 
@@ -40,10 +45,14 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	private View alert_page;
 	private View system_page;
 	
+	private static ArrayList<HashMap<String, String>> msgList = null;
+	private MessageItemAdapter msgAdapter = null;
 	private ListView lv_list;
 	private PullToRefreshView mPullToRefreshView;
 	private String msg_refresh_time = null;
 	private String msg_refresh_terminal = null;
+	
+	private File imageCache = null;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,7 +75,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * 锟斤拷始锟斤拷锟矫斤拷锟斤拷锟斤拷要锟斤拷锟斤拷锟斤拷页锟斤拷
+	 * 初始化告警消息和系统消息的界面
 	 */
 	private void initViewPageView() {
 		mViewPager = (ViewPager)mView.findViewById(R.id.msg_viewpager);
@@ -111,6 +120,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	
 	private void initData() {
 		preferData = new PreferData(mActivity);
+		String SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
+		String filePath = SD_path + File.separator + "KaerVideo" + File.separator + "cache";
+		imageCache = new File(filePath);
+		if(!imageCache.exists()){
+			imageCache.mkdirs();
+		}
 		//初始化下拉刷新的显示
 		if (preferData.isExist("msgRefreshTime")) {
 			msg_refresh_time = preferData.readString("msgRefreshTime");
@@ -121,6 +136,39 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		if ((msg_refresh_time != null) && (msg_refresh_terminal != null)) {
 			mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
 		}
+		//告警消息
+		testMsgView();
+	}
+	
+	private void testMsgView() {
+		msgList = new ArrayList<HashMap<String, String>>();
+		HashMap<String, String> item = null;
+		item = getMsgItem(true, "发生移动侦测报警", "0090B0000021", "2014-04-08 15:32:10");
+		msgList.add(item);
+		item = getMsgItem(false, "发生人体感应报警", "0090B0000022", "2014-04-08 16:10:15");
+		msgList.add(item);
+		item = getMsgItem(false, "发生人体感应报警", "0090B0000023", "2014-04-08 18:46:24");
+		msgList.add(item);
+		if (msgList != null) {
+			msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
+			lv_list.setAdapter(msgAdapter);
+		}
+	}
+	
+	private HashMap<String, String> getMsgItem(boolean isReaded, String event, String mac, String time) {
+		
+		HashMap<String, String> item = new HashMap<String, String>();
+		String state = "false";
+		if (isReaded) {
+			state = "true";
+		} else {
+			state = "false";
+		}
+		item.put("isReaded", state);
+		item.put("msgEvent", "事件: "+event);
+		item.put("msgMAC", "来自: "+mac);
+		item.put("msgTime", time);
+		return item;
 	}
 	
 	/**
@@ -147,8 +195,8 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			public void run() {
 				msg_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd hh:mm:ss");
 				msg_refresh_terminal = "终端: "+Build.MODEL;
-				preferData.writeData("listRefreshTime", msg_refresh_time);
-				preferData.writeData("listRefreshTerminal", msg_refresh_terminal);
+				preferData.writeData("msgRefreshTime", msg_refresh_time);
+				preferData.writeData("msgRefreshTerminal", msg_refresh_terminal);
 				mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
 			}
 		}, 1500);
@@ -172,20 +220,22 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 				startActivity(new Intent(mActivity, LoginActivity.class));
 				break;
 			case R.id.btn_test2:
-				TunnelCommunication.Instance().tunnelInitialize("com/video/play/TunnelCommunication");
+				System.out.println("MyDebug: 【打开通道】");
+				TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
+				TunnelCommunication.getInstance().openTunnel("123456");
 				break;
 			case R.id.btn_test3:
-				TunnelCommunication.Instance().openTunnel("123456");
-//				TunnelCommunication.askMediaData("123456");
-//				TunnelCommunication.tunnelTerminate();	
+				System.out.println("MyDebug: 【播放视频】");
+				TunnelCommunication.getInstance().askMediaData("123456");
+				startActivity(new Intent(mActivity, VideoPlayActivity.class));
 				break;
 			case R.id.btn_test4:
-				System.out.println("close tunnel test");
-				TunnelCommunication.Instance().closeTunnel("123456");				
+				System.out.println("MyDebug: 【关闭通道】");
+				TunnelCommunication.getInstance().closeTunnel("123456");
+//				TunnelCommunication.getInstance().tunnelTerminate();
 				break;
 			case R.id.btn_test5:
-				System.out.println("close tunnel test");
-				TunnelCommunication.Instance().askMediaData("123456");	
+				System.out.println("MyDebug: ");
 				break;
 		}
 	}
@@ -212,4 +262,17 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 				break;
 		}
 	}
+
+	@Override
+	public void onDestroyView() {
+		// TODO Auto-generated method stub
+		super.onDestroyView();
+		 //清空缓存
+//        File[] files = imageCache.listFiles();
+//        for(File file :files){
+//            file.delete();
+//        }
+//        imageCache.delete();
+	}
+
 }

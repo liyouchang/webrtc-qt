@@ -73,7 +73,7 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
 		return false;
 	}
 
-	jmethodID mid = p_env->GetStaticMethodID(callBackCls, "SendToPeer",
+	jmethodID mid = p_env->GetMethodID(callBackCls, "SendToPeer",
 			"(Ljava/lang/String;Ljava/lang/String;)V");
 	if (!mid) {
 		LOGE("get method SendToPeer error");
@@ -118,7 +118,7 @@ bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
 		return false;
 	}
 
-	jmethodID mid = p_env->GetStaticMethodID(callBackCls, "RecvVideoData",
+	jmethodID mid = p_env->GetMethodID(callBackCls, "RecvVideoData",
 			"(Ljava/lang/String;[B)V");
 	if (!mid) {
 		LOGE("get method RecvVideoData error");
@@ -169,7 +169,7 @@ bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
 		return false;
 	}
 
-	jmethodID mid = p_env->GetStaticMethodID(callBackCls, "RecvAudioData",
+	jmethodID mid = p_env->GetMethodID(callBackCls, "RecvAudioData",
 			"(Ljava/lang/String;[B)V");
 	if (!mid) {
 		LOGE("get method RecvVideoData error");

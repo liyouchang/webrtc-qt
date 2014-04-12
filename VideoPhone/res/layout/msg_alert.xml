@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     android:background="@color/page_bg_grey"
     android:orientation="vertical" >
     
@@ -17,10 +17,13 @@
             android:id="@+id/msg_list"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_marginBottom="65dp"
+            android:layout_marginBottom="70dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:cacheColorHint="#00000000"
-            android:divider="@color/orange"
-            android:dividerHeight="1dp" />
+            android:divider="#00000000"
+			android:dividerHeight="10dp"
+			android:scrollbars="none" />
     </com.video.main.PullToRefreshView>
 
 </LinearLayout>
