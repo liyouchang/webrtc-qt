@@ -3,11 +3,14 @@
 
 #include <QWidget>
 #include <QAxBindable>
-#include "VideoWall.h"
 #include "zmqclient/peerconnectionclientdealer.h"
 #include "TunnelClientUI/KeQtTunnelClient.h"
 
-class KePlayerPlugin : public QWidget,public QAxBindable
+
+class VideoWall;
+
+
+class KePlayerPlugin : public QWidget
 {
     Q_OBJECT
     Q_PROPERTY( QString text READ text WRITE setText )
@@ -46,13 +49,9 @@ public slots:
     int OpenTunnel(QString peer_id);
     int CloseTunnel(QString peer_id);
     int StartVideo(QString peer_id);
-    void setText( const QString &string )
-     {
-//         if ( !requestPropertyChange( "text" ) )
-//             return;
-//         propertyChanged( "text" );
-     }
-//    int StopVideo(QString peer_id);
+    int StopVideo(QString peer_id);
+
+    void setText( const QString &string );
 
 
 
@@ -60,6 +59,13 @@ public slots:
     // QWidget interface
 protected:
     void paintEvent(QPaintEvent *);
+    void resizeEvent(QResizeEvent *);
+
+    // QAxBindable interface
+public:
+    QAxAggregated *createAggregate();
+    bool readData(QIODevice *source, const QString &format);
+    bool writeData(QIODevice *sink);
 };
 
 #endif // KEPLAYERPLUGIN_H

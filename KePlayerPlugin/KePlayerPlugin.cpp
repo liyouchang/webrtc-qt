@@ -1,4 +1,6 @@
 #include "KePlayerPlugin.h"
+#include <QtWidgets>
+#include "VideoWall.h"
 
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
@@ -24,14 +26,11 @@ void KePlayerPlugin::about()
 
 void KePlayerPlugin::SetDivision(int num)
 {
-    qDebug("to emit closed");
-    emit TunnelClosed("ddd");
     this->videoWall->SetDivision(num);
 }
 
 QString KePlayerPlugin::PlayLocalFile()
 {
-    //QMessageBox::aboutQt(this);
     this->videoWall->PlayLocalFile();
     return "play success";
 }
@@ -52,8 +51,6 @@ int KePlayerPlugin::Initialize(QString routerUrl)
     QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigTunnelClosed,
                      this,&KePlayerPlugin::TunnelClosed);
 
-
-
     return 0;
 }
 
@@ -64,9 +61,30 @@ int KePlayerPlugin::StartVideo(QString peer_id)
     return 0;
 }
 
-void KePlayerPlugin::paintEvent(QPaintEvent *)
+int KePlayerPlugin::StopVideo(QString peer_id)
 {
-    qDebug()<<"KePlayerPlugin::paintEvent";
+return 0;
+}
+
+void KePlayerPlugin::setText(const QString &string)
+{
+    //         if ( !requestPropertyChange( "text" ) )
+    //             return;
+    //         propertyChanged( "text" );
+}
+
+void KePlayerPlugin::paintEvent(QPaintEvent *event)
+{
+    qDebug()<<"KePlayerPlugin::paintEvent"<<event->rect();
+    this->videoWall->setGeometry(event->rect());
+
+}
+
+void KePlayerPlugin::resizeEvent(QResizeEvent *event)
+{
+    qDebug()<<"KePlayerPlugin::resizeEvent"<<event->size();
+    this->videoWall->resize(event->size());
+
 }
 
 int KePlayerPlugin::OpenTunnel(QString peer_id)

@@ -1,38 +1,42 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE html
-PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "DTD/xhtml1-strict.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<!-- scripting.qdoc -->
 <head>
 <title>KePlayerPlugin</title>
-<link href="classic.css" rel="stylesheet" type="text/css" />
+
+<script language=JavaScript src="js/keplayer.js" ></script>
+
+<link href="css/main.css" rel="stylesheet" type="text/css" />
 
 
-<script language=JavaScript src="js/keplayer.js"></script>
 </head>
 <body onload=load()>
 
-
-    <input type="button" value="About..." OnClick="KePlayerPlugin.about();"/>
-    <p/>
-    <object ID="KePlayerPlugin" TYPE=application/keplayer-plugin   WIDTH=600 HEIGHT=400 text="">
+    <object ID="KePlayerPlugin" TYPE="application/keplayer-plugin">
     [Object not available! Did you forget to build and register the server?]
     </object>
-    <p/>
 
-    Division Number: <INPUT TYPE ="text" id="divisionNum" VALUE=" 1">
-    <input type="button" value="Set Devision" OnClick="KePlayerPlugin.SetDivision(divisionNum.value);"/>
-    <p/>
-    router url :<INPUT TYPE ="text" id="routerUrl" VALUE="tcp://192.168.40.191:5555">
+    <input type="button" value="About..." OnClick="KePlayerPlugin.about();"/>
+    <p></p>
+
+
+    <p></p>
+
+
+    Division Number: <INPUT TYPE ="text" id="divisionNum" VALUE=" 1"/>
+    <input type="button" value="Set Devision" OnClick="KePlayerPlugin.SetDivision(divisionNum.value)"/>
+    <p></p>
+    router url :<INPUT TYPE ="text" id="routerUrl" VALUE="tcp://192.168.40.191:5555"/>
     <input type="button" value="Initilize" OnClick="KePlayerPlugin.Initialize(routerUrl.value);"/>
-    <p/>
-    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="1234567">
-    <input type="button" value="Open Tunnel"" OnClick="KePlayerPlugin.OpenTunnel(PeerID.value);"/>
+    <p></p>
+
+    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="1234567"/>
+    <input type="button" value="Open Tunnel" OnClick="KePlayerPlugin.OpenTunnel(PeerID.value);"/>
     <input type="button" value="Close Tunnel" OnClick="KePlayerPlugin.CloseTunnel(PeerID.value);"/>
-    <p/>
+    <p></p>
+
     <input type="button" value="Start Video" OnClick="KePlayerPlugin.StartVideo(PeerID.value)"/>
 
-<p/>
+    <p></p>
 <div id="textDiv"></div>
 
 </body>

@@ -1,6 +1,7 @@
 #include "peerconnectionclientdealer.h"
 
 #include "talk/base/logging.h"
+#include "asyndealer.h"
 
 // This is our magical hangup signal.
 const char kByeMessage[] = "BYE";

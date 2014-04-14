@@ -19,7 +19,7 @@ win32{
 #DEF_FILE = KePlayerPlugin.def
 
 include(npapi/qtbrowserplugin.pri)
-include(../TunnelClientUI/QtUICommon.pri)
+include(QtUICommon.pri)
 
 
 SOURCES +=\
@@ -32,4 +32,5 @@ OTHER_FILES += \
     KePlayerPlugin.rc \
     pluginTest/KePlayerPlugin.html \
     pluginTest/js/jquery-1.11.0.js \
-    pluginTest/js/keplayer.js
+    pluginTest/js/keplayer.js \
+    pluginTest/css/main.css

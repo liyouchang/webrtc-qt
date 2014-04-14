@@ -13,6 +13,16 @@ function load(){
     eventFunction();
 }
 
+
+
+function SetDivision(num){
+
+    KePlayerPlugin.SetDivision(num);
+    KePlayerPlugin.style.height="400px";
+    KePlayerPlugin.style.width="300px";
+}
+
+
 var eventFunction = function(){
     function kePlayerObj::TunnelOpened(peer) {
         kePlayerObj.TunnelOpened(peer);
@@ -22,5 +32,4 @@ var eventFunction = function(){
     }
 
 };
-
 
