@@ -264,7 +264,7 @@ void VideoWall::paintEvent(QPaintEvent *event)
     //    p.setPen(Qt::black);
     //    r.adjust(0, 0, -1, -1);
     //    p.drawRect(r);
-    qDebug()<<"VideoWall::paintEvent "<<event->rect();
+    //qDebug()<<"VideoWall::paintEvent "<<event->rect();
     QWidget::paintEvent(event);
 }
 

@@ -33,7 +33,7 @@ TunnelClientUI::~TunnelClientUI()
 
 void TunnelClientUI::on_btn_init_clicked()
 {
-
+    this->ui->playPlugin->Initialize("tcp://192.168.40.191:5555");
     //connection_->Connect("tcp://192.168.0.182:5555","");
 //    connection_->Connect("tcp://192.168.40.191:5555","");
 //    tunnel_->Initialize(connection_.get());
@@ -41,6 +41,8 @@ void TunnelClientUI::on_btn_init_clicked()
 
 void TunnelClientUI::on_btn_connect_clicked()
 {
+    this->ui->playPlugin->OpenTunnel("1234567");
+
 //    std::string peer_id = ui->edit_peer_id->text().toStdString();
 //    tunnel_->ConnectToPeer(peer_id);
 //    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvVideoData,
@@ -60,6 +62,8 @@ void TunnelClientUI::on_btn_video_clicked()
 
 void TunnelClientUI::on_btn_disconnect_clicked()
 {
+    this->ui->playPlugin->CloseTunnel("1234567");
+
 //    std::string peer_id = ui->edit_peer_id->text().toStdString();
 
 //    tunnel_->CloseTunnel(peer_id);

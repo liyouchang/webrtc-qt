@@ -1,13 +1,11 @@
 #include "p2pconductor.h"
 
-//#include "defaults.h"
-#include "talk/p2p/client/basicportallocator.h"
 #include "talk/base/json.h"
 #include "talk/base/bind.h"
 
 namespace  kaerp2p {
 
-
+const int kConnectTimeout = 10000; // close DeletePeerConnection after 10s without connect
 
 std::string GetEnvVarOrDefault(const char* env_var_name,
                                const char* default_value) {
@@ -117,6 +115,8 @@ void P2PConductor::OnTunnelEstablished()
 {
     LOG(INFO) << __FUNCTION__;
     ASSERT(stream_process_);
+
+    signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     SignalStreamOpened(this->GetStreamProcess());
     tunnel_established_ = true;
 }
@@ -148,12 +148,15 @@ bool P2PConductor::InitializePeerConnection()
 
     peer_connection_ = PeerTunnelProxy::Create(pt->signaling_thread(), pt);
 
+    signal_thread_->PostDelayed(kConnectTimeout,this,MSG_CONNECT_TIMEOUT);
     return true;
 }
 
 void P2PConductor::DeletePeerConnection()
 {
     LOG(INFO) << "P2PConductor::DeletePeerConnection";
+    //when close peer_connection the session will terminate and destroy the channels
+    //the channel destroy will make the StreamProcess clean up
     peer_connection_->Close();
     peer_connection_.release();
     peer_id_.clear();
@@ -180,6 +183,7 @@ void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
         LOG(WARNING)<<"stream process faild";
         return;
     }
+
 
     Json::StyledWriter writer;
     Json::Value jmessage;
@@ -237,6 +241,14 @@ void P2PConductor::OnIceGatheringChange(IceObserver::IceGatheringState new_state
 {
     LOG(INFO) << __FUNCTION__ <<"-----------"<<new_state;
 
+}
+
+void P2PConductor::OnMessage(talk_base::Message *msg)
+{
+    if(msg->message_id == MSG_CONNECT_TIMEOUT){
+        LOG(INFO)<<"P2PConductor::OnMessage-----"<<"connect is timeout";
+        DeletePeerConnection();
+    }
 }
 
 void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::string &message)

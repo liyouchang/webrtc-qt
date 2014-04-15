@@ -37,7 +37,8 @@ QString KePlayerPlugin::PlayLocalFile()
 
 int KePlayerPlugin::Initialize(QString routerUrl)
 {
-    int ret = connection_->Connect("tcp://192.168.40.191:5555","");
+    //int ret = connection_->Connect("tcp://192.168.40.191:5555","");
+    int ret = connection_->Connect(routerUrl.toStdString(),"");
     if(ret != 0){
         return ret;
     }

@@ -35,9 +35,9 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
 
     if (events & talk_base::SE_CLOSE) {
         if (error == 0) {
-            std::cout << "Tunnel closed normally" << std::endl;
+            LOG(LS_INFO) << "Tunnel closed normally";
         } else {
-            std::cout << "Tunnel closed with error: " << error << std::endl;
+            LOG(LS_WARNING) << "Tunnel closed with error: " << error << std::endl;
         }
         Cleanup(stream);
 

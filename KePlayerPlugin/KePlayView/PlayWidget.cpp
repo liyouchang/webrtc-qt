@@ -33,7 +33,7 @@ void PlayWidget::paintEvent(QPaintEvent *event)
     r.adjust(0, 0, -1, -1);
     p.drawRect(r);
     p.drawText(10,10,QString::number(playIndex()));
-    qDebug()<<"PlayWidget::paintEvent "<<playIndex()<<" rect "<<r;
+    //qDebug()<<"PlayWidget::paintEvent "<<playIndex()<<" rect "<<r;
     QWidget::paintEvent(event);
 
 

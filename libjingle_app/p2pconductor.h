@@ -1,12 +1,17 @@
 #ifndef P2PCONDUCTOR_H
 #define P2PCONDUCTOR_H
 
-#include "talk/app/kaerp2p/KaerSession.h"
-#include <iostream>
-#include "streamprocess.h"
+
 #include <list>
+#include <iostream>
+
 #include "talk/app/kaerp2p/peertunnel.h"
+#include "talk/base/messagehandler.h"
+
+#include "streamprocess.h"
 #include "PeerConnectionClinetInterface.h"
+
+
 namespace kaerp2p {
 
 //implament the p2p tunnel's create , write and read .
@@ -16,20 +21,10 @@ namespace kaerp2p {
 class P2PConductor:
         public webrtc::CreateSessionDescriptionObserver,
         public PeerTunnelObserver,
-        public sigslot::has_slots<>
+        public sigslot::has_slots<>,
+        public talk_base::MessageHandler
 {
 public:
-
-    enum CallbackID {
-        MEDIA_CHANNELS_INITIALIZED = 1,
-        PEER_CONNECTION_CLOSED,
-        SEND_MESSAGE_TO_PEER,
-        PEER_CONNECTION_ERROR,
-        NEW_STREAM_ADDED,
-        STREAM_REMOVED,
-    };
-
-
     P2PConductor();
     ~P2PConductor();
     virtual int ConnectToPeer(const std::string & peer_id);
@@ -74,6 +69,13 @@ public:
     void OnRenegotiationNeeded();
     void OnIceCandidate(const IceCandidateInterface *candidate);
     void OnIceGatheringChange(IceObserver::IceGatheringState new_state);
+
+    // MessageHandler interface
+public:
+    enum {
+        MSG_CONNECT_TIMEOUT
+    };
+    void OnMessage(talk_base::Message *msg);
 };
 
 }
