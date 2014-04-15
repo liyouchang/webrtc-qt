@@ -1,10 +1,13 @@
 #ifndef KEVIDEOSIMULATOR_H
 #define KEVIDEOSIMULATOR_H
 
-#include "talk/base/thread.h"
-#include "talk/base/fileutils.h"
-#include "talk/base/buffer.h"
 #include "libjingle_app/KeMsgProcessContainer.h"
+#include "talk/base/messagehandler.h"
+
+namespace talk_base {
+    class Thread;
+    class Buffer;
+}
 
 class KeVideoSimulator:public talk_base::MessageHandler,public KeTunnelCamera
 {

@@ -1,6 +1,8 @@
 #include "CameraClient.h"
 #include "talk/base/json.h"
 #include "talk/base/logging.h"
+#include "talk/base/thread.h"
+
 CameraClient::CameraClient()
 {
     comm_thread_ = talk_base::Thread::Current();

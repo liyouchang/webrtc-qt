@@ -2,6 +2,12 @@
 #define CAMERACLIENT_H
 
 #include "peerconnectionclientdealer.h"
+#include "talk/base/messagehandler.h"
+
+namespace talk_base {
+class Thread;
+}  // namespace talk_base
+
 class CameraClient: public PeerConnectionClientDealer,
         public talk_base::MessageHandler
 {

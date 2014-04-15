@@ -1,5 +1,8 @@
 #include "KeMsgProcessContainer.h"
 #include "peerterminal.h"
+#include "KeMsgProcess.h"
+
+
 KeMsgProcessContainer::KeMsgProcessContainer()
 {
     this->terminal_ = 0;

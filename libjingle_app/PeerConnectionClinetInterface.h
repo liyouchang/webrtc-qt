@@ -12,7 +12,7 @@ public:
 
     //send message to peer, it should be thread safe
     virtual bool SendToPeer(const std::string &peer_id, const std::string& message) =0;
-    virtual bool IsSendingMessage(){return false;};
+    virtual bool IsSendingMessage(){return false;}
     virtual  void OnMessageFromPeer(const std::string& peer_id, const std::string& message){
         SignalMessageFromPeer(peer_id,message);
     }

@@ -3,9 +3,8 @@
 
 
 #include "libjingle_app/PeerConnectionClinetInterface.h"
-#include <map>
 #include "talk/base/scoped_ptr.h"
-class AsynDealer;
+#include "asyndealer.h"
 
 class PeerConnectionClientDealer :
         public kaerp2p::PeerConnectionClientInterface,

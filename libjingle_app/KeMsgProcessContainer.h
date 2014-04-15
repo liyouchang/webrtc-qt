@@ -2,9 +2,11 @@
 #define KEMSGPROCESSCONTAINER_H
 
 #include "PeerTerminalInterface.h"
-#include "KeMsgProcess.h"
 #include "PeerConnectionClinetInterface.h"
 #include <vector>
+
+class KeMsgProcess;
+class KeMessageProcessCamera;
 
 class KeMsgProcessContainer:public sigslot::has_slots<>
 {
@@ -47,7 +49,7 @@ class KeTunnelCamera:public KeMsgProcessContainer{
 public:
     virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
 protected:
-    void OnProcessMediaRequest(KeMessageProcessCamera * process,int video,int audio);
+    virtual void OnProcessMediaRequest(KeMessageProcessCamera * process,int video,int audio);
     sigslot::signal2<const char *, int > SignalVideoData;
     sigslot::signal2<const char *, int > SignalAudioData;
 
