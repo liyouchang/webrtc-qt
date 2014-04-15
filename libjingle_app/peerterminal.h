@@ -3,7 +3,6 @@
 
 
 #include "p2pconductor.h"
-//#include "talk/app/webrtc/proxy.h"
 #include "PeerTerminalInterface.h"
 #include "PeerConnectionClinetInterface.h"
 #include <vector>

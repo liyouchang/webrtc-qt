@@ -40,7 +40,11 @@ int KeMsgProcessContainer::Initialize(kaerp2p::PeerConnectionClientInterface *cl
 
 int KeMsgProcessContainer::OpenTunnel(const std::string &peer_id)
 {
-    return terminal_->OpenTunnel(peer_id);
+    int ret =  terminal_->OpenTunnel(peer_id);
+    if(ret == 0){//start opened
+
+    }
+    return ret;
 }
 
 int KeMsgProcessContainer::CloseTunnel(const std::string &peer_id)
@@ -110,6 +114,7 @@ KeMsgProcess *KeMsgProcessContainer::GetProcess(const std::string &peer_id)
 void KeMsgProcessContainer::AddMsgProcess(KeMsgProcess *process)
 {
     process->SignalNeedSendData.connect(this,&KeMsgProcessContainer::OnProcessNeedSend);
+    process->SignalHeartStop.connect(this,&KeMsgProcessContainer::OnHeartStop);
     processes_.push_back(process);
 
 }
@@ -121,6 +126,12 @@ void KeMsgProcessContainer::OnProcessNeedSend(const std::string &peer_id, const 
         LOG(WARNING)<<"Send to tunnel failed";
     }
 
+}
+
+void KeMsgProcessContainer::OnHeartStop(const std::string &peer_id)
+{
+    LOG(WARNING)<<"heart stop close tunnel";
+    this->CloseTunnel(peer_id);
 }
 
 

@@ -1,10 +1,12 @@
 #include "HisiMediaDevice.h"
 
-#include "keapi/keapi.h"
 #include "talk/base/bind.h"
 #include "talk/base/thread.h"
 #include "talk/base/timeutils.h"
 #include "talk/base/buffer.h"
+#include "talk/base/logging.h"
+
+#include "keapi/keapi.h"
 #include "libjingle_app/KeMessage.h"
 
 #define VIDEO1_DATA				"video1_data"
@@ -46,16 +48,8 @@ HisiMediaDevice::~HisiMediaDevice()
 
 void HisiMediaDevice::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
 {
-    OnMediaRequest(1,1);
+    media_thread_->Send(this,HisiMediaDevice::MSG_STOP_VIDEO);
     KeTunnelCamera::OnTunnelClosed(t,peer_id);
-}
-
-void HisiMediaDevice::OnMediaRequest(int video,int audio)
-{
-}
-
-int HisiMediaDevice::MediaControl_m(int video, int audio)
-{
 }
 
 void HisiMediaDevice::SendVideoFrame(const char *data, int len)

@@ -20,6 +20,7 @@ bool StreamProcess::ProcessStream(talk_base::StreamInterface *stream)
         return false;
     }
     stream_ = stream;
+
     if (stream->GetState() == talk_base::SS_OPEN) {
         OnStreamEvent(stream,
                       talk_base::SE_OPEN | talk_base::SE_READ | talk_base::SE_WRITE, 0);

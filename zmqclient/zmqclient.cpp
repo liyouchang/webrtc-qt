@@ -66,8 +66,7 @@ int main()
     simulator->ReadVideoData("video.h264");
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
-    terminal->SignalTunnelOpened.connect(device,&HisiMediaDevice::OnTunnelOpened);
-    terminal->SignalTunnelClosed.connect(device,&HisiMediaDevice::OnTunnelClosed);
+    device->Initialize(&client);
 
 #endif //arm
 

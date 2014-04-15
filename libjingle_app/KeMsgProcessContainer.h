@@ -3,12 +3,13 @@
 
 #include "PeerTerminalInterface.h"
 #include "PeerConnectionClinetInterface.h"
+#include "talk/base/messagehandler.h"
 #include <vector>
 
 class KeMsgProcess;
 class KeMessageProcessCamera;
 
-class KeMsgProcessContainer:public sigslot::has_slots<>
+class KeMsgProcessContainer: public sigslot::has_slots<>
 {
 public:
     KeMsgProcessContainer();
@@ -28,7 +29,7 @@ protected:
     virtual KeMsgProcess * GetProcess(const std::string & peer_id);
     virtual void AddMsgProcess(KeMsgProcess * process);
     virtual void OnProcessNeedSend(const std::string & peer_id,const char * data,int len);
-
+    virtual void OnHeartStop(const std::string & peer_id);
 
     std::vector<KeMsgProcess *> processes_;
     PeerTerminalInterface * terminal_;
