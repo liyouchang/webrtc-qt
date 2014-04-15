@@ -115,6 +115,7 @@ void KeMsgProcessContainer::AddMsgProcess(KeMsgProcess *process)
 {
     process->SignalNeedSendData.connect(this,&KeMsgProcessContainer::OnProcessNeedSend);
     process->SignalHeartStop.connect(this,&KeMsgProcessContainer::OnHeartStop);
+    process->StartHeartBeat();
     processes_.push_back(process);
 
 }

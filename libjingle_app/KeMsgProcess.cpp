@@ -9,7 +9,7 @@ const int kHeartDelay = 1000;  // 1000 milliseconds
 
 
 KeMsgProcess::KeMsgProcess(std::string peer_id):
-    peer_id_(peer_id),kMsgMaxLen(512*1024),msg_thread_(0),heart_count_(0)
+    peer_id_(peer_id),kMsgMaxLen(512*1024),heart_thread_(0),heart_count_(0)
 {
     buf_position_ = 0;
     to_read_ = 0;
@@ -25,7 +25,7 @@ void KeMsgProcess::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer
 
 void KeMsgProcess::StartHeartBeat()
 {
-    msg_thread_ =  talk_base::Thread::Current();
+    heart_thread_ =  talk_base::Thread::Current();
     this->heart_count_ = 0;
     SendHeart();
 }
@@ -105,8 +105,8 @@ void KeMsgProcess::OnMessageRespond(talk_base::Buffer &msgData)
     char msgType = msgData.data()[1];
     switch(msgType){
     case DevMsg_HeartBeat:
-        if(msg_thread_){
-            msg_thread_->Post(this,MSG_HEART_RECEIVED);
+        if(heart_thread_){
+            heart_thread_->Post(this,MSG_HEART_RECEIVED);
         }
         break;
     default:
@@ -131,8 +131,8 @@ void KeMsgProcess::SendHeart()
 
     SignalNeedSendData(this->peer_id_,sendBuf.data(),sendBuf.length());
 
-    if(msg_thread_){
-        msg_thread_->PostDelayed(kHeartDelay,this,MSG_HEART_SENDED);
+    if(heart_thread_){
+        heart_thread_->PostDelayed(kHeartDelay,this,MSG_HEART_SENDED);
     }
 }
 
@@ -143,6 +143,7 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
     case MSG_HEART_SENDED:{
         if(heart_count_++ > kHeartStop){
             SignalHeartStop(peer_id_);
+            break;
         }
         SendHeart();
         break;
