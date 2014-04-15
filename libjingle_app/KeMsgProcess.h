@@ -37,7 +37,7 @@ protected:
     talk_base::Buffer msg_received_;
     const int kMsgMaxLen;
     //heart beat param
-    talk_base::Thread * msg_thread_;
+    talk_base::Thread * heart_thread_;
     int heart_count_;
 public:
     enum {
