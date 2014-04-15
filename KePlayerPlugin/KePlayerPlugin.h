@@ -2,7 +2,6 @@
 #define KEPLAYERPLUGIN_H
 
 #include <QWidget>
-#include <QAxBindable>
 #include "zmqclient/peerconnectionclientdealer.h"
 #include "TunnelClientUI/KeQtTunnelClient.h"
 
@@ -52,20 +51,11 @@ public slots:
     int StopVideo(QString peer_id);
 
     void setText( const QString &string );
-
-
-
-
     // QWidget interface
 protected:
     void paintEvent(QPaintEvent *);
     void resizeEvent(QResizeEvent *);
 
-    // QAxBindable interface
-public:
-    QAxAggregated *createAggregate();
-    bool readData(QIODevice *source, const QString &format);
-    bool writeData(QIODevice *sink);
 };
 
 #endif // KEPLAYERPLUGIN_H

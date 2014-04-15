@@ -5,8 +5,13 @@ PlayWidget::PlayWidget(int index, QWidget *parent) :
     QWidget(parent),m_playIndex(index)
 {
     selected = false;
-    m_playSource = new AVService(this,m_playIndex+1);
+    playSource = new AVService(m_playIndex+1);
 
+}
+
+PlayWidget::~PlayWidget()
+{
+    delete playSource;
 }
 void PlayWidget::setSelected(bool select)
 {

@@ -28,7 +28,7 @@
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="VideoWall" name="videoWall" native="true"/>
+        <widget class="KePlayerPlugin" name="videoWall" native="true"/>
        </item>
       </layout>
      </widget>
@@ -126,9 +126,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>VideoWall</class>
+   <class>KePlayerPlugin</class>
    <extends>QWidget</extends>
-   <header location="global">KePlayView/VideoWall.h</header>
+   <header location="global">keplayerplugin.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

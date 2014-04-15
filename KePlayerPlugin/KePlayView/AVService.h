@@ -2,25 +2,21 @@
 #define AVSERVICE_H
 
 #include <Windows.h>
-#include <QObject>
-#include <qwindowdefs.h>
 
-
-class AVService : public QObject
+class AVService
 {
-    Q_OBJECT
 public:
-    explicit AVService(QObject *parent = 0, int streamID);
+    explicit AVService(int streamID);
 
     void SetPlayWnd(HWND hWnd);
-    int OpenStream(WId playWnd);
+    int OpenStream(HWND playWnd);
     int OpenSound();
     int CloseSound();
     int InputStream(const char * data, int dataLen);
     int CloseStream();
     bool IsPlaying();
     int CapPic(const char * fileName);
-    int PlayFile(const char * fileName,int fileSize,WId playWnd);
+    int PlayFile(const char * fileName,int fileSize,HWND playWnd);
 
     enum PlayStatus
     {
@@ -28,12 +24,6 @@ public:
         PLAYSTATUS_PlayStream,
         PLAYSTATUS_PlayFile
     };
-
-signals:
-
-public slots:
-    //int InputStream(QByteArray data);
-
 public://静态方法
     int mCameraID;
     //static int StartTalk();

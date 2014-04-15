@@ -32,10 +32,10 @@ private slots:
 private:
     Ui::TunnelClientUI *ui;
     //PeerTerminal * terminal_;
-    talk_base::scoped_ptr<KeQtTunnelClient> tunnel_;
-    talk_base::scoped_ptr<PeerConnectionClientDealer> connection_;
+//    talk_base::scoped_ptr<KeQtTunnelClient> tunnel_;
+//    talk_base::scoped_ptr<PeerConnectionClientDealer> connection_;
 
-    QFile * recordFile;
+   // QFile * recordFile;
 
     // PeerTerminalObserver interface
 public:

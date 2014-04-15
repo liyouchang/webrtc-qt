@@ -45,9 +45,11 @@ include( $$PWD/KePlayView/KePlayView.pri)
 SOURCES +=\
     ../zmqclient/asyndealer.cpp \
     ../zmqclient/peerconnectionclientdealer.cpp \
-    $$PWD/KeQtTunnelClient.cpp
+    $$PWD/KeQtTunnelClient.cpp \
+    $$PWD/KePlayerPlugin.cpp
 
 HEADERS  += \
     ../zmqclient/asyndealer.h \
     ../zmqclient/peerconnectionclientdealer.h \
-    $$PWD/KeQtTunnelClient.h
+    $$PWD/KeQtTunnelClient.h \
+    $$PWD/KePlayerPlugin.h

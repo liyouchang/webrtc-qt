@@ -1,10 +1,8 @@
 #include "avservice.h"
-
-
 #include"AVPlay.h"
+#include <QDebug>
 
-AVService::AVService(QObject *parent,int streamID) :
-    QObject(parent)
+AVService::AVService(int streamID)
 {
     m_lPlayHandle = streamID;
     m_lPause      = 1;
@@ -26,7 +24,7 @@ void AVService::SetPlayWnd(HWND hWnd)
     }
 }
 
-int AVService::OpenStream(WId playWnd)
+int AVService::OpenStream(HWND playWnd)
 {
     if(playWnd != 0){
         m_hPlayWnd = reinterpret_cast<HWND>(playWnd);
@@ -79,7 +77,7 @@ int AVService::CapPic(const char * fileName)
  * @param playWnd
  * @return
  */
-int AVService::PlayFile(const char *fileName, int fileSize, WId playWnd)
+int AVService::PlayFile(const char *fileName, int fileSize, HWND playWnd)
 {
     int playHandle = 65;  //回放句柄范围  65~96
     if(playWnd != 0){

@@ -16,11 +16,11 @@ class PlayWidget : public QWidget
     Q_OBJECT
 public:
     explicit PlayWidget(int index,QWidget *parent = 0);
+    virtual ~PlayWidget();
     void setSelected(bool select);
     int playIndex() {return m_playIndex;}
-    AVService * m_playSource;
-signals:
-    //void selectPlayer(int n);
+    AVService * playSource;
+
 public slots:
 
 private:

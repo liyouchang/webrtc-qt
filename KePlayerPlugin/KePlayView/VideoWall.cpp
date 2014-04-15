@@ -27,23 +27,19 @@ VideoWall::VideoWall(QWidget *parent) :
     mainLayout->setMargin(1);
     this->setLayout(mainLayout);
     for(int i=0;i<MAX_AVPLAYER;i++){
-        this->players[i] = new PlayWidget(this);
-        this->players[i]->setPlayIndex(i);
+        this->players[i] = new PlayWidget(i,this);
+        this->players[i]->resize(0,0);
     }
-    oldDivType = ScreenDivision_None;
-    selectedPlayer = 0;
+    m_divType = ScreenDivision_None;
+    m_selectedPlayer = 0;
     setSelectedPlayer(0);
     SetDivision(ScreenDivision_Six);
-
-    //playSource = new AVService(this);
 
     setAcceptDrops(true);
 }
 
 VideoWall::~VideoWall()
 {
-    qDebug()<<this->players[0]->effectiveWinId();
-
     AVService::Cleanup();
 }
 
@@ -52,55 +48,35 @@ VideoWall::~VideoWall()
 void VideoWall::SetDivision(ScreenDivisionType divType)
 {
     qDebug("Start SetDivision %d",divType);
+    int splitNum = 0;
+    if(this->m_divType == divType) return;
 
 
-    static int splitNum = 0;
-    if(oldDivType == divType) return;
-    for(int i=0;i<MAX_AVPLAYER;i++){
-        mainLayout->removeWidget(this->players[i]);
-        this->players[i]->resize(0,0);
+    for(int i=0;i<m_layoutList.size();i++){
+        int index = m_layoutList.at(i);
+        mainLayout->removeWidget(this->players[index]);
+        this->players[index]->resize(0,0);
     }
-
-
+    m_layoutList.clear();
     switch(divType){
     case ScreenDivision_One:
-    {
-        splitNum = 1;
-        //this->players[0]->show();
-        mainLayout->addWidget(this->players[0]);
-    }
-        break;
     case ScreenDivision_Four:
-    {
-        splitNum = 4;
-        for(int i=0;i<splitNum;i++){
-            //this->players[i]->show();
-            mainLayout->addWidget(players[i],i/2,i%2);
-        }
-    }
-        break;
     case ScreenDivision_Six:
     {
-        splitNum = 6;
-        mainLayout->addWidget(players[0],0,0,2,2);
-        mainLayout->addWidget(players[1],0,2);
-        mainLayout->addWidget(players[2],1,2);
-        mainLayout->addWidget(players[3],2,0);
-        mainLayout->addWidget(players[4],2,1);
-        mainLayout->addWidget(players[5],2,2);
-        //        for(int i=0;i<splitNum;i++){
-        //            this->players[i]->show();
-        //        }
-    }
+        splitNum = divType;
+        for(int i=0;i<splitNum;i++)
+            m_layoutList<<i;
         break;
-
+    }
     default:
+        qWarning("VideoWall::SetDivision-----devision type error");
         return;
     }
-    if(selectedPlayer >= splitNum){
+    if(m_selectedPlayer >= splitNum){
         this->setSelectedPlayer(0);
     }
-    oldDivType = divType;
+    m_divType = divType;
+    this->BuildLayout();
 }
 
 void VideoWall::SetDivision(int num)
@@ -122,6 +98,45 @@ void VideoWall::SetDivision(int num)
     SetDivision(static_cast<ScreenDivisionType>(num));
 }
 
+void VideoWall::BuildLayout()
+{
+    int splitNum = m_layoutList.size();
+
+    switch(m_divType){
+    case ScreenDivision_One:
+    {
+        for(int i=0;i< splitNum;i++)
+            mainLayout->addWidget(this->players[m_layoutList.at(i)]);
+        break;
+    }
+    case ScreenDivision_Four:
+    {
+        for(int i=0;i<splitNum;i++){
+            mainLayout->addWidget(players[m_layoutList.at(i)],i/2,i%2);
+        }
+        break;
+    }
+    case ScreenDivision_Six:
+    {
+        for(int i = 0; i< splitNum; i++){
+            int index = m_layoutList.at(i);
+            switch(i){
+            case 0: mainLayout->addWidget(players[index],0,0,2,2);break;
+            case 1: mainLayout->addWidget(players[index],0,2);break;
+            case 2: mainLayout->addWidget(players[index],1,2);break;
+            case 3: mainLayout->addWidget(players[index],2,0);break;
+            case 4: mainLayout->addWidget(players[index],2,1);break;
+            case 5: mainLayout->addWidget(players[index],2,2);break;
+            }
+        }
+        break;
+    }
+    default:
+        qWarning("VideoWall::BuildLayout-----devision type error");
+        return;
+    }
+}
+
 void VideoWall::PlayLocalFile()
 {
     QString filename = QFileDialog::getOpenFileName(
@@ -131,8 +146,8 @@ void VideoWall::PlayLocalFile()
                 "Video files (*.h264 *.264);;All files(*.*)");
     if (!filename.isNull()) { //用户选择了文件
         qDebug()<<QDir::currentPath();
-        int ret = playSource->PlayFile(filename.toLatin1().constData(),0,this->players[0]->effectiveWinId());
-        qDebug()<<"play result:"<<ret;
+        //int ret = playSource->PlayFile(filename.toLatin1().constData(),0,this->players[0]->effectiveWinId());
+        //qDebug()<<"play result:"<<ret;
         //   QMessageBox::information(this, "Document", "No document", QMessageBox::Ok | QMessageBox::Cancel);
 
     } else // 用户取消选择
@@ -142,17 +157,33 @@ void VideoWall::PlayLocalFile()
 
 }
 
+void VideoWall::ExchangePlayWidget(int from, int to)
+{
+    qDebug()<<"VideoWall::ExchangePlayWidget-- from" << from<<" to "<<to;
+    if(from == to){
+        return;
+    }
+    int fromLayoutIndex = m_layoutList.indexOf(from);
+    int toLayouIndex = m_layoutList.indexOf(to);
+
+    m_layoutList[fromLayoutIndex] = to;
+    m_layoutList[toLayouIndex] = from;
+
+    BuildLayout();
+
+}
+
 
 void VideoWall::setSelectedPlayer(int newSelected)
 {
-    this->players[selectedPlayer]->setSelected(false);
-    this->selectedPlayer = newSelected;
-    this->players[selectedPlayer]->setSelected(true);
+    this->players[m_selectedPlayer]->setSelected(false);
+    this->m_selectedPlayer = newSelected;
+    this->players[m_selectedPlayer]->setSelected(true);
 }
 
 void VideoWall::deleteItem()
 {
-    qDebug("VideoWall::deleteItem %d",selectedPlayer);
+    qDebug("VideoWall::deleteItem %d",m_selectedPlayer);
 }
 
 void VideoWall::showfullScreenWall()
@@ -171,12 +202,12 @@ void VideoWall::showNormalScreenWall()
 
 void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
 {
-    if(!playSource->IsPlaying()){
-        WId playWId = this->players[0]->winId();
-        if(playSource->OpenStream(playWId)!=0)
-            return;
-    }
-    playSource->InputStream(data.constData(),data.length());
+//    if(!playSource->IsPlaying()){
+//        HWND playWId = (HWND)this->players[0]->winId();
+//        if(playSource->OpenStream(playWId)!=0)
+//            return;
+//    }
+//    playSource->InputStream(data.constData(),data.length());
 
 }
 
@@ -212,7 +243,7 @@ void VideoWall::performDrag(PlayWidget *pw)
     QDrag *drag = new QDrag(this);
     drag->setMimeData(mimeData);
     if (drag->exec(Qt::CopyAction | Qt::MoveAction) == Qt::MoveAction) {
-        //selectionModel()->clearSelection();
+        //drag end
     }
 
     //    if (drag->exec(Qt::MoveAction | Qt::CopyAction, Qt::CopyAction) == Qt::MoveAction){
@@ -257,7 +288,7 @@ void VideoWall::mouseMoveEvent(QMouseEvent *event)
     if (event->buttons() & Qt::LeftButton) {
         int distance = (event->pos() - startPos).manhattanLength();
         if (distance >= QApplication::startDragDistance()) {
-            performDrag(this->players[selectedPlayer]);
+            performDrag(this->players[m_selectedPlayer]);
         }
     }
 }
@@ -288,17 +319,11 @@ void VideoWall::dragEnterEvent(QDragEnterEvent *event)
     //! [4] //! [5]
     if (event->mimeData()->hasFormat("application/x-playwidget")) {
         if (children().contains(event->source())) {
-            qDebug()<<"VideoWall::dragEnterEvent-- children().contains(event->source";
-
             event->setDropAction(Qt::MoveAction);
             event->accept();
         } else {
-            qDebug()<<"VideoWall::dragEnterEvent-- event->acceptProposedAction();";
-
             event->acceptProposedAction();
-            //! [5] //! [6]
         }
-        //! [6] //! [7]
     }  else {
         event->ignore();
     }
@@ -336,11 +361,9 @@ void VideoWall::dropEvent(QDropEvent *event)
         QByteArray itemData = mime->data("application/x-playwidget");
         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
 
-        int moveFromIndex;
-        QPoint offset;
-        dataStream >> moveFromIndex >> offset;
-        qDebug()<<"VideoWall::dropEvent----move  from "<<moveFromIndex;
-
+        int moveFrom;
+//        QPoint offset;
+        dataStream >> moveFrom;
 
         PlayWidget *child = static_cast<PlayWidget*>(this->childAt(event->pos()));
         if (!child){
@@ -348,8 +371,9 @@ void VideoWall::dropEvent(QDropEvent *event)
             event->ignore();
             return;
         }
-        qDebug()<<"VideoWall::dropEvent----move  to "<<child->playIndex();
 
+        int moveTo = child->playIndex();
+        ExchangePlayWidget(moveFrom,moveTo);
 
 
         //        DragLabel *newLabel = new DragLabel(text, this);

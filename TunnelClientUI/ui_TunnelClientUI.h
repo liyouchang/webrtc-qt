@@ -9,7 +9,6 @@
 #ifndef UI_TUNNELCLIENTUI_H
 #define UI_TUNNELCLIENTUI_H
 
-#include <KePlayView/VideoWall.h>
 #include <QtCore/QVariant>
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
@@ -24,6 +23,7 @@
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include <keplayerplugin.h>
 
 QT_BEGIN_NAMESPACE
 
@@ -34,7 +34,7 @@ public:
     QHBoxLayout *horizontalLayout;
     QGroupBox *groupBox;
     QHBoxLayout *horizontalLayout_2;
-    VideoWall *videoWall;
+    KePlayerPlugin *videoWall;
     QGroupBox *groupBox_2;
     QVBoxLayout *verticalLayout;
     QPushButton *btn_init;
@@ -63,7 +63,7 @@ public:
         groupBox->setSizePolicy(sizePolicy);
         horizontalLayout_2 = new QHBoxLayout(groupBox);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
-        videoWall = new VideoWall(groupBox);
+        videoWall = new KePlayerPlugin(groupBox);
         videoWall->setObjectName(QStringLiteral("videoWall"));
 
         horizontalLayout_2->addWidget(videoWall);

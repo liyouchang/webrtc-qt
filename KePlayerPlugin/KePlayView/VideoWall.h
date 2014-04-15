@@ -2,6 +2,7 @@
 #define PLAYPANNEL_H
 
 #include <QWidget>
+#include <QVector>
 #define MAX_AVPLAYER 64
 class AVService;
 class PlayWidget;
@@ -48,8 +49,9 @@ public:
 
     void SetDivision(ScreenDivisionType divType);
     void SetDivision(int num);
+    void BuildLayout();
     void PlayLocalFile();
-
+    void ExchangePlayWidget(int from,int to);
 public slots:
     void setSelectedPlayer(int newSelected);
     void deleteItem();
@@ -59,11 +61,11 @@ public slots:
 
 protected:
     //AVService * playSource;
-
     QGridLayout *mainLayout;
     PlayWidget * players[MAX_AVPLAYER];
-    int selectedPlayer;
-    int oldDivType;
+    int m_selectedPlayer;
+    int m_divType;
+    QVector<int> m_layoutList;
 
     QMenu *itemMenu;
     QPoint startPos;

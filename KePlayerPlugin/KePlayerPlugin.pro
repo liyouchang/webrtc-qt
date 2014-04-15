@@ -23,10 +23,8 @@ include(QtUICommon.pri)
 
 
 SOURCES +=\
-        KePlayerPlugin.cpp \
     PluginMain.cpp
 
-HEADERS  += KePlayerPlugin.h
 
 OTHER_FILES += \
     KePlayerPlugin.rc \

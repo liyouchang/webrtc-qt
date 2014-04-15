@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = TunnelClientUI
 TEMPLATE = app
 
-include (QtUICommon.pri)
+include (../KePlayerPlugin/QtUICommon.pri)
 
 
 SOURCES +=\
