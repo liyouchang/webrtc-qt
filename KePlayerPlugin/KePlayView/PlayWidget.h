@@ -20,6 +20,7 @@ public:
     void setSelected(bool select);
     int playIndex() {return m_playIndex;}
     AVService * playSource;
+    void PlayMediaData(QByteArray & data);
 
 public slots:
 

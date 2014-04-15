@@ -41,9 +41,10 @@ void TunnelClientUI::on_btn_init_clicked()
 
 void TunnelClientUI::on_btn_connect_clicked()
 {
-    this->ui->playPlugin->OpenTunnel("1234567");
+    QString peer_id = ui->edit_peer_id->text();
+    this->ui->playPlugin->OpenTunnel(peer_id);
 
-//    std::string peer_id = ui->edit_peer_id->text().toStdString();
+//
 //    tunnel_->ConnectToPeer(peer_id);
 //    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvVideoData,
 //                     ui->videoWall,&VideoWall::OnRecvMediaData);
@@ -55,6 +56,9 @@ void TunnelClientUI::on_btn_connect_clicked()
 
 void TunnelClientUI::on_btn_video_clicked()
 {
+    QString peer_id = ui->edit_peer_id->text();
+
+    this->ui->playPlugin->StartVideo(peer_id);
 //    std::string peer_id = ui->edit_peer_id->text().toStdString();
 //    tunnel_->AskPeerVideo(peer_id);
 }
@@ -62,9 +66,10 @@ void TunnelClientUI::on_btn_video_clicked()
 
 void TunnelClientUI::on_btn_disconnect_clicked()
 {
-    this->ui->playPlugin->CloseTunnel("1234567");
 
-//    std::string peer_id = ui->edit_peer_id->text().toStdString();
+
+    QString peer_id = ui->edit_peer_id->text();
+    this->ui->playPlugin->CloseTunnel(peer_id);
 
 //    tunnel_->CloseTunnel(peer_id);
 }

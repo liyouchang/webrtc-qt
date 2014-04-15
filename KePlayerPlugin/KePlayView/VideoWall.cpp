@@ -202,12 +202,9 @@ void VideoWall::showNormalScreenWall()
 
 void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
 {
-//    if(!playSource->IsPlaying()){
-//        HWND playWId = (HWND)this->players[0]->winId();
-//        if(playSource->OpenStream(playWId)!=0)
-//            return;
-//    }
-//    playSource->InputStream(data.constData(),data.length());
+
+    this->players[0]->PlayMediaData(data);
+
 
 }
 

@@ -27,7 +27,7 @@ void AVService::SetPlayWnd(HWND hWnd)
 int AVService::OpenStream(HWND playWnd)
 {
     if(playWnd != 0){
-        m_hPlayWnd = reinterpret_cast<HWND>(playWnd);
+        m_hPlayWnd = playWnd;
     }
     int iRet = AV_OpenStream_Ex(m_lPlayHandle);
     if (iRet != 0)

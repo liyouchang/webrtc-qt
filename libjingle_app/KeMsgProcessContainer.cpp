@@ -13,6 +13,7 @@ KeMsgProcessContainer::~KeMsgProcessContainer()
 {
     if(has_terminal){
         delete this->terminal_;
+        this->terminal_ = 0;
     }
 
     for(int i =0 ;i< processes_.size();i++){
@@ -40,6 +41,7 @@ int KeMsgProcessContainer::Initialize(kaerp2p::PeerConnectionClientInterface *cl
 
 int KeMsgProcessContainer::OpenTunnel(const std::string &peer_id)
 {
+    ASSERT(terminal_);
     int ret =  terminal_->OpenTunnel(peer_id);
     if(ret == 0){//start opened
 
@@ -49,11 +51,13 @@ int KeMsgProcessContainer::OpenTunnel(const std::string &peer_id)
 
 int KeMsgProcessContainer::CloseTunnel(const std::string &peer_id)
 {
+    ASSERT(terminal_);
     return terminal_->CloseTunnel(peer_id);
 }
 
 void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
+    ASSERT(terminal_ == t);
     KeMsgProcess *process = new KeMsgProcess(peer_id);
     AddMsgProcess(process);
 }

@@ -19,6 +19,17 @@ void PlayWidget::setSelected(bool select)
     this->update();
 }
 
+void PlayWidget::PlayMediaData(QByteArray &data)
+{
+    if(!playSource->IsPlaying()){
+        HWND playWId = (HWND)this->winId();
+        if(playSource->OpenStream(playWId)!=0)
+            return;
+    }
+    playSource->InputStream(data.constData(),data.length());
+
+}
+
 void PlayWidget::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
