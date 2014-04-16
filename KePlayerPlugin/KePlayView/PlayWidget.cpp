@@ -33,6 +33,7 @@ void PlayWidget::PlayMediaData(QByteArray &data)
 void PlayWidget::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
+//    qDebug()<<"PlayWidget::paintEvent ---"<<this->winId();
 
     if(this->selected){
         p.setPen(Qt::yellow);
@@ -49,6 +50,12 @@ void PlayWidget::paintEvent(QPaintEvent *event)
 
 
 }
+
+//void PlayWidget::showEvent(QShowEvent *)
+//{
+////    qDebug()<<"PlayWidget::showEvent ---"<<this->effectiveWinId();
+
+//}
 
 //bool PlayWidget::nativeEvent(const QByteArray &eventType, void *message, long *result)
 //{

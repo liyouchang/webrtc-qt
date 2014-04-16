@@ -28,7 +28,7 @@ VideoWall::VideoWall(QWidget *parent) :
     this->setLayout(mainLayout);
     for(int i=0;i<MAX_AVPLAYER;i++){
         this->players[i] = new PlayWidget(i,this);
-        this->players[i]->resize(0,0);
+        this->players[i]->hide();
     }
     m_divType = ScreenDivision_None;
     m_selectedPlayer = 0;
@@ -55,7 +55,6 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
     for(int i=0;i<m_layoutList.size();i++){
         int index = m_layoutList.at(i);
         mainLayout->removeWidget(this->players[index]);
-        this->players[index]->resize(0,0);
     }
     m_layoutList.clear();
     switch(divType){
@@ -76,7 +75,14 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
         this->setSelectedPlayer(0);
     }
     m_divType = divType;
+    for(int i=0;i<splitNum;i++){
+        this->players[i]->show();
+    }
+    for(int i=splitNum;i<MAX_AVPLAYER;i++){
+        this->players[i]->hide();
+    }
     this->BuildLayout();
+
 }
 
 void VideoWall::SetDivision(int num)

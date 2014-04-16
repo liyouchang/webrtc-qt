@@ -30,8 +30,7 @@ private:
     // QWidget interface
 protected:
     void paintEvent(QPaintEvent *);
-//    bool nativeEvent(const QByteArray &eventType, void *message, long *result);
-   // void contextMenuEvent(QContextMenuEvent *event);
+//    void showEvent(QShowEvent *);
 };
 
 #endif // PLAYWIDGET_H
