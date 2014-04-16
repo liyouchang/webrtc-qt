@@ -21,7 +21,6 @@ import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.socket.HandlerApplication;
-import com.video.socket.ZmqThread;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
 
