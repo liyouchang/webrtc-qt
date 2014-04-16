@@ -20,22 +20,22 @@ KeMsgProcessContainer::~KeMsgProcessContainer()
     }
 }
 
-int KeMsgProcessContainer::Initialize(PeerTerminalInterface *t)
+bool KeMsgProcessContainer::Init(PeerTerminalInterface *t)
 {
     this->terminal_ = t;
     t->SignalTunnelOpened.connect(this,&KeMsgProcessContainer::OnTunnelOpened);
     t->SignalTunnelClosed.connect(this,&KeMsgProcessContainer::OnTunnelClosed);
     t->SignalTunnelMessage.connect(this,&KeMsgProcessContainer::OnTunnelMessage);
     t->SignalRouterMessage.connect(this,&KeMsgProcessContainer::OnRouterMessage);
-    return 0;
+    return true;
 }
 
-int KeMsgProcessContainer::Initialize(kaerp2p::PeerConnectionClientInterface *client)
+bool KeMsgProcessContainer::Init(kaerp2p::PeerConnectionClientInterface *client)
 {
     PeerTerminal * t = new PeerTerminal();
     t->Initialize(client);
     this->has_terminal = true;
-    return this->Initialize(t);
+    return this->Init(t);
 }
 
 int KeMsgProcessContainer::OpenTunnel(const std::string &peer_id)
@@ -124,7 +124,7 @@ void KeMsgProcessContainer::OnProcessNeedSend(const std::string &peer_id, const 
 {
     int ret = terminal_->SendByTunnel(peer_id,data,len);
     if(ret != 0){
-        LOG(WARNING)<<"Send to tunnel failed";
+        LOG(LS_VERBOSE)<<"Send to tunnel failed";
     }
 
 }

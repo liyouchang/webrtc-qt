@@ -56,11 +56,13 @@ public:
     sigslot::signal3<KeMessageProcessCamera *,int,int> SignalRecvAskMediaMsg;
     void OnVideoData(const char *data, int len);
     void OnAudioData(const char * data,int len);
+    bool start_video_;
+    bool start_audio_;
+
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     void RecvAskMediaMsg(talk_base::Buffer &msgData);
 
-    bool start_video_;
 };
 
 class KeMessageProcessClient: public KeMsgProcess

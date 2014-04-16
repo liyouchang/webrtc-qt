@@ -101,7 +101,6 @@ void KeMsgProcess::ExtractMessage(talk_base::Buffer &allBytes)
 
 void KeMsgProcess::OnMessageRespond(talk_base::Buffer &msgData)
 {
-    LOG(INFO)<<__FUNCTION__;
     char msgType = msgData.data()[1];
     switch(msgType){
     case DevMsg_HeartBeat:
@@ -141,6 +140,7 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
 {
     switch(msg->message_id){
     case MSG_HEART_SENDED:{
+        LOG(INFO)<<"heart beat "<<heart_count_;
         if(heart_count_++ > kHeartStop){
             SignalHeartStop(peer_id_);
             break;
@@ -158,7 +158,7 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
 
 
 KeMessageProcessCamera::KeMessageProcessCamera(std::string peer_id):
-    KeMsgProcess(peer_id),start_video_(false)
+    KeMsgProcess(peer_id),start_video_(false),start_audio_(false)
 {
 }
 
@@ -183,12 +183,20 @@ void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
     LOG(INFO)<< __FUNCTION__<<"receive message video server msg";
     KEVideoServerReq * msg = (KEVideoServerReq *)msgData.data();
     int video = msg->video;
-
     if(video == 0){
         start_video_ = true;
+    }else{
+        start_video_ = false;
     }
 
+
     int audio = msg->listen;
+    if(audio == 0){
+        start_audio_ = true;
+    }else{
+        start_audio_ = false;
+    }
+
     SignalRecvAskMediaMsg(this,video,audio);
 
 }

@@ -17,14 +17,15 @@ class HisiMediaDevice:talk_base::MessageHandler,public KeTunnelCamera
 {
 public:
     enum{
-        MSG_START_VIDEO,
-        MSG_STOP_VIDEO,
         MSG_SEND_VIDEO,
+        MSG_SEND_AUDIO,
         MSG_MEDIA_CONTROL
     };
 
     HisiMediaDevice();
     ~HisiMediaDevice();
+    virtual bool Init(kaerp2p::PeerConnectionClientInterface *client);
+
     virtual void OnTunnelClosed(PeerTerminalInterface * t,const std::string & peer_id);
     void OnMessage(talk_base::Message *msg);
 
@@ -32,11 +33,13 @@ protected:
     //video == 0 start video ,audio == 0 start audio
     void OnProcessMediaRequest(KeMessageProcessCamera *process, int video, int audio);
 
-
 private:
     void SendVideoFrame(const char *data, int len);
+    void SendAudioFrame(const char *data, int len);
+    void CountVideoAndAudio(int & video_num, int & audio_num);
     talk_base::Thread * media_thread_;
     int video_handle_;
+    int audio_handle_;
     char media_buffer_[MEDIA_BUFFER_LENGTH];
 
 };

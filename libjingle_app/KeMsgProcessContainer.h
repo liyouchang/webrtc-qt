@@ -15,8 +15,8 @@ public:
     KeMsgProcessContainer();
     virtual ~KeMsgProcessContainer();
 
-    virtual int Initialize(PeerTerminalInterface *t);
-    virtual int Initialize(kaerp2p::PeerConnectionClientInterface * client);
+    virtual bool Init(PeerTerminalInterface *t);
+    virtual bool Init(kaerp2p::PeerConnectionClientInterface * client);
     virtual int OpenTunnel(const std::string &peer_id);
     virtual int CloseTunnel(const std::string &peer_id);
 
