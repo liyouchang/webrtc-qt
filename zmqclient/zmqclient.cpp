@@ -66,7 +66,7 @@ int main()
     simulator->ReadVideoData("video.h264");
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
-    device->Initialize(&client);
+    device->Init(&client);
 
 #endif //arm
 
