@@ -4,14 +4,14 @@
     android:layout_height="fill_parent"
     android:background="@color/page_bg_grey"
     android:orientation="vertical" >
-    
+
     <TextView
         android:id="@+id/listview_item_textview"
         android:layout_width="fill_parent"
         android:layout_height="40dp"
         android:background="#b5b5b5"
-        android:paddingLeft="10dp"
         android:gravity="center_vertical"
+        android:paddingLeft="10dp"
         android:textColor="#1c1c1c"
         android:textSize="25dp" />
 
@@ -19,10 +19,10 @@
         android:id="@+id/listview_item_gridview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:verticalSpacing="5dp"
+        android:gravity="center"
         android:horizontalSpacing="5dp"
         android:numColumns="3"
-        android:gravity="center"
-        android:stretchMode="columnWidth" />
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="5dp" />
 
 </LinearLayout>

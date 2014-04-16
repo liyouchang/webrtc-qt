@@ -18,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.video.R;
+import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlDevice;
 import com.video.socket.HandlerApplication;
@@ -28,6 +29,8 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 
 	private Context mContext;
 	private XmlDevice xmlData;
+	private PreferData preferData = null;
+	private String userName = null;
 	private EditText et_name;
 	private ProgressDialog progressDialog;
 	
@@ -60,6 +63,10 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		mContext = ModifyDeviceNameActivity.this;
 		ZmqHandler.setHandler(handler);
 		xmlData = new XmlDevice(mContext);
+		preferData = new PreferData(mContext);
+		if (preferData.isExist("UserName")) {
+			userName = preferData.readString("UserName");
+		}
 		
 		Bundle bundle = this.getIntent().getExtras();
 		mDeviceName = bundle.getString("deviceName");
@@ -76,6 +83,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		try {
 			jsonObj.put("type", "Client_ModifyTerm");
 			jsonObj.put("TermName", mDeviceName);
+			jsonObj.put("UserName", userName);
 			jsonObj.put("MAC", mDeviceId);
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -103,7 +111,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					showProgressDialog((String) msg.obj);
+					showProgressDialog("正在提交修改...");
 					break;
 				case REQUEST_TIMEOUT:
 					if (progressDialog != null)
@@ -112,7 +120,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
 					Value.isNeedReqTermListFlag = false;
-					Toast.makeText(mContext, msg.obj+"，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "修改终端名称失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.modify_device_name_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
@@ -128,7 +136,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							Toast.makeText(mContext, msg.obj+"，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "修改终端名称失败，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.modify_device_name_id);
@@ -141,16 +149,14 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	/**
 	 * 发送Handler消息
 	 */
-	private void sendHandlerMsg(int what, String obj) {
+	private void sendHandlerMsg(int what) {
 		Message msg = new Message();
 		msg.what = what;
-		msg.obj = obj;
 		handler.sendMessage(msg);
 	}
-	private void sendHandlerMsg(int what, String obj, int timeout) {
+	private void sendHandlerMsg(int what, int timeout) {
 		Message msg = new Message();
 		msg.what = what;
-		msg.obj = obj;
 		handler.sendMessageDelayed(msg, timeout);
 	}
 	private void sendHandlerMsg(Handler handler, int what, String obj) {
@@ -165,8 +171,8 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 			if (checkModifyDeviceData()) {
 				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateModifyTermNameJson();
-				sendHandlerMsg(IS_REQUESTING, "正在提交修改...");
-				sendHandlerMsg(REQUEST_TIMEOUT, "修改终端名称失败", Value.requestTimeout);
+				sendHandlerMsg(IS_REQUESTING);
+				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
@@ -220,5 +226,4 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		}
 		return super.onKeyDown(keyCode, event);
 	}
-	
 }

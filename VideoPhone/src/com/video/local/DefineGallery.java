@@ -8,11 +8,8 @@ import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Gallery;
 
-import com.video.R;
 import com.video.utils.Utils;
 
 public class DefineGallery extends Gallery {
@@ -118,17 +115,6 @@ public class DefineGallery extends Gallery {
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
 			// TODO Auto-generated method stub
-			if (ViewLocalImageActivity.isVisible) {
-				ViewLocalImageActivity.isVisible = false;
-				ViewLocalImageActivity.image_title.setVisibility(View.INVISIBLE);
-				Animation animation = AnimationUtils.loadAnimation(ViewLocalImageActivity.mContext, R.anim.popupwindow_exit);  
-				ViewLocalImageActivity.image_title.startAnimation(animation); 
-			} else {
-				ViewLocalImageActivity.isVisible = true;
-				ViewLocalImageActivity.image_title.setVisibility(View.VISIBLE);
-				Animation animation = AnimationUtils.loadAnimation(ViewLocalImageActivity.mContext, R.anim.popupwindow_enter);  
-				ViewLocalImageActivity.image_title.startAnimation(animation); 
-			}
 			return true;
 		}
 		

@@ -3,6 +3,8 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_centerVertical="true"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
     android:background="@color/page_bg_grey"
     android:orientation="vertical" >
 

@@ -3,23 +3,52 @@ package com.video.data;
 public class Value {
 
 	/**
-	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¨ï¿½ï¿½ï¿½
+	 * Éè±¸·şÎñÆ÷Ãû³Æ
 	 */
-	public final static String BackstageName = "Backstage";
+	public final static String DeviceBackstageName = "Backstage";
 	
 	/**
-	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½IPï¿½ï¿½Port
+	 * ±¨¾¯·şÎñÆ÷Ãû³Æ
+	 */
+	public final static String AlarmBackstageName = "Alarmstage";
+	
+	/**
+	 * ·şÎñÆ÷IDºÍPort
 	 */
 	public final static String BackstageIPPort = "tcp://192.168.40.191:5555";
 //	public final static String BackstageIPPort = "tcp://218.56.11.182:5555";
 	
 	/**
-	 * ï¿½ï¿½ï¿½ï¿½Ê±Ê±ï¿½ï¿½
+	 * ³¬Ê±Ê±¼ä
 	 */
 	public final static int requestTimeout = 5000;
 	
 	/**
-	 * ï¿½Ç·ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¶ï¿½ï¿½Ğ±ï¿½
+	 * ÊÇ·ñĞèÒªÇëÇó±¨¾¯¼ÇÂ¼µÄ±êÖ¾
+	 */
+	public static boolean isLoginSuccess = false;
+	
+	/**
+	 * ÊÇ·ñĞèÒªÇëÇóÖÕ¶ËÁĞ±íµÄ±êÖ¾
 	 */
 	public static boolean isNeedReqTermListFlag = true;
+	
+	/**
+	 * ÊÇ·ñĞèÒªÇëÇó±¨¾¯¼ÇÂ¼µÄ±êÖ¾
+	 */
+	public static boolean isNeedReqAlarmListFlag = true;
+	
+	/**
+	 * ÇëÇó±¨¾¯¼ÇÂ¼µÄÊı¾İ
+	 */
+	public static int requstAlarmCount = 5;
+	
+	/**
+	 * ³õÊ¼»¯Ó¦ÓÃ³ÌĞòµÄÈ«¾Ö±äÁ¿
+	 */
+	public static void resetValues() {
+		isLoginSuccess = false;
+		isNeedReqTermListFlag = true;
+		isNeedReqAlarmListFlag = true;
+	}
 }

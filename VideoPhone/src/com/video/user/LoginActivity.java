@@ -4,10 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,6 +18,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.PreferData;
@@ -133,23 +132,6 @@ public class LoginActivity extends Activity implements OnClickListener {
         progressDialog.show(); 
 	}
 	
-	/**
-	 * 显示操作的提示
-	 */
-	private void showHandleDialog(String info) {
-		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-				.setTitle("温馨提示")
-				.setMessage(info)
-				.setCancelable(false)
-				.setPositiveButton("确定",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								dialog.dismiss();
-							}
-						}).create();
-		aboutDialog.show();
-	}
-	
 	private Handler handler = new Handler() {
 
 		@Override
@@ -163,10 +145,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 				case LOGIN_TIMEOUT:
 					if (progressDialog != null)
 						progressDialog.dismiss();
-					showHandleDialog("登录失败，网络超时！");
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
 					}
+					Toast.makeText(mContext, "登录失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.login_id:
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
@@ -175,12 +157,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 						if (resultCode == 0) {
 							if (progressDialog != null)
 								progressDialog.dismiss();
+							Value.isLoginSuccess = true;
 							startActivity(new Intent(mContext, MainActivity.class));
 							LoginActivity.this.finish();
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							showHandleDialog("登录失败，"+Utils.getErrorReason(resultCode));
+							Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.login_id);
@@ -252,7 +235,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				}
 			}
 		} else {
-			showHandleDialog("没有可用的网络连接，请确认后重试！");
+			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
 	}
 	

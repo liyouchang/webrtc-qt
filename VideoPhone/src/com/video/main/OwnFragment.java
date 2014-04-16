@@ -11,7 +11,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -35,36 +34,32 @@ import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlDevice;
-import com.video.main.PullToRefreshView.OnFooterRefreshListener;
-import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.DeviceItemAdapter;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
-public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRefreshListener, OnFooterRefreshListener {
+public class OwnFragment extends Fragment implements OnClickListener {
 	
 	private FragmentActivity mActivity;
 	private View mView;
-	private XmlDevice xmlData;
+	private static XmlDevice xmlData;
 	private PreferData preferData = null;
 	private String userName = null;
-	private String list_refresh_time = null;
-	private String list_refresh_terminal = null;
 	//终端列表项
 	private String mDeviceName = null;
 	private String mDeviceId = null;
-	private int listPosition = -1;
+	private int listPosition = 0;
+	private static int listSize = 0;
 	
 	private ImageButton button_add;
 	private PopupWindow mPopupWindow;
 	private ProgressDialog progressDialog;
 	
 	private static ArrayList<HashMap<String, String>> deviceList = null;
-	private DeviceItemAdapter deviceAdapter = null;
+	private static DeviceItemAdapter deviceAdapter = null;
 	private ListView lv_list;
-	private PullToRefreshView mPullToRefreshView;
 	
 	private final int IS_REQUESTING = 1;
 	private final int REQUEST_TIMEOUT = 2;
@@ -99,9 +94,6 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		
 		lv_list = (ListView) mView.findViewById(R.id.device_list);
 		lv_list.setOnItemLongClickListener(new OnItemLongClickListenerImpl());
-		mPullToRefreshView = (PullToRefreshView) mView.findViewById(R.id.main_pull_refresh_view);
-		mPullToRefreshView.setOnHeaderRefreshListener(this);
-        mPullToRefreshView.setOnFooterRefreshListener(this);
 	}
 	
 	private void initData() {
@@ -112,22 +104,13 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
 		}
-		//初始化下拉刷新的显示
-		if (preferData.isExist("listRefreshTime")) {
-			list_refresh_time = preferData.readString("listRefreshTime");
-		}
-		if (preferData.isExist("listRefreshTerminal")) {
-			list_refresh_terminal = preferData.readString("listRefreshTerminal");
-		}
-		if ((list_refresh_time != null) && (list_refresh_terminal != null)) {
-			mPullToRefreshView.onHeaderRefreshComplete(list_refresh_time, list_refresh_terminal);
-		}
 		//初始化终端列表的显示
 		if (Value.isNeedReqTermListFlag) {
 			reqTermListEvent();
 		}
 		deviceList = xmlData.readXml();
 		if (deviceList != null) {
+			listSize = deviceList.size();
 			deviceAdapter = new DeviceItemAdapter(mActivity, deviceList);
 			lv_list.setAdapter(deviceAdapter);
 		}
@@ -181,6 +164,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_DelTerm");
+			jsonObj.put("UserName", userName);
 			jsonObj.put("MAC", mac);
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -236,6 +220,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 								lv_list.setAdapter(deviceAdapter);
 								xmlData.updateList(deviceList);
 							}
+							listSize = xmlData.getListSize();
 						} else {
 							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
@@ -255,6 +240,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 							xmlData.deleteItem(mDeviceId);
 							deviceList.remove(listPosition);
 							deviceAdapter.notifyDataSetChanged();
+							listSize = xmlData.getListSize();
 						} else {
 							Toast.makeText(mActivity, "删除终端绑定失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
@@ -262,6 +248,29 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						handler.removeMessages(R.id.request_terminal_list_id);
 					}
 					break;
+			}
+		}
+	};
+	
+	public static Handler ownHandler = new Handler() {
+		@SuppressWarnings("unchecked")
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			super.handleMessage(msg);
+			if (msg.what == 0) {
+				HashMap<String, String> item = (HashMap<String, String>)msg.obj;
+				String mac = item.get("deviceID");
+				for (int i=0; i<listSize; i++) {
+					if (deviceList.get(i).get("deviceID").equals(mac)) {
+						item.put("deviceName", deviceList.get(i).get("deviceName"));
+						deviceList.get(i).put("isOnline", item.get("isOnline"));
+						deviceList.get(i).put("dealerName", item.get("dealerName"));
+						break;
+					}
+				}
+				deviceAdapter.notifyDataSetChanged();
+				xmlData.updateItem(item);
 			}
 		}
 	};
@@ -336,40 +345,9 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 			// TODO Auto-generated method stub
 			listPosition = position;
-			showPopupWindow(mPullToRefreshView);
+			showPopupWindow(lv_list);
 			return false;
 		}
-	}
-	
-	/**
-	 * 上拖刷新
-	 */
-	@Override
-	public void onFooterRefresh(PullToRefreshView view) {
-		// TODO Auto-generated method stub
-		mPullToRefreshView.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				mPullToRefreshView.onFooterRefreshComplete();
-			}
-		}, 1000);
-	}
-	
-	/**
-	 * 下拉刷新
-	 */
-	@Override
-	public void onHeaderRefresh(PullToRefreshView view) {
-		mPullToRefreshView.postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				list_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd hh:mm:ss");
-				list_refresh_terminal = "终端: "+Build.MODEL;
-				preferData.writeData("listRefreshTime", list_refresh_time);
-				preferData.writeData("listRefreshTerminal", list_refresh_terminal);
-				mPullToRefreshView.onHeaderRefreshComplete(list_refresh_time, list_refresh_terminal);
-			}
-		}, 1500);
 	}
 
 	/**

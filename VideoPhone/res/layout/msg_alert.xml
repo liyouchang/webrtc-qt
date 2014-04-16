@@ -18,12 +18,9 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_marginBottom="70dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
             android:cacheColorHint="#00000000"
             android:divider="#00000000"
-			android:dividerHeight="10dp"
-			android:scrollbars="none" />
+			android:dividerHeight="10dp" />
     </com.video.main.PullToRefreshView>
 
 </LinearLayout>

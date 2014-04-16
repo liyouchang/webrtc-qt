@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
@@ -18,9 +19,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.video.R;
+import com.video.main.AlarmImageViewActivity;
 
 public class MessageItemAdapter extends BaseAdapter {
 
@@ -88,7 +89,11 @@ public class MessageItemAdapter extends BaseAdapter {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Toast.makeText(context, "Adapter中点击："+position, Toast.LENGTH_SHORT).show();
+//				String UrlPath = list.get(position).get("imageURL");
+				String filePath = imageCache+File.separator+"10021_0_20140403192854_000_23.jpg";//UrlPath.substring(UrlPath.lastIndexOf("/")+1);
+				Intent intent = new Intent(context, AlarmImageViewActivity.class);
+				intent.putExtra("imagePath", filePath);
+				context.startActivity(intent);
 			}
 		});
 		return convertView;
@@ -130,7 +135,6 @@ public class MessageItemAdapter extends BaseAdapter {
 		protected void onPostExecute(Uri result) {
 			super.onPostExecute(result);
 			if (imageView != null && result != null) {
-				System.out.println("MyDebug: 【显示图片】");
 				imageView.setImageURI(result);
 			}
 		}
@@ -147,10 +151,8 @@ public class MessageItemAdapter extends BaseAdapter {
 		String name = path.substring(path.lastIndexOf("/")+1);
 		File file = new File(cache, name);
 		if (file.exists()) {
-			System.out.println("MyDebug: 【加载缓存图片】"+name);
 			return Uri.fromFile(file);
 		} else {
-			System.out.println("MyDebug: 【从网络上获取图片】");
 			URL url = new URL(path);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setConnectTimeout(5000);

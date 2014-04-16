@@ -1,9 +1,14 @@
 package com.video.main;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -14,6 +19,9 @@ import android.widget.Button;
 
 import com.video.R;
 import com.video.data.PreferData;
+import com.video.data.Value;
+import com.video.socket.HandlerApplication;
+import com.video.socket.ZmqThread;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
 
@@ -24,6 +32,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	
 	Button button_logout;
 	private PreferData preferData = null;
+	private String userName = null;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -59,6 +68,25 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	
 	private void initData() {
 		preferData = new PreferData(mActivity);
+		if (preferData.isExist("UserName")) {
+			userName = preferData.readString("UserName");
+		}
+	}
+	
+	/**
+	 * 生成JSON的注销登录字符串
+	 */
+	private String generateLogoutJson() {
+		String result = "";
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_Logout");
+			jsonObj.put("UserName", userName);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		result = jsonObj.toString();
+		return result;
 	}
 	
 	/**
@@ -73,6 +101,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								dialog.dismiss();
+								Value.resetValues();
 								ExitLogoutAPP();
 							}
 						})
@@ -86,6 +115,16 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
+	 * 发送Handler消息
+	 */
+	private void sendHandlerMsg(Handler handler, int what, String obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
+		handler.sendMessage(msg);
+	}
+	
+	/**
 	 * 退出当前账号登录的处理
 	 */
 	private void ExitLogoutAPP() {
@@ -95,6 +134,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		if (preferData.isExist("AutoLogin")) {
 			preferData.deleteItem("AutoLogin");
 		}
+		Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+		String data = generateLogoutJson();
+		sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		startActivity(new Intent(mActivity, LoginActivity.class));
 		mActivity.finish();
 	}

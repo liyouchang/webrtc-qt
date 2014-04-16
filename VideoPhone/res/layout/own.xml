@@ -33,22 +33,14 @@
             android:src="@drawable/imagebutton_add_selected" />
     </RelativeLayout>
 
-    <com.video.main.PullToRefreshView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/main_pull_refresh_view"
+    <ListView
+        android:id="@+id/device_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_marginBottom="70dp"
         android:background="@color/page_bg_grey"
-        android:orientation="vertical" >
-
-        <ListView
-            android:id="@+id/device_list"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_marginBottom="65dp"
-            android:cacheColorHint="#00000000"
-            android:divider="@color/orange"
-            android:dividerHeight="1dp" />
-    </com.video.main.PullToRefreshView>
+        android:cacheColorHint="#00000000"
+        android:divider="@color/orange"
+        android:dividerHeight="1dp" />
 
 </LinearLayout>

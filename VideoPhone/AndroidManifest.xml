@@ -23,6 +23,7 @@
         android:theme="@style/AppThemeNoTitle" >
         <activity
             android:name=".main.MainActivity"
+            android:launchMode="singleTask"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,14 +33,6 @@
         </activity>
         <!-- 该软件的后台服务 -->
         <service android:name=".service.BackstageService" />
-        <!-- 主界面
-        <activity
-            android:name=".main.MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeNoTitle" >
-        </activity>
-         -->
         <!-- 拥有 -->
         <activity
             android:name=".main.OwnFragment"
@@ -119,6 +112,12 @@
         <!-- 显示本地图片 -->
         <activity
             android:name=".local.ViewLocalImageActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 显示报警消息图片 -->
+        <activity
+            android:name=".main.AlarmImageViewActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -20,31 +22,64 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 
 import com.video.R;
+import com.video.data.PreferData;
+import com.video.data.Value;
 import com.video.service.BackstageService;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
+import com.video.user.LoginActivity;
 import com.video.utils.TabFactory;
 import com.video.utils.Utils;
 
 public class MainActivity extends FragmentActivity {
 	
-	private Context mContext;
+	public static Context mContext;
+	private PreferData preferData = null;
 	private TabHost mTabHost;
 	private TextView app_exit;
+	
+	private boolean appFirstTime = true;
 	private boolean isTextViewShow = false;
+	private static TextView tabMsgTextView = null;
+	private static ImageView tabMsgImageView = null;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
         
-        initData();
-        initView();
+        mContext = MainActivity.this;
+        preferData = new PreferData(mContext);
+        ZmqCtrl.getInstance().init();
+        
+        if (!Value.isLoginSuccess) {
+			setContentView(R.layout.first);
+			
+			if (preferData.isExist("AppFirstTime")) {
+				appFirstTime = preferData.readBoolean("AppFirstTime");
+			}
+			
+			new Handler().postDelayed(new Runnable(){   
+			    public void run() {   
+			    	if (appFirstTime) {
+			    		appFirstTime = true;
+			    		preferData.writeData("AppFirstTime", appFirstTime);
+			    		startActivity(new Intent(mContext, HelpActivity.class));
+			    		MainActivity.this.finish();
+			    	} else {
+			    		startActivity(new Intent(mContext, LoginActivity.class));
+			    		MainActivity.this.finish();
+			    	}
+			    } 
+			 }, 1000); 
+		} else {
+			setContentView(R.layout.main);
+	        
+	        initData();
+	        initView();
+		}
     }
 	
 	private void initData() {
-		mContext = MainActivity.this;
-		ZmqCtrl.getInstance().init();
 		DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         Utils.screenWidth = dm.widthPixels;
@@ -57,7 +92,6 @@ public class MainActivity extends FragmentActivity {
 				// TODO Auto-generated method stub
 				Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
 		    	HandlerApplication.getInstance().stopService(intent);
-		    	System.out.println("MyDebug: 【退出应用软件】");
 		    	finish();
 			}
 		});
@@ -118,6 +152,9 @@ public class MainActivity extends FragmentActivity {
             tv.setTextSize(16);
         }  
         updateTab(mTabHost);
+        if (preferData.isExist("AlarmCount")) {
+        	setAlarmIconAndText(preferData.readInt("AlarmCount"));
+        }
 	}
 	
 	private TabHost.OnTabChangeListener tabChangeListener = new TabHost.OnTabChangeListener() {
@@ -154,7 +191,6 @@ public class MainActivity extends FragmentActivity {
 	};
 	
 	private void updateTab(final TabHost _TabHost) {
-		
 		for (int i = 0; i < _TabHost.getTabWidget().getChildCount(); i++) {
 			TextView tv = (TextView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
 			if (_TabHost.getCurrentTab() == i) {				
@@ -162,14 +198,42 @@ public class MainActivity extends FragmentActivity {
 			} else {
 				tv.setTextColor(this.getResources().getColorStateList(R.color.white));
 			}
+			if (i == 2) {
+				tabMsgTextView = tv;
+				tabMsgImageView = (ImageView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.icon);
+			}
 		}
 	}
-
-	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
-		super.onDestroy();
-	}	
+	
+	/**
+	 * 设置消息tab的报警显示
+	 * @param msg 多少条消息
+	 */
+	public static void setAlarmIconAndText(int msg) {
+		if (msg == 0) {
+			tabMsgTextView.setText("消息");
+			tabMsgImageView.setImageResource(R.drawable.tab_msg_xml);
+		} 
+		else if (msg < 100) {
+			tabMsgTextView.setText("消息("+msg+")");
+			tabMsgImageView.setImageResource(R.drawable.tab_msg_alarm_xml);
+		}
+		else if (msg >= 100) {
+			tabMsgTextView.setText("消息(99+)");
+			tabMsgImageView.setImageResource(R.drawable.tab_msg_alarm_xml);
+		}
+	}
+	
+	public static Handler mainHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			super.handleMessage(msg);
+			if (msg.what == 0) {
+				setAlarmIconAndText(msg.arg1);
+			}
+		}
+	};	
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -194,8 +258,6 @@ public class MainActivity extends FragmentActivity {
 				app_exit.startAnimation(animation); 
 				return true;
 			}
-		} else if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
-			MainActivity.this.finish();
 		}
 		return super.onKeyDown(keyCode, event);
 	}

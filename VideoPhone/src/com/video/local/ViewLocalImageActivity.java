@@ -14,14 +14,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Gallery;
 import android.widget.ImageButton;
-import android.widget.RelativeLayout;
 
 import com.video.R;
 import com.video.utils.Utils;
 
 public class ViewLocalImageActivity extends Activity implements OnClickListener {
 
-	public static Context mContext;
+	private Context mContext;
 	private Gallery mGallery;
 	private ArrayList<String> imagesPath = null;
 	private final int INIT_FINISH = 1;
@@ -31,8 +30,6 @@ public class ViewLocalImageActivity extends Activity implements OnClickListener 
 	
 	private int count = 0;
 	private int index = 0;
-	public static boolean isVisible = true;
-	public static RelativeLayout image_title;
 	public static boolean isDeleteImage = false;
 
 	@Override
@@ -49,7 +46,6 @@ public class ViewLocalImageActivity extends Activity implements OnClickListener 
 	private void initView() {
 		mGallery = (Gallery) super.findViewById(R.id.mygallery);
 		
-		image_title = (RelativeLayout) super.findViewById(R.id.image_view_title);
 		ImageButton back = (ImageButton) super.findViewById(R.id.ib_image_back);
 		back.setOnClickListener(this);
 		ImageButton delete = (ImageButton) super.findViewById(R.id.ib_image_delete);

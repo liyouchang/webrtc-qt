@@ -192,7 +192,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 					break;
 				case INIT_LOCAL_IMAGE_FINISH:
 					mListViewAdapter = new ListViewAdapter(mActivity, mFileAll);
-					if (mListViewAdapter != null) {
+					if ((mListViewAdapter != null) && (mListView != null)) {
 						mListView.setAdapter(mListViewAdapter);
 					}
 					break;

@@ -23,34 +23,17 @@ public class ZmqThread extends Thread {
 	
 	/**
 	 * ZMQ发送数据
+	 * @param stage 服务器名称
 	 * @param data 要发送的数据
 	 * @return true:发送成功  false:发送失败
 	 */
-	private boolean sendZmqData(String data) {
+	private boolean sendZmqData(String stage, String data) {
 		boolean result = false;
 		String requestContentString = data+" ";  
         byte[] requestContentByteArray = requestContentString.getBytes();  
         requestContentByteArray[requestContentByteArray.length-1] = 0;  
         
-        result = zmq_socket.send(Value.BackstageName, ZMQ.SNDMORE); 
-        result = zmq_socket.send(requestContentByteArray, 0);
-        
-        return result;
-	}
-	
-	/**
-	 * ZMQ向终端发送数据
-	 * @param peerId 终端ID
-	 * @param data 要发送的数据
-	 * @return true:发送成功  false:发送失败
-	 */
-	private boolean sendZmqData(String peerId, String data) {
-		boolean result = false;
-		String requestContentString = data+" ";  
-        byte[] requestContentByteArray = requestContentString.getBytes();  
-        requestContentByteArray[requestContentByteArray.length-1] = 0;  
-        
-        result = zmq_socket.send(peerId, ZMQ.SNDMORE); 
+        result = zmq_socket.send(stage, ZMQ.SNDMORE); 
         result = zmq_socket.send(requestContentByteArray, 0);
         
         return result;
@@ -72,12 +55,11 @@ public class ZmqThread extends Thread {
             message_byte2 = zmq_socket.recv(0);
 			String message_str1 = new String(message_byte1);
 			String message_str2 = new String(message_byte2);
-			if (message_str1.equals(Value.BackstageName)) {
-				result = message_str2;
-			} 
-			else if (message_str1.equals("123456")) {
+			if (message_str1.equals("123456")) {
 				System.out.println("MyDebug:  " + message_str1);
 				TunnelCommunication.getInstance().messageFromPeer("123456", message_str2);
+			} else {
+				result = message_str2;
 			}
         }
 		return result;
@@ -113,37 +95,50 @@ public class ZmqThread extends Thread {
 						String result = recvZmqData();
 						if (result != null) {
 							sendHandlerMsg(result);
-							System.out.println("MyDebug:  "+result);
+							System.out.println("MyDebug: ZMQ接收数据："+result);
 						}
 						if (zmqThreadHandler.hasMessages(R.id.zmq_recv_data_id)) {
 							zmqThreadHandler.removeMessages(R.id.zmq_recv_data_id);
 						}
 						break; 
-					//ZMQ发送数据
+					//ZMQ向后台服务器发送数据
 					case R.id.zmq_send_data_id:
-						sendZmqData((String)msg.obj);
+						sendZmqData(Value.DeviceBackstageName, (String)msg.obj);
 						System.out.println("MyDebug: \n");
-						System.out.println("MyDebug:  "+(String)msg.obj);
+						System.out.println("MyDebug: ZMQ向后台服务器发送数据"+(String)msg.obj);
 						if (zmqThreadHandler.hasMessages(R.id.zmq_send_data_id)) {
 							zmqThreadHandler.removeMessages(R.id.zmq_send_data_id);
 						}
 						break;
-					//ZMQ向终端发送数据
+					//ZMQ向报警服务器发送数据
+					case R.id.zmq_send_alarm_id:
+						sendZmqData(Value.AlarmBackstageName, (String)msg.obj);
+						System.out.println("MyDebug: \n");
+						System.out.println("MyDebug: ZMQ向报警服务器发送数据："+(String)msg.obj);
+						if (zmqThreadHandler.hasMessages(R.id.zmq_send_alarm_id)) {
+							zmqThreadHandler.removeMessages(R.id.zmq_send_alarm_id);
+						}
+						break;
+					//ZMQ向终端服务器发送数据
 					case R.id.send_to_peer_id:
 						HashMap<String, String> mapData = (HashMap<String, String>)msg.obj;
 						String peerId = mapData.get("peerId");
 						String peerData = mapData.get("peerData");
 						sendZmqData(peerId, peerData);
 						System.out.println("MyDebug: \n");
-						System.out.println("MyDebug: " + peerData);
+						System.out.println("MyDebug: ZMQ向终端服务器发送数据：" + peerData);
 						if (zmqThreadHandler.hasMessages(R.id.send_to_peer_id)) {
 							zmqThreadHandler.removeMessages(R.id.send_to_peer_id);
 						}
 						break;
 					//关闭ZMQ Socket
 					case R.id.close_zmq_socket_id:
-						zmq_socket.close();
-						ZmqCtrl.getInstance().exit();
+						try {
+							zmq_socket.close();
+							ZmqCtrl.getInstance().exit();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 						if (zmqThreadHandler.hasMessages(R.id.close_zmq_socket_id)) {
 							zmqThreadHandler.removeMessages(R.id.close_zmq_socket_id);
 						}

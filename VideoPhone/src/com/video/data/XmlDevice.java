@@ -238,6 +238,21 @@ public class XmlDevice {
 	}
 	
 	/**
+	 * 获得列表的大小
+	 */
+	public int getListSize() {
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			return nodeList.getLength();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getListSize()异常！");
+		}
+		return 0;
+	}
+	
+	/**
 	 * 更新一个List列表
 	 * @return true: 更新成功  false: 更新失败
 	 */

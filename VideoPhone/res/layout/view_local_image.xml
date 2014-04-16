@@ -24,15 +24,15 @@
             android:background="@drawable/title_more_xml"
             android:contentDescription="@null"
             android:gravity="center_vertical|center_horizontal"
-            android:src="@drawable/btn_title_back_unselected" />
+            android:src="@drawable/btn_title_back_selected" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:text="@string/image_view"
-            android:textColor="@color/white"
-            android:textSize="20dp" />
+            android:textColor="@color/orange"
+            android:textSize="@dimen/title_text_size" />
 
         <ImageButton
             android:id="@+id/ib_image_delete"
@@ -45,12 +45,12 @@
             android:gravity="center_vertical|center_horizontal"
             android:src="@drawable/delete" />
     </RelativeLayout>
-
+
     <com.video.local.DefineGallery
         android:id="@+id/mygallery"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/image_view_title"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/image_view_title"
         android:spacing="5dp" />
 
 </RelativeLayout>

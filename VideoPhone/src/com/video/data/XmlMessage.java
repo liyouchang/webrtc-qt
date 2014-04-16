@@ -38,6 +38,10 @@ public class XmlMessage {
 	File currentFile;
 	File[] currentFiles;
 
+	public XmlMessage () {
+		init();
+	}
+	
 	public XmlMessage (Context context) {
 		this.context = context;
 		init();
@@ -146,6 +150,7 @@ public class XmlMessage {
 			Element stateElement = (Element) document.createElement("state");
 			Element eventElement = (Element) document.createElement("event");
 			Element urlElement = (Element) document.createElement("url");
+			Element idElement = (Element) document.createElement("id");
 			
 			Text timeText = document.createTextNode(map.get("msgTime"));
 			timeElement.appendChild(timeText);
@@ -157,12 +162,15 @@ public class XmlMessage {
 			eventElement.appendChild(eventText);
 			Text urlText = document.createTextNode(map.get("imageURL"));
 			urlElement.appendChild(urlText);
+			Text idText = document.createTextNode(map.get("msgID"));
+			idElement.appendChild(idText);
 			
 			itemElement.appendChild(timeElement);
 			itemElement.appendChild(macElement);
 			itemElement.appendChild(stateElement);
 			itemElement.appendChild(eventElement);
 			itemElement.appendChild(urlElement);
+			itemElement.appendChild(idElement);
 			Element rootElement = (Element) document.getDocumentElement();
 			rootElement.appendChild(itemElement);
 			writeXML(document, filePath);
@@ -185,7 +193,7 @@ public class XmlMessage {
 			NodeList nodeList = document.getElementsByTagName("item");
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
-				String id = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
 				if (id.equals(deviceID)) {
 					return true;
 				}
@@ -208,7 +216,7 @@ public class XmlMessage {
 			NodeList nodeList = document.getElementsByTagName("item");
 			int len = nodeList.getLength();
 			for (int i = 0; i < len; i++) {
-				String id = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
 				if (id.equals(deviceID)) {
 					Node node = nodeList.item(i);
 					node.getParentNode().removeChild(node);
@@ -260,15 +268,15 @@ public class XmlMessage {
 	 * 更新一个Item节点的状态
 	 * @return true: 更新成功  false: 更新失败
 	 */
-	public boolean updateItemState(String mac, String newName) {
+	public boolean updateItemState(String id, String state) {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName("item");
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
-				String id = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
-				if (id.equals(mac)) {
-					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(newName);
+				String xmlID = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (xmlID.equals(id)) {
+					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(state);
 					break;
 				}
 			}
@@ -291,8 +299,9 @@ public class XmlMessage {
 			NodeList nodeList = document.getElementsByTagName("item");
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
-				String id = document.getElementsByTagName("mac").item(i).getFirstChild().getNodeValue();
-				if (id.equals(map.get("msgMAC"))) {
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (id.equals(map.get("msgID"))) {
+					document.getElementsByTagName("mac").item(i).getFirstChild().setNodeValue(map.get("msgMAC"));
 					document.getElementsByTagName("time").item(i).getFirstChild().setNodeValue(map.get("msgTime"));
 					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(map.get("isReaded"));
 					document.getElementsByTagName("event").item(i).getFirstChild().setNodeValue(map.get("msgEvent"));
@@ -307,6 +316,93 @@ public class XmlMessage {
 			System.out.println("MyDebug: updateItem()异常！");
 		}
 		return false;
+	}
+	
+	/**
+	 * 获得节点是否已标记的状态
+	 */
+	public boolean getItemState(int id) {
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			for (int i=0; i<len; i++) {
+				String xmlID = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (Integer.parseInt(xmlID.trim()) == id) {
+					String isReaded = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
+					if ("true".equals(isReaded.trim())) {
+						return true;
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getItemState()异常！");
+		}
+		return false;
+	}
+	
+	/**
+	 * 获得列表的大小
+	 */
+	public int getListSize() {
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			return nodeList.getLength();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getListSize()异常！");
+		}
+		return 0;
+	}
+	
+	/**
+	 * @return 返回获取报警数据ID的最大值
+	 */
+	public int getMaxUpdateID() {
+		int result = -1;
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			int[] idArray = new int[len];
+			
+			for (int i=0; i<len; i++) {
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				idArray[i] = Integer.parseInt(id);
+			}
+			idArray = Utils.bubbleSortIntArray(idArray);
+			return idArray[0];
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getDownUpdateID()异常！");
+		}
+		return result;
+	}
+	
+	/**
+	 * @return 返回获取报警数据ID的最小值
+	 */
+	public int getMinUpdateID() {
+		int result = -1;
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			int[] idArray = new int[len];
+			
+			for (int i=0; i<len; i++) {
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				idArray[i] = Integer.parseInt(id);
+			}
+			idArray = Utils.bubbleSortIntArray(idArray);
+			return idArray[len-1];
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getDownUpdateID()异常！");
+		}
+		return result;
 	}
 
 	/**
@@ -345,11 +441,13 @@ public class XmlMessage {
 				String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
 				String event = document.getElementsByTagName("event").item(i).getFirstChild().getNodeValue();
 				String url = document.getElementsByTagName("url").item(i).getFirstChild().getNodeValue();
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
 				item.put("msgTime", time);
 				item.put("msgMAC", mac);
 				item.put("isReaded", state);
 				item.put("msgEvent", event);
 				item.put("imageURL", url);
+				item.put("msgID", id);
 				list.add(item);
 			}
 			return list;
