@@ -5,7 +5,6 @@ import java.util.HashMap;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.video.R;
 import com.video.socket.HandlerApplication;
@@ -106,7 +105,7 @@ public class TunnelCommunication {
 	 * 
 	 */
 	public void SendToPeer(String peerId, String data) {
-		System.out.print("MyDebug: 1��SendToPeer(): "+data);
+		System.out.print("MyDebug: 1.SendToPeer(): "+data);
 		
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", peerId);
