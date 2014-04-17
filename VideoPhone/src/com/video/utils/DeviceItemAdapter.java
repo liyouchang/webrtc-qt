@@ -72,7 +72,7 @@ public class DeviceItemAdapter extends BaseAdapter {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Toast.makeText(context, "AdapterÖÐµã»÷£º"+position, Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, "Adapterä¸­ç‚¹å‡»ï¼š"+position, Toast.LENGTH_SHORT).show();
 			}
 		});
 		return convertView;

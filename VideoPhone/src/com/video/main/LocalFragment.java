@@ -46,9 +46,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	File currentFile;
 	File[] currentFiles;
 	
-	//±¾µØÂ¼Ïñ³õÊ¼»¯
+	//æœ¬åœ°å½•åƒåˆå§‹åŒ–
 	
-	//×¥ÅÄÍ¼Æ¬³õÊ¼»¯
+	//æŠ“æ‹å›¾ç‰‡åˆå§‹åŒ–
 	private final int INIT_LOCAL_VIDEO_FINISH = 1;
 	private final int INIT_LOCAL_IMAGE_FINISH = 2;
 	private ListView mListView;
@@ -88,9 +88,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	private void initView() {
 		viewpage_video = (TextView)mView.findViewById(R.id.tv_vp_video);
 		viewpage_image = (TextView)mView.findViewById(R.id.tv_vp_image);
-		//±¾µØÂ¼Ïñ³õÊ¼»¯
+		//æœ¬åœ°å½•åƒåˆå§‹åŒ–
 		
-		//×¥ÅÄÍ¼Æ¬³õÊ¼»¯
+		//æŠ“æ‹å›¾ç‰‡åˆå§‹åŒ–
 		mListView = (ListView)mView.findViewById(R.id.local_image_listView);
 		
 		viewpage_video.setOnClickListener(this);
@@ -98,9 +98,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	private void initData() {
-		//±¾µØÂ¼Ïñ³õÊ¼»¯
+		//æœ¬åœ°å½•åƒåˆå§‹åŒ–
 		
-		//×¥ÅÄÍ¼Æ¬³õÊ¼»¯
+		//æŠ“æ‹å›¾ç‰‡åˆå§‹åŒ–
 		new LocalImageThread().start();
 	}
 	
@@ -122,7 +122,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	/**
-	 * ³õÊ¼»¯¸Ã½çÃæÏÂÒª»¬¶¯µÄÒ³Ãæ
+	 * åˆå§‹åŒ–è¯¥ç•Œé¢ä¸‹è¦æ»‘åŠ¨çš„é¡µé¢
 	 */
 	private void initViewPageView() {
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
@@ -165,8 +165,8 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	/**
-	 * ÏòÖ÷Ïß³Ì·¢ËÍHandlerÏûÏ¢(¶àÌ«º¯Êı)
-	 * @param what ÏûÏ¢ÀàĞÍ
+	 * å‘ä¸»çº¿ç¨‹å‘é€Handleræ¶ˆæ¯(å¤šå¤ªå‡½æ•°)
+	 * @param what æ¶ˆæ¯ç±»å‹
 	 */
 	public void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -202,12 +202,12 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	};
 	
 	//-----------------------------------------------------------------------------------
-	//±¾µØÂ¼Ïñ´¦Àí
+	//æœ¬åœ°å½•åƒå¤„ç†
 	//-----------------------------------------------------------------------------------
 	
 	
 	//-----------------------------------------------------------------------------------
-	//×¥ÅÄÍ¼Æ¬´¦Àí
+	//æŠ“æ‹å›¾ç‰‡å¤„ç†
 	//-----------------------------------------------------------------------------------
 	
 	private class LocalImageThread extends Thread {
@@ -225,7 +225,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		mFileAll = new ArrayList<ImageViewFileItem>();
 		ImageViewFileItem fileItem = null;
 		
-		//×¥ÅÄÍ¼Æ¬³õÊ¼»¯
+		//æŠ“æ‹å›¾ç‰‡åˆå§‹åŒ–
 		if (Utils.checkSDCard()) {
 			SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
 			File rootPath = new File(SD_path);
@@ -239,13 +239,13 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 					ArrayList<String> imageFileArrayString = handleImageFileName(currentFiles);
 					
 					if (imageFileArrayString == null) {
-						Toast.makeText(mActivity, "Ã»ÓĞ±¾µØ×¥ÅÄÍ¼Æ¬", Toast.LENGTH_SHORT).show();
+						Toast.makeText(mActivity, "æ²¡æœ‰æœ¬åœ°æŠ“æ‹å›¾ç‰‡", Toast.LENGTH_SHORT).show();
 						return ;
 					}
 					
 					for (int i=0; i<imageFileCount; i++) {
 						fileItem = new ImageViewFileItem();
-						//ÎÄ¼ş¼ĞÏÂµÄÍ¼Æ¬
+						//æ–‡ä»¶å¤¹ä¸‹çš„å›¾ç‰‡
 						String imageFilePath = currentFile.getPath()+File.separator+imageFileArrayString.get(i);
 						File file = new File(imageFilePath);
 						File[] files = file.listFiles();
@@ -256,7 +256,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 							continue;
 						}
 						fileItem.imageViews = fileImages;
-						//ÎÄ¼ş¼ĞÃû
+						//æ–‡ä»¶å¤¹å
 						fileItem.fileName = imageFileArrayString.get(i);
 						mFileAll.add(fileItem);
 					}
@@ -267,9 +267,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	/**
-	 * ½«ÖÆ¶¨ÎÄ¼ş¼ĞÏÂµÄÍ¼Æ¬È«²¿ÁĞ³öÀ´
-	 * @param files ÎÄ¼ş½áºÏ
-	 * @return ·µ»ØÍ¼Æ¬¸ñÊ½µÄÎÄ¼ş½áºÏ
+	 * å°†åˆ¶å®šæ–‡ä»¶å¤¹ä¸‹çš„å›¾ç‰‡å…¨éƒ¨åˆ—å‡ºæ¥
+	 * @param files æ–‡ä»¶ç»“åˆ
+	 * @return è¿”å›å›¾ç‰‡æ ¼å¼çš„æ–‡ä»¶ç»“åˆ
 	 */
 	private ArrayList<HashMap<String, Object>> listAllImageViews(File[] files) {
 		int count = files.length;
@@ -289,7 +289,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	/**
-	 * ÅÅĞòÎÄ¼ş¼Ğ¼¯ºÏ£¬ÈÕÆÚ´Ó´óµ½Ğ¡
+	 * æ’åºæ–‡ä»¶å¤¹é›†åˆï¼Œæ—¥æœŸä»å¤§åˆ°å°
 	 */
 	private ArrayList<Integer> sortImageFileName(File[] fileArray) {
 		int fileCount = fileArray.length;
@@ -306,7 +306,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	/**
-	 * ´¦ÀíÍ¼Æ¬ÎÄ¼ş¼ĞÃû×Ö¼¯ºÏ£¬ÅÅĞòÈÕÆÚ´Ó´óµ½Ğ¡µÄ×Ö·û´®Êı×é
+	 * å¤„ç†å›¾ç‰‡æ–‡ä»¶å¤¹åå­—é›†åˆï¼Œæ’åºæ—¥æœŸä»å¤§åˆ°å°çš„å­—ç¬¦ä¸²æ•°ç»„
 	 */
 	private ArrayList<String> handleImageFileName(File[] fileArray) {
 		int fileCount = fileArray.length;
@@ -325,10 +325,10 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 
 	/**
-	 * ²éÕÒÎÄ¼ş¼Ğ¼¯ºÏÏÂÊÇ·ñÓĞÕâ¸öÎÄ¼ş¼Ğ
-	 * @param files ÎÄ¼ş¼Ğ¼¯ºÏ
-	 * @param fileName Òª²éÕÒµÄÎÄ¼ş¼Ğ
-	 * @return true:ÓĞ false:Ã»ÓĞ
+	 * æŸ¥æ‰¾æ–‡ä»¶å¤¹é›†åˆä¸‹æ˜¯å¦æœ‰è¿™ä¸ªæ–‡ä»¶å¤¹
+	 * @param files æ–‡ä»¶å¤¹é›†åˆ
+	 * @param fileName è¦æŸ¥æ‰¾çš„æ–‡ä»¶å¤¹
+	 * @return true:æœ‰ false:æ²¡æœ‰
 	 */
 	private boolean isDirectoryExist(File[] files, String fileName) {
 		for (int i=0; i<files.length; i++) {

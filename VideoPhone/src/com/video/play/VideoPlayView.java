@@ -27,10 +27,10 @@ public class VideoPlayView extends View {
     private int bitWide=352;
     private int bitHeight=288;
     
-    private PlayVideoThread playVideoThread = null; //²¥·ÅÊÓÆµÏß³Ì
+    private PlayVideoThread playVideoThread = null; //æ’­æ”¾è§†é¢‘çº¿ç¨‹
     private boolean runFlag = false;
     
-    //ÊÓÆµ½âÂë¿âJNI½Ó¿Ú
+  //è§†é¢‘è§£ç åº“JNIæ¥å£
     private native int initDecoder(int width, int height); 
     private native int uninitDecoder();
     private native int decodeNalu(byte[] in, int insize, byte[] out);
@@ -46,7 +46,7 @@ public class VideoPlayView extends View {
 	
 	public void initView() {
 		initDecoder(width, height);
-		System.out.println("MyDebug: ¡¾InitDecoder()¡¿");
+		System.out.println("MyDebug: ã€InitDecoder()ã€‘");
 		if (TunnelCommunication.videoDataCache != null) {
 			TunnelCommunication.videoDataCache.clearBuffer();
 		}
@@ -55,33 +55,33 @@ public class VideoPlayView extends View {
 	public void uninitView() {
 		TunnelCommunication.videoDataCache.clearBuffer();
 		uninitDecoder();
-		System.out.println("MyDebug: ¡¾UninitDecoder()¡¿");
+		System.out.println("MyDebug: ã€UninitDecoder()ã€‘");
 	}
 	
 	/**
-	 * ²¥·ÅÊÓÆµ
+	 * æ’­æ”¾è§†é¢‘
 	 */
 	public void playVideo() {
 		if (playVideoThread == null) {
 			playVideoThread = new PlayVideoThread(true);
 			playVideoThread.start();
-			System.out.println("MyDebug: ¡¾²¥·ÅÊÓÆµ¡¿");
+			System.out.println("MyDebug: ã€æ’­æ”¾è§†é¢‘ã€‘");
 		}
 	}
 	
 	/**
-	 * Í£Ö¹²¥·Å
+	 * åœæ­¢æ’­æ”¾
 	 */
 	public void stopVideo() {
 		if (playVideoThread != null) {
 			runFlag = false;
 			playVideoThread = null;
-			System.out.println("MyDebug: ¡¾Í£Ö¹²¥·Å¡¿");
+			System.out.println("MyDebug: ã€åœæ­¢æ’­æ”¾ã€‘");
 		}
 	}
 	
 	/**
-	 * ²¥·ÅÊÓÆµÏß³Ì
+	 * æ’­æ”¾è§†é¢‘çº¿ç¨‹
 	 */
 	private class PlayVideoThread extends Thread {
 		
@@ -122,7 +122,7 @@ public class VideoPlayView extends View {
 			drawWide = canvas.getWidth(); 
 			drawHeight = canvas.getHeight();
 			videoBuffer.rewind();
-			videoBmp.copyPixelsFromBuffer(videoBuffer); // bmp´Ó»º³åÇø»ñµÃÊı¾İ
+			videoBmp.copyPixelsFromBuffer(videoBuffer); // bmpä»ç¼“å†²åŒºè·å¾—æ•°æ®
 
 			videoType = (byte) (TunnelCommunication.frameType & 0x5F);
 
@@ -166,7 +166,7 @@ public class VideoPlayView extends View {
 				dstRect.bottom = drawHeight;
 			}
 
-			// »æÖÆÍ¼Ïñ
+			// ç»˜åˆ¶å›¾åƒ
 			canvas.drawBitmap(videoBmp, srcRect, dstRect, null);
 		} catch (Exception e) {
 			e.printStackTrace();

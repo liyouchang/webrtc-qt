@@ -50,7 +50,7 @@ public class BackstageService extends Service {
 	}
 	
 	/**
-	 * 关闭应用程序
+	 * 鍏抽棴搴旂敤绋嬪簭
 	 */
 	public static void closeAPPAndService() {
 		Value.isLoginSuccess = false;
@@ -74,7 +74,7 @@ public class BackstageService extends Service {
 	}
 	
 	/**
-	 * 生成JSON的发送心跳字符串
+	 * 鐢熸垚JSON鐨勫彂閫佸績璺冲瓧绗︿覆
 	 */
 	private String generateBeatHeartJson() {
 		String result = "";
@@ -93,7 +93,7 @@ public class BackstageService extends Service {
 	}
 	
 	/**
-	 * 发送Handler消息
+	 * 鍙戦�丠andler娑堟伅
 	 */
 	public static void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -118,7 +118,7 @@ public class BackstageService extends Service {
 	}
 	
 	/**
-	 * 后台线程
+	 * 鍚庡彴绾跨▼
 	 */
 	class BackstageThread extends Thread {
 

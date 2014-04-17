@@ -75,7 +75,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄÉú³ÉÖÕ¶ËÃû×Ö×Ö·û´®
+	 * ç”ŸæˆJSONçš„ç”Ÿæˆç»ˆç«¯åå­—å­—ç¬¦ä¸²
 	 */
 	private String generateModifyTermNameJson() {
 		String result = "";
@@ -93,7 +93,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄ½ø¶ÈÌõ
+	 * æ˜¾ç¤ºæ“ä½œçš„è¿›åº¦æ¡
 	 */
 	private void showProgressDialog(String info) {
 		progressDialog = new ProgressDialog(mContext);
@@ -111,7 +111,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					showProgressDialog("ÕıÔÚÌá½»ĞŞ¸Ä...");
+					showProgressDialog("æ­£åœ¨æäº¤ä¿®æ”¹...");
 					break;
 				case REQUEST_TIMEOUT:
 					if (progressDialog != null)
@@ -120,7 +120,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
 					Value.isNeedReqTermListFlag = false;
-					Toast.makeText(mContext, "ĞŞ¸ÄÖÕ¶ËÃû³ÆÊ§°Ü£¬ÍøÂç³¬Ê±£¡", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "ä¿®æ”¹ç»ˆç«¯åç§°å¤±è´¥ï¼Œç½‘ç»œè¶…æ—¶ï¼", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.modify_device_name_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
@@ -129,14 +129,14 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 						if (resultCode == 0) {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							Toast.makeText(mContext, "ĞŞ¸ÄÖÕ¶ËÃû³Æ³É¹¦£¡", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "ä¿®æ”¹ç»ˆç«¯åç§°æˆåŠŸï¼", Toast.LENGTH_SHORT).show();
 							xmlData.updateItemName(mDeviceId, mDeviceName);
 							finish();
 							overridePendingTransition(0, R.anim.down_out);
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							Toast.makeText(mContext, "ĞŞ¸ÄÖÕ¶ËÃû³ÆÊ§°Ü£¬"+Utils.getErrorReason(resultCode)+"£¡", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "ä¿®æ”¹ç»ˆç«¯åç§°å¤±è´¥ï¼Œ"+Utils.getErrorReason(resultCode)+"ï¼", Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.modify_device_name_id);
@@ -147,7 +147,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	};
 	
 	/**
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * å‘é€Handleræ¶ˆæ¯
 	 */
 	private void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -176,7 +176,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			Toast.makeText(mContext, "Ã»ÓĞ¿ÉÓÃµÄÍøÂçÁ¬½Ó£¬ÇëÈ·ÈÏºóÖØÊÔ£¡", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, "æ²¡æœ‰å¯ç”¨çš„ç½‘ç»œè¿æ¥ï¼Œè¯·ç¡®è®¤åé‡è¯•ï¼", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -195,21 +195,21 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	}
 	
 	/**
-	 * @return true:×¢²áĞÅÏ¢¸ñÊ½ÕıÈ·  false:×¢²áĞÅÏ¢¸ñÊ½´íÎó
+	 * @return true:æ³¨å†Œä¿¡æ¯æ ¼å¼æ­£ç¡®  false:æ³¨å†Œä¿¡æ¯æ ¼å¼é”™è¯¯
 	 */
 	private boolean checkModifyDeviceData() {
 		boolean resultFlag = false;
 		
-		//»ñÈ¡EditTextÊäÈë¿òµÄ×Ö·û´®
+		//è·å–EditTextè¾“å…¥æ¡†çš„å­—ç¬¦ä¸²
 		String newDeviceName = et_name.getText().toString().trim();
 		
 		if (newDeviceName.equals("")) {
 			resultFlag = false;
-			et_name.setError("ÇëÊäÈëÉè±¸Ãû³Æ£¡");
+			et_name.setError("è¯·è¾“å…¥è®¾å¤‡åç§°ï¼");
 		}
 		else if ((newDeviceName.length()<2) || (newDeviceName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("Éè±¸Ãû³Æ³¤¶È·¶Î§2~20£¡");
+			et_name.setError("è®¾å¤‡åç§°é•¿åº¦èŒƒå›´2~20ï¼");
 		} else {
 			resultFlag = true;
 			mDeviceName = newDeviceName;

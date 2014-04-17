@@ -2,24 +2,30 @@ package com.video.play;
 
 import com.video.utils.Tools;
 
-public class ByteCache {
+public class VideoCache {
 
 	private byte[] mLock = new byte[0];
 	private byte[] mBuffer = null;
 	private int mBufferLen;
 	private int inPtr;
 	private int outPtr;
+	
+	public VideoCache(int size) {
+		mBufferLen = size;
+		mBuffer = new byte[mBufferLen];
+		clearBuffer();
+	}
 
 	/**
-	 * ÅĞ¶Ï»º³åÇøÊÇ·ñÎª¿Õ
-	 * @return true:»º³åÇøÎª¿Õ  false:»º³åÇø²»Îª¿Õ
+	 * åˆ¤æ–­ç¼“å†²åŒºæ˜¯å¦ä¸ºç©º
+	 * @return true:ç¼“å†²åŒºä¸ºç©º  false:ç¼“å†²åŒºä¸ä¸ºç©º
 	 */
 	public boolean isEmpty() {
 		return (inPtr == outPtr) ? true : false;
 	}
 	
 	/**
-	 * Çå¿Õ»º³åÇø
+	 * æ¸…ç©ºç¼“å†²åŒº
 	 */
 	public void clearBuffer() {
 		synchronized (mLock) {
@@ -29,18 +35,8 @@ public class ByteCache {
 	}
 
 	/**
-	 * ÉèÖÃ»º³åÇøµÄ´óĞ¡
-	 * @param size »º³åÇø´óĞ¡
-	 */
-	public void setBufferLen(int size) {
-		mBufferLen = size;
-		mBuffer = new byte[mBufferLen];
-		clearBuffer();
-	}
-
-	/**
-	 * »ñµÃ×î´ó¿ÉÒÔĞ´ÈëµÄÊı¾İ
-	 * @return ·µ»Ø×î´ó¿ÉÒÔĞ´ÈëµÄÊı¾İ
+	 * è·å¾—æœ€å¤§å¯ä»¥å†™å…¥çš„æ•°æ®
+	 * @return è¿”å›æœ€å¤§å¯ä»¥å†™å…¥çš„æ•°æ®
 	 */
 	public int getMaxWriteLen() {
 		int result = 0;
@@ -61,8 +57,8 @@ public class ByteCache {
 	}
 
 	/**
-	 * »ñµÃ×î´ó¿ÉÒÔ¶ÁÈ¡µÄÊı¾İ
-	 * @return ·µ»Ø×î´ó¿ÉÒÔ¶ÁÈ¡µÄÊı¾İ
+	 * è·å¾—æœ€å¤§å¯ä»¥è¯»å–çš„æ•°æ®
+	 * @return è¿”å›æœ€å¤§å¯ä»¥è¯»å–çš„æ•°æ®
 	 */
 	private int getMaxReadLen() {
 		int result = 0;
@@ -83,10 +79,10 @@ public class ByteCache {
 	}
 
 	/**
-	 * ½«Êı¾İÑ¹Èë»º³åÇø
-	 * @param buf ÒªÑ¹ÈëµÄÊı¾İ
-	 * @param len Ñ¹ÈëÊı¾İµÄ³¤¶È
-	 * @return 0:Ñ¹Èë³É¹¦  <0Ñ¹ÈëÊ§°Ü
+	 * å°†æ•°æ®å‹å…¥ç¼“å†²åŒº
+	 * @param buf è¦å‹å…¥çš„æ•°æ®
+	 * @param len å‹å…¥æ•°æ®çš„é•¿åº¦
+	 * @return 0:å‹å…¥æˆåŠŸ  <0å‹å…¥å¤±è´¥
 	 */
 	public int push(byte[] buf, int len) {
 		int result = -1;
@@ -118,9 +114,9 @@ public class ByteCache {
 	}
 	
 	/**
-	 * µ¯³ö»º³åÇøµÄÊı¾İ
-	 * @param naluData µ¯³öµÄÊı¾İ
-	 * @return ·µ»Øµ¯³öÊı¾İµÄ´óĞ¡
+	 * å¼¹å‡ºç¼“å†²åŒºçš„æ•°æ®
+	 * @param naluData å¼¹å‡ºçš„æ•°æ®
+	 * @return è¿”å›å¼¹å‡ºæ•°æ®çš„å¤§å°
 	 */
 	public int pop(byte[] naluData) {
 		int len = -1;
@@ -169,8 +165,8 @@ public class ByteCache {
 	}
 	
 	/**
-	 * ¹ıµÃµ¯³öÊı¾İµÄ´óĞ¡
-	 * @return ·µ»Øµ¯³öÊı¾İµÄ´óĞ¡
+	 * è¿‡å¾—å¼¹å‡ºæ•°æ®çš„å¤§å°
+	 * @return è¿”å›å¼¹å‡ºæ•°æ®çš„å¤§å°
 	 */
 	private int getPopLen() {
 		byte[] result = new byte[6];

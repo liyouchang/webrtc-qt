@@ -47,7 +47,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	private static XmlDevice xmlData;
 	private PreferData preferData = null;
 	private String userName = null;
-	//ÖÕ¶ËÁĞ±íÏî
+	//ç»ˆç«¯åˆ—è¡¨é¡¹
 	private String mDeviceName = null;
 	private String mDeviceId = null;
 	private int listPosition = 0;
@@ -97,14 +97,14 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	private void initData() {
-		//³õÊ¼»¯ActivityÒªÊ¹ÓÃµÄ²ÎÊı
+		//åˆå§‹åŒ–Activityè¦ä½¿ç”¨çš„å‚æ•°
 		ZmqHandler.setHandler(handler);
 		xmlData = new XmlDevice(mActivity);
 		preferData = new PreferData(mActivity);
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
 		}
-		//³õÊ¼»¯ÖÕ¶ËÁĞ±íµÄÏÔÊ¾
+		//åˆå§‹åŒ–ç»ˆç«¯åˆ—è¡¨çš„æ˜¾ç¤º
 		if (Value.isNeedReqTermListFlag) {
 			reqTermListEvent();
 		}
@@ -117,11 +117,11 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * »ñµÃÒ»¸öÉè±¸ÏîItem
-	 * @param isOnline Éè±¸ÊÇ·ñÔÚÏß
-	 * @param deviceName Éè±¸Ãû³Æ
-	 * @param deviceID Éè±¸µÄMAC
-	 * @return ·µ»ØÒ»¸öÉè±¸ÏîItem
+	 * è·å¾—ä¸€ä¸ªè®¾å¤‡é¡¹Item
+	 * @param isOnline è®¾å¤‡æ˜¯å¦åœ¨çº¿
+	 * @param deviceName è®¾å¤‡åç§°
+	 * @param deviceID è®¾å¤‡çš„MAC
+	 * @return è¿”å›ä¸€ä¸ªè®¾å¤‡é¡¹Item
 	 */
 	@SuppressWarnings("unused")
 	private HashMap<String, String> getDeviceItem(boolean isOnline, String deviceName, String deviceID, String dealerName) {
@@ -141,7 +141,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄÇëÇóÉè±¸ÁĞ±í×Ö·û´®
+	 * ç”ŸæˆJSONçš„è¯·æ±‚è®¾å¤‡åˆ—è¡¨å­—ç¬¦ä¸²
 	 */
 	private String generateReqTermListJson() {
 		String result = "";
@@ -157,7 +157,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄÉ¾³ıÖÕ¶Ë°ó¶¨×Ö·û´®
+	 * ç”ŸæˆJSONçš„åˆ é™¤ç»ˆç«¯ç»‘å®šå­—ç¬¦ä¸²
 	 */
 	private String generateDelTermItemJson(String mac) {
 		String result = "";
@@ -174,7 +174,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄ½ø¶ÈÌõ
+	 * æ˜¾ç¤ºæ“ä½œçš„è¿›åº¦æ¡
 	 */
 	private void showProgressDialog(String info) {
 		progressDialog = new ProgressDialog(mActivity);
@@ -205,7 +205,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					Value.isNeedReqTermListFlag = false;
 					Toast.makeText(mActivity, ""+msg.obj, Toast.LENGTH_SHORT).show();
 					break;
-				//ÇëÇóÖÕ¶ËÁĞ±í
+				//è¯·æ±‚ç»ˆç«¯åˆ—è¡¨
 				case R.id.request_terminal_list_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
@@ -222,13 +222,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							}
 							listSize = xmlData.getListSize();
 						} else {
-							Toast.makeText(mActivity, msg.obj+"£¬"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, msg.obj+"ï¼Œ"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.request_terminal_list_id);
 					}
 					break;
-				//É¾³ıÖÕ¶Ë°ó¶¨
+				//åˆ é™¤ç»ˆç«¯ç»‘å®š
 				case R.id.delete_device_item_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
@@ -236,13 +236,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							progressDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							Toast.makeText(mActivity, "É¾³ıÖÕ¶Ë°ó¶¨³É¹¦£¡", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, "åˆ é™¤ç»ˆç«¯ç»‘å®šæˆåŠŸï¼", Toast.LENGTH_SHORT).show();
 							xmlData.deleteItem(mDeviceId);
 							deviceList.remove(listPosition);
 							deviceAdapter.notifyDataSetChanged();
 							listSize = xmlData.getListSize();
 						} else {
-							Toast.makeText(mActivity, "É¾³ıÖÕ¶Ë°ó¶¨Ê§°Ü£¬"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, "åˆ é™¤ç»ˆç«¯ç»‘å®šå¤±è´¥ï¼Œ"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.request_terminal_list_id);
@@ -276,7 +276,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	};
 	
 	/**
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * å‘é€Handleræ¶ˆæ¯
 	 */
 	private void sendHandlerMsg(int what, String obj) {
 		Message msg = new Message();
@@ -298,32 +298,32 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * ÇëÇóÖÕ¶ËÁĞ±íµÄÍøÂç²Ù×÷
+	 * è¯·æ±‚ç»ˆç«¯åˆ—è¡¨çš„ç½‘ç»œæ“ä½œ
 	 */
 	public void reqTermListEvent() {
 		if (Utils.isNetworkAvailable(mActivity)) {
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqTermListJson();
-			sendHandlerMsg(IS_REQUESTING, "ÕıÔÚÇëÇóÖÕ¶ËÁĞ±í...");
-			sendHandlerMsg(REQUEST_TIMEOUT, "ÇëÇóÖÕ¶Ë¿Î±íÊ§°Ü£¬ÍøÂç³¬Ê±£¡", Value.requestTimeout);
+			sendHandlerMsg(IS_REQUESTING, "æ­£åœ¨è¯·æ±‚ç»ˆç«¯åˆ—è¡¨...");
+			sendHandlerMsg(REQUEST_TIMEOUT, "è¯·æ±‚ç»ˆç«¯è¯¾è¡¨å¤±è´¥ï¼Œç½‘ç»œè¶…æ—¶ï¼", Value.requestTimeout);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		} else {
-			Toast.makeText(mActivity, "Ã»ÓĞ¿ÉÓÃµÄÍøÂçÁ¬½Ó£¬ÇëÈ·ÈÏºóÖØÊÔ£¡", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mActivity, "æ²¡æœ‰å¯ç”¨çš„ç½‘ç»œè¿æ¥ï¼Œè¯·ç¡®è®¤åé‡è¯•ï¼", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
 	/**
-	 * É¾³ıÖÕ¶Ë°ó¶¨µÄÍøÂç²Ù×÷
+	 * åˆ é™¤ç»ˆç«¯ç»‘å®šçš„ç½‘ç»œæ“ä½œ
 	 */
 	public void delTermItemEvent(String id) {
 		if (Utils.isNetworkAvailable(mActivity)) {
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateDelTermItemJson(id);
-			sendHandlerMsg(IS_REQUESTING, "ÕıÔÚÉ¾³ıÖÕ¶Ë°ó¶¨...");
-			sendHandlerMsg(REQUEST_TIMEOUT, "É¾³ıÖÕ¶Ë°ó¶¨Ê§°Ü£¬ÍøÂç³¬Ê±£¡", Value.requestTimeout);
+			sendHandlerMsg(IS_REQUESTING, "æ­£åœ¨åˆ é™¤ç»ˆç«¯ç»‘å®š...");
+			sendHandlerMsg(REQUEST_TIMEOUT, "åˆ é™¤ç»ˆç«¯ç»‘å®šå¤±è´¥ï¼Œç½‘ç»œè¶…æ—¶ï¼", Value.requestTimeout);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		} else {
-			Toast.makeText(mActivity, "Ã»ÓĞ¿ÉÓÃµÄÍøÂçÁ¬½Ó£¬ÇëÈ·ÈÏºóÖØÊÔ£¡", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mActivity, "æ²¡æœ‰å¯ç”¨çš„ç½‘ç»œè¿æ¥ï¼Œè¯·ç¡®è®¤åé‡è¯•ï¼", Toast.LENGTH_SHORT).show();
 		}
 	}
 
@@ -338,7 +338,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * Éè±¸ÏîListViewµÄ³¤µã»÷ÊÂ¼ş
+	 * è®¾å¤‡é¡¹ListViewçš„é•¿ç‚¹å‡»äº‹ä»¶
 	 */
 	private class OnItemLongClickListenerImpl implements OnItemLongClickListener {
 		@Override
@@ -351,7 +351,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 
 	/**
-	 * Éè±¸ÏîListViewµÄ³¤°´¼üµÄPopupWindowÑ¡Ïî
+	 * è®¾å¤‡é¡¹ListViewçš„é•¿æŒ‰é”®çš„PopupWindowé€‰é¡¹
 	 */
 	public void showPopupWindow(View view) {
 		LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -359,10 +359,10 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
 		
 		List<String> item_list = new ArrayList<String>();
-		item_list.add("ĞŞ¸ÄÖÕ¶ËÃû³Æ");
-		item_list.add("É¾³ıÖÕ¶Ë°ó¶¨");
-		item_list.add("ÉèÖÃ±³¾°Í¼Æ¬");
-		item_list.add("É¾³ı±³¾°Í¼Æ¬");
+		item_list.add("ä¿®æ”¹ç»ˆç«¯åç§°");
+		item_list.add("åˆ é™¤ç»ˆç«¯ç»‘å®š");
+		item_list.add("è®¾ç½®èƒŒæ™¯å›¾ç‰‡");
+		item_list.add("åˆ é™¤èƒŒæ™¯å›¾ç‰‡");
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mActivity, item_list);
 		pop_listView.setAdapter(popAdapter);
 		

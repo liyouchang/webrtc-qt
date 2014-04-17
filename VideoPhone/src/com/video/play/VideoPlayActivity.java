@@ -6,7 +6,7 @@ import android.view.KeyEvent;
 
 public class VideoPlayActivity  extends Activity {
 
-	private VideoPlayView view = null; //ÊÓÆµÍ¼ÏñÀà
+	private VideoPlayView view = null; //è§†é¢‘å›¾åƒç±»
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

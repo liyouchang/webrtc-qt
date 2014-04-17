@@ -39,7 +39,7 @@ public class XmlDevice {
 	}
 	
 	/**
-	 * ³õÊ¼»¯xmlÎÄ¼ş
+	 * åˆå§‹åŒ–xmlæ–‡ä»¶
 	 */
 	public void init() {
 		if (Utils.checkSDCard()) {
@@ -51,7 +51,7 @@ public class XmlDevice {
 					initXmlFile(file);
 				} catch (IOException e) {
 					e.printStackTrace();
-					System.out.println("MyDebug: init()Òì³££¡");
+					System.out.println("MyDebug: init()å¼‚å¸¸ï¼");
 				}
 			}
 		}
@@ -59,7 +59,7 @@ public class XmlDevice {
 	}
 
 	/**
-	 * ³õÊ¼»¯´´½¨ºóµÄxmlÎÄ¼ş
+	 * åˆå§‹åŒ–åˆ›å»ºåçš„xmlæ–‡ä»¶
 	 */
 	public void initXmlFile(File file) {
 		XmlSerializer serializer = Xml.newSerializer();
@@ -77,12 +77,12 @@ public class XmlDevice {
 			os.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: initXmlFile()Òì³££¡");
+			System.out.println("MyDebug: initXmlFile()å¼‚å¸¸ï¼");
 		}
 	}
 
 	/**
-	 * Í¨¹ı´«ÈëµÄÎÄ¼şÂ·¾¶£¬·µ»ØÒ»¸ödocument¶ÔÏó
+	 * é€šè¿‡ä¼ å…¥çš„æ–‡ä»¶è·¯å¾„ï¼Œè¿”å›ä¸€ä¸ªdocumentå¯¹è±¡
 	 */
 	public Document loadInit(String path) {
 		Document document = null;
@@ -94,14 +94,14 @@ public class XmlDevice {
 			return document;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: loadInit()Òì³££¡");
+			System.out.println("MyDebug: loadInit()å¼‚å¸¸ï¼");
 		}
 		return null;
 	}
 	
 	/**
-	 * Ôö¼ÓÒ»¸öListÁĞ±í
-	 * @return true: Ôö¼Ó³É¹¦  false: Ôö¼ÓÊ§°Ü
+	 * å¢åŠ ä¸€ä¸ªListåˆ—è¡¨
+	 * @return true: å¢åŠ æˆåŠŸ  false: å¢åŠ å¤±è´¥
 	 */
 	public boolean addList(ArrayList<HashMap<String, String>> list) {
 		
@@ -112,14 +112,14 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: addList()Òì³££¡");
+			System.out.println("MyDebug: addList()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 
 	/**
-	 * Ôö¼ÓÒ»¸öItem½Úµã
-	 * @return true: Ôö¼Ó³É¹¦  false: Ôö¼ÓÊ§°Ü
+	 * å¢åŠ ä¸€ä¸ªItemèŠ‚ç‚¹
+	 * @return true: å¢åŠ æˆåŠŸ  false: å¢åŠ å¤±è´¥
 	 */
 	public boolean addItem(HashMap<String, String> map) {
 
@@ -150,14 +150,14 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: addItem()Òì³££¡");
+			System.out.println("MyDebug: addItem()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 	
 	/**
-	 * ÊÇ·ñ´æÔÚÒ»¸öItem½Úµã
-	 * @return true: ´æÔÚ  false: ²»´æÔÚ
+	 * æ˜¯å¦å­˜åœ¨ä¸€ä¸ªItemèŠ‚ç‚¹
+	 * @return true: å­˜åœ¨  false: ä¸å­˜åœ¨
 	 */
 	public boolean isItemExit(String deviceID) {
 
@@ -173,14 +173,14 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: isItemExit()Òì³££¡");
+			System.out.println("MyDebug: isItemExit()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 
 	/**
-	 * É¾³ıÒ»¸öItem½Úµã
-	 * @return true: É¾³ı³É¹¦  false: É¾³ıÊ§°Ü
+	 * åˆ é™¤ä¸€ä¸ªItemèŠ‚ç‚¹
+	 * @return true: åˆ é™¤æˆåŠŸ  false: åˆ é™¤å¤±è´¥
 	 */
 	public boolean deleteItem(String deviceID) {
 
@@ -200,14 +200,14 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: deleteItem()Òì³££¡");
+			System.out.println("MyDebug: deleteItem()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 
 	/**
-	 * É¾³ıËùÓĞ½Úµã *
-	 * @return true: É¾³ı³É¹¦  false: É¾³ıÊ§°Ü
+	 * åˆ é™¤æ‰€æœ‰èŠ‚ç‚¹ *
+	 * @return true: åˆ é™¤æˆåŠŸ  false: åˆ é™¤å¤±è´¥
 	 */
 	public boolean deleteAllItem() {
 		try {
@@ -216,13 +216,13 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: deleteAllItem()Òì³££¡");
+			System.out.println("MyDebug: deleteAllItem()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 	
 	/**
-	 * »ñµÃÁĞ±íµÄ´óĞ¡
+	 * è·å¾—åˆ—è¡¨çš„å¤§å°
 	 */
 	public int getListSize() {
 		Document document = loadInit(filePath);
@@ -231,14 +231,14 @@ public class XmlDevice {
 			return nodeList.getLength();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getListSize()Òì³££¡");
+			System.out.println("MyDebug: getListSize()å¼‚å¸¸ï¼");
 		}
 		return 0;
 	}
 	
 	/**
-	 * ¸üĞÂÒ»¸öListÁĞ±í
-	 * @return true: ¸üĞÂ³É¹¦  false: ¸üĞÂÊ§°Ü
+	 * æ›´æ–°ä¸€ä¸ªListåˆ—è¡¨
+	 * @return true: æ›´æ–°æˆåŠŸ  false: æ›´æ–°å¤±è´¥
 	 */
 	public boolean updateList(ArrayList<HashMap<String, String>> list) {
 		
@@ -247,14 +247,14 @@ public class XmlDevice {
 			addList(list);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()Òì³££¡");
+			System.out.println("MyDebug: updateItem()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 	
 	/**
-	 * ¸üĞÂÒ»¸öItem½ÚµãµÄÃû³Æ
-	 * @return true: ¸üĞÂ³É¹¦  false: ¸üĞÂÊ§°Ü
+	 * æ›´æ–°ä¸€ä¸ªItemèŠ‚ç‚¹çš„åç§°
+	 * @return true: æ›´æ–°æˆåŠŸ  false: æ›´æ–°å¤±è´¥
 	 */
 	public boolean updateItemName(String mac, String newName) {
 		Document document = loadInit(filePath);
@@ -272,14 +272,14 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()Òì³££¡");
+			System.out.println("MyDebug: updateItem()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 
 	/**
-	 * ¸üĞÂÒ»¸öItem½Úµã
-	 * @return true: ¸üĞÂ³É¹¦  false: ¸üĞÂÊ§°Ü
+	 * æ›´æ–°ä¸€ä¸ªItemèŠ‚ç‚¹
+	 * @return true: æ›´æ–°æˆåŠŸ  false: æ›´æ–°å¤±è´¥
 	 */
 	public boolean updateItem(HashMap<String, String> map) {
 		Document document = loadInit(filePath);
@@ -299,14 +299,14 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()Òì³££¡");
+			System.out.println("MyDebug: updateItem()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 
 	/**
-	 * ±£´ædocumentµ½XMLÎÄ¼ş
-	 * @return true: ±£´æ³É¹¦  false: ±£´æÊ§°Ü
+	 * ä¿å­˜documentåˆ°XMLæ–‡ä»¶
+	 * @return true: ä¿å­˜æˆåŠŸ  false: ä¿å­˜å¤±è´¥
 	 */
 	public boolean writeXML(Document document, String filePath) {
 		try {
@@ -318,14 +318,14 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: writeXML()Òì³££¡");
+			System.out.println("MyDebug: writeXML()å¼‚å¸¸ï¼");
 		}
 		return false;
 	}
 
 	/**
-	 * »ñÈ¡XMLÎÄ¼şµÄËùÓĞ½Úµã
-	 * @return ³É¹¦·µ»ØÒ»¸öArrayListÁĞ±í  Ê§°Ü·µ»Ønull
+	 * è·å–XMLæ–‡ä»¶çš„æ‰€æœ‰èŠ‚ç‚¹
+	 * @return æˆåŠŸè¿”å›ä¸€ä¸ªArrayListåˆ—è¡¨  å¤±è´¥è¿”å›null
 	 */
 	public ArrayList<HashMap<String, String>> readXml() {
 		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
@@ -348,7 +348,7 @@ public class XmlDevice {
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: readXml()Òì³££¡");
+			System.out.println("MyDebug: readXml()å¼‚å¸¸ï¼");
 		}
 		return null;
 	}

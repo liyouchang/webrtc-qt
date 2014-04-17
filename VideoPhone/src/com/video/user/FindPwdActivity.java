@@ -62,7 +62,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄ×¢²á×Ö·û´®
+	 * ç”ŸæˆJSONçš„æ³¨å†Œå­—ç¬¦ä¸²
 	 */
 	private String generateFindPwdJson(String username, String email) {
 		String result = "";
@@ -79,7 +79,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄ½ø¶ÈÌõ
+	 * æ˜¾ç¤ºæ“ä½œçš„è¿›åº¦æ¡
 	 */
 	private void showProgressDialog(String info) {
 		progressDialog = new ProgressDialog(mContext);
@@ -91,14 +91,14 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄÌáÊ¾
+	 * æ˜¾ç¤ºæ“ä½œçš„æç¤º
 	 */
 	private void showHandleDialog(String info) {
 		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-				.setTitle("ÎÂÜ°ÌáÊ¾")
+				.setTitle("æ¸©é¦¨æç¤º")
 				.setMessage(info)
 				.setCancelable(false)
-				.setPositiveButton("È·¶¨",
+				.setPositiveButton("ç¡®å®š",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								dialog.dismiss();
@@ -115,12 +115,12 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_SUBMITTING:
-					showProgressDialog("ÕÒ»ØÃÜÂëÖĞ... ");
+					showProgressDialog("æ‰¾å›å¯†ç ä¸­... ");
 					break;
 				case SUBMIT_TIMEOUT:
 					if (progressDialog != null)
 						progressDialog.dismiss();
-					showHandleDialog("ÕÒ»ØÃÜÂëÊ§°Ü£¬ÍøÂç³¬Ê±£¡");
+					showHandleDialog("æ‰¾å›å¯†ç å¤±è´¥ï¼Œç½‘ç»œè¶…æ—¶ï¼");
 					if (handler.hasMessages(SUBMIT_TIMEOUT)) {
 						handler.removeMessages(SUBMIT_TIMEOUT);
 					}
@@ -132,11 +132,11 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 						if (resultCode == 0) {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							showHandleDialog("¹§Ï²Äú£¬ÕÒ»ØÃÜÂë³É¹¦£¬ÃÜÂëÒÑ±»ÖØÖÃÎª¡¾123456¡¿£¡");
+							showHandleDialog("æ­å–œæ‚¨ï¼Œæ‰¾å›å¯†ç æˆåŠŸï¼Œå¯†ç å·²è¢«é‡ç½®ä¸ºã€123456ã€‘ï¼");
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							showHandleDialog("ÕÒ»ØÃÜÂëÊ§°Ü£¬"+Utils.getErrorReason(resultCode));
+							showHandleDialog("æ‰¾å›å¯†ç å¤±è´¥ï¼Œ"+Utils.getErrorReason(resultCode));
 						}
 					} else {
 						handler.removeMessages(R.id.find_pwd_id);
@@ -147,7 +147,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	};
 	
 	/**
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * å‘é€Handleræ¶ˆæ¯
 	 */
 	private void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -176,7 +176,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			showHandleDialog("Ã»ÓĞ¿ÉÓÃµÄÍøÂçÁ¬½Ó£¬ÇëÈ·ÈÏºóÖØÊÔ£¡");
+			showHandleDialog("æ²¡æœ‰å¯ç”¨çš„ç½‘ç»œè¿æ¥ï¼Œè¯·ç¡®è®¤åé‡è¯•ï¼");
 		}
 	}
 	
@@ -191,39 +191,39 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * @return true:×¢²áĞÅÏ¢¸ñÊ½ÕıÈ·  false:×¢²áĞÅÏ¢¸ñÊ½´íÎó
+	 * @return true:æ³¨å†Œä¿¡æ¯æ ¼å¼æ­£ç¡®  false:æ³¨å†Œä¿¡æ¯æ ¼å¼é”™è¯¯
 	 */
 	private boolean checkFindPwdData() {
 		boolean resultFlag = false;
 		
-		//»ñÈ¡EditTextÊäÈë¿òµÄ×Ö·û´®
+		//è·å–EditTextè¾“å…¥æ¡†çš„å­—ç¬¦ä¸²
 		userName = et_name.getText().toString().trim();
 		userEmail = et_email.getText().toString().trim();
 		
 		if (userName.equals("")) {
 			resultFlag = false;
-			et_name.setError("ÇëÊäÈëÓÃ»§Ãû£¡");
+			et_name.setError("è¯·è¾“å…¥ç”¨æˆ·åï¼");
 		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("ÓÃ»§Ãû³¤¶È·¶Î§3~20£¡");
+			et_name.setError("ç”¨æˆ·åé•¿åº¦èŒƒå›´3~20ï¼");
 		} else {
 			resultFlag = true;
 			if (userEmail.equals("")) {
 				resultFlag = false;
-				et_email.setError("ÇëÊäÈëµç×ÓÓÊÏä£¡");
+				et_email.setError("è¯·è¾“å…¥ç”µå­é‚®ç®±ï¼");
 			}
 			else if ((userEmail.length()<6) || (userEmail.length()>20)) {
 				resultFlag = false;
-				et_email.setError("µç×ÓÓÊÏä³¤¶È·¶Î§6~20£¡");
+				et_email.setError("ç”µå­é‚®ç®±é•¿åº¦èŒƒå›´6~20ï¼");
 			}
 			else if (userEmail.indexOf("@")<=0) {
 				resultFlag = false;
-				et_email.setError("ÓÊÏä¸ñÊ½²»ÕıÈ·£¡");
+				et_email.setError("é‚®ç®±æ ¼å¼ä¸æ­£ç¡®ï¼");
 			}
 			else if (userEmail.indexOf(".")<=0) {
 				resultFlag = false;
-				et_email.setError("ÓÊÏä¸ñÊ½²»ÕıÈ·£¡");
+				et_email.setError("é‚®ç®±æ ¼å¼ä¸æ­£ç¡®ï¼");
 			} else {
 				resultFlag = true;
 			}

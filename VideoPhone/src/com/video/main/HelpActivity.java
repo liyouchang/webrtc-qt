@@ -72,7 +72,7 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 	}
 	
 	/**
-	 * ³õÊ¼»¯¸Ã½çÃæÏÂÒª»¬¶¯µÄÒ³Ãæ
+	 * åˆå§‹åŒ–è¯¥ç•Œé¢ä¸‹è¦æ»‘åŠ¨çš„é¡µé¢
 	 */
 	private void initViewPageView() {
 		LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);

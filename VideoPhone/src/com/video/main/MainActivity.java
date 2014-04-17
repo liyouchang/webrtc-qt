@@ -103,25 +103,25 @@ public class MainActivity extends FragmentActivity {
 		mTabHost.setOnTabChangedListener(tabChangeListener);
 		
 		TabHost.TabSpec tabSpec = mTabHost.newTabSpec("tab1");
-		tabSpec.setIndicator("ÊµÊ±²é¿´",
+		tabSpec.setIndicator("å®æ—¶æŸ¥çœ‹",
 				getResources().getDrawable(R.drawable.tab_own_xml))
 		.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
 		
 		tabSpec = mTabHost.newTabSpec("tab2");
-		tabSpec.setIndicator("±¾µØÎÄ¼ş",
+		tabSpec.setIndicator("æœ¬åœ°æ–‡ä»¶",
 				getResources().getDrawable(R.drawable.tab_video_xml));
 		tabSpec.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
 		
 		tabSpec = mTabHost.newTabSpec("tab3");
-		tabSpec.setIndicator("¸æ¾¯ÏûÏ¢",
+		tabSpec.setIndicator("å‘Šè­¦æ¶ˆæ¯",
 				getResources().getDrawable(R.drawable.tab_msg_xml));
 		tabSpec.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
 		
 		tabSpec = mTabHost.newTabSpec("tab4");
-		tabSpec.setIndicator("¸ü¶à",
+		tabSpec.setIndicator("æ›´å¤š",
 				getResources().getDrawable(R.drawable.tab_more_xml));
 		tabSpec.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
@@ -206,20 +206,20 @@ public class MainActivity extends FragmentActivity {
 	}
 	
 	/**
-	 * ÉèÖÃÏûÏ¢tabµÄ±¨¾¯ÏÔÊ¾
-	 * @param msg ¶àÉÙÌõÏûÏ¢
+	 * è®¾ç½®æ¶ˆæ¯tabçš„æŠ¥è­¦æ˜¾ç¤º
+	 * @param msg å¤šå°‘æ¡æ¶ˆæ¯
 	 */
 	public static void setAlarmIconAndText(int msg) {
 		if (msg == 0) {
-			tabMsgTextView.setText("¸æ¾¯ÏûÏ¢");
+			tabMsgTextView.setText("å‘Šè­¦æ¶ˆæ¯");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_xml);
 		} 
 		else if (msg < 100) {
-			tabMsgTextView.setText("¸æ¾¯ÏûÏ¢("+msg+")");
+			tabMsgTextView.setText("å‘Šè­¦æ¶ˆæ¯("+msg+")");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_alarm_xml);
 		}
 		else if (msg >= 100) {
-			tabMsgTextView.setText("¸æ¾¯ÏûÏ¢(99+)");
+			tabMsgTextView.setText("å‘Šè­¦æ¶ˆæ¯(99+)");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_alarm_xml);
 		}
 	}

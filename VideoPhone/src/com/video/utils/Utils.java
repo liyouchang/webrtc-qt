@@ -22,9 +22,9 @@ public class Utils {
 	
 	
 	/**
-	 * Á¬½ÓÍøÂçÒì³£Ê±»ñµÃÒì³£Ô­Òò
-	 * @param num ´íÎóÂë
-	 * @return ·µ»ØÒì³£Ô­ÒòµÄ×Ö·û´®
+	 * è¿æ¥ç½‘ç»œå¼‚å¸¸æ—¶è·å¾—å¼‚å¸¸åŸå› 
+	 * @param num é”™è¯¯ç 
+	 * @return è¿”å›å¼‚å¸¸åŸå› çš„å­—ç¬¦ä¸²
 	 */
 	public static String getErrorReason(int num) {
 		String result = "";
@@ -33,43 +33,43 @@ public class Utils {
 				result = "Block!";
 				break;
 			case 2:
-				result = "ÕËºÅ»òÃÜÂë´íÎó£¡";
+				result = "è´¦å·æˆ–å¯†ç é”™è¯¯ï¼";
 				break;
 			case 3:
-				result = "·şÎñÆ÷¶Ë²éÑ¯Êı¾İ¿âÊ±´íÎó£¡";
+				result = "æœåŠ¡å™¨ç«¯æŸ¥è¯¢æ•°æ®åº“æ—¶é”™è¯¯ï¼";
 				break;
 			case 4:
-				result = "ÕËºÅÒÑ´æÔÚ£¡";
+				result = "è´¦å·å·²å­˜åœ¨ï¼";
 				break;
 			case 5:
-				result = "²»´æÔÚ£¡";
+				result = "ä¸å­˜åœ¨ï¼";
 				break;
 			case 6:
-				result = "¸ÃÉè±¸ÒÑ±»°ó¶¨£¡";
+				result = "è¯¥è®¾å¤‡å·²è¢«ç»‘å®šï¼";
 				break;
 			case 7:
-				result = "ÕËºÅºÍÓÊÏä²»Æ¥Åä£¡";
+				result = "è´¦å·å’Œé‚®ç®±ä¸åŒ¹é…ï¼";
 				break;
 			case 8:
-				result = "³¬³öÊıÁ¿ÏŞÖÆ£¡";
+				result = "è¶…å‡ºæ•°é‡é™åˆ¶ï¼";
 				break;
 			case 9:
-				result = "Î´µÇÂ¼£¡";
+				result = "æœªç™»å½•ï¼";
 				break;
 			case 10:
-				result = "Éè±¸Î´×¢²á£¡";
+				result = "è®¾å¤‡æœªæ³¨å†Œï¼";
 				break;
 			default: 
-				result = "²»Ã÷Ô­Òò£¡";
+				result = "ä¸æ˜åŸå› ï¼";
 				break;
 		}
 		return result;
 	}
 	
 	/**
-	 * ÅĞ¶ÏÍøÂçÁ¬½ÓÊÇ·ñ¿ÉÓÃ
-	 * @param context ÉÏÏÂÎÄ
-	 * @return true:¿ÉÓÃ  false:²»¿ÉÓÃ
+	 * åˆ¤æ–­ç½‘ç»œè¿æ¥æ˜¯å¦å¯ç”¨
+	 * @param context ä¸Šä¸‹æ–‡
+	 * @return true:å¯ç”¨  false:ä¸å¯ç”¨
 	 */
 	public static boolean isNetworkAvailable(Context context) {   
 		ConnectivityManager connectivity = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);   
@@ -89,11 +89,11 @@ public class Utils {
 	}
 	
 	/**
-	 * ×ª»»×Ö·û´®µÄ±àÂë¸ñÊ½
-	 * @param src ×Ö·û´®
-	 * @param oldEncode Ô­±àÂë¸ñÊ½
-	 * @param newEncode ĞÂ±àÂë¸ñÊ½
-	 * @return ·µ»ØĞÂ±àÂë¸ñÊ½µÄ×Ö·û´®
+	 * è½¬æ¢å­—ç¬¦ä¸²çš„ç¼–ç æ ¼å¼
+	 * @param src å­—ç¬¦ä¸²
+	 * @param oldEncode åŸç¼–ç æ ¼å¼
+	 * @param newEncode æ–°ç¼–ç æ ¼å¼
+	 * @return è¿”å›æ–°ç¼–ç æ ¼å¼çš„å­—ç¬¦ä¸²
 	 */
 	public static String changeEncodeing(String src, String oldEncode, String newEncode) {
 		if (src != null) {
@@ -109,9 +109,9 @@ public class Utils {
 	}
 	
 	/**
-	 * ½«×Ö½ÚÊı×é×ª»¯ÎªHex×Ö·û´®
-	 * @param src ×Ö½ÚÊı×é
-	 * @return ·µ»Ø×Ö·û´®
+	 * å°†å­—èŠ‚æ•°ç»„è½¬åŒ–ä¸ºHexå­—ç¬¦ä¸²
+	 * @param src å­—èŠ‚æ•°ç»„
+	 * @return è¿”å›å­—ç¬¦ä¸²
 	 */
 	public static String BytesToHexString(byte[] src) {  
 		StringBuilder sb = new StringBuilder(src.length * 2);  
@@ -124,8 +124,8 @@ public class Utils {
 	}
 	
 	/**
-	 * Éú³É32Î»Ëæ»úµÄUUID
-	 * @return ·µ»Ø²»´ø"-"µÄ32Î»UUID×Ö·û´®
+	 * ç”Ÿæˆ32ä½éšæœºçš„UUID
+	 * @return è¿”å›ä¸å¸¦"-"çš„32ä½UUIDå­—ç¬¦ä¸²
 	 */
 	public static String getRandomUUID(){ 
         String s = UUID.randomUUID().toString(); 
@@ -133,9 +133,9 @@ public class Utils {
     }
 	
 	/**
-	 * Éú³ÉMD5µÄ¼ÓÃÜÃÜÂë
-	 * @param pwd ÃÜÂë
-	 * @return ·µ»Ø¼ÓÃÜÃÜÂë
+	 * ç”ŸæˆMD5çš„åŠ å¯†å¯†ç 
+	 * @param pwd å¯†ç 
+	 * @return è¿”å›åŠ å¯†å¯†ç 
 	 */
 	public static String CreateMD5Pwd(String pwd) {
 		try {
@@ -151,8 +151,8 @@ public class Utils {
 	}
 	
 	/**
-	 * ÅĞ¶ÏSD¿¨ÊÇ·ñ´æÔÚ
-	 * @return ´æÔÚ·µ»Øtrue ²»´æÔÚ·µ»Øfalse
+	 * åˆ¤æ–­SDå¡æ˜¯å¦å­˜åœ¨
+	 * @return å­˜åœ¨è¿”å›true ä¸å­˜åœ¨è¿”å›false
 	 */
 	public static boolean checkSDCard() {
 		if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
@@ -161,9 +161,9 @@ public class Utils {
 	}
 	
 	/**
-	 * ÅĞ¶ÏÊÇ·ñÎªÍ¼Æ¬¸ñÊ½µÄÎÄ¼ş
-	 * @param fileName ÎÄ¼ş
-	 * @return true:ÊÇ false:²»ÊÇ
+	 * åˆ¤æ–­æ˜¯å¦ä¸ºå›¾ç‰‡æ ¼å¼çš„æ–‡ä»¶
+	 * @param fileName æ–‡ä»¶
+	 * @return true:æ˜¯ false:ä¸æ˜¯
 	 */
 	public static boolean isImageFile(String fileName) {
 	    String end = fileName.substring(fileName.lastIndexOf(".")+1, fileName.length()).toLowerCase(); 
@@ -176,10 +176,10 @@ public class Utils {
 	}
 	
 	/**
-	 * ½«×Ö·û´®×ª»»³ÉÈÕÆÚÀàĞÍ
-	 * @param date_string ÈÕÆÚ×Ö·û´®
-	 * @param format_string Òª×ª»»µÄÈÕÆÚ¸ñÊ½
-	 * @return ·µ»ØÈÕÆÚÀàĞÍÊı¾İ
+	 * å°†å­—ç¬¦ä¸²è½¬æ¢æˆæ—¥æœŸç±»å‹
+	 * @param date_string æ—¥æœŸå­—ç¬¦ä¸²
+	 * @param format_string è¦è½¬æ¢çš„æ—¥æœŸæ ¼å¼
+	 * @return è¿”å›æ—¥æœŸç±»å‹æ•°æ®
 	 */
 	public static Date StringToDate(String date_string, String format_string) {
 
@@ -194,10 +194,10 @@ public class Utils {
 	}
 
 	/**
-	 * ½«ÈÕÆÚÀàĞÍÊı¾İ×ª»»³É×Ö·û´®ÀàĞÍ
-	 * @param date ÈÕÆÚÀàĞÍÊı¾İ
-	 * @param format_string Òª×ª»»µÄÈÕÆÚ¸ñÊ½
-	 * @return ·µ»Ø×Ö·û´®ÀàĞÍµÄÈÕÆÚÊı¾İ
+	 * å°†æ—¥æœŸç±»å‹æ•°æ®è½¬æ¢æˆå­—ç¬¦ä¸²ç±»å‹
+	 * @param date æ—¥æœŸç±»å‹æ•°æ®
+	 * @param format_string è¦è½¬æ¢çš„æ—¥æœŸæ ¼å¼
+	 * @return è¿”å›å­—ç¬¦ä¸²ç±»å‹çš„æ—¥æœŸæ•°æ®
 	 */
 	public static String DateToString(Date date, String format_string) {
 
@@ -207,18 +207,18 @@ public class Utils {
 	}
 	
 	/**
-	 * »ñµÃµ±Ç°µÄÊ±¼ä
-	 * @param format_string Òª»ñµÃÈÕÆÚµÄ¸ñÊ½
-	 * @return ·µ»Øµ±Ç°Ê±¼ä
+	 * è·å¾—å½“å‰çš„æ—¶é—´
+	 * @param format_string è¦è·å¾—æ—¥æœŸçš„æ ¼å¼
+	 * @return è¿”å›å½“å‰æ—¶é—´
 	 */
 	public static String getNowTime(String format_string){
 	    return DateToString(new Date(), format_string);
 	}
 	
 	/**
-	 * Ã°ÅİÅÅĞò´Ó´óµ½Ğ¡
-	 * @param intArray ÅÅĞòÇ°µÄÕûĞÍ×Ö·û´®
-	 * @return ·µ»ØÅÅĞòºóµÄÕûĞÍ×Ö·û´®
+	 * å†’æ³¡æ’åºä»å¤§åˆ°å°
+	 * @param intArray æ’åºå‰çš„æ•´å‹å­—ç¬¦ä¸²
+	 * @return è¿”å›æ’åºåçš„æ•´å‹å­—ç¬¦ä¸²
 	 */
 	public static int[] bubbleSortIntArray(int[] intArray) {
 		for (int i = 0; i < intArray.length - 1; i++) {
@@ -235,9 +235,9 @@ public class Utils {
 	}
 	
 	/**
-	 * ArrayList¼¯ºÏÃ°ÅİÅÅĞò´Ó´óµ½Ğ¡
-	 * @param arrayList ÅÅĞòÇ°µÄArrayList¼¯ºÏ
-	 * @return ·µ»ØÅÅĞòºóµÄArrayList¼¯ºÏ
+	 * ArrayListé›†åˆå†’æ³¡æ’åºä»å¤§åˆ°å°
+	 * @param arrayList æ’åºå‰çš„ArrayListé›†åˆ
+	 * @return è¿”å›æ’åºåçš„ArrayListé›†åˆ
 	 */
 	public static ArrayList<Integer> bubbleSortArrayList(ArrayList<Integer> arrayList) {
 		int size = arrayList.size();
@@ -256,7 +256,7 @@ public class Utils {
 	}
 	
 	/**
-	 * ÎşÉüÍ¼Æ¬µÄÖÊÁ¿·ÀÖ¹¼ÓÔØµÄÍ¼Æ¬OOM(ÄÚ´æÒç³ö)
+	 * ç‰ºç‰²å›¾ç‰‡çš„è´¨é‡é˜²æ­¢åŠ è½½çš„å›¾ç‰‡OOM(å†…å­˜æº¢å‡º)
 	 */
 	public static int computeSampleSize(BitmapFactory.Options options, int minSideLength, int maxNumOfPixels) {
 		int initialSize = computeInitialSampleSize(options, minSideLength, maxNumOfPixels);

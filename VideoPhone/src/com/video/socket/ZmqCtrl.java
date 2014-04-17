@@ -6,7 +6,7 @@ public class ZmqCtrl {
 	private ZmqSocket zmqSocketInstance = null;
 	
 	/**
-	 * ÊµÀı»¯ZmqCtrlµÄµ¥Àı¶ÔÏó
+	 * å®ä¾‹åŒ–ZmqCtrlçš„å•ä¾‹å¯¹è±¡
 	 */
 	synchronized public static ZmqCtrl getInstance() {
 		if (zmqCtrlInstance == null) {
@@ -16,7 +16,7 @@ public class ZmqCtrl {
 	}
 	
 	/**
-	 * ³õÊ¼»¯ZMQ, Æô¶¯Ïà¹ØÏß³Ì
+	 * åˆå§‹åŒ–ZMQ, å¯åŠ¨ç›¸å…³çº¿ç¨‹
 	 */
 	public void init() {
 		if (zmqSocketInstance == null) {
@@ -25,7 +25,7 @@ public class ZmqCtrl {
 	}
 	
 	/**
-	 * ¹Ø±ÕZMQÁ¬½Ó¾ä±ú
+	 * å…³é—­ZMQè¿æ¥å¥æŸ„
 	 */
 	public void exit() {
 		if (zmqSocketInstance != null) {

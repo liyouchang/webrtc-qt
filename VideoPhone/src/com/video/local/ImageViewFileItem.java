@@ -6,12 +6,12 @@ import java.util.List;
 public class ImageViewFileItem {
 
 	/**
-	 * ÎÄ¼ş¼ĞÃû
+	 * æ–‡ä»¶å¤¹å
 	 */
 	public String fileName;
 	
 	/**
-	 * ÎÄ¼ş¼ĞÏÂµÄÍ¼Æ¬
+	 * æ–‡ä»¶å¤¹ä¸‹çš„å›¾ç‰‡
 	 */
 	public List<HashMap<String, Object>> imageViews;
 }

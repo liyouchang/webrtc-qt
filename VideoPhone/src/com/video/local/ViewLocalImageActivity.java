@@ -107,8 +107,8 @@ public class ViewLocalImageActivity extends Activity implements OnClickListener 
 	}
 	
 	/**
-	 * ÏòÖ÷Ïß³Ì·¢ËÍHandlerÏûÏ¢
-	 * @param what ÏûÏ¢ÀàĞÍ
+	 * å‘ä¸»çº¿ç¨‹å‘é€Handleræ¶ˆæ¯
+	 * @param what æ¶ˆæ¯ç±»å‹
 	 */
 	public void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -141,15 +141,15 @@ public class ViewLocalImageActivity extends Activity implements OnClickListener 
 	} 
 	
 	/**
-	 * É¾³ıÕÕÆ¬µÄÌáÊ¾
+	 * åˆ é™¤ç…§ç‰‡çš„æç¤º
 	 */
 	private void showDeleteImageDialog() {
 		AlertDialog aboutDialog = new AlertDialog.Builder(
 				ViewLocalImageActivity.this)
-				.setTitle("ÎÂÜ°ÌáÊ¾")
-				.setMessage("È·ÈÏÉ¾³ı¸ÃÕÅÍ¼Æ¬£¿")
+				.setTitle("æ¸©é¦¨æç¤º")
+				.setMessage("ç¡®è®¤åˆ é™¤è¯¥å¼ å›¾ç‰‡ï¼Ÿ")
 				.setCancelable(false)
-				.setPositiveButton("É¾³ı",
+				.setPositiveButton("åˆ é™¤",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -157,7 +157,7 @@ public class ViewLocalImageActivity extends Activity implements OnClickListener 
 								dialog.dismiss();
 							}
 						})
-				.setNegativeButton("È¡Ïû",
+				.setNegativeButton("å–æ¶ˆ",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {

@@ -64,12 +64,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	private ProgressDialog progressDialog;
 	
 	/**
-	 * 0:Õı³£ÇëÇóºÍÏÂÀ­ÇëÇó  1:ÉÏÍÏÇëÇó  2:É¾³ı¸ÃÌõ±¨¾¯  3:É¾³ıµ±Ç°È«²¿±¨¾¯  4:±ê¼Ç¸ÃÌõ±¨¾¯  5:±ê¼Çµ±Ç°È«²¿±¨¾¯
+	 * 0:æ­£å¸¸è¯·æ±‚å’Œä¸‹æ‹‰è¯·æ±‚  1:ä¸Šæ‹–è¯·æ±‚  2:åˆ é™¤è¯¥æ¡æŠ¥è­¦  3:åˆ é™¤å½“å‰å…¨éƒ¨æŠ¥è­¦  4:æ ‡è®°è¯¥æ¡æŠ¥è­¦  5:æ ‡è®°å½“å‰å…¨éƒ¨æŠ¥è­¦
 	 */
 	private int reqAlarmType = 0;
 	private String userName = "";
 	
-	//ÖÕ¶ËÁĞ±íÏî
+	//ç»ˆç«¯åˆ—è¡¨é¡¹
 	private String mMsgID = null;
 	private int listSize = 0;
 	private int listPosition = 0;
@@ -112,7 +112,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * ³õÊ¼»¯¸æ¾¯ÏûÏ¢ºÍÏµÍ³ÏûÏ¢µÄ½çÃæ
+	 * åˆå§‹åŒ–å‘Šè­¦æ¶ˆæ¯å’Œç³»ç»Ÿæ¶ˆæ¯çš„ç•Œé¢
 	 */
 	private void initViewPageView() {
 		mViewPager = (ViewPager)mView.findViewById(R.id.msg_viewpager);
@@ -132,7 +132,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		viewpage_alert.setOnClickListener(this);
 		viewpage_system.setOnClickListener(this);
 		
-		//¸æ¾¯ÏûÏ¢
+		//å‘Šè­¦æ¶ˆæ¯
 		lv_list = (ListView) mView.findViewById(R.id.msg_list);
 		lv_list.setOnItemClickListener(new OnItemClickListenerImpl());
 		lv_list.setOnItemLongClickListener(new OnItemLongClickListenerImpl());
@@ -140,7 +140,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		mPullToRefreshView.setOnHeaderRefreshListener(this);
         mPullToRefreshView.setOnFooterRefreshListener(this);
         
-        //ÏµÍ³ÏûÏ¢
+        //ç³»ç»Ÿæ¶ˆæ¯
 		Button test2 = (Button)mView.findViewById(R.id.btn_test2);
 		test2.setOnClickListener(this);
 		
@@ -167,7 +167,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			imageCache.mkdirs();
 		}
 		
-		//³õÊ¼»¯ÏÂÀ­Ë¢ĞÂµÄÏÔÊ¾
+		//åˆå§‹åŒ–ä¸‹æ‹‰åˆ·æ–°çš„æ˜¾ç¤º
 		if (preferData.isExist("msgRefreshTime")) {
 			msg_refresh_time = preferData.readString("msgRefreshTime");
 		}
@@ -177,7 +177,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		if ((msg_refresh_time != null) && (msg_refresh_terminal != null)) {
 			mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
 		}
-		//¸æ¾¯ÏûÏ¢
+		//å‘Šè­¦æ¶ˆæ¯
 		if (Value.isNeedReqAlarmListFlag) {
 			reqAlarmEvent();
 		}
@@ -190,7 +190,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄÇëÇó±¨¾¯Êı¾İ×Ö·û´®
+	 * ç”ŸæˆJSONçš„è¯·æ±‚æŠ¥è­¦æ•°æ®å­—ç¬¦ä¸²
 	 */
 	private String generateReqAlarmJson(int id, int count) {
 		String result = "";
@@ -213,7 +213,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄÉ¾³ı¸ÃÌõ±¨¾¯×Ö·û´®
+	 * ç”ŸæˆJSONçš„åˆ é™¤è¯¥æ¡æŠ¥è­¦å­—ç¬¦ä¸²
 	 */
 	private String generateDeleteThisItemJson(int id) {
 		reqAlarmType = 2;
@@ -230,7 +230,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄÉ¾³ıµ±Ç°È«²¿±¨¾¯×Ö·û´®
+	 * ç”ŸæˆJSONçš„åˆ é™¤å½“å‰å…¨éƒ¨æŠ¥è­¦å­—ç¬¦ä¸²
 	 */
 	private String generateDeleteThisListJson() {
 		reqAlarmType = 3;
@@ -252,7 +252,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄ±ê¼Ç¸ÃÌõ±¨¾¯×Ö·û´®
+	 * ç”ŸæˆJSONçš„æ ‡è®°è¯¥æ¡æŠ¥è­¦å­—ç¬¦ä¸²
 	 */
 	private String generateMarkThisItemJson(int id) {
 		reqAlarmType = 4;
@@ -271,7 +271,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄ±ê¼Çµ±Ç°È«²¿±¨¾¯×Ö·û´®
+	 * ç”ŸæˆJSONçš„æ ‡è®°å½“å‰å…¨éƒ¨æŠ¥è­¦å­—ç¬¦ä¸²
 	 */
 	private String generateMarkThisListJson() {
 		boolean result = false;
@@ -308,7 +308,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		return result;
 	}
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄ½ø¶ÈÌõ
+	 * æ˜¾ç¤ºæ“ä½œçš„è¿›åº¦æ¡
 	 */
 	private void showProgressDialog(String info) {
 		progressDialog = new ProgressDialog(mActivity);
@@ -327,7 +327,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					showProgressDialog("ÕıÔÚÇëÇó±¨¾¯Êı¾İ... ");
+					showProgressDialog("æ­£åœ¨è¯·æ±‚æŠ¥è­¦æ•°æ®... ");
 					break;
 				case REQUEST_TIMEOUT:
 					if (progressDialog != null)
@@ -335,7 +335,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
-					Toast.makeText(mActivity, "ÇëÇó±¨¾¯Êı¾İÊ§°Ü£¬ÍøÂç³¬Ê±£¡", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mActivity, "è¯·æ±‚æŠ¥è­¦æ•°æ®å¤±è´¥ï¼Œç½‘ç»œè¶…æ—¶ï¼", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.request_alarm_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
@@ -346,7 +346,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 								progressDialog.dismiss();
 							Value.isNeedReqAlarmListFlag = false;
 							switch (reqAlarmType) {
-								//Õı³£ÇëÇóºÍÏÂÀ­ÇëÇó
+								//æ­£å¸¸è¯·æ±‚å’Œä¸‹æ‹‰è¯·æ±‚
 								case 0:
 									msgList = (ArrayList<HashMap<String, String>>) msg.obj;
 									if (msgList != null) {
@@ -357,7 +357,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 									}
 									Value.requstAlarmCount = 5;
 									break;
-								//ÉÏÍÏÇëÇó
+								//ä¸Šæ‹–è¯·æ±‚
 								case 1:
 									ArrayList<HashMap<String, String>> list = (ArrayList<HashMap<String, String>>) msg.obj;
 									if (list != null) {
@@ -369,25 +369,25 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 										msgAdapter.notifyDataSetChanged();
 									}
 									break;
-								//É¾³ı¸ÃÌõ±¨¾¯
+								//åˆ é™¤è¯¥æ¡æŠ¥è­¦
 								case 2:
 									msgList.remove(listPosition);
 									xmlData.deleteItem(mMsgID);
 									msgAdapter.notifyDataSetChanged();
 									break;
-								//É¾³ıµ±Ç°È«²¿±¨¾¯
+								//åˆ é™¤å½“å‰å…¨éƒ¨æŠ¥è­¦
 								case 3:
 									msgList.removeAll(msgList);
 									xmlData.deleteAllItem();
 									msgAdapter.notifyDataSetChanged();
 									break;
-								//±ê¼Ç¸ÃÌõ±¨¾¯
+								//æ ‡è®°è¯¥æ¡æŠ¥è­¦
 								case 4:
 									msgList.get(listPosition).put("isReaded", "true");
 									xmlData.updateItemState(mMsgID, "true");
 									msgAdapter.notifyDataSetChanged();
 									break;
-								//±ê¼Çµ±Ç°È«²¿±¨¾¯
+								//æ ‡è®°å½“å‰å…¨éƒ¨æŠ¥è­¦
 								case 5:
 									for (int i=0; i<listSize; i++) {
 										msgList.get(i).put("isReaded", "true");
@@ -398,7 +398,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 								default: break;
 							}
 							reqAlarmType = 0;
-							//ÊµÊ±¸üĞÂÁĞ±íµÄ´óĞ¡ºÍÎ´¶Á±¨¾¯ÏûÏ¢µÄÊıÁ¿
+							//å®æ—¶æ›´æ–°åˆ—è¡¨çš„å¤§å°å’Œæœªè¯»æŠ¥è­¦æ¶ˆæ¯çš„æ•°é‡
 							listSize = xmlData.getListSize();
 							unreadAlarmCount = getAlarmCount();
 							MainActivity.setAlarmIconAndText(unreadAlarmCount);
@@ -417,7 +417,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	};
 	
 	/** 
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * å‘é€Handleræ¶ˆæ¯
 	 */
 	private void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -444,12 +444,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
 		} else {
-			Toast.makeText(mActivity, "Ã»ÓĞ¿ÉÓÃµÄÍøÂçÁ¬½Ó£¬ÇëÈ·ÈÏºóÖØÊÔ£¡", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mActivity, "æ²¡æœ‰å¯ç”¨çš„ç½‘ç»œè¿æ¥ï¼Œè¯·ç¡®è®¤åé‡è¯•ï¼", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
 	/**
-	 * ÉÏÍÏË¢ĞÂ
+	 * ä¸Šæ‹–åˆ·æ–°
 	 */
 	@Override
 	public void onFooterRefresh(PullToRefreshView view) {
@@ -467,15 +467,15 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * ÏÂÀ­Ë¢ĞÂ
+	 * ä¸‹æ‹‰åˆ·æ–°
 	 */
 	@Override
 	public void onHeaderRefresh(PullToRefreshView view) {
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				msg_refresh_time = "ÉÏ´Î¸üĞÂÓÚ: "+Utils.getNowTime("yyyy-MM-dd hh:mm:ss");
-				msg_refresh_terminal = "ÖÕ¶Ë: "+Build.MODEL;
+				msg_refresh_time = "ä¸Šæ¬¡æ›´æ–°äº: "+Utils.getNowTime("yyyy-MM-dd hh:mm:ss");
+				msg_refresh_terminal = "ç»ˆç«¯: "+Build.MODEL;
 				preferData.writeData("msgRefreshTime", msg_refresh_time);
 				preferData.writeData("msgRefreshTerminal", msg_refresh_terminal);
 				mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
@@ -502,25 +502,25 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 				mViewPager.setCurrentItem(1);
 				break;
 			case R.id.btn_test2:
-				System.out.println("MyDebug: ¡¾´ò¿ªÍ¨µÀ¡¿");
+				System.out.println("MyDebug: ã€æ‰“å¼€é€šé“ã€‘");
 				TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
-				TunnelCommunication.getInstance().openTunnel("123456");
+				TunnelCommunication.getInstance().openTunnel(Value.TerminalDealerName);
 				break;
 			case R.id.btn_test3:
-				System.out.println("MyDebug: ¡¾²¥·ÅÊÓÆµ¡¿");
-				TunnelCommunication.getInstance().askMediaData("123456");
+				System.out.println("MyDebug: ã€æ’­æ”¾è§†é¢‘ã€‘");
+				TunnelCommunication.getInstance().askMediaData(Value.TerminalDealerName);
 				startActivity(new Intent(mActivity, VideoPlayActivity.class));
 				break;
 			case R.id.btn_test4:
-				System.out.println("MyDebug: ¡¾¹Ø±ÕÍ¨µÀ¡¿");
-				TunnelCommunication.getInstance().closeTunnel("123456");
+				System.out.println("MyDebug: ã€å…³é—­é€šé“ã€‘");
+				TunnelCommunication.getInstance().closeTunnel(Value.TerminalDealerName);
 //				TunnelCommunication.getInstance().tunnelTerminate();
 				break;
 		}
 	}
 	
 	/**
-	 * Éè±¸ÏîListViewµÄµã»÷ÊÂ¼ş£¬±ê¼Ç¸ÃÌõÒÑ¶Á
+	 * è®¾å¤‡é¡¹ListViewçš„ç‚¹å‡»äº‹ä»¶ï¼Œæ ‡è®°è¯¥æ¡å·²è¯»
 	 */
 	private class OnItemClickListenerImpl implements OnItemClickListener {
 		@Override
@@ -539,7 +539,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * Éè±¸ÏîListViewµÄ³¤µã»÷ÊÂ¼ş
+	 * è®¾å¤‡é¡¹ListViewçš„é•¿ç‚¹å‡»äº‹ä»¶
 	 */
 	private class OnItemLongClickListenerImpl implements OnItemLongClickListener {
 		@Override
@@ -575,7 +575,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	}
 	
 	/**
-	 * Éè±¸ÏîListViewµÄ³¤°´¼üµÄPopupWindowÑ¡Ïî
+	 * è®¾å¤‡é¡¹ListViewçš„é•¿æŒ‰é”®çš„PopupWindowé€‰é¡¹
 	 */
 	public void showPopupWindow(View view) {
 		LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -583,10 +583,10 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
 		
 		List<String> item_list = new ArrayList<String>();
-		item_list.add("É¾³ı¸ÃÌõ±¨¾¯");
-		item_list.add("É¾³ıÈ«²¿±¨¾¯");
-		item_list.add("±ê¼Ç¸ÃÌõÒÑ¶Á");
-		item_list.add("È«²¿±ê¼ÇÒÑ¶Á");
+		item_list.add("åˆ é™¤è¯¥æ¡æŠ¥è­¦");
+		item_list.add("åˆ é™¤å…¨éƒ¨æŠ¥è­¦");
+		item_list.add("æ ‡è®°è¯¥æ¡å·²è¯»");
+		item_list.add("å…¨éƒ¨æ ‡è®°å·²è¯»");
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mActivity, item_list);
 		pop_listView.setAdapter(popAdapter);
 		
@@ -609,29 +609,29 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 				String sendData = null;
 				
 				switch (position) {
-					case 0: //É¾³ı¸ÃÌõ±¨¾¯
+					case 0: //åˆ é™¤è¯¥æ¡æŠ¥è­¦
 						sendData = generateDeleteThisItemJson(Integer.parseInt(mMsgID));
 						sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 						break;
-					case 1: //É¾³ıµ±Ç°È«²¿±¨¾¯
+					case 1: //åˆ é™¤å½“å‰å…¨éƒ¨æŠ¥è­¦
 						sendData = generateDeleteThisListJson();
 						sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 						break;
-					case 2: //±ê¼Ç¸ÃÌõ±¨¾¯
+					case 2: //æ ‡è®°è¯¥æ¡æŠ¥è­¦
 						sendData = generateMarkThisItemJson(Integer.parseInt(mMsgID));
 						if (sendData == null) {
-							Toast.makeText(mActivity, "¸ÃÌõ±¨¾¯ÒÑ±ê¼Ç£¡", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, "è¯¥æ¡æŠ¥è­¦å·²æ ‡è®°ï¼", Toast.LENGTH_SHORT).show();
 						} else {
 							sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 							sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 						}
 						break;
-					case 3: //±ê¼Çµ±Ç°È«²¿±¨¾¯
+					case 3: //æ ‡è®°å½“å‰å…¨éƒ¨æŠ¥è­¦
 						sendData = generateMarkThisListJson();
 						if (sendData == null) {
-							Toast.makeText(mActivity, "µ±Ç°È«²¿±¨¾¯ÒÑ±ê¼Ç£¡", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, "å½“å‰å…¨éƒ¨æŠ¥è­¦å·²æ ‡è®°ï¼", Toast.LENGTH_SHORT).show();
 						} else {
 							sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 							sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
@@ -649,7 +649,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	public void onDestroyView() {
 		// TODO Auto-generated method stub
 		super.onDestroyView();
-		 //Çå¿Õ»º´æ
+		 //æ¸…ç©ºç¼“å­˜
 //        File[] files = imageCache.listFiles();
 //        for(File file :files){
 //            file.delete();

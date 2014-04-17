@@ -73,7 +73,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄ×¢ÏúµÇÂ¼×Ö·û´®
+	 * ç”ŸæˆJSONçš„æ³¨é”€ç™»å½•å­—ç¬¦ä¸²
 	 */
 	private String generateLogoutJson() {
 		String result = "";
@@ -89,14 +89,14 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄÌáÊ¾
+	 * æ˜¾ç¤ºæ“ä½œçš„æç¤º
 	 */
 	private void showHandleDialog() {
 		AlertDialog aboutDialog = new AlertDialog.Builder(mActivity)
-				.setTitle("ÎÂÜ°ÌáÊ¾")
-				.setMessage("È·ÈÏÍË³öµ±Ç°ÕËºÅµÄµÇÂ¼£¿")
+				.setTitle("æ¸©é¦¨æç¤º")
+				.setMessage("ç¡®è®¤é€€å‡ºå½“å‰è´¦å·çš„ç™»å½•ï¼Ÿ")
 				.setCancelable(false)
-				.setPositiveButton("È·¶¨",
+				.setPositiveButton("ç¡®å®š",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								dialog.dismiss();
@@ -104,7 +104,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 								ExitLogoutAPP();
 							}
 						})
-				.setNegativeButton("È¡Ïû",
+				.setNegativeButton("å–æ¶ˆ",
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int which) {
 							dialog.dismiss();
@@ -114,7 +114,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * å‘é€Handleræ¶ˆæ¯
 	 */
 	private void sendHandlerMsg(Handler handler, int what, String obj) {
 		Message msg = new Message();
@@ -124,7 +124,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * ÍË³öµ±Ç°ÕËºÅµÇÂ¼µÄ´¦Àí
+	 * é€€å‡ºå½“å‰è´¦å·ç™»å½•çš„å¤„ç†
 	 */
 	private void ExitLogoutAPP() {
 		if (preferData.isExist("UserPwd")) {

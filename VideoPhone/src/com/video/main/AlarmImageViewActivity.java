@@ -37,7 +37,7 @@ public class AlarmImageViewActivity extends Activity implements OnClickListener 
 	private void initData() {
 		Intent intent = this.getIntent();
 		File file = new File((String) intent.getCharSequenceExtra("imagePath"));
-		System.out.println("MyDebug: Í¼Æ¬µÄÂ·¾¶£º"+intent.getCharSequenceExtra("imagePath"));
+		System.out.println("MyDebug: å›¾ç‰‡çš„è·¯å¾„ï¼š"+intent.getCharSequenceExtra("imagePath"));
 		Uri UriPath = Uri.fromFile(file);
 		view.setImageURI(UriPath);
 	}

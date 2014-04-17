@@ -25,7 +25,7 @@ public class ZmqHandler extends Handler {
 	}
 	
 	/**
-	 * ×ª»»»ñµÃµÄ×´Ì¬£¬½«intÀàĞÍ×ªÎªStringÀàĞÍ
+	 * è½¬æ¢è·å¾—çš„çŠ¶æ€ï¼Œå°†intç±»å‹è½¬ä¸ºStringç±»å‹
 	 */
 	private String getState(int state) {
 	    String isActiveString = "false";
@@ -38,7 +38,7 @@ public class ZmqHandler extends Handler {
 	}
 	
 	/**
-	 * ½âÎö»ñµÃµÄÇëÇóÖÕ¶ËÁĞ±íJSONArrayÊı¾İ
+	 * è§£æè·å¾—çš„è¯·æ±‚ç»ˆç«¯åˆ—è¡¨JSONArrayæ•°æ®
 	 */
 	private ArrayList<HashMap<String, String>> getReqTermList(JSONArray jsonArray) {
 		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
@@ -58,13 +58,13 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getReqTermList()Òì³££¡");
+			System.out.println("MyDebug: getReqTermList()å¼‚å¸¸ï¼");
 		}
 		return null;
 	}
 	
 	/**
-	 * ½âÎö»ñµÃµÄÇëÇó±¨¾¯Êı¾İJSONArrayÊı¾İ
+	 * è§£æè·å¾—çš„è¯·æ±‚æŠ¥è­¦æ•°æ®JSONArrayæ•°æ®
 	 */
 	private ArrayList<HashMap<String, String>> getReqAlarmList(JSONArray jsonArray) {
 		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
@@ -75,8 +75,8 @@ public class ZmqHandler extends Handler {
 	    	for (int i=0; i<len; i++) { 
 		    	JSONObject obj = (JSONObject) jsonArray.get(i); 
 		    	item = new HashMap<String, String>();
-			    item.put("msgMAC", "À´×Ô: "+obj.getString("MAC")); 
-			    item.put("msgEvent", "ÊÂ¼ş: "+obj.getString("AlarmInfo"));
+			    item.put("msgMAC", "æ¥è‡ª: "+obj.getString("MAC")); 
+			    item.put("msgEvent", "äº‹ä»¶: "+obj.getString("AlarmInfo"));
 				item.put("msgTime", obj.getString("DateTime"));
 				item.put("imageURL", obj.getString("PictureURL"));
 				item.put("msgID", obj.getString("ID"));
@@ -86,7 +86,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getReqAlarmList()Òì³££¡");
+			System.out.println("MyDebug: getReqAlarmList()å¼‚å¸¸ï¼");
 		}
 		return null;
 	}
@@ -98,7 +98,7 @@ public class ZmqHandler extends Handler {
 		try {
 			obj = new JSONObject(recvData);
 			String type = obj.getString("type");
-			//±¨¾¯ÏûÏ¢ÍÆËÍ
+			//æŠ¥è­¦æ¶ˆæ¯æ¨é€
 			if (type.equals("Backstage_message")) {
 				Value.isNeedReqAlarmListFlag = true;
 				Value.requstAlarmCount++;
@@ -110,7 +110,7 @@ public class ZmqHandler extends Handler {
 					MainActivity.mainHandler.obtainMessage(0, alarmCount, 0).sendToTarget();
 				}
 			}
-			//ÖÕ¶ËÉÏÏÂÏßÏûÏ¢ÍÆËÍ
+			//ç»ˆç«¯ä¸Šä¸‹çº¿æ¶ˆæ¯æ¨é€
 			else if (type.equals("Backstage_TermActive")) {
 				HashMap<String, String> item = new HashMap<String, String>();
 			    item.put("deviceID", obj.getString("MAC"));
@@ -118,36 +118,36 @@ public class ZmqHandler extends Handler {
 				item.put("dealerName", obj.getString("DealerName"));
 				OwnFragment.ownHandler.obtainMessage(0, item).sendToTarget();
 			}
-			//¿Í»§¶ËºÍ·şÎñÆ÷µÄĞÄÌø
+			//å®¢æˆ·ç«¯å’ŒæœåŠ¡å™¨çš„å¿ƒè·³
 			else if (type.equals("Client_BeatHeart")) {
 				int resultCode = obj.getInt("Result");
 				if (resultCode != 0) {
 					Value.isLoginSuccess = true;
 				}
 			}
-			//¸÷¸ö½çÃæÏÂµÄhandler²Ù×÷
+			//å„ä¸ªç•Œé¢ä¸‹çš„handleræ“ä½œ
 			else if (mHandler != null) {
-				//×¢²á
+				//æ³¨å†Œ
 				if (type.equals("Client_Registration")) {
 					int resultCode = obj.getInt("Result");
 					mHandler.obtainMessage(R.id.register_id, resultCode, 0).sendToTarget();
 				}
-				//µÇÂ¼
+				//ç™»å½•
 				else if (type.equals("Client_Login")) {
 					int resultCode = obj.getInt("Result");
 					mHandler.obtainMessage(R.id.login_id, resultCode, 0).sendToTarget();
 				}
-				//ÖØÖÃÃÜÂë
+				//é‡ç½®å¯†ç 
 				else if (type.equals("Client_ResetPwd")) {
 					int resultCode = obj.getInt("Result");
 					mHandler.obtainMessage(R.id.find_pwd_id, resultCode, 0).sendToTarget();
 				}
-				//ĞŞ¸ÄÃÜÂë
+				//ä¿®æ”¹å¯†ç 
 				else if (type.equals("Client_ChangePwd")) {
 					int resultCode = obj.getInt("Result");
 					mHandler.obtainMessage(R.id.modify_pwd_id, resultCode, 0).sendToTarget();
 				}
-				//Ìí¼ÓÖÕ¶Ë
+				//æ·»åŠ ç»ˆç«¯
 				else if (type.equals("Client_AddTerm")) {
 					int resultCode = obj.getInt("Result");
 					if (resultCode == 0) {
@@ -157,70 +157,70 @@ public class ZmqHandler extends Handler {
 						mHandler.obtainMessage(R.id.add_device_id, resultCode, 0).sendToTarget();
 					}
 				}
-				//ÇëÇóÖÕ¶ËÁĞ±í
+				//è¯·æ±‚ç»ˆç«¯åˆ—è¡¨
 				else if (type.equals("Client_ReqTermList")) {
 					int resultCode = obj.getInt("Result");
 					if (resultCode == 0) {
 						JSONArray jsonArray = obj.getJSONArray("Terminal");
 						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, getReqTermList(jsonArray)).sendToTarget();
 					} else {
-						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, "ÇëÇóÖÕ¶ËÁĞ±íÊ§°Ü").sendToTarget();
+						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, "è¯·æ±‚ç»ˆç«¯åˆ—è¡¨å¤±è´¥").sendToTarget();
 					}
 				}
-				//ĞŞ¸ÄÖÕ¶ËÃû³Æ
+				//ä¿®æ”¹ç»ˆç«¯åç§°
 				else if (type.equals("Client_ModifyTerm")) {
 					int resultCode = obj.getInt("Result");
 					mHandler.obtainMessage(R.id.modify_device_name_id, resultCode, 0).sendToTarget();
 				}
-				//É¾³ıÖÕ¶Ë°ó¶¨
+				//åˆ é™¤ç»ˆç«¯ç»‘å®š
 				else if (type.equals("Client_DelTerm")) {
 					int resultCode = obj.getInt("Result");
 					mHandler.obtainMessage(R.id.delete_device_item_id, resultCode, 0).sendToTarget();
 				}
-				//ÇëÇó±¨¾¯Êı¾İ
+				//è¯·æ±‚æŠ¥è­¦æ•°æ®
 				else if (type.equals("Client_ReqAlarm")) {
 					int resultCode = obj.getInt("Result");
 					if (resultCode == 0) {
 						JSONArray jsonArray = obj.getJSONArray("AlarmData");
 						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, getReqAlarmList(jsonArray)).sendToTarget();
 					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "ÇëÇó±¨¾¯Êı¾İÊ§°Ü").sendToTarget();
+						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "è¯·æ±‚æŠ¥è­¦æ•°æ®å¤±è´¥").sendToTarget();
 					}
 				}
-				//É¾³ı¸ÃÌõ±¨¾¯
+				//åˆ é™¤è¯¥æ¡æŠ¥è­¦
 				else if (type.equals("Client_DelAlarm")) {
 					int resultCode = obj.getInt("Result");
 					if (resultCode == 0) {
 						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
 					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "É¾³ı¸ÃÌõ±¨¾¯Ê§°Ü").sendToTarget();
+						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "åˆ é™¤è¯¥æ¡æŠ¥è­¦å¤±è´¥").sendToTarget();
 					}
 				}
-				//É¾³ıµ±Ç°È«²¿±¨¾¯
+				//åˆ é™¤å½“å‰å…¨éƒ¨æŠ¥è­¦
 				else if (type.equals("Client_DelSelectAlarm")) {
 					int resultCode = obj.getInt("Result");
 					if (resultCode == 0) {
 						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
 					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "É¾³ıµ±Ç°È«²¿±¨¾¯Ê§°Ü").sendToTarget();
+						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "åˆ é™¤å½“å‰å…¨éƒ¨æŠ¥è­¦å¤±è´¥").sendToTarget();
 					}
 				}
-				//±ê¼Ç¸ÃÌõ±¨¾¯
+				//æ ‡è®°è¯¥æ¡æŠ¥è­¦
 				else if (type.equals("Client_MarkAlarm")) {
 					int resultCode = obj.getInt("Result");
 					if (resultCode == 0) {
 						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
 					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "±ê¼Ç¸ÃÌõ±¨¾¯Ê§°Ü").sendToTarget();
+						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "æ ‡è®°è¯¥æ¡æŠ¥è­¦å¤±è´¥").sendToTarget();
 					}
 				}
-				//±ê¼Çµ±Ç°È«²¿±¨¾¯
+				//æ ‡è®°å½“å‰å…¨éƒ¨æŠ¥è­¦
 				else if (type.equals("Client_MarkSelectAlarm")) {
 					int resultCode = obj.getInt("Result");
 					if (resultCode == 0) {
 						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
 					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "±ê¼Çµ±Ç°È«²¿±¨¾¯Ê§°Ü").sendToTarget();
+						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "æ ‡è®°å½“å‰å…¨éƒ¨æŠ¥è­¦å¤±è´¥").sendToTarget();
 					}
 				}
 			}

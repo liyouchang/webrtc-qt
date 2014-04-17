@@ -3,48 +3,53 @@ package com.video.data;
 public class Value {
 
 	/**
-	 * Éè±¸·şÎñÆ÷Ãû³Æ
+	 * è®¾å¤‡æœåŠ¡å™¨åç§°
 	 */
 	public final static String DeviceBackstageName = "Backstage";
 	
 	/**
-	 * ±¨¾¯·şÎñÆ÷Ãû³Æ
+	 * æŠ¥è­¦æœåŠ¡å™¨åç§°
 	 */
 	public final static String AlarmBackstageName = "Alarmstage";
 	
 	/**
-	 * ·şÎñÆ÷IDºÍPort
+	 * ç»ˆç«¯çš„Dealeråç§°
+	 */
+	public final static String TerminalDealerName = "1234567";
+	
+	/**
+	 * æœåŠ¡å™¨IDå’ŒPort
 	 */
 	public final static String BackstageIPPort = "tcp://192.168.40.191:5555";
 //	public final static String BackstageIPPort = "tcp://218.56.11.182:5555";
 	
 	/**
-	 * ³¬Ê±Ê±¼ä
+	 * è¶…æ—¶æ—¶é—´
 	 */
 	public final static int requestTimeout = 5000;
 	
 	/**
-	 * ÊÇ·ñĞèÒªÇëÇó±¨¾¯¼ÇÂ¼µÄ±êÖ¾
+	 * æ˜¯å¦éœ€è¦è¯·æ±‚æŠ¥è­¦è®°å½•çš„æ ‡å¿—
 	 */
 	public static boolean isLoginSuccess = false;
 	
 	/**
-	 * ÊÇ·ñĞèÒªÇëÇóÖÕ¶ËÁĞ±íµÄ±êÖ¾
+	 * æ˜¯å¦éœ€è¦è¯·æ±‚ç»ˆç«¯åˆ—è¡¨çš„æ ‡å¿—
 	 */
 	public static boolean isNeedReqTermListFlag = true;
 	
 	/**
-	 * ÊÇ·ñĞèÒªÇëÇó±¨¾¯¼ÇÂ¼µÄ±êÖ¾
+	 * æ˜¯å¦éœ€è¦è¯·æ±‚æŠ¥è­¦è®°å½•çš„æ ‡å¿—
 	 */
 	public static boolean isNeedReqAlarmListFlag = true;
 	
 	/**
-	 * ÇëÇó±¨¾¯¼ÇÂ¼µÄÊı¾İ
+	 * è¯·æ±‚æŠ¥è­¦è®°å½•çš„æ•°æ®
 	 */
 	public static int requstAlarmCount = 5;
 	
 	/**
-	 * ³õÊ¼»¯Ó¦ÓÃ³ÌĞòµÄÈ«¾Ö±äÁ¿
+	 * åˆå§‹åŒ–åº”ç”¨ç¨‹åºçš„å…¨å±€å˜é‡
 	 */
 	public static void resetValues() {
 		isLoginSuccess = false;

@@ -78,7 +78,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄ×¢²á×Ö·û´®
+	 * ç”ŸæˆJSONçš„æ³¨å†Œå­—ç¬¦ä¸²
 	 */
 	private String generateModifyPwdJson(String username, String oldpwd, String newpwd) {
 		String result = "";
@@ -96,7 +96,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄ½ø¶ÈÌõ
+	 * æ˜¾ç¤ºæ“ä½œçš„è¿›åº¦æ¡
 	 */
 	private void showProgressDialog(String info) {
 		progressDialog = new ProgressDialog(mContext);
@@ -108,14 +108,14 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄÌáÊ¾
+	 * æ˜¾ç¤ºæ“ä½œçš„æç¤º
 	 */
 	private void showHandleDialog(String info) {
 		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-				.setTitle("ÎÂÜ°ÌáÊ¾")
+				.setTitle("æ¸©é¦¨æç¤º")
 				.setMessage(info)
 				.setCancelable(false)
-				.setPositiveButton("È·¶¨",
+				.setPositiveButton("ç¡®å®š",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int whichButton) {
 								dialog.dismiss();
@@ -132,12 +132,12 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_MODIFYING:
-					showProgressDialog("ÕıÔÚÌá½»... ");
+					showProgressDialog("æ­£åœ¨æäº¤... ");
 					break;
 				case MODIFY_TIMEOUT:
 					if (progressDialog != null)
 						progressDialog.dismiss();
-					showHandleDialog("ĞŞ¸ÄÃÜÂëÊ§°Ü£¬ÍøÂç³¬Ê±£¡");
+					showHandleDialog("ä¿®æ”¹å¯†ç å¤±è´¥ï¼Œç½‘ç»œè¶…æ—¶ï¼");
 					if (handler.hasMessages(MODIFY_TIMEOUT)) {
 						handler.removeMessages(MODIFY_TIMEOUT);
 					}
@@ -149,11 +149,11 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 						if (resultCode == 0) {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							showHandleDialog("¹§Ï²Äú£¬ĞŞ¸ÄÃÜÂë³É¹¦£¡");
+							showHandleDialog("æ­å–œæ‚¨ï¼Œä¿®æ”¹å¯†ç æˆåŠŸï¼");
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							showHandleDialog("ĞŞ¸ÄÃÜÂëÊ§°Ü£¬"+Utils.getErrorReason(resultCode));
+							showHandleDialog("ä¿®æ”¹å¯†ç å¤±è´¥ï¼Œ"+Utils.getErrorReason(resultCode));
 						}
 					} else {
 						handler.removeMessages(R.id.modify_pwd_id);
@@ -164,7 +164,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	};
 	
 	/**
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * å‘é€Handleræ¶ˆæ¯
 	 */
 	private void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -193,7 +193,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			showHandleDialog("Ã»ÓĞ¿ÉÓÃµÄÍøÂçÁ¬½Ó£¬ÇëÈ·ÈÏºóÖØÊÔ£¡");
+			showHandleDialog("æ²¡æœ‰å¯ç”¨çš„ç½‘ç»œè¿æ¥ï¼Œè¯·ç¡®è®¤åé‡è¯•ï¼");
 		}
 	}
 	
@@ -211,45 +211,45 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * @return true:ĞŞ¸ÄÃÜÂë¸ñÊ½ÕıÈ·  false:ĞŞ¸ÄÃÜÂë¸ñÊ½´íÎó
+	 * @return true:ä¿®æ”¹å¯†ç æ ¼å¼æ­£ç¡®  false:ä¿®æ”¹å¯†ç æ ¼å¼é”™è¯¯
 	 */
 	private boolean checkModifyPwdData() {
 		boolean resultFlag = false;
 		
-		//»ñÈ¡EditTextÊäÈë¿òµÄ×Ö·û´®
+		//è·å–EditTextè¾“å…¥æ¡†çš„å­—ç¬¦ä¸²
 		userOldPwd = et_old_pwd.getText().toString().trim();
 		userNewPwd = et_new_pwd.getText().toString().trim();
 		userNewRepwd = et_new_repwd.getText().toString().trim();
 		
 		if (userOldPwd.equals("")) {
 			resultFlag = false;
-			et_old_pwd.setError("ÇëÊäÈë¾ÉÃÜÂë£¡");
+			et_old_pwd.setError("è¯·è¾“å…¥æ—§å¯†ç ï¼");
 		}
 		else if (!userOldPwd.equals(userPwd)) {
 			resultFlag = false;
-			et_old_pwd.setError("¾ÉÃÜÂëÓëÔ­ÃÜÂë²»Æ¥Åä£¡");
+			et_old_pwd.setError("æ—§å¯†ç ä¸åŸå¯†ç ä¸åŒ¹é…ï¼");
 		} else {
 			resultFlag = true;
 			if (userNewPwd.equals("")) {
 				resultFlag = false;
-				et_new_pwd.setError("ÇëÊäÈëĞÂÃÜÂë£¡");
+				et_new_pwd.setError("è¯·è¾“å…¥æ–°å¯†ç ï¼");
 			}
 			else if ((userNewPwd.length()<6) || (userNewPwd.length()>20)) {
 				resultFlag = false;
-				et_new_pwd.setError("ÃÜÂë³¤¶È·¶Î§6~20£¡");
+				et_new_pwd.setError("å¯†ç é•¿åº¦èŒƒå›´6~20ï¼");
 			} else {
 				resultFlag = true;
 				if (userNewRepwd.equals("")) {
 					resultFlag = false;
-					et_new_repwd.setError("ÇëÔÙ´ÎÊäÈëĞÂÃÜÂë£¡");
+					et_new_repwd.setError("è¯·å†æ¬¡è¾“å…¥æ–°å¯†ç ï¼");
 				}
 				else if ((userNewRepwd.length()<6) || (userNewRepwd.length()>20)) {
 					resultFlag = false;
-					et_new_repwd.setError("È·ÈÏÃÜÂë³¤¶È·¶Î§6~20£¡");
+					et_new_repwd.setError("ç¡®è®¤å¯†ç é•¿åº¦èŒƒå›´6~20ï¼");
 				}
 				else if (!userNewPwd.equals(userNewRepwd)) {
 					resultFlag = false;
-					et_new_repwd.setError("Á½´ÎÊäÈëµÄÃÜÂë²»Ò»ÖÂ£¡");
+					et_new_repwd.setError("ä¸¤æ¬¡è¾“å…¥çš„å¯†ç ä¸ä¸€è‡´ï¼");
 				} else {
 					resultFlag = true;
 				}

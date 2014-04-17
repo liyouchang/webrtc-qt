@@ -18,7 +18,7 @@ public class TunnelCommunication {
 	public static int height = 720;
 	
 	public static byte frameType; //
-	public static ByteCache videoDataCache = null; //
+	public static VideoCache videoDataCache = null; //
 	private static byte[] naluData = new byte[width*height*3]; //
 	private static int naluDataLen = 4; //
 	
@@ -85,8 +85,7 @@ public class TunnelCommunication {
 	 */
 	public int askMediaData(String peerId) {
 		if (videoDataCache == null) {
-			videoDataCache = new ByteCache();
-			videoDataCache.setBufferLen(1024*1024*3);
+			videoDataCache = new VideoCache(1024*1024*3);
 		}
 		return naAskMediaData(peerId);
 	}

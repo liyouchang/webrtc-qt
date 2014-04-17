@@ -52,7 +52,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	private EditText et_id;
 	private RelativeLayout add_title;
 	private ProgressDialog progressDialog;
-	//ÖÕ¶ËÁĞ±íÏî
+	//ç»ˆç«¯åˆ—è¡¨é¡¹
 	private String mDeviceName = null;
 	private String mDeviceId = null;
 	
@@ -99,7 +99,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄµÇÂ¼×Ö·û´®
+	 * ç”ŸæˆJSONçš„ç™»å½•å­—ç¬¦ä¸²
 	 */
 	private String generateAddDeviceJson(String username, String mac, String termname) {
 		String result = "";
@@ -117,7 +117,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄ½ø¶ÈÌõ
+	 * æ˜¾ç¤ºæ“ä½œçš„è¿›åº¦æ¡
 	 */
 	private void showProgressDialog(String info) {
 		progressDialog = new ProgressDialog(mContext);
@@ -135,12 +135,12 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_ADDING:
-					showProgressDialog("ÕıÔÚÌí¼Ó... ");
+					showProgressDialog("æ­£åœ¨æ·»åŠ ... ");
 					break;
 				case ADD_TIMEOUT:
 					if (progressDialog != null)
 						progressDialog.dismiss();
-					Toast.makeText(mContext, "Ìí¼ÓÖÕ¶ËÊ§°Ü£¬ÍøÂç³¬Ê±£¡", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "æ·»åŠ ç»ˆç«¯å¤±è´¥ï¼Œç½‘ç»œè¶…æ—¶ï¼", Toast.LENGTH_SHORT).show();
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
 					}
@@ -154,10 +154,10 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 						if (resultCode == 0) {
 							String dealerName = (String)msg.obj;
 							xmlData.addItem(getDeviceItem(mDeviceName, mDeviceId, dealerName));
-							Toast.makeText(mContext, "Ìí¼ÓÖÕ¶Ë³É¹¦£¡", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "æ·»åŠ ç»ˆç«¯æˆåŠŸï¼", Toast.LENGTH_SHORT).show();
 							AddDeviceActivity.this.finish();
 						} else {
-							Toast.makeText(mContext, "Ìí¼ÓÖÕ¶ËÊ§°Ü£¬"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "æ·»åŠ ç»ˆç«¯å¤±è´¥ï¼Œ"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.add_device_id);
@@ -168,7 +168,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	};
 	
 	/**
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * å‘é€Handleræ¶ˆæ¯
 	 */
 	private void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -197,7 +197,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			Toast.makeText(mContext, "Ã»ÓĞ¿ÉÓÃµÄÍøÂçÁ¬½Ó£¬ÇëÈ·ÈÏºóÖØÊÔ£¡", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, "æ²¡æœ‰å¯ç”¨çš„ç½‘ç»œè¿æ¥ï¼Œè¯·ç¡®è®¤åé‡è¯•ï¼", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -218,32 +218,32 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * @return true:×¢²áĞÅÏ¢¸ñÊ½ÕıÈ·  false:×¢²áĞÅÏ¢¸ñÊ½´íÎó
+	 * @return true:æ³¨å†Œä¿¡æ¯æ ¼å¼æ­£ç¡®  false:æ³¨å†Œä¿¡æ¯æ ¼å¼é”™è¯¯
 	 */
 	private boolean checkAddDeviceData() {
 		boolean resultFlag = false;
 		
-		//»ñÈ¡EditTextÊäÈë¿òµÄ×Ö·û´®
+		//è·å–EditTextè¾“å…¥æ¡†çš„å­—ç¬¦ä¸²
 		termName = et_name.getText().toString().trim();
 		termMac = et_id.getText().toString().trim();
 		
 		if (termName.equals("")) {
 			resultFlag = false;
-			et_name.setError("ÇëÊäÈëÉè±¸Ãû³Æ£¡");
+			et_name.setError("è¯·è¾“å…¥è®¾å¤‡åç§°ï¼");
 		}
 		else if ((termName.length()<2) || (termName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("Éè±¸Ãû³Æ³¤¶È·¶Î§2~20£¡");
+			et_name.setError("è®¾å¤‡åç§°é•¿åº¦èŒƒå›´2~20ï¼");
 		} else {
 			resultFlag = true;
 			mDeviceName = termName;
 			if (termMac.equals("")) {
 				resultFlag = false;
-				et_id.setError("ÇëÊäÈëÉè±¸ID£¬Äú¿ÉÒÔÍ¨¹ıÉ¨Ãè¶şÎ¬Âë»òËÑË÷Éè±¸ÊäÈëÉè±¸ID£¡");
+				et_id.setError("è¯·è¾“å…¥è®¾å¤‡IDï¼Œæ‚¨å¯ä»¥é€šè¿‡æ‰«æäºŒç»´ç æˆ–æœç´¢è®¾å¤‡è¾“å…¥è®¾å¤‡IDï¼");
 			}
 			else if ((termMac.length()<6) || (termMac.length()>20)) {
 				resultFlag = false;
-				et_id.setError("Éè±¸ID³¤¶È·¶Î§6~20£¡");
+				et_id.setError("è®¾å¤‡IDé•¿åº¦èŒƒå›´6~20ï¼");
 			} else {
 				resultFlag = true;
 				mDeviceId = termMac;
@@ -253,10 +253,10 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * »ñµÃÒ»¸öÉè±¸ÏîItem
-	 * @param deviceName Éè±¸Ãû³Æ
-	 * @param deviceID Éè±¸µÄMAC
-	 * @return ·µ»ØÒ»¸öÉè±¸ÏîItem
+	 * è·å¾—ä¸€ä¸ªè®¾å¤‡é¡¹Item
+	 * @param deviceName è®¾å¤‡åç§°
+	 * @param deviceID è®¾å¤‡çš„MAC
+	 * @return è¿”å›ä¸€ä¸ªè®¾å¤‡é¡¹Item
 	 */
 	private HashMap<String, String> getDeviceItem(String deviceName, String deviceId, String dealerName) {
 		HashMap<String, String> item = new HashMap<String, String>();
@@ -268,7 +268,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * Ìí¼ÓÉè±¸µÄµ¯³ö¶Ô»°¿ò
+	 * æ·»åŠ è®¾å¤‡çš„å¼¹å‡ºå¯¹è¯æ¡†
 	 */
 	private void showPopupWindow() {
 		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -276,8 +276,8 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
 		
 		List<String> item_list = new ArrayList<String>();
-		item_list.add("É¨Ãè¶şÎ¬Âë");
-		item_list.add("ËÑË÷Éè±¸");
+		item_list.add("æ‰«æäºŒç»´ç ");
+		item_list.add("æœç´¢è®¾å¤‡");
 		AddPopupWindowAdapter popAdapter = new AddPopupWindowAdapter(mContext, item_list);
 		pop_listView.setAdapter(popAdapter);
 		
@@ -322,7 +322,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * Ìí¼ÓÉè±¸µÄÊÊÅäÆ÷
+	 * æ·»åŠ è®¾å¤‡çš„é€‚é…å™¨
 	 */
 	private class AddPopupWindowAdapter extends BaseAdapter {
 

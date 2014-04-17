@@ -104,7 +104,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * Éú³ÉJSONµÄµÇÂ¼×Ö·û´®
+	 * ç”ŸæˆJSONçš„ç™»å½•å­—ç¬¦ä¸²
 	 */
 	private String generateLoginJson(String username, String pwd) {
 		String result = "";
@@ -121,7 +121,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * ÏÔÊ¾²Ù×÷µÄ½ø¶ÈÌõ
+	 * æ˜¾ç¤ºæ“ä½œçš„è¿›åº¦æ¡
 	 */
 	private void showProgressDialog(String info) {
 		progressDialog = new ProgressDialog(mContext);
@@ -140,7 +140,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_LOGINNING:
-					showProgressDialog("ÕıÔÚµÇÂ¼... ");
+					showProgressDialog("æ­£åœ¨ç™»å½•... ");
 					break;
 				case LOGIN_TIMEOUT:
 					if (progressDialog != null)
@@ -148,7 +148,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
 					}
-					Toast.makeText(mContext, "µÇÂ¼Ê§°Ü£¬ÍøÂç³¬Ê±£¡", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "ç™»å½•å¤±è´¥ï¼Œç½‘ç»œè¶…æ—¶ï¼", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.login_id:
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
@@ -163,7 +163,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 						} else {
 							if (progressDialog != null)
 								progressDialog.dismiss();
-							Toast.makeText(mContext, "µÇÂ¼Ê§°Ü£¬"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "ç™»å½•å¤±è´¥ï¼Œ"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.login_id);
@@ -174,7 +174,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	};
 	
 	/**
-	 * ·¢ËÍHandlerÏûÏ¢
+	 * å‘é€Handleræ¶ˆæ¯
 	 */
 	private void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -235,7 +235,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				}
 			}
 		} else {
-			Toast.makeText(mContext, "Ã»ÓĞ¿ÉÓÃµÄÍøÂçÁ¬½Ó£¬ÇëÈ·ÈÏºóÖØÊÔ£¡", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, "æ²¡æœ‰å¯ç”¨çš„ç½‘ç»œè¿æ¥ï¼Œè¯·ç¡®è®¤åé‡è¯•ï¼", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -256,31 +256,31 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * @return true:×¢²áĞÅÏ¢¸ñÊ½ÕıÈ·  false:×¢²áĞÅÏ¢¸ñÊ½´íÎó
+	 * @return true:æ³¨å†Œä¿¡æ¯æ ¼å¼æ­£ç¡®  false:æ³¨å†Œä¿¡æ¯æ ¼å¼é”™è¯¯
 	 */
 	private boolean checkRegisterData() {
 		boolean resultFlag = false;
 		
-		//»ñÈ¡EditTextÊäÈë¿òµÄ×Ö·û´®
+		//è·å–EditTextè¾“å…¥æ¡†çš„å­—ç¬¦ä¸²
 		userName = et_name.getText().toString().trim();
 		userPwd = et_pwd.getText().toString().trim();
 		
 		if (userName.equals("")) {
 			resultFlag = false;
-			et_name.setError("ÇëÊäÈëÓÃ»§Ãû£¡");
+			et_name.setError("è¯·è¾“å…¥ç”¨æˆ·åï¼");
 		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("ÓÃ»§Ãû³¤¶È·¶Î§3~20£¡");
+			et_name.setError("ç”¨æˆ·åé•¿åº¦èŒƒå›´3~20ï¼");
 		} else {
 			resultFlag = true;
 			if (userPwd.equals("")) {
 				resultFlag = false;
-				et_pwd.setError("ÇëÊäÈëÃÜÂë£¡");
+				et_pwd.setError("è¯·è¾“å…¥å¯†ç ï¼");
 			}
 			else if ((userPwd.length()<6) || (userPwd.length()>20)) {
 				resultFlag = false;
-				et_pwd.setError("ÃÜÂë³¤¶È·¶Î§6~20£¡");
+				et_pwd.setError("å¯†ç é•¿åº¦èŒƒå›´6~20ï¼");
 			} else {
 				resultFlag = true;
 			}

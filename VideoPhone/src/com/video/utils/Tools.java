@@ -3,21 +3,21 @@ package com.video.utils;
 public class Tools {
 	
 	/**
-	 * Byte[]Êı¾İ¿½±´
+	 * Byte[]æ•°æ®æ‹·è´
 	 */
 	public static void CopyByteArray(byte[] dst, byte[] src, int len) {
 		System.arraycopy(src, 0, dst, 0, len);
 	}
 	
 	/**
-	 * Byte[]Êı¾İ¿½±´
+	 * Byte[]æ•°æ®æ‹·è´
 	 */
 	public static void CopyByteArray(byte[] dst, int dstPos, byte[] src, int srcPos, int len) {
 		System.arraycopy(src, srcPos, dst, dstPos, len);
 	}
 	
 	/**
-	 * ÉèÖÃshortµÄÖµ
+	 * è®¾ç½®shortçš„å€¼
 	 */
 	public static void setWordValue(byte[] buffer, int offset, short value) {
 		buffer[offset] = (byte) (value & 0x00FF);
@@ -25,7 +25,7 @@ public class Tools {
 	}
 
 	/**
-	 * »ñµÃshortµÄÖµ
+	 * è·å¾—shortçš„å€¼
 	 */
 	public static short getWordValue(byte[] buffer, int offset) {
 		short result = 0;
@@ -36,7 +36,7 @@ public class Tools {
 	}
 	
 	/**
-	 * ÉèÖÃintµÄÖµ
+	 * è®¾ç½®intçš„å€¼
 	 */
 	public static void setIntValue(byte[] buffer, int offset, int value) {
 		buffer[offset] = (byte) ((value & 0x000000FF));
@@ -46,7 +46,7 @@ public class Tools {
 	}
 	
 	/**
-	 * »ñµÃintµÄÖµ
+	 * è·å¾—intçš„å€¼
 	 */
 	public static int getIntValue(byte[] buffer, int offset) {
 		int result = 0;

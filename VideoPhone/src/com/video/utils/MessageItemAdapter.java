@@ -108,7 +108,7 @@ public class MessageItemAdapter extends BaseAdapter {
 	}
 	
 	/**
-	 * Òì²½¼ÓÔØÍ¼Æ¬Àà
+	 * å¼‚æ­¥åŠ è½½å›¾ç‰‡ç±»
 	 */
 	private final class AsyncImageTask extends AsyncTask<String, Integer, Uri> {
 		private ImageView imageView;
@@ -119,7 +119,7 @@ public class MessageItemAdapter extends BaseAdapter {
 			this.imagePath = path;
 		}
 
-		//ºóÌ¨ÔËĞĞµÄ×ÓÏß³Ì
+		//åå°è¿è¡Œçš„å­çº¿ç¨‹
 		@Override
 		protected Uri doInBackground(String... params) {
 			try {
@@ -130,7 +130,7 @@ public class MessageItemAdapter extends BaseAdapter {
 			return null;
 		}
 
-		//¸üĞÂ½çÃæÏÔÊ¾
+		//æ›´æ–°ç•Œé¢æ˜¾ç¤º
 		@Override
 		protected void onPostExecute(Uri result) {
 			super.onPostExecute(result);
@@ -141,10 +141,10 @@ public class MessageItemAdapter extends BaseAdapter {
 	}
 	
 	/**
-	 * »ñµÃÍ¼Æ¬»º´æµÄUriÂ·¾¶
-	 * @param path ÍøÂçÉÏÍ¼Æ¬µÄÂ·¾¶
-	 * @param cache ±¾µØ»º´æÎÄ¼ş¼Ğ
-	 * @return ·µ»Ø»º´æµÄUriÂ·¾¶
+	 * è·å¾—å›¾ç‰‡ç¼“å­˜çš„Uriè·¯å¾„
+	 * @param path ç½‘ç»œä¸Šå›¾ç‰‡çš„è·¯å¾„
+	 * @param cache æœ¬åœ°ç¼“å­˜æ–‡ä»¶å¤¹
+	 * @return è¿”å›ç¼“å­˜çš„Uriè·¯å¾„
 	 * @throws Exception 
 	 */
 	public Uri getCacheImageUri(String path, File cache) throws Exception {
