@@ -60,11 +60,6 @@ public class BackstageService extends Service {
 			isRun = false;
 			thread = null;
 		}
-//		try {
-//			sendHandlerMsg(R.id.close_zmq_socket_id);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
 	}
 
 	@Override
@@ -72,6 +67,10 @@ public class BackstageService extends Service {
 		// TODO Auto-generated method stub
 		super.onDestroy();
 		closeAPPAndService();
+		try {
+			sendHandlerMsg(R.id.close_zmq_socket_id);
+		} catch (Exception e) {
+		}
 	}
 	
 	/**
@@ -82,12 +81,12 @@ public class BackstageService extends Service {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_BeatHeart");
+			if ((userName == null) && (preferData.isExist("UserName"))) {
+				userName = preferData.readString("UserName");
+			}
 			jsonObj.put("UserName", userName);
 		} catch (JSONException e) {
 			e.printStackTrace();
-			if (preferData.isExist("UserName")) {
-				userName = preferData.readString("UserName");
-			}
 		}
 		result = jsonObj.toString();
 		return result;

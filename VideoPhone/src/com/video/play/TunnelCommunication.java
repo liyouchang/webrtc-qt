@@ -13,17 +13,17 @@ import com.video.utils.Tools;
 
 public class TunnelCommunication {
 
-	private static TunnelCommunication tunnel = null; //���൥�����
+	private static TunnelCommunication tunnel = null; //
 	
 	public static int width = 1280; 
 	public static int height = 720;
 	
-	public static byte frameType; //֡����
-	public static ByteCache videoDataCache = null; //����ͼ����ݶ���
-	private static byte[] naluData = new byte[width*height*3]; //Ҫ��������
-	private static int naluDataLen = 4; //Ҫ�������ݴ�С
+	public static byte frameType; //
+	public static ByteCache videoDataCache = null; //
+	private static byte[] naluData = new byte[width*height*3]; //
+	private static int naluDataLen = 4; //
 	
-	//P2PͨѶ��JNI�ӿ�
+	//P2P
 	private native int naInitialize(String classPath);
 	private native int naTerminate();
 	private native int naOpenTunnel(String peerId);
@@ -45,21 +45,21 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * ͨ����ʼ��
+	 * 
 	 */
 	public int tunnelInitialize(String classPath) {
 		return naInitialize(classPath);
 	}
 
 	/**
-	 * ͨ����ֹ
+	 * 
 	 */
 	public int tunnelTerminate() {
 		return naTerminate();
 	}
 
 	/**
-	 * ��ͨ��
+	 * 
 	 */
 	public int openTunnel(String peerId) {
 		return naOpenTunnel(peerId);
@@ -68,7 +68,7 @@ public class TunnelCommunication {
 	private static File myData = null;
 	
 	/**
-	 * �ر�ͨ��
+	 * 
 	 */
 	public int closeTunnel(String peerId) {
 		if (videoDataCache != null) {
@@ -82,7 +82,7 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * ������Ƶ���
+	 * 
 	 */
 	public int askMediaData(String peerId) {
 		if (videoDataCache == null) {
@@ -93,7 +93,7 @@ public class TunnelCommunication {
 	}
 	
 	/**
-	 * ����handler��Ϣ
+	 * 
 	 */
 	private static void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
 		Message msg = new Message();
@@ -103,7 +103,7 @@ public class TunnelCommunication {
 	}
 	
 	/**
-	 * ת�����ն����
+	 * 
 	 */
 	public void SendToPeer(String peerId, String data) {
 		System.out.print("MyDebug: 1��SendToPeer(): "+data);
@@ -116,7 +116,7 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * �յ���Ƶ���
+	 * 
 	 */
 	public void RecvVideoData(String peerID, byte[] data) {
 		int dataLen = data.length;
@@ -146,7 +146,7 @@ public class TunnelCommunication {
 	}
 	
 	/**
-	 * �յ���Ƶ���
+	 * 
 	 */
 	public void RecvAudioData(String peerID,byte [] data) {
 		
