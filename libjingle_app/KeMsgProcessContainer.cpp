@@ -1,6 +1,12 @@
 #include "KeMsgProcessContainer.h"
+
+#include "talk/base/json.h"
+
 #include "peerterminal.h"
 #include "KeMsgProcess.h"
+
+const char kTunnelTypeName[] = "type";
+const char kTunnelCommandName[] = "command";
 
 
 KeMsgProcessContainer::KeMsgProcessContainer()
@@ -155,6 +161,45 @@ int KeTunnelClient::AskPeerVideo(std::string peer_id)
     process->AskVideo();
     return 0;
 }
+/**
+ * @brief KeTunnelClient::PeerVideoClarity
+ * @param peer_id
+ * @param clarity --- 1:low,2:normal,3:heigh. 1~3 is to set clarity.
+ *                      101:get camera clarity
+ * @return
+ */
+int KeTunnelClient::PeerVideoClarity(std::string peer_id, int clarity)
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage[kTunnelTypeName] = "tunnel";
+    jmessage[kTunnelCommandName] = "video_clarity";
+    jmessage["value"] = clarity;
+    std::string msg = writer.write(jmessage);
+    LOG(INFO) <<"SetPeerVideoClarity msg is " << msg;
+    return this->terminal_->SendByRouter(peer_id,msg);
+}
+/**
+ * @brief KeTunnelClient::QueryRecordList
+ * @param peer_id
+ * @param condition : condition is a json like :
+ *  {"starttime":"20140417183600","endtime":"20140418183600","offset""0,"query_num":30}
+ *  the query_num's max size is 30.
+ *
+ * @return
+ */
+int KeTunnelClient::QueryRecordList(std::string peer_id, const std::string &condition)
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage[kTunnelTypeName] = "tunnel";
+    jmessage[kTunnelCommandName] = "query_record";
+    jmessage["condition"] = condition;
+    std::string msg = writer.write(jmessage);
+    LOG(INFO) <<"SetPeerVideoClarity msg is " << msg;
+    return this->terminal_->SendByRouter(peer_id,msg);
+
+}
 
 void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
@@ -163,6 +208,25 @@ void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string 
     process->SignalRecvAudioData.connect(this,&KeTunnelClient::OnRecvAudioData);
     process->SignalRecvVideoData.connect(this,&KeTunnelClient::OnRecvVideoData);
     this->AddMsgProcess(process);
+}
+
+void KeTunnelClient::OnRouterMessage(const std::string &peer_id, const std::string &msg)
+{
+    Json::Reader reader;
+    Json::Value jmessage;
+    if (!reader.parse(msg, jmessage)) {
+        LOG(WARNING) << "Received unknown message. " << msg;
+        return;
+    }
+    std::string command;
+    GetStringFromJsonObject(jmessage, kTunnelCommandName, &command);
+    if(command.compare("video_clarity") == 0){
+        int clarity;
+        GetIntFromJsonObject(jmessage,"value",&clarity);
+        OnRecvVideoClarity(peer_id,clarity);
+    }else{
+        LOG(WARNING)<<"receive unexpected command from "<<peer_id;
+    }
 
 }
 
@@ -174,6 +238,12 @@ void KeTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *dat
 void KeTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *data, int len)
 {
     LOG(INFO)<<__FUNCTION__;
+}
+
+void KeTunnelClient::OnRecvVideoClarity(const std::string &peer_id, int clarity)
+{
+    LOG(INFO)<<"KeTunnelClient::OnRecvVideoClarity---" <<peer_id<<" clarity:"<<clarity ;
+
 }
 
 
@@ -199,6 +269,32 @@ void KeTunnelCamera::OnProcessMediaRequest(KeMessageProcessCamera *process, int 
         this->SignalAudioData.connect(process,&KeMessageProcessCamera::OnAudioData);
     }else{
         this->SignalAudioData.disconnect(process);
+    }
+
+}
+
+void KeTunnelCamera::OnRecvVideoClarity(const std::string &peer_id, int clarity)
+{
+    LOG(INFO)<<"KeTunnelCamera::OnRecvVideoClarity---" <<peer_id<<" clarity:"<<clarity ;
+
+}
+
+void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::string &msg)
+{
+    Json::Reader reader;
+    Json::Value jmessage;
+    if (!reader.parse(msg, jmessage)) {
+        LOG(WARNING) << "Received unknown message. " << msg;
+        return;
+    }
+    std::string command;
+    GetStringFromJsonObject(jmessage, kTunnelCommandName, &command);
+    if(command.compare("video_clarity") == 0){
+        int clarity;
+        GetIntFromJsonObject(jmessage,"value",&clarity);
+        OnRecvVideoClarity(peer_id,clarity);
+    }else{
+        LOG(WARNING)<<"receive unexpected command from "<<peer_id;
     }
 
 }

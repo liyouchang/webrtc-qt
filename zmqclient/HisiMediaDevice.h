@@ -28,11 +28,11 @@ public:
 
     virtual void OnTunnelClosed(PeerTerminalInterface * t,const std::string & peer_id);
     void OnMessage(talk_base::Message *msg);
-
+    void SetVideoResolution(std::string r);
 protected:
     //video == 0 start video ,audio == 0 start audio
     void OnProcessMediaRequest(KeMessageProcessCamera *process, int video, int audio);
-
+    int GetVideoFrameType();
 private:
     void SendVideoFrame(const char *data, int len);
     void SendAudioFrame(const char *data, int len);
@@ -40,6 +40,7 @@ private:
     talk_base::Thread * media_thread_;
     int video_handle_;
     int audio_handle_;
+    int video_frame_type_;
     char media_buffer_[MEDIA_BUFFER_LENGTH];
 
 };

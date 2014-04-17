@@ -121,7 +121,11 @@ void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
     delete buffer;
     this->SignalTunnelMessage(aTunnel->GetPeerID(),data);
 }
-
+/**
+ * @brief PeerTerminal::OnRouterReadData
+ * @param peer_id
+ * @param msg --- the message received by client_, the message should be a json string
+ */
 void PeerTerminal::OnRouterReadData(const std::string & peer_id, const std::string & msg)
 {
     Json::Reader reader;
@@ -142,9 +146,11 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id, const std::stri
         GetStringFromJsonObject(jmessage, "msg", &peerMsg);
         aTunnel->OnMessageFromPeer(peer_id,peerMsg);
     }
-    else{
-        //TODO: other message dispatch
+    else if(type.compare("tunnel") == 0){
+        //dispath tunnel message
         SignalRouterMessage(peer_id,msg);
+    }else{
+        LOG(WARNING)<<"receive unexpected message from "<<peer_id;
     }
 
 }

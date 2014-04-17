@@ -69,7 +69,7 @@ struct KEFrameHead{
     short piecesNo;
     int second;
     char millisecond;//millisecond devide 10
-    char frameType;
+    char frameType;// 0-D1 1-QCIF 3-HD1 7-VGA 10-720P 4-QVGA 50-audio_frame
     short frameLen;
 };
 
@@ -227,7 +227,7 @@ struct KEVideoServerReq
     int msgLength;
     int videoID;
     int clientID;
-    char channelNo;
+    char channelNo;//1 for main frame 2 for sub frame
     char video;//视频=0请求   =1 停止
     char listen;//监听=0请求   =1 停止
     char talk;// 对讲=0请求   =1 停止

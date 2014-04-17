@@ -25,6 +25,7 @@ void KeMsgProcess::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer
 
 void KeMsgProcess::StartHeartBeat()
 {
+    LOG(INFO)<<"KeMsgProcess::StartHeartBeat";
     heart_thread_ =  talk_base::Thread::Current();
     this->heart_count_ = 0;
     SendHeart();

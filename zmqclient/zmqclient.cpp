@@ -53,21 +53,23 @@ int main()
     CameraClient client;
 
     //client.Connect("tcp://192.168.0.182:5555","123456");
-    client.Connect("tcp://192.168.40.191:5555","1234567");
-    client.Login();
 
 //    talk_base::scoped_ptr<PeerTerminal> terminal;
 //    terminal.reset(new PeerTerminal());
 //    terminal->Initialize(&client);
 
 #ifndef ARM
+    client.Connect("tcp://192.168.40.191:5555","123456");
+    client.Login();
     KeVideoSimulator * simulator = new KeVideoSimulator();
     simulator->Init(&client);
     simulator->ReadVideoData("video.h264");
 #else
+    client.Connect("tcp://192.168.40.191:5555","1234567");
+    client.Login();
     HisiMediaDevice * device = new HisiMediaDevice();
     device->Init(&client);
-
+    //device->SetVideoResolution("704,576");
 #endif //arm
 
 

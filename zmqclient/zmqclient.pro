@@ -53,13 +53,15 @@ SOURCES += \
 HEADERS += \
     asyndealer.h \
     peerconnectionclientdealer.h \
-    CameraClient.h
+    CameraClient.h \
 
 
 arm{
 
     SOURCES += HisiMediaDevice.cpp
-    HEADERS += HisiMediaDevice.h
+    HEADERS += HisiMediaDevice.h \
+            keapi/RayCommIPC_ParamInfo.h \
+            keapi/keapi.h
 
     LIBS += -lkeapi -lstore -lexfat
 

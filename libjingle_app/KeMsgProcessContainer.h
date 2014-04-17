@@ -40,19 +40,29 @@ class KeTunnelClient:public KeMsgProcessContainer{
 public:
     KeTunnelClient();
     virtual int AskPeerVideo(std::string peer_id);
+    virtual int PeerVideoClarity(std::string peer_id,int clarity);
+    virtual int QueryRecordList(std::string peer_id,const std::string & condition);
     virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
+    virtual void OnRouterMessage(const std::string &peer_id,const std::string& msg);
+
 protected:
     virtual void OnRecvAudioData(const std::string & peer_id,const char * data,int len);
     virtual void OnRecvVideoData(const std::string & peer_id,const char * data,int len);
+    virtual void OnRecvVideoClarity(const std::string & peer_id,int clarity);
+    //virtual void OnRecvRecordList(const std::string & peer_id,const std::string & recordArray);
 };
 
 class KeTunnelCamera:public KeMsgProcessContainer{
 public:
+
     virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
+    virtual void OnRouterMessage(const std::string &peer_id, const std::string &msg);
+
 protected:
     virtual void OnProcessMediaRequest(KeMessageProcessCamera * process,int video,int audio);
     sigslot::signal2<const char *, int > SignalVideoData;
     sigslot::signal2<const char *, int > SignalAudioData;
+    virtual void OnRecvVideoClarity(const std::string & peer_id,int clarity);
 
 };
 

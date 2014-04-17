@@ -11,6 +11,15 @@
 #include "libjingle_app/KeMsgProcess.h"
 
 #define VIDEO1_DATA				"video1_data"
+#define VIDEO1_CODEC 			"video1_codec"      	// 	0:H264, 1:MJPG
+#define VIDEO1_BITRATECTRL 		"video1_control"		// 	0:CBR,  1:VBR
+#define VIDEO1_BITRATE 			"video1_bitrate"		//
+#define VIDEO1_QUALITY 			"video1_quality"		// 	5:普通,7:较好,9:最好
+#define VIDEO1_FRAMERATE 		"video1_framerate"		//	1,5,10,15,20,25,30
+#define VIDEO1_IFRAMEINTERVAL 	"video1_int"			// 	1,4,20,100,200
+#define VIDEO1_DEINTERLACE 		"video1_deint"			// 	0:close,1:open反交错
+#define VIDEO1_RESOLUTION 		"video1_resolution"		// 	176x144, 352x288, 320x240 640x480 1280x720
+
 #define AUDIO1_DATA				"audio_data"
 
 const int kVideoSampleRate = 40;//40 ms per frame
@@ -49,6 +58,7 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
     ret = Raycomm_MediaDataInit();
     LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
 
+    LOG(INFO)<<"vidoe frame type "<<GetVideoFrameType();
     KeTunnelCamera::Init(client);
 }
 
@@ -58,7 +68,6 @@ void HisiMediaDevice::OnTunnelClosed(PeerTerminalInterface *t, const std::string
     //media_thread_->Send(this,HisiMediaDevice::MSG_STOP_VIDEO);
     KeTunnelCamera::OnTunnelClosed(t,peer_id);
 
-
     int video_count,audio_count;
     CountVideoAndAudio(video_count,audio_count);
     int video_start = 0;
@@ -66,8 +75,6 @@ void HisiMediaDevice::OnTunnelClosed(PeerTerminalInterface *t, const std::string
     if(video_count == 0) video_start = 1;
     if(audio_count == 0) audio_start = 1;
     media_thread_->Post(this,MSG_MEDIA_CONTROL,new MediaControlData(video_start,audio_start));
-
-
 }
 
 void HisiMediaDevice::SendVideoFrame(const char *data, int len)
@@ -81,7 +88,7 @@ void HisiMediaDevice::SendVideoFrame(const char *data, int len)
     frameHead.second = ams/1000;
     frameHead.millisecond = (ams%1000)/10;
     //frame type:2-CIF
-    frameHead.frameType = 2;
+    frameHead.frameType = video_frame_type_;
     frameHead.frameLen = len;
     talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
     frameBuf.AppendData(data,len);
@@ -99,8 +106,10 @@ void HisiMediaDevice::SendAudioFrame(const char *data, int len)
     frameHead.millisecond = (ams%1000)/10;
     //frame type:2-CIF
     frameHead.frameType = 80;
-    frameHead.frameLen = len;
+    frameHead.frameLen = len+4;
     talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
+    const char nalhead[4] = {0,0,0,1};
+    frameBuf.AppendData(nalhead,4);
     frameBuf.AppendData(data,len);
     SignalAudioData(frameBuf.data(),frameBuf.length());
 
@@ -182,9 +191,12 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         int media_len = Raycomm_GetMediaData(audio_handle_,media_buffer_,MEDIA_BUFFER_LENGTH,&timespan);
         if(media_len > 0){
             this->SendAudioFrame(media_buffer_,media_len);
+            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_AUDIO);
+
+        }else{
+            media_thread_->PostDelayed(kAudioSampleRate,this,
+                                       HisiMediaDevice::MSG_SEND_AUDIO);
         }
-        media_thread_->PostDelayed(kAudioSampleRate,this,
-                                   HisiMediaDevice::MSG_SEND_AUDIO);
         break;
     }
     default:
@@ -192,6 +204,22 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
 
     }
 }
+
+void HisiMediaDevice::SetVideoResolution(std::string r)
+{
+    std::string command = VIDEO1_RESOLUTION;
+    command+="=";
+    command+=r;
+    Raycomm_SetParam((char*)command.c_str(),0);
+
+    talk_base::Thread::SleepMs(2000);
+
+    GetVideoFrameType();
+    LOG(INFO)<<"HisiMediaDevice::SetVideoResolution ---" << command
+            << ";vidoe type now is "<<video_frame_type_;
+
+}
+
 
 void HisiMediaDevice::OnProcessMediaRequest(KeMessageProcessCamera *process, int video, int audio)
 {
@@ -207,4 +235,21 @@ void HisiMediaDevice::OnProcessMediaRequest(KeMessageProcessCamera *process, int
 
 
     KeTunnelCamera::OnProcessMediaRequest(process,video,audio);
+}
+
+int HisiMediaDevice::GetVideoFrameType()
+{
+    char buf[1024];
+    memset(buf,0,1024);
+    Raycomm_GetParam(VIDEO1_RESOLUTION,buf,0);
+    std::string resolution(buf);
+    LOG(INFO)<<"Raycomm_GetParam buf = "<<resolution;
+    if(resolution.compare("352x288") == 0){
+        video_frame_type_ = 2;
+    }else if(resolution.compare("704x576") == 0){
+        video_frame_type_ = 0;
+    }else if(resolution.compare("1280x720") == 0){
+        video_frame_type_ = 10;
+    }
+    return video_frame_type_;
 }
