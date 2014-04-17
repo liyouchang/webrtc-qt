@@ -158,9 +158,10 @@ void P2PConductor::DeletePeerConnection()
     //when close peer_connection the session will terminate and destroy the channels
     //the channel destroy will make the StreamProcess clean up
     peer_connection_->Close();
-    peer_connection_.release();
     peer_id_.clear();
-    stream_process_.reset();
+    //stream_process_.reset();
+    peer_connection_.release();
+
 
 }
 

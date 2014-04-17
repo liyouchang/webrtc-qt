@@ -35,7 +35,7 @@ win32 {
     LIBS += -L$$output_dir/libs
 
     LIBS +=   -ljingle_app  -ljingle_p2p  -ljingle
-    LIBS += -ljsoncpp  -lcppzmq
+    LIBS += -lcppzmq -ljsoncpp
 
     LIBS += -pthread -ldl
 

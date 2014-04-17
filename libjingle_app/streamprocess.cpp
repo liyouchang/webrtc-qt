@@ -11,6 +11,11 @@ StreamProcess::StreamProcess(talk_base::Thread * stream_thread):
     totalread = 0;
 }
 
+StreamProcess::~StreamProcess()
+{
+    LOG(INFO)<<"StreamProcess::~StreamProcess";
+}
+
 bool StreamProcess::ProcessStream(talk_base::StreamInterface *stream)
 {
     ASSERT(stream_thread_->IsCurrent());

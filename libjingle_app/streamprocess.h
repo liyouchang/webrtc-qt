@@ -13,7 +13,7 @@ public:
         MSG_DATAWRITE
     };
     StreamProcess(talk_base::Thread *stream_thread);
-
+    virtual ~StreamProcess();
     bool ProcessStream(talk_base::StreamInterface* stream);
 
     void Cleanup();

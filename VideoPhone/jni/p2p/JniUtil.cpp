@@ -82,14 +82,16 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
 
 	jstring jni_pid = p_env->NewStringUTF(peer_id);
 	jstring jni_msg = p_env->NewStringUTF(message);
-	LOGI("message: %s", message);
+	LOGI("JniUtil::JniSendToPeer----message: %s", message);
 
 
-	p_env->CallStaticVoidMethod(callBackCls, mid, jni_pid, jni_msg);
+	p_env->CallVoidMethod(g_obj_, mid, jni_pid, jni_msg);
 
 	if(attached){
 		g_vm_->DetachCurrentThread();
 	}
+	LOGI("JniUtil::JniSendToPeer----end");
+
 	return true;
 }
 
@@ -130,7 +132,7 @@ bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
 	void *rd = p_env->GetPrimitiveArrayCritical((jarray) byteArr, &isCopy);
 	memcpy(rd, data, len);
 
-	p_env->CallStaticVoidMethod(callBackCls, mid, jni_pid, byteArr);
+	p_env->CallVoidMethod(g_obj_, mid, jni_pid, byteArr);
 
 	p_env->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
 	p_env->DeleteLocalRef(byteArr);
@@ -181,7 +183,7 @@ bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
 	void *rd = p_env->GetPrimitiveArrayCritical((jarray) byteArr, &isCopy);
 	memcpy(rd, data, len);
 
-	p_env->CallStaticVoidMethod(callBackCls, mid, jni_pid, byteArr);
+	p_env->CallVoidMethod(g_obj_, mid, jni_pid, byteArr);
 
 	p_env->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
 	p_env->DeleteLocalRef(byteArr);

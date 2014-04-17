@@ -62,7 +62,7 @@ int main()
 
 #ifndef ARM
     KeVideoSimulator * simulator = new KeVideoSimulator();
-    simulator->Initialize(&client);
+    simulator->Init(&client);
     simulator->ReadVideoData("video.h264");
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
