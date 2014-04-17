@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@color/page_bg_grey"
+    android:background="@color/white"
     android:orientation="horizontal"
     android:paddingBottom="5dp"
     android:paddingLeft="10dp"
@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="10dp"
-        android:background="@color/page_bg_grey"
+        android:background="@color/white"
         android:orientation="vertical" >
 
         <TextView

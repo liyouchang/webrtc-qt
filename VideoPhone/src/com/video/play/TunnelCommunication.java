@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.video.R;
-import com.video.data.ByteCache;
 import com.video.socket.HandlerApplication;
 import com.video.utils.Tools;
 

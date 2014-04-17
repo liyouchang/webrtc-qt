@@ -70,7 +70,7 @@ public class MainActivity extends FragmentActivity {
 			    		MainActivity.this.finish();
 			    	}
 			    } 
-			 }, 1000); 
+			 }, 1500); 
 		} else {
 			setContentView(R.layout.main);
 	        
@@ -103,19 +103,19 @@ public class MainActivity extends FragmentActivity {
 		mTabHost.setOnTabChangedListener(tabChangeListener);
 		
 		TabHost.TabSpec tabSpec = mTabHost.newTabSpec("tab1");
-		tabSpec.setIndicator("拥有",
+		tabSpec.setIndicator("实时查看",
 				getResources().getDrawable(R.drawable.tab_own_xml))
 		.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
 		
 		tabSpec = mTabHost.newTabSpec("tab2");
-		tabSpec.setIndicator("本地",
+		tabSpec.setIndicator("本地文件",
 				getResources().getDrawable(R.drawable.tab_video_xml));
 		tabSpec.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
 		
 		tabSpec = mTabHost.newTabSpec("tab3");
-		tabSpec.setIndicator("消息",
+		tabSpec.setIndicator("告警消息",
 				getResources().getDrawable(R.drawable.tab_msg_xml));
 		tabSpec.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
@@ -211,15 +211,15 @@ public class MainActivity extends FragmentActivity {
 	 */
 	public static void setAlarmIconAndText(int msg) {
 		if (msg == 0) {
-			tabMsgTextView.setText("消息");
+			tabMsgTextView.setText("告警消息");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_xml);
 		} 
 		else if (msg < 100) {
-			tabMsgTextView.setText("消息("+msg+")");
+			tabMsgTextView.setText("告警消息("+msg+")");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_alarm_xml);
 		}
 		else if (msg >= 100) {
-			tabMsgTextView.setText("消息(99+)");
+			tabMsgTextView.setText("告警消息(99+)");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_alarm_xml);
 		}
 	}

@@ -60,11 +60,11 @@ public class BackstageService extends Service {
 			isRun = false;
 			thread = null;
 		}
-		try {
-			sendHandlerMsg(R.id.close_zmq_socket_id);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//		try {
+//			sendHandlerMsg(R.id.close_zmq_socket_id);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	@Override

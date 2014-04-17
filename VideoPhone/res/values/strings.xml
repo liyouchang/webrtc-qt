@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">视频监控</string>
-    <string name="app_version">版本: V1.0.1</string>
+    <string name="app_name">卡尔微视界</string>
+    <string name="app_version">版本: V1.2</string>
+    <string name="app_info">卡尔微视界\u0020\u0020V1.2</string>
     <string name="company_website">公司网址：www.kaer.cn</string>
     <string name="company_phone">公司电话：4006080787</string>
     <string name="copyright">版权所有：山东卡尔电气股份有限公司</string>
@@ -24,6 +25,7 @@
     
     <string name="btn_ok">确定</string>
     <string name="btn_back">返回</string>
+    <string name="own">实时查看</string>
     <string name="add">添加</string>
     <string name="more">更多</string>
     <string name="app_exit">退出应用</string>

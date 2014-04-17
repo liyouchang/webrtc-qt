@@ -5,12 +5,34 @@
     android:background="@drawable/login_bg"
     android:orientation="vertical" >
 
-    <ProgressBar
-        android:id="@+id/widget110"
+    <ImageView
+        android:id="@+id/app_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginTop="180dp"
+        android:contentDescription="@null"
+        android:src="@drawable/video_logo1" />
+
+    <TextView
+        android:id="@+id/app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/app_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="@string/app_info"
+        android:textColor="@color/orange"
+        android:textSize="20dp" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/app_name"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

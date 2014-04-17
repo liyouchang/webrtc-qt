@@ -48,8 +48,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10.0dip"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/page_view_bg" >
 
@@ -72,7 +72,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="5dp"
                     android:contentDescription="@null"
-                    android:src="@drawable/video_logo" />
+                    android:src="@drawable/video_logo1" />
 
                 <TextView
                     android:id="@+id/app_name"
@@ -132,8 +132,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/layout_about_software"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
                 android:background="@drawable/page_view_bg" >
 
                 <TextView

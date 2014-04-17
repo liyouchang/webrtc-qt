@@ -47,7 +47,6 @@ import com.video.play.TunnelCommunication;
 import com.video.play.VideoPlayActivity;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.user.LoginActivity;
 import com.video.utils.MessageItemAdapter;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
@@ -142,9 +141,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
         mPullToRefreshView.setOnFooterRefreshListener(this);
         
         //系统消息
-		Button test1 = (Button)mView.findViewById(R.id.btn_test1);
-		test1.setOnClickListener(this);
-		
 		Button test2 = (Button)mView.findViewById(R.id.btn_test2);
 		test2.setOnClickListener(this);
 		
@@ -153,9 +149,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		
 		Button test4 = (Button)mView.findViewById(R.id.btn_test4);
 		test4.setOnClickListener(this);
-		
-		Button test5 = (Button)mView.findViewById(R.id.btn_test5);
-		test5.setOnClickListener(this);
 	}
 	
 	private void initData() {
@@ -508,9 +501,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 				viewpage_alert.setBackgroundResource(R.drawable.viewpage_unselected);
 				mViewPager.setCurrentItem(1);
 				break;
-			case R.id.btn_test1:
-				startActivity(new Intent(mActivity, LoginActivity.class));
-				break;
 			case R.id.btn_test2:
 				System.out.println("MyDebug: 【打开通道】");
 				TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
@@ -525,10 +515,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 				System.out.println("MyDebug: 【关闭通道】");
 				TunnelCommunication.getInstance().closeTunnel("123456");
 //				TunnelCommunication.getInstance().tunnelTerminate();
-				break;
-			case R.id.btn_test5:
-				System.out.println("MyDebug: ");
-				MainActivity.setAlarmIconAndText(22);
 				break;
 		}
 	}

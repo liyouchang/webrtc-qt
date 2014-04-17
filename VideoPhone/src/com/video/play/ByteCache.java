@@ -1,4 +1,4 @@
-package com.video.data;
+package com.video.play;
 
 import com.video.utils.Tools;
 

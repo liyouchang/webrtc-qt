@@ -23,24 +23,15 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlSerializer;
 
-import com.video.utils.Utils;
-
 import android.content.Context;
-import android.os.Environment;
 import android.util.Xml;
+
+import com.video.utils.Utils;
 
 public class XmlMessage {
 
-	private String filePath = "";
+	private static String filePath = "";
 	public Context context;
-	
-	String SD_path = "";
-	File currentFile;
-	File[] currentFiles;
-
-	public XmlMessage () {
-		init();
-	}
 	
 	public XmlMessage (Context context) {
 		this.context = context;
@@ -52,8 +43,7 @@ public class XmlMessage {
 	 */
 	public void init() {
 		if (Utils.checkSDCard()) {
-			SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
-			filePath = SD_path + File.separator + "KaerVideo" + File.separator + "MessageList.xml";
+			filePath = context.getFilesDir().getPath() + File.separator + "MessageList.xml";
 			File file = new File(filePath);
 			if (!file.exists()) {
 				try {
@@ -65,16 +55,7 @@ public class XmlMessage {
 				}
 			}
 		}
-//		filePath = context.getFilesDir().getPath() + File.separator + "DeviceList.xml";
-//		File file = new File(filePath);
-//		if (!file.exists()) {
-//			try {
-//				file.createNewFile();
-//				initXmlFile(file);
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
+
 	}
 
 	/**

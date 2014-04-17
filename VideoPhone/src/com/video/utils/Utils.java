@@ -42,7 +42,7 @@ public class Utils {
 				result = "账号已存在！";
 				break;
 			case 5:
-				result = "账号不存在！";
+				result = "不存在！";
 				break;
 			case 6:
 				result = "该设备已被绑定！";
@@ -50,8 +50,14 @@ public class Utils {
 			case 7:
 				result = "账号和邮箱不匹配！";
 				break;
+			case 8:
+				result = "超出数量限制！";
+				break;
 			case 9:
-				result = "未登录请求设备列表！";
+				result = "未登录！";
+				break;
+			case 10:
+				result = "设备未注册！";
 				break;
 			default: 
 				result = "不明原因！";
