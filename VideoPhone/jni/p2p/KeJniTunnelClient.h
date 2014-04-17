@@ -10,7 +10,7 @@
 //#include "JniUtil.h"
 
 #include "libjingle_app/KeMsgProcessContainer.h"
-#include "talk/base/thread.h"
+
 class KeJniTunnelClient :public KeTunnelClient{
 public:
 	KeJniTunnelClient();

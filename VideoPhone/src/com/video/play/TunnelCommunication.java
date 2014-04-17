@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.video.R;
 import com.video.socket.HandlerApplication;
@@ -12,17 +13,17 @@ import com.video.utils.Tools;
 
 public class TunnelCommunication {
 
-	private static TunnelCommunication tunnel = null; //¸ÃÀàµ¥Àý¶ÔÏó
+	private static TunnelCommunication tunnel = null; //ï¿½ï¿½ï¿½àµ¥ï¿½ï¿½ï¿½ï¿½ï¿½
 	
 	public static int width = 1280; 
 	public static int height = 720;
 	
-	public static byte frameType; //Ö¡ÀàÐÍ
-	public static ByteCache videoDataCache = null; //»º´æÍ¼ÏñÊý¾Ý¶ÔÏó
-	private static byte[] naluData = new byte[width*height*3]; //Òª»º´æµÄÊý¾Ý
-	private static int naluDataLen = 4; //Òª»º´æµÄÊý¾Ý´óÐ¡
+	public static byte frameType; //Ö¡ï¿½ï¿½ï¿½ï¿½
+	public static ByteCache videoDataCache = null; //ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½Ý¶ï¿½ï¿½ï¿½
+	private static byte[] naluData = new byte[width*height*3]; //Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	private static int naluDataLen = 4; //Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý´ï¿½Ð¡
 	
-	//P2PÍ¨Ñ¶¿âJNI½Ó¿Ú
+	//P2PÍ¨Ñ¶ï¿½ï¿½JNIï¿½Ó¿ï¿½
 	private native int naInitialize(String classPath);
 	private native int naTerminate();
 	private native int naOpenTunnel(String peerId);
@@ -44,21 +45,21 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * Í¨µÀ³õÊ¼»¯
+	 * Í¨ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
 	 */
 	public int tunnelInitialize(String classPath) {
 		return naInitialize(classPath);
 	}
 
 	/**
-	 * Í¨µÀÖÕÖ¹
+	 * Í¨ï¿½ï¿½ï¿½ï¿½Ö¹
 	 */
 	public int tunnelTerminate() {
 		return naTerminate();
 	}
 
 	/**
-	 * ´ò¿ªÍ¨µÀ
+	 * ï¿½ï¿½Í¨ï¿½ï¿½
 	 */
 	public int openTunnel(String peerId) {
 		return naOpenTunnel(peerId);
@@ -67,7 +68,7 @@ public class TunnelCommunication {
 	private static File myData = null;
 	
 	/**
-	 * ¹Ø±ÕÍ¨µÀ
+	 * ï¿½Ø±ï¿½Í¨ï¿½ï¿½
 	 */
 	public int closeTunnel(String peerId) {
 		if (videoDataCache != null) {
@@ -81,7 +82,7 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * ÇëÇóÊÓÆµÊý¾Ý
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½
 	 */
 	public int askMediaData(String peerId) {
 		if (videoDataCache == null) {
@@ -92,7 +93,7 @@ public class TunnelCommunication {
 	}
 	
 	/**
-	 * ·¢ËÍhandlerÏûÏ¢
+	 * ï¿½ï¿½ï¿½ï¿½handlerï¿½ï¿½Ï¢
 	 */
 	private static void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
 		Message msg = new Message();
@@ -102,10 +103,10 @@ public class TunnelCommunication {
 	}
 	
 	/**
-	 * ×ª·¢¸øÖÕ¶ËÊý¾Ý
+	 * ×ªï¿½ï¿½ï¿½ï¿½ï¿½Õ¶ï¿½ï¿½ï¿½ï¿½
 	 */
 	public void SendToPeer(String peerId, String data) {
-		System.out.print("MyDebug: 1¡¢SendToPeer(): "+data);
+		System.out.print("MyDebug: 1ï¿½ï¿½SendToPeer(): "+data);
 		
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", peerId);
@@ -115,7 +116,7 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * ÊÕµ½ÊÓÆµÊý¾Ý
+	 * ï¿½Õµï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½
 	 */
 	public void RecvVideoData(String peerID, byte[] data) {
 		int dataLen = data.length;
@@ -145,7 +146,7 @@ public class TunnelCommunication {
 	}
 	
 	/**
-	 * ÊÕµ½ÒôÆµÊý¾Ý
+	 * ï¿½Õµï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½
 	 */
 	public void RecvAudioData(String peerID,byte [] data) {
 		

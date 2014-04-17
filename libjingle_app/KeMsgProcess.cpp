@@ -140,7 +140,7 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
 {
     switch(msg->message_id){
     case MSG_HEART_SENDED:{
-        LOG(INFO)<<"heart beat "<<heart_count_;
+        LOG(LS_VERBOSE)<<"heart beat "<<heart_count_;
         if(heart_count_++ > kHeartStop){
             SignalHeartStop(peer_id_);
             break;

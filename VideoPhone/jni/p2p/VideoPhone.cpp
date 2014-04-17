@@ -20,7 +20,8 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
 
 	jniPeer = new JniPeerConnection();
 	client = new KeJniTunnelClient();
-	client->Initialize(jniPeer);
+
+	client->Init(jniPeer);
 
 	return 0;
 }
@@ -45,7 +46,8 @@ jint naOpenTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
 	}
 
 	const char * pid = env->GetStringUTFChars(peer_id, NULL);
-	return client->ConnectToPeer(pid);
+
+	return client->OpenTunnel(pid);
 }
 jint naMessageFromPeer(JNIEnv *env, jobject thiz, jstring peer_id, jstring message){
 		if (jniPeer == NULL) {
