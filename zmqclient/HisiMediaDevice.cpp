@@ -22,6 +22,12 @@
 
 #define AUDIO1_DATA				"audio_data"
 
+#define PTZ_MOVE_LEFT "ptz_move_left"
+#define PTZ_MOVE_RIGTE "ptz_move_right"
+#define PTZ_MOVE_UP "ptz_move_up"
+#define PTZ_MOVE_DOWN "ptz_move_down"
+#define PTZ_STOP "ptz_stop"
+
 const int kVideoSampleRate = 40;//40 ms per frame
 const int kAudioSampleRate = 20;//20 ms
 
@@ -243,13 +249,21 @@ int HisiMediaDevice::GetVideoFrameType()
     memset(buf,0,1024);
     Raycomm_GetParam(VIDEO1_RESOLUTION,buf,0);
     std::string resolution(buf);
-    LOG(INFO)<<"Raycomm_GetParam buf = "<<resolution;
     if(resolution.compare("352x288") == 0){
         video_frame_type_ = 2;
     }else if(resolution.compare("704x576") == 0){
         video_frame_type_ = 0;
     }else if(resolution.compare("1280x720") == 0){
         video_frame_type_ = 10;
+    }else if(resolution.compare("176x144") == 0){
+        video_frame_type_ = 1;
+    }else if(resolution.compare("704x288") == 0){
+        video_frame_type_ = 3;
+    }else if(resolution.compare("320x240") == 0){
+        video_frame_type_ = 4;
+    }else {
+        LOG(WARNING)<<"GetVideoFrameType get not defined frame resolution "<<resolution;
+        video_frame_type_ = 2;
     }
     return video_frame_type_;
 }

@@ -45,7 +45,7 @@ bool KeMsgProcessContainer::Init(kaerp2p::PeerConnectionClientInterface *client)
     return this->Init(t);
 }
 
-int KeMsgProcessContainer::OpenTunnel(const std::string &peer_id)
+int KeMsgProcessContainer::OpenTunnel(const std::string & peer_id)
 {
     ASSERT(terminal_);
     int ret =  terminal_->OpenTunnel(peer_id);
@@ -60,6 +60,7 @@ int KeMsgProcessContainer::CloseTunnel(const std::string &peer_id)
     ASSERT(terminal_);
     return terminal_->CloseTunnel(peer_id);
 }
+
 
 void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
@@ -151,55 +152,39 @@ KeTunnelClient::KeTunnelClient()
 
 }
 
-int KeTunnelClient::AskPeerVideo(std::string peer_id)
+int KeTunnelClient::SendCommand(const std::string &peer_id, const std::string &command)
+{
+    Json::Reader reader;
+    Json::Value jmessage;
+    if (!reader.parse(command, jmessage)) {
+        LOG(WARNING) << "command format error. " << msg;
+        return 101;
+    }
+    jmessage[kTunnelTypeName] = "tunnel";
+
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+
+    return this->terminal_->SendByRouter(peer_id,msg);
+}
+
+int KeTunnelClient::StartPeerMedia(std::string peer_id, bool toStart)
 {
     KeMessageProcessClient * process =dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
     if(process == NULL){
         LOG(WARNING) << "process not found "<<peer_id;
         return -1;
     }
-    process->AskVideo();
+    if(toStart){
+        process->AskVideo(0,0);
+    }
+    else{
+        process->AskVideo(1,1);
+    }
     return 0;
 }
-/**
- * @brief KeTunnelClient::PeerVideoClarity
- * @param peer_id
- * @param clarity --- 1:low,2:normal,3:heigh. 1~3 is to set clarity.
- *                      101:get camera clarity
- * @return
- */
-int KeTunnelClient::PeerVideoClarity(std::string peer_id, int clarity)
-{
-    Json::StyledWriter writer;
-    Json::Value jmessage;
-    jmessage[kTunnelTypeName] = "tunnel";
-    jmessage[kTunnelCommandName] = "video_clarity";
-    jmessage["value"] = clarity;
-    std::string msg = writer.write(jmessage);
-    LOG(INFO) <<"SetPeerVideoClarity msg is " << msg;
-    return this->terminal_->SendByRouter(peer_id,msg);
-}
-/**
- * @brief KeTunnelClient::QueryRecordList
- * @param peer_id
- * @param condition : condition is a json like :
- *  {"starttime":"20140417183600","endtime":"20140418183600","offset""0,"query_num":30}
- *  the query_num's max size is 30.
- *
- * @return
- */
-int KeTunnelClient::QueryRecordList(std::string peer_id, const std::string &condition)
-{
-    Json::StyledWriter writer;
-    Json::Value jmessage;
-    jmessage[kTunnelTypeName] = "tunnel";
-    jmessage[kTunnelCommandName] = "query_record";
-    jmessage["condition"] = condition;
-    std::string msg = writer.write(jmessage);
-    LOG(INFO) <<"SetPeerVideoClarity msg is " << msg;
-    return this->terminal_->SendByRouter(peer_id,msg);
 
-}
+
 
 void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
@@ -219,13 +204,10 @@ void KeTunnelClient::OnRouterMessage(const std::string &peer_id, const std::stri
         return;
     }
     std::string command;
-    GetStringFromJsonObject(jmessage, kTunnelCommandName, &command);
-    if(command.compare("video_clarity") == 0){
-        int clarity;
-        GetIntFromJsonObject(jmessage,"value",&clarity);
-        OnRecvVideoClarity(peer_id,clarity);
-    }else{
-        LOG(WARNING)<<"receive unexpected command from "<<peer_id;
+    bool ret = GetStringFromJsonObject(jmessage, kTunnelCommandName, &command);
+    if(!ret){
+        LOG(WARNING)<<"get command error"<<peer_id;
+        return;
     }
 
 }
@@ -240,11 +222,6 @@ void KeTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *dat
     LOG(INFO)<<__FUNCTION__;
 }
 
-void KeTunnelClient::OnRecvVideoClarity(const std::string &peer_id, int clarity)
-{
-    LOG(INFO)<<"KeTunnelClient::OnRecvVideoClarity---" <<peer_id<<" clarity:"<<clarity ;
-
-}
 
 
 void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
@@ -273,10 +250,29 @@ void KeTunnelCamera::OnProcessMediaRequest(KeMessageProcessCamera *process, int 
 
 }
 
-void KeTunnelCamera::OnRecvVideoClarity(const std::string &peer_id, int clarity)
+void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
 {
     LOG(INFO)<<"KeTunnelCamera::OnRecvVideoClarity---" <<peer_id<<" clarity:"<<clarity ;
+}
 
+void KeTunnelCamera::OnRecvRecordQuery( std::string peer_id,  std::string condition)
+{
+    LOG(INFO)<<"KeTunnelCamera::OnRecvRecordQuery---" <<peer_id<<" query:"<<condition ;
+}
+
+void KeTunnelCamera::SetPtz(std::string ptz_key, int param)
+{
+    LOG(INFO)<<"KeTunnelCamera::SetPtz---key:" <<ptz_key<<" param:"<<param ;
+}
+
+void KeTunnelCamera::OnRecvGetWifiInfo(std::string peer_id)
+{
+    LOG(INFO)<<"KeTunnelCamera::OnRecvGetWifiInfo---from:" <<ptz_key;
+}
+
+void KeTunnelCamera::SetWifiInfo(std::string peer_id, std::string param)
+{
+    LOG(INFO)<<"KeTunnelCamera::SetWifiInfo---from:" <<peer_id<<" param:"<<param ;
 }
 
 void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::string &msg)
@@ -288,12 +284,29 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::stri
         return;
     }
     std::string command;
-    GetStringFromJsonObject(jmessage, kTunnelCommandName, &command);
+    bool ret = GetStringFromJsonObject(jmessage, kTunnelCommandName, &command);
+    if(!ret){
+        LOG(WARNING)<<"get command error-"<<command<<" from"<<peer_id ;
+        return;
+    }
     if(command.compare("video_clarity") == 0){
         int clarity;
         GetIntFromJsonObject(jmessage,"value",&clarity);
         OnRecvVideoClarity(peer_id,clarity);
-    }else{
+    }else if(command.compare("ptz") == 0){
+        std::string ptz_control;
+        GetStringFromJsonObject(jmessage,"control",&ptz_control);
+        int param;
+        GetIntFromJsonObject(jmessage,"param",&param);
+        std::string ptz_key = "ptz_";
+        ptz_key += ptz_control;
+        this->SetPtz(ptz_key,param);
+    }else if(command.compare("query_record") == 0){
+        std::string condition;
+        GetStringFromJsonObject(jmessage,"result",&condition);
+        OnRecvRecordQuery(peer_id,condition);
+    }
+    else{
         LOG(WARNING)<<"receive unexpected command from "<<peer_id;
     }
 

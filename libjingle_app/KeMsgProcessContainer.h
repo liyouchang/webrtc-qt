@@ -39,17 +39,28 @@ protected:
 class KeTunnelClient:public KeMsgProcessContainer{
 public:
     KeTunnelClient();
-    virtual int AskPeerVideo(std::string peer_id);
-    virtual int PeerVideoClarity(std::string peer_id,int clarity);
-    virtual int QueryRecordList(std::string peer_id,const std::string & condition);
+    /**
+     * @brief SendCommand
+     * @param peer_id
+     * @param command --- the message send to another peer
+     * @return ---0 : success, 101 : command format error,
+     */
+    int SendCommand(const std::string &peer_id,const std::string & command);
+    /**
+     * @brief StartPeerMedia
+     * @param peer_id
+     * @param toStart---true:start media,false:stop media
+     * @return
+     */
+    virtual int StartPeerMedia( std::string  peer_id,bool toStart = true);
+
+
     virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
     virtual void OnRouterMessage(const std::string &peer_id,const std::string& msg);
 
 protected:
     virtual void OnRecvAudioData(const std::string & peer_id,const char * data,int len);
     virtual void OnRecvVideoData(const std::string & peer_id,const char * data,int len);
-    virtual void OnRecvVideoClarity(const std::string & peer_id,int clarity);
-    //virtual void OnRecvRecordList(const std::string & peer_id,const std::string & recordArray);
 };
 
 class KeTunnelCamera:public KeMsgProcessContainer{
@@ -62,7 +73,12 @@ protected:
     virtual void OnProcessMediaRequest(KeMessageProcessCamera * process,int video,int audio);
     sigslot::signal2<const char *, int > SignalVideoData;
     sigslot::signal2<const char *, int > SignalAudioData;
-    virtual void OnRecvVideoClarity(const std::string & peer_id,int clarity);
+
+    virtual void OnRecvVideoClarity( std::string peer_id,int clarity);
+    virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
+    virtual void SetPtz( std::string  ptz_key,int param);
+    virtual void OnRecvGetWifiInfo(std::string peer_id);
+    virtual void SetWifiInfo(std::string peer_id,std::string param);
 
 };
 

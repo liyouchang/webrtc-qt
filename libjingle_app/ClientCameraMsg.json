@@ -1,0 +1,94 @@
+1. query camera record
+client-->camera
+{
+    "type":"tunnel",
+"command":"query_record",
+"condition":{
+        "start_time":"20140417175100", //query start time
+        "end_time":"20140418175500",   //query stop time
+        "offset":0,
+        "to_query":30
+    }
+}
+
+camera-->client
+{
+    "type":"tunnel",
+    "command":"query_record",
+    "result":{
+        "start_time":"20140417175100", //query start time
+        "end_time":"20140418175500",   //query stop time
+        "offset":0,
+        "to_query":30,
+        "total_num":100,    //the total records from startime to endtime
+        "record_list":[{"file_name":"",//the record dir stored in camera
+            "file_date":"20140417175100",//the record file start  time
+                "file_size":256,//record file size
+            }]
+    }
+}
+
+2.ptz control message
+client-->camera
+{
+    "type":"tunnel",
+    "command":"ptz",
+    "control":"move_left",//this could be "move_lef","move_right","move_up","move_down","move_stop"
+            // and others
+    "param":10 //the param need to send to camera,for the move control this param stand for move speed
+}
+
+3.video clarity
+client-->camera
+{
+    "type":"tunnel",
+    "command":"video_clarity",
+    "value":1,    //1:low,2:normal,3:heigh. 1~3 is to set clarity.
+            //101:get camera clarity
+}
+
+camera-->client
+{
+    "type":"tunnel",
+    "command":"video_clarity",
+    "value":1,    //1:low,2:normal,3:heigh.
+}
+
+4.get camera wifi info
+client-->camera
+{
+    "type":"tunnel",
+    "command":"wifi_info"
+}
+camera-->client
+{
+    "type":"tunnel",
+    "command":"wifi_info",
+    "info":{
+        "ssid":"",//the ssid of wifi
+        "quality":0,
+        "enc":1,
+        "mode":1
+    }
+}
+
+5. set camera wifi
+client-->camera
+{
+    "type":"tunnel",
+    "command":"set_wifi",
+    "param":{
+        "enable":0,//enable wifi 1,disable wifi 0
+        "ssid":"",//ssid of wifi
+        "key":"",//password of wifi
+        "auth":0,//0-none auth,1-wep ,2-wpa,3-wpa2
+        "enc":0,//0-enc tkip,1-enc aes
+        "mode":1
+    }
+}
+camera-->clent
+{
+    "type":"tunnel",
+    "command":"set_wifi",
+    "result":1,//0 false,1 success
+}

@@ -64,4 +64,7 @@ HEADERS += \
     KeMsgProcessContainer.h \
     PeerTerminalInterface.h
 
+OTHER_FILES += \
+    ClientCameraMsg.json
+
 

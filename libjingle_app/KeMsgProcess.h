@@ -70,7 +70,7 @@ class KeMessageProcessClient: public KeMsgProcess
 public:
     KeMessageProcessClient(std::string peer_id);
 
-    void AskVideo();
+    void AskVideo(int video, int audio);
 
     sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;

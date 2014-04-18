@@ -244,7 +244,7 @@ KeMessageProcessClient::KeMessageProcessClient(std::string peer_id):
 
 }
 
-void KeMessageProcessClient::AskVideo()
+void KeMessageProcessClient::AskVideo(int video,int audio)
 {
     talk_base::Buffer sendBuf;
     int msgLen = sizeof(KEVideoServerReq);
@@ -257,8 +257,8 @@ void KeMessageProcessClient::AskVideo()
     pReqMsg->clientID = 0;
     pReqMsg->channelNo = 1;
     pReqMsg->videoID = 0;
-    pReqMsg->video = 0;
-    pReqMsg->listen = 0;
+    pReqMsg->video = video;
+    pReqMsg->listen = audio;
     pReqMsg->talk = 0;
     pReqMsg->protocalType = 0;
     pReqMsg->transSvrIp = 0;

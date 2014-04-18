@@ -8,6 +8,7 @@
 #include <vector>
 //one terminal contains one PeerConnectionClient and some P2PConductor
 
+const int kInfiniteTunnel = -1;
 
 
 typedef talk_base::scoped_refptr<kaerp2p::P2PConductor> ScopedTunnel;
@@ -18,7 +19,7 @@ class PeerTerminal:public PeerTerminalInterface, public sigslot::has_slots<>
 public:
     PeerTerminal();
     //need a client that has been login
-    int Initialize(kaerp2p::PeerConnectionClientInterface * client);
+    int Initialize(kaerp2p::PeerConnectionClientInterface * client,int max_tunnel = kInfiniteTunnel);
 
     virtual int OpenTunnel(const std::string &peer_id);
     virtual int CloseTunnel(const std::string &peer_id);

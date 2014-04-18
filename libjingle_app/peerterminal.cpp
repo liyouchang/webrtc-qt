@@ -2,15 +2,16 @@
 #include "KeMessage.h"
 #include "talk/base/json.h"
 
+
 PeerTerminal::PeerTerminal():
     client_(0)
 {
 
 }
 
-int PeerTerminal::Initialize(kaerp2p::PeerConnectionClientInterface * client)
+int PeerTerminal::Initialize(kaerp2p::PeerConnectionClientInterface * client, int max_tunnel)
 {
-    max_tunnel_num_ = 4;
+    max_tunnel_num_ = max_tunnel;
     this->client_ = client;
     //int ret = client_->Connect(router,id);
     client_->SignalMessageFromPeer.connect(this,&PeerTerminal::OnRouterReadData);
@@ -214,7 +215,7 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel){
         return aTunnel;
-    }else if(tunnels_.size() <= max_tunnel_num_){
+    }else if(tunnels_.size() <= max_tunnel_num_ || max_tunnel_num_ == kInfiniteTunnel){
         aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
         aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
         aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
