@@ -12,14 +12,22 @@ namespace talk_base {
 class Thread;
 }
 
+class KeMsgProcessContainer;
+class KeTunnelCamera;
+class KeTunnelClient;
 class KeMsgProcess:public talk_base::MessageHandler,public sigslot::has_slots<>
 {
 public:
+    enum {
+        MSG_HEART_SENDED,
+        MSG_HEART_RECEIVED
+    };
+    void OnMessage(talk_base::Message *msg);
 
-    KeMsgProcess(std::string peer_id);
+    KeMsgProcess(std::string peer_id,KeMsgProcessContainer * container);
     sigslot::signal3<const std::string &,const char * ,int> SignalNeedSendData;
     void OnTunnelMessage(const std::string & peer_id,talk_base::Buffer & msg);
-    std::string GetPeerID(){ return peer_id_;}
+    std::string peer_id(){ return peer_id_;}
 
     void StartHeartBeat();
     sigslot::signal1<const std::string &> SignalHeartStop;
@@ -28,6 +36,9 @@ protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     void SendHeart();
 
+    KeMsgProcessContainer *container_;
+
+private:
     std::string peer_id_;
     //PeerTerminalInterface * terminal_;
     //message extract param
@@ -39,12 +50,6 @@ protected:
     //heart beat param
     talk_base::Thread * heart_thread_;
     int heart_count_;
-public:
-    enum {
-        MSG_HEART_SENDED,
-        MSG_HEART_RECEIVED
-    };
-    void OnMessage(talk_base::Message *msg);
 
 };
 
@@ -52,31 +57,34 @@ public:
 class KeMessageProcessCamera: public KeMsgProcess
 {
 public:
-    KeMessageProcessCamera(std::string peer_id);
-    sigslot::signal3<KeMessageProcessCamera *,int,int> SignalRecvAskMediaMsg;
+    KeMessageProcessCamera(std::string peer_id,KeTunnelCamera * container);
     void OnVideoData(const char *data, int len);
     void OnAudioData(const char * data,int len);
-    bool start_video_;
-    bool start_audio_;
-
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
-    void RecvAskMediaMsg(talk_base::Buffer &msgData);
+    virtual void RecvAskMediaMsg(talk_base::Buffer &msgData);
+    virtual void RecvPlayFile(talk_base::Buffer &msgData);
 
 };
 
 class KeMessageProcessClient: public KeMsgProcess
 {
 public:
-    KeMessageProcessClient(std::string peer_id);
+    KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
 
-    void AskVideo(int video, int audio);
+    void AskVideo(int vid,int video, int audio);
+    void ReqestPlayFile(const char * file_name);
 
     sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
+
+    sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;
+    sigslot::signal2<const std::string &,int > SignalRecordPlayStatus;
+
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
-
+    virtual void OnRecvRecordMsg(talk_base::Buffer & msgData);
+    virtual void OnRecvMediaData(talk_base::Buffer & msgData);
 };
 
 

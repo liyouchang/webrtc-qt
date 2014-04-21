@@ -8,7 +8,7 @@ enum KEMsgType
     KEDevMsg_AlarmSenser = 0x0F,
     KEDevMsg_SearchOnlineDevice = 0x49,
     KEMSG_RecordFileList = 0x53,
-    KEMSG_REQUEST_DOWNLOAD_FILE = 0x54,
+    KEMSG_REQUEST_PLAY_FILE = 0x54,
     KEMSG_RecordPlayData = 0x55,
     DevMsg_GetPTZParam = 0x73,
     DevMsg_SerialData = 0x46,
@@ -326,11 +326,11 @@ struct KEPlayRecordFileReq
     int videoID;
     int clientID;
     char channelNo;
-    char fileType;//0 无用
+    char fileType;
     int fileNo;//1 无用
     char startTime[6];//无用
     int clientIp;//0或本机ip
-    char protocalType;//1 无用
+    char protocalType;
     char fileData[80];
 };
 
@@ -342,7 +342,7 @@ struct KEPlayRecordDataHead
     int videoID;
     int clientID;
     char channelNo;
-    char resp;//13 后面有数据 ，6 数据结束
+    char resp;//13 后面有数据 ，6 数据结束,5 start download,4 no file
 };
 
 //device ----> client

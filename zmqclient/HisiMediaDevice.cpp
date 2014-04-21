@@ -55,8 +55,6 @@ HisiMediaDevice::~HisiMediaDevice()
 
 bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
 {
-    media_thread_ = new talk_base::Thread();
-    media_thread_->Start();
 
     int ret = Raycomm_InitParam();
     LOG(INFO)<<"Raycomm_InitParam : "<<ret;
@@ -65,23 +63,19 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
     LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
 
     LOG(INFO)<<"vidoe frame type "<<GetVideoFrameType();
+
+
+    media_thread_ = new talk_base::Thread();
+    media_thread_->Start();
+
+    //start get media
+    media_thread_->Post(this,MSG_MEDIA_CONTROL,new MediaControlData(0,0));
+
+
     KeTunnelCamera::Init(client);
 }
 
 
-void HisiMediaDevice::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
-{
-    //media_thread_->Send(this,HisiMediaDevice::MSG_STOP_VIDEO);
-    KeTunnelCamera::OnTunnelClosed(t,peer_id);
-
-    int video_count,audio_count;
-    CountVideoAndAudio(video_count,audio_count);
-    int video_start = 0;
-    int audio_start = 0;
-    if(video_count == 0) video_start = 1;
-    if(audio_count == 0) audio_start = 1;
-    media_thread_->Post(this,MSG_MEDIA_CONTROL,new MediaControlData(video_start,audio_start));
-}
 
 void HisiMediaDevice::SendVideoFrame(const char *data, int len)
 {
@@ -118,28 +112,7 @@ void HisiMediaDevice::SendAudioFrame(const char *data, int len)
     frameBuf.AppendData(nalhead,4);
     frameBuf.AppendData(data,len);
     SignalAudioData(frameBuf.data(),frameBuf.length());
-
 }
-
-void HisiMediaDevice::CountVideoAndAudio(int &video_num, int &audio_num)
-{
-    int cv = 0;
-    int ca = 0;
-    std::vector<KeMsgProcess *>::iterator it = processes_.begin();
-    for (; it != processes_.end(); ++it) {
-        KeMessageProcessCamera * pc = static_cast<KeMessageProcessCamera *>(*it);
-        if(pc->start_video_){
-            cv++;
-        }
-        if(pc->start_audio_){
-            ca++;
-        }
-    }
-    video_num = cv;
-    audio_num = ca;
-}
-
-
 
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)
 {
@@ -148,24 +121,24 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         MediaControlData* mcd = static_cast<MediaControlData*>(msg->pdata);
         if(mcd->video == 0 && video_handle_ == 0){
             video_handle_ =  Raycomm_ConnectMedia(VIDEO1_DATA,0);
-            LOG(INFO)<<"start video" <<video_handle_;
+            LOG(INFO)<<"HisiMediaDevice start video" <<video_handle_;
             media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO);
         }
         else if(mcd->video != 0 && video_handle_ != 0){
             Raycomm_DisConnectMedia(video_handle_);
-            LOG(INFO)<<"stop video";
+            LOG(INFO)<<"HisiMediaDevice stop video";
             video_handle_ = 0;
         }
 
         if(mcd->audio == 0 && audio_handle_ == 0 ){
             audio_handle_ =  Raycomm_ConnectMedia(AUDIO1_DATA,0);
-            LOG(INFO)<<"start audio" <<audio_handle_;
+            LOG(INFO)<<"HisiMediaDevice start audio" <<audio_handle_;
             media_thread_->Post(this,HisiMediaDevice::MSG_SEND_AUDIO);
         }
         else if(mcd->audio != 0 && audio_handle_ != 0){
 
             Raycomm_DisConnectMedia(audio_handle_);
-            LOG(INFO)<<"stop audio" ;
+            LOG(INFO)<<"HisiMediaDevice stop audio" ;
             audio_handle_ = 0;
         }
 
@@ -198,7 +171,6 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         if(media_len > 0){
             this->SendAudioFrame(media_buffer_,media_len);
             media_thread_->Post(this,HisiMediaDevice::MSG_SEND_AUDIO);
-
         }else{
             media_thread_->PostDelayed(kAudioSampleRate,this,
                                        HisiMediaDevice::MSG_SEND_AUDIO);
@@ -224,23 +196,6 @@ void HisiMediaDevice::SetVideoResolution(std::string r)
     LOG(INFO)<<"HisiMediaDevice::SetVideoResolution ---" << command
             << ";vidoe type now is "<<video_frame_type_;
 
-}
-
-
-void HisiMediaDevice::OnProcessMediaRequest(KeMessageProcessCamera *process, int video, int audio)
-{
-
-    int video_count,audio_count;
-    CountVideoAndAudio(video_count,audio_count);
-
-    int video_stop = 0;
-    int audio_stop = 0;
-    if(video_count == 0) video_stop = 1;
-    if(audio_count == 0) audio_stop = 1;
-    media_thread_->Post(this,MSG_MEDIA_CONTROL,new MediaControlData(video_stop,audio_stop));
-
-
-    KeTunnelCamera::OnProcessMediaRequest(process,video,audio);
 }
 
 int HisiMediaDevice::GetVideoFrameType()

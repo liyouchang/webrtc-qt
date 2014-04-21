@@ -65,7 +65,7 @@ camera-->client
     "type":"tunnel",
     "command":"wifi_info",
     "info":{
-        "ssid":"",//the ssid of wifi
+        "ssid":"", //the ssid of wifi
         "quality":0,
         "enc":1,
         "mode":1
@@ -78,11 +78,11 @@ client-->camera
     "type":"tunnel",
     "command":"set_wifi",
     "param":{
-        "enable":0,//enable wifi 1,disable wifi 0
-        "ssid":"",//ssid of wifi
-        "key":"",//password of wifi
-        "auth":0,//0-none auth,1-wep ,2-wpa,3-wpa2
-        "enc":0,//0-enc tkip,1-enc aes
+        "enable":0,  //enable wifi 1,disable wifi 0
+        "ssid":"",  //ssid of wifi
+        "key":"",  //password of wifi
+        "auth":0,  //0-none auth,1-wep ,2-wpa,3-wpa2
+        "enc":0,  //0-enc tkip,1-enc aes
         "mode":1
     }
 }
