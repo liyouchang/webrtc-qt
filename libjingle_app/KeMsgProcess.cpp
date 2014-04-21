@@ -163,7 +163,7 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
 
 
 KeMessageProcessCamera::KeMessageProcessCamera(std::string peer_id, KeTunnelCamera *container):
-    KeMsgProcess(peer_id,container)
+    KeMsgProcess(peer_id,container),video_started_(false),audio_started_(false)
 {
 
 }
@@ -193,17 +193,22 @@ void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
     KEVideoServerReq * msg = (KEVideoServerReq *)msgData.data();
     int video = msg->video;
     KeTunnelCamera * camera = static_cast<KeTunnelCamera *>(container_);
-    if(video == 0){
-        camera->SignalVideoData.connect(this , &KeMessageProcessCamera::OnVideoData);
-    }else{
+    if(video != 0){
         camera->SignalVideoData.disconnect(this);
+        this->video_started_ = false;
+    }else if(!video_started_){
+        video_started_ = true;
+        camera->SignalVideoData.connect(this , &KeMessageProcessCamera::OnVideoData);
     }
 
     int audio = msg->listen;
-    if(audio == 0){
-        camera->SignalAudioData.connect(this,&KeMessageProcessCamera::OnAudioData);
-    }else{
+    if(audio != 0){
         camera->SignalAudioData.disconnect(this);
+        this->audio_started_ = false;
+    }else if(!audio_started_){
+        audio_started_ = true;
+        camera->SignalAudioData.connect(this,&KeMessageProcessCamera::OnAudioData);
+
     }
 }
 

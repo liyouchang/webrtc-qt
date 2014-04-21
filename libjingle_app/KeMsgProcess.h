@@ -64,6 +64,9 @@ protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     virtual void RecvAskMediaMsg(talk_base::Buffer &msgData);
     virtual void RecvPlayFile(talk_base::Buffer &msgData);
+private:
+    bool video_started_;
+    bool audio_started_;
 
 };
 
