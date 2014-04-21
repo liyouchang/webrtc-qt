@@ -21,7 +21,7 @@ public:
     virtual bool Init(kaerp2p::PeerConnectionClientInterface * client);
     virtual int OpenTunnel(const std::string &peer_id);
     virtual int CloseTunnel(const std::string &peer_id);
-
+    virtual bool IsTunnelOpened(const std::string &peer_id);
     virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
     virtual void OnTunnelClosed(PeerTerminalInterface * t,const std::string & peer_id);
     virtual void OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg);

@@ -5,12 +5,19 @@
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
       connection_(new   PeerConnectionClientDealer()),
-      tunnel_(new KeQtTunnelClient())
+      tunnel_(new KeQtTunnelClient()),
+      is_inited(false)
 {
     QVBoxLayout *vbox = new QVBoxLayout( this );
     vbox->setMargin(0);
     videoWall = new VideoWall(this);
     vbox->addWidget( videoWall );
+    m_savePath = QDir::currentPath();
+
+    QObject::connect(videoWall,&VideoWall::SigNeedStopPeerPlay,
+                     this,&KePlayerPlugin::StopVideo);
+    QObject::connect(this,&KePlayerPlugin::TunnelClosed,
+                     videoWall,&VideoWall::StopPeerPlay);
 
 }
 
@@ -37,12 +44,15 @@ QString KePlayerPlugin::PlayLocalFile()
 
 int KePlayerPlugin::Initialize(QString routerUrl)
 {
+    if(is_inited){
+        return 10002;
+    }
     //int ret = connection_->Connect("tcp://192.168.40.191:5555","");
     int ret = connection_->Connect(routerUrl.toStdString(),"");
     if(ret != 0){
         return ret;
     }
-    tunnel_->Initialize(connection_.get());
+    tunnel_->Init(connection_.get());
     QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvVideoData,
                      this->videoWall,&VideoWall::OnRecvMediaData);
     QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvAudioData,
@@ -51,42 +61,58 @@ int KePlayerPlugin::Initialize(QString routerUrl)
                      this,&KePlayerPlugin::TunnelOpened);
     QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigTunnelClosed,
                      this,&KePlayerPlugin::TunnelClosed);
+    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecordStatus,
+                     this,&KePlayerPlugin::RecordStatus);
+    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvPeerMsg,
+                     this,&KePlayerPlugin::RecvPeerMsg);
 
+
+
+
+    this->is_inited = true;
     return 0;
 }
 
 int KePlayerPlugin::StartVideo(QString peer_id)
 {
     std::string str_id = peer_id.toStdString();
-    tunnel_->AskPeerVideo(str_id);
-    return 0;
+    int ret =  tunnel_->StartPeerMedia(str_id,true);
+    if(ret != 0){
+        return ret;
+    }
+    int index = videoWall->SetPeerPlay(peer_id);
+    qDebug()<<"KePlayerPlugin::StartVideo play index is "<< index;
+
+
 }
 
 int KePlayerPlugin::StopVideo(QString peer_id)
 {
-return 0;
+    if(peer_id.isEmpty()){
+        return 10001;
+    }
+    videoWall->StopPeerPlay(peer_id);
+    std::string str_id = peer_id.toStdString();
+    return tunnel_->StartPeerMedia(str_id,false);
 }
 
-void KePlayerPlugin::setText(const QString &string)
+int KePlayerPlugin::SendCommand(QString peer_id, QString msg)
 {
-    //         if ( !requestPropertyChange( "text" ) )
-    //             return;
-    //         propertyChanged( "text" );
+    std::string str_id = peer_id.toStdString();
+    std::string str_msg = msg.toStdString();
+    return tunnel_->SendCommand(str_id,str_msg);
 }
 
-void KePlayerPlugin::paintEvent(QPaintEvent *event)
+void KePlayerPlugin::setSavePath(const QString &path)
 {
-    qDebug()<<"KePlayerPlugin::paintEvent"<<event->rect();
-    this->videoWall->setGeometry(event->rect());
-
+    this->m_savePath = path;
 }
 
-void KePlayerPlugin::resizeEvent(QResizeEvent *event)
+QString KePlayerPlugin::savePath() const
 {
-    qDebug()<<"KePlayerPlugin::resizeEvent"<<event->size();
-    this->videoWall->resize(event->size());
-
+    return m_savePath;
 }
+
 
 int KePlayerPlugin::OpenTunnel(QString peer_id)
 {

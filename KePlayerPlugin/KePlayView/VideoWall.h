@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QVector>
+#include <QMap>
+
 #define MAX_AVPLAYER 64
 class AVService;
 class PlayWidget;
@@ -52,24 +54,31 @@ public:
     void BuildLayout();
     void PlayLocalFile();
     void ExchangePlayWidget(int from,int to);
+    int SetPeerPlay(QString peer_id);
+    //player_num == -1 for the current player
+    QString GetPeerPlay(int player_num = -1);
+    void StopPeerPlay(QString peer_id);
+    QRect m_rect;
+
+signals:
+    void SigNeedStopPeerPlay(QString peer_id);
 public slots:
     void setSelectedPlayer(int newSelected);
     void deleteItem();
     void showfullScreenWall();
     void showNormalScreenWall();
     void OnRecvMediaData(QString peer_id, QByteArray data);
-
-protected:
+private:
     //AVService * playSource;
     QGridLayout *mainLayout;
     PlayWidget * players[MAX_AVPLAYER];
     int m_selectedPlayer;
     int m_divType;
     QVector<int> m_layoutList;
+    QMap<QString,int> peer_play_map_;
 
     QMenu *itemMenu;
     QPoint startPos;
-
     QAction *deleteAction;
 private:
     void createActions();
@@ -85,7 +94,6 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *);
     void keyPressEvent(QKeyEvent *e);
-    void paintEvent(QPaintEvent *);
     void contextMenuEvent(QContextMenuEvent *event);
 };
 

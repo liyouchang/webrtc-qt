@@ -71,17 +71,23 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
         qWarning("VideoWall::SetDivision-----devision type error");
         return;
     }
+    m_rect= rect();
+    qDebug()<<"rect is "<<m_rect;
     if(m_selectedPlayer >= splitNum){
         this->setSelectedPlayer(0);
     }
-    m_divType = divType;
+
     for(int i=0;i<splitNum;i++){
         this->players[i]->show();
     }
-    for(int i=splitNum;i<MAX_AVPLAYER;i++){
-        this->players[i]->hide();
-    }
+    m_divType = divType;
     this->BuildLayout();
+
+    for(int i=splitNum;i<MAX_AVPLAYER;i++){
+        emit SigNeedStopPeerPlay(GetPeerPlay(i));
+        this->players[i]->resize(0,0);
+    }
+    this->update();
 
 }
 
@@ -179,12 +185,53 @@ void VideoWall::ExchangePlayWidget(int from, int to)
 
 }
 
+int VideoWall::SetPeerPlay(QString peer_id)
+{
+    int play_index = peer_play_map_.value(peer_id,-1);
+    if(play_index == -1){
+        QString played = GetPeerPlay(-1);
+        if(!played.isEmpty()){
+            SigNeedStopPeerPlay(played);
+        }
+        play_index = m_selectedPlayer;
+        peer_play_map_.insert(peer_id,m_selectedPlayer);
+        return play_index;//free to play
+
+    }
+    else {
+        this->setSelectedPlayer(play_index);
+        return play_index;//has a player to play
+    }
+
+}
+
+QString VideoWall::GetPeerPlay(int player_num)
+{
+    int play_index = m_selectedPlayer;
+    if(player_num != -1){
+        play_index = player_num;
+    }
+    return peer_play_map_.key(play_index);
+}
+
+void VideoWall::StopPeerPlay(QString peer_id)
+{
+    int play_index = peer_play_map_.value(peer_id,-1);
+    if(play_index != -1){
+        players[play_index]->StopPlay();
+        peer_play_map_.insert(peer_id,-1);
+    }
+}
+
+
 
 void VideoWall::setSelectedPlayer(int newSelected)
 {
-    this->players[m_selectedPlayer]->setSelected(false);
-    this->m_selectedPlayer = newSelected;
-    this->players[m_selectedPlayer]->setSelected(true);
+    if(m_selectedPlayer != newSelected){
+        this->players[m_selectedPlayer]->setSelected(false);
+        this->m_selectedPlayer = newSelected;
+        this->players[m_selectedPlayer]->setSelected(true);
+    }
 }
 
 void VideoWall::deleteItem()
@@ -208,10 +255,9 @@ void VideoWall::showNormalScreenWall()
 
 void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
 {
-
-    this->players[0]->PlayMediaData(data);
-
-
+    int play_index = peer_play_map_.value(peer_id,-1);
+    if(play_index != -1)
+        this->players[play_index]->PlayMediaData(data);
 }
 
 void VideoWall::createActions()
@@ -260,16 +306,6 @@ void VideoWall::performDrag(PlayWidget *pw)
     //    }
 }
 
-void VideoWall::paintEvent(QPaintEvent *event)
-{  
-    //    QPainter p(this);
-    //    QRect r(rect());
-    //    p.setPen(Qt::black);
-    //    r.adjust(0, 0, -1, -1);
-    //    p.drawRect(r);
-    //qDebug()<<"VideoWall::paintEvent "<<event->rect();
-    QWidget::paintEvent(event);
-}
 
 void VideoWall::contextMenuEvent(QContextMenuEvent *event)
 {
@@ -298,27 +334,23 @@ void VideoWall::mouseMoveEvent(QMouseEvent *event)
 
 void VideoWall::mousePressEvent(QMouseEvent *event)
 {
-    qDebug()<<"VideoWall::mousePressEvent";
+    //qDebug()<<"VideoWall::mousePressEvent";
     if (event->button() == Qt::LeftButton) {
         startPos = event->pos();
     }
     PlayWidget *child = static_cast<PlayWidget*>(this->childAt(event->pos()));
     if (!child){
-        qDebug()<<"VideoWall::mousePressEvent--- no find PlayWidget";
+        //qDebug()<<"VideoWall::mousePressEvent--- no find PlayWidget";
     }else{
         int playIndex = child->playIndex();
         this->setSelectedPlayer(playIndex);
     }
     QWidget::mousePressEvent(event);
-    //QPoint hotSpot = event->pos() - child->pos();
-
-
-
 }
 
 void VideoWall::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug()<<"VideoWall::dragEnterEvent";
+    //qDebug()<<"VideoWall::dragEnterEvent";
     //! [4] //! [5]
     if (event->mimeData()->hasFormat("application/x-playwidget")) {
         if (children().contains(event->source())) {
@@ -337,8 +369,7 @@ void VideoWall::dragMoveEvent(QDragMoveEvent *event)
 {
     if (event->mimeData()->hasFormat("application/x-playwidget")) {
         if (children().contains(event->source())) {
-            qDebug()<<"VideoWall::dragMoveEvent-- children().contains(event->source";
-
+            //qDebug()<<"VideoWall::dragMoveEvent-- children().contains(event->source";
             event->setDropAction(Qt::MoveAction);
             event->accept();
         } else {
@@ -351,7 +382,7 @@ void VideoWall::dragMoveEvent(QDragMoveEvent *event)
 
 void VideoWall::dragLeaveEvent(QDragLeaveEvent *event)
 {
-    qDebug()<<"VideoWall::dragLeaveEvent";
+    //qDebug()<<"VideoWall::dragLeaveEvent";
     QWidget::dragLeaveEvent(event);
 }
 
@@ -365,7 +396,7 @@ void VideoWall::dropEvent(QDropEvent *event)
         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
 
         int moveFrom;
-//        QPoint offset;
+        //        QPoint offset;
         dataStream >> moveFrom;
 
         PlayWidget *child = static_cast<PlayWidget*>(this->childAt(event->pos()));

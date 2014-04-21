@@ -98,6 +98,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="btn_stop_video">
+         <property name="text">
+          <string>Stop Video</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="btn_disconnect">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Maximum">

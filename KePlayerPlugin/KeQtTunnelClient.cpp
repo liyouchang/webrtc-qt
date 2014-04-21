@@ -1,6 +1,7 @@
 #include "KeQtTunnelClient.h"
 #include <QBuffer>
 #include <QDebug>
+#include <QFile>
 KeQtTunnelClient::KeQtTunnelClient(QObject *parent) :
     QObject(parent)
 {
@@ -18,6 +19,18 @@ void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *d
     emit SigRecvVideoData(peer_id.c_str(),mediaData);
 }
 
+void KeQtTunnelClient::OnRecordFileData(const std::string &peer_id, const char *data, int len)
+{
+    QByteArray mediaData(data,len);
+    emit SigRecordFileData(peer_id.c_str(),mediaData);
+
+}
+
+void KeQtTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
+{
+    emit SigRecordStatus(peer_id.c_str(),status);
+}
+
 void KeQtTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
     qDebug()<<"KeQtTunnelClient::OnTunnelOpened";
@@ -30,6 +43,11 @@ void KeQtTunnelClient::OnTunnelClosed(PeerTerminalInterface *t, const std::strin
     qDebug()<<"KeQtTunnelClient::OnTunnelClosed";
     KeTunnelClient::OnTunnelClosed(t,peer_id);
     emit SigTunnelClosed(peer_id.c_str());
+}
+
+void KeQtTunnelClient::OnRouterMessage(const std::string &peer_id, const std::string &msg)
+{
+    emit SigRecvPeerMsg(peer_id.c_str(),msg.c_str());
 }
 
 

@@ -25,9 +25,21 @@ void PlayWidget::PlayMediaData(QByteArray &data)
         HWND playWId = (HWND)this->winId();
         if(playSource->OpenStream(playWId)!=0)
             return;
+        playSource->OpenSound();
     }
     playSource->InputStream(data.constData(),data.length());
 
+}
+
+bool PlayWidget::IsPlaying()
+{
+    return playSource->IsPlaying();
+}
+
+void PlayWidget::StopPlay()
+{
+    playSource->CloseStream();
+    this->update();
 }
 
 void PlayWidget::paintEvent(QPaintEvent *event)
@@ -46,25 +58,8 @@ void PlayWidget::paintEvent(QPaintEvent *event)
     p.drawRect(r);
     p.drawText(10,10,QString::number(playIndex()));
     //qDebug()<<"PlayWidget::paintEvent "<<playIndex()<<" rect "<<r;
-    QWidget::paintEvent(event);
+   // QWidget::paintEvent(event);
 
 
 }
-
-//void PlayWidget::showEvent(QShowEvent *)
-//{
-////    qDebug()<<"PlayWidget::showEvent ---"<<this->effectiveWinId();
-
-//}
-
-//bool PlayWidget::nativeEvent(const QByteArray &eventType, void *message, long *result)
-//{
-//    return false;
-//}
-
-//void PlayWidget::contextMenuEvent(QContextMenuEvent *event)
-//{
-//    //qDebug("PlayWidget::contextMenuEvent");
-
-//}
 

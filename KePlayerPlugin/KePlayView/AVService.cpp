@@ -48,6 +48,24 @@ int AVService::OpenStream(HWND playWnd)
     return iRet;
 }
 
+int AVService::OpenSound()
+{
+    int iRet = AV_SoundPlay(m_lPlayHandle);
+    if (iRet != 0 )
+    {
+        qCritical("AV_SoundPlay error iRet= %d",iRet);
+        return iRet;
+    }
+    return iRet;
+
+
+}
+
+int AVService::CloseSound()
+{
+    return AV_StopSound(m_lPlayHandle);
+}
+
 int AVService::InputStream(const char *data, int dataLen)
 {
     AV_InputData(m_lPlayHandle,(long *)(data) , dataLen);

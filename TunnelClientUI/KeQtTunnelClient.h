@@ -13,6 +13,7 @@ signals:
     void SigRecvAudioData(QString peer_id,QByteArray data);
     void SigTunnelOpened(QString peer_id);
     void SigTunnelClosed(QString peer_id);
+    void SigTunnelRecordStatus(QString peer_id,int );
 protected:
     void OnRecvAudioData(const std::string & peer_id,const char * data,int len);
     void OnRecvVideoData(const std::string & peer_id,const char * data,int len);

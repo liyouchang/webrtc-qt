@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "zmqclient/peerconnectionclientdealer.h"
-#include "TunnelClientUI/KeQtTunnelClient.h"
+#include "KeQtTunnelClient.h"
 
 
 class VideoWall;
@@ -12,7 +12,7 @@ class VideoWall;
 class KePlayerPlugin : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY( QString text READ text WRITE setText )
+    Q_PROPERTY( QString savePath READ savePath WRITE setSavePath )
 
     Q_CLASSINFO("ClassID","{806873E8-893C-402D-8129-34951563272A}")
     Q_CLASSINFO("InterfaceID", "{63314D1F-5592-4166-87F0-655F2C8DBFF8}")
@@ -20,25 +20,17 @@ class KePlayerPlugin : public QWidget
 
     Q_CLASSINFO("MIME", "application/keplayer-plugin:kpp:Kaer player plugin")
     Q_CLASSINFO("ToSuperClass", "KePlayerPlugin")
-    Q_CLASSINFO("DefaultProperty", "text")
-
-
 
 public:
     KePlayerPlugin(QWidget *parent = 0);
     ~KePlayerPlugin();
-    QString text() const
-    {
-        return "edit->text()";
-    }
+    QString savePath() const;
 
 signals:
     void TunnelOpened(const QString &);
     void TunnelClosed(const QString &);
-private:
-    VideoWall * videoWall;
-    talk_base::scoped_ptr<KeQtTunnelClient> tunnel_;
-    talk_base::scoped_ptr<PeerConnectionClientDealer> connection_;
+    void RecordStatus(const QString &,int );
+    void RecvPeerMsg(const QString &,const QString &);
 
 public slots:
     void about();
@@ -49,13 +41,15 @@ public slots:
     int CloseTunnel(QString peer_id);
     int StartVideo(QString peer_id);
     int StopVideo(QString peer_id);
+    int SendCommand(QString peer_id,QString msg);
+    void setSavePath(const QString &path );
 
-    void setText( const QString &string );
-    // QWidget interface
-protected:
-    void paintEvent(QPaintEvent *);
-    void resizeEvent(QResizeEvent *);
-
+private:
+    VideoWall * videoWall;
+    talk_base::scoped_ptr<KeQtTunnelClient> tunnel_;
+    talk_base::scoped_ptr<PeerConnectionClientDealer> connection_;
+    QString m_savePath;
+    bool is_inited;
 };
 
 #endif // KEPLAYERPLUGIN_H

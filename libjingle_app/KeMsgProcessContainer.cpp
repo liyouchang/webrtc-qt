@@ -61,6 +61,11 @@ int KeMsgProcessContainer::CloseTunnel(const std::string &peer_id)
     return terminal_->CloseTunnel(peer_id);
 }
 
+bool KeMsgProcessContainer::IsTunnelOpened(const std::string &peer_id)
+{
+    return (this->GetProcess(peer_id) != NULL);
+}
+
 
 void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
 {
@@ -192,6 +197,7 @@ int KeTunnelClient::DownloadRemoteFile(std::string peer_id, std::string remote_f
     }
 
     process->ReqestPlayFile(remote_file_name.c_str());
+
 
     return 0;
 }

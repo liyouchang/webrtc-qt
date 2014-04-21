@@ -38,9 +38,12 @@
 **
 ****************************************************************************/
 
-#include <QtWidgets>
+//#include <QtWidgets>
 #include<QtGui>
-
+#include <QDir>
+#include <QApplication>
+#include <QDialog>
+#include <QTimer>
 #include "qtbrowserplugin.h"
 #include "qtbrowserplugin_p.h"
 
@@ -48,7 +51,6 @@
 
 #include "qtnpapi.h"
 
-#include <QGuiApplication>
 //#include  <qpa/qplatformnativeinterface.h>
 
 #if QT_VERSION >= 0x050000
@@ -161,7 +163,7 @@ void MyMessageOutput(QtMsgType Type, const QMessageLogContext& Context, const QS
 {
 
     OutputDebugString(reinterpret_cast<const wchar_t *>(Message.utf16()));
-    QString logFile = GetCurrentPath();
+    QString logFile = QDir::currentPath();
     logFile += "\\test.log";
     //QFile file(QDate::currentDate().toString("nsetrade_dd_MM_yyyy.log"));
     QFile file(logFile);

@@ -90,3 +90,11 @@ void TunnelClientUI::OnRecvMediaData(int cameraID, int dataType, QByteArray data
 //    this->recordFile->flush();
 
 }
+
+void TunnelClientUI::on_btn_stop_video_clicked()
+{
+    QString peer_id = ui->edit_peer_id->text();
+
+    this->ui->playPlugin->StopVideo(peer_id);
+
+}

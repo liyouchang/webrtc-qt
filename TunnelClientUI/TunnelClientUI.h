@@ -29,6 +29,8 @@ private slots:
     //save to file
     void OnRecvMediaData(int cameraID,int dataType,QByteArray data);
 
+    void on_btn_stop_video_clicked();
+
 private:
     Ui::TunnelClientUI *ui;
     //PeerTerminal * terminal_;

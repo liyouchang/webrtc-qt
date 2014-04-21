@@ -21,7 +21,8 @@ public:
     int playIndex() {return m_playIndex;}
     AVService * playSource;
     void PlayMediaData(QByteArray & data);
-
+    bool IsPlaying();
+    void StopPlay();
 public slots:
 
 private:
@@ -31,6 +32,7 @@ private:
 protected:
     void paintEvent(QPaintEvent *);
 //    void showEvent(QShowEvent *);
+
 };
 
 #endif // PLAYWIDGET_H
