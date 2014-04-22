@@ -9,6 +9,7 @@ AVService::AVService(int streamID)
     m_hPlayWnd = NULL;
     playStatus = PLAYSTATUS_Free;
     m_iPlaySpeed = 0;
+    m_fileHandle = 65+streamID;
 }
 
 void AVService::SetPlayWnd(HWND hWnd)
@@ -97,14 +98,14 @@ int AVService::CapPic(const char * fileName)
  */
 int AVService::PlayFile(const char *fileName, int fileSize, HWND playWnd)
 {
-    int playHandle = 65;  //回放句柄范围  65~96
+      //回放句柄范围  65~96
     if(playWnd != 0){
         m_hPlayWnd = reinterpret_cast<HWND>(playWnd);
     }
-    long lRet = AV_OpenFile_Ex(playHandle,(char *)fileName,fileSize);
+    long lRet = AV_OpenFile_Ex(m_fileHandle,(char *)fileName,fileSize);
     if (lRet == 0)
     {
-        lRet = AV_Play(playHandle,m_hPlayWnd);
+        lRet = AV_Play(m_fileHandle,m_hPlayWnd);
         if (lRet != 0)
         {
             qWarning("播放失败");
@@ -118,6 +119,22 @@ int AVService::PlayFile(const char *fileName, int fileSize, HWND playWnd)
         qWarning("打开文件失败");
     }
     return lRet;
+}
+
+int AVService::SetFileSize(long fileSize)
+{
+    return AV_SetFileSize(m_fileHandle,fileSize);
+}
+
+int AVService::SetPlayPos(int pos)
+{
+    return AV_SetPlayPos(m_fileHandle, pos);
+}
+
+int AVService::CloseFile()
+{
+    playStatus = PLAYSTATUS_Free;
+    return AV_CloseFile_Ex(m_fileHandle);
 }
 
 

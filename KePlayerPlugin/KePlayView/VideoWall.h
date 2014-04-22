@@ -5,7 +5,7 @@
 #include <QVector>
 #include <QMap>
 
-#define MAX_AVPLAYER 64
+#define MAX_AVPLAYER 32
 class AVService;
 class PlayWidget;
 
@@ -52,14 +52,14 @@ public:
     void SetDivision(ScreenDivisionType divType);
     void SetDivision(int num);
     void BuildLayout();
-    void PlayLocalFile();
+
     void ExchangePlayWidget(int from,int to);
     int SetPeerPlay(QString peer_id);
     //player_num == -1 for the current player
     QString GetPeerPlay(int player_num = -1);
     void StopPeerPlay(QString peer_id);
-    QRect m_rect;
-
+    bool SetLocalPlayFileSize(QString peer_id,int size);
+    void StopFilePlay(QString peer_id);
 signals:
     void SigNeedStopPeerPlay(QString peer_id);
 public slots:
@@ -68,6 +68,8 @@ public slots:
     void showfullScreenWall();
     void showNormalScreenWall();
     void OnRecvMediaData(QString peer_id, QByteArray data);
+
+    void PlayLocalFile(QString peer_id, QString file_name, int file_size);
 private:
     //AVService * playSource;
     QGridLayout *mainLayout;
@@ -75,6 +77,8 @@ private:
     int m_selectedPlayer;
     int m_divType;
     QVector<int> m_layoutList;
+    //某个id的播放号和播放屏幕编号的对应，对于实时视频使用peer_id作为key，
+    //对于录像回放，使用kLocalIndexPrefix+peer_id作为key
     QMap<QString,int> peer_play_map_;
 
     QMenu *itemMenu;

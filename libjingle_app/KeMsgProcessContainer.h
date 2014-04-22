@@ -58,7 +58,7 @@ public:
      */
     virtual int StartPeerMedia( std::string  peer_id,bool toStart = true);
 
-    virtual int DownloadRemoteFile(std::string  peer_id,std::string remote_file_name);
+    virtual bool DownloadRemoteFile(std::string  peer_id,std::string remote_file_name);
 
     virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
 

@@ -31,6 +31,24 @@ void PlayWidget::PlayMediaData(QByteArray &data)
 
 }
 
+void PlayWidget::PlayFile(QString file_name,int file_size)
+{
+    QByteArray data = file_name.toLocal8Bit();
+    HWND playWId = (HWND)this->winId();
+    playSource->PlayFile(data.constData(),file_size,playWId);
+}
+
+void PlayWidget::SetPlayFileSize(int size)
+{
+    playSource->SetFileSize(size);
+}
+
+void PlayWidget::StopPlayFile()
+{
+    playSource->CloseFile();
+    this->update();
+}
+
 bool PlayWidget::IsPlaying()
 {
     return playSource->IsPlaying();

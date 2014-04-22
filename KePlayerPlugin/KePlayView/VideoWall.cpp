@@ -6,6 +6,7 @@
 #include "PlayWidget.h"
 #include "AVService.h"
 
+const QString kLocalIndexPrefix = "local_file_";
 
 VideoWall::VideoWall(QWidget *parent) :
     QWidget(parent)
@@ -71,8 +72,7 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
         qWarning("VideoWall::SetDivision-----devision type error");
         return;
     }
-    m_rect= rect();
-    qDebug()<<"rect is "<<m_rect;
+
     if(m_selectedPlayer >= splitNum){
         this->setSelectedPlayer(0);
     }
@@ -149,25 +149,13 @@ void VideoWall::BuildLayout()
     }
 }
 
-void VideoWall::PlayLocalFile()
+void VideoWall::PlayLocalFile(QString peer_id,QString file_name,int file_size)
 {
-    QString filename = QFileDialog::getOpenFileName(
-                this,
-                "Open Video File",
-                QDir::currentPath(),
-                "Video files (*.h264 *.264);;All files(*.*)");
-    if (!filename.isNull()) { //用户选择了文件
-        qDebug()<<QDir::currentPath();
-        //int ret = playSource->PlayFile(filename.toLatin1().constData(),0,this->players[0]->effectiveWinId());
-        //qDebug()<<"play result:"<<ret;
-        //   QMessageBox::information(this, "Document", "No document", QMessageBox::Ok | QMessageBox::Cancel);
-
-    } else // 用户取消选择
-    {
-
-    }
-
+    QString local_key = kLocalIndexPrefix + peer_id;
+    int play_index = this->SetPeerPlay(local_key);
+    this->players[play_index]->PlayFile(file_name,file_size);
 }
+
 
 void VideoWall::ExchangePlayWidget(int from, int to)
 {
@@ -191,7 +179,7 @@ int VideoWall::SetPeerPlay(QString peer_id)
     if(play_index == -1){
         QString played = GetPeerPlay(-1);
         if(!played.isEmpty()){
-            SigNeedStopPeerPlay(played);
+            emit SigNeedStopPeerPlay(played);
         }
         play_index = m_selectedPlayer;
         peer_play_map_.insert(peer_id,m_selectedPlayer);
@@ -221,6 +209,31 @@ void VideoWall::StopPeerPlay(QString peer_id)
         players[play_index]->StopPlay();
         peer_play_map_.insert(peer_id,-1);
     }
+}
+
+bool VideoWall::SetLocalPlayFileSize(QString peer_id,int size)
+{
+    QString local_key = kLocalIndexPrefix + peer_id;
+
+    int play_index = peer_play_map_.value(local_key,-1);
+
+    if(play_index != -1){
+        players[play_index]->SetPlayFileSize(size);
+        return true;
+    }
+    return false;
+}
+
+void VideoWall::StopFilePlay(QString peer_id)
+{
+    QString local_key = kLocalIndexPrefix + peer_id;
+
+    int play_index = peer_play_map_.value(local_key,-1);
+    if(play_index != -1){
+        players[play_index]->StopPlayFile();
+        peer_play_map_.insert(local_key,-1);
+    }
+
 }
 
 

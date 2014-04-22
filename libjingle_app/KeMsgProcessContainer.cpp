@@ -188,18 +188,18 @@ int KeTunnelClient::StartPeerMedia(std::string peer_id, bool toStart)
     return 0;
 }
 
-int KeTunnelClient::DownloadRemoteFile(std::string peer_id, std::string remote_file_name)
+bool KeTunnelClient::DownloadRemoteFile(std::string peer_id, std::string remote_file_name)
 {
     KeMessageProcessClient * process =dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
     if(process == NULL){
         LOG(WARNING) << "process not found "<<peer_id;
-        return -1;
+        return false;
     }
 
     process->ReqestPlayFile(remote_file_name.c_str());
 
 
-    return 0;
+    return true;
 }
 
 

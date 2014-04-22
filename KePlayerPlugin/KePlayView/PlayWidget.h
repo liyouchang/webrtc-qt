@@ -23,6 +23,10 @@ public:
     void PlayMediaData(QByteArray & data);
     bool IsPlaying();
     void StopPlay();
+
+    void PlayFile(QString file_name,int file_size);
+    void SetPlayFileSize(int size);
+    void StopPlayFile();
 public slots:
 
 private:

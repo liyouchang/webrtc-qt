@@ -46,10 +46,12 @@ SOURCES +=\
     ../zmqclient/asyndealer.cpp \
     ../zmqclient/peerconnectionclientdealer.cpp \
     $$PWD/KeQtTunnelClient.cpp \
-    $$PWD/KePlayerPlugin.cpp
+    $$PWD/KePlayerPlugin.cpp \
+    ke_recorder.cpp
 
 HEADERS  += \
     ../zmqclient/asyndealer.h \
     ../zmqclient/peerconnectionclientdealer.h \
     $$PWD/KeQtTunnelClient.h \
-    $$PWD/KePlayerPlugin.h
+    $$PWD/KePlayerPlugin.h \
+    ke_recorder.h

@@ -59,7 +59,7 @@ int main()
 //    terminal->Initialize(&client);
 
 #ifndef ARM
-    client.Connect("tcp://192.168.40.191:5555","123456");
+    client.Connect("tcp://192.168.40.191:5555","");
     client.Login();
     KeVideoSimulator * simulator = new KeVideoSimulator();
     simulator->Init(&client);

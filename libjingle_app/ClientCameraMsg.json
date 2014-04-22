@@ -38,7 +38,7 @@ client-->camera
     "param":10 //the param need to send to camera,for the move control this param stand for move speed
 }
 
-3.video clarity
+3. video clarity
 client-->camera
 {
     "type":"tunnel",

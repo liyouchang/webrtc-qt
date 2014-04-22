@@ -16,8 +16,13 @@ public:
     int CloseStream();
     bool IsPlaying();
     int CapPic(const char * fileName);
-    int PlayFile(const char * fileName,int fileSize,HWND playWnd);
 
+    //play file methods
+    int PlayFile(const char * fileName,int fileSize,HWND playWnd);
+    int SetFileSize(long fileSize);
+    int SetPlayPos(int pos);
+    int GetPlayPos(int &pos);
+    int CloseFile();
     enum PlayStatus
     {
         PLAYSTATUS_Free = 0,
@@ -33,6 +38,7 @@ public://静态方法
     static int Cleanup();
 private:
     long m_lPlayHandle;
+    long m_fileHandle;
     long  m_lPause;
     HWND m_hPlayWnd;
     PlayStatus  playStatus; //0,无播放；1，播放视频
