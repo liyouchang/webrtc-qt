@@ -138,7 +138,6 @@ public class CaptureActivity extends Activity implements Callback {
 
 	}
 
-	// …®√ËÕÍ≥…
 	public void handleDecode(Result obj, Bitmap barcode) {
 		inactivityTimer.onActivity();
 		viewfinderView.drawResultBitmap(barcode);

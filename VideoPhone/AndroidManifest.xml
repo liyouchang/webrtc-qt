@@ -6,8 +6,10 @@
 
     <uses-sdk android:minSdkVersion="14" />
     
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -18,7 +20,7 @@
 
     <application
         android:name=".socket.HandlerApplication"
-        android:icon="@drawable/video_logo1"
+        android:icon="@drawable/video_logo5"
         android:label="@string/app_name"
         android:theme="@style/AppThemeNoTitle" >
         <activity
@@ -38,6 +40,7 @@
             android:name=".main.OwnFragment"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
         <!-- 好友 -->
@@ -71,6 +74,7 @@
         <activity
             android:name=".user.LoginActivity"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
         <!-- 找回密码 -->
@@ -112,6 +116,12 @@
         <!-- 显示本地图片 -->
         <activity
             android:name=".local.ViewLocalImageActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 设置背景图片 -->
+        <activity
+            android:name=".main.SetDeviceBgActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>

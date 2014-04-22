@@ -1,5 +1,10 @@
 package com.video.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.text.ParseException;
@@ -8,11 +13,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
+import com.video.R;
+
+import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.util.Base64;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class Utils {
 	
@@ -64,6 +81,29 @@ public class Utils {
 				break;
 		}
 		return result;
+	}
+	
+	/**
+	 * 自定义Dialog
+	 * @param context 上下文
+	 * @param msg 显示的信息
+	 * @return 返回Dialog
+	 */
+	public static Dialog createLoadingDialog(Context context, String msg) {
+		LayoutInflater inflater = LayoutInflater.from(context);
+		View v = inflater.inflate(R.layout.dialog_layout, null);
+		LinearLayout layout = (LinearLayout) v.findViewById(R.id.dialog_view);
+		ImageView spaceshipImage = (ImageView) v.findViewById(R.id.dialog_img);
+		TextView tipTextView = (TextView) v.findViewById(R.id.dialog_textView);
+		Animation hyperspaceJumpAnimation = AnimationUtils.loadAnimation(context, R.anim.dialog_anim);
+		spaceshipImage.startAnimation(hyperspaceJumpAnimation);
+		tipTextView.setText(msg);
+		Dialog loadingDialog = new Dialog(context, R.style.dialog_style);
+		loadingDialog.setCancelable(true);
+		loadingDialog.setContentView(layout, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.FILL_PARENT,
+				LinearLayout.LayoutParams.FILL_PARENT));
+		return loadingDialog;
 	}
 	
 	/**
@@ -289,6 +329,83 @@ public class Utils {
 			return lowerBound;
 		} else {
 			return upperBound;
+		}
+	}
+	
+	/**
+	 * 将图片转化为Base64的格式
+	 * @param imgPath 图片的路径
+	 * @return 返回图片的String类型
+	 */
+	public static String imageToBase64(String imgPath) {
+		Bitmap bitmap = null;
+		if (imgPath != null && imgPath.length() > 0) {
+			bitmap = readBitmap(imgPath);
+		}
+		if (bitmap == null) {
+			return null;
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+
+			out.flush();
+			out.close();
+
+			byte[] imgBytes = out.toByteArray();
+			return Base64.encodeToString(imgBytes, Base64.DEFAULT);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			try {
+				out.flush();
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}  
+  
+	/**
+	 * 将Base64的图片转化为jpg格式保存
+	 * @param base64Data Base64图片数据
+	 * @param savePath 保存的路径
+	 * @return 返回图片的Bitmap
+	 */
+	public static Bitmap base64ToBitmap(String base64Data, String savePath) {
+		byte[] bytes = Base64.decode(base64Data, Base64.DEFAULT);
+		Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+
+		File file = new File(savePath);
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(file);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		try {
+			boolean isSuccess = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+			if (isSuccess) {
+				fos.flush();
+				fos.close();
+				return bitmap;
+			} else {
+				fos.close();
+				return null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	private static Bitmap readBitmap(String imgPath) {
+		try {
+			return BitmapFactory.decodeFile(imgPath);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 }

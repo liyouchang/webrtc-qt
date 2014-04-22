@@ -53,6 +53,11 @@ public class ZmqHandler extends Handler {
 			    item.put("deviceID", obj.getString("MAC"));
 			    item.put("isOnline", getState(obj.getInt("Active")));
 				item.put("dealerName", obj.getString("DealerName"));
+				if (obj.isNull("PictureURL")) {
+					item.put("deviceBg", "null");
+				} else {
+					item.put("deviceBg", obj.getString("PictureURL"));
+				}
 				list.add(item);
 	    	}
 	    	return list;
@@ -122,7 +127,7 @@ public class ZmqHandler extends Handler {
 			else if (type.equals("Client_BeatHeart")) {
 				int resultCode = obj.getInt("Result");
 				if (resultCode != 0) {
-					Value.isLoginSuccess = true;
+					Value.isLoginSuccess = false;
 				}
 			}
 			//各个界面下的handler操作
@@ -222,6 +227,20 @@ public class ZmqHandler extends Handler {
 					} else {
 						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "标记当前全部报警失败").sendToTarget();
 					}
+				}
+				//上传背景图片
+				else if (type.equals("Client_PushBackPic")) {
+					int resultCode = obj.getInt("Result");
+					if (resultCode == 0) {
+						mHandler.obtainMessage(R.id.upload_back_image_id, resultCode, 0, obj.getString("PictureURL")).sendToTarget();
+					} else {
+						mHandler.obtainMessage(R.id.upload_back_image_id, resultCode, 0).sendToTarget();
+					}
+				}
+				//删除背景图片
+				else if (type.equals("Client_DelBackPic")) {
+					int resultCode = obj.getInt("Result");
+					mHandler.obtainMessage(R.id.delete_back_image_id, resultCode, 0).sendToTarget();
 				}
 			}
 		} catch (JSONException e) {

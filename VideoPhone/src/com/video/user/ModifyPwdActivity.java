@@ -4,18 +4,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.PreferData;
@@ -32,7 +33,10 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	private EditText et_old_pwd;
 	private EditText et_new_pwd;
 	private EditText et_new_repwd;
-	private ProgressDialog progressDialog;
+	private Button button_delete_old_password;
+	private Button button_delete_new_password;
+	private Button button_delete_new_repassword;
+	private Dialog mDialog = null;
 	
 	private String userName = "";
 	private String userPwd = "";
@@ -54,12 +58,78 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	}
 
 	private void initView() {
-		et_old_pwd = (EditText)super.findViewById(R.id.et_modify_old_pwd);
-		et_new_pwd = (EditText)super.findViewById(R.id.et_modify_new_pwd);
-		et_new_repwd = (EditText)super.findViewById(R.id.et_modify_new_repwd);
-		
-		ImageButton button_back = (ImageButton) super.findViewById(R.id.ib_modify_pwd_back);
+		ImageButton button_back = (ImageButton) super.findViewById(R.id.ib_modify_back);
 		button_back.setOnClickListener(this);
+		
+		button_delete_old_password = (Button) this.findViewById(R.id.btn_modify_old_password_del);
+		button_delete_old_password.setOnClickListener(this);
+		
+		button_delete_new_password = (Button) this.findViewById(R.id.btn_modify_new_password_del);
+		button_delete_new_password.setOnClickListener(this);
+		
+		button_delete_new_repassword = (Button) this.findViewById(R.id.btn_modify_new_repassword_del);
+		button_delete_new_repassword.setOnClickListener(this);
+		
+		et_old_pwd = (EditText)super.findViewById(R.id.et_modify_old_password);
+		et_old_pwd.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_old_password.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_old_password.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
+		et_new_pwd = (EditText)super.findViewById(R.id.et_modify_new_password);
+		et_new_pwd.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_new_password.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_new_password.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
+		et_new_repwd = (EditText)super.findViewById(R.id.et_modify_new_repassword);
+		et_new_repwd.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_new_repassword.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_new_repassword.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
 		Button button_submit = (Button) super.findViewById(R.id.btn_modify_pwd_submit);
 		button_submit.setOnClickListener(this);
 	}
@@ -95,35 +165,6 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 		return result;
 	}
 	
-	/**
-	 * 显示操作的进度条
-	 */
-	private void showProgressDialog(String info) {
-		progressDialog = new ProgressDialog(mContext);
-        progressDialog.setMessage(info); 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
-        progressDialog.setIndeterminate(false);     
-        progressDialog.setCancelable(false); 
-        progressDialog.show(); 
-	}
-	
-	/**
-	 * 显示操作的提示
-	 */
-	private void showHandleDialog(String info) {
-		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-				.setTitle("温馨提示")
-				.setMessage(info)
-				.setCancelable(false)
-				.setPositiveButton("确定",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								dialog.dismiss();
-							}
-						}).create();
-		aboutDialog.show();
-	}
-	
 	private Handler handler = new Handler() {
 
 		@Override
@@ -132,28 +173,27 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_MODIFYING:
-					showProgressDialog("正在提交... ");
+					mDialog = Utils.createLoadingDialog(mContext, "正在提交...");
+					mDialog.show();
 					break;
 				case MODIFY_TIMEOUT:
-					if (progressDialog != null)
-						progressDialog.dismiss();
-					showHandleDialog("修改密码失败，网络超时！");
+					if (mDialog != null)
+						mDialog.dismiss();
 					if (handler.hasMessages(MODIFY_TIMEOUT)) {
 						handler.removeMessages(MODIFY_TIMEOUT);
 					}
+					Toast.makeText(mContext, "修改密码失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.modify_pwd_id:
 					if (handler.hasMessages(MODIFY_TIMEOUT)) {
 						handler.removeMessages(MODIFY_TIMEOUT);
+						if (mDialog != null)
+							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							if (progressDialog != null)
-								progressDialog.dismiss();
-							showHandleDialog("恭喜您，修改密码成功！");
+							Toast.makeText(mContext, "恭喜您，修改密码成功！", Toast.LENGTH_SHORT).show();
 						} else {
-							if (progressDialog != null)
-								progressDialog.dismiss();
-							showHandleDialog("修改密码失败，"+Utils.getErrorReason(resultCode));
+							Toast.makeText(mContext, "修改密码失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.modify_pwd_id);
@@ -193,7 +233,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			showHandleDialog("没有可用的网络连接，请确认后重试！");
+			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -201,8 +241,17 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
-			case R.id.ib_modify_pwd_back:
+			case R.id.ib_modify_back:
 				finish();
+				break;
+			case R.id.btn_modify_old_password_del:
+				et_old_pwd.setText("");
+				break;
+			case R.id.btn_modify_new_password_del:
+				et_new_pwd.setText("");	
+				break;
+			case R.id.btn_modify_new_repassword_del:
+				et_new_repwd.setText("");
 				break;
 			case R.id.btn_modify_pwd_submit:
 				clickModifyPwdEvent();

@@ -56,5 +56,11 @@
     
     <!-- 请求报警数据 -->
     <item name="request_alarm_id" type="id"/>
+    
+    <!-- 上传背景图片 -->
+    <item name="upload_back_image_id" type="id"/>
+    
+    <!-- 删除背景图片 -->
+    <item name="delete_back_image_id" type="id"/>
 
 </resources>

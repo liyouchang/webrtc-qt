@@ -97,21 +97,25 @@ public class VideoPlayView extends View {
 			int naluDataLen = 0;
 			
 			while (runFlag) {
-				naluDataLen = TunnelCommunication.videoDataCache.pop(naluData);
-				if (naluDataLen > 0) {
-					try{
+				try{
+					naluDataLen = TunnelCommunication.videoDataCache.pop(naluData);
+					if (naluDataLen > 0) {
 						decodeLen = decodeNalu(naluData, naluDataLen, decodeData);
 						if (decodeLen >= 0) {
 							postInvalidate();
 						}
+					} else {
 						sleep(10);
-					}catch(Exception ex){
-						ex.printStackTrace();
-						uninitView();
-						initView();
 					}
+				}catch(Exception ex){
+					TunnelCommunication.videoDataCache.clearBuffer();
+					ex.printStackTrace();
+					uninitView();
+					initView();
 				}
+				
 			}
+			uninitView();
 		}
 	}
 	
@@ -124,7 +128,7 @@ public class VideoPlayView extends View {
 			videoBuffer.rewind();
 			videoBmp.copyPixelsFromBuffer(videoBuffer); // bmp从缓冲区获得数据
 
-			videoType = (byte) (TunnelCommunication.frameType & 0x5F);
+			videoType = (byte) (TunnelCommunication.videoFrameType & 0x5F);
 
 			if (videoType == 0) {// D1
 				bitWide = 704;

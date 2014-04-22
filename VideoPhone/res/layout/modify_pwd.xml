@@ -14,7 +14,7 @@
         android:orientation="horizontal" >
 
         <ImageButton
-            android:id="@+id/ib_modify_pwd_back"
+            android:id="@+id/ib_modify_back"
             android:layout_width="60dp"
             android:layout_height="@dimen/title_height_size"
             android:layout_alignParentLeft="true"
@@ -32,58 +32,151 @@
             android:textColor="@color/orange"
             android:textSize="@dimen/title_text_size" />
     </RelativeLayout>
-
-    <EditText
-        android:id="@+id/et_modify_old_pwd"
+    
+    <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="60dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/edittext_style"
-        android:hint="@string/old_pwd"
-        android:inputType="textPassword"
-        android:paddingLeft="10dp"
-        android:textColor="@color/light_black"
-        android:textCursorDrawable="@null"
-        android:textSize="20dp" />
+        android:layout_height="50dp"
+        android:layout_marginTop="15.0dip"
+        android:layout_marginLeft="15.0dip"
+        android:layout_marginRight="15.0dip"
+        android:background="@drawable/input_background" >
 
-    <EditText
-        android:id="@+id/et_modify_new_pwd"
-        android:layout_width="fill_parent"
-        android:layout_height="60dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/edittext_style"
-        android:hint="@string/new_pwd"
-        android:inputType="textPassword"
-        android:paddingLeft="10dp"
-        android:textColor="@color/light_black"
-        android:textCursorDrawable="@null"
-        android:textSize="20dp" />
+        <ImageView
+            android:id="@+id/iv_modify_old_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:background="@null"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/icon_password" />
 
-    <EditText
-        android:id="@+id/et_modify_new_repwd"
+        <EditText
+            android:id="@+id/et_modify_old_password"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_modify_old_password_del"
+            android:layout_toRightOf="@+id/iv_modify_old_password"
+            android:background="@null"
+            android:hint="@string/old_pwd"
+            android:inputType="textPassword"
+            android:padding="0.0dip"
+            android:textColor="@color/black"
+            android:textSize="18.0sp" />
+
+        <Button
+            android:id="@+id/btn_modify_old_password_del"
+            android:layout_width="20.0dip"
+            android:layout_height="20.0dip"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10.0dip"
+            android:background="@drawable/input_delete"
+            android:visibility="invisible" />
+    </RelativeLayout>
+    
+    <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="60dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="5dp"
-        android:background="@drawable/edittext_style"
-        android:hint="@string/new_repwd"
-        android:inputType="textPassword"
-        android:paddingLeft="10dp"
-        android:textColor="@color/light_black"
-        android:textCursorDrawable="@null"
-        android:textSize="20dp" />
+        android:layout_height="50dp"
+        android:layout_marginTop="10.0dip"
+        android:layout_marginLeft="15.0dip"
+        android:layout_marginRight="15.0dip"
+        android:background="@drawable/input_background" >
+
+        <ImageView
+            android:id="@+id/iv_modify_new_password"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:background="@null"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/icon_password" />
+
+        <EditText
+            android:id="@+id/et_modify_new_password"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_modify_new_password_del"
+            android:layout_toRightOf="@+id/iv_modify_new_password"
+            android:background="@null"
+            android:hint="@string/new_pwd"
+            android:inputType="textPassword"
+            android:padding="0.0dip"
+            android:textColor="@color/black"
+            android:textSize="18.0sp" />
+
+        <Button
+            android:id="@+id/btn_modify_new_password_del"
+            android:layout_width="20.0dip"
+            android:layout_height="20.0dip"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10.0dip"
+            android:background="@drawable/input_delete"
+            android:visibility="invisible" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="10.0dip"
+        android:layout_marginLeft="15.0dip"
+        android:layout_marginRight="15.0dip"
+        android:background="@drawable/input_background" >
+
+        <ImageView
+            android:id="@+id/iv_modify_new_repassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:background="@null"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/icon_password" />
+
+        <EditText
+            android:id="@+id/et_modify_new_repassword"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_modify_new_repassword_del"
+            android:layout_toRightOf="@+id/iv_modify_new_repassword"
+            android:background="@null"
+            android:hint="@string/new_repwd"
+            android:inputType="textPassword"
+            android:padding="0.0dip"
+            android:textColor="@color/black"
+            android:textSize="18.0sp" />
+
+        <Button
+            android:id="@+id/btn_modify_new_repassword_del"
+            android:layout_width="20.0dip"
+            android:layout_height="20.0dip"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10.0dip"
+            android:background="@drawable/input_delete"
+            android:visibility="invisible" />
+    </RelativeLayout>
     
     <Button
         android:id="@+id/btn_modify_pwd_submit"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/button_style"
         android:text="@string/submit"

@@ -55,7 +55,6 @@ public class XmlDevice {
 				}
 			}
 		}
-		
 	}
 
 	/**
@@ -130,6 +129,7 @@ public class XmlDevice {
 			Element idElement = (Element) document.createElement("id");
 			Element stateElement = (Element) document.createElement("state");
 			Element dealerNameElement = (Element) document.createElement("dealer");
+			Element bgElement = (Element) document.createElement("bg");
 			
 			Text nameText = document.createTextNode(map.get("deviceName"));
 			nameElement.appendChild(nameText);
@@ -139,11 +139,14 @@ public class XmlDevice {
 			stateElement.appendChild(stateText);
 			Text dealerNameText = document.createTextNode(map.get("dealerName"));
 			dealerNameElement.appendChild(dealerNameText);
+			Text bgText = document.createTextNode(map.get("deviceBg"));
+			bgElement.appendChild(bgText);
 			
 			itemElement.appendChild(nameElement);
 			itemElement.appendChild(idElement);
 			itemElement.appendChild(stateElement);
 			itemElement.appendChild(dealerNameElement);
+			itemElement.appendChild(bgElement);
 			Element rootElement = (Element) document.getDocumentElement();
 			rootElement.appendChild(itemElement);
 			writeXML(document, filePath);
@@ -159,7 +162,7 @@ public class XmlDevice {
 	 * 是否存在一个Item节点
 	 * @return true: 存在  false: 不存在
 	 */
-	public boolean isItemExit(String deviceID) {
+	public boolean isItemExist(String deviceID) {
 
 		Document document = loadInit(filePath);
 		try {
@@ -204,6 +207,31 @@ public class XmlDevice {
 		}
 		return false;
 	}
+	
+	/**
+	 * 删除一个Item节点的背景
+	 * @return true: 删除成功  false: 删除失败
+	 */
+	public boolean deleteItemBg(String mac) {
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			for (int i=0; i<len; i++) {
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (id.equals(mac)) {
+					document.getElementsByTagName("bg").item(i).getFirstChild().setNodeValue("null");
+					break;
+				}
+			}
+			writeXML(document, filePath);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: deleteItemBg()异常！");
+		}
+		return false;
+	}
 
 	/**
 	 * 删除所有节点 *
@@ -241,10 +269,36 @@ public class XmlDevice {
 	 * @return true: 更新成功  false: 更新失败
 	 */
 	public boolean updateList(ArrayList<HashMap<String, String>> list) {
-		
 		try {
 			deleteAllItem();
 			addList(list);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: updateItem()异常！");
+		}
+		return false;
+	}
+	
+	/**
+	 * 更新一个Item节点的状态
+	 * @return true: 更新成功  false: 更新失败
+	 */
+	public boolean updateItemState(String mac, String state, String dealerName) {
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			for (int i=0; i<len; i++) {
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (id.equals(mac)) {
+					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(state);
+					document.getElementsByTagName("dealer").item(i).getFirstChild().setNodeValue(dealerName);
+					break;
+				}
+			}
+			writeXML(document, filePath);
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("MyDebug: updateItem()异常！");
@@ -276,6 +330,31 @@ public class XmlDevice {
 		}
 		return false;
 	}
+	
+	/**
+	 * 更新一个Item节点的背景的Url
+	 * @return true: 更新成功  false: 更新失败
+	 */
+	public boolean updateItemBg(String mac, String bg) {
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			for (int i=0; i<len; i++) {
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (id.equals(mac)) {
+					document.getElementsByTagName("bg").item(i).getFirstChild().setNodeValue(bg);
+					break;
+				}
+			}
+			writeXML(document, filePath);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: updateItemBg()异常！");
+		}
+		return false;
+	}
 
 	/**
 	 * 更新一个Item节点
@@ -292,6 +371,7 @@ public class XmlDevice {
 					document.getElementsByTagName("name").item(i).getFirstChild().setNodeValue(map.get("deviceName"));
 					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(map.get("isOnline"));
 					document.getElementsByTagName("dealer").item(i).getFirstChild().setNodeValue(map.get("dealerName"));
+					document.getElementsByTagName("bg").item(i).getFirstChild().setNodeValue(map.get("deviceBg"));
 					break;
 				}
 			}
@@ -339,10 +419,12 @@ public class XmlDevice {
 				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
 				String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
 				String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
+				String bg = document.getElementsByTagName("bg").item(i).getFirstChild().getNodeValue();
 				item.put("deviceName", name);
 				item.put("deviceID", id);
 				item.put("isOnline", state);
 				item.put("dealerName", dealer);
+				item.put("deviceBg", bg);
 				list.add(item);
 			}
 			return list;
