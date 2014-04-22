@@ -15,7 +15,10 @@ KeJniTunnelClient::KeJniTunnelClient() {
 KeJniTunnelClient::~KeJniTunnelClient() {
 	// TODO Auto-generated destructor stub
 }
-
+void KeJniTunnelClient::OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id){
+	KeTunnelClient::OnTunnelOpened(t,peer_id);
+	JniUtil::GetInstance()->JniTunnelOpened(peer_id.c_str());
+}
 void KeJniTunnelClient::OnRecvAudioData(const std::string& peer_id,
 		const char* data, int len) {
 	 JniUtil::GetInstance()->JniRecvAudioData(peer_id.c_str(),data,len);

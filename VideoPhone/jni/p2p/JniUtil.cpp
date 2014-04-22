@@ -194,7 +194,49 @@ bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
 
 	return true;
 }
+bool JniUtil::JniTunnelOpened(const char * peer_id){
 
+	if(g_vm_ == 0){
+		LOGE("g_vm is null");
+		return false;
+	}
+	JNIEnv *p_env;
+	bool attached = false;
+	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
+	if(status != JNI_OK){
+		//LOGI("g_vm GetEnv error %d", status);
+		status = g_vm_->AttachCurrentThread(&p_env,NULL);
+		if(status != JNI_OK){
+			LOGE("g_vm AttachCurrentThread error %d", status);
+			return false ;
+		}
+		attached = true;
+	}
+
+	jclass callBackCls = p_env->GetObjectClass(g_obj_);
+	if (!callBackCls) {
+		LOGE("Get class %s error", call_class_name_.c_str());
+		return false;
+	}
+
+	jmethodID mid = p_env->GetMethodID(callBackCls, "TunnelOpened",
+			"(Ljava/lang/String;)V");
+	if (!mid) {
+		LOGE("get method SendToPeer error");
+		return false;
+	}
+
+	jstring jni_pid = p_env->NewStringUTF(peer_id);
+
+	p_env->CallVoidMethod(g_obj_, mid, jni_pid);
+
+	if(attached){
+		g_vm_->DetachCurrentThread();
+	}
+	LOGI("JniUtil::JniSendToPeer----end");
+
+	return true;
+}
 bool JniUtil::getSendToPeerMethod(JNIEnv* env, jobject obj) {
 	callBackCls = env->FindClass(call_class_name_.c_str());
 	if (!callBackCls) {

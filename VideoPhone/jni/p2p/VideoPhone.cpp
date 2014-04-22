@@ -74,7 +74,7 @@ jint naAskMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
 		return -1;
 	}
 	const char * pid = env->GetStringUTFChars(peer_id, NULL);
-	return client->AskPeerVideo(pid);
+	return client->StartPeerMedia(pid,true);
 }
 
 #ifndef NELEM

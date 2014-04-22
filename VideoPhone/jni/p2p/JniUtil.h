@@ -26,6 +26,7 @@ public:
 	bool JniSendToPeer(const char * peer_id,const char * message);
 	bool JniRecvVideoData(const char * peer_id,const char* data, int len);
 	bool JniRecvAudioData(const char * peer_id,const char* data, int len);
+	bool JniTunnelOpened(const char * peer_id);
 	bool getSendToPeerMethod(JNIEnv *env, jobject obj);
 	JavaVM * g_vm_;
 	jobject g_obj_;
