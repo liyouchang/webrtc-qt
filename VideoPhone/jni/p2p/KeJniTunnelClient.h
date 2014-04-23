@@ -15,7 +15,7 @@ class KeJniTunnelClient :public KeTunnelClient{
 public:
 	KeJniTunnelClient();
 	virtual ~KeJniTunnelClient();
-    virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
+    //virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
 
 protected:
     virtual void OnRecvAudioData(const std::string & peer_id,const char * data,int len);

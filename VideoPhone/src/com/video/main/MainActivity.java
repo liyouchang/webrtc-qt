@@ -1,5 +1,7 @@
 package com.video.main;
 
+import java.util.ArrayList;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,9 +12,8 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
@@ -29,6 +30,7 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.main.FragmentTabAdapter.OnMyTabChangedListener;
 import com.video.service.BackstageService;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
@@ -38,6 +40,8 @@ import com.video.utils.TabFactory;
 import com.video.utils.Utils;
 
 public class MainActivity extends FragmentActivity {
+	
+	public ArrayList<Fragment> fragments = new ArrayList<Fragment>();
 	
 	public static Context mContext;
 	private PreferData preferData = null;
@@ -158,7 +162,6 @@ public class MainActivity extends FragmentActivity {
 	private void initView() {
 		mTabHost = (TabHost)findViewById(android.R.id.tabhost);
 		mTabHost.setup();
-		mTabHost.setOnTabChangedListener(tabChangeListener);
 		
 		TabHost.TabSpec tabSpec = mTabHost.newTabSpec("tab1");
 		tabSpec.setIndicator("直播",
@@ -213,41 +216,28 @@ public class MainActivity extends FragmentActivity {
         if (preferData.isExist("AlarmCount")) {
         	setAlarmIconAndText(preferData.readInt("AlarmCount"));
         }
+        
+        fragments.add(new OwnFragment());
+        fragments.add(new LocalFragment());
+        fragments.add(new MsgFragment());
+        fragments.add(new MoreFragment());
+        
+        FragmentTabAdapter tabAdapter = new FragmentTabAdapter(this, fragments, android.R.id.tabcontent, mTabHost);
+        tabAdapter.setOnMyTabChangedListener(new OnMyTabChangedListener() {
+			@Override
+			public void MyTabChanged(FragmentTabAdapter adapter) {
+				// TODO Auto-generated method stub
+				updateTab(mTabHost);
+			}
+		});
 	}
 	
-	private TabHost.OnTabChangeListener tabChangeListener = new TabHost.OnTabChangeListener() {
-		
-		@Override
-		public void onTabChanged(String tabId) {
-			// TODO Auto-generated method stub
-			
-			FragmentManager fm = getSupportFragmentManager();
-			FragmentTransaction ft = fm.beginTransaction();
-			
-			if (tabId.equals("tab1")) {
-				OwnFragment fragment = new OwnFragment();
-				ft.replace(android.R.id.tabcontent, fragment);
-				ft.commit();
-			}
-			else if (tabId.equals("tab2")) {
-				LocalFragment fragment = new LocalFragment();
-				ft.replace(android.R.id.tabcontent, fragment);
-				ft.commit();
-			}
-			else if (tabId.equals("tab3")) {
-				MsgFragment fragment = new MsgFragment();
-				ft.replace(android.R.id.tabcontent, fragment);
-				ft.commit();
-			}
-			else if (tabId.equals("tab4")) {
-				MoreFragment fragment = new MoreFragment();
-				ft.replace(android.R.id.tabcontent, fragment);
-				ft.commit();
-			}
-			updateTab(mTabHost);
-		}
-	};
-	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		// TODO Auto-generated method stub
+		super.onSaveInstanceState(outState);
+	}
+
 	private void updateTab(final TabHost _TabHost) {
 		for (int i = 0; i < _TabHost.getTabWidget().getChildCount(); i++) {
 			TextView tv = (TextView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);

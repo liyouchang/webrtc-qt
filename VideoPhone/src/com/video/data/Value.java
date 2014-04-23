@@ -1,5 +1,7 @@
 package com.video.data;
 
+import com.video.play.TunnelCommunication;
+
 public class Value {
 
 	/**
@@ -15,7 +17,7 @@ public class Value {
 	/**
 	 * 终端的Dealer名称
 	 */
-	public static String TerminalDealerName = "1234567";
+	public static String TerminalDealerName = null;
 	
 	/**
 	 * 服务器ID和Port
@@ -54,6 +56,8 @@ public class Value {
 	 * 初始化应用程序的全局变量
 	 */
 	public static void resetValues() {
+		TunnelCommunication.getInstance().closeTunnel(TerminalDealerName);
+		TerminalDealerName = null;
 		isLoginSuccess = false;
 		isNeedReqTermListFlag = true;
 		isNeedReqAlarmListFlag = true;

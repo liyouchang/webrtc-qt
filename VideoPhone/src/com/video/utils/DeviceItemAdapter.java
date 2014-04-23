@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
@@ -23,6 +24,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.video.R;
+import com.video.data.Value;
+import com.video.play.TunnelCommunication;
+import com.video.play.VideoPlayActivity;
 
 public class DeviceItemAdapter extends BaseAdapter {
 
@@ -51,12 +55,12 @@ public class DeviceItemAdapter extends BaseAdapter {
 		return position;
 	}
 	
-	private int getOnlineState(String state) {
-		int result = -1;
+	private boolean getOnlineState(String state) {
+		boolean result = false;
 		if (state.equals("true")) {
-			result = View.INVISIBLE;
+			result = true;
 		} else {
-			result = View.VISIBLE;
+			result = false;
 		}
 		return result;
 	}
@@ -85,7 +89,12 @@ public class DeviceItemAdapter extends BaseAdapter {
 		} else {
 			holder.device_bg.setBackgroundResource(R.drawable.device_item_view_bg);
 		}
-		holder.device_net_state.setVisibility(getOnlineState(list.get(position).get("isOnline")));
+		boolean termState = getOnlineState(list.get(position).get("isOnline"));
+		if (termState) {
+			holder.device_net_state.setBackgroundResource(R.drawable.icon_online);
+		} else {
+			holder.device_net_state.setBackgroundResource(R.drawable.icon_offline);
+		}
 		holder.device_name.setText(list.get(position).get("deviceName"));
 		holder.device_id.setText(list.get(position).get("deviceID"));
 		//实时视频
@@ -93,7 +102,16 @@ public class DeviceItemAdapter extends BaseAdapter {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Toast.makeText(context, "实时视频："+position, Toast.LENGTH_SHORT).show();
+//				Intent intent = new Intent(context, VideoPlayActivity.class);
+//				intent.putExtra("dealerName", list.get(position).get("dealerName"));
+//				context.startActivity(intent);
+				if (position == 0) {
+					TunnelCommunication.getInstance().askMediaData(Value.TerminalDealerName);
+				} else {
+					TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
+					TunnelCommunication.getInstance().openTunnel(list.get(position).get("dealerName"));
+					Value.TerminalDealerName = list.get(position).get("dealerName");
+				}
 			}
 		});
 		//终端视频

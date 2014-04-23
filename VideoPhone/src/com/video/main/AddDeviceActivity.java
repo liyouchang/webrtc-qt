@@ -295,9 +295,9 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				resultFlag = false;
 				et_id.setError("请输入设备ID，您可以通过扫描二维码或搜索设备输入设备ID！");
 			}
-			else if ((termMac.length()<6) || (termMac.length()>20)) {
+			else if ((termMac.length()<3) || (termMac.length()>20)) {
 				resultFlag = false;
-				et_id.setError("设备ID长度范围6~20！");
+				et_id.setError("设备ID长度范围3~20！");
 			} else {
 				resultFlag = true;
 				mDeviceId = termMac;

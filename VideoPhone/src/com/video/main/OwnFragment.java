@@ -72,8 +72,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	private final int REQUEST_TIMEOUT = 2;
 	
 	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		return inflater.inflate(R.layout.own, container, false);
 	}
@@ -86,18 +85,19 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		mView = getView();
 		
 		initView();
+		initData();
 	}
 	
 	@Override
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		initData();
+		ZmqHandler.setHandler(handler);
 		if (Value.SetDeviceBgActivityImagePath != null) {
 			Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 			String data = generateUploadImageJson(mDeviceId, Value.SetDeviceBgActivityImagePath);
 			sendHandlerMsg(IS_REQUESTING, "正在上传图片...");
-			sendHandlerMsg(REQUEST_TIMEOUT, "上传图片失败，请重试！", Value.requestTimeout);
+			sendHandlerMsg(REQUEST_TIMEOUT, "上传图片失败，请重试！", 10000);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		}
 	}
@@ -114,7 +114,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	
 	private void initData() {
 		//初始化Activity要使用的参数
-		ZmqHandler.setHandler(handler);
+		
 		xmlData = new XmlDevice(mActivity);
 		preferData = new PreferData(mActivity);
 		if (preferData.isExist("UserName")) {
@@ -138,11 +138,11 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
 				lv_list.setAdapter(deviceAdapter);
 			} 
-		}
-		if (listSize == 0) {
-			noDeviceLayout.setVisibility(View.VISIBLE);
-		} else {
-			noDeviceLayout.setVisibility(View.INVISIBLE);
+			if (listSize == 0) {
+				noDeviceLayout.setVisibility(View.VISIBLE);
+			} else {
+				noDeviceLayout.setVisibility(View.INVISIBLE);
+			}
 		}
 	}
 	

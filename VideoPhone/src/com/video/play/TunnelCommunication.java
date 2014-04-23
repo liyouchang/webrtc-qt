@@ -8,6 +8,7 @@ import android.os.Message;
 import com.video.R;
 import com.video.socket.HandlerApplication;
 import com.video.utils.Tools;
+import com.video.utils.Utils;
 
 public class TunnelCommunication {
 
@@ -60,6 +61,15 @@ public class TunnelCommunication {
 	public int tunnelTerminate() {
 		return naTerminate();
 	}
+	
+	/**
+	 * 通道被打开(回调)
+	 */
+	public void TunnelOpened(String peerId) {
+		System.out.println("MyDebug: 【"+peerId+"】通道被打开");
+//		sendHandlerMsg(VideoPlayActivity.playHandler, 0, peerId);
+		askMediaData(peerId);
+	}
 
 	/**
 	 * 打开通道
@@ -75,6 +85,9 @@ public class TunnelCommunication {
 		if (videoDataCache != null) {
 			videoDataCache.clearBuffer();
 		}
+//		if (audioDataCache != null) {
+//			audioDataCache.clearBuffer();
+//		}
 		return naCloseTunnel(peerId);
 	}
 	
@@ -85,9 +98,9 @@ public class TunnelCommunication {
 		if (videoDataCache == null) {
 			videoDataCache = new VideoCache(1024*1024*3);
 		}
-		if (audioDataCache == null) {
-			audioDataCache = new AudioCache(1024*1024);
-		}
+//		if (audioDataCache == null) {
+//			audioDataCache = new AudioCache(1024*1024);
+//		}
 		return naAskMediaData(peerId);
 	}
 	
@@ -95,6 +108,12 @@ public class TunnelCommunication {
 	 * 发送handler消息
 	 */
 	private static void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
+		handler.sendMessage(msg);
+	}
+	private static void sendHandlerMsg(Handler handler, int what, String obj) {
 		Message msg = new Message();
 		msg.what = what;
 		msg.obj = obj;
@@ -120,46 +139,46 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * 接收的视频数据
+	 * 接收的视频数据(回调)
 	 */
 	public void RecvVideoData(String peerID, byte[] data) {
-		int dataLen = data.length;
-		videoFrameType = (byte)(data[9]);
-		
-		int pushPosition = 10;
-		int frameLen = Tools.getWordValue(data, pushPosition);
-		pushPosition += 2;
-		if (frameLen == (dataLen - pushPosition)) {
-			if ((byte)(videoFrameType & 0x80) == 0x80) {
-				pushPosition += 4;
-			} else {
-				if(naluDataLen > 4 ){
-					Tools.setIntValue(naluData, 0, naluDataLen-4);
-					if (videoDataCache.push(naluData, naluDataLen) != 0) {
-						videoDataCache.clearBuffer();
-					}
-					naluDataLen = 4;
-				}
-			}
-			int naluLen = dataLen - pushPosition;
-			Tools.CopyByteArray(naluData, naluDataLen, data, pushPosition, naluLen);
-			naluDataLen += naluLen;
-		}
+//		int dataLen = data.length;
+//		videoFrameType = (byte)(data[9]);
+//		int pushPosition = 10;
+//		int frameLen = Tools.getWordValue(data, pushPosition);
+//		pushPosition += 2;
+//		if (frameLen == (dataLen - pushPosition)) {
+//			if ((byte)(videoFrameType & 0x80) == 0x80) {
+//				pushPosition += 4;
+//			} else {
+//				if(naluDataLen > 4 ){
+//					Tools.setIntValue(naluData, 0, naluDataLen-4);
+//					System.out.println("MyDebug: push: "+(naluDataLen-4));
+//					if (videoDataCache.push(naluData, naluDataLen) != 0) {
+//						videoDataCache.clearBuffer();
+//					}
+//					naluDataLen = 4;
+//				}
+//			}
+//			int naluLen = dataLen - pushPosition;
+//			Tools.CopyByteArray(naluData, naluDataLen, data, pushPosition, naluLen);
+//			naluDataLen += naluLen;
+//		}
 	}
 	
 	/**
-	 * 接收的音频数据
+	 * 接收的音频数据(回调)
 	 */
 	public void RecvAudioData(String peerID,byte [] data) {
-		int dataLen = data.length;
-		audioFrameType = (byte)(data[9]);
-		
-		int pushPosition = 10;
-		int frameLen = Tools.getWordValue(data, pushPosition);
-		pushPosition += 2;
-		if (frameLen == (dataLen - pushPosition)) {
-			pushPosition += 4;
-			audioDataCache.push(data, pushPosition, dataLen - pushPosition);
-		}
+//		int dataLen = data.length;
+//		audioFrameType = (byte)(data[9]);
+//		
+//		int pushPosition = 10;
+//		int frameLen = Tools.getWordValue(data, pushPosition);
+//		pushPosition += 2;
+//		if (frameLen == (dataLen - pushPosition)) {
+//			pushPosition += 4;
+//			audioDataCache.push(data, pushPosition, dataLen - pushPosition);
+//		}
 	}
 }
