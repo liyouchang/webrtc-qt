@@ -1,5 +1,6 @@
 package com.video.main;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,11 +8,12 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
@@ -28,12 +30,14 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlDevice;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.DeviceItemAdapter;
@@ -48,15 +52,18 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	private PreferData preferData = null;
 	private String userName = null;
 	//终端列表项
-	private String mDeviceName = null;
-	private String mDeviceId = null;
-	private int listPosition = 0;
+	private static String mDeviceName = null;
+	private static String mDeviceId = null;
+	private static int listPosition = 0;
 	private static int listSize = 0;
+	private RelativeLayout noDeviceLayout = null;
 	
 	private ImageButton button_add;
 	private PopupWindow mPopupWindow;
-	private ProgressDialog progressDialog;
+	private Dialog mDialog = null;
 	
+	private String thumbnailsPath = null;
+	private File thumbnailsFile = null;
 	private static ArrayList<HashMap<String, String>> deviceList = null;
 	private static DeviceItemAdapter deviceAdapter = null;
 	private ListView lv_list;
@@ -86,11 +93,20 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onResume();
 		initData();
+		if (Value.SetDeviceBgActivityImagePath != null) {
+			Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+			String data = generateUploadImageJson(mDeviceId, Value.SetDeviceBgActivityImagePath);
+			sendHandlerMsg(IS_REQUESTING, "正在上传图片...");
+			sendHandlerMsg(REQUEST_TIMEOUT, "上传图片失败，请重试！", Value.requestTimeout);
+			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+		}
 	}
 	
 	private void initView () {
 		button_add = (ImageButton)mView.findViewById(R.id.btn_add_device);
 		button_add.setOnClickListener(this);
+		
+		noDeviceLayout = (RelativeLayout) mView.findViewById(R.id.rl_no_device_list);
 		
 		lv_list = (ListView) mView.findViewById(R.id.device_list);
 		lv_list.setOnItemLongClickListener(new OnItemLongClickListenerImpl());
@@ -104,40 +120,30 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
 		}
+		
+		String SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
+		thumbnailsPath = SD_path + File.separator + "KaerVideo" + File.separator + "thumbnails";
+		thumbnailsFile = new File(thumbnailsPath);
+		if(!thumbnailsFile.exists()){
+			thumbnailsFile.mkdirs();
+		}
+		
 		//初始化终端列表的显示
 		if (Value.isNeedReqTermListFlag) {
 			reqTermListEvent();
-		}
-		deviceList = xmlData.readXml();
-		if (deviceList != null) {
-			listSize = deviceList.size();
-			deviceAdapter = new DeviceItemAdapter(mActivity, deviceList);
-			lv_list.setAdapter(deviceAdapter);
-		}
-	}
-	
-	/**
-	 * 获得一个设备项Item
-	 * @param isOnline 设备是否在线
-	 * @param deviceName 设备名称
-	 * @param deviceID 设备的MAC
-	 * @return 返回一个设备项Item
-	 */
-	@SuppressWarnings("unused")
-	private HashMap<String, String> getDeviceItem(boolean isOnline, String deviceName, String deviceID, String dealerName) {
-		
-		HashMap<String, String> item = new HashMap<String, String>();
-		String state = "false";
-		if (isOnline) {
-			state = "true";
 		} else {
-			state = "false";
+			deviceList = xmlData.readXml();
+			if (deviceList != null) {
+				listSize = deviceList.size();
+				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+				lv_list.setAdapter(deviceAdapter);
+			} 
 		}
-		item.put("isOnline", state);
-		item.put("deviceName", deviceName);
-		item.put("deviceID", deviceID);
-		item.put("dealerName", dealerName);
-		return item;
+		if (listSize == 0) {
+			noDeviceLayout.setVisibility(View.VISIBLE);
+		} else {
+			noDeviceLayout.setVisibility(View.INVISIBLE);
+		}
 	}
 	
 	/**
@@ -174,15 +180,38 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * 显示操作的进度条
+	 * 生成JSON的上传背景图片字符串
 	 */
-	private void showProgressDialog(String info) {
-		progressDialog = new ProgressDialog(mActivity);
-        progressDialog.setMessage(info); 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
-        progressDialog.setIndeterminate(false);     
-        progressDialog.setCancelable(false); 
-        progressDialog.show(); 
+	private String generateUploadImageJson(String mac, String imgPath) {
+		String result = "";
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_PushBackPic");
+			jsonObj.put("UserName", userName);
+			jsonObj.put("MAC", mac);
+			jsonObj.put("Picture", Utils.imageToBase64(imgPath));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		result = jsonObj.toString();
+		return result;
+	}
+	
+	/**
+	 * 生成JSON的删除背景图片字符串
+	 */
+	private String generateDeleteImageJson(String mac) {
+		String result = "";
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_DelBackPic");
+			jsonObj.put("UserName", userName);
+			jsonObj.put("MAC", mac);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		result = jsonObj.toString();
+		return result;
 	}
 	
 	private Handler handler = new Handler() {
@@ -194,33 +223,39 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					showProgressDialog((String) msg.obj);
+					mDialog = Utils.createLoadingDialog(mActivity, (String) msg.obj);
+					mDialog.show();
 					break;
 				case REQUEST_TIMEOUT:
-					if (progressDialog != null)
-						progressDialog.dismiss();
+					if (mDialog != null) {
+						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
-					Value.isNeedReqTermListFlag = false;
+					Value.isNeedReqTermListFlag = true;
+					Value.SetDeviceBgActivityImagePath = null;
 					Toast.makeText(mActivity, ""+msg.obj, Toast.LENGTH_SHORT).show();
 					break;
 				//请求终端列表
 				case R.id.request_terminal_list_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
-						if (progressDialog != null)
-							progressDialog.dismiss();
+						if (mDialog != null) {
+							mDialog.dismiss();
+							mDialog = null;
+						}
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
 							deviceList = (ArrayList<HashMap<String, String>>) msg.obj;
 							if (deviceList != null) {
 								Value.isNeedReqTermListFlag = false;
-								deviceAdapter = new DeviceItemAdapter(mActivity, deviceList);
-								lv_list.setAdapter(deviceAdapter);
 								xmlData.updateList(deviceList);
+								deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+								lv_list.setAdapter(deviceAdapter);
+								listSize = deviceList.size();
 							}
-							listSize = xmlData.getListSize();
 						} else {
 							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
@@ -232,22 +267,80 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				case R.id.delete_device_item_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
-						if (progressDialog != null)
-							progressDialog.dismiss();
+						if (mDialog != null) {
+							mDialog.dismiss();
+							mDialog = null;
+						}
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							Toast.makeText(mActivity, "删除终端绑定成功！", Toast.LENGTH_SHORT).show();
 							xmlData.deleteItem(mDeviceId);
 							deviceList.remove(listPosition);
 							deviceAdapter.notifyDataSetChanged();
 							listSize = xmlData.getListSize();
+							Toast.makeText(mActivity, "删除终端绑定成功！", Toast.LENGTH_SHORT).show();
 						} else {
 							Toast.makeText(mActivity, "删除终端绑定失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
-						handler.removeMessages(R.id.request_terminal_list_id);
+						handler.removeMessages(R.id.delete_device_item_id);
 					}
 					break;
+				//上传背景图片
+				case R.id.upload_back_image_id:
+					if (handler.hasMessages(REQUEST_TIMEOUT)) {
+						handler.removeMessages(REQUEST_TIMEOUT);
+						if (mDialog != null) {
+							mDialog.dismiss();
+							mDialog = null;
+						}
+						Value.SetDeviceBgActivityImagePath = null;
+						int resultCode = msg.arg1;
+						if (resultCode == 0) {
+							//删除缩略图
+							String filePath = thumbnailsPath+File.separator+mDeviceId+".jpg";
+							deleteImageFile(filePath);
+							//设置背景图片
+							deviceList.get(listPosition).put("deviceBg", (String) msg.obj);
+							deviceAdapter.notifyDataSetChanged();
+							xmlData.updateItemBg(mDeviceId, (String) msg.obj);
+							Toast.makeText(mActivity, "上传背景图片成功！", Toast.LENGTH_SHORT).show();
+						} else {
+							Toast.makeText(mActivity, "上传背景图片失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+						}
+					} else {
+						handler.removeMessages(R.id.upload_back_image_id);
+					}
+					break;
+				//删除背景图片
+				case R.id.delete_back_image_id:
+					if (handler.hasMessages(REQUEST_TIMEOUT)) {
+						handler.removeMessages(REQUEST_TIMEOUT);
+						if (mDialog != null) {
+							mDialog.dismiss();
+							mDialog = null;
+						}
+						int resultCode = msg.arg1;
+						if (resultCode == 0) {
+							//更新背景图片
+							deviceList.get(listPosition).put("deviceBg", "null");
+							deviceAdapter.notifyDataSetChanged();
+							xmlData.updateItemBg(mDeviceId, "null");
+							//删除缩略图
+							String filePath = thumbnailsPath+File.separator+mDeviceId+".jpg";
+							deleteImageFile(filePath);
+							Toast.makeText(mActivity, "删除背景图片成功！", Toast.LENGTH_SHORT).show();
+						} else {
+							Toast.makeText(mActivity, "删除背景图片失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+						}
+					} else {
+						handler.removeMessages(R.id.delete_back_image_id);
+					}
+					break;
+			}
+			if (listSize == 0) {
+				noDeviceLayout.setVisibility(View.VISIBLE);
+			} else {
+				noDeviceLayout.setVisibility(View.INVISIBLE);
 			}
 		}
 	};
@@ -270,10 +363,21 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					}
 				}
 				deviceAdapter.notifyDataSetChanged();
-				xmlData.updateItem(item);
+				xmlData.updateItemState(mac, item.get("isOnline"), item.get("dealerName"));
 			}
 		}
 	};
+	
+	/**
+	 * 删除指定的图片文件
+	 * @param filePath 图片文件路径
+	 */
+	private void deleteImageFile(String filePath) {
+		File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+	}
 	
 	/**
 	 * 发送Handler消息
@@ -302,7 +406,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	 */
 	public void reqTermListEvent() {
 		if (Utils.isNetworkAvailable(mActivity)) {
-			Handler sendHandler = ZmqThread.zmqThreadHandler;
+			Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 			String data = generateReqTermListJson();
 			sendHandlerMsg(IS_REQUESTING, "正在请求终端列表...");
 			sendHandlerMsg(REQUEST_TIMEOUT, "请求终端课表失败，网络超时！", Value.requestTimeout);
@@ -360,9 +464,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		
 		List<String> item_list = new ArrayList<String>();
 		item_list.add("修改终端名称");
-		item_list.add("删除终端绑定");
 		item_list.add("设置背景图片");
 		item_list.add("删除背景图片");
+		item_list.add("删除终端绑定");
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mActivity, item_list);
 		pop_listView.setAdapter(popAdapter);
 		
@@ -381,15 +485,30 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				HashMap<String, String> item = deviceList.get(listPosition);
 				mDeviceName = item.get("deviceName");
 				mDeviceId = item.get("deviceID");
+				Intent intent = null;
 				switch (position) {
 					case 0:
-						Intent intent = new Intent(mActivity, ModifyDeviceNameActivity.class);
+						intent = new Intent(mActivity, ModifyDeviceNameActivity.class);
 						intent.putExtra("deviceName", mDeviceName);
 						intent.putExtra("deviceID", mDeviceId);
 						startActivity(intent);
 						mActivity.overridePendingTransition(R.anim.down_in, 0);
 						break;
 					case 1:
+						intent = new Intent(mActivity, SetDeviceBgActivity.class);
+						intent.putExtra("deviceName", mDeviceName);
+						intent.putExtra("deviceID", mDeviceId);
+						startActivityForResult(intent, 1);
+						mActivity.overridePendingTransition(R.anim.down_in, 0);
+						break;
+					case 2:
+						Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+						String data = generateDeleteImageJson(mDeviceId);
+						sendHandlerMsg(IS_REQUESTING, "正在删除图片...");
+						sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.requestTimeout);
+						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+						break;
+					case 3:
 						delTermItemEvent(mDeviceId);
 						break;
 				}

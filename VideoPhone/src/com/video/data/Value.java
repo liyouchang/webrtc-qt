@@ -15,7 +15,7 @@ public class Value {
 	/**
 	 * 终端的Dealer名称
 	 */
-	public final static String TerminalDealerName = "1234567";
+	public static String TerminalDealerName = "1234567";
 	
 	/**
 	 * 服务器ID和Port
@@ -26,7 +26,7 @@ public class Value {
 	/**
 	 * 超时时间
 	 */
-	public final static int requestTimeout = 5000;
+	public final static int requestTimeout = 6000;
 	
 	/**
 	 * 是否需要请求报警记录的标志
@@ -47,6 +47,8 @@ public class Value {
 	 * 请求报警记录的数据
 	 */
 	public static int requstAlarmCount = 5;
+	
+	public static String SetDeviceBgActivityImagePath = null;
 	
 	/**
 	 * 初始化应用程序的全局变量

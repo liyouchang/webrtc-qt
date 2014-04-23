@@ -16,6 +16,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager.LayoutParams;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -50,6 +52,8 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	private ImageButton button_title_more;
 	private EditText et_name;
 	private EditText et_id;
+	private Button button_delete_devicename;
+	private Button button_delete_id;
 	private RelativeLayout add_title;
 	private ProgressDialog progressDialog;
 	//终端列表项
@@ -80,11 +84,55 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		
 		ImageButton button_back = (ImageButton) this.findViewById(R.id.btn_add_device_back);
 		button_back.setOnClickListener(this);
+		
 		Button button_ok = (Button) this.findViewById(R.id.btn_add_device_ok);
 		button_ok.setOnClickListener(this);
 		
-		et_id = (EditText) this.findViewById(R.id.et_add_device_id);
+		button_delete_devicename = (Button) this.findViewById(R.id.btn_add_device_name_del);
+		button_delete_devicename.setOnClickListener(this);
+		
+		button_delete_id = (Button) this.findViewById(R.id.btn_add_device_id_del);
+		button_delete_id.setOnClickListener(this);
+		
 		et_name = (EditText) this.findViewById(R.id.et_add_device_name);
+		et_name.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_devicename.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_devicename.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
+		et_id = (EditText) this.findViewById(R.id.et_add_device_id);
+		et_id.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_id.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_id.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
 	}
 	
 	private void initData() {
@@ -214,6 +262,12 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 			case R.id.btn_add_device_ok:
 				clickAddDeviceEvent();
 				break;
+			case R.id.btn_add_device_name_del:
+				et_name.setText("");
+				break;
+			case R.id.btn_add_device_id_del:
+				et_id.setText("");
+				break;
 		}
 	}
 	
@@ -264,6 +318,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		item.put("deviceName", deviceName);
 		item.put("deviceID", deviceId);
 		item.put("dealerName", dealerName);
+		item.put("deviceBg", "null");
 		return item;
 	}
 	

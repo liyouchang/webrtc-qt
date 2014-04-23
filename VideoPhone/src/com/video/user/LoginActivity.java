@@ -4,12 +4,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -17,7 +19,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.video.R;
@@ -35,9 +36,12 @@ public class LoginActivity extends Activity implements OnClickListener {
 	
 	private EditText et_name;
 	private EditText et_pwd;
-	private CheckBox cb_auto_login;
-	private ProgressDialog progressDialog;
 	private boolean isAutoLogin = false;
+	private CheckBox cb_auto_login;
+	
+	private Button button_delete_username;
+	private Button button_delete_password;
+	private Dialog mDialog = null;
 	
 	private String userName = "";
 	private String userPwd = "";
@@ -62,16 +66,64 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 	
 	private void initView() {
-		et_name = (EditText) super.findViewById(R.id.et_name);
-		et_pwd = (EditText) super.findViewById(R.id.et_pwd);
+		
 		cb_auto_login = (CheckBox) super.findViewById(R.id.cb_auto_login);
 		cb_auto_login.setOnCheckedChangeListener(new onCheckedChangeListenerImpl());
+		
 		Button button_login = (Button) super.findViewById(R.id.btn_login);
 		button_login.setOnClickListener(this);
-		TextView text_register = (TextView)super.findViewById(R.id.tv_register);
-		text_register.setOnClickListener(this);
-		TextView text_find_pwd = (TextView)super.findViewById(R.id.tv_find_pwd);
-		text_find_pwd.setOnClickListener(this);
+		
+		Button button_register = (Button)super.findViewById(R.id.btn_login_regist);
+		button_register.setOnClickListener(this);
+		
+		Button button_find_pwd = (Button)super.findViewById(R.id.btn_login_find);
+		button_find_pwd.setOnClickListener(this);
+		
+		button_delete_username = (Button)super.findViewById(R.id.btn_login_username_del);
+		button_delete_username.setOnClickListener(this);
+		
+		button_delete_password = (Button)super.findViewById(R.id.btn_login_password_del);
+		button_delete_password.setOnClickListener(this);
+		
+		et_name = (EditText) super.findViewById(R.id.et_login_username);
+		et_name.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_username.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_username.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
+		et_pwd = (EditText) super.findViewById(R.id.et_login_password);
+		et_pwd.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_password.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_password.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
 	}
 	
 	private void initData() {
@@ -79,6 +131,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 		ZmqHandler.setHandler(handler);
 		preferData = new PreferData(mContext);
 		
+		if (preferData.isExist("AutoLogin")) {
+			isAutoLogin = preferData.readBoolean("AutoLogin");
+		}
 		if (isAutoLogin) {
 			cb_auto_login.setChecked(true);
 		} else {
@@ -89,17 +144,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 			userName = preferData.readString("UserName");
 			et_name.setText(userName);
 		}
-		
 		if (preferData.isExist("UserPwd")) {
 			userPwd = preferData.readString("UserPwd");
 			et_pwd.setText(userPwd);
-		}
-		
-		if (preferData.isExist("AutoLogin")) {
-			isAutoLogin = preferData.readBoolean("AutoLogin");
-		}
-		if (isAutoLogin) {
-			clickLoginEvent();
 		}
 	}
 	
@@ -120,18 +167,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 		return result;
 	}
 	
-	/**
-	 * 显示操作的进度条
-	 */
-	private void showProgressDialog(String info) {
-		progressDialog = new ProgressDialog(mContext);
-        progressDialog.setMessage(info); 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
-        progressDialog.setIndeterminate(false);     
-        progressDialog.setCancelable(false); 
-        progressDialog.show(); 
-	}
-	
 	private Handler handler = new Handler() {
 
 		@Override
@@ -140,29 +175,28 @@ public class LoginActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_LOGINNING:
-					showProgressDialog("正在登录... ");
+					mDialog = Utils.createLoadingDialog(mContext, "正在登录...");
+					mDialog.show();
 					break;
 				case LOGIN_TIMEOUT:
-					if (progressDialog != null)
-						progressDialog.dismiss();
+					if (mDialog != null)
+						mDialog.dismiss();
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
 					}
-					Toast.makeText(mContext, "登录失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.login_id:
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
+						if (mDialog != null)
+							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							if (progressDialog != null)
-								progressDialog.dismiss();
 							Value.isLoginSuccess = true;
 							startActivity(new Intent(mContext, MainActivity.class));
 							LoginActivity.this.finish();
 						} else {
-							if (progressDialog != null)
-								progressDialog.dismiss();
 							Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
@@ -191,12 +225,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 		msg.what = what;
 		msg.obj = obj;
 		handler.sendMessage(msg);
-	}
-	private void sendHandlerMsg(Handler handler, int what,  String obj, int timeout) {
-		Message msg = new Message();
-		msg.what = what;
-		msg.obj = obj;
-		handler.sendMessageDelayed(msg, timeout);
 	}
 	
 	private class onCheckedChangeListenerImpl implements OnCheckedChangeListener {
@@ -228,11 +256,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				String data = generateLoginJson(userName, userPwd);
 				sendHandlerMsg(IS_LOGINNING);
 				sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
-				if (isAutoLogin) {
-					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data, 1000);
-				} else {
-					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
-				}
+				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
 			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
@@ -246,11 +270,17 @@ public class LoginActivity extends Activity implements OnClickListener {
 			case R.id.btn_login:
 				clickLoginEvent();
 				break;
-			case R.id.tv_register:
+			case R.id.btn_login_regist:
 				startActivity(new Intent(this, RegisterActivity.class));
 				break;
-			case R.id.tv_find_pwd:
+			case R.id.btn_login_find:
 				startActivity(new Intent(this, FindPwdActivity.class));
+				break;
+			case R.id.btn_login_username_del:
+				et_name.setText("");
+				break;
+			case R.id.btn_login_password_del:
+				et_pwd.setText("");
 				break;
 		}
 	}

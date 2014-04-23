@@ -33,9 +33,6 @@ public class BackstageService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		// TODO Auto-generated method stub
 		preferData = new PreferData(BackstageService.this);
-		if (preferData.isExist("UserName")) {
-			userName = preferData.readString("UserName");
-		}
 		HandlerApplication.getInstance().setMyHandler(ZmqThread.zmqThreadHandler);
 		isRun = true;
 		thread = new BackstageThread();
@@ -81,7 +78,7 @@ public class BackstageService extends Service {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_BeatHeart");
-			if ((userName == null) && (preferData.isExist("UserName"))) {
+			if (preferData.isExist("UserName")) {
 				userName = preferData.readString("UserName");
 			}
 			jsonObj.put("UserName", userName);

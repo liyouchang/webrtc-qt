@@ -1,6 +1,5 @@
 package com.video.play;
 
-import java.io.File;
 import java.util.HashMap;
 
 import android.os.Handler;
@@ -17,12 +16,17 @@ public class TunnelCommunication {
 	public static int width = 1280; 
 	public static int height = 720;
 	
-	public static byte frameType; //
-	public static VideoCache videoDataCache = null; //
-	private static byte[] naluData = new byte[width*height*3]; //
-	private static int naluDataLen = 4; //
+	//视频
+	public static byte videoFrameType; 
+	public static VideoCache videoDataCache = null;
+	private static byte[] naluData = new byte[width*height*3];
+	private static int naluDataLen = 4;
 	
-	//P2P
+	//音频
+	public static byte audioFrameType; 
+	public static AudioCache audioDataCache = null;
+	
+	//P2P动态库接口
 	private native int naInitialize(String classPath);
 	private native int naTerminate();
 	private native int naOpenTunnel(String peerId);
@@ -44,30 +48,28 @@ public class TunnelCommunication {
 	}
 
 	/**
-	 * 
+	 * 初始化通道
 	 */
 	public int tunnelInitialize(String classPath) {
 		return naInitialize(classPath);
 	}
 
 	/**
-	 * 
+	 * 结束通道
 	 */
 	public int tunnelTerminate() {
 		return naTerminate();
 	}
 
 	/**
-	 * 
+	 * 打开通道
 	 */
 	public int openTunnel(String peerId) {
 		return naOpenTunnel(peerId);
 	}
-
-	private static File myData = null;
 	
 	/**
-	 * 
+	 * 关闭通道
 	 */
 	public int closeTunnel(String peerId) {
 		if (videoDataCache != null) {
@@ -76,22 +78,21 @@ public class TunnelCommunication {
 		return naCloseTunnel(peerId);
 	}
 	
-	public int messageFromPeer(String peerId, String msg) {
-		return naMessageFromPeer(peerId, msg);
-	}
-
 	/**
-	 * 
+	 * 请求视频数据
 	 */
 	public int askMediaData(String peerId) {
 		if (videoDataCache == null) {
 			videoDataCache = new VideoCache(1024*1024*3);
 		}
+		if (audioDataCache == null) {
+			audioDataCache = new AudioCache(1024*1024);
+		}
 		return naAskMediaData(peerId);
 	}
 	
 	/**
-	 * 
+	 * 发送handler消息
 	 */
 	private static void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
 		Message msg = new Message();
@@ -101,52 +102,64 @@ public class TunnelCommunication {
 	}
 	
 	/**
-	 * 
+	 * 向P2P发送消息
 	 */
 	public void SendToPeer(String peerId, String data) {
-		System.out.print("MyDebug: 1.SendToPeer(): "+data);
-		
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", peerId);
 		map.put("peerData", data);
 		Handler handler = HandlerApplication.getInstance().getMyHandler();
 		sendHandlerMsg(handler, R.id.send_to_peer_id, map); 
 	}
+	
+	/**
+	 * 向终端发送消息
+	 */
+	public int messageFromPeer(String peerId, String msg) {
+		return naMessageFromPeer(peerId, msg);
+	}
 
 	/**
-	 * 
+	 * 接收的视频数据
 	 */
 	public void RecvVideoData(String peerID, byte[] data) {
 		int dataLen = data.length;
-		frameType = (byte)(data[9]);
+		videoFrameType = (byte)(data[9]);
 		
-		if ((frameType & 0x5F) < 30) {
-			int pushPosition = 10;
-			int frameLen = Tools.getWordValue(data, pushPosition);
-			pushPosition += 2;
-			if (frameLen == (dataLen - pushPosition)) {
-				if ((byte)(frameType & 0x80) != 0) {
-					pushPosition += 4;
-				} else {
-					if(naluDataLen > 4 ){
-						Tools.setIntValue(naluData, 0, naluDataLen-4);
-						if (videoDataCache.push(naluData, naluDataLen) != 0) {
-							videoDataCache.clearBuffer();
-						}
-						naluDataLen = 4;
+		int pushPosition = 10;
+		int frameLen = Tools.getWordValue(data, pushPosition);
+		pushPosition += 2;
+		if (frameLen == (dataLen - pushPosition)) {
+			if ((byte)(videoFrameType & 0x80) == 0x80) {
+				pushPosition += 4;
+			} else {
+				if(naluDataLen > 4 ){
+					Tools.setIntValue(naluData, 0, naluDataLen-4);
+					if (videoDataCache.push(naluData, naluDataLen) != 0) {
+						videoDataCache.clearBuffer();
 					}
+					naluDataLen = 4;
 				}
-				int naluLen = dataLen - pushPosition;
-				Tools.CopyByteArray(naluData, naluDataLen, data, pushPosition, naluLen);
-				naluDataLen += naluLen;
 			}
+			int naluLen = dataLen - pushPosition;
+			Tools.CopyByteArray(naluData, naluDataLen, data, pushPosition, naluLen);
+			naluDataLen += naluLen;
 		}
 	}
 	
 	/**
-	 * 
+	 * 接收的音频数据
 	 */
 	public void RecvAudioData(String peerID,byte [] data) {
+		int dataLen = data.length;
+		audioFrameType = (byte)(data[9]);
 		
+		int pushPosition = 10;
+		int frameLen = Tools.getWordValue(data, pushPosition);
+		pushPosition += 2;
+		if (frameLen == (dataLen - pushPosition)) {
+			pushPosition += 4;
+			audioDataCache.push(data, pushPosition, dataLen - pushPosition);
+		}
 	}
 }

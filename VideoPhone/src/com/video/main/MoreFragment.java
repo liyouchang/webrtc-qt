@@ -127,12 +127,6 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	 * 退出当前账号登录的处理
 	 */
 	private void ExitLogoutAPP() {
-		if (preferData.isExist("UserPwd")) {
-			preferData.deleteItem("UserPwd");
-		}
-		if (preferData.isExist("AutoLogin")) {
-			preferData.deleteItem("AutoLogin");
-		}
 		Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 		String data = generateLogoutJson();
 		sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);

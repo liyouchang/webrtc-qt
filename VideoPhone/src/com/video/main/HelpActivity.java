@@ -24,7 +24,7 @@ import com.video.utils.ViewPagerAdapter;
 public class HelpActivity extends Activity implements OnPageChangeListener  {
 
 	private PreferData preferData = null;
-	private boolean appFirstTime = true;
+	private boolean isAppFirstTime = true;
 	
 	private ViewPager mViewPager = null;
 	private List<View> pageList = null;
@@ -94,9 +94,9 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 		preferData = new PreferData(HelpActivity.this);
 		Button useNow = (Button) help_page5.findViewById(R.id.btn_use_now);
 		if (preferData.isExist("AppFirstTime")) {
-			appFirstTime = preferData.readBoolean("AppFirstTime");
+			isAppFirstTime = preferData.readBoolean("AppFirstTime");
 		}
-		if (appFirstTime) {
+		if (isAppFirstTime) {
 			useNow.setVisibility(View.VISIBLE);
 		} else {
 			useNow.setVisibility(View.INVISIBLE);
@@ -104,8 +104,8 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 		useNow.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				appFirstTime = false;
-	    		preferData.writeData("AppFirstTime", appFirstTime);
+				isAppFirstTime = false;
+	    		preferData.writeData("AppFirstTime", isAppFirstTime);
 				startActivity(new Intent(HelpActivity.this, LoginActivity.class));
 				HelpActivity.this.finish();
 			}
@@ -170,7 +170,7 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
-			if (!appFirstTime) {
+			if (!isAppFirstTime) {
 				HelpActivity.this.finish();
 			} else {
 				return false;

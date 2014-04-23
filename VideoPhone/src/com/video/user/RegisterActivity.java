@@ -4,17 +4,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.PreferData;
@@ -33,7 +35,11 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	private EditText et_pwd;
 	private EditText et_repwd;
 	private Button btn_register;
-	private ProgressDialog progressDialog;
+	private Button button_delete_username;
+	private Button button_delete_email;
+	private Button button_delete_password;
+	private Button button_delete_repassword;
+	private Dialog mDialog = null;
 	
 	private String userName = "";
 	private String userEmail = "";
@@ -54,10 +60,100 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	}
 	
 	private void initView() {
-		et_name = (EditText)super.findViewById(R.id.et_register_name);
+		ImageButton button_back = (ImageButton) this.findViewById(R.id.btn_register_back);
+		button_back.setOnClickListener(this);
+		
+		button_delete_username = (Button) this.findViewById(R.id.btn_register_username_del);
+		button_delete_username.setOnClickListener(this);
+		
+		button_delete_email = (Button) this.findViewById(R.id.btn_register_email_del);
+		button_delete_email.setOnClickListener(this);
+		
+		button_delete_password = (Button) this.findViewById(R.id.btn_register_password_del);
+		button_delete_password.setOnClickListener(this);
+		
+		button_delete_repassword = (Button) this.findViewById(R.id.btn_register_repassword_del);
+		button_delete_repassword.setOnClickListener(this);
+		
+		et_name = (EditText)super.findViewById(R.id.et_register_username);
+		et_name.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_username.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_username.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
 		et_email = (EditText)super.findViewById(R.id.et_register_email);
-		et_pwd = (EditText)super.findViewById(R.id.et_register_pwd);
-		et_repwd = (EditText)super.findViewById(R.id.et_register_repwd);
+		et_email.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_email.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_email.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
+		et_pwd = (EditText)super.findViewById(R.id.et_register_password);
+		et_pwd.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_password.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_password.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
+		et_repwd = (EditText)super.findViewById(R.id.et_register_repassword);
+		et_repwd.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_repassword.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_repassword.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
 		
 		btn_register = (Button)super.findViewById(R.id.btn_register);
 		btn_register.setOnClickListener(this);
@@ -88,35 +184,6 @@ public class RegisterActivity extends Activity implements OnClickListener {
 		return result;
 	}
 	
-	/**
-	 * 显示操作的进度条
-	 */
-	private void showProgressDialog(String info) {
-		progressDialog = new ProgressDialog(mContext);
-        progressDialog.setMessage(info); 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
-        progressDialog.setIndeterminate(false);     
-        progressDialog.setCancelable(false); 
-        progressDialog.show(); 
-	}
-	
-	/**
-	 * 显示操作的提示
-	 */
-	private void showHandleDialog(String info) {
-		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-				.setTitle("温馨提示")
-				.setMessage(info)
-				.setCancelable(false)
-				.setPositiveButton("确定",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								dialog.dismiss();
-							}
-						}).create();
-		aboutDialog.show();
-	}
-	
 	private Handler handler = new Handler() {
 
 		@Override
@@ -125,24 +192,25 @@ public class RegisterActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REGISTERING:
-					showProgressDialog("正在注册... ");
+					mDialog = Utils.createLoadingDialog(mContext, "正在注册...");
+					mDialog.show();
 					break;
 				case REGISTER_TIMEOUT:
-					if (progressDialog != null)
-						progressDialog.dismiss();
-					showHandleDialog("注册失败，网络超时！");
+					if (mDialog != null)
+						mDialog.dismiss();
 					if (handler.hasMessages(REGISTER_TIMEOUT)) {
 						handler.removeMessages(REGISTER_TIMEOUT);
 					}
+					Toast.makeText(mContext, "注册失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.register_id:
 					if (handler.hasMessages(REGISTER_TIMEOUT)) {
 						handler.removeMessages(REGISTER_TIMEOUT);
+						if (mDialog != null)
+							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							if (progressDialog != null)
-								progressDialog.dismiss();
-							showHandleDialog("恭喜您，注册成功！");
+							Toast.makeText(mContext, "恭喜您，注册成功！", Toast.LENGTH_SHORT).show();
 							if (preferData.isExist("UserName")) {
 								preferData.deleteItem("UserName");
 								preferData.writeData("UserName", userName);
@@ -156,9 +224,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 								preferData.deleteItem("AutoLogin");
 							}
 						} else {
-							if (progressDialog != null)
-								progressDialog.dismiss();
-							showHandleDialog("注册失败，"+Utils.getErrorReason(resultCode));
+							Toast.makeText(mContext, "注册失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.register_id);
@@ -198,7 +264,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			showHandleDialog("没有可用的网络连接，请确认后重试！");
+			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -206,6 +272,21 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
+			case R.id.btn_register_back:
+				finish();
+				break;
+			case R.id.btn_register_username_del:
+				et_name.setText("");
+				break;
+			case R.id.btn_register_email_del:
+				et_email.setText("");
+				break;
+			case R.id.btn_register_password_del:
+				et_pwd.setText("");
+				break;
+			case R.id.btn_register_repassword_del:
+				et_repwd.setText("");
+				break;
 			case R.id.btn_register:
 				clickRegisterEvent();
 				break;

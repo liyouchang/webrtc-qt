@@ -5,16 +5,20 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.Value;
@@ -29,7 +33,9 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	private EditText et_name;
 	private EditText et_email;
 	private Button btn_submit;
-	private ProgressDialog progressDialog;
+	private Button button_delete_username;
+	private Button button_delete_email;
+	private Dialog mDialog = null;
 	
 	private String userName = "";
 	private String userEmail = "";
@@ -49,8 +55,54 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	}
 
 	private void initView() {
-		et_name = (EditText)super.findViewById(R.id.et_find_pwd_name);
-		et_email = (EditText)super.findViewById(R.id.et_find_pwd_email);
+		ImageButton button_back = (ImageButton) this.findViewById(R.id.btn_find_back);
+		button_back.setOnClickListener(this);
+		
+		button_delete_username = (Button) this.findViewById(R.id.btn_find_username_del);
+		button_delete_username.setOnClickListener(this);
+		
+		button_delete_email = (Button) this.findViewById(R.id.btn_find_email_del);
+		button_delete_email.setOnClickListener(this);
+		
+		et_name = (EditText)super.findViewById(R.id.et_find_username);
+		et_name.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_username.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_username.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
+		
+		et_email = (EditText)super.findViewById(R.id.et_find_email);
+		et_email.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_email.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_email.setVisibility(View.VISIBLE);
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {
+			}
+		});
 		
 		btn_submit = (Button)super.findViewById(R.id.btn_find_pwd_submit);
 		btn_submit.setOnClickListener(this);
@@ -79,18 +131,6 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
-	 * 显示操作的进度条
-	 */
-	private void showProgressDialog(String info) {
-		progressDialog = new ProgressDialog(mContext);
-        progressDialog.setMessage(info); 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
-        progressDialog.setIndeterminate(false);     
-        progressDialog.setCancelable(false); 
-        progressDialog.show(); 
-	}
-	
-	/**
 	 * 显示操作的提示
 	 */
 	private void showHandleDialog(String info) {
@@ -115,28 +155,27 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_SUBMITTING:
-					showProgressDialog("找回密码中... ");
+					mDialog = Utils.createLoadingDialog(mContext, "正在找回...");
+					mDialog.show();
 					break;
 				case SUBMIT_TIMEOUT:
-					if (progressDialog != null)
-						progressDialog.dismiss();
-					showHandleDialog("找回密码失败，网络超时！");
+					if (mDialog != null)
+						mDialog.dismiss();
 					if (handler.hasMessages(SUBMIT_TIMEOUT)) {
 						handler.removeMessages(SUBMIT_TIMEOUT);
 					}
+					Toast.makeText(mContext, "找回密码失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.find_pwd_id:
 					if (handler.hasMessages(SUBMIT_TIMEOUT)) {
 						handler.removeMessages(SUBMIT_TIMEOUT);
+						if (mDialog != null)
+							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							if (progressDialog != null)
-								progressDialog.dismiss();
-							showHandleDialog("恭喜您，找回密码成功，密码已被重置为【123456】！");
+							showHandleDialog("恭喜您！找回密码成功，服务器已将您的密码重置为【123456】！");
 						} else {
-							if (progressDialog != null)
-								progressDialog.dismiss();
-							showHandleDialog("找回密码失败，"+Utils.getErrorReason(resultCode));
+							Toast.makeText(mContext, "找回密码失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.find_pwd_id);
@@ -176,7 +215,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			showHandleDialog("没有可用的网络连接，请确认后重试！");
+			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -184,6 +223,15 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
+			case R.id.btn_find_back:
+				finish();
+				break;
+			case R.id.btn_find_username_del:
+				et_name.setText("");
+				break;
+			case R.id.btn_find_email_del:
+				et_email.setText("");
+				break;
 			case R.id.btn_find_pwd_submit:
 				clickFindPwdEvent();
 				break;

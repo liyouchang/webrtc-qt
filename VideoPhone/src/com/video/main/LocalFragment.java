@@ -165,8 +165,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	/**
-	 * 向主线程发送Handler消息(多太函数)
-	 * @param what 消息类型
+	 * 发送Handler消息
 	 */
 	public void sendHandlerMsg(int what) {
 		Message msg = new Message();
@@ -236,31 +235,30 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 				if (isDirectoryExist(currentFiles, "image")) {
 					
 					int imageFileCount = currentFiles.length;
-					ArrayList<String> imageFileArrayString = handleImageFileName(currentFiles);
+					ArrayList<String> imageFileStringArray = handleImageFileName(currentFiles);
 					
-					if (imageFileArrayString == null) {
+					if (imageFileStringArray.size() == 0) {
 						Toast.makeText(mActivity, "没有本地抓拍图片", Toast.LENGTH_SHORT).show();
-						return ;
-					}
-					
-					for (int i=0; i<imageFileCount; i++) {
-						fileItem = new ImageViewFileItem();
-						//文件夹下的图片
-						String imageFilePath = currentFile.getPath()+File.separator+imageFileArrayString.get(i);
-						File file = new File(imageFilePath);
-						File[] files = file.listFiles();
-						ArrayList<HashMap<String, Object>> fileImages = listAllImageViews(files);
-						if (fileImages == null) {
-							if (file.exists())
-								file.delete();
-							continue;
+					} else {
+						for (int i=0; i<imageFileCount; i++) {
+							fileItem = new ImageViewFileItem();
+							//文件夹下的图片
+							String imageFilePath = currentFile.getPath()+File.separator+imageFileStringArray.get(i);
+							File file = new File(imageFilePath);
+							File[] files = file.listFiles();
+							ArrayList<HashMap<String, Object>> fileImages = listAllImageViews(files);
+							if (fileImages == null) {
+								if (file.exists())
+									file.delete();
+								continue;
+							}
+							fileItem.imageViews = fileImages;
+							//文件夹名
+							fileItem.fileName = imageFileStringArray.get(i);
+							mFileAll.add(fileItem);
 						}
-						fileItem.imageViews = fileImages;
-						//文件夹名
-						fileItem.fileName = imageFileArrayString.get(i);
-						mFileAll.add(fileItem);
+						sendHandlerMsg(INIT_LOCAL_IMAGE_FINISH);
 					}
-					sendHandlerMsg(INIT_LOCAL_IMAGE_FINISH);
 				}
 			}
 		}

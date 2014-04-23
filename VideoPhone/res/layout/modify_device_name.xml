@@ -12,7 +12,7 @@
         android:layout_height="@dimen/title_height_size"
         android:background="@color/title_bg_black"
         android:orientation="horizontal" >
-        
+
         <ImageButton
             android:id="@+id/btn_modify_device_back"
             android:layout_width="60dp"
@@ -33,29 +33,60 @@
             android:textSize="@dimen/title_text_size" />
     </RelativeLayout>
 
-    <EditText
-        android:id="@+id/et_modify_device_name"
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="50dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/edittext_style"
-        android:hint="@string/hint_device_name"
-        android:paddingLeft="10dp"
-        android:textColor="@color/light_black"
-        android:textCursorDrawable="@null"
-        android:textSize="20dp" />
+        android:layout_marginLeft="15.0dip"
+        android:layout_marginRight="15.0dip"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/input_background" >
+
+        <ImageView
+            android:id="@+id/iv_modify_device_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10.0dip"
+            android:layout_marginRight="10.0dip"
+            android:background="@null"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/icon_device_name" />
+
+        <EditText
+            android:id="@+id/et_modify_device_name"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@+id/btn_modify_device_name_del"
+            android:layout_toRightOf="@+id/iv_modify_device_name"
+            android:background="@null"
+            android:hint="@string/hint_device_name"
+            android:padding="0.0dip"
+            android:textColor="@color/black"
+            android:textSize="18.0sp" />
+
+        <Button
+            android:id="@+id/btn_modify_device_name_del"
+            android:layout_width="20.0dip"
+            android:layout_height="20.0dip"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10.0dip"
+            android:background="@drawable/input_delete"
+            android:visibility="invisible" />
+    </RelativeLayout>
 
     <Button
         android:id="@+id/btn_modify_device_ok"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/button_style"
-        android:text="@string/btn_ok"
+        android:text="@string/submit"
         android:textColor="@color/white"
         android:textSize="18dp" />
 

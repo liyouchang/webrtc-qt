@@ -1,5 +1,9 @@
 package com.video.main;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -20,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.PreferData;
@@ -27,6 +32,7 @@ import com.video.data.Value;
 import com.video.service.BackstageService;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
+import com.video.socket.ZmqHandler;
 import com.video.user.LoginActivity;
 import com.video.utils.TabFactory;
 import com.video.utils.Utils;
@@ -38,7 +44,15 @@ public class MainActivity extends FragmentActivity {
 	private TabHost mTabHost;
 	private TextView app_exit;
 	
-	private boolean appFirstTime = true;
+	private String userName = "";
+	private String userPwd = "";
+	private boolean isAppFirstTime = true;
+	private boolean isAutoLogin = false;
+	
+	private static Dialog mDialog = null;
+	private final static int IS_LOGINNING = 1;
+	private final static int LOGIN_TIMEOUT = 2;
+	
 	private boolean isTextViewShow = false;
 	private static TextView tabMsgTextView = null;
 	private static ImageView tabMsgImageView = null;
@@ -53,31 +67,75 @@ public class MainActivity extends FragmentActivity {
         
         if (!Value.isLoginSuccess) {
 			setContentView(R.layout.first);
-			
+			ZmqHandler.setHandler(handler);
 			if (preferData.isExist("AppFirstTime")) {
-				appFirstTime = preferData.readBoolean("AppFirstTime");
+				isAppFirstTime = preferData.readBoolean("AppFirstTime");
 			}
-			
+			if (preferData.isExist("AutoLogin")) {
+				isAutoLogin = preferData.readBoolean("AutoLogin");
+			}
 			new Handler().postDelayed(new Runnable(){   
 			    public void run() {   
-			    	if (appFirstTime) {
-			    		appFirstTime = true;
-			    		preferData.writeData("AppFirstTime", appFirstTime);
+			    	if (isAppFirstTime) {
+			    		//第一次使用该软件的帮助图片
+			    		isAppFirstTime = true;
+			    		preferData.writeData("AppFirstTime", isAppFirstTime);
 			    		startActivity(new Intent(mContext, HelpActivity.class));
 			    		MainActivity.this.finish();
 			    	} else {
-			    		startActivity(new Intent(mContext, LoginActivity.class));
-			    		MainActivity.this.finish();
+			    		if (isAutoLogin) {
+			    			//自动登录，不进入登录界面
+			    			if (Utils.isNetworkAvailable(mContext)) {
+			    				if (preferData.isExist("UserName")) {
+			    					userName = preferData.readString("UserName");
+			    				}
+			    				
+			    				if (preferData.isExist("UserPwd")) {
+			    					userPwd = preferData.readString("UserPwd");
+			    				}
+		    					Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+		    					String data = generateLoginJson(userName, userPwd);
+		    					sendHandlerMsg(IS_LOGINNING);
+		    					sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
+		    					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+			    			} else {
+			    				//无可用网络
+			    				Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			    				startActivity(new Intent(mContext, LoginActivity.class));
+				    			MainActivity.this.finish();
+			    			}
+			    		} else {
+			    			//非自动登录
+			    			startActivity(new Intent(mContext, LoginActivity.class));
+			    			MainActivity.this.finish();
+			    		}
 			    	}
 			    } 
 			 }, 1500); 
 		} else {
+			//已登录成功
 			setContentView(R.layout.main);
-	        
 	        initData();
 	        initView();
 		}
     }
+	
+	/**
+	 * 生成JSON的登录字符串
+	 */
+	private String generateLoginJson(String username, String pwd) {
+		String result = "";
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_Login");
+			jsonObj.put("UserName", username);
+			jsonObj.put("Pwd", Utils.CreateMD5Pwd(pwd));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		result = jsonObj.toString();
+		return result;
+	}
 	
 	private void initData() {
 		DisplayMetrics dm = new DisplayMetrics();
@@ -103,19 +161,19 @@ public class MainActivity extends FragmentActivity {
 		mTabHost.setOnTabChangedListener(tabChangeListener);
 		
 		TabHost.TabSpec tabSpec = mTabHost.newTabSpec("tab1");
-		tabSpec.setIndicator("实时查看",
+		tabSpec.setIndicator("直播",
 				getResources().getDrawable(R.drawable.tab_own_xml))
 		.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
 		
 		tabSpec = mTabHost.newTabSpec("tab2");
-		tabSpec.setIndicator("本地文件",
+		tabSpec.setIndicator("本地",
 				getResources().getDrawable(R.drawable.tab_video_xml));
 		tabSpec.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
 		
 		tabSpec = mTabHost.newTabSpec("tab3");
-		tabSpec.setIndicator("告警消息",
+		tabSpec.setIndicator("消息",
 				getResources().getDrawable(R.drawable.tab_msg_xml));
 		tabSpec.setContent(new TabFactory(mContext));
 		mTabHost.addTab(tabSpec);
@@ -211,15 +269,15 @@ public class MainActivity extends FragmentActivity {
 	 */
 	public static void setAlarmIconAndText(int msg) {
 		if (msg == 0) {
-			tabMsgTextView.setText("告警消息");
+			tabMsgTextView.setText("消息");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_xml);
 		} 
 		else if (msg < 100) {
-			tabMsgTextView.setText("告警消息("+msg+")");
+			tabMsgTextView.setText("消息("+msg+")");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_alarm_xml);
 		}
 		else if (msg >= 100) {
-			tabMsgTextView.setText("告警消息(99+)");
+			tabMsgTextView.setText("消息(99+)");
 			tabMsgImageView.setImageResource(R.drawable.tab_msg_alarm_xml);
 		}
 	}
@@ -229,11 +287,77 @@ public class MainActivity extends FragmentActivity {
 		public void handleMessage(Message msg) {
 			// TODO Auto-generated method stub
 			super.handleMessage(msg);
-			if (msg.what == 0) {
-				setAlarmIconAndText(msg.arg1);
+			switch (msg.what) {
+				case 0:
+					setAlarmIconAndText(msg.arg1);
+					break;
 			}
 		}
 	};	
+	
+	private Handler handler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			// TODO Auto-generated method stub
+			super.handleMessage(msg);
+			switch (msg.what) {
+				case IS_LOGINNING:
+					mDialog = Utils.createLoadingDialog(mContext, "正在登录...");
+					mDialog.show();
+					break;
+				case LOGIN_TIMEOUT:
+					if (mDialog != null)
+						mDialog.dismiss();
+					if (handler.hasMessages(LOGIN_TIMEOUT)) {
+						handler.removeMessages(LOGIN_TIMEOUT);
+					}
+					Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
+					startActivity(new Intent(mContext, LoginActivity.class));
+	    			MainActivity.this.finish();
+					break;
+				case R.id.login_id:
+					if (handler.hasMessages(LOGIN_TIMEOUT)) {
+						handler.removeMessages(LOGIN_TIMEOUT);
+						if (mDialog != null)
+							mDialog.dismiss();
+						int resultCode = msg.arg1;
+						if (resultCode == 0) {
+							Value.isLoginSuccess = true;
+							setContentView(R.layout.main);
+					        initData();
+					        initView();
+						} else {
+							Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							startActivity(new Intent(mContext, LoginActivity.class));
+			    			MainActivity.this.finish();
+						}
+					} else {
+						handler.removeMessages(R.id.login_id);
+					}
+					break;
+			}
+		}
+	};	
+	
+	/**
+	 * 发送Handler消息
+	 */
+	private void sendHandlerMsg(int what) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessage(msg);
+	}
+	private void sendHandlerMsg(int what, int timeout) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessageDelayed(msg, timeout);
+	}
+	private void sendHandlerMsg(Handler handler, int what, String obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
+		handler.sendMessage(msg);
+	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {

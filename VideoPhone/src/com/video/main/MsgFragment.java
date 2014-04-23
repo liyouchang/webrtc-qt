@@ -9,7 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
@@ -61,7 +61,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	private int unreadAlarmCount = 0;
 	private TextView viewpage_alert;
 	private TextView viewpage_system;
-	private ProgressDialog progressDialog;
+	private Dialog mDialog = null;
 	
 	/**
 	 * 0:正常请求和下拉请求  1:上拖请求  2:删除该条报警  3:删除当前全部报警  4:标记该条报警  5:标记当前全部报警
@@ -307,17 +307,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		}
 		return result;
 	}
-	/**
-	 * 显示操作的进度条
-	 */
-	private void showProgressDialog(String info) {
-		progressDialog = new ProgressDialog(mActivity);
-        progressDialog.setMessage(info); 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
-        progressDialog.setIndeterminate(false);     
-        progressDialog.setCancelable(false); 
-        progressDialog.show(); 
-	}
 	
 	private Handler handler = new Handler() {
 		@SuppressWarnings("unchecked")
@@ -327,11 +316,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					showProgressDialog("正在请求报警数据... ");
+					mDialog = Utils.createLoadingDialog(mActivity, "正在请求报警数据...");
+					mDialog.show();
 					break;
 				case REQUEST_TIMEOUT:
-					if (progressDialog != null)
-						progressDialog.dismiss();
+					if (mDialog != null)
+						mDialog.dismiss();
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
@@ -340,10 +330,10 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 				case R.id.request_alarm_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
+						if (mDialog != null)
+							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							if (progressDialog != null)
-								progressDialog.dismiss();
 							Value.isNeedReqAlarmListFlag = false;
 							switch (reqAlarmType) {
 								//正常请求和下拉请求
@@ -404,8 +394,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 							MainActivity.setAlarmIconAndText(unreadAlarmCount);
 							preferData.writeData("AlarmCount", unreadAlarmCount);
 						} else {
-							if (progressDialog != null)
-								progressDialog.dismiss();
 							Toast.makeText(mActivity, msg.obj+","+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
