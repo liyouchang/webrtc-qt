@@ -1,6 +1,5 @@
 #include "ke_recorder.h"
-#include <QDebug>
-#include "talk/base/thread.h"
+
 
 
 const int kLeastPlaySize = 100*1024;
@@ -53,12 +52,12 @@ void KeRecorder::OnRecvRecordData(QString peer_id, QByteArray data)
     //ASSERT(peer_id == save_peer_id_);
     int ret = file_->write(data);
     if(ret < data.size()){
-        qWarning()<<"file write size error";
+        //qWarning()<<"file write size error";
         return;
     }
     //下载了一部分后，播放文件
     if(!sig_played &&file_->size() > kLeastPlaySize ){
-        SigAbleToPlay(save_file_path_,pre_file_size_);
+        SigAbleToPlay(peer_id,save_file_path_,pre_file_size_);
         sig_played = true;
     }
 
@@ -67,7 +66,7 @@ void KeRecorder::OnRecvRecordData(QString peer_id, QByteArray data)
 void KeRecorder::OnRecordDownloadEnd(QString peer_id)
 {
     if(peer_id ==save_peer_id_){
-        qDebug()<<"KeRecorder::OnRecordDownloadEnd delete"<<peer_id;
+       // qDebug()<<"KeRecorder::OnRecordDownloadEnd delete"<<peer_id;
 
         delete this;
     }

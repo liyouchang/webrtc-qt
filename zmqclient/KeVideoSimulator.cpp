@@ -6,6 +6,8 @@
 #include "talk/base/thread.h"
 #include "talk/base/fileutils.h"
 #include "talk/base/buffer.h"
+#include "talk/base/json.h"
+
 #include "libjingle_app/KeMessage.h"
 
 KeVideoSimulator::KeVideoSimulator()
@@ -31,9 +33,10 @@ bool KeVideoSimulator::ReadVideoData(std::string file_name)
 
     LOG(INFO)<<"file name is "<<path.pathname();
 
-    talk_base::FileStream * stream = talk_base::Filesystem::OpenFile(path,"r");
+    talk_base::scoped_ptr<talk_base::FileStream> stream;
+    stream.reset( talk_base::Filesystem::OpenFile(path,"r")) ;
     if(stream == NULL){
-        LOG(WARNING) << "open file error";
+        LOG(WARNING) << "open video file error";
         return false;
     }
     size_t fileSize;
@@ -99,4 +102,24 @@ void KeVideoSimulator::OnMessage(talk_base::Message *msg)
             media_thread_->Post(this,MSG_SENDFILEVIDEO);
         }
     }
+}
+
+void KeVideoSimulator::OnRecvRecordQuery(std::string peer_id, std::string condition)
+{
+    LOG(INFO)<<"KeVideoSimulator::OnRecvRecordQuery ---" <<peer_id<<" query:"<<condition ;
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] ="tunnel";
+    jmessage["command"] = "query_record";
+    Json::Value jresult;
+    jresult["condition"] = condition;
+    jresult["total_num"] = 10;
+
+    Json::Value jrecord;
+    jresult["record_list"].append(jrecord);
+
+    jmessage["result"] = jresult;
+
+    std::string msg = writer.write(jmessage);
+    this->terminal_->SendByRouter(peer_id,msg);
 }

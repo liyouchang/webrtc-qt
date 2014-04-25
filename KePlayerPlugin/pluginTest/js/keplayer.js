@@ -40,10 +40,19 @@ function QueryCameraRemoteFile(){
     var query_command = {type:"tunnel",command:"query_record",
                 condition:{start_time:"20140417175100",
             end_time:"20140418175500",offset:0,to_query:30}};
-
-    kePlayerObj.SendCommand(g_peer_id,query_command);
+    var query_str = JSON.stringify(query_command);
+    kePlayerObj.SendCommand(g_peer_id,query_str);
 
 }
 
+function PlayCameraRemoteFile(){
+    g_peer_id =  PeerID.value;
+    var record_list =
+            [{"file_name":"testfile1","file_date":"20140417175100","file_size":256},
+            {"file_name":"testfile2","file_date":"20140417175100","file_size":256}];
+    var record_str = JSON.stringify(record_list);
+
+    kePlayerObj.PlayRecordFiles(g_peer_id,record_str);
+}
 
 

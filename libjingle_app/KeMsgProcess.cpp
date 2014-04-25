@@ -214,7 +214,11 @@ void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
 
 void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
 {
-    LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile";
+    KEPlayRecordFileReq * pMsg =reinterpret_cast<KEPlayRecordFileReq *>(msgData.data());
+    LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile:"<<pMsg->fileData;
+
+    this->SignalToPlayFile(this->peer_id(),pMsg->fileData);
+
 
 }
 

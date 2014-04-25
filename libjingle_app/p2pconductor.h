@@ -25,6 +25,10 @@ class P2PConductor:
         public talk_base::MessageHandler
 {
 public:
+    enum {
+        MSG_CONNECT_TIMEOUT
+    };
+
     P2PConductor();
     ~P2PConductor();
     virtual int ConnectToPeer(const std::string & peer_id);
@@ -42,40 +46,38 @@ public:
     sigslot::signal2<const std::string &, const std::string& > SignalNeedSendToPeer;
     //when connect success ,this signal will be emit
     sigslot::signal1<StreamProcess *> SignalStreamOpened;
+    sigslot::signal1<StreamProcess *> SignalStreamClosed;
 
-protected:
-    bool InitializePeerConnection();
-    void DeletePeerConnection();
-
-    void OnTunnelEstablished();
-
-    talk_base::scoped_refptr<PeerTunnelInterface> peer_connection_;
-    talk_base::Thread * stream_thread_;
-    talk_base::Thread * signal_thread_;
-    talk_base::scoped_ptr<StreamProcess> stream_process_;
-    bool tunnel_established_;
-
-    //maybe conflict
-    std::string peer_id_;
 
     // CreateSessionDescriptionObserver interface
-public:
     void OnSuccess(SessionDescriptionInterface *desc);
     void OnFailure(const std::string &error);
 
     // PeerTunnelObserver interface
-public:
     void OnError();
     void OnRenegotiationNeeded();
     void OnIceCandidate(const IceCandidateInterface *candidate);
     void OnIceGatheringChange(IceObserver::IceGatheringState new_state);
 
     // MessageHandler interface
-public:
-    enum {
-        MSG_CONNECT_TIMEOUT
-    };
     void OnMessage(talk_base::Message *msg);
+
+
+protected:
+    bool InitializePeerConnection();
+    void DeletePeerConnection();
+
+    void OnTunnelEstablished();
+    void OnTunnelTerminate(StreamProcess * stream);
+
+private:
+    talk_base::scoped_refptr<PeerTunnelInterface> peer_connection_;
+    talk_base::Thread * stream_thread_;
+    talk_base::Thread * signal_thread_;
+    talk_base::scoped_ptr<StreamProcess> stream_process_;
+    bool tunnel_established_;
+    //maybe conflict
+    std::string peer_id_;
 };
 
 }

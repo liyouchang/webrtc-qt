@@ -121,6 +121,16 @@ void P2PConductor::OnTunnelEstablished()
     tunnel_established_ = true;
 }
 
+void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
+{
+    LOG(INFO) << "P2PConductor::OnTunnelTerminate";
+    ASSERT(this->GetStreamProcess() == stream);
+    SignalStreamClosed(stream);
+
+    peer_id_.clear();
+
+}
+
 
 bool P2PConductor::InitializePeerConnection()
 {
@@ -139,6 +149,7 @@ bool P2PConductor::InitializePeerConnection()
 
     stream_process_.reset( new StreamProcess(stream_thread_));
     stream_process_->SignalOpened.connect(this,&P2PConductor::OnTunnelEstablished);
+    stream_process_->SignalClosed.connect(this,&P2PConductor::OnTunnelTerminate);
 
     talk_base::scoped_refptr<PeerTunnel> pt (
                 new talk_base::RefCountedObject<PeerTunnel>(signal_thread_,stream_thread_));
@@ -158,11 +169,8 @@ void P2PConductor::DeletePeerConnection()
     //when close peer_connection the session will terminate and destroy the channels
     //the channel destroy will make the StreamProcess clean up
     peer_connection_->Close();
-    peer_id_.clear();
     //stream_process_.reset();
     peer_connection_.release();
-
-
 }
 
 void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)

@@ -6,11 +6,12 @@
 #include <QString>
 #include "zmqclient/peerconnectionclientdealer.h"
 #include "KeQtTunnelClient.h"
-#include "ke_recorder.h"
+//
 
 
 class VideoWall;
-
+struct RecordFileInfo;
+class KeRecorder;
 
 
 class KePlayerPlugin : public QWidget
@@ -49,14 +50,12 @@ public slots:
     int SendCommand(QString peer_id,QString msg);
 
     int PlayRecordFiles(QString peer_id,QString record_info_list);
-    //停止录像播放，peer_id为空时停止本地录像播放，否则是停止远程录像回放
     int StopPlayFile(QString peer_id);
     void setSavePath(const QString &path );
 
 
     void OnRecordStatus(QString peer_id,int status);
 private:
-    //我们存储所有需要播放的录像
     QQueue<RecordFileInfo> need_play_records_;
     VideoWall * video_wall_;
     talk_base::scoped_ptr<KeQtTunnelClient> tunnel_;

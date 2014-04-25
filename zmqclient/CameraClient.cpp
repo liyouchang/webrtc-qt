@@ -3,7 +3,8 @@
 #include "talk/base/logging.h"
 #include "talk/base/thread.h"
 
-CameraClient::CameraClient()
+CameraClient::CameraClient(std::string mac):
+    mac_(mac)
 {
     comm_thread_ = talk_base::Thread::Current();
 }
@@ -13,8 +14,7 @@ void CameraClient::Login()
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage["type"] = "Terminal_Login";
-    jmessage["MAC"] = "54321";
-    jmessage["DealerName"] = "123456";
+    jmessage["MAC"] = mac_;
     std::string msg = writer.write(jmessage);
 
     this->SendToPeer("Backstage",msg);

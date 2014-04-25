@@ -143,21 +143,21 @@ extern "C" bool qtns_event(QtNPInstance *, NPEvent *)
 //extern Q_CORE_EXPORT void qWinMsgHandler(QtMsgType t, const char* str);
 //extern Q_CORE_EXPORT void qWinMessageHandler(QtMsgType t, const QMessageLogContext &context,const QString &str);
 
-QString GetCurrentPath()
-{
-    QString retPath;
+//QString GetCurrentPath()
+//{
+//    QString retPath;
 
-    char filePath[MAX_PATH];
-    HMODULE hModule= NULL;
-    void *callerAddress = _ReturnAddress();
-    GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,(LPCTSTR)callerAddress,&hModule);
-    GetModuleFileNameA(hModule, filePath, MAX_PATH);
-//	PathRemoveFileSpec(filePath);
-    retPath = QString::fromLatin1(filePath);
-    int pathIndex = retPath.lastIndexOf('\\');
-    retPath = retPath.left(pathIndex);
-    return retPath;
-}
+//    char filePath[MAX_PATH];
+//    HMODULE hModule= NULL;
+//    void *callerAddress = _ReturnAddress();
+//    GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,(LPCTSTR)callerAddress,&hModule);
+//    GetModuleFileNameA(hModule, filePath, MAX_PATH);
+////	PathRemoveFileSpec(filePath);
+//    retPath = QString::fromLatin1(filePath);
+//    int pathIndex = retPath.lastIndexOf('\\');
+//    retPath = retPath.left(pathIndex);
+//    return retPath;
+//}
 
 void MyMessageOutput(QtMsgType Type, const QMessageLogContext& Context, const QString &Message)
 {

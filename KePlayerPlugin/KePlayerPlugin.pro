@@ -31,4 +31,5 @@ OTHER_FILES += \
     pluginTest/KePlayerPlugin.html \
     pluginTest/js/jquery-1.11.0.js \
     pluginTest/js/keplayer.js \
-    pluginTest/css/main.css
+    pluginTest/css/main.css \
+    pluginTest/js/json2.js

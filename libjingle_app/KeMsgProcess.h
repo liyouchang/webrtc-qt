@@ -60,6 +60,10 @@ public:
     KeMessageProcessCamera(std::string peer_id,KeTunnelCamera * container);
     void OnVideoData(const char *data, int len);
     void OnAudioData(const char * data,int len);
+    void OnRecordData(const char * data,int len);
+
+    sigslot::signal2<const std::string &,const std::string & > SignalToPlayFile;
+
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     virtual void RecvAskMediaMsg(talk_base::Buffer &msgData);

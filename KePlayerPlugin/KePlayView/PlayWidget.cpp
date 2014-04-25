@@ -63,7 +63,7 @@ void PlayWidget::StopPlay()
 void PlayWidget::paintEvent(QPaintEvent *event)
 {
     QPainter p(this);
-//    qDebug()<<"PlayWidget::paintEvent ---"<<this->winId();
+    //qDebug()<<"PlayWidget::paintEvent ---"<<this->winId();
 
     if(this->selected){
         p.setPen(Qt::yellow);

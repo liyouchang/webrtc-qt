@@ -2,9 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <title>KePlayerPlugin</title>
-
+<script language=JavaScript src="js/json2.js" ></script>
 <script language=JavaScript src="js/keplayer.js" ></script>
-
 <link href="css/main.css" rel="stylesheet" type="text/css" />
 
 
@@ -37,7 +36,11 @@
     <input type="button" value="Start Video" OnClick="KePlayerPlugin.StartVideo(PeerID.value)"/>
 
     <p></p>
-<div id="textDiv"></div>
+    <input type="button" value="query record file" OnClick="QueryCameraRemoteFile()"/>
+    <input type="button" value="play record file" OnClick="PlayCameraRemoteFile()"/>
+
+    <p></p>
+    <div id="textDiv"></div>
 
 </body>
 </html>

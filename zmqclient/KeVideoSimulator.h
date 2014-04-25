@@ -23,14 +23,18 @@ public:
     void SendMediaMsg(const char *data, int len);
 
 
-protected:
-    talk_base::Thread * media_thread_;
-    talk_base::Buffer video_data_;
-    std::vector<KeMessageProcessCamera *> processes_;
-    std::string mac;
     // MessageHandler interface
 public:
     void OnMessage(talk_base::Message *msg);
+
+    // KeTunnelCamera interface
+protected:
+    void OnRecvRecordQuery(std::string peer_id, std::string condition);
+
+protected:
+    talk_base::Thread * media_thread_;
+    talk_base::Buffer video_data_;
+
 };
 
 #endif // KEVIDEOSIMULATOR_H

@@ -32,7 +32,7 @@ int PeerTerminal::OpenTunnel(const std::string & peer_id)
 
 int PeerTerminal::CloseTunnel(const std::string &peer_id)
 {
-    LOG(INFO)<< __FUNCTION__;
+    LOG(INFO)<< "PeerTerminal::CloseTunnel" << peer_id;
 
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
@@ -85,7 +85,7 @@ void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *stream)
     }
     //this->tunnel_stream_ = tunnel;
     stream->SignalReadData.connect(this,&PeerTerminal::OnTunnelReadData);
-    stream->SignalClosed.connect(this,&PeerTerminal::OnTunnelClosed);
+    //stream->SignalClosed.connect(this,&PeerTerminal::OnTunnelClosed);
     this->SignalTunnelOpened(this,aTunnel->GetPeerID());
 }
 
@@ -219,6 +219,8 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
         aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
         aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
         aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
+        aTunnel->SignalStreamClosed.connect(this,&PeerTerminal::OnTunnelClosed);
+
         tunnels_.push_back(aTunnel);
     }
     else{

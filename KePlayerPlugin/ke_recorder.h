@@ -1,7 +1,6 @@
 #ifndef KE_RECORDER_H
 #define KE_RECORDER_H
 
-#include <QObject>
 #include <QFile>
 
 
@@ -11,6 +10,8 @@ struct RecordFileInfo{
     std::string file_date;
     std::string remote_name;
 };
+
+
 class KeRecorder : public QObject
 {
     Q_OBJECT
@@ -21,10 +22,12 @@ public:
     int GetFileSize();
     void SetPreFileSize(int pre_size);
 signals:
-    void SigAbleToPlay(QString file_name,int file_size);
+    void SigAbleToPlay(QString peer_id,QString file_name,int file_size);
+
 public slots:
     void OnRecvRecordData(QString peer_id,QByteArray data);
     void OnRecordDownloadEnd(QString peer_id);
+
 private:
     QString save_file_path_;
     QFile * file_;

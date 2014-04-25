@@ -330,7 +330,7 @@ struct KEPlayRecordFileReq
     int fileNo;//1 无用
     char startTime[6];//无用
     int clientIp;//0或本机ip
-    char protocalType;
+    char protocalType; //
     char fileData[80];
 };
 

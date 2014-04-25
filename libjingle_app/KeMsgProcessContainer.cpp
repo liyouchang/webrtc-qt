@@ -289,6 +289,12 @@ void KeTunnelCamera::SetWifiInfo(std::string peer_id, std::string param)
     LOG(INFO)<<"KeTunnelCamera::SetWifiInfo---from:" <<peer_id<<" param:"<<param ;
 }
 
+void KeTunnelCamera::OnToPlayFile(const std::string &peer_id, const std::string &filename)
+{
+    LOG(INFO) << "KeTunnelCamera::OnToPlayFile --- "<<peer_id<<" file name "<<filename ;
+
+}
+
 void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::string &msg)
 {
     Json::Reader reader;
@@ -317,7 +323,7 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::stri
         this->SetPtz(ptz_key,param);
     }else if(command.compare("query_record") == 0){
         std::string condition;
-        GetStringFromJsonObject(jmessage,"result",&condition);
+        GetStringFromJsonObject(jmessage,"condition",&condition);
         OnRecvRecordQuery(peer_id,condition);
     }
     else{

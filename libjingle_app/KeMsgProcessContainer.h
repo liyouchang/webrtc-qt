@@ -87,6 +87,7 @@ protected:
     virtual void SetPtz( std::string  ptz_key,int param);
     virtual void OnRecvGetWifiInfo(std::string peer_id);
     virtual void SetWifiInfo(std::string peer_id,std::string param);
+    virtual void OnToPlayFile(const std::string &peer_id, const std::string &filename);
 
 };
 

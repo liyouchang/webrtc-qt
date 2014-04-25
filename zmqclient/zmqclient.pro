@@ -23,9 +23,8 @@ win32 {
     LIBS += -lStrmiids -lshell32 -lrpcrt4
 
     LIBS += -L$$output_dir/libs
-    LIBS += -ljsoncpp
+    LIBS += -ljsoncpp  -lcppzmq
     LIBS += -ljingle_app  -ljingle_p2p  -ljingle
-    LIBS +=  -lcppzmq
 
 
 
@@ -47,13 +46,17 @@ SOURCES += \
     asyndealer.cpp \
     peerconnectionclientdealer.cpp \
     CameraClient.cpp \
-    zmqclient.cpp
+    zmqclient.cpp \
+    jsonconfig.cpp \
+    recordreader.cpp
 
 
 HEADERS += \
     asyndealer.h \
     peerconnectionclientdealer.h \
     CameraClient.h \
+    jsonconfig.h \
+    recordreader.h
 
 
 arm{

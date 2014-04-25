@@ -9,7 +9,7 @@
 const QString kLocalIndexPrefix = "local_file_";
 
 VideoWall::VideoWall(QWidget *parent) :
-    QWidget(parent)
+    QWidget(parent),layout_changed_(false)
 {
 
     AVService::Initialize();
@@ -29,12 +29,13 @@ VideoWall::VideoWall(QWidget *parent) :
     this->setLayout(mainLayout);
     for(int i=0;i<MAX_AVPLAYER;i++){
         this->players[i] = new PlayWidget(i,this);
+        //hideLayout->addWidget( this->players[i]);
         this->players[i]->hide();
     }
     m_divType = ScreenDivision_None;
     m_selectedPlayer = 0;
     setSelectedPlayer(0);
-    SetDivision(ScreenDivision_Six);
+    SetDivision(ScreenDivision_One);
 
     setAcceptDrops(true);
 }
@@ -51,7 +52,6 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
     qDebug("Start SetDivision %d",divType);
     int splitNum = 0;
     if(this->m_divType == divType) return;
-
 
     for(int i=0;i<m_layoutList.size();i++){
         int index = m_layoutList.at(i);
@@ -78,15 +78,20 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
     }
 
     for(int i=0;i<splitNum;i++){
-        this->players[i]->show();
+        if(!this->players[i]->isVisible()){
+            this->players[i]->setVisible(true);
+        }
     }
     m_divType = divType;
     this->BuildLayout();
 
     for(int i=splitNum;i<MAX_AVPLAYER;i++){
         emit SigNeedStopPeerPlay(GetPeerPlay(i));
-        this->players[i]->resize(0,0);
+        this->players[i]->setVisible(false);
+        //this->players[i]->resize(0,0);
+
     }
+    layout_changed_ = true;
     this->update();
 
 }
@@ -107,6 +112,7 @@ void VideoWall::SetDivision(int num)
         if(num == AvailableScreenDivisionType[find]) break;
     }
     if(find == arrayLen) return;
+
     SetDivision(static_cast<ScreenDivisionType>(num));
 }
 
@@ -204,6 +210,7 @@ QString VideoWall::GetPeerPlay(int player_num)
 
 void VideoWall::StopPeerPlay(QString peer_id)
 {
+    qDebug()<<"VideoWall::StopPeerPlay "<<peer_id;
     int play_index = peer_play_map_.value(peer_id,-1);
     if(play_index != -1){
         players[play_index]->StopPlay();
@@ -332,6 +339,31 @@ void VideoWall::contextMenuEvent(QContextMenuEvent *event)
     //this->setSelectedPlayer(playIndex);
 
     itemMenu->exec(event->globalPos());
+
+}
+
+void VideoWall::paintEvent(QPaintEvent *)
+{
+    if(layout_changed_){
+        for(int i=0;i<MAX_AVPLAYER;i++){
+            //                    if(!this->players[i]->isVisible()){
+            //                        this->players[i]->setVisible(true);
+
+
+            //}
+            this->players[i]->winId();
+            // this->players[i]->update();
+        }
+        //        for(int i=m_layoutList.size();i<MAX_AVPLAYER;i++){
+        //            //this->players[i]->winId();
+        //            //this->players[i]->setGeometry(-100,-100,0,0);
+        //            //this->players[i]->winId();
+        //            this->players[i]->setVisible(false);
+
+        //        }
+        layout_changed_ = false;
+    }
+
 
 }
 

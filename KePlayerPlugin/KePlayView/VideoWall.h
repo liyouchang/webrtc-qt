@@ -15,6 +15,7 @@ QT_BEGIN_NAMESPACE
 class QDragEnterEvent;
 class QDropEvent;
 class QGridLayout;
+class QVBoxLayout;
 class QMenu;
 QT_END_NAMESPACE
 
@@ -73,6 +74,8 @@ public slots:
 private:
     //AVService * playSource;
     QGridLayout *mainLayout;
+    QVBoxLayout *hideLayout;
+
     PlayWidget * players[MAX_AVPLAYER];
     int m_selectedPlayer;
     int m_divType;
@@ -84,6 +87,7 @@ private:
     QMenu *itemMenu;
     QPoint startPos;
     QAction *deleteAction;
+    bool layout_changed_;
 private:
     void createActions();
     void createMenus();
@@ -99,6 +103,8 @@ protected:
     void dropEvent(QDropEvent *);
     void keyPressEvent(QKeyEvent *e);
     void contextMenuEvent(QContextMenuEvent *event);
+    void paintEvent(QPaintEvent *);
+
 };
 
 

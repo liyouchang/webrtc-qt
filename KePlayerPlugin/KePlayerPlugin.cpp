@@ -1,11 +1,14 @@
 #include "KePlayerPlugin.h"
 
-#include <vector>
 
 #include <QtWidgets>
-#include <QFile>
-#include "VideoWall.h"
+
 #include "talk/base/json.h"
+
+#include "VideoWall.h"
+#include "ke_recorder.h"
+#include <vector>
+
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
       connection_(new   PeerConnectionClientDealer()),
@@ -47,7 +50,7 @@ int KePlayerPlugin::PlayLocalFile()
                 "Open Video File",
                 QDir::currentPath(),
                 "Video files (*.h264 *.264);;All files(*.*)");
-    if (!filename.isNull()) { //用户选择了文件
+    if (!filename.isNull()) {
         qDebug()<<QDir::currentPath();
         this->video_wall_->PlayLocalFile("",filename,0);
     }
@@ -131,6 +134,7 @@ int KePlayerPlugin::PlayRecordFiles(QString peer_id, QString record_info_list)
         qWarning() << "parse  record_info_list error. " << record_info_list;
         return 10001;
     }
+
     need_play_records_.clear();
     std::vector<Json::Value>::iterator it = record_vector.begin();
     for(;it != record_vector.end();++it){
@@ -163,8 +167,10 @@ int KePlayerPlugin::PlayRecordFiles(QString peer_id, QString record_info_list)
 
     KeRecorder * recorder = new KeRecorder(this);
     recorder->setObjectName(peer_id);
+
     QObject::connect(recorder,&KeRecorder::SigAbleToPlay,
                      this->video_wall_,&VideoWall::PlayLocalFile);
+
     QObject::connect(this,&KePlayerPlugin::RemoteFileDownloadEnd,
                      recorder,&KeRecorder::OnRecordDownloadEnd);
 
@@ -181,7 +187,7 @@ int KePlayerPlugin::StopPlayFile(QString peer_id)
         delete recorder;
     }
     this->video_wall_->StopFilePlay(peer_id);
-
+    return 0;
 }
 
 void KePlayerPlugin::setSavePath(const QString &path)

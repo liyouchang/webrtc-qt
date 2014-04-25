@@ -16,7 +16,7 @@ public:
     {
         MSG_LOGIN_TIMEOUT
     };
-    CameraClient();
+    explicit CameraClient(std::string mac);
     virtual void Login();
 
     // MessageHandler interface
@@ -24,6 +24,7 @@ public:
     void OnMessage(talk_base::Message *msg);
 private:
     talk_base::Thread * comm_thread_;
+    std::string mac_;
 
     // PeerConnectionClientInterface interface
 public:
