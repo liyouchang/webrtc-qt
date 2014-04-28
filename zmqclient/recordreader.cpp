@@ -11,12 +11,11 @@ void RecordReaderInterface::OnMessage(talk_base::Message *msg)
     case MSG_RECORD_SEND:{
         talk_base::Buffer * send_buffer = this->ReadRecordFrame();
         if(send_buffer == NULL){
-            this->CloseRecord();
             break;
         }
         this->SignalRecordData(send_buffer->data(),send_buffer->length());
         delete send_buffer;
-        file_thread_->PostDelayed(frame_internal_,this,MSG_RECORD_SEND);
+        file_thread_->PostDelayed(frameInternal_,this,MSG_RECORD_SEND);
         break;
     }
     default:
@@ -27,7 +26,7 @@ void RecordReaderInterface::OnMessage(talk_base::Message *msg)
 bool RecordReaderInterface::StartPlayRecord(int internal,talk_base::Thread *thread)
 {
     ASSERT(internal>0);
-    frame_internal_ = internal;
+    frameInternal_ = internal;
     if(thread == NULL){
         file_thread_ = talk_base::Thread::Current();
     }else{
@@ -37,20 +36,23 @@ bool RecordReaderInterface::StartPlayRecord(int internal,talk_base::Thread *thre
     if(!ret){
         return ret;
     }
-    file_thread_->PostDelayed(frame_internal_,this,MSG_RECORD_SEND);
+    file_thread_->PostDelayed(frameInternal_,this,MSG_RECORD_SEND);
     return ret;
 }
 
-RecordReaderInterface::RecordReaderInterface():
-    file_thread_(NULL),frame_internal_(0)
+
+RecordReaderInterface::RecordReaderInterface(int frame_internal):
+    file_thread_(NULL),frameInternal_(frame_internal),useInterval()
 {
 
 }
 
 
-FileRecordReader::FileRecordReader(std::string filename):
-    filename_(filename),file_stream_(NULL)
+FileRecordReader::FileRecordReader(std::string filename,int frame_internal):
+    RecordReaderInterface(frame_internal), filename_(filename),file_stream_(NULL)
 {
+    sendFrameHead_ = NULL;
+
 }
 
 talk_base::Buffer *FileRecordReader::ReadRecordFrame()
@@ -60,33 +62,53 @@ talk_base::Buffer *FileRecordReader::ReadRecordFrame()
     talk_base::scoped_ptr<talk_base::Buffer> buffer;
     buffer.reset(new talk_base::Buffer);
 
-//    if(fileBufPos > (video_data_.length() - sizeof(KEFrameHead))){
-//        fileBufPos = 0;
-//    }
-//    KEFrameHead * pHead = (KEFrameHead *)(video_data_.data() + fileBufPos);
-//    int frameLen = pHead->frameLen + sizeof(KEFrameHead);
-//    if( frameLen < 0 || fileBufPos + frameLen > video_data_.length()  ){
-//        fileBufPos = 0;
-//        media_thread_->Post(this,MSG_SENDFILEVIDEO);
-//        return;
-//    }
-//    //send media
-//    this->SendMediaMsg(video_data_.data() + fileBufPos,frameLen);
+    //    if(fileBufPos > (video_data_.length() - sizeof(KEFrameHead))){
+    //        fileBufPos = 0;
+    //    }
+    talk_base::StreamResult result;
 
-//    fileBufPos += frameLen;
+    if(sendFrameHead_){
+        int framelen = sendFrameHead_->frameLen;
+        char * framedata = new char[framelen];
+        result =  file_stream_->Read(framedata,framelen);
+        if(result == talk_base::SR_SUCCESS){
+            buffer->AppendData(reinterpret_cast<void *>(sendFrameHead_),sizeof(KEFrameHead));
+            buffer->AppendData(framedata,framelen);
+        }else if(result == talk_base::SR_EOS){
+            delete sendFrameHead_;
+            sendFrameHead_ = NULL;
+            this->CloseRecord();
+            return NULL;
+        }else{
+            LOG(WARNING)<<"FileRecordReader::ReadRecordFrame---read error file:"<<filename_;
+            delete sendFrameHead_;
+            sendFrameHead_ = NULL;
+            this->CloseRecord();
+            return NULL;
+        }
+    }
 
-//    if(lastFrameNo == 0){
-//        lastFrameNo = pHead->frameNo;
-//    }
+    talk_base::scoped_ptr<KEFrameHead> frame_head;
+    frame_head.reset(new KEFrameHead());
+    result =  file_stream_->Read(reinterpret_cast<void *>(frame_head.get()),sizeof(KEFrameHead));
+    if(result == talk_base::SR_SUCCESS){
 
-//    if(lastFrameNo != pHead->frameNo){
-//        lastFrameNo = pHead->frameNo;
-//        media_thread_->PostDelayed(40,this ,MSG_SENDFILEVIDEO);
-//    }
-//    else{
-//        media_thread_->Post(this,MSG_SENDFILEVIDEO);
-//    }
+    }else if(result == talk_base::SR_EOS){
+        this->CloseRecord();
+        return NULL;
+    }else{
+        LOG(WARNING)<<"FileRecordReader::ReadRecordFrame---read error file:"<<filename_;
+        return NULL;
+    }
 
+    if(send_speed_ > 0 && sendFrameHead_){
+        int second = frame_head->second - sendFrameHead_->second ;
+        int tenmsecond = frame_head->millisecond - sendFrameHead_->millisecond;
+        frameInternal_ = 1000*second + 10*tenmsecond;
+    }
+
+
+    sendFrameHead_ = frame_head.release();
 
     return buffer.release();
 }

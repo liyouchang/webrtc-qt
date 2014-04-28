@@ -2,7 +2,7 @@
 
 include (../talk/talk_common.pri)
 
-DESTDIR = $$output_dir
+DESTDIR = $$output_dir/$$TARGET
 
 INCLUDEPATH     +=  $$PWD\
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \

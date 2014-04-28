@@ -48,8 +48,6 @@ std::string ReadConfigFile();
 
 int main()
 {
-
-
     //read config
     JsonConfig::Instance()->FromFile(GetAppFilePath("config.json"));
 

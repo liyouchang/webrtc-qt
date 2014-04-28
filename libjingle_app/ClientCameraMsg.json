@@ -45,7 +45,7 @@ client-->camera
 {
     "type":"tunnel",
             "command":"video_clarity",
-            "value":1,    //1:low,2:normal,3:heigh. 1~3 is to set clarity.
+            "value":1,    //1:low,2:normal,3:high. 1~3 is to set clarity.
             //101:get camera clarity
 }
 
@@ -53,7 +53,7 @@ camera-->client
 {
     "type":"tunnel",
             "command":"video_clarity",
-            "value":1,    //1:low,2:normal,3:heigh.
+            "value":1,    //1:low,2:normal,3:high.
 }
 
 4.get camera wifi info
@@ -68,9 +68,9 @@ camera-->client
             "command":"wifi_info",
             "info":{
         "ssid":"", //the ssid of wifi
-        "quality":0,
-        "enc":1,
-        "mode":1
+        "quality":0,//信号质量
+        "enc":1,//加密方式
+        "mode":1//加密模式
     }
 }
 

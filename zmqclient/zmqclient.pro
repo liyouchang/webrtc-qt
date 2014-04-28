@@ -6,7 +6,9 @@ CONFIG -= qt
 
 include (../talk/talk_common.pri)
 
-DESTDIR = $$output_dir
+DESTDIR = $$output_dir/$$TARGET
+
+message("out put dir is "$$DESTDIR)
 
 INCLUDEPATH     +=  \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
@@ -74,3 +76,6 @@ arm{
     HEADERS +=  KeVideoSimulator.h
 
 }
+
+OTHER_FILES += \
+    config.json

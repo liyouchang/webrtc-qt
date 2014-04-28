@@ -11,6 +11,8 @@ class Buffer;
 class FileStream;
 }
 
+struct KEFrameHead;
+
 class RecordReaderInterface:public talk_base::MessageHandler
 {
 public:
@@ -25,17 +27,21 @@ protected:
     virtual talk_base::Buffer *ReadRecordFrame() = 0;
     virtual bool OpenRecord() = 0;
     virtual void CloseRecord() = 0;
-    RecordReaderInterface();
+    RecordReaderInterface(int frame_internal);
+    int frameInternal_;//internal millisecond
+    bool useInterval;
+
 private:
     talk_base::Thread * file_thread_;
-    int frame_internal_;//internal millisecond
+
 
 };
 
 class FileRecordReader:public RecordReaderInterface
 {
 public:
-    FileRecordReader(std::string filename);
+    FileRecordReader(std::string filename,int frame_internal);
+    virtual ~FileRecordReader();
 protected:
     virtual talk_base::Buffer *ReadRecordFrame();
     virtual bool OpenRecord();
@@ -45,6 +51,9 @@ private:
     talk_base::FileStream * file_stream_;
     int file_pos;
     int last_frame;
+    KEFrameHead * sendFrameHead_;
+    int send_speed_;
+
 };
 
 
