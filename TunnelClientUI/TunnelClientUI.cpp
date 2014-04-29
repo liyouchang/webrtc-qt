@@ -2,7 +2,7 @@
 #include "ui_TunnelClientUI.h"
 
 
-
+#include "talk/base/logging.h"
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     TunnelClientUI w;
     w.show();
-    //talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
+    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
 
     return a.exec();
 }

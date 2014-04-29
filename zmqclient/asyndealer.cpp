@@ -114,7 +114,7 @@ int AsynDealer::recv_z()
         msg.recv(*socket_);
         std::string addr = msg.GetAddress();
         std::string data = msg.GetBody();
-        LOG(INFO) <<"Client "<<this->id_ << " :Receive "<<addr<<data;
+        //LOG(INFO) <<"Client "<<this->id_ << " :Receive "<<addr<<data;
 
         SignalReadData(addr,data);
     }

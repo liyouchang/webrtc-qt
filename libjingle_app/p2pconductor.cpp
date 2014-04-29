@@ -5,7 +5,7 @@
 
 namespace  kaerp2p {
 
-const int kConnectTimeout = 10000; // close DeletePeerConnection after 10s without connect
+const int kConnectTimeout = 30000; // close DeletePeerConnection after 10s without connect
 
 std::string GetEnvVarOrDefault(const char* env_var_name,
                                const char* default_value) {

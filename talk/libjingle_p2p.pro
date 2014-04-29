@@ -84,6 +84,7 @@ SOURCES += \
     ../talk/p2p/base/transportdescriptionfactory.cc \
     ../talk/p2p/client/basicportallocator.cc \
     p2p/client/socketmonitor.cc \
+    p2p/base/turnserver.cc
 
 
 
@@ -119,4 +120,5 @@ HEADERS += \
     ../talk/p2p/base/dtlstransportchannel.h \
     ../talk/p2p/base/transportdescriptionfactory.h \
     p2p/client/socketmonitor.h \
+    p2p/base/turnserver.h
 
