@@ -54,8 +54,8 @@ int main()
 
     Json::Value mac_value = JsonConfig::Instance()->Get("camera.mac","");
     Json::Value dealer_value = JsonConfig::Instance()->Get("dealer_id","");
-    Json::Value router_value = JsonConfig::Instance()->Get("router_url","");
-    Json::Value log_params_value = JsonConfig::Instance()->Get("log_params","");
+    Json::Value router_value = JsonConfig::Instance()->Get("router_url","tcp://192.168.40.191:5555");
+    Json::Value log_params_value = JsonConfig::Instance()->Get("log_params","tstamp thread info debug");
 
     talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),NULL);
 

@@ -5,7 +5,7 @@
 
 namespace  kaerp2p {
 
-const int kConnectTimeout = 10000; // close DeletePeerConnection after 10s without connect
+const int kConnectTimeout = 30000; // close DeletePeerConnection after 10s without connect
 
 std::string GetEnvVarOrDefault(const char* env_var_name,
                                const char* default_value) {
@@ -21,7 +21,8 @@ std::string GetEnvVarOrDefault(const char* env_var_name,
 }
 
 std::string GetPeerConnectionString() {
-    return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
+    //return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
+    return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:192.168.40.195:5389");
 }
 
 std::string GetDefaultServerName() {
