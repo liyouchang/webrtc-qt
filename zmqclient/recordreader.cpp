@@ -55,6 +55,11 @@ FileRecordReader::FileRecordReader(std::string filename,int frame_internal):
 
 }
 
+FileRecordReader::~FileRecordReader()
+{
+
+}
+
 talk_base::Buffer *FileRecordReader::ReadRecordFrame()
 {
     ASSERT(file_stream_);
@@ -70,7 +75,7 @@ talk_base::Buffer *FileRecordReader::ReadRecordFrame()
     if(sendFrameHead_){
         int framelen = sendFrameHead_->frameLen;
         char * framedata = new char[framelen];
-        result =  file_stream_->Read(framedata,framelen);
+        result =  file_stream_->Read(framedata,framelen,NULL,NULL);
         if(result == talk_base::SR_SUCCESS){
             buffer->AppendData(reinterpret_cast<void *>(sendFrameHead_),sizeof(KEFrameHead));
             buffer->AppendData(framedata,framelen);
@@ -90,7 +95,7 @@ talk_base::Buffer *FileRecordReader::ReadRecordFrame()
 
     talk_base::scoped_ptr<KEFrameHead> frame_head;
     frame_head.reset(new KEFrameHead());
-    result =  file_stream_->Read(reinterpret_cast<void *>(frame_head.get()),sizeof(KEFrameHead));
+    result =  file_stream_->Read(reinterpret_cast<void *>(frame_head.get()),sizeof(KEFrameHead),NULL,NULL);
     if(result == talk_base::SR_SUCCESS){
 
     }else if(result == talk_base::SR_EOS){

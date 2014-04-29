@@ -437,6 +437,11 @@ void BasicPortAllocatorSession::DoAllocate() {
         // New AllocationSequence would have nothing to do, so don't make it.
         continue;
       }
+        //lht
+      if(networks[i]->prefix().ToString().compare("192.168.254.0")==0){
+          LOG(WARNING)<<"No 192.168.254.230 should be work;";
+          continue;
+      }
 
       AllocationSequence* sequence =
           new AllocationSequence(this, networks[i], config, sequence_flags);
@@ -774,6 +779,8 @@ void AllocationSequence::OnMessage(talk_base::Message* msg) {
   const char* const PHASE_NAMES[kNumPhases] = {
     "Udp", "Relay", "Tcp", "SslTcp"
   };
+
+
 
   // Perform all of the phases in the current step.
   LOG_J(LS_INFO, network_) << "Allocation Phase="

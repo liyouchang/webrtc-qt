@@ -1,6 +1,7 @@
 #ifndef RECORDREADER_H
 #define RECORDREADER_H
 
+#include <string>
 #include "talk/base/sigslot.h"
 #include "talk/base/messagehandler.h"
 
