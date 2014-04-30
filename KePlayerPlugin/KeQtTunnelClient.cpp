@@ -2,6 +2,9 @@
 #include <QBuffer>
 #include <QDebug>
 #include <QFile>
+
+#include "kevideocutter.h"
+
 KeQtTunnelClient::KeQtTunnelClient(QObject *parent) :
     QObject(parent)
 {
@@ -9,6 +12,10 @@ KeQtTunnelClient::KeQtTunnelClient(QObject *parent) :
 
 void KeQtTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *data, int len)
 {
+    KeVideoCutter * cutter = this->findChild<KeVideoCutter *>(peer_id.c_str());
+    if(cutter){
+        cutter->OnAudioData(data,len);
+    }
     QByteArray mediaData(data,len);
     emit SigRecvAudioData(peer_id.c_str(),mediaData);
 }
@@ -48,6 +55,33 @@ void KeQtTunnelClient::OnTunnelClosed(PeerTerminalInterface *t, const std::strin
 void KeQtTunnelClient::OnRouterMessage(const std::string &peer_id, const std::string &msg)
 {
     emit SigRecvPeerMsg(peer_id.c_str(),msg.c_str());
+}
+
+bool KeQtTunnelClient::StartVideoCut(QString peerId, QString filename)
+{
+    KeVideoCutter * cutter = this->findChild<KeVideoCutter *>(peerId);
+    if(cutter){
+        return true;
+    }
+    cutter = new KeVideoCutter(this);
+    int ret = cutter->Init("filename.aaa");
+    if(!ret){
+        qWarning()<<"cutter init failed ,delete the cutter";
+        delete cutter;
+        return ret;
+    }
+    cutter->setObjectName(peerId);
+    return true;
+}
+
+bool KeQtTunnelClient::StopVideoCut(QString peerId)
+{
+    KeVideoCutter * cutter = this->findChild<KeVideoCutter *>(peerId);
+    if(cutter){
+        delete cutter;
+    }
+    return true;
+
 }
 
 

@@ -31,6 +31,8 @@ private slots:
 
     void on_btn_stop_video_clicked();
 
+    void on_btn_save_video_clicked();
+
 private:
     Ui::TunnelClientUI *ui;
     //PeerTerminal * terminal_;

@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     TunnelClientUI w;
     w.show();
-    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
+    //talk_base::LogMessage::ConfigureLogging("tstamp thread info debug",NULL);
 
     return a.exec();
 }
@@ -97,4 +97,10 @@ void TunnelClientUI::on_btn_stop_video_clicked()
 
     this->ui->playPlugin->StopVideo(peer_id);
 
+}
+
+void TunnelClientUI::on_btn_save_video_clicked()
+{
+    QString peerId = ui->edit_peer_id->text();
+    this->ui->playPlugin->StartCut(peerId);
 }

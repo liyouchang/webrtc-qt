@@ -102,14 +102,41 @@ int KePlayerPlugin::StartVideo(QString peer_id)
 
 }
 
-int KePlayerPlugin::StopVideo(QString peer_id)
+int KePlayerPlugin::StopVideo(QString peerId)
 {
-    if(peer_id.isEmpty()){
-        return 10001;
+    if(peerId.isEmpty()){
+        return KE_PARAM_ERROR;
     }
-    video_wall_->StopPeerPlay(peer_id);
-    std::string str_id = peer_id.toStdString();
-    return tunnel_->StartPeerMedia(str_id,false);
+    tunnel_->StopVideoCut(peerId);
+    video_wall_->StopPeerPlay(peerId);
+    std::string strId = peerId.toStdString();
+    return tunnel_->StartPeerMedia(strId,false);
+}
+
+int KePlayerPlugin::StartCut(QString peerId)
+{
+    if(peerId.isEmpty()){
+        return KE_PARAM_ERROR;
+    }
+    std::string strId = peerId.toStdString();
+    if(!tunnel_->IsTunnelOpened(strId)){
+        return KE_TUNNEL_NOT_OPEN;
+    }
+    QString filename;
+    if(!tunnel_->StartVideoCut(peerId,filename)){
+        return KE_INIT_CUT_VIDEO_FAILED;
+    }
+    return KE_SUCCESS;
+
+}
+
+int KePlayerPlugin::StopCut(QString peerId)
+{
+    if(peerId.isEmpty()){
+        return KE_PARAM_ERROR;
+    }
+    tunnel_->StopVideoCut(peerId);
+    return KE_SUCCESS;
 }
 
 int KePlayerPlugin::SendCommand(QString peer_id, QString msg)

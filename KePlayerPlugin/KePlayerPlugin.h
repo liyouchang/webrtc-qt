@@ -13,6 +13,13 @@ class VideoWall;
 struct RecordFileInfo;
 class KeRecorder;
 
+enum KE_ERROR{
+    KE_SUCCESS = 0,
+    KE_PARAM_ERROR = 10001,
+    KE_TUNNEL_NOT_OPEN = 10002,
+    KE_INIT_CUT_VIDEO_FAILED = 10003,
+    KE_OTHER_ERROR
+};
 
 class KePlayerPlugin : public QWidget
 {
@@ -46,7 +53,10 @@ public slots:
     int OpenTunnel(QString peer_id);
     int CloseTunnel(QString peer_id);
     int StartVideo(QString peer_id);
-    int StopVideo(QString peer_id);
+    int StopVideo(QString peerId);
+    int StartCut(QString peerId);
+    int StopCut(QString peerId);
+
     int SendCommand(QString peer_id,QString msg);
 
     int PlayRecordFiles(QString peer_id,QString record_info_list);

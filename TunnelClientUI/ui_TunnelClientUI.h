@@ -41,6 +41,7 @@ public:
     QLineEdit *edit_peer_id;
     QPushButton *btn_connect;
     QPushButton *btn_video;
+    QPushButton *btn_save_video;
     QPushButton *btn_stop_video;
     QPushButton *btn_disconnect;
     QMenuBar *menubar;
@@ -115,6 +116,11 @@ public:
 
         verticalLayout->addWidget(btn_video);
 
+        btn_save_video = new QPushButton(groupBox_2);
+        btn_save_video->setObjectName(QStringLiteral("btn_save_video"));
+
+        verticalLayout->addWidget(btn_save_video);
+
         btn_stop_video = new QPushButton(groupBox_2);
         btn_stop_video->setObjectName(QStringLiteral("btn_stop_video"));
 
@@ -153,6 +159,7 @@ public:
         edit_peer_id->setText(QApplication::translate("TunnelClientUI", "1234567", 0));
         btn_connect->setText(QApplication::translate("TunnelClientUI", "ConnectToPeer", 0));
         btn_video->setText(QApplication::translate("TunnelClientUI", "Ask Video", 0));
+        btn_save_video->setText(QApplication::translate("TunnelClientUI", "save video", 0));
         btn_stop_video->setText(QApplication::translate("TunnelClientUI", "Stop Video", 0));
         btn_disconnect->setText(QApplication::translate("TunnelClientUI", "DisConnectToPeer", 0));
     } // retranslateUi
