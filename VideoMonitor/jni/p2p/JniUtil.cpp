@@ -273,4 +273,105 @@ bool JniUtil::getSendToPeerMethod(JNIEnv* env, jobject obj) {
 	return true;
 }
 
+bool JniUtil::JniTunnelMethodCallback(const char* methodName,
+		const char* peer_id) {
+	if(g_vm_ == 0){
+		LOGE("g_vm is null");
+		return false;
+	}
+	JNIEnv *p_env;
+	bool attached = false;
+	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
+	if(status != JNI_OK){
+		//LOGI("g_vm GetEnv error %d", status);
+		status = g_vm_->AttachCurrentThread(&p_env,NULL);
+		if(status != JNI_OK){
+			LOGE("g_vm AttachCurrentThread error %d", status);
+			return false ;
+		}
+		attached = true;
+	}
 
+	jclass callBackCls = p_env->GetObjectClass(g_obj_);
+	if (!callBackCls) {
+		LOGE("Get class %s error", call_class_name_.c_str());
+		return false;
+	}
+
+	jmethodID mid = p_env->GetMethodID(callBackCls, methodName,
+			"(Ljava/lang/String;)V");
+	if (!mid) {
+		LOGE("JniUtil::JniTunnelMethodCallback 1 ---get method %s error",methodName);
+		return false;
+	}
+
+	jstring jni_pid = p_env->NewStringUTF(peer_id);
+
+	p_env->CallVoidMethod(g_obj_, mid, jni_pid);
+
+
+	p_env->DeleteLocalRef(callBackCls);
+
+	p_env->DeleteLocalRef(jni_pid);
+
+
+
+	if(attached){
+		g_vm_->DetachCurrentThread();
+	}
+
+	return true;
+}
+
+bool JniUtil::JniTunnelMethodCallback(const char* methodName,
+		const char* peer_id, const char* data, int len) {
+	if(g_vm_ == 0){
+		LOGE("g_vm is null");
+		return false;
+	}
+	JNIEnv *p_env;
+	bool attached = false;
+	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
+	if(status != JNI_OK){
+		//LOGI("g_vm GetEnv error %d", status);
+		status = g_vm_->AttachCurrentThread(&p_env,NULL);
+		if(status != JNI_OK){
+			LOGE("g_vm AttachCurrentThread error %d", status);
+			return false ;
+		}
+		attached = true;
+	}
+
+	jclass callBackCls = p_env->GetObjectClass(g_obj_);
+	if (!callBackCls) {
+		LOGE("Get class %s error", call_class_name_.c_str());
+		return false;
+	}
+
+	jmethodID mid = p_env->GetMethodID(callBackCls, methodName,
+			"(Ljava/lang/String;[B)V");
+	if (!mid) {
+		LOGE("JniUtil::JniTunnelMethodCallback---get method %s (Ljava/lang/String;[B)V error",methodName);
+		return false;
+	}
+	jstring jni_pid = p_env->NewStringUTF(peer_id);
+	jbyteArray byteArr = p_env->NewByteArray(len);
+	jboolean isCopy;
+	void *rd = p_env->GetPrimitiveArrayCritical((jarray) byteArr, &isCopy);
+	memcpy(rd, data, len);
+
+	p_env->CallVoidMethod(g_obj_, mid, jni_pid, byteArr);
+
+	p_env->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
+	p_env->DeleteLocalRef(byteArr);
+
+	p_env->DeleteLocalRef(callBackCls);
+
+	p_env->DeleteLocalRef(jni_pid);
+
+	if(attached){
+		g_vm_->DetachCurrentThread();
+	}
+
+	return true;
+}
