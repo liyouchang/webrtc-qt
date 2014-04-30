@@ -114,6 +114,25 @@ void HisiMediaDevice::SendAudioFrame(const char *data, int len)
     SignalAudioData(frameBuf.data(),frameBuf.length());
 }
 
+void HisiMediaDevice::SetVideoClarity(int clarity)
+{
+    if(clarity == 1){
+        SetVideoResolution("352x288");
+    }else if(clarity == 2){
+        SetVideoResolution("704x576");
+    }else if(clarity == 3){
+        SetVideoResolution("1280x720");
+    }else{
+        LOG(WARNING)<<"clarity value error";
+    }
+}
+
+void HisiMediaDevice::SetPtz(std::string ptz_key, int param)
+{
+    LOG(INFO)<<"HisiMediaDevice::SetPtz---key:" <<ptz_key<<" param:"<<param ;
+    Raycomm_SetPtz(ptz_key.c_str(),param,0);
+}
+
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)
 {
     switch (msg->message_id) {

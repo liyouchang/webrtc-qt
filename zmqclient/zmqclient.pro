@@ -8,7 +8,7 @@ include (../talk/talk_common.pri)
 
 DESTDIR = $$output_dir/$$TARGET
 
-message("out put dir is "$$DESTDIR)
+message("DESTDIR is "$$DESTDIR)
 
 INCLUDEPATH     +=  \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
@@ -79,3 +79,14 @@ arm{
 
 OTHER_FILES += \
     config.json
+
+arm {
+    target_config.files  = $$OTHER_FILES $$DESTDIR/$$TARGET
+    target_config.path   = /var/lib/tftpboot
+    INSTALLS  += target_config
+}eles{
+
+target_config.files  = $$OTHER_FILES
+target_config.path   = $$DESTDIR
+INSTALLS             += target_config
+}

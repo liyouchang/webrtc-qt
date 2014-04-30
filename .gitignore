@@ -207,7 +207,6 @@ Makefile*
 *-build-*
 
 .svn
-*.mk
 libs/
 bin/
 tmp/

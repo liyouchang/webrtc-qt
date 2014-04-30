@@ -264,9 +264,13 @@ void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t, const std::string 
 
 }
 
-void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
+void KeTunnelCamera::SetVideoClarity(int)
 {
-    LOG(INFO)<<"KeTunnelCamera::OnRecvVideoClarity---" <<peer_id<<" clarity:"<<clarity ;
+}
+
+int KeTunnelCamera::GetVideoClarity()
+{
+    return 2;
 }
 
 void KeTunnelCamera::OnRecvRecordQuery( std::string peer_id,  std::string condition)
@@ -330,4 +334,22 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::stri
         LOG(WARNING)<<"receive unexpected command from "<<peer_id;
     }
 
+}
+
+void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
+{
+    LOG(INFO)<<"KeTunnelCamera::OnRecvVideoClarity---" <<peer_id<<" clarity:"<<clarity ;
+    if(clarity == 101){
+        int clarity = this->GetVideoClarity();
+        Json::Value jmessage;
+        jmessage[kTunnelTypeName] = "tunnel";
+        jmessage[kTunnelCommandName] = "video_clarity";
+        jmessage["value"] = clarity;
+        Json::StyledWriter writer;
+        std::string msg = writer.write(jmessage);
+        return this->terminal_->SendByRouter(peer_id,msg);
+
+    }else{
+        this->SetVideoClarity(clarity);
+    }
 }

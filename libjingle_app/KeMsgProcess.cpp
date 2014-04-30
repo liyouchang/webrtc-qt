@@ -7,7 +7,8 @@
 
 #include "KeMessage.h"
 #include "KeMsgProcessContainer.h"
-const int kHeartStop = 3; //3 time without receive heart
+
+const int kHeartStop = 5; //5 time without receive heart
 const int kHeartDelay = 1000;  // 1000 milliseconds
 
 
@@ -23,7 +24,6 @@ void KeMsgProcess::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer
 {
     ASSERT(this->peer_id_ == peer_id);
     ASSERT(msg.length() > 0);
-
     this->ExtractMessage(msg);
 }
 
