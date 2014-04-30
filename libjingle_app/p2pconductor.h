@@ -78,6 +78,13 @@ private:
     bool tunnel_established_;
     //maybe conflict
     std::string peer_id_;
+public :
+    static void AddIceServer(const std::string &  uri,
+                             const std::string & username,
+                             const std::string & password);
+
+    static PeerTunnelInterface::IceServers g_servers;
+
 };
 
 }

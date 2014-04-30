@@ -69,7 +69,6 @@ std::string GetPeerConnectionString() {
 }
 
 std::string GetDefaultServerName() {
-    //return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
     return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
 }
 
@@ -126,3 +125,18 @@ std::string GetAppFilePath(std::string filename)
     path.AppendPathname(filename);
     return path.pathname();
 }
+//// Split the message into two parts by the first delimiter.
+//static bool SplitByDelimiter(const std::string& message,
+//                             const char delimiter,
+//                             std::string* field1,
+//                             std::string* field2) {
+//    // Find the first delimiter
+//    size_t pos = message.find(delimiter);
+//    if (pos == std::string::npos) {
+//        return false;
+//    }
+//    *field1 = message.substr(0, pos);
+//    // The rest is the value.
+//    *field2 = message.substr(pos + 1);
+//    return true;
+//}

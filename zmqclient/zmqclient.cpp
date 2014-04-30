@@ -8,6 +8,7 @@
 #include "CameraClient.h"
 
 #include "libjingle_app/defaults.h"
+#include "libjingle_app/p2pconductor.h"
 
 #ifndef ARM
 #include "KeVideoSimulator.h"
@@ -15,34 +16,7 @@
 #include "HisiMediaDevice.h"
 
 #endif//arm
-using namespace std;
 
-
-
-typedef talk_base::TypedMessageData<std::string> StringMsg ;
-
-struct SendInfo{
-    std::string peer_id;
-    std::string data;
-};
-typedef talk_base::TypedMessageData<SendInfo> SendMsg ;
-
-
-// Split the message into two parts by the first delimiter.
-static bool SplitByDelimiter(const std::string& message,
-                             const char delimiter,
-                             std::string* field1,
-                             std::string* field2) {
-    // Find the first delimiter
-    size_t pos = message.find(delimiter);
-    if (pos == std::string::npos) {
-        return false;
-    }
-    *field1 = message.substr(0, pos);
-    // The rest is the value.
-    *field2 = message.substr(pos + 1);
-    return true;
-}
 
 std::string ReadConfigFile();
 
@@ -52,27 +26,40 @@ int main()
     JsonConfig::Instance()->FromFile(GetAppFilePath("config.json"));
 
 
+
     Json::Value mac_value = JsonConfig::Instance()->Get("camera.mac","");
-    Json::Value dealer_value = JsonConfig::Instance()->Get("dealer_id","");
-    Json::Value router_value = JsonConfig::Instance()->Get("router_url","tcp://192.168.40.191:5555");
-    Json::Value log_params_value = JsonConfig::Instance()->Get("log_params","tstamp thread info debug");
+    Json::Value dealer_value = JsonConfig::Instance()->Get("dealerId","");
+    Json::Value router_value = JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
+    Json::Value log_params_value = JsonConfig::Instance()->Get("logParams","tstamp thread info debug");
+    Json::Value jservers = JsonConfig::Instance()->Get("servers","");
 
     talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),NULL);
-
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
+
+    std::vector<Json::Value> jServersArray;
+
+    if(JsonArrayToValueVector(jservers,&jServersArray)){
+        for(int i=0;i<jServersArray.size();i++){
+            Json::Value jserver = jServersArray[i];
+            std::string uri,username,password;
+            GetStringFromJsonObject(jserver,"uri",&uri);
+            GetStringFromJsonObject(jserver,"username",&username);
+            GetStringFromJsonObject(jserver,"password",&password);
+            kaerp2p::P2PConductor::AddIceServer(uri,username,password);
+        }
+    }
+
 
 
     CameraClient client(mac_value.asString());
-
-#ifndef ARM
     client.Connect(router_value.asString(),dealer_value.asString());
     client.Login();
+
+#ifndef ARM
     KeVideoSimulator * simulator = new KeVideoSimulator();
     simulator->Init(&client);
     simulator->ReadVideoData("video.h264");
 #else
-    client.Connect("tcp://192.168.40.191:5555","1234567");
-    client.Login();
     HisiMediaDevice * device = new HisiMediaDevice();
     device->Init(&client);
     //device->SetVideoResolution("704,576");

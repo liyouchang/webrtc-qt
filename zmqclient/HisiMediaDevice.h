@@ -40,6 +40,13 @@ private:
     int video_frame_type_;
     char media_buffer_[MEDIA_BUFFER_LENGTH];
 
+
+    // KeTunnelCamera interface
+protected:
+    void SetVideoClarity(int);
+    void SetPtz(std::string ptz_key, int param);
+
+    // KeMsgProcessContainer interface
 };
 
 #endif // HISIMEDIADEVICE_H

@@ -2,33 +2,10 @@
 
 #include "talk/base/json.h"
 #include "talk/base/bind.h"
-
+#include "defaults.h"
 namespace  kaerp2p {
 
 const int kConnectTimeout = 30000; // close DeletePeerConnection after 10s without connect
-
-std::string GetEnvVarOrDefault(const char* env_var_name,
-                               const char* default_value) {
-    std::string value;
-    const char* env_var = getenv(env_var_name);
-    if (env_var)
-        value = env_var;
-
-    if (value.empty())
-        value = default_value;
-
-    return value;
-}
-
-std::string GetPeerConnectionString() {
-    //return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:stun.l.google.com:19302");
-    return GetEnvVarOrDefault("WEBRTC_CONNECT", "stun:192.168.40.195:5389");
-}
-
-std::string GetDefaultServerName() {
-    //return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
-    return GetEnvVarOrDefault("WEBRTC_SERVER", "localhost");
-}
 
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -132,13 +109,25 @@ void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
 
 }
 
+void P2PConductor::AddIceServer(const std::string &uri, const std::string &username, const std::string &password)
+{
+    PeerTunnelInterface::IceServer server;
+    server.uri = uri;
+    server.username = username;
+    server.password = password;
+    g_servers.push_back(server);
+
+}
+
 
 bool P2PConductor::InitializePeerConnection()
 {
-    PeerTunnelInterface::IceServers servers;
-    PeerTunnelInterface::IceServer server;
-    server.uri = GetPeerConnectionString();
-    servers.push_back(server);
+    if(g_servers.empty()){
+        PeerTunnelInterface::IceServer server;
+        server.uri = GetPeerConnectionString();
+        g_servers.push_back(server);
+
+    }
 
     stream_thread_ =  new talk_base::Thread();
     bool result = stream_thread_->Start();
@@ -154,7 +143,7 @@ bool P2PConductor::InitializePeerConnection()
 
     talk_base::scoped_refptr<PeerTunnel> pt (
                 new talk_base::RefCountedObject<PeerTunnel>(signal_thread_,stream_thread_));
-    if(!pt->Initialize(servers,this)){
+    if(!pt->Initialize(g_servers,this)){
         return false;
     }
 
@@ -261,6 +250,7 @@ void P2PConductor::OnMessage(talk_base::Message *msg)
     }
 }
 
+
 void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
 {
     LOG(INFO) << __FUNCTION__;
@@ -349,5 +339,6 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
         return;
     }
 }
+PeerTunnelInterface::IceServers P2PConductor::g_servers;
 
 }

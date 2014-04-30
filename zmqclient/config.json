@@ -1,10 +1,11 @@
 {
 
-   "camera" : {
-      "mac" : "987654321"
-   },
-   "dealer_id" : "1234567",
-   "router_url":"tcp://192.168.40.191:5555",
-   "log_params":"tstamp thread info debug",
-   "log_save_file":""
+    "camera" : {
+        "mac" : "987654321"
+    },
+    "dealerId" : "123456",
+    "routerUrl":"tcp://192.168.40.191:5555",
+    "logParams":"tstamp thread info debug",
+    "logSaveFile":"",
+    "servers":[{"uri":"stun:192.168.40.195:5389"}],
 }
