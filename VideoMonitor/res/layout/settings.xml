@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_bg_grey"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/add_device_title"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/title_height_size"
+        android:background="@color/title_bg_black"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/ib_settings_back"
+            android:layout_width="60dp"
+            android:layout_height="@dimen/title_height_size"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/title_more_xml"
+            android:contentDescription="@null"
+            android:gravity="center_vertical|center_horizontal"
+            android:src="@drawable/btn_title_back_selected" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/setting"
+            android:textColor="@color/orange"
+            android:textSize="@dimen/title_text_size" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/et_play_music_explain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10.0dip"
+        android:layout_marginRight="10.0dip"
+        android:layout_marginTop="10.0dip"
+        android:text="@string/play_alarm_music_explain"
+        android:textColor="@color/light_black"
+        android:textSize="16.0sp" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="5.0dip"
+        android:layout_marginRight="5.0dip"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_updown_alone" >
+
+        <TextView
+            android:id="@+id/tv_play_music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:paddingLeft="15dp"
+            android:text="@string/play_alarm_music"
+            android:textColor="@color/black"
+            android:textSize="18.0sp" />
+
+        <ImageButton
+            android:id="@+id/ib_play_music_switch"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/icon_set_on"
+            android:contentDescription="@null"
+            android:paddingRight="10dp" />
+    </RelativeLayout>
+    
+    <TextView
+        android:id="@+id/et_remember_pwd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10.0dip"
+        android:layout_marginRight="10.0dip"
+        android:layout_marginTop="10.0dip"
+        android:text="@string/remember_pwd_explain"
+        android:textColor="@color/light_black"
+        android:textSize="16.0sp" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="5.0dip"
+        android:layout_marginRight="5.0dip"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_updown_alone" >
+
+        <TextView
+            android:id="@+id/tv_remember_pwd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:paddingLeft="15dp"
+            android:text="@string/remember_pwd"
+            android:textColor="@color/black"
+            android:textSize="18.0sp" />
+
+        <ImageButton
+            android:id="@+id/ib_remember_pwd_switch"
+            android:layout_width="90dp"
+            android:layout_height="30dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/icon_set_on"
+            android:contentDescription="@null"
+            android:paddingRight="10dp" />
+    </RelativeLayout>
+
+</LinearLayout>

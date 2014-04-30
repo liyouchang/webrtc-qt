@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">卡尔微视界</string>
+    <string name="app_version">版本: V1.0.3</string>
+    <string name="app_info">卡尔微视界\u0020\u0020V1.0.3</string>
+    <string name="company_website">公司网址：www.kaer.cn</string>
+    <string name="company_phone">公司电话：4006080787</string>
+    <string name="copyright">版权所有：山东卡尔电气股份有限公司</string>
+    
+    <string name="use_now">立即体验</string>
+    <string name="login">登录</string>
+    <string name="logout">注销</string>
+    <string name="register">注册账号</string>
+    <string name="register_now">立即注册</string>
+    <string name="submit">提交</string>
+    <string name="login_username">用户名</string>
+    <string name="login_password">密码</string>
+    <string name="hint_user">请输入用户名</string>
+    <string name="hint_pwd">请输入密码</string>
+    <string name="hint_repwd">请输入确认密码</string>
+    <string name="hint_email">请输入邮箱</string>
+    <string name="auto_login">自动登录</string>
+    <string name="forget_pwd_title">忘记密码</string>
+    <string name="forget_pwd">忘记密码？</string>
+    <string name="find_now">立即找回</string>
+    <string name="old_pwd">请输入旧密码</string>
+    <string name="new_pwd">请输入新密码</string>
+    <string name="new_repwd">请再次输入新密码</string>
+    
+    <string name="btn_ok">确定</string>
+    <string name="btn_back">返回</string>
+    <string name="own">实时</string>
+    <string name="add">添加</string>
+    <string name="more">更多</string>
+    <string name="app_exit">退出应用</string>
+    
+    <string name="network_upgrade">升级APK</string>
+    <string name="network_check_upgrade">检查升级应用程序</string>
+    <string name="network_check_result">升级结果</string>
+    <string name="network_upgrade_prompt">检查到有新版本的软件，是否现在升级？</string>
+    <string name="network_upgrade_now">现在升级</string>
+    <string name="network_upgrade_later">稍后升级</string>
+    <string name="network_upgrade_info">软件更新的信息</string>
+    <string name="network_tv_upgrade_info">0%</string>
+    
+    <string name="modify_pwd">修改密码</string>
+    <string name="remember_pwd">记住密码</string>
+    <string name="setting">功能设置</string>
+    <string name="help">帮助</string>
+    <string name="about">关于</string>
+    <string name="about_software">关于软件</string>
+    <string name="about_kaer">关于卡尔</string>
+    <string name="play_alarm_music">语音报警</string>
+    <string name="play_alarm_music_explain">开启后，手机收到报警消息语音通知</string>
+    <string name="remember_pwd_explain">关闭后，注销登录将删除密码</string>
+    
+    <string name="add_new_device">添加设备</string>
+    <string name="add_device_share">添加终端分享</string>
+    <string name="hint_share_name">请输入拥有者用户名</string>
+    <string name="hint_device_id">请输入设备ID</string>
+    <string name="hint_device_name">请输入设备名称</string>
+    <string name="scan_qr">扫描二维码</string>
+    <string name="modify_device_name">修改终端名称</string>
+    <string name="devices_shared">我的分享</string>
+    
+    <string name="no_device_list">您暂时还没有添加设备哦，赶快行动吧！</string>
+    <string name="no_shared_list">您的好友暂时还没有分享设备给您哦！</string>
+    <string name="no_local_image">您暂时还没有抓拍图片哦！</string>
+    <string name="no_local_video">您暂时还没有本地录像文件哦！</string>
+    <string name="no_alert_msg">恭喜您，暂时还没有报警消息哦！</string>
+    
+    <string name="local_video">本地录像</string>
+    <string name="local_picture">抓拍图片</string>
+    <string name="alert_msg">告警消息</string>
+    <string name="system_msg">系统消息</string>
+    <string name="image_view">图片查看</string>
+    <string name="set_background">设置背景图片</string>
+    
+    <string name="clarity_high">高清</string>
+    <string name="clarity_normal">标准</string>
+    <string name="clarity_low">流畅</string>
+    
+    <string name="terminal_device_video">终端视频</string>
+    <string name="device_item_name">名称: 门口摄像头</string>
+    <string name="device_item_mac">ID: 009B684850022</string>
+    <string name="msg_item_event">事件: 发生移动侦测</string>
+    <string name="msg_item_mac">来自: 0090B0000020</string>
+    <string name="msg_item_time"><![CDATA[时间: 2014-04-08 15:32:10]]></string>
+    
+    <string name="pull_to_refresh_pull_label">下拉刷新</string>
+    <string name="pull_to_refresh_release_label">松开后刷新</string>
+    <string name="pull_to_refresh_refreshing_label">刷新中\u2026</string>
+    <string name="pull_to_refresh_footer_release_label">松开后加载</string>
+    <string name="pull_to_refresh_footer_pull_label">上拉加载更多</string>
+    <string name="pull_to_refresh_footer_refreshing_label">加载中\u2026</string>
+    
+    <string name="about_kaer_content">山东卡尔电气股份有限公司主要从事通信终端、安防视频终端的研究、开发、生产与销售，是集科工贸为一体的科研型高科技股份制企业。公司已通过ISO9001国际质量管理体系认证、ISO14001环境管理体系认证和国家强制性产品认证(CCC)，所有产品均获得国家工信部进网许可证书及CMC证书，DVR、IPC系列产品已通过公安部检测，DVS系列产品2007年被安防行业权威媒体“慧聪网”评为“十大创新品牌”之一。
+\n\n公司将现代化的管理模式融于产品的研发、生产和销售之中，建立完善的售后服务管理体系，确保用户在使用高质量产品的同时能够得到更好的售后服务。
+\n\n卡尔电气拥有雄厚的技术力量、卓越的产品基础和一流的服务理念，愿为社会各行业提供领先、专业、优质的技术支持和产品服务，为客户持续创造更大的价值，同时愿与客户真诚合作，共同创业。</string>
+
+</resources>
