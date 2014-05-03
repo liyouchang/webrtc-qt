@@ -15,6 +15,7 @@ class KeJniTunnelClient :public KeTunnelClient{
 public:
 	KeJniTunnelClient();
     virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
+    //tunnel should
     virtual void OnTunnelClosed(PeerTerminalInterface * t,const std::string & peer_id);
 
 protected:
