@@ -1,6 +1,6 @@
 /*
  * KeJniTunnelClient.h
- *
+ * An interface to control tunnel
  *  Created on: 2014-4-1
  *      Author: lht
  */
