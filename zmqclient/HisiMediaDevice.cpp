@@ -9,6 +9,8 @@
 #include "keapi/keapi.h"
 #include "libjingle_app/KeMessage.h"
 #include "libjingle_app/KeMsgProcess.h"
+#include "jsonconfig.h"
+#include "libjingle_app/defaults.h"
 
 #define VIDEO1_DATA				"video1_data"
 #define VIDEO1_CODEC 			"video1_codec"      	// 	0:H264, 1:MJPG
@@ -62,8 +64,7 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
     ret = Raycomm_MediaDataInit();
     LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
 
-    LOG(INFO)<<"vidoe frame type "<<GetVideoFrameType();
-
+    LOG(INFO)<<"vidoe frame type " << GetVideoFrameType();
 
     media_thread_ = new talk_base::Thread();
     media_thread_->Start();
@@ -116,6 +117,7 @@ void HisiMediaDevice::SendAudioFrame(const char *data, int len)
 
 void HisiMediaDevice::SetVideoClarity(int clarity)
 {
+
     if(clarity == 1){
         SetVideoResolution("352x288");
     }else if(clarity == 2){
@@ -124,7 +126,17 @@ void HisiMediaDevice::SetVideoClarity(int clarity)
         SetVideoResolution("1280x720");
     }else{
         LOG(WARNING)<<"clarity value error";
+        return;
     }
+    JsonConfig::Instance()->Set("clarity",clarity);
+    JsonConfig::Instance()->ToFile(kConfigFileName);
+}
+
+int HisiMediaDevice::GetVideoClarity()
+{
+    Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
+    return jclarity.asInt();
+    //return video_clarity_;
 }
 
 void HisiMediaDevice::SetPtz(std::string ptz_key, int param)
@@ -142,8 +154,7 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
             video_handle_ =  Raycomm_ConnectMedia(VIDEO1_DATA,0);
             LOG(INFO)<<"HisiMediaDevice start video" <<video_handle_;
             media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO);
-        }
-        else if(mcd->video != 0 && video_handle_ != 0){
+        }else if(mcd->video != 0 && video_handle_ != 0){
             Raycomm_DisConnectMedia(video_handle_);
             LOG(INFO)<<"HisiMediaDevice stop video";
             video_handle_ = 0;
@@ -153,8 +164,7 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
             audio_handle_ =  Raycomm_ConnectMedia(AUDIO1_DATA,0);
             LOG(INFO)<<"HisiMediaDevice start audio" <<audio_handle_;
             media_thread_->Post(this,HisiMediaDevice::MSG_SEND_AUDIO);
-        }
-        else if(mcd->audio != 0 && audio_handle_ != 0){
+        }else if(mcd->audio != 0 && audio_handle_ != 0){
 
             Raycomm_DisConnectMedia(audio_handle_);
             LOG(INFO)<<"HisiMediaDevice stop audio" ;
@@ -175,8 +185,7 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
             this->SendVideoFrame(media_buffer_,media_len);
             //get next frame
             media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO);
-        }
-        else{
+        }else{
             //wait and get
             media_thread_->PostDelayed(kVideoSampleRate,this,
                                        HisiMediaDevice::MSG_SEND_VIDEO);
@@ -198,7 +207,6 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
     }
     default:
         break;
-
     }
 }
 
@@ -209,11 +217,11 @@ void HisiMediaDevice::SetVideoResolution(std::string r)
     command+=r;
     Raycomm_SetParam((char*)command.c_str(),0);
 
-    talk_base::Thread::SleepMs(2000);
+//    talk_base::Thread::SleepMs(2000);
 
-    GetVideoFrameType();
-    LOG(INFO)<<"HisiMediaDevice::SetVideoResolution ---" << command
-            << ";vidoe type now is "<<video_frame_type_;
+//    GetVideoFrameType();
+//    LOG(INFO)<<"HisiMediaDevice::SetVideoResolution ---" << command
+//            << ";vidoe type now is "<<video_frame_type_;
 
 }
 

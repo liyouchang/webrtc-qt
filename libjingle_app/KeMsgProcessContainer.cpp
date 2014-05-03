@@ -347,7 +347,7 @@ void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
         jmessage["value"] = clarity;
         Json::StyledWriter writer;
         std::string msg = writer.write(jmessage);
-        return this->terminal_->SendByRouter(peer_id,msg);
+        this->terminal_->SendByRouter(peer_id,msg);
 
     }else{
         this->SetVideoClarity(clarity);

@@ -32,6 +32,7 @@ int main()
     Json::Value router_value = JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
     Json::Value log_params_value = JsonConfig::Instance()->Get("logParams","tstamp thread info debug");
     Json::Value jservers = JsonConfig::Instance()->Get("servers","");
+    Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
 
     talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),NULL);
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
@@ -60,8 +61,12 @@ int main()
     simulator->Init(&client);
     simulator->ReadVideoData("video.h264");
 #else
+
     HisiMediaDevice * device = new HisiMediaDevice();
+    int clarity = jclarity.asInt();
+
     device->Init(&client);
+    device->SetVideoClarity(clarity);
     //device->SetVideoResolution("704,576");
 #endif //arm
 

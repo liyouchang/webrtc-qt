@@ -8,4 +8,5 @@
     "logParams":"tstamp thread info debug",
     "logSaveFile":"",
     "servers":[{"uri":"stun:192.168.40.195:5389"}],
+    "clarity":3
 }
