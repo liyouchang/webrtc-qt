@@ -27,7 +27,7 @@ public:
 	bool JniRecvVideoData(const char * peer_id,const char* data, int len);
 	bool JniRecvAudioData(const char * peer_id,const char* data, int len);
 	bool JniTunnelOpened(const char * peer_id);
-
+	//method call back
 	bool JniTunnelMethodCallback(const char * methodName,const char * peer_id);
 	bool JniTunnelMethodCallback(const char * methodName,const char * peer_id,const char* data, int len);
 	bool getSendToPeerMethod(JNIEnv *env, jobject obj);
@@ -40,3 +40,8 @@ protected:
 };
 
 #endif /* JNIUTIL_H_ */
+
+
+
+
+
