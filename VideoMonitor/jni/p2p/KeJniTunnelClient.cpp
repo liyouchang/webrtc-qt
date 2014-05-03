@@ -30,6 +30,9 @@ void KeJniTunnelClient::OnRecvVideoData(const std::string& peer_id,
 	 JniUtil::GetInstance()->JniRecvVideoData(peer_id.c_str(),data,len);
 
 }
-
-
-
+//on tunnel closed
+void KeJniTunnelClient::OnTunnelClosed(PeerTerminalInterface* t,
+		const std::string& peer_id) {
+	KeTunnelClient::OnTunnelClosed(t,peer_id);
+	JniUtil::GetInstance()->JniTunnelMethodCallback("TunnelClosed",peer_id.c_str());
+}
