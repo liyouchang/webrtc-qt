@@ -4,5 +4,29 @@
     android:layout_height="fill_parent"
     android:background="@drawable/startup_bg"
     android:orientation="vertical" >
+    
+    <TextView
+		android:id="@+id/app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingBottom="10dp"
+		android:layout_centerHorizontal="true"
+		android:gravity="center"
+		android:text="@string/company"
+		android:textColor="@color/light_black"
+		android:textSize="18.0sp" />
+
+    <TextView
+        android:id="@+id/app_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/app_name"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="2dp"
+        android:gravity="center"
+        android:text="@string/app_version"
+        android:textColor="@color/light_black"
+        android:textSize="16.0sp" />
 
 </RelativeLayout>

@@ -2,24 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/page_bg_grey" >
-
-    <ImageView
-        android:id="@+id/iv_login_logo"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="50dp"
-        android:contentDescription="@null"
-        android:background="@null"
-        android:src="@drawable/login_logo" />
+    android:background="@drawable/login_bg" >
 
     <LinearLayout
         android:id="@+id/layout_login_input"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/iv_login_logo"
+        android:layout_marginTop="50dp"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="15.0dip"
         android:layout_marginRight="15.0dip"
         android:orientation="vertical" >

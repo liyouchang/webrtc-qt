@@ -120,7 +120,7 @@ public class MainActivity extends FragmentActivity {
 						}
 			    	}
 			    } 
-			 }, 2000); 
+			 }, 2500); 
 		} else {
 			//已登录成功
 			setContentView(R.layout.main);
@@ -398,6 +398,14 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
+		if (mDialog != null)
+			mDialog.dismiss();
+		if (handler.hasMessages(LOGIN_TIMEOUT)) {
+			handler.removeMessages(LOGIN_TIMEOUT);
+		}
+		if (handler.hasMessages(R.id.login_id)) {
+			handler.removeMessages(R.id.login_id);
+		}
 		if (keyCode == KeyEvent.KEYCODE_MENU  && event.getRepeatCount() == 0) {
 			if (isTextViewShow == false) {
 				isTextViewShow = true;

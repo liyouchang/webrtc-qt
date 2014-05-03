@@ -56,6 +56,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private int titleHeight = 80;
 	private int bottomHeight = 100;
 	
+	private static boolean isTunnelOpened = false;
 	private boolean isVoiceEnable = true;
 	private boolean isPlayMusic = false;
 	private boolean isFullScreen = false;
@@ -63,6 +64,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private boolean isClarityPopupWindowShow = false;
 	private final int SHOW_TIME_MS = 6000;
 	private final int HIDE_POPUPWINDOW = 1;
+	private final int REQUEST_TIMEOUT = 2;
 	
 	private GestureDetector mGestureDetector = null;//手势识别
 	
@@ -215,6 +217,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		//【打开通道】
 		TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
 		TunnelCommunication.getInstance().openTunnel(dealerName);
+		sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 		mDialog = createLoadingDialog("正在请求视频...");
 		mDialog.show();
 	}
@@ -227,6 +230,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			switch (msg.what) {
 				case HIDE_POPUPWINDOW:
 					hidePopupWindow();
+					break;
+				case REQUEST_TIMEOUT:
+					
 					break;
 			}
 		}
@@ -251,6 +257,26 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			}
 		}
 	};
+	
+	/**
+	 * 发送Handler消息
+	 */
+	private void sendHandlerMsg(int what) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessage(msg);
+	}
+	private void sendHandlerMsg(int what, int timeout) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessageDelayed(msg, timeout);
+	}
+	private void sendHandlerMsg(Handler handler, int what, String obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
+		handler.sendMessage(msg);
+	}
 	
 	/**
 	 * 显示PopupWindow

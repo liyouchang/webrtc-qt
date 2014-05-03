@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,9 +19,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.LayoutParams;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,10 +28,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.video.R;
@@ -43,24 +38,19 @@ import com.video.data.Value;
 import com.video.data.XmlMessage;
 import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
-import com.video.play.TunnelCommunication;
-import com.video.play.PlayerActivity;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
 import com.video.utils.MessageItemAdapter;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
-import com.video.utils.ViewPagerAdapter;
 
-public class MsgFragment extends Fragment implements OnClickListener, OnPageChangeListener, OnHeaderRefreshListener, OnFooterRefreshListener {
+public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRefreshListener, OnFooterRefreshListener {
 
 	private FragmentActivity mActivity;
 	private View mView;
 	private XmlMessage xmlData = null;
 	private PreferData preferData = null;
 	private int unreadAlarmCount = 0;
-	private TextView viewpage_alert;
-	private TextView viewpage_system;
 	private Dialog mDialog = null;
 	
 	/**
@@ -74,11 +64,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	private int listSize = 0;
 	private int listPosition = 0;
 	private PopupWindow mPopupWindow;
-	
-	private ViewPager mViewPager;
-	private List<View> pageList;
-	private View alert_page;
-	private View system_page;
+//	private RelativeLayout noMsgLayout = null;
 	
 	private static ArrayList<HashMap<String, String>> msgList = null;
 	private MessageItemAdapter msgAdapter = null;
@@ -106,7 +92,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		mActivity = getActivity();
 		mView = getView();
 		
-		initViewPageView();
 		initView();
 		initData();
 	}
@@ -118,44 +103,16 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		ZmqHandler.setHandler(handler);
 	}
 	
-	/**
-	 * 初始化告警消息和系统消息的界面
-	 */
-	private void initViewPageView() {
-		mViewPager = (ViewPager)mView.findViewById(R.id.msg_viewpager);
-		mViewPager.setOnPageChangeListener(this);
-		LayoutInflater inflater = LayoutInflater.from(mActivity);
-		alert_page = inflater.inflate(R.layout.msg_alert, null);
-		system_page = inflater.inflate(R.layout.msg_system, null);
-		pageList = new ArrayList<View>();
-		pageList.add(alert_page);
-		pageList.add(system_page);
-		mViewPager.setAdapter(new ViewPagerAdapter(pageList));
-	}
-	
 	private void initView() {
-		viewpage_alert = (TextView)mView.findViewById(R.id.tv_vp_alert);
-		viewpage_system = (TextView)mView.findViewById(R.id.tv_vp_system);
-		viewpage_alert.setOnClickListener(this);
-		viewpage_system.setOnClickListener(this);
-		
-		//告警消息
 		lv_list = (ListView) mView.findViewById(R.id.msg_list);
 		lv_list.setOnItemClickListener(new OnItemClickListenerImpl());
 		lv_list.setOnItemLongClickListener(new OnItemLongClickListenerImpl());
+		
+//		noMsgLayout = (RelativeLayout) mView.findViewById(R.id.rl_no_alert_msg_image);
+		
 		mPullToRefreshView = (PullToRefreshView) mView.findViewById(R.id.main_pull_refresh_view);
 		mPullToRefreshView.setOnHeaderRefreshListener(this);
         mPullToRefreshView.setOnFooterRefreshListener(this);
-        
-        //系统消息
-		Button test2 = (Button)mView.findViewById(R.id.btn_test2);
-		test2.setOnClickListener(this);
-		
-		Button test3 = (Button)mView.findViewById(R.id.btn_test3);
-		test3.setOnClickListener(this);
-		
-		Button test4 = (Button)mView.findViewById(R.id.btn_test4);
-		test4.setOnClickListener(this);
 	}
 	
 	private void initData() {
@@ -184,15 +141,28 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 		if ((msg_refresh_time != null) && (msg_refresh_terminal != null)) {
 			mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
 		}
-		//告警消息
+		//初始化消息列表的显示
 		if (Value.isNeedReqAlarmListFlag) {
 			reqAlarmEvent();
-		}
-		msgList = xmlData.readXml();
-		if (msgList != null) {
-			listSize = msgList.size();
-			msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
-			lv_list.setAdapter(msgAdapter);
+		} else {
+			msgList = xmlData.readXml();
+			if (msgList != null) {
+				listSize = msgList.size();
+				msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
+				lv_list.setAdapter(msgAdapter);
+//				if (listSize == 0) {
+//					noMsgLayout.setVisibility(View.VISIBLE);
+//				} else {
+//					noMsgLayout.setVisibility(View.INVISIBLE);
+//				}
+			} else {
+//				listSize = xmlData.getListSize();
+//				if (listSize == 0) {
+//					noMsgLayout.setVisibility(View.VISIBLE);
+//				} else {
+//					noMsgLayout.setVisibility(View.INVISIBLE);
+//				}
+			}
 		}
 	}
 	
@@ -408,6 +378,11 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 					}
 					break;
 			}
+//			if (listSize == 0) {
+//				noMsgLayout.setVisibility(View.VISIBLE);
+//			} else {
+//				noMsgLayout.setVisibility(View.INVISIBLE);
+//			}
 		}
 	};
 	
@@ -486,31 +461,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
-			case R.id.tv_vp_alert:
-				viewpage_alert.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_system.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(0);
-				break;
-			case R.id.tv_vp_system:
-				viewpage_system.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_alert.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(1);
-				break;
-			case R.id.btn_test2:
-				System.out.println("MyDebug: 【打开通道】");
-				TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
-				TunnelCommunication.getInstance().openTunnel(Value.TerminalDealerName);
-				break;
-			case R.id.btn_test3:
-				System.out.println("MyDebug: 【播放视频】");
-				TunnelCommunication.getInstance().askMediaData(Value.TerminalDealerName);
-				startActivity(new Intent(mActivity, PlayerActivity.class));
-				break;
-			case R.id.btn_test4:
-				System.out.println("MyDebug: 【关闭通道】");
-				TunnelCommunication.getInstance().closeTunnel(Value.TerminalDealerName);
-//				TunnelCommunication.getInstance().tunnelTerminate();
-				break;
+			
 		}
 	}
 	
@@ -543,29 +494,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnPageChan
 			listPosition = position;
 			showPopupWindow(mPullToRefreshView);
 			return false;
-		}
-	}
-	
-	@Override
-	public void onPageScrollStateChanged(int arg0) {
-		// TODO Auto-generated method stub
-	}
-	@Override
-	public void onPageScrolled(int arg0, float arg1, int arg2) {
-		// TODO Auto-generated method stub
-	}
-	@Override
-	public void onPageSelected(int arg0) {
-		// TODO Auto-generated method stub
-		switch (arg0) {
-			case 0:
-				viewpage_alert.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_system.setBackgroundResource(R.drawable.viewpage_unselected);
-				break;
-			case 1:
-				viewpage_system.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_alert.setBackgroundResource(R.drawable.viewpage_unselected);
-				break;
 		}
 	}
 	

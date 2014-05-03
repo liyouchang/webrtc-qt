@@ -124,14 +124,14 @@ public class UpdateAPK {
 		LayoutInflater mInflater = LayoutInflater.from(mContext);
 		View view = mInflater.inflate(R.layout.upgrade_content, null);
 		StringBuffer info = new StringBuffer();
-		info.append("卡尔微视界更新信息\n");
+		info.append("微视界更新信息\n");
 		info.append("新版本号："+xmlHashMap.get("versionName")+"\n");
 		info.append("软件大小："+xmlHashMap.get("apkLeagth")+"\n");
 		info.append("更新原因："+xmlHashMap.get("upgradeReason"));
 		TextView tv_info = (TextView)view.findViewById(R.id.tv_content);
 		tv_info.setText(info);
 		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-			.setTitle("卡尔微视界已更新")
+			.setTitle("微视界已更新")
 			.setIcon(R.drawable.upgrade_icon)
 			.setView(view)
 			.setCancelable(false)
@@ -161,7 +161,7 @@ public class UpdateAPK {
 		LayoutInflater mInflater = LayoutInflater.from(mContext);
 		View view = mInflater.inflate(R.layout.download_progressbar, null);
 		StringBuffer info = new StringBuffer();
-		info.append("卡尔微视界更新信息\n");
+		info.append("微视界更新信息\n");
 		info.append("新版本号："+xmlHashMap.get("versionName")+"\n");
 		info.append("软件大小："+xmlHashMap.get("apkLeagth")+"\n");
 		info.append("更新原因："+xmlHashMap.get("upgradeReason"));
@@ -317,7 +317,7 @@ public class UpdateAPK {
 						do {
 							//下载apk数据
 							int readCount = inputStream.read(buf);
-							sleep(10);
+							sleep(5);
 							//处理下载界面的显示
 							count += readCount;
 							int percent = (int)(((float)count/apkLeagth)*100);

@@ -33,6 +33,8 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	private PreferData preferData = null;
 	private String userName = null;
 	
+	private boolean isRememberPwd = true;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -72,6 +74,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		preferData = new PreferData(mActivity);
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
+		}
+		if (preferData.isExist("RememberPwd")) {
+			isRememberPwd = preferData.readBoolean("RememberPwd");
 		}
 	}
 	
@@ -130,6 +135,14 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	 * 退出当前账号登录的处理
 	 */
 	private void ExitLogoutAPP() {
+		if (!isRememberPwd) {
+			if (preferData.isExist("UserPwd")) {
+				preferData.deleteItem("UserPwd");
+			}
+			if (preferData.isExist("AutoLogin")) {
+				preferData.deleteItem("AutoLogin");
+			}
+		}
 		Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 		String data = generateLogoutJson();
 		sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);

@@ -197,13 +197,26 @@ public class VideoView extends View {
 		mCanvas.restore();  
 		
 		String SDPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-		String filePath = SDPath + File.separator + "KaerVideo" + File.separator + 
-						  "image" + File.separator +Utils.getNowTime("yyyy-MM-dd");
-		File imageFilePath = new File(filePath);
-		if(!imageFilePath.exists()){
-			imageFilePath.mkdir();
+		
+		String filePath1 = SDPath + File.separator + "KaerVideo";
+		File imageFilePath1 = new File(filePath1);
+		if(!imageFilePath1.exists()){
+			imageFilePath1.mkdir();
 		} 
-		String imageFile = filePath + File.separator +Utils.getNowTime("yyyyMMddhhmmss") + ".jpg";
+		
+		String filePath2 = filePath1 + File.separator + "image";
+		File imageFilePath2 = new File(filePath2);
+		if(!imageFilePath2.exists()){
+			imageFilePath2.mkdir();
+		} 
+		
+		String filePath3 = filePath2 + File.separator +Utils.getNowTime("yyyy-MM-dd");
+		File imageFilePath3 = new File(filePath3);
+		if(!imageFilePath3.exists()){
+			imageFilePath3.mkdir();
+		} 
+		
+		String imageFile = filePath3 + File.separator +Utils.getNowTime("yyyyMMddhhmmss") + ".jpg";
 		File file = new File(imageFile);
         FileOutputStream fos = null;  
         try {  

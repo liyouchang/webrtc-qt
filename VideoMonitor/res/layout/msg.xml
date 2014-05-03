@@ -4,37 +4,72 @@
     android:layout_height="match_parent"
     android:background="@color/page_bg_grey"
     android:orientation="vertical" >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/title_height_size" >
-
-        <TextView
-            android:id="@+id/tv_vp_alert"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/title_height_size"
-            android:layout_weight="1"
-            android:background="@drawable/viewpage_selected"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/alert_msg"
-            android:textColor="@color/orange"
-            android:textSize="16dp" />
+    
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/add_device_title"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/title_height_size"
+        android:background="@color/title_bg_black" >
 
         <TextView
-            android:id="@+id/tv_vp_system"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/title_height_size"
-            android:layout_weight="1"
-            android:background="@drawable/viewpage_unselected"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/system_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/msg"
             android:textColor="@color/orange"
-            android:textSize="16dp" />
-    </LinearLayout>
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/msg_viewpager"
+            android:textSize="@dimen/title_text_size" />
+    </RelativeLayout>
+    
+    <!-- 
+    <RelativeLayout
+        android:id="@+id/rl_no_alert_msg_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:visibility="visible" >
+
+        <ImageView
+            android:id="@+id/iv_alert_msg_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@null"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/no_alert_msg_icon" />
+
+        <TextView
+            android:id="@+id/tv_alert_msg_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/iv_alert_msg_image"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:background="@null"
+            android:text="@string/no_alert_msg"
+            android:textColor="@color/light_black"
+            android:textSize="16.0sp" />
+    </RelativeLayout>
+	 -->
+	 
+    <com.video.main.PullToRefreshView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/main_pull_refresh_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/page_bg_grey"
+        android:orientation="vertical" >
+        
+        <ListView
+            android:id="@+id/msg_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginBottom="70dp"
+            android:cacheColorHint="#00000000"
+            android:divider="#00000000"
+			android:dividerHeight="10dp" />
+        
+    </com.video.main.PullToRefreshView>
 
 </LinearLayout>
