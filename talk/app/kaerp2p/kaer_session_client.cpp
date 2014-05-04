@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014, Kaer Inc.
+ */
+
 #include "kaer_session_client.h"
 #include "talk/p2p/base/transportdescription.h"
 #include "talk/p2p/base/transportinfo.h"

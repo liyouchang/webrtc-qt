@@ -228,9 +228,9 @@ struct KEVideoServerReq
     int videoID;
     int clientID;
     char channelNo;//1 for main frame 2 for sub frame
-    char video;//视频=0请求   =1 停止
-    char listen;//监听=0请求   =1 停止
-    char talk;// 对讲=0请求   =1 停止
+    char video;//视频=1 request main,2 request sub   =0 停止
+    char listen;//监听=1请求   =0 停止
+    char talk;// 对讲=1请求   =0 停止
     char protocalType;//0/tcp ,1/udp
     int transSvrIp;//服务器IP
 };

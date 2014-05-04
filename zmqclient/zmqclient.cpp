@@ -66,7 +66,7 @@ int main()
     int clarity = jclarity.asInt();
 
     device->Init(&client);
-    device->SetVideoClarity(clarity);
+    //device->SetVideoClarity(clarity);
     //device->SetVideoResolution("704,576");
 #endif //arm
 

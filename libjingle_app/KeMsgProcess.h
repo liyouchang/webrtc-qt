@@ -1,3 +1,4 @@
+
 #ifndef KEMSGPROCESS_H
 #define KEMSGPROCESS_H
 
@@ -79,7 +80,7 @@ class KeMessageProcessClient: public KeMsgProcess
 public:
     KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
 
-    void AskVideo(int vid,int video, int audio);
+    void AskVideo(int video, int listen, int talk);
     void ReqestPlayFile(const char * file_name);
 
     sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;

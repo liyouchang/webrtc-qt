@@ -67,27 +67,29 @@ bool KeMsgProcessContainer::IsTunnelOpened(const std::string &peer_id)
 }
 
 
-void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
+void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t,
+                                           const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
     KeMsgProcess *process = new KeMsgProcess(peer_id,this);
     this->AddMsgProcess(process);
 }
 
-void KeMsgProcessContainer::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
+void KeMsgProcessContainer::OnTunnelClosed(PeerTerminalInterface *t,
+                                           const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
     LOG(INFO)<<"KeMsgProcessContainer::OnTunnelClosed";
 
     std::vector<KeMsgProcess *>::iterator it = processes_.begin();
     for (; it != processes_.end(); ++it) {
-      if ((*it)->peer_id() == peer_id) {
-        break;
-      }
+        if ((*it)->peer_id() == peer_id) {
+            break;
+        }
     }
     if (it == processes_.end()){
         LOG(WARNING)<< "peer id "<< peer_id<<" not found";
-      return ;
+        return ;
     }
 
     LOG(INFO)<< "delete and erase peer "<< peer_id;
@@ -96,7 +98,8 @@ void KeMsgProcessContainer::OnTunnelClosed(PeerTerminalInterface *t, const std::
 
 }
 
-void KeMsgProcessContainer::OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg)
+void KeMsgProcessContainer::OnTunnelMessage(const std::string &peer_id,
+                                            talk_base::Buffer &msg)
 {
     KeMsgProcess * process = this->GetProcess(peer_id);
     if(process == NULL){
@@ -107,9 +110,11 @@ void KeMsgProcessContainer::OnTunnelMessage(const std::string &peer_id, talk_bas
 
 }
 
-void KeMsgProcessContainer::OnRouterMessage(const std::string &peer_id, const std::string &msg)
+void KeMsgProcessContainer::OnRouterMessage(const std::string &peer_id,
+                                            const std::string &msg)
 {
-    LOG(INFO)<<__FUNCTION__<<"---- peer_id = "<<peer_id<<" msg = "<<msg;
+    LOG(INFO)<<"KeMsgProcessContainer::OnRouterMessage"
+            <<"---- peer_id = "<<peer_id<<" msg = "<<msg;
 
 }
 
@@ -117,25 +122,26 @@ KeMsgProcess *KeMsgProcessContainer::GetProcess(const std::string &peer_id)
 {
     std::vector<KeMsgProcess *>::iterator it = processes_.begin();
     for (; it != processes_.end(); ++it) {
-      if ((*it)->peer_id() == peer_id) {
-        break;
-      }
+        if ((*it)->peer_id() == peer_id) {
+            break;
+        }
     }
     if (it == processes_.end())
-      return NULL;
+        return NULL;
     return *it;
-
 }
 
 void KeMsgProcessContainer::AddMsgProcess(KeMsgProcess *process)
 {
-    process->SignalNeedSendData.connect(this,&KeMsgProcessContainer::OnProcessNeedSend);
+    process->SignalNeedSendData.connect(
+                this,&KeMsgProcessContainer::OnProcessNeedSend);
     process->SignalHeartStop.connect(this,&KeMsgProcessContainer::OnHeartStop);
     process->StartHeartBeat();
     processes_.push_back(process);
 }
 
-void KeMsgProcessContainer::OnProcessNeedSend(const std::string &peer_id, const char *data, int len)
+void KeMsgProcessContainer::OnProcessNeedSend(const std::string &peer_id,
+                                              const char *data, int len)
 {
     int ret = terminal_->SendByTunnel(peer_id,data,len);
     if(ret != 0){
@@ -156,7 +162,8 @@ KeTunnelClient::KeTunnelClient()
 
 }
 
-int KeTunnelClient::SendCommand(const std::string &peer_id, const std::string &command)
+int KeTunnelClient::SendCommand(const std::string &peer_id,
+                                const std::string &command)
 {
     Json::Reader reader;
     Json::Value jmessage;
@@ -172,25 +179,29 @@ int KeTunnelClient::SendCommand(const std::string &peer_id, const std::string &c
     return this->terminal_->SendByRouter(peer_id,msg);
 }
 
-int KeTunnelClient::StartPeerMedia(std::string peer_id, bool toStart)
+int KeTunnelClient::StartPeerMedia(std::string peer_id, int video)
 {
-    KeMessageProcessClient * process =dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
+    KeMessageProcessClient * process =
+            dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
     if(process == NULL){
         LOG(WARNING) << "process not found "<<peer_id;
         return -1;
     }
-    if(toStart){
-        process->AskVideo(1,0,0);
+    if(video == 0){
+        process->AskVideo(0,0,0);
     }
     else{
-        process->AskVideo(1,1,1);
+        process->AskVideo(0,0,0);
+        process->AskVideo(video,1,1);
     }
     return 0;
 }
 
-bool KeTunnelClient::DownloadRemoteFile(std::string peer_id, std::string remote_file_name)
+bool KeTunnelClient::DownloadRemoteFile(std::string peer_id,
+                                        std::string remote_file_name)
 {
-    KeMessageProcessClient * process =dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
+    KeMessageProcessClient * process =
+            dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peer_id));
     if(process == NULL){
         LOG(WARNING) << "process not found "<<peer_id;
         return false;
@@ -198,13 +209,13 @@ bool KeTunnelClient::DownloadRemoteFile(std::string peer_id, std::string remote_
 
     process->ReqestPlayFile(remote_file_name.c_str());
 
-
     return true;
 }
 
 
 
-void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
+void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t,
+                                    const std::string &peer_id)
 {
     ASSERT(this->terminal_ == t);
     KeMessageProcessClient * process = new KeMessageProcessClient(peer_id,this);
@@ -214,7 +225,8 @@ void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string 
     this->AddMsgProcess(process);
 }
 
-void KeTunnelClient::OnRouterMessage(const std::string &peer_id, const std::string &msg)
+void KeTunnelClient::OnRouterMessage(const std::string &peer_id,
+                                     const std::string &msg)
 {
     Json::Reader reader;
     Json::Value jmessage;
@@ -231,17 +243,20 @@ void KeTunnelClient::OnRouterMessage(const std::string &peer_id, const std::stri
 
 }
 
-void KeTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *data, int len)
+void KeTunnelClient::OnRecvAudioData(const std::string &peer_id,
+                                     const char *data, int len)
 {
     LOG(INFO)<<__FUNCTION__;
 }
 
-void KeTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *data, int len)
+void KeTunnelClient::OnRecvVideoData(const std::string &peer_id,
+                                     const char *data, int len)
 {
     LOG(INFO)<<__FUNCTION__;
 }
 
-void KeTunnelClient::OnRecordFileData(const std::string &peer_id, const char *data, int len)
+void KeTunnelClient::OnRecordFileData(const std::string &peer_id,
+                                      const char *data, int len)
 {
     LOG(INFO)<<"KeTunnelClient::OnRecordFileData";
 
@@ -255,7 +270,8 @@ void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
 
 
 
-void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
+void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t,
+                                    const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
     LOG(INFO)<<__FUNCTION__<<"---------"<<peer_id;
@@ -273,9 +289,11 @@ int KeTunnelCamera::GetVideoClarity()
     return 2;
 }
 
-void KeTunnelCamera::OnRecvRecordQuery( std::string peer_id,  std::string condition)
+void KeTunnelCamera::OnRecvRecordQuery( std::string peer_id,
+                                        std::string condition)
 {
-    LOG(INFO)<<"KeTunnelCamera::OnRecvRecordQuery---" <<peer_id<<" query:"<<condition ;
+    LOG(INFO)<<"KeTunnelCamera::OnRecvRecordQuery---"
+            <<peer_id<<" query:"<<condition ;
 }
 
 void KeTunnelCamera::SetPtz(std::string ptz_key, int param)
@@ -290,16 +308,20 @@ void KeTunnelCamera::OnRecvGetWifiInfo(std::string peer_id)
 
 void KeTunnelCamera::SetWifiInfo(std::string peer_id, std::string param)
 {
-    LOG(INFO)<<"KeTunnelCamera::SetWifiInfo---from:" <<peer_id<<" param:"<<param ;
+    LOG(INFO)<<"KeTunnelCamera::SetWifiInfo---from:"
+            <<peer_id<<" param:"<<param ;
 }
 
-void KeTunnelCamera::OnToPlayFile(const std::string &peer_id, const std::string &filename)
+void KeTunnelCamera::OnToPlayFile(const std::string &peer_id,
+                                  const std::string &filename)
 {
-    LOG(INFO) << "KeTunnelCamera::OnToPlayFile --- "<<peer_id<<" file name "<<filename ;
+    LOG(INFO) << "KeTunnelCamera::OnToPlayFile --- "
+              <<peer_id<<" file name "<<filename ;
 
 }
 
-void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::string &msg)
+void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
+                                     const std::string &msg)
 {
     Json::Reader reader;
     Json::Value jmessage;
@@ -329,8 +351,9 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::stri
         std::string condition;
         GetStringFromJsonObject(jmessage,"condition",&condition);
         OnRecvRecordQuery(peer_id,condition);
-    }
-    else{
+    }else if(command.compare("echo") == 0){
+        this->terminal_->SendByRouter(peer_id,msg);
+    }else{
         LOG(WARNING)<<"receive unexpected command from "<<peer_id;
     }
 
@@ -338,7 +361,8 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id, const std::stri
 
 void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
 {
-    LOG(INFO)<<"KeTunnelCamera::OnRecvVideoClarity---" <<peer_id<<" clarity:"<<clarity ;
+    LOG(INFO)<<"KeTunnelCamera::OnRecvVideoClarity---"
+            <<peer_id<<" clarity:"<<clarity ;
     if(clarity == 101){
         int clarity = this->GetVideoClarity();
         Json::Value jmessage;
