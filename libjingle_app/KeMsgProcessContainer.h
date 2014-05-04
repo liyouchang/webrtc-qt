@@ -55,6 +55,7 @@ public:
      * @return ---0 : success, 101 : command format error,
      */
     int SendCommand(const std::string &peer_id,const std::string & command);
+
     /**
      * @brief StartPeerMedia
      * @param peer_id
@@ -63,12 +64,14 @@ public:
      */
     virtual int StartPeerMedia( std::string  peer_id,int video);
 
+    //send talk data to camera
+    sigslot::signal2<const char *, int > SignalTalkData;
+    virtual void SendTalkData(const char * data,int len);
+
     virtual bool DownloadRemoteFile(std::string  peer_id,
                                     std::string remote_file_name);
-
     virtual void OnTunnelOpened(PeerTerminalInterface * t,
                                 const std::string & peer_id);
-
     virtual void OnRouterMessage(const std::string &peer_id,
                                  const std::string& msg);
 
@@ -105,6 +108,8 @@ protected:
     virtual void SetWifiInfo(std::string peer_id,std::string param);
     virtual void OnToPlayFile(const std::string &peer_id,
                               const std::string &filename);
+    virtual void OnRecvTalkData(const std::string & peer_id,
+                                const char * data,int len);
 
 };
 

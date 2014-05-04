@@ -4,6 +4,7 @@
 
 #include "peerterminal.h"
 #include "KeMsgProcess.h"
+#include "KeMessage.h"
 
 const char kTunnelTypeName[] = "type";
 const char kTunnelCommandName[] = "command";
@@ -221,7 +222,7 @@ void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t,
     KeMessageProcessClient * process = new KeMessageProcessClient(peer_id,this);
     process->SignalRecvAudioData.connect(this,&KeTunnelClient::OnRecvAudioData);
     process->SignalRecvVideoData.connect(this,&KeTunnelClient::OnRecvVideoData);
-
+    this->SignalTalkData.connect(process,&KeMessageProcessClient::OnTalkData);
     this->AddMsgProcess(process);
 }
 
@@ -240,6 +241,24 @@ void KeTunnelClient::OnRouterMessage(const std::string &peer_id,
         LOG(WARNING)<<"get command error"<<peer_id;
         return;
     }
+
+}
+
+void KeTunnelClient::SendTalkData(const char *data, int len)
+{
+    KEFrameHead frameHead;
+    frameHead.frameNo = 0;
+    frameHead.piecesNo = 0;
+    //time span is not use
+    //int ams = talk_base::Time();
+    //frameHead.second = ams/1000;
+    //frameHead.millisecond = (ams%1000)/10;
+    //frame type: is not use
+    frameHead.frameType = 80;
+    frameHead.frameLen = len;
+    talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
+    frameBuf.AppendData(data,len);
+    SignalTalkData(frameBuf.data(),frameBuf.length());
 
 }
 
@@ -317,6 +336,11 @@ void KeTunnelCamera::OnToPlayFile(const std::string &peer_id,
 {
     LOG(INFO) << "KeTunnelCamera::OnToPlayFile --- "
               <<peer_id<<" file name "<<filename ;
+
+}
+
+void KeTunnelCamera::OnRecvTalkData(const std::string &peer_id, const char *data, int len)
+{
 
 }
 

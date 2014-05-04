@@ -170,7 +170,8 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
 
 KeMessageProcessCamera::KeMessageProcessCamera(std::string peer_id,
                                                KeTunnelCamera *container):
-    KeMsgProcess(peer_id,container),video_started_(false),audio_started_(false)
+    KeMsgProcess(peer_id,container),video_started_(false),audio_started_(false),
+    talk_started_(false)
 {
 
 }
@@ -186,6 +187,9 @@ void KeMessageProcessCamera::OnMessageRespond(talk_base::Buffer &msgData)
     case KEMSG_REQUEST_PLAY_FILE:
         RecvPlayFile(msgData);
         break;
+    case KEMSG_TYPE_AUDIOSTREAM://receive talk data
+        RecvTalkData(msgData);
+        break;
     default:
         KeMsgProcess::OnMessageRespond(msgData);
         break;
@@ -196,12 +200,15 @@ void KeMessageProcessCamera::OnMessageRespond(talk_base::Buffer &msgData)
 void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
 {
     //send stream
-    LOG(INFO)<< "KeMessageProcessCamera::RecvAskMediaMsg---"
-             <<"receive message video server msg";
     KEVideoServerReq * msg = (KEVideoServerReq *)msgData.data();
-    int video = msg->video;
+
+    LOG(INFO)<< "KeMessageProcessCamera::RecvAskMediaMsg---"
+             <<"receive ask media msg : video-"<<msg->video<<
+               " listen-"<<msg->listen<<" talk-"<<msg->talk;
+
     KeTunnelCamera * camera = static_cast<KeTunnelCamera *>(container_);
 
+    int video = msg->video;
     if(video == 0){//stop
         camera->SignalVideoData1.disconnect(this);
         camera->SignalVideoData2.disconnect(this);
@@ -230,6 +237,15 @@ void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
                     this,&KeMessageProcessCamera::OnAudioData);
     }
 
+    int talk = msg->talk;
+    if(talk == 0){
+        this->SignalRecvTalkData.disconnect(camera);
+        this->talk_started_ = false;
+
+    }else if(!talk_started_){
+        this->SignalRecvTalkData.connect(camera,&KeTunnelCamera::OnRecvTalkData);
+        this->talk_started_ = true;
+    }
 
 }
 
@@ -242,6 +258,20 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
     this->SignalToPlayFile(this->peer_id(),pMsg->fileData);
 
 
+}
+
+void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
+{
+    KERTStreamHead * pMsg = (KERTStreamHead *)msgData.data();
+    const int sendStartPos = 11;
+    int mediaDataLen = msgData.length() - sendStartPos;
+    if(pMsg->msgType == KEMSG_TYPE_AUDIOSTREAM){
+        SignalRecvTalkData(this->peer_id(),msgData.data() +
+                            sendStartPos,mediaDataLen);
+    }else{
+        LOG(WARNING)<<"KeMessageProcessCamera::RecvTalkData---"<<
+                    "message type error";
+    }
 }
 
 void KeMessageProcessCamera::OnVideoData(const char *data, int len)
@@ -329,6 +359,23 @@ void KeMessageProcessClient::ReqestPlayFile(const char *file_name)
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 
 }
+//send talk data to camera
+void KeMessageProcessClient::OnTalkData(const char *data, int len)
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KERTStreamHead)  + len;
+    sendBuf.SetLength(msgLen);
+    KERTStreamHead * head = (KERTStreamHead *)sendBuf.data();
+    head->protocal = PROTOCOL_HEAD;
+    head->msgType = KEMSG_TYPE_AUDIOSTREAM;
+    head->msgLength = msgLen;
+    head->channelNo = 1;
+    head->videoID = 0;
+    memcpy(sendBuf.data() + sizeof(KERTStreamHead),data,len);
+
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+
+}
 
 void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
 {
@@ -341,19 +388,9 @@ void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
         break;
     case KEMSG_TYPE_AUDIOSTREAM:
     case KEMSG_TYPE_VIDEOSTREAM:{
-        KERTStreamHead * pMsg = (KERTStreamHead *)msgData.data();
-        const int sendStartPos = 11;
-        int mediaDataLen = msgData.length() - sendStartPos;
-        if(msgType == KEMSG_TYPE_VIDEOSTREAM){
-            SignalRecvVideoData(this->peer_id(),msgData.data() +
-                                sendStartPos,mediaDataLen);
-        }else if(msgType == KEMSG_TYPE_AUDIOSTREAM){
-            SignalRecvAudioData(this->peer_id(),msgData.data() +
-                                sendStartPos,mediaDataLen);
-        }
+        RecvMediaData(msgData);
         break;
     }
-
     case KEMSG_RecordPlayData:{
         OnRecvRecordMsg(msgData);
         break;
@@ -384,7 +421,7 @@ void KeMessageProcessClient::OnRecvRecordMsg(talk_base::Buffer &msgData)
     }
 }
 
-void KeMessageProcessClient::OnRecvMediaData(talk_base::Buffer &msgData)
+void KeMessageProcessClient::RecvMediaData(talk_base::Buffer &msgData)
 {
     KERTStreamHead * pMsg = (KERTStreamHead *)msgData.data();
     const int sendStartPos = 11;
