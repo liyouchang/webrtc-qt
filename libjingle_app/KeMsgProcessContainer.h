@@ -22,15 +22,20 @@ public:
     virtual int OpenTunnel(const std::string &peer_id);
     virtual int CloseTunnel(const std::string &peer_id);
     virtual bool IsTunnelOpened(const std::string &peer_id);
-    virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
-    virtual void OnTunnelClosed(PeerTerminalInterface * t,const std::string & peer_id);
-    virtual void OnTunnelMessage(const std::string &peer_id, talk_base::Buffer &msg);
-    virtual void OnRouterMessage(const std::string &peer_id,const std::string& msg);
+    virtual void OnTunnelOpened(PeerTerminalInterface * t,
+                                const std::string & peer_id);
+    virtual void OnTunnelClosed(PeerTerminalInterface * t,
+                                const std::string & peer_id);
+    virtual void OnTunnelMessage(const std::string &peer_id,
+                                 talk_base::Buffer &msg);
+    virtual void OnRouterMessage(const std::string &peer_id,
+                                 const std::string& msg);
 
 protected:
     virtual KeMsgProcess * GetProcess(const std::string & peer_id);
     virtual void AddMsgProcess(KeMsgProcess * process);
-    virtual void OnProcessNeedSend(const std::string & peer_id,const char * data,int len);
+    virtual void OnProcessNeedSend(const std::string & peer_id,
+                                   const char * data,int len);
     virtual void OnHeartStop(const std::string & peer_id);
 
     std::vector<KeMsgProcess *> processes_;
@@ -53,21 +58,27 @@ public:
     /**
      * @brief StartPeerMedia
      * @param peer_id
-     * @param toStart---true:start media,false:stop media
+     * @param video---0:stop media,1:main stream media,2:sub stream media
      * @return
      */
-    virtual int StartPeerMedia( std::string  peer_id,bool toStart = true);
+    virtual int StartPeerMedia( std::string  peer_id,int video);
 
-    virtual bool DownloadRemoteFile(std::string  peer_id,std::string remote_file_name);
+    virtual bool DownloadRemoteFile(std::string  peer_id,
+                                    std::string remote_file_name);
 
-    virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
+    virtual void OnTunnelOpened(PeerTerminalInterface * t,
+                                const std::string & peer_id);
 
-    virtual void OnRouterMessage(const std::string &peer_id,const std::string& msg);
+    virtual void OnRouterMessage(const std::string &peer_id,
+                                 const std::string& msg);
 
 protected:
-    virtual void OnRecvAudioData(const std::string & peer_id,const char * data,int len);
-    virtual void OnRecvVideoData(const std::string & peer_id,const char * data,int len);
-    virtual void OnRecordFileData(const std::string & peer_id,const char * data,int len);
+    virtual void OnRecvAudioData(const std::string & peer_id,
+                                 const char * data,int len);
+    virtual void OnRecvVideoData(const std::string & peer_id,
+                                 const char * data,int len);
+    virtual void OnRecordFileData(const std::string & peer_id,
+                                  const char * data,int len);
     virtual void OnRecordStatus(const std::string & peer_id,int status);
 };
 
@@ -75,20 +86,25 @@ class KeTunnelCamera:public KeMsgProcessContainer{
     friend class KeMessageProcessCamera;
 public:
 
-    virtual void OnTunnelOpened(PeerTerminalInterface * t,const std::string & peer_id);
-    virtual void OnRouterMessage(const std::string &peer_id, const std::string &msg);
+    virtual void OnTunnelOpened(PeerTerminalInterface * t,
+                                const std::string & peer_id);
+    virtual void OnRouterMessage(const std::string &peer_id,
+                                 const std::string &msg);
     virtual void SetVideoClarity(int);
     virtual int GetVideoClarity();
     virtual void SetPtz(std::string  ptz_key,int param);
 
 protected:
-    sigslot::signal2<const char *, int > SignalVideoData;
+    sigslot::signal2<const char *, int > SignalVideoData1;
+    sigslot::signal2<const char *, int > SignalVideoData2;
+
     sigslot::signal2<const char *, int > SignalAudioData;
     virtual void OnRecvVideoClarity(std::string peer_id,int clarity);
     virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
     virtual void OnRecvGetWifiInfo(std::string peer_id);
     virtual void SetWifiInfo(std::string peer_id,std::string param);
-    virtual void OnToPlayFile(const std::string &peer_id, const std::string &filename);
+    virtual void OnToPlayFile(const std::string &peer_id,
+                              const std::string &filename);
 
 };
 

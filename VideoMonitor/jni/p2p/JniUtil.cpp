@@ -272,7 +272,7 @@ bool JniUtil::getSendToPeerMethod(JNIEnv* env, jobject obj) {
 	}
 	return true;
 }
-
+//method callback for notify
 bool JniUtil::JniTunnelMethodCallback(const char* methodName,
 		const char* peer_id) {
 	if(g_vm_ == 0){
@@ -322,7 +322,7 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
 
 	return true;
 }
-
+//methodd callback for data
 bool JniUtil::JniTunnelMethodCallback(const char* methodName,
 		const char* peer_id, const char* data, int len) {
 	if(g_vm_ == 0){
@@ -375,3 +375,6 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
 
 	return true;
 }
+
+
+

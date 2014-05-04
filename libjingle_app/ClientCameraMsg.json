@@ -35,10 +35,10 @@ client-->camera
 {
     "type":"tunnel",
     "command":"ptz",
-    "control":"move_left",//this could be "move_lef","move_right","move_up",
-            //"move_down","move_stop" and others
+    "control":"move_left",//this could be "move_lef","move_right","move_up","move_down","stop"
+          // and others
     "param":10 //the param need to send to camera,
-    //for the move control this param stand for move speed
+    //for the move control this param is not useful
 }
 
 3. video clarity
@@ -94,4 +94,11 @@ camera-->clent
     "type":"tunnel",
             "command":"set_wifi",
             "result":1,//0 false,1 success
+}
+6. check online
+
+camera<-->clent
+{
+    "type":"tunnel",
+    "command":"echo"
 }

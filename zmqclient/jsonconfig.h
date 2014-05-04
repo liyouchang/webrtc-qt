@@ -3,6 +3,8 @@
 
 #include "talk/base/json.h"
 
+extern const char kConfigFileName[];
+
 class JsonConfig
 {
 public:

@@ -5,6 +5,7 @@
 #include "talk/base/scoped_ptr.h"
 
 
+const char kConfigFileName[] = "config.json";
 
 JsonConfig::JsonConfig():
     value_(Json::objectValue)

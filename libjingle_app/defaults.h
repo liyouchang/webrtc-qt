@@ -36,7 +36,6 @@ extern const char kVideoLabel[];
 extern const char kStreamLabel[];
 
 
-extern const char kConfigFileName[];
 
 extern const uint16 kDefaultServerPort;
 
