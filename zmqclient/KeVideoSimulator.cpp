@@ -64,7 +64,8 @@ void KeVideoSimulator::SendMediaMsg(const char * data,int len)
     int mediaFormat = pFrame->frameType & 0x7f;
 
     if(mediaFormat <30 ){
-        this->SignalVideoData(data,len);
+        this->SignalVideoData1(data,len);
+        this->SignalVideoData2(data,len);
     }else {
         this->SignalAudioData(data,len);
     }

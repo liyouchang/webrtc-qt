@@ -1,3 +1,7 @@
+/*
+ * Copyright 2014, Kaer Inc.
+ */
+
 #ifndef KAER_SESSION_CLIENT_H
 #define KAER_SESSION_CLIENT_H
 
