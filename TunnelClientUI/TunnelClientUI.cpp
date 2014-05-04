@@ -3,6 +3,8 @@
 
 
 #include "talk/base/logging.h"
+#include "talk/base/json.h"
+
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -21,6 +23,8 @@ TunnelClientUI::TunnelClientUI(QWidget *parent) :
     ui(new Ui::TunnelClientUI)
 {
     ui->setupUi(this);
+    this->ui->playPlugin->Initialize("tcp://192.168.40.191:5555");
+
     //connection_ = new   PeerConnectionClientDealer();
 }
 
@@ -33,7 +37,6 @@ TunnelClientUI::~TunnelClientUI()
 
 void TunnelClientUI::on_btn_init_clicked()
 {
-    this->ui->playPlugin->Initialize("tcp://192.168.40.191:5555");
     //connection_->Connect("tcp://192.168.0.182:5555","");
 //    connection_->Connect("tcp://192.168.40.191:5555","");
 //    tunnel_->Initialize(connection_.get());
@@ -103,4 +106,104 @@ void TunnelClientUI::on_btn_save_video_clicked()
 {
     QString peerId = ui->edit_peer_id->text();
     this->ui->playPlugin->StartCut(peerId);
+}
+
+void TunnelClientUI::on_ptz_up_pressed()
+{
+    OnPtzMove("move_up");
+}
+
+void TunnelClientUI::on_ptz_up_released()
+{
+    OnPtzMove("stop");
+}
+
+void TunnelClientUI::OnPtzMove(std::string side)
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "ptz";
+    jmessage["control"] = side;
+    jmessage["param"] = 10;
+
+    std::string msg = writer.write(jmessage);
+    QString peerId = ui->edit_peer_id->text();
+
+    this->ui->playPlugin->SendCommand(peerId,msg.c_str());
+
+}
+
+void TunnelClientUI::OnVideoClarity(int clarity)
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "video_clarity";
+    jmessage["value"] = clarity;
+
+    std::string msg = writer.write(jmessage);
+    QString peerId = ui->edit_peer_id->text();
+
+    this->ui->playPlugin->SendCommand(peerId,msg.c_str());
+
+}
+
+void TunnelClientUI::on_ptz_left_pressed()
+{
+    OnPtzMove("move_left");
+}
+
+void TunnelClientUI::on_ptz_left_released()
+{
+    OnPtzMove("stop");
+}
+
+void TunnelClientUI::on_ptz_down_pressed()
+{
+    OnPtzMove("move_down");
+
+}
+
+void TunnelClientUI::on_ptz_down_released()
+{
+    OnPtzMove("stop");
+
+}
+
+void TunnelClientUI::on_ptz_right_pressed()
+{
+    OnPtzMove("move_right");
+
+}
+
+void TunnelClientUI::on_ptz_right_released()
+{
+    OnPtzMove("stop");
+
+}
+
+void TunnelClientUI::on_clarity_low_clicked()
+{
+OnVideoClarity(1);
+}
+
+void TunnelClientUI::on_clarity_normal_clicked()
+{
+    OnVideoClarity(2);
+
+}
+
+void TunnelClientUI::on_pushButton_high_clicked()
+{
+    OnVideoClarity(3);
+
+}
+
+void TunnelClientUI::on_get_clarity_clicked()
+{
+    OnVideoClarity(101);
+
 }
