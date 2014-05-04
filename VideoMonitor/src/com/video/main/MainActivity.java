@@ -39,6 +39,7 @@ import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
 import com.video.user.LoginActivity;
+import com.video.utils.MyAlertDialog;
 import com.video.utils.TabFactory;
 import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
@@ -179,9 +180,7 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
-		    	HandlerApplication.getInstance().stopService(intent);
-		    	finish();
+				exitVideoMonitorApp();
 			}
 		});
 	}
@@ -394,6 +393,45 @@ public class MainActivity extends FragmentActivity {
 		msg.obj = obj;
 		handler.sendMessage(msg);
 	}
+	
+	/**
+	 * 退出微视界
+	 */
+	private void exitVideoMonitorApp() {
+		final MyAlertDialog myDialog=new MyAlertDialog(mContext);
+		myDialog.setTitle("温馨提示");
+		myDialog.setMessage("确认退出微视界？");
+		myDialog.setPositiveButton("确认", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+				Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
+		    	HandlerApplication.getInstance().stopService(intent);
+		    	finish();
+			}
+		});
+		myDialog.setNegativeButton("取消", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+				hideExitView();
+			}
+		});
+	}
+	
+	private void showExitView() {
+		isTextViewShow = true;
+		app_exit.setVisibility(View.VISIBLE);
+		Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_in);  
+		app_exit.startAnimation(animation);
+	}
+	
+	private void hideExitView() {
+		isTextViewShow = false;
+		app_exit.setVisibility(View.INVISIBLE);
+		Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_out);  
+		app_exit.startAnimation(animation);
+	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -408,22 +446,13 @@ public class MainActivity extends FragmentActivity {
 		}
 		if (keyCode == KeyEvent.KEYCODE_MENU  && event.getRepeatCount() == 0) {
 			if (isTextViewShow == false) {
-				isTextViewShow = true;
-				app_exit.setVisibility(View.VISIBLE);
-				Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_in);  
-				app_exit.startAnimation(animation); 
+				showExitView();
 			} else {
-				isTextViewShow = false;
-				app_exit.setVisibility(View.INVISIBLE);
-				Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_out);  
-				app_exit.startAnimation(animation); 
+				hideExitView();
 			}
 		} else if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
 			if (isTextViewShow) {
-				isTextViewShow = false;
-				app_exit.setVisibility(View.INVISIBLE);
-				Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_out);  
-				app_exit.startAnimation(animation); 
+				hideExitView();
 				return true;
 			}
 		}

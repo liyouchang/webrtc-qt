@@ -11,6 +11,8 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 
@@ -88,6 +90,20 @@ public class VideoView extends View {
 	}
 	
 	/**
+	 * 暂停播放
+	 */
+	public void pauseVideo() {
+		runFlag = false;
+		TunnelCommunication.videoDataCache.clearBuffer();
+	}
+	
+	private static void sendHandlerMsg(Handler handler, int what) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessage(msg);
+	}
+	
+	/**
 	 * 播放视频线程
 	 */
 	private class PlayVideoThread extends Thread {
@@ -115,12 +131,15 @@ public class VideoView extends View {
 					} else {
 						sleep(10);
 					}
+					if (!PlayerActivity.isTunnelOpened) {
+						sendHandlerMsg(PlayerActivity.playHandler, 2);
+						sleep(1000);
+					}
 				}catch(Exception ex){
 					ex.printStackTrace();
 					uninitView();
 					initView();
 				}
-				
 			}
 			uninitView();
 		}

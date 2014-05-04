@@ -26,8 +26,8 @@ import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.main.MainActivity;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.socket.ZmqThread;
 import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
 
@@ -258,7 +258,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				} else {
 					preferData.writeData("UserPwd", userPwd);
 				}
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
+				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateLoginJson(userName, userPwd);
 				sendHandlerMsg(IS_LOGINNING);
 				sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);

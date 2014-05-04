@@ -1,5 +1,10 @@
 package com.video.play;
 
+import java.util.HashMap;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -38,13 +43,14 @@ import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.Value;
+import com.video.socket.HandlerApplication;
 
 public class PlayerActivity  extends Activity implements OnClickListener  {
 
-	private Context mContext;
+	private static Context mContext;
 	
 	private static VideoView videoView = null; //视频对象
-	private AudioThread audioThread = null; //音频对象
+	private static AudioThread audioThread = null; //音频对象
 	private WakeLock wakeLock = null; //锁屏对象
 
 	private TextView tv_title = null;
@@ -56,7 +62,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private int titleHeight = 80;
 	private int bottomHeight = 100;
 	
-	private static boolean isTunnelOpened = false;
+	public static boolean isTunnelOpened = false;
 	private boolean isVoiceEnable = true;
 	private boolean isPlayMusic = false;
 	private boolean isFullScreen = false;
@@ -64,7 +70,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private boolean isClarityPopupWindowShow = false;
 	private final int SHOW_TIME_MS = 6000;
 	private final int HIDE_POPUPWINDOW = 1;
-	private final int REQUEST_TIMEOUT = 2;
 	
 	private GestureDetector mGestureDetector = null;//手势识别
 	
@@ -217,7 +222,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		//【打开通道】
 		TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
 		TunnelCommunication.getInstance().openTunnel(dealerName);
-		sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 		mDialog = createLoadingDialog("正在请求视频...");
 		mDialog.show();
 	}
@@ -231,9 +235,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				case HIDE_POPUPWINDOW:
 					hidePopupWindow();
 					break;
-				case REQUEST_TIMEOUT:
-					
-					break;
 			}
 		}
 	};
@@ -243,17 +244,37 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		public void handleMessage(Message msg) {
 			// TODO Auto-generated method stub
 			super.handleMessage(msg);
-			if (msg.what == 0) {
-				String peerId = (String) msg.obj;
-				if (peerId.equals(dealerName)) {
-					//【播放视频】
-					TunnelCommunication.getInstance().askMediaData(dealerName);
-					videoView.playVideo();
+			switch (msg.what) {
+				case 0:
+					isTunnelOpened = true;
+					String peerId = (String) msg.obj;
+					if (peerId.equals(dealerName)) {
+						//【播放视频】
+						TunnelCommunication.getInstance().askMediaData(dealerName);
+						videoView.playVideo();
+						System.out.println("MyDebug: 【播放视频】");
+						if (mDialog != null) {
+							mDialog.dismiss();
+							mDialog = null;
+						}
+					}
+					break;
+				case 1:
 					if (mDialog != null) {
 						mDialog.dismiss();
-						mDialog = null;
 					}
-				}
+					if (!isTunnelOpened) {
+						toastNotify(mContext, "请求视频超时，请重试！");
+					}
+					isTunnelOpened = false;
+					System.out.println("MyDebug: ------> 1");
+					break;
+				case 2:
+					videoView.pauseVideo();
+					TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
+					TunnelCommunication.getInstance().openTunnel(dealerName);
+					System.out.println("MyDebug: ------> 2");
+					break;
 			}
 		}
 	};
@@ -261,17 +282,17 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	/**
 	 * 发送Handler消息
 	 */
-	private void sendHandlerMsg(int what) {
+	public void sendHandlerMsg(int what) {
 		Message msg = new Message();
 		msg.what = what;
 		handler.sendMessage(msg);
 	}
-	private void sendHandlerMsg(int what, int timeout) {
+	public void sendHandlerMsg(int what, int timeout) {
 		Message msg = new Message();
 		msg.what = what;
-		handler.sendMessageDelayed(msg, timeout);
+		playHandler.sendMessageDelayed(msg, timeout);
 	}
-	private void sendHandlerMsg(Handler handler, int what, String obj) {
+	public void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
 		Message msg = new Message();
 		msg.what = what;
 		msg.obj = obj;
@@ -326,6 +347,22 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private void getScreenSize() {
 		Display display = getWindowManager().getDefaultDisplay();
 		screenWidth = display.getWidth();
+	}
+	
+	/**
+	 * 自定义Toast显示
+	 */
+	private static void toastNotify(Context context, String notify_text) {	
+		LayoutInflater Inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View tx_view = Inflater.inflate(R.layout.toast_layout, null);
+		
+		TextView textView = (TextView)tx_view.findViewById(R.id.toast_text_id);
+		textView.setText(notify_text);
+		
+		Toast toast = new Toast(context);
+		toast.setDuration(Toast.LENGTH_SHORT);
+		toast.setView(tx_view);
+		toast.show();
 	}
 	
 	/**
@@ -408,9 +445,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			case R.id.btn_player_capture:
 				if (videoView.captureVideo()) {
 					playCaptureMusic(R.raw.capture);
-					Toast.makeText(mContext, "抓拍成功！", Toast.LENGTH_SHORT).show();
+					toastNotify(mContext, "抓拍成功！");
 				} else {
-					Toast.makeText(mContext, "抓拍失败！", Toast.LENGTH_SHORT).show();
+					toastNotify(mContext, "抓拍失败！");
 				}
 				break;
 			//录像
@@ -477,6 +514,53 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		}
 	}
 	
+	/**
+	 * @param order: "move_left", "move_right", "move_up", "move_down", "stop" 
+	 * @return 返回生成JSON云台控制的字符串
+	 */
+	private String generatePtzControlJson(String order) {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "tunnel");
+			jsonObj.put("command", "ptz");
+			jsonObj.put("control", order);
+			jsonObj.put("param", 0);
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private void sendPtzControlOrder(String order) {
+		Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+		String data = generatePtzControlJson(order);
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("peerId", dealerName);
+		map.put("peerData", data);
+		sendHandlerMsg(sendHandler, R.id.send_to_peer_id, map); 
+	}
+	
+	private boolean isPtzControling = false;
+	private long startTime = 0;
+	private long endTime = 0;
+	private long spaceTime = 0;
+	
+	private final String PTZ_UP = "move_up";
+	private final String PTZ_DOWN = "move_down";
+	private final String PTZ_LEFT = "move_left";
+	private final String PTZ_RIGHT = "move_right";
+	private final String PTZ_STOP = "stop";
+	
+	private float startPointX = 0.0f;
+	private float startPointY = 0.0f;
+	
+	private float endPointX = 0.0f;
+	private float endPointY = 0.0f;
+	
+	private float spaceX = 0.0f;
+	private float spaceY = 0.0f;
+	
 	//处理云台事件
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
@@ -486,13 +570,49 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		if (!result) {
 			switch (event.getAction()) {
 				case MotionEvent.ACTION_UP:
-					
+					if (isPtzControling) {
+						//停止
+						isPtzControling = false;
+						sendPtzControlOrder(PTZ_STOP);
+					}
 					break;
 				case MotionEvent.ACTION_DOWN:
-					
+					isPtzControling = false;
+					startTime = System.currentTimeMillis();
+					startPointX = event.getX();
+					startPointY = event.getY();
 					break;
 				case MotionEvent.ACTION_MOVE:
-					
+					endTime = System.currentTimeMillis();
+					spaceTime = endTime - startTime;
+					if (!isPtzControling && (spaceTime > 100)) {
+						isPtzControling = true;
+						
+						endPointX = event.getX();
+						endPointY = event.getY();
+						spaceX = endPointX - startPointX;
+						spaceY = endPointY - startPointY;
+						
+						if (Math.abs(spaceX) >= Math.abs(spaceY)) {
+							if (spaceX < -1) {
+								//向左
+								sendPtzControlOrder(PTZ_LEFT);
+							} 
+							else if (spaceX > 1) {
+								//向右
+								sendPtzControlOrder(PTZ_RIGHT);
+							}
+						} else {
+							if (spaceY < -1) {
+								//向上
+								sendPtzControlOrder(PTZ_UP);
+							} 
+							else if (spaceY > 1) {
+								//向下
+								sendPtzControlOrder(PTZ_DOWN);
+							}
+						}
+					}
 					break;
 			}
 			result = super.onTouchEvent(event);
@@ -513,11 +633,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 
 	private void closePlayer() {
 		try {
+			videoView.stopVideo();
+			audioThread.stopAudioPlay();
 			TunnelCommunication.getInstance().closeTunnel(dealerName);
 			TunnelCommunication.getInstance().tunnelTerminate();
 			Value.TerminalDealerName = null;
-			videoView.stopVideo();
-			audioThread.stopAudioPlay();
 			if (titlePopupWindow != null) {
 				titlePopupWindow.dismiss();
 			}

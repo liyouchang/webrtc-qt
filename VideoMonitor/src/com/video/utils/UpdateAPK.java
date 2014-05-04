@@ -12,21 +12,16 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
+import android.view.View.OnClickListener;
 import android.widget.Toast;
 
-import com.video.R;
 import com.video.data.Value;
 
 public class UpdateAPK {
@@ -42,10 +37,7 @@ public class UpdateAPK {
 	private String apkName = "VideoMonitor.apk"; //下载安装的软件名称
 	public static HashMap<String, String> xmlHashMap; //存储应用软件xml的信息
 	private boolean isCancelUpgrade = false; //是否取消升级的标志
-	
-    private ProgressBar progressBar_upgrade_percent;
-    private TextView tv_upgrade_percent;
-	private AlertDialog downLoadDialog;
+	private DownloadAlertDialogProgressBar downLoadDialog;
 	
 	public UpdateAPK(Context context) {
 		this.mContext = context;
@@ -71,13 +63,11 @@ public class UpdateAPK {
 					break;
 				//下载apk应用软件的进度
 				case DOWNLOAD_PERCENT:
-					progressBar_upgrade_percent.setProgress(msg.arg1);
-					tv_upgrade_percent.setText(msg.arg1+"%");
+					downLoadDialog.setProgressPercent(msg.arg1);
 					break;
 				//apk应用软件下载完成
 				case APK_DOWNLOAD_FINISH:
-					progressBar_upgrade_percent.setProgress(100);
-					tv_upgrade_percent.setText("100%");
+					downLoadDialog.setProgressPercent(100);
 					installAPK();
 					break;
 			}
@@ -121,70 +111,52 @@ public class UpdateAPK {
 	 * 软件需要升级的对话框
 	 */
 	private void showUpgradeVersionDialog() {
-		LayoutInflater mInflater = LayoutInflater.from(mContext);
-		View view = mInflater.inflate(R.layout.upgrade_content, null);
 		StringBuffer info = new StringBuffer();
 		info.append("微视界更新信息\n");
 		info.append("新版本号："+xmlHashMap.get("versionName")+"\n");
 		info.append("软件大小："+xmlHashMap.get("apkLeagth")+"\n");
 		info.append("更新原因："+xmlHashMap.get("upgradeReason"));
-		TextView tv_info = (TextView)view.findViewById(R.id.tv_content);
-		tv_info.setText(info);
-		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-			.setTitle("微视界已更新")
-			.setIcon(R.drawable.upgrade_icon)
-			.setView(view)
-			.setCancelable(false)
-			.setPositiveButton("现在升级",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							sendHandlerMsg(APK_IS_DOWNLOADING);
-							dialog.dismiss();
-						}
-					})
-			.setNegativeButton("忽略升级",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int which) {
-							dialog.dismiss();
-						}
-					}).create();
-		aboutDialog.show();
+		
+		final DownloadAlertDialog myDialog=new DownloadAlertDialog(mContext);
+		myDialog.setTitle("微视界已更新");
+		myDialog.setMessage(""+info);
+		myDialog.setPositiveButton("现在升级", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+				sendHandlerMsg(APK_IS_DOWNLOADING);
+			}
+		});
+
+		myDialog.setNegativeButton("忽略升级", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+			}
+		});
 	}
 	
 	/**
 	 * 正在升级的对话框
 	 */
 	private void showDownloadDialog() {
-		
-		LayoutInflater mInflater = LayoutInflater.from(mContext);
-		View view = mInflater.inflate(R.layout.download_progressbar, null);
 		StringBuffer info = new StringBuffer();
 		info.append("微视界更新信息\n");
 		info.append("新版本号："+xmlHashMap.get("versionName")+"\n");
 		info.append("软件大小："+xmlHashMap.get("apkLeagth")+"\n");
 		info.append("更新原因："+xmlHashMap.get("upgradeReason"));
-		TextView tv_info = (TextView)view.findViewById(R.id.tv_upgrade_info);
-		tv_info.setText(info);
-		progressBar_upgrade_percent = (ProgressBar)view.findViewById(R.id.progressBar_percent);
-		progressBar_upgrade_percent.setProgress(0);
-		tv_upgrade_percent = (TextView)view.findViewById(R.id.tv_percent);
-		tv_upgrade_percent.setText("0%");
-		downLoadDialog = new AlertDialog.Builder(mContext)
-			.setTitle("正在下载软件包")
-			.setIcon(R.drawable.download_icon)
-			.setView(view)
-			.setCancelable(false)
-			.setPositiveButton("取消升级",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							isCancelUpgrade = true;
-							dialog.dismiss();
-						}
-					}).create();
-		downLoadDialog.show();
+		
+		downLoadDialog = new DownloadAlertDialogProgressBar(mContext);
+		downLoadDialog.setProgressPercent(0);
+		downLoadDialog.setTitle("正在下载软件包");
+		downLoadDialog.setMessage(""+info);
+		downLoadDialog.setNegativeButton("取消下载", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				downLoadDialog.dismiss();
+				isCancelUpgrade = true;
+			}
+		});
 		//启动下载APK应用软件的线程
 		 new downloadingApkThread().start();
 	}

@@ -22,8 +22,8 @@ import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.Value;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
 public class FindPwdActivity extends Activity implements OnClickListener {
@@ -208,7 +208,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	private void clickFindPwdEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkFindPwdData()) {
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
+				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateFindPwdJson(userName, userEmail);
 				sendHandlerMsg(IS_SUBMITTING);
 				sendHandlerMsg(SUBMIT_TIMEOUT, Value.requestTimeout);

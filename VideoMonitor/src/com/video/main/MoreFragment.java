@@ -3,8 +3,6 @@ package com.video.main;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +21,7 @@ import com.video.data.Value;
 import com.video.socket.HandlerApplication;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
+import com.video.utils.MyAlertDialog;
 
 public class MoreFragment extends Fragment implements OnClickListener {
 
@@ -100,25 +99,24 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	 * 显示操作的提示
 	 */
 	private void showHandleDialog() {
-		AlertDialog aboutDialog = new AlertDialog.Builder(mActivity)
-				.setTitle("温馨提示")
-				.setMessage("确认退出当前账号的登录？")
-				.setCancelable(false)
-				.setPositiveButton("确定",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								dialog.dismiss();
-								Value.resetValues();
-								ExitLogoutAPP();
-							}
-						})
-				.setNegativeButton("取消",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					}).create();
-		aboutDialog.show();
+		final MyAlertDialog myDialog=new MyAlertDialog(mActivity);
+		myDialog.setTitle("温馨提示");
+		myDialog.setMessage("确认退出当前账号的登录？");
+		myDialog.setPositiveButton("确定", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+				Value.resetValues();
+				ExitLogoutAPP();
+			}
+		});
+
+		myDialog.setNegativeButton("取消", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+			}
+		});
 	}
 	
 	/**
@@ -149,7 +147,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		startActivity(new Intent(mActivity, LoginActivity.class));
 		mActivity.finish();
 	}
-
+	
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
