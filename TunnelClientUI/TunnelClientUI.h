@@ -33,7 +33,34 @@ private slots:
 
     void on_btn_save_video_clicked();
 
+    void on_ptz_up_pressed();
+
+    void on_ptz_up_released();
+
+    void on_ptz_left_pressed();
+
+    void on_ptz_left_released();
+
+    void on_ptz_down_pressed();
+
+    void on_ptz_down_released();
+
+    void on_ptz_right_pressed();
+
+    void on_ptz_right_released();
+
+    void on_clarity_low_clicked();
+
+    void on_clarity_normal_clicked();
+
+    void on_pushButton_high_clicked();
+
+    void on_get_clarity_clicked();
+
 private:
+    void OnPtzMove(std::string side);
+    void OnVideoClarity(int clarity);
+
     Ui::TunnelClientUI *ui;
     //PeerTerminal * terminal_;
 //    talk_base::scoped_ptr<KeQtTunnelClient> tunnel_;
