@@ -5,6 +5,7 @@
 #include "talk/base/timeutils.h"
 #include "talk/base/buffer.h"
 #include "talk/base/logging.h"
+#include "talk/base/stringutils.h"
 
 #include "keapi/keapi.h"
 #include "libjingle_app/KeMessage.h"
@@ -183,6 +184,74 @@ void HisiMediaDevice::OnRecvTalkData(const std::string &peer_id, const char *dat
 
 }
 
+void HisiMediaDevice::RecvGetWifiInfo(std::string peer_id)
+{
+    LOG(INFO)<<"HisiMediaDevice::RecvGetWifiInfo---"<<peer_id;
+    t_WIFI_INFO * wifiList = new t_WIFI_INFO[64];
+    int count;
+    int ret = Raycomm_GetWifiList(&count,wifiList);
+    LOG(INFO)<<"Raycomm_GetWifiList ret-"<<ret<<" count-"<<count;
+
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "wifi_info";
+
+    for(int i=0;i < count;++i){
+        Json::Value jwifi;
+        jwifi["ssid"] = wifiList[i].sSsID;
+        jwifi["quality"] = wifiList[i].u32Quality;
+        jwifi["auth"] = wifiList[i].u32Auth;
+        jwifi["enc"] = wifiList[i].u32Enc;
+        jwifi["mode"] = wifiList[i].u32Mode;
+
+        jmessage["wifis"].append(jwifi);
+    }
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+
+    LOG(LS_VERBOSE)<<"send msg is "<< msg;
+
+    this->terminal_->SendByRouter(peer_id,msg);
+
+}
+
+void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
+{
+
+    Json::Reader reader;
+    Json::Value jparam;
+    if (!reader.parse(param,jparam)) {
+        LOG(WARNING) << "Received unknown message. " << param;
+        return;
+    }
+
+
+    t_WIFI_PARAM wifiParam;
+    std::string ssid;
+    GetStringFromJsonObject(jparam,"ssid",&ssid);
+    talk_base::asccpyn(wifiParam.sSsID,32,ssid.c_str());
+    std::string key;
+    GetStringFromJsonObject(jparam,"key",&key);
+    talk_base::asccpyn(wifiParam.sKey,32,ssid.c_str());
+    GetIntFromJsonObject(jparam,"enable",&wifiParam.u32Enable);
+    GetIntFromJsonObject(jparam,"auth",&wifiParam.u32Auth);
+    GetIntFromJsonObject(jparam,"enc",&wifiParam.u32Enc);
+    GetIntFromJsonObject(jparam,"mode",&wifiParam.u32Mode);
+
+    int ret = Raycomm_SetWifi(&wifiParam);
+
+    LOG(INFO)<<"Raycomm_SetWifi --- ret:"<<ret;
+
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "set_wifi";
+    jmessage["result"] = ret;
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+
+    this->terminal_->SendByRouter(peerId,msg);
+}
+
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)
 {
     switch (msg->message_id) {
@@ -309,19 +378,21 @@ int HisiMediaDevice::GetVideoFrameType(int level)
     Raycomm_GetParam(key,buf,0);
     int frameType;
     std::string resolution(buf);
-    if(resolution.compare("352x288") == 0){
+    if(resolution.compare("352x288") == 0){//CIF
         frameType = 2;
-    }else if(resolution.compare("704x576") == 0){
+    }else if(resolution.compare("704x576") == 0){//D1
         frameType = 0;
-    }else if(resolution.compare("1280x720") == 0){
+    }else if(resolution.compare("1280x720") == 0){//720P
         frameType = 10;
-    }else if(resolution.compare("176x144") == 0){
+    }else if(resolution.compare("176x144") == 0){//QCIF
         frameType = 1;
-    }else if(resolution.compare("704x288") == 0){
+    }else if(resolution.compare("704x288") == 0){//HD1
         frameType = 3;
-    }else if(resolution.compare("320x240") == 0){
+    }else if(resolution.compare("320x240") == 0){//QVGA
         frameType = 4;
-    }else {
+    }else if(resolution.compare("640x480") == 0){//VGA
+        frameType = 7;
+    }else{
         LOG(WARNING)<<"GetVideoFrameType get not defined frame resolution "<<
                       resolution;
         frameType = 2;

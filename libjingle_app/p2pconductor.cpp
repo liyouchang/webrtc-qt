@@ -269,7 +269,7 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
         return;
     }
 
-    if (!peer_connection_.get()) {
+    if(!peer_connection_.get()) {
         ASSERT(peer_id_.empty());
         peer_id_ = peer_id;
         if (!InitializePeerConnection()) {
@@ -339,6 +339,7 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
         return;
     }
 }
+
 PeerTunnelInterface::IceServers P2PConductor::g_servers;
 
 }

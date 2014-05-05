@@ -104,7 +104,7 @@ protected:
     sigslot::signal2<const char *, int > SignalAudioData;
     virtual void OnRecvVideoClarity(std::string peer_id,int clarity);
     virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
-    virtual void OnRecvGetWifiInfo(std::string peer_id);
+    virtual void RecvGetWifiInfo(std::string peer_id);
     virtual void SetWifiInfo(std::string peer_id,std::string param);
     virtual void OnToPlayFile(const std::string &peer_id,
                               const std::string &filename);
