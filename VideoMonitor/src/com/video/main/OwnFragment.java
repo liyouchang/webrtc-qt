@@ -443,7 +443,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				mActivity.overridePendingTransition(R.anim.up_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_add_device:
-				startActivity(new Intent(mActivity, AddDeviceActivity.class));
+				startActivityForResult(new Intent(mActivity, AddDeviceActivity.class), 0);
 				mActivity.overridePendingTransition(R.anim.up_in, R.anim.fragment_nochange);
 				break;
 		}
@@ -505,6 +505,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						break;
 					case 1:
 						intent = new Intent(mActivity, AddShareActivity.class);
+						intent.putExtra("deviceName", mDeviceName);
 						intent.putExtra("deviceID", mDeviceId);
 						startActivity(intent);
 						mActivity.overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
@@ -539,6 +540,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == 1) {
+			listSize = xmlData.getListSize();
 			Bundle bundle = data.getExtras();
 			String id = bundle.getString("deviceId");
 			String name = bundle.getString("deviceName");
@@ -558,6 +560,12 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			sendHandlerMsg(IS_REQUESTING, "正在上传图片...");
 			sendHandlerMsg(REQUEST_TIMEOUT, "上传图片失败，请重试！", 10000);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, sendData);
+		}
+		else if (resultCode == 3) {
+			Bundle bundle = data.getExtras();
+			String id = bundle.getString("deviceId");
+			deviceList.add(xmlData.getItem(id));
+			deviceAdapter.notifyDataSetChanged();
 		}
 	}
 }

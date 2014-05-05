@@ -57,8 +57,7 @@ private:
 protected:
     virtual int GetVideoClarity();
     void SetPtz(std::string ptz_key, int param);
-
-    // KeMsgProcessContainer interface
+    void OnRecvTalkData(const std::string &peer_id, const char *data, int len);
 };
 
 #endif // HISIMEDIADEVICE_H

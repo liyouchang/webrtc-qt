@@ -74,8 +74,24 @@ jint naAskMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
 		return -1;
 	}
 	const char * pid = env->GetStringUTFChars(peer_id, NULL);
-	return client->StartPeerMedia(pid,true);
+	return client->StartPeerMedia(pid,2);
 }
+
+
+jint naSendTalkData(JNIEnv *env, jobject thiz, jbyteArray talkBytes) {
+	LOGI("5. naSendTalkData()");
+	if (client == NULL) {
+		return -1;
+	}
+    jbyte * talkData = env->GetByteArrayElements( talkBytes, 0);
+    jsize len = env->GetArrayLength(talkBytes);
+
+    client->SendTalkData( (char *)talkData,len);
+
+    env->ReleaseByteArrayElements(talkBytes,talkData,0);
+    return 0;
+}
+
 
 #ifndef NELEM
 #define NELEM(x) ((int)(sizeof(x)/sizeof((x)[0])))
@@ -95,7 +111,9 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
 			{ "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
 			{ "naCloseTunnel", "(Ljava/lang/String;)I", (void*) naCloseTunnel },
 			{ "naAskMediaData", "(Ljava/lang/String;)I", (void*) naAskMediaData },
-			{ "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I", (void*) naMessageFromPeer }
+			{ "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I", (void*) naMessageFromPeer },
+			{ "naSendTalkData", "([B)I", (void*) naSendTalkData }
+
 	};
 
 	jclass cls = env->FindClass("com/video/play/TunnelCommunication");

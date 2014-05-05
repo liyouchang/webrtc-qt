@@ -54,6 +54,26 @@ private:
 
 };
 
+class KeMessageProcessClient: public KeMsgProcess
+{
+public:
+    KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
+
+    void AskVideo(int video, int listen, int talk);
+    void ReqestPlayFile(const char * file_name);
+    void OnTalkData(const char * data,int len);
+    sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
+    sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
+
+    sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;
+    sigslot::signal2<const std::string &,int > SignalRecordPlayStatus;
+
+protected:
+    virtual void OnMessageRespond(talk_base::Buffer & msgData);
+    virtual void OnRecvRecordMsg(talk_base::Buffer & msgData);
+    virtual void RecvMediaData(talk_base::Buffer & msgData);
+};
+
 
 class KeMessageProcessCamera: public KeMsgProcess
 {
@@ -64,35 +84,18 @@ public:
     void OnRecordData(const char * data,int len);
 
     sigslot::signal2<const std::string &,const std::string & > SignalToPlayFile;
+    sigslot::signal3<const std::string &,const char *,int > SignalRecvTalkData;
 
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     virtual void RecvAskMediaMsg(talk_base::Buffer &msgData);
     virtual void RecvPlayFile(talk_base::Buffer &msgData);
+    virtual void RecvTalkData(talk_base::Buffer &msgData);
 private:
     bool video_started_;
     bool audio_started_;
+    bool talk_started_;
 
-};
-
-class KeMessageProcessClient: public KeMsgProcess
-{
-public:
-    KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
-
-    void AskVideo(int video, int listen, int talk);
-    void ReqestPlayFile(const char * file_name);
-
-    sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
-    sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
-
-    sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;
-    sigslot::signal2<const std::string &,int > SignalRecordPlayStatus;
-
-protected:
-    virtual void OnMessageRespond(talk_base::Buffer & msgData);
-    virtual void OnRecvRecordMsg(talk_base::Buffer & msgData);
-    virtual void OnRecvMediaData(talk_base::Buffer & msgData);
 };
 
 

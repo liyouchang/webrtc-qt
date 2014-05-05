@@ -170,6 +170,19 @@ void HisiMediaDevice::SetPtz(std::string ptz_key, int param)
     Raycomm_SetPtz(ptz_key.c_str(),param,0);
 }
 
+void HisiMediaDevice::OnRecvTalkData(const std::string &peer_id, const char *data, int len)
+{
+    KEFrameHead * head = (KEFrameHead *)data;
+    int dataPos =  sizeof(KEFrameHead);
+    if(head->frameLen == len-dataPos){
+        Raycomm_TalkPlay(0,const_cast<char *>(data+dataPos),head->frameLen,0,0);
+    }else{
+        LOG(WARNING)<<"HisiMediaDevice::OnRecvTalkData--- from "<<peer_id<<
+                    " frame format error";
+    }
+
+}
+
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)
 {
     switch (msg->message_id) {

@@ -11,16 +11,16 @@
     <RelativeLayout
         android:id="@+id/rl_device_bg"
         android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_height="90dp"
         android:background="@drawable/device_item_view_bg" >
 
         <ImageView
             android:id="@+id/iv_device_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:background="@drawable/icon_device_default"
+            android:background="@drawable/icon_device_play_xml"
             android:contentDescription="@null"
             android:padding="5dp"
             android:scaleType="fitXY" />
@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="10dp"
-        android:background="@color/white"
+        android:background="@null"
         android:orientation="vertical" >
 
         <TextView

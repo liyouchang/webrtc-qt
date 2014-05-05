@@ -383,6 +383,40 @@ public class XmlDevice {
 		}
 		return false;
 	}
+	
+	/**
+	 * 获取XML文件的一个节点
+	 * @return 成功返回一个ArrayList列表的一个节点  失败返回null
+	 */
+	public HashMap<String, String> getItem(String mac) {
+		try {
+			Document document = loadInit(filePath);
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			for (int i=0; i<len; i++) {
+				String searchId = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (searchId.equals(mac)) {
+					HashMap<String, String> item = new HashMap<String, String>();
+					String name = document.getElementsByTagName("name").item(i).getFirstChild().getNodeValue();
+					String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+					String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
+					String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
+					String bg = document.getElementsByTagName("bg").item(i).getFirstChild().getNodeValue();
+					item.put("deviceName", name);
+					item.put("deviceID", id);
+					item.put("isOnline", state);
+					item.put("dealerName", dealer);
+					item.put("deviceBg", bg);
+					return item;
+				}
+				
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getItem()异常！");
+		}
+		return null;
+	}
 
 	/**
 	 * 保存document到XML文件

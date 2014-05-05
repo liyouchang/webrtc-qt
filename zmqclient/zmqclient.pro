@@ -89,4 +89,5 @@ arm {
 target_config.files  = $$OTHER_FILES
 target_config.path   = $$DESTDIR
 INSTALLS             += target_config
+
 }

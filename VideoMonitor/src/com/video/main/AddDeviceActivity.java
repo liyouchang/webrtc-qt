@@ -204,7 +204,14 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 							String dealerName = (String)msg.obj;
 							xmlData.addItem(getDeviceItem(mDeviceName, mDeviceId, dealerName));
 							Toast.makeText(mContext, "添加终端成功！", Toast.LENGTH_SHORT).show();
+							
+							Bundle bundle = new Bundle();
+							bundle.putString("deviceId", mDeviceId);
+							Intent intent = new Intent();
+							intent.putExtras(bundle);
+							setResult(3, intent);
 							AddDeviceActivity.this.finish();
+							overridePendingTransition(R.anim.fragment_nochange, R.anim.up_out);
 						} else {
 							Toast.makeText(mContext, "添加终端失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
