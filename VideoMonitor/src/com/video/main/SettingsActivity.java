@@ -16,8 +16,10 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 	private Context mContext;
 	private PreferData preferData = null;
 	private ImageButton playMusic;
+	private ImageButton rememberPwd;
 	
 	private boolean isPlayAlarmMusic = true;
+	private boolean isRememberPwd = true;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +37,14 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 	
 		playMusic = (ImageButton) this.findViewById(R.id.ib_play_music_switch);
 		playMusic.setOnClickListener(this);
+		rememberPwd = (ImageButton) this.findViewById(R.id.ib_remember_pwd_switch);
+		rememberPwd.setOnClickListener(this);
 	}
 	
 	private void initData() {
 		mContext = SettingsActivity.this;
 		preferData = new PreferData(mContext);
+		//语音报警
 		if (preferData.isExist("PlayAlarmMusic")) {
 			isPlayAlarmMusic = preferData.readBoolean("PlayAlarmMusic");
 		}
@@ -47,6 +52,15 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 			playMusic.setBackgroundResource(R.drawable.icon_set_on);
 		} else {
 			playMusic.setBackgroundResource(R.drawable.icon_set_off);
+		}
+		//记住密码
+		if (preferData.isExist("RememberPwd")) {
+			isRememberPwd = preferData.readBoolean("RememberPwd");
+		}
+		if (isRememberPwd) {
+			rememberPwd.setBackgroundResource(R.drawable.icon_set_on);
+		} else {
+			rememberPwd.setBackgroundResource(R.drawable.icon_set_off);
 		}
 	}
 
@@ -58,6 +72,7 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 				finish();
 				overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 				break;
+			//语音报警
 			case R.id.ib_play_music_switch:
 				if (isPlayAlarmMusic) {
 					isPlayAlarmMusic = false;
@@ -67,6 +82,18 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 					isPlayAlarmMusic = true;
 					preferData.writeData("PlayAlarmMusic", isPlayAlarmMusic);
 					playMusic.setBackgroundResource(R.drawable.icon_set_on);
+				}
+				break;
+			//记住密码
+			case R.id.ib_remember_pwd_switch:
+				if (isRememberPwd) {
+					isRememberPwd = false;
+					preferData.writeData("RememberPwd", isRememberPwd);
+					rememberPwd.setBackgroundResource(R.drawable.icon_set_off);
+				} else {
+					isRememberPwd = true;
+					preferData.writeData("RememberPwd", isRememberPwd);
+					rememberPwd.setBackgroundResource(R.drawable.icon_set_on);
 				}
 				break;
 		}

@@ -96,6 +96,26 @@ public class ZmqHandler extends Handler {
 		return null;
 	}
 	
+	/**
+	 * 请求指定终端分享用户列表
+	 */
+	private ArrayList<String> getReqMACShareUserList(JSONArray jsonArray) {
+		ArrayList<String> list = new ArrayList<String>();
+		int len = jsonArray.length();
+		  
+	    try {
+	    	for (int i=0; i<len; i++) { 
+		    	JSONObject obj = (JSONObject) jsonArray.get(i); 
+				list.add(obj.getString("UserName"));
+	    	}
+	    	return list;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getReqMACShareUserList()异常！");
+		}
+		return null;
+	}
+	
 	@Override
 	public void handleMessage(Message msg) {
 		String recvData = (String)msg.obj;
@@ -262,6 +282,16 @@ public class ZmqHandler extends Handler {
 				else if (type.equals("Client_DelShareTerm")) {
 					int resultCode = obj.getInt("Result");
 					mHandler.obtainMessage(R.id.delete_device_share_id, resultCode, 0).sendToTarget();
+				}
+				//请求指定终端分享用户列表
+				else if (type.equals("Client_ReqMAClist")) {
+					int resultCode = obj.getInt("Result");
+					if (resultCode == 0) {
+						JSONArray jsonArray = obj.getJSONArray("Terminal");
+						mHandler.obtainMessage(R.id.requst_device_share_user_id, resultCode, 0, getReqMACShareUserList(jsonArray)).sendToTarget();
+					} else {
+						mHandler.obtainMessage(R.id.requst_device_share_user_id, resultCode, 0).sendToTarget();
+					}
 				}
 			}
 		} catch (JSONException e) {

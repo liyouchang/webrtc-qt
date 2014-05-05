@@ -76,6 +76,9 @@ public class Utils {
 			case 10:
 				result = "设备未注册！";
 				break;
+			case 11:
+				result = "未知类型！";
+				break;
 			default: 
 				result = "不明原因！";
 				break;

@@ -21,8 +21,8 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
 public class RegisterActivity extends Activity implements OnClickListener {
@@ -257,7 +257,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	private void clickRegisterEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkRegisterData()) {
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
+				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateRegisterJson(userName, userPwd, userEmail);
 				sendHandlerMsg(IS_REGISTERING);
 				sendHandlerMsg(REGISTER_TIMEOUT, Value.requestTimeout);

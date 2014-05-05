@@ -71,7 +71,7 @@
                     android:layout_below="@id/about_software"
                     android:layout_centerHorizontal="true"
                     android:contentDescription="@null"
-                    android:src="@drawable/login_logo" />
+                    android:src="@drawable/video_logo" />
 
                 <TextView
                     android:id="@+id/app_name"

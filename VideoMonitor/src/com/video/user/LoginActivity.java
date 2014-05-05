@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -25,8 +26,8 @@ import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.main.MainActivity;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.socket.ZmqThread;
 import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
 
@@ -257,7 +258,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				} else {
 					preferData.writeData("UserPwd", userPwd);
 				}
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
+				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateLoginJson(userName, userPwd);
 				sendHandlerMsg(IS_LOGINNING);
 				sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
@@ -288,6 +289,20 @@ public class LoginActivity extends Activity implements OnClickListener {
 				et_pwd.setText("");
 				break;
 		}
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+		if (mDialog != null)
+			mDialog.dismiss();
+		if (handler.hasMessages(LOGIN_TIMEOUT)) {
+			handler.removeMessages(LOGIN_TIMEOUT);
+		}
+		if (handler.hasMessages(R.id.login_id)) {
+			handler.removeMessages(R.id.login_id);
+		}
+		return super.onKeyDown(keyCode, event);
 	}
 	
 	/**

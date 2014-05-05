@@ -24,7 +24,7 @@
         
         <ImageButton
             android:id="@+id/btn_device_share"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
             android:layout_height="@dimen/title_height_size"
             android:layout_toLeftOf="@+id/btn_add_device"
             android:layout_centerVertical="true"
@@ -35,7 +35,7 @@
 
         <ImageButton
             android:id="@+id/btn_add_device"
-            android:layout_width="50dp"
+            android:layout_width="40dp"
             android:layout_height="@dimen/title_height_size"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"

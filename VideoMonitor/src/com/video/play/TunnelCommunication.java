@@ -68,6 +68,14 @@ public class TunnelCommunication {
 		System.out.println("MyDebug: 【"+peerId+"】通道被打开");
 		sendHandlerMsg(PlayerActivity.playHandler, 0, peerId);
 	}
+	
+	/**
+	 * 通道被关闭(回调)
+	 */
+	public void TunnelClosed(String peerId) {
+		System.out.println("MyDebug: 【"+peerId+"】通道被关闭");
+		sendHandlerMsg(PlayerActivity.playHandler, 1, peerId);
+	}
 
 	/**
 	 * 打开通道

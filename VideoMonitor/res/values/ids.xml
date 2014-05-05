@@ -71,5 +71,8 @@
     
     <!-- 删除终端分享 -->
     <item name="delete_device_share_id" type="id"/>
+    
+   <!-- 请求终端分享用户 -->
+   <item name="requst_device_share_user_id" type="id"/>
 
 </resources>

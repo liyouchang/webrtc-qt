@@ -20,7 +20,7 @@
     <!-- 标题背景#002e3e -->
     <color name="title_bg_black">#414445</color>
     <!-- 背景颜色 -->
-    <color name="page_bg_grey">#D3D3D3</color>
+    <color name="page_bg_grey">#E3E3E3</color>
     <!-- 扫描二维码颜色 -->
     <color name="possible_result_points">#c0ffff00</color>
     <color name="result_view">#b0000000</color>

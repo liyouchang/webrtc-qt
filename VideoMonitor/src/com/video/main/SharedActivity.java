@@ -74,6 +74,8 @@ public class SharedActivity extends Activity implements OnClickListener {
 		initData();
 	}
 	
+	
+	
 	private void initView () {
 		ImageButton back = (ImageButton) this.findViewById(R.id.btn_shared_back);
 		back.setOnClickListener(this);
@@ -309,7 +311,7 @@ public class SharedActivity extends Activity implements OnClickListener {
 			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
 	}
-
+	
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub

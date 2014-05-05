@@ -11,6 +11,8 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 
@@ -88,6 +90,20 @@ public class VideoView extends View {
 	}
 	
 	/**
+	 * 暂停播放
+	 */
+	public void pauseVideo() {
+		runFlag = false;
+		TunnelCommunication.videoDataCache.clearBuffer();
+	}
+	
+	private static void sendHandlerMsg(Handler handler, int what) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessage(msg);
+	}
+	
+	/**
 	 * 播放视频线程
 	 */
 	private class PlayVideoThread extends Thread {
@@ -115,12 +131,15 @@ public class VideoView extends View {
 					} else {
 						sleep(10);
 					}
+					if (!PlayerActivity.isTunnelOpened) {
+						sendHandlerMsg(PlayerActivity.playHandler, 2);
+						sleep(1000);
+					}
 				}catch(Exception ex){
 					ex.printStackTrace();
 					uninitView();
 					initView();
 				}
-				
 			}
 			uninitView();
 		}
@@ -197,13 +216,26 @@ public class VideoView extends View {
 		mCanvas.restore();  
 		
 		String SDPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-		String filePath = SDPath + File.separator + "KaerVideo" + File.separator + 
-						  "image" + File.separator +Utils.getNowTime("yyyy-MM-dd");
-		File imageFilePath = new File(filePath);
-		if(!imageFilePath.exists()){
-			imageFilePath.mkdir();
+		
+		String filePath1 = SDPath + File.separator + "KaerVideo";
+		File imageFilePath1 = new File(filePath1);
+		if(!imageFilePath1.exists()){
+			imageFilePath1.mkdir();
 		} 
-		String imageFile = filePath + File.separator +Utils.getNowTime("yyyyMMddhhmmss") + ".jpg";
+		
+		String filePath2 = filePath1 + File.separator + "image";
+		File imageFilePath2 = new File(filePath2);
+		if(!imageFilePath2.exists()){
+			imageFilePath2.mkdir();
+		} 
+		
+		String filePath3 = filePath2 + File.separator +Utils.getNowTime("yyyy-MM-dd");
+		File imageFilePath3 = new File(filePath3);
+		if(!imageFilePath3.exists()){
+			imageFilePath3.mkdir();
+		} 
+		
+		String imageFile = filePath3 + File.separator +Utils.getNowTime("yyyyMMddhhmmss") + ".jpg";
 		File file = new File(imageFile);
         FileOutputStream fos = null;  
         try {  

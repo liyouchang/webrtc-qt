@@ -22,8 +22,8 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
 public class ModifyPwdActivity extends Activity implements OnClickListener {
@@ -227,7 +227,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	private void clickModifyPwdEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkModifyPwdData()) {
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
+				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateModifyPwdJson(userName, userOldPwd, userNewPwd);
 				sendHandlerMsg(IS_MODIFYING);
 				sendHandlerMsg(MODIFY_TIMEOUT, Value.requestTimeout);
