@@ -137,6 +137,22 @@ int AVService::CloseFile()
     return AV_CloseFile_Ex(m_fileHandle);
 }
 
+int AVService::StartTalk()
+{
+    AV_InitAudioTalk();
+    return AV_TalkOpen();
+}
+
+int AVService::StopTalk()
+{
+    return AV_TalkClose();
+}
+
+int AVService::GetAudioData(char *pBuf)
+{
+    return AV_GetAudioData(pBuf);
+}
+
 
 bool AVService::isInitailed = 0;
 
