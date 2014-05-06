@@ -320,7 +320,7 @@ void KeTunnelCamera::SetPtz(std::string ptz_key, int param)
     LOG(INFO)<<"KeTunnelCamera::SetPtz---key:" <<ptz_key<<" param:"<<param ;
 }
 
-void KeTunnelCamera::OnRecvGetWifiInfo(std::string peer_id)
+void KeTunnelCamera::RecvGetWifiInfo(std::string peer_id)
 {
     LOG(INFO)<<"KeTunnelCamera::OnRecvGetWifiInfo---from:" <<peer_id;
 }
@@ -377,8 +377,22 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
         OnRecvRecordQuery(peer_id,condition);
     }else if(command.compare("echo") == 0){
         this->terminal_->SendByRouter(peer_id,msg);
-    }else{
-        LOG(WARNING)<<"receive unexpected command from "<<peer_id;
+    }else if(command.compare("wifi_info") == 0){
+        this->RecvGetWifiInfo(peer_id);
+    }else if(command.compare("set_wifi") == 0){
+        Json::Value jwifiParam;
+        if(!GetValueFromJsonObject(jmessage, "param", &jwifiParam)){
+            LOG(WARNING)<<"get param value error from"<<
+                          peer_id<< " msg"<<msg;
+            return;
+        }
+        std::string paramStr  = JsonValueToString(jwifiParam);
+        this->SetWifiInfo(peer_id,paramStr);
+    }
+    else{
+        LOG(WARNING)<<"receive unexpected command from "<<
+                      peer_id<< " msg"<<msg;
+
     }
 
 }

@@ -56,8 +56,11 @@ private:
     // KeTunnelCamera interface
 protected:
     virtual int GetVideoClarity();
-    void SetPtz(std::string ptz_key, int param);
-    void OnRecvTalkData(const std::string &peer_id, const char *data, int len);
+    virtual void SetPtz(std::string ptz_key, int param);
+    virtual void OnRecvTalkData(const std::string &peer_id,
+                                const char *data, int len);
+    virtual void RecvGetWifiInfo(std::string peer_id);
+    virtual void SetWifiInfo(std::string peerId, std::string param);
 };
 
 #endif // HISIMEDIADEVICE_H

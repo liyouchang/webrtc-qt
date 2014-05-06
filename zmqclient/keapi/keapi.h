@@ -67,6 +67,15 @@ int Raycomm_ForceIframe(int handle );
 //int IPC_TalkPlay(const char* keyword,char* buf,int len,unsigned int timestamp,unsigned int audiotype);
 int Raycomm_TalkPlay (int handle, char* buf, int len, unsigned int timestamp, unsigned int audiotype);
 int Raycomm_SetPtz(const char* keyword,int preset,int cam_id);
+//通道号   chn = 1.2.3.4
+//移动侦测 rea = 1
+//遮挡报警 rea = 4
+//开关量   rea = 5
+//门磁     rea = 2，io = 20
+//人体红外 rea = 2，io = 21
+//烟感报警 rea = 2，io = 22
+typedef int (*NOTIFY_CALLBACK)(int chn,int rea,int io);
+int Raycomm_Register_Callback(NOTIFY_CALLBACK notify_callback);
 
 #ifdef __cplusplus
 }
