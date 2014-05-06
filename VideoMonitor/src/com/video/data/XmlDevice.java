@@ -417,6 +417,39 @@ public class XmlDevice {
 		}
 		return null;
 	}
+	
+	/**
+	 * 获取XML文件在线的节点
+	 * @return 成功返回一个ArrayList列表的一个节点  失败返回null
+	 */
+	public ArrayList<HashMap<String, Object>> getOnlineList() {
+		try {
+			ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
+			Document document = loadInit(filePath);
+			NodeList nodeList = document.getElementsByTagName("item");
+			int len = nodeList.getLength();
+			for (int i=0; i<len; i++) {
+				String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
+				if (state.equals("true")) {
+					HashMap<String, Object> item = new HashMap<String, Object>();
+					String name = document.getElementsByTagName("name").item(i).getFirstChild().getNodeValue();
+					String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
+					item.put("deviceName", name);
+					item.put("dealerName", dealer);
+					list.add(item);
+				}
+			}
+			if (list.size() != 0) {
+				return list;
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getItem()异常！");
+		}
+		return null;
+	}
 
 	/**
 	 * 保存document到XML文件

@@ -8,21 +8,28 @@ public class AudioThread extends Thread {
 
 	private AudioTrack audioTrack = null;
 	private boolean runFlag = false;
+	
 	private byte[] readBuf = null;
 	private byte[] writeBuf = null;
+	private int audioTrackBufferSize = 0; 
+	private int audioTrackPlaySize = 0;
 
-	int audioTrackBufferSize = 0; 
-	int audioTrackPlaySize = 0;
-
-	private void initAudioPlayer() {
+	/**
+	 * 初始化
+	 */
+	private void initAudioThread() {
 		try {
-			audioTrackBufferSize = AudioTrack.getMinBufferSize(8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+			audioTrackBufferSize = AudioTrack.getMinBufferSize(8000,
+					AudioFormat.CHANNEL_CONFIGURATION_MONO,
 					AudioFormat.ENCODING_PCM_16BIT);
-
+			
 			audioTrackPlaySize = audioTrackBufferSize * 2;
 			audioTrackBufferSize = audioTrackBufferSize * 100;
-			audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-					AudioFormat.ENCODING_PCM_16BIT, audioTrackPlaySize, AudioTrack.MODE_STREAM);
+			
+			audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
+					AudioFormat.CHANNEL_CONFIGURATION_MONO,
+					AudioFormat.ENCODING_PCM_16BIT, audioTrackPlaySize,
+					AudioTrack.MODE_STREAM);
 
 			readBuf = new byte[audioTrackBufferSize];
 			writeBuf = new byte[audioTrackBufferSize * 2];
@@ -32,8 +39,10 @@ public class AudioThread extends Thread {
 		}
 	}
 
-	private void uninitAudioPlayer() {
-		runFlag = false;
+	/**
+	 * 反初始化
+	 */
+	private void uninitAudioThread() {
 		TunnelCommunication.audioDataCache.clearBuffer();
 		if (audioTrack != null) {
 			try {
@@ -49,14 +58,15 @@ public class AudioThread extends Thread {
 	}
 	
 	/**
-	 * 停止播放
+	 * 停止声音
 	 */
-	public void stopAudioPlay() {
-		uninitAudioPlayer();
+	public void stopAudioThread() {
+		runFlag = false;
+		uninitAudioThread();
 	}
 	
 	public void run() {
-		initAudioPlayer();
+		initAudioThread();
 		runFlag = true;
 		
 		while (runFlag) {
@@ -74,17 +84,17 @@ public class AudioThread extends Thread {
 							playPosition = readBufLen;
 						}
 					}
-					sleep(5);
-				} else {
 					sleep(10);
+				} else {
+					sleep(20);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				uninitAudioPlayer();
-				initAudioPlayer();
+				uninitAudioThread();
+				initAudioThread();
 			}
 		}
-		uninitAudioPlayer();
+		stopAudioThread();
 	}
 	
 	/**

@@ -20,7 +20,6 @@ import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
-import android.support.v4.view.ViewPager.LayoutParams;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -51,6 +50,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	
 	private static VideoView videoView = null; //视频对象
 	private static AudioThread audioThread = null; //音频对象
+	private static TalkThread talkThread = null; //对讲对象
 	private WakeLock wakeLock = null; //锁屏对象
 
 	private TextView tv_title = null;
@@ -64,10 +64,10 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	
 	public static boolean isTunnelOpened = false;
 	private boolean isVoiceEnable = true;
+	private boolean isTalkEnable = false;
 	private boolean isPlayMusic = false;
 	private boolean isFullScreen = false;
 	private boolean isPopupWindowShow = false;
-	private boolean isClarityPopupWindowShow = false;
 	private final int SHOW_TIME_MS = 6000;
 	private final int HIDE_POPUPWINDOW = 1;
 	
@@ -77,17 +77,14 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private PopupWindow titlePopupWindow = null;//标题弹出框
 	private View bottomView = null;//底部视图
 	private PopupWindow bottomPopupWindow = null;//底部弹出框
-	private View clarityView = null;//底部视图
-	private PopupWindow clarityPopupWindow = null;//底部弹出框
+
 	
 	private Button player_capture = null;
 	private Button player_record = null;
 	private Button player_talkback = null;
 	private Button player_sound = null;
 	private Button video_clarity = null;
-	private Button clarity_high = null;
-	private Button clarity_normal = null;
-	private Button clarity_low = null;
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -131,16 +128,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		player_sound.setOnClickListener(this);
 		video_clarity = (Button) bottomView.findViewById(R.id.btn_player_clarity);
 		video_clarity.setOnClickListener(this);
-		
-		//视频质量弹出框
-		clarityView = getLayoutInflater().inflate(R.layout.player_clarity_view, null);
-		clarityPopupWindow = new PopupWindow(clarityView);
-		clarity_high = (Button) clarityView.findViewById(R.id.btn_video_clarity_high);
-		clarity_high.setOnClickListener(this);
-		clarity_normal = (Button) clarityView.findViewById(R.id.btn_video_clarity_normal);
-		clarity_normal.setOnClickListener(this);
-		clarity_low = (Button) clarityView.findViewById(R.id.btn_video_clarity_low);
-		clarity_low.setOnClickListener(this);
 		
 		//空闲的队列
 		Looper.myQueue().addIdleHandler(new IdleHandler() {
@@ -199,14 +186,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				setRequestedOrientation(orientation); 
 				return super.onDoubleTap(e);
 			}
-
-			//长按屏幕
-			@Override
-			public void onLongPress(MotionEvent e) {
-				// TODO Auto-generated method stub
-
-				super.onLongPress(e);
-			}
 		});
 	}
 	
@@ -264,16 +243,17 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						mDialog.dismiss();
 					}
 					if (!isTunnelOpened) {
-						toastNotify(mContext, "请求视频超时，请重试！");
+						toastNotify(mContext, "请求视频超时，请重试！", Toast.LENGTH_SHORT);
+					} else {
+						toastNotify(mContext, "设备掉线啦！", Toast.LENGTH_SHORT);
 					}
 					isTunnelOpened = false;
-					System.out.println("MyDebug: ------> 1");
 					break;
 				case 2:
 					videoView.pauseVideo();
 					TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
 					TunnelCommunication.getInstance().openTunnel(dealerName);
-					System.out.println("MyDebug: ------> 2");
+					toastNotify(mContext, "正在重新请求视频...", Toast.LENGTH_LONG);
 					break;
 			}
 		}
@@ -321,10 +301,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		if (bottomPopupWindow.isShowing()) {
 			bottomPopupWindow.update(0, 0, 0, 0);
 		}
-		if (clarityPopupWindow != null) {
-			clarityPopupWindow.dismiss();
-			isClarityPopupWindowShow = false;
-		}
 	}
 	
 	/**
@@ -352,7 +328,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	/**
 	 * 自定义Toast显示
 	 */
-	private static void toastNotify(Context context, String notify_text) {	
+	private static void toastNotify(Context context, String notify_text, int duration) {	
 		LayoutInflater Inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View tx_view = Inflater.inflate(R.layout.toast_layout, null);
 		
@@ -360,7 +336,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		textView.setText(notify_text);
 		
 		Toast toast = new Toast(context);
-		toast.setDuration(Toast.LENGTH_SHORT);
+		toast.setDuration(duration);
 		toast.setView(tx_view);
 		toast.show();
 	}
@@ -408,7 +384,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	/**
 	 * 播放抓拍声音
 	 */
-	private void playCaptureMusic(int resid) {
+	private void playMyMusic(int resid) {
 		if (!isPlayMusic) {
 			MediaPlayer mediaPlayer = null;
 			if (mediaPlayer == null) {
@@ -444,19 +420,35 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			//截屏
 			case R.id.btn_player_capture:
 				if (videoView.captureVideo()) {
-					playCaptureMusic(R.raw.capture);
-					toastNotify(mContext, "抓拍成功！");
+					playMyMusic(R.raw.capture);
+					toastNotify(mContext, "抓拍成功！", Toast.LENGTH_SHORT);
 				} else {
-					toastNotify(mContext, "抓拍失败！");
+					toastNotify(mContext, "抓拍失败！", Toast.LENGTH_SHORT);
 				}
 				break;
 			//录像
 			case R.id.btn_player_record:
-				playCaptureMusic(R.raw.record);
+				playMyMusic(R.raw.record);
 				break;
 			//对讲
 			case R.id.btn_player_talkback:
-				System.out.println("MyDebug: ---> talkback");
+				playMyMusic(R.raw.di);
+				if (isTalkEnable) {
+					//停止对讲
+					isTalkEnable =false;
+					player_talkback.setBackgroundResource(R.drawable.player_talkstop_xml);
+					if (talkThread != null) {
+						talkThread.stopTalkThread();
+					}
+				} else {
+					//开始对讲
+					isTalkEnable = true;
+					player_talkback.setBackgroundResource(R.drawable.player_talkback_xml);
+					talkThread = new TalkThread();
+					if (talkThread != null) {
+						talkThread.start();
+					}
+				}
 				break;
 			//声音
 			case R.id.btn_player_sound:
@@ -468,43 +460,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					isVoiceEnable = true;
 					player_sound.setBackgroundResource(R.drawable.player_sound_enable_xml);
 					audioThread.openAudioTrackVolume();
-				}
-				break;
-			//视频清晰度选择
-			case R.id.btn_player_clarity:
-				if (isClarityPopupWindowShow) {
-					isClarityPopupWindowShow = false;
-					clarityPopupWindow.update(0, 0, 0, 0);
-				} else {
-					isClarityPopupWindowShow = true;
-					if (clarityPopupWindow != null && videoView != null) {
-						clarityPopupWindow.showAtLocation(videoView, Gravity.BOTTOM|Gravity.RIGHT, 0, 0);
-						clarityPopupWindow.update(10, (bottomHeight+10), LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-					}
-				}
-				break;
-			//高清
-			case R.id.btn_video_clarity_high:
-				System.out.println("MyDebug: ---> btn_video_clarity_high");
-				if (isClarityPopupWindowShow) {
-					isClarityPopupWindowShow = false;
-					clarityPopupWindow.update(0, 0, 0, 0);
-				}
-				break;
-			//标准
-			case R.id.btn_video_clarity_normal:
-				System.out.println("MyDebug: ---> btn_video_clarity_normal");
-				if (isClarityPopupWindowShow) {
-					isClarityPopupWindowShow = false;
-					clarityPopupWindow.update(0, 0, 0, 0);
-				}
-				break;
-			//流畅
-			case R.id.btn_video_clarity_low:
-				System.out.println("MyDebug: ---> btn_video_clarity_low");
-				if (isClarityPopupWindowShow) {
-					isClarityPopupWindowShow = false;
-					clarityPopupWindow.update(0, 0, 0, 0);
 				}
 				break;
 		}
@@ -634,18 +589,18 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private void closePlayer() {
 		try {
 			videoView.stopVideo();
-			audioThread.stopAudioPlay();
+			audioThread.stopAudioThread();
+			talkThread.stopTalkThread();
+			
 			TunnelCommunication.getInstance().closeTunnel(dealerName);
 			TunnelCommunication.getInstance().tunnelTerminate();
 			Value.TerminalDealerName = null;
+			
 			if (titlePopupWindow != null) {
 				titlePopupWindow.dismiss();
 			}
 			if (bottomPopupWindow != null) {
 				bottomPopupWindow.dismiss();
-			}
-			if (clarityPopupWindow != null) {
-				clarityPopupWindow.dismiss();
 			}
 			wakeLock.release(); //解除屏幕保持唤醒
 			wakeLock = null;
@@ -653,4 +608,70 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			e.printStackTrace();
 		}
 	}
+	
+//	{
+//		private boolean isClarityPopupWindowShow = false;
+//		private Button clarity_high = null;
+//		private Button clarity_normal = null;
+//		private Button clarity_low = null;
+//		private View clarityView = null;//底部视图
+//		private PopupWindow clarityPopupWindow = null;//底部弹出框
+		
+		//视频质量弹出框
+//		clarityView = getLayoutInflater().inflate(R.layout.player_clarity_view, null);
+//		clarityPopupWindow = new PopupWindow(clarityView);
+//		clarity_high = (Button) clarityView.findViewById(R.id.btn_video_clarity_high);
+//		clarity_high.setOnClickListener(this);
+//		clarity_normal = (Button) clarityView.findViewById(R.id.btn_video_clarity_normal);
+//		clarity_normal.setOnClickListener(this);
+//		clarity_low = (Button) clarityView.findViewById(R.id.btn_video_clarity_low);
+//		clarity_low.setOnClickListener(this);
+		
+//		if (clarityPopupWindow != null) {
+//			clarityPopupWindow.dismiss();
+//			isClarityPopupWindowShow = false;
+//		}
+		
+//		//视频清晰度选择
+//	case R.id.btn_player_clarity:
+//		if (isClarityPopupWindowShow) {
+//			isClarityPopupWindowShow = false;
+//			clarityPopupWindow.update(0, 0, 0, 0);
+//		} else {
+//			isClarityPopupWindowShow = true;
+//			if (clarityPopupWindow != null && videoView != null) {
+//				clarityPopupWindow.showAtLocation(videoView, Gravity.BOTTOM|Gravity.RIGHT, 0, 0);
+//				clarityPopupWindow.update(10, (bottomHeight+10), LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+//			}
+//		}
+//		break;
+//	//高清
+//	case R.id.btn_video_clarity_high:
+//		System.out.println("MyDebug: ---> btn_video_clarity_high");
+//		if (isClarityPopupWindowShow) {
+//			isClarityPopupWindowShow = false;
+//			clarityPopupWindow.update(0, 0, 0, 0);
+//		}
+//		break;
+//	//标准
+//	case R.id.btn_video_clarity_normal:
+//		System.out.println("MyDebug: ---> btn_video_clarity_normal");
+//		if (isClarityPopupWindowShow) {
+//			isClarityPopupWindowShow = false;
+//			clarityPopupWindow.update(0, 0, 0, 0);
+//		}
+//		break;
+//	//流畅
+//	case R.id.btn_video_clarity_low:
+//		System.out.println("MyDebug: ---> btn_video_clarity_low");
+//		if (isClarityPopupWindowShow) {
+//			isClarityPopupWindowShow = false;
+//			clarityPopupWindow.update(0, 0, 0, 0);
+//		}
+//		break;
+		
+//		if (clarityPopupWindow != null) {
+//			clarityPopupWindow.dismiss();
+//		}
+//	}
 }

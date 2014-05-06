@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.video"
-    android:versionCode="4"
-    android:versionName="1.0.5" >
+    android:versionCode="6"
+    android:versionName="1.0.6" >
 
     <uses-sdk android:minSdkVersion="14" />
     
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>  
+	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" />
@@ -95,6 +97,12 @@
         <!-- 功能设置 -->
         <activity
             android:name=".main.SettingsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 终端WiFi配置 -->
+        <activity
+            android:name=".main.WiFiActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>

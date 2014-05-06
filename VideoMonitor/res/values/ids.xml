@@ -74,5 +74,10 @@
     
    <!-- 请求终端分享用户 -->
    <item name="requst_device_share_user_id" type="id"/>
+   
+   <!-- 请求终端周围WiFi列表 -->
+   <item name="requst_wifi_list_id" type="id"/>
 
+   <!-- 配置终端WiFi -->
+   <item name="set_term_wifi_id" type="id"/>
 </resources>

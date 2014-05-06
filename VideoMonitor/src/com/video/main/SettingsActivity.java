@@ -17,9 +17,11 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 	private PreferData preferData = null;
 	private ImageButton playMusic;
 	private ImageButton rememberPwd;
+	private ImageButton protectTraffic;
 	
 	private boolean isPlayAlarmMusic = true;
 	private boolean isRememberPwd = true;
+	private boolean isProtectTraffic = true;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,8 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 		playMusic.setOnClickListener(this);
 		rememberPwd = (ImageButton) this.findViewById(R.id.ib_remember_pwd_switch);
 		rememberPwd.setOnClickListener(this);
+		protectTraffic = (ImageButton) this.findViewById(R.id.ib_protect_traffic_switch);
+		protectTraffic.setOnClickListener(this);
 	}
 	
 	private void initData() {
@@ -61,6 +65,15 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 			rememberPwd.setBackgroundResource(R.drawable.icon_set_on);
 		} else {
 			rememberPwd.setBackgroundResource(R.drawable.icon_set_off);
+		}
+		//流量保护
+		if (preferData.isExist("ProtectTraffic")) {
+			isProtectTraffic = preferData.readBoolean("ProtectTraffic");
+		}
+		if (isProtectTraffic) {
+			protectTraffic.setBackgroundResource(R.drawable.icon_set_on);
+		} else {
+			protectTraffic.setBackgroundResource(R.drawable.icon_set_off);
 		}
 	}
 
@@ -94,6 +107,18 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 					isRememberPwd = true;
 					preferData.writeData("RememberPwd", isRememberPwd);
 					rememberPwd.setBackgroundResource(R.drawable.icon_set_on);
+				}
+				break;
+			//流量保护
+			case R.id.ib_protect_traffic_switch:
+				if (isProtectTraffic) {
+					isProtectTraffic = false;
+					preferData.writeData("ProtectTraffic", isProtectTraffic);
+					protectTraffic.setBackgroundResource(R.drawable.icon_set_off);
+				} else {
+					isProtectTraffic = true;
+					preferData.writeData("ProtectTraffic", isProtectTraffic);
+					protectTraffic.setBackgroundResource(R.drawable.icon_set_on);
 				}
 				break;
 		}

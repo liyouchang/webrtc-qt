@@ -4,9 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,6 +14,7 @@ import android.widget.Gallery;
 import android.widget.ImageButton;
 
 import com.video.R;
+import com.video.utils.MyAlertDialog;
 import com.video.utils.Utils;
 
 public class ViewLocalImageActivity extends Activity implements OnClickListener {
@@ -142,27 +141,22 @@ public class ViewLocalImageActivity extends Activity implements OnClickListener 
 	 * 删除照片的提示
 	 */
 	private void showDeleteImageDialog() {
-		AlertDialog aboutDialog = new AlertDialog.Builder(
-				ViewLocalImageActivity.this)
-				.setTitle("温馨提示")
-				.setMessage("确认删除该张图片？")
-				.setCancelable(false)
-				.setPositiveButton("删除",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								deleteImage();
-								dialog.dismiss();
-							}
-						})
-				.setNegativeButton("取消",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int which) {
-								dialog.dismiss();
-							}
-						}).create();
-		aboutDialog.show();
+		final MyAlertDialog myDialog=new MyAlertDialog(mContext);
+		myDialog.setTitle("温馨提示");
+		myDialog.setMessage("确认删除该张图片？");
+		myDialog.setPositiveButton("确认", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+				deleteImage();
+			}
+		});
+		myDialog.setNegativeButton("取消", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+			}
+		});
 	}
 
 	@Override

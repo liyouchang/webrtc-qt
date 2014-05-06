@@ -17,13 +17,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.video.R;
+import com.video.data.PreferData;
 import com.video.play.PlayerActivity;
 
 public class DeviceItemAdapter extends BaseAdapter {
@@ -76,7 +76,6 @@ public class DeviceItemAdapter extends BaseAdapter {
 			holder.device_net_state = (ImageView) convertView.findViewById(R.id.iv_device_net_state);
 			holder.device_name = (TextView) convertView.findViewById(R.id.tv_device_name);
 			holder.device_id = (TextView) convertView.findViewById(R.id.tv_device_mac);
-			holder.terminal_video = (Button) convertView.findViewById(R.id.btn_terminal_video);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
@@ -95,28 +94,59 @@ public class DeviceItemAdapter extends BaseAdapter {
 		}
 		holder.device_name.setText(list.get(position).get("deviceName"));
 		holder.device_id.setText(list.get(position).get("deviceID"));
-		//实时视频
+		
 		holder.device_icon.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-				String name = list.get(position).get("deviceName");
+				final String name = list.get(position).get("deviceName");
 				if (getOnlineState(list.get(position).get("isOnline"))) {
-					Intent intent = new Intent(context, PlayerActivity.class);
-					intent.putExtra("deviceName", name);
-					intent.putExtra("dealerName", list.get(position).get("dealerName"));
-					context.startActivity(intent);
+					//读取流量保护开关设置
+					boolean isProtectTraffic = true;
+					PreferData preferData = new PreferData(context);
+					if (preferData.isExist("ProtectTraffic")) {
+						isProtectTraffic = preferData.readBoolean("ProtectTraffic");
+					}
+					
+					if (isProtectTraffic) {
+						//实时视频
+						Intent intent = new Intent(context, PlayerActivity.class);
+						intent.putExtra("deviceName", name);
+						intent.putExtra("dealerName", list.get(position).get("dealerName"));
+						context.startActivity(intent);
+					} else {
+						if (Utils.isWiFiNetwork(context)) {
+							//实时视频
+							Intent intent = new Intent(context, PlayerActivity.class);
+							intent.putExtra("deviceName", name);
+							intent.putExtra("dealerName", list.get(position).get("dealerName"));
+							context.startActivity(intent);
+						} else {
+							final MyAlertDialog myDialog=new MyAlertDialog(context);
+							myDialog.setTitle("温馨提示");
+							myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
+							myDialog.setPositiveButton("确认", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog.dismiss();
+									//实时视频
+									Intent intent = new Intent(context, PlayerActivity.class);
+									intent.putExtra("deviceName", name);
+									intent.putExtra("dealerName", list.get(position).get("dealerName"));
+									context.startActivity(intent);
+								}
+							});
+							myDialog.setNegativeButton("取消", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog.dismiss();
+								}
+							});
+						}
+					}
 				} else {
 					Toast.makeText(context, "【"+name+"】终端设备不在线！", Toast.LENGTH_SHORT).show();
 				}
-			}
-		});
-		//终端视频
-		holder.terminal_video.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				Toast.makeText(context, "终端视频："+position, Toast.LENGTH_SHORT).show();
 			}
 		});
 		return convertView;
@@ -128,7 +158,6 @@ public class DeviceItemAdapter extends BaseAdapter {
 		ImageView device_icon;
 		TextView device_name;
 		TextView device_id;
-		Button terminal_video;
 	}
 	
 	/**

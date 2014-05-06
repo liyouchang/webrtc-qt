@@ -115,7 +115,7 @@ public class Utils {
 	 * @return true:可用  false:不可用
 	 */
 	public static boolean isNetworkAvailable(Context context) {   
-		ConnectivityManager connectivity = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);   
+		ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);   
 		if (connectivity == null) {    
 			return false;   
 		} else {   
@@ -129,6 +129,26 @@ public class Utils {
 			}   
 		}   
 		return false;   
+	}
+	
+	/**
+	 * 判断网络是否是WiFi网络
+	 * @param context 上下文
+	 * @return true:是  false:不是
+	 */
+	public static boolean isWiFiNetwork(Context context) {
+		ConnectivityManager connectivity = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		if (connectivity == null) {    
+			return false;   
+		} else {   
+			NetworkInfo info = connectivity.getActiveNetworkInfo();   
+			if (info != null) {
+				if (info.getType() == ConnectivityManager.TYPE_WIFI) {
+					return true;
+				}
+			}   
+		}   
+		return false;
 	}
 	
 	/**

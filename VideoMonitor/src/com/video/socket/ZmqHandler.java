@@ -116,6 +116,46 @@ public class ZmqHandler extends Handler {
 		return null;
 	}
 	
+	private int getWiFiLevelIconResource(int level) {
+		if (level <= 25) {
+			return R.drawable.wifi_level1;
+		} else if (level > 25 && level <= 50) {
+			return R.drawable.wifi_level2;
+		} else if (level > 50 && level <= 75) {
+			return R.drawable.wifi_level3;
+		} else if (level > 75) {
+			return R.drawable.wifi_level4;
+		}
+		return R.drawable.wifi_level1;
+	}
+	
+	/**
+	 * 请求终端周围WiFi列表
+	 */
+	private ArrayList<HashMap<String, Object>> getTermWiFiList(JSONArray jsonArray) {
+		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
+		HashMap<String, Object> map = null;
+		int len = jsonArray.length();
+		  
+	    try {
+	    	for (int i=0; i<len; i++) { 
+		    	JSONObject obj = (JSONObject) jsonArray.get(i); 
+		    	map = new HashMap<String, Object>();
+		    	map.put("WiFiSSID", obj.getString("ssid"));
+		    	map.put("WiFiLevel", getWiFiLevelIconResource(obj.getInt("quality")));
+		    	map.put("WiFAuth", obj.getInt("auth"));
+		    	map.put("WiFiMode", obj.getInt("mode"));
+		    	map.put("WiFiEnc", obj.getInt("enc"));
+				list.add(map);
+	    	}
+	    	return list;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getTermWiFiList()异常！");
+		}
+		return null;
+	}
+	
 	@Override
 	public void handleMessage(Message msg) {
 		String recvData = (String)msg.obj;
@@ -291,6 +331,22 @@ public class ZmqHandler extends Handler {
 						mHandler.obtainMessage(R.id.requst_device_share_user_id, resultCode, 0, getReqMACShareUserList(jsonArray)).sendToTarget();
 					} else {
 						mHandler.obtainMessage(R.id.requst_device_share_user_id, resultCode, 0).sendToTarget();
+					}
+				}
+				//接收到终端发回的数据
+				else if (type.equals("tunnel")) {
+					String resultCode = obj.getString("command");
+					if (resultCode.equals("wifi_info")) {
+						if (!obj.isNull("wifis")) {
+							JSONArray jsonArray = obj.getJSONArray("wifis");
+							mHandler.obtainMessage(R.id.requst_wifi_list_id, 0, 0, getTermWiFiList(jsonArray)).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.requst_wifi_list_id, -1, 0, "null").sendToTarget();
+						}
+					}
+					else if (resultCode.equals("set_wifi")) {
+						int result = obj.getInt("result");//0:失败  1:成功
+						mHandler.obtainMessage(R.id.set_term_wifi_id, result, 0).sendToTarget();
 					}
 				}
 			}

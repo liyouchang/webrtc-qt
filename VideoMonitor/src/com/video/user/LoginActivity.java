@@ -27,6 +27,7 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.main.MainActivity;
 import com.video.socket.HandlerApplication;
+import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
 import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
@@ -191,6 +192,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 						handler.removeMessages(LOGIN_TIMEOUT);
 					}
 					Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
+					//超时之后关闭服务，断开连接，再重启服务
+					sendHandlerMsg(R.id.close_zmq_socket_id);
+					Value.resetValues();
+					ZmqCtrl.getInstance().init();
 					break;
 				case R.id.login_id:
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
