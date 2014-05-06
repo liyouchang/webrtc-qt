@@ -6,6 +6,7 @@
 #include "talk/base/buffer.h"
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
+#include "talk/base/stringencode.h"
 
 #include "keapi/keapi.h"
 #include "libjingle_app/KeMessage.h"
@@ -175,6 +176,11 @@ void HisiMediaDevice::OnRecvTalkData(const std::string &peer_id, const char *dat
 {
     KEFrameHead * head = (KEFrameHead *)data;
     int dataPos =  sizeof(KEFrameHead);
+    std::string hexdata = talk_base::hex_encode(data+dataPos,head->frameLen);
+
+    LOG(INFO)<<"HisiMediaDevice::OnRecvTalkData--- from "<<peer_id<<
+                " framelen="<<head->frameLen<<"  data is "<<hexdata;
+
     if(head->frameLen == len-dataPos){
         Raycomm_TalkPlay(0,const_cast<char *>(data+dataPos),head->frameLen,0,0);
     }else{
@@ -240,7 +246,7 @@ void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
 
     int ret = Raycomm_SetWifi(&wifiParam);
 
-    LOG(INFO)<<"Raycomm_SetWifi --- ret:"<<ret;
+    LOG(INFO)<<"Raycomm_SetWifi --- ret:"<<ret<<" param:"<<param;
 
     Json::Value jmessage;
     jmessage["type"] = "tunnel";
