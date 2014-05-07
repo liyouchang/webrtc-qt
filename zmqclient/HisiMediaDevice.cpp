@@ -176,11 +176,6 @@ void HisiMediaDevice::OnRecvTalkData(const std::string &peer_id, const char *dat
 {
     KEFrameHead * head = (KEFrameHead *)data;
     int dataPos =  sizeof(KEFrameHead);
-    std::string hexdata = talk_base::hex_encode(data+dataPos,head->frameLen);
-
-    LOG(INFO)<<"HisiMediaDevice::OnRecvTalkData--- from "<<peer_id<<
-                " framelen="<<head->frameLen<<"  data is "<<hexdata;
-
     if(head->frameLen == len-dataPos){
         Raycomm_TalkPlay(0,const_cast<char *>(data+dataPos),head->frameLen,0,0);
     }else{

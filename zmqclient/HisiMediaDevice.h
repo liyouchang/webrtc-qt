@@ -48,11 +48,8 @@ private:
     int audio_handle_;
     int video1_frame_type_;
     int video2_frame_type_;
-
     int video_clarity_;
     char media_buffer_[MEDIA_BUFFER_LENGTH];
-
-
     // KeTunnelCamera interface
 protected:
     virtual int GetVideoClarity();

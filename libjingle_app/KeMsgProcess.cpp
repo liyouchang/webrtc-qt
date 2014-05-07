@@ -55,7 +55,7 @@ void KeMsgProcess::ExtractMessage(talk_base::Buffer &allBytes)
             //消息头在最后几个字节，记录读取的字节，下次继续读取。
             if(read_bytes < headLen-buf_position_)
             {
-                LOG(INFO)<<"Continue Read head in new package\r\n ";
+                //LOG(INFO)<<"Continue Read head in new package\r\n ";
                 buf_position_ = read_bytes;
                 break;
             }
@@ -95,7 +95,7 @@ void KeMsgProcess::ExtractMessage(talk_base::Buffer &allBytes)
                 break;
             }
             if (read_bytes < to_read_){
-                LOG(INFO)<<"to read more and more!";
+                //LOG(INFO)<<"to read more and more!";
             }
             buf_position_ += read_bytes;
             to_read_ -= read_bytes;

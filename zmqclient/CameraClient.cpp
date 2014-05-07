@@ -3,6 +3,7 @@
 #include "talk/base/logging.h"
 #include "talk/base/thread.h"
 
+const int kHeartInterval = 60000;//ms
 CameraClient::CameraClient(std::string mac):
     mac_(mac)
 {
@@ -18,7 +19,7 @@ void CameraClient::Login()
     std::string msg = writer.write(jmessage);
 
     this->SendToPeer("Backstage",msg);
-    comm_thread_->PostDelayed(60000,this,MSG_LOGIN_TIMEOUT);
+    comm_thread_->PostDelayed(kHeartInterval,this,MSG_LOGIN_TIMEOUT);
 }
 
 void CameraClient::OnMessage(talk_base::Message *msg)
@@ -34,7 +35,8 @@ void CameraClient::OnMessage(talk_base::Message *msg)
     }
 }
 
-void CameraClient::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
+void CameraClient::OnMessageFromPeer(const std::string &peer_id,
+                                     const std::string &message)
 {
     if(peer_id.compare("Backstage") == 0){
         Json::Reader reader;
