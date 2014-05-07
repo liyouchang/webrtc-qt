@@ -1,0 +1,7 @@
+{
+    "dealerId" : "",
+    "routerUrl":"tcp://192.168.0.185:5555",
+    "logParams":"tstamp thread info debug",
+    "logSaveFile":"",
+    "servers":[{"uri":"stun:192.168.0.185:5389"}],
+}

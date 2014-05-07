@@ -4,6 +4,9 @@
 #include <QtWidgets>
 
 #include "talk/base/json.h"
+#include "libjingle_app/jsonconfig.h"
+#include "libjingle_app/p2pconductor.h"
+#include "libjingle_app/defaults.h"
 
 #include "VideoWall.h"
 #include "ke_recorder.h"
@@ -62,7 +65,6 @@ int KePlayerPlugin::Initialize(QString routerUrl)
     if(is_inited){
         return 10002;
     }
-    //int ret = connection_->Connect("tcp://192.168.40.191:5555","");
     int ret = connection_->Connect(routerUrl.toStdString(),"");
     if(ret != 0){
         return ret;
@@ -88,10 +90,22 @@ int KePlayerPlugin::Initialize(QString routerUrl)
     return 0;
 }
 
-int KePlayerPlugin::StartVideo(QString peer_id)
+int KePlayerPlugin::Initialize()
+{
+    JsonConfig::Instance()->FromFile(GetAppFilePath("config.json"));
+    Json::Value routerValue = JsonConfig::Instance()->Get("routerUrl","tcp://222.174.213.185:5555");
+    Json::Value jservers = JsonConfig::Instance()->Get("servers","");
+
+    kaerp2p::P2PConductor::AddIceServers(jservers.asString());
+
+    return this->Initialize(routerValue.asString().c_str());
+
+}
+//video:1 main stream 2 sub stream
+int KePlayerPlugin::StartVideo(QString peer_id, int video)
 {
     std::string str_id = peer_id.toStdString();
-    int ret =  tunnel_->StartPeerMedia(str_id,true);
+    int ret =  tunnel_->StartPeerMedia(str_id,video);
     if(ret != 0){
         return ret;
     }
@@ -110,7 +124,7 @@ int KePlayerPlugin::StopVideo(QString peerId)
     tunnel_->StopVideoCut(peerId);
     video_wall_->StopPeerPlay(peerId);
     std::string strId = peerId.toStdString();
-    return tunnel_->StartPeerMedia(strId,false);
+    return tunnel_->StartPeerMedia(strId,0);
 }
 
 int KePlayerPlugin::StartCut(QString peerId)

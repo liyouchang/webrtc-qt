@@ -4,9 +4,9 @@
 #include "talk/base/thread.h"
 #include "talk/base/logging.h"
 #include "talk/base/json.h"
-#include "jsonconfig.h"
-#include "CameraClient.h"
 
+#include "CameraClient.h"
+#include "libjingle_app/jsonconfig.h"
 #include "libjingle_app/defaults.h"
 #include "libjingle_app/p2pconductor.h"
 
@@ -37,20 +37,7 @@ int main()
     talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),NULL);
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
 
-    std::vector<Json::Value> jServersArray;
-
-    if(JsonArrayToValueVector(jservers,&jServersArray)){
-        for(int i=0;i<jServersArray.size();i++){
-            Json::Value jserver = jServersArray[i];
-            std::string uri,username,password;
-            GetStringFromJsonObject(jserver,"uri",&uri);
-            GetStringFromJsonObject(jserver,"username",&username);
-            GetStringFromJsonObject(jserver,"password",&password);
-            kaerp2p::P2PConductor::AddIceServer(uri,username,password);
-        }
-    }
-
-
+    kaerp2p::P2PConductor::AddIceServers(jservers.asString());
 
     CameraClient client(mac_value.asString());
     client.Connect(router_value.asString(),dealer_value.asString());

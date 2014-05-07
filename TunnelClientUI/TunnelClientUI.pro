@@ -22,3 +22,6 @@ HEADERS  += \
 
 FORMS += \
     TunnelClientUI.ui
+
+OTHER_FILES += \
+    config.json

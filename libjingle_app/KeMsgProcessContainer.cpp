@@ -381,7 +381,7 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
         this->RecvGetWifiInfo(peer_id);
     }else if(command.compare("set_wifi") == 0){
         std::string wifi_param;
-        GetStringFromJson(jmessage,"param",&wifi_param);
+        GetStringFromJsonObject(jmessage,"param",&wifi_param);
         this->SetWifiInfo(peer_id,wifi_param);
     }
     else{

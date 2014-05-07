@@ -4,7 +4,6 @@
 
 #include "talk/base/logging.h"
 #include "talk/base/json.h"
-
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -23,7 +22,9 @@ TunnelClientUI::TunnelClientUI(QWidget *parent) :
     ui(new Ui::TunnelClientUI)
 {
     ui->setupUi(this);
-    this->ui->playPlugin->Initialize("tcp://192.168.40.191:5555");
+
+
+    this->ui->playPlugin->Initialize("tcp://192.168.0.185:5555");
 
     //connection_ = new   PeerConnectionClientDealer();
 }
@@ -61,7 +62,7 @@ void TunnelClientUI::on_btn_video_clicked()
 {
     QString peer_id = ui->edit_peer_id->text();
 
-    this->ui->playPlugin->StartVideo(peer_id);
+    this->ui->playPlugin->StartVideo(peer_id,1);
 //    std::string peer_id = ui->edit_peer_id->text().toStdString();
 //    tunnel_->AskPeerVideo(peer_id);
 }
@@ -185,25 +186,26 @@ void TunnelClientUI::on_ptz_right_released()
 
 }
 
-void TunnelClientUI::on_clarity_low_clicked()
-{
-OnVideoClarity(1);
-}
 
-void TunnelClientUI::on_clarity_normal_clicked()
-{
-    OnVideoClarity(2);
 
-}
-
-void TunnelClientUI::on_pushButton_high_clicked()
+void TunnelClientUI::on_video2_clicked()
 {
-    OnVideoClarity(3);
+    QString peer_id = ui->edit_peer_id->text();
+
+    this->ui->playPlugin->StartVideo(peer_id,2);
 
 }
 
-void TunnelClientUI::on_get_clarity_clicked()
+void TunnelClientUI::on_getwifi_clicked()
 {
-    OnVideoClarity(101);
+    Json::StyledWriter writer;
+    Json::Value jmessage;
 
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "wifi_info";
+
+    std::string msg = writer.write(jmessage);
+    QString peerId = ui->edit_peer_id->text();
+
+    this->ui->playPlugin->SendCommand(peerId,msg.c_str());
 }

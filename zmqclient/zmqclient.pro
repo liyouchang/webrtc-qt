@@ -49,7 +49,6 @@ SOURCES += \
     peerconnectionclientdealer.cpp \
     CameraClient.cpp \
     zmqclient.cpp \
-    jsonconfig.cpp \
     recordreader.cpp
 
 
@@ -57,7 +56,6 @@ HEADERS += \
     asyndealer.h \
     peerconnectionclientdealer.h \
     CameraClient.h \
-    jsonconfig.h \
     recordreader.h
 
 

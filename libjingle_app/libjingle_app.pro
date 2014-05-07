@@ -41,7 +41,8 @@ SOURCES += \
     peerterminal.cpp \
     KeMsgProcess.cpp \
     KeMsgProcessContainer.cpp \
-    defaults.cc
+    defaults.cc \
+    jsonconfig.cpp
 
 
 HEADERS += \
@@ -64,7 +65,8 @@ HEADERS += \
     KeMsgProcess.h \
     KeMsgProcessContainer.h \
     PeerTerminalInterface.h \
-    defaults.h
+    defaults.h \
+    jsonconfig.h
 
 OTHER_FILES += \
     ClientCameraMsg.json

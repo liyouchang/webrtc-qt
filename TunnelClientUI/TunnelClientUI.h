@@ -49,13 +49,10 @@ private slots:
 
     void on_ptz_right_released();
 
-    void on_clarity_low_clicked();
 
-    void on_clarity_normal_clicked();
+    void on_video2_clicked();
 
-    void on_pushButton_high_clicked();
-
-    void on_get_clarity_clicked();
+    void on_getwifi_clicked();
 
 private:
     void OnPtzMove(std::string side);

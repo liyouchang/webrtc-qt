@@ -41,22 +41,18 @@ public:
     QPushButton *btn_init;
     QLineEdit *edit_peer_id;
     QPushButton *btn_connect;
+    QPushButton *btn_disconnect;
+    QPushButton *getwifi;
     QGroupBox *groupBox_ptz;
     QGridLayout *gridLayout;
     QPushButton *ptz_left;
     QPushButton *ptz_right;
     QPushButton *ptz_up;
     QPushButton *ptz_down;
-    QGroupBox *groupBox_3;
-    QHBoxLayout *horizontalLayout_3;
-    QPushButton *clarity_low;
-    QPushButton *clarity_normal;
-    QPushButton *pushButton_high;
-    QPushButton *get_clarity;
     QPushButton *btn_video;
+    QPushButton *video2;
     QPushButton *btn_save_video;
     QPushButton *btn_stop_video;
-    QPushButton *btn_disconnect;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -123,6 +119,18 @@ public:
 
         verticalLayout->addWidget(btn_connect);
 
+        btn_disconnect = new QPushButton(groupBox_2);
+        btn_disconnect->setObjectName(QStringLiteral("btn_disconnect"));
+        sizePolicy2.setHeightForWidth(btn_disconnect->sizePolicy().hasHeightForWidth());
+        btn_disconnect->setSizePolicy(sizePolicy2);
+
+        verticalLayout->addWidget(btn_disconnect);
+
+        getwifi = new QPushButton(groupBox_2);
+        getwifi->setObjectName(QStringLiteral("getwifi"));
+
+        verticalLayout->addWidget(getwifi);
+
         groupBox_ptz = new QGroupBox(groupBox_2);
         groupBox_ptz->setObjectName(QStringLiteral("groupBox_ptz"));
         QSizePolicy sizePolicy4(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -156,57 +164,17 @@ public:
 
         verticalLayout->addWidget(groupBox_ptz);
 
-        groupBox_3 = new QGroupBox(groupBox_2);
-        groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
-        QSizePolicy sizePolicy5(QSizePolicy::Preferred, QSizePolicy::Preferred);
-        sizePolicy5.setHorizontalStretch(0);
-        sizePolicy5.setVerticalStretch(0);
-        sizePolicy5.setHeightForWidth(groupBox_3->sizePolicy().hasHeightForWidth());
-        groupBox_3->setSizePolicy(sizePolicy5);
-        horizontalLayout_3 = new QHBoxLayout(groupBox_3);
-        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
-        clarity_low = new QPushButton(groupBox_3);
-        clarity_low->setObjectName(QStringLiteral("clarity_low"));
-        QSizePolicy sizePolicy6(QSizePolicy::Minimum, QSizePolicy::Fixed);
-        sizePolicy6.setHorizontalStretch(1);
-        sizePolicy6.setVerticalStretch(0);
-        sizePolicy6.setHeightForWidth(clarity_low->sizePolicy().hasHeightForWidth());
-        clarity_low->setSizePolicy(sizePolicy6);
-        clarity_low->setMaximumSize(QSize(30, 16777215));
-
-        horizontalLayout_3->addWidget(clarity_low);
-
-        clarity_normal = new QPushButton(groupBox_3);
-        clarity_normal->setObjectName(QStringLiteral("clarity_normal"));
-        sizePolicy6.setHeightForWidth(clarity_normal->sizePolicy().hasHeightForWidth());
-        clarity_normal->setSizePolicy(sizePolicy6);
-        clarity_normal->setMaximumSize(QSize(30, 16777215));
-
-        horizontalLayout_3->addWidget(clarity_normal);
-
-        pushButton_high = new QPushButton(groupBox_3);
-        pushButton_high->setObjectName(QStringLiteral("pushButton_high"));
-        sizePolicy6.setHeightForWidth(pushButton_high->sizePolicy().hasHeightForWidth());
-        pushButton_high->setSizePolicy(sizePolicy6);
-        pushButton_high->setMaximumSize(QSize(30, 16777215));
-
-        horizontalLayout_3->addWidget(pushButton_high);
-
-        get_clarity = new QPushButton(groupBox_3);
-        get_clarity->setObjectName(QStringLiteral("get_clarity"));
-        get_clarity->setMaximumSize(QSize(30, 16777215));
-
-        horizontalLayout_3->addWidget(get_clarity);
-
-
-        verticalLayout->addWidget(groupBox_3);
-
         btn_video = new QPushButton(groupBox_2);
         btn_video->setObjectName(QStringLiteral("btn_video"));
         sizePolicy2.setHeightForWidth(btn_video->sizePolicy().hasHeightForWidth());
         btn_video->setSizePolicy(sizePolicy2);
 
         verticalLayout->addWidget(btn_video);
+
+        video2 = new QPushButton(groupBox_2);
+        video2->setObjectName(QStringLiteral("video2"));
+
+        verticalLayout->addWidget(video2);
 
         btn_save_video = new QPushButton(groupBox_2);
         btn_save_video->setObjectName(QStringLiteral("btn_save_video"));
@@ -217,13 +185,6 @@ public:
         btn_stop_video->setObjectName(QStringLiteral("btn_stop_video"));
 
         verticalLayout->addWidget(btn_stop_video);
-
-        btn_disconnect = new QPushButton(groupBox_2);
-        btn_disconnect->setObjectName(QStringLiteral("btn_disconnect"));
-        sizePolicy2.setHeightForWidth(btn_disconnect->sizePolicy().hasHeightForWidth());
-        btn_disconnect->setSizePolicy(sizePolicy2);
-
-        verticalLayout->addWidget(btn_disconnect);
 
 
         horizontalLayout->addWidget(groupBox_2);
@@ -250,20 +211,17 @@ public:
         btn_init->setText(QApplication::translate("TunnelClientUI", "Init", 0));
         edit_peer_id->setText(QApplication::translate("TunnelClientUI", "1234567", 0));
         btn_connect->setText(QApplication::translate("TunnelClientUI", "ConnectToPeer", 0));
+        btn_disconnect->setText(QApplication::translate("TunnelClientUI", "DisConnectToPeer", 0));
+        getwifi->setText(QApplication::translate("TunnelClientUI", "get wifi", 0));
         groupBox_ptz->setTitle(QApplication::translate("TunnelClientUI", "PTZ", 0));
         ptz_left->setText(QApplication::translate("TunnelClientUI", "left", 0));
         ptz_right->setText(QApplication::translate("TunnelClientUI", "right", 0));
         ptz_up->setText(QApplication::translate("TunnelClientUI", "up", 0));
         ptz_down->setText(QApplication::translate("TunnelClientUI", "down", 0));
-        groupBox_3->setTitle(QApplication::translate("TunnelClientUI", "Clarity", 0));
-        clarity_low->setText(QApplication::translate("TunnelClientUI", "1", 0));
-        clarity_normal->setText(QApplication::translate("TunnelClientUI", "2", 0));
-        pushButton_high->setText(QApplication::translate("TunnelClientUI", "3", 0));
-        get_clarity->setText(QApplication::translate("TunnelClientUI", "101", 0));
         btn_video->setText(QApplication::translate("TunnelClientUI", "Ask Video", 0));
+        video2->setText(QApplication::translate("TunnelClientUI", "ask video 2", 0));
         btn_save_video->setText(QApplication::translate("TunnelClientUI", "save video", 0));
         btn_stop_video->setText(QApplication::translate("TunnelClientUI", "Stop Video", 0));
-        btn_disconnect->setText(QApplication::translate("TunnelClientUI", "DisConnectToPeer", 0));
     } // retranslateUi
 
 };

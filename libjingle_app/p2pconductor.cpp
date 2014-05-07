@@ -119,6 +119,30 @@ void P2PConductor::AddIceServer(const std::string &uri, const std::string &usern
 
 }
 
+void P2PConductor::AddIceServers(std::string jstrServers)
+{
+    Json::Reader reader;
+    Json::Value jservers;
+    if (!reader.parse(jstrServers, jservers)) {
+        LOG(WARNING) << "P2PConductor::AddIceServers---"<<
+                        "unknown json string " << jstrServers;
+        return;
+    }
+    std::vector<Json::Value> jServersArray;
+
+    if(JsonArrayToValueVector(jservers,&jServersArray)){
+        for(int i=0;i<jServersArray.size();i++){
+            Json::Value jserver = jServersArray[i];
+            std::string uri,username,password;
+            GetStringFromJsonObject(jserver,"uri",&uri);
+            GetStringFromJsonObject(jserver,"username",&username);
+            GetStringFromJsonObject(jserver,"password",&password);
+            P2PConductor::AddIceServer(uri,username,password);
+        }
+    }
+
+}
+
 
 bool P2PConductor::InitializePeerConnection()
 {
