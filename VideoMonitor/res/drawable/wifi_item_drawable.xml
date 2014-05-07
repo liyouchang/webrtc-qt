@@ -4,7 +4,6 @@
 	    <!-- 按键按下风格 -->
 		<shape>
 		    <size android:height="50dip" />
-		    <stroke android:width="0.1dip" android:color="@color/blue" />
 			<solid android:color="@color/blue" />
 	  	</shape>
   	</item>
@@ -12,8 +11,7 @@
 	    <!-- 按键显示风格 -->
 		<shape>
 		    <size android:height="50dip" />
-		    <stroke android:width="0.1dip" android:color="#363636" />
-	    	<solid android:color="#FFFFFF" />
+	    	<solid android:color="@color/page_bg_grey" />
 	    </shape>
 	</item>
 </selector>

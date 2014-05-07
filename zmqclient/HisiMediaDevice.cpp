@@ -6,6 +6,7 @@
 #include "talk/base/buffer.h"
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
+#include "talk/base/stringencode.h"
 
 #include "keapi/keapi.h"
 #include "libjingle_app/KeMessage.h"
@@ -240,7 +241,7 @@ void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
 
     int ret = Raycomm_SetWifi(&wifiParam);
 
-    LOG(INFO)<<"Raycomm_SetWifi --- ret:"<<ret;
+    LOG(INFO)<<"Raycomm_SetWifi --- ret:"<<ret<<" param:"<<param;
 
     Json::Value jmessage;
     jmessage["type"] = "tunnel";

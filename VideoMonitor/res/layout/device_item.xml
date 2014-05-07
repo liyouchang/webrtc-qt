@@ -56,22 +56,8 @@
             android:id="@+id/tv_device_mac"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="5dp"
             android:text="@string/device_item_mac"
-            android:textColor="@color/light_black"
-            android:textSize="16dp" />
-
-        <Button
-            android:id="@+id/btn_terminal_video"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:focusable="false"
-            android:background="@drawable/device_item_button_style"
-            android:gravity="center_vertical"
-            android:text="@string/terminal_device_video"
             android:textColor="@color/light_black"
             android:textSize="16dp" />
     </LinearLayout>

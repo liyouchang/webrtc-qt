@@ -380,12 +380,19 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
     }else if(command.compare("wifi_info") == 0){
         this->RecvGetWifiInfo(peer_id);
     }else if(command.compare("set_wifi") == 0){
-        std::string wifi_param;
-        GetStringFromJsonObject(jmessage,"param",&wifi_param);
-        this->SetWifiInfo(peer_id,wifi_param);
+        Json::Value jwifiParam;
+        if(!GetValueFromJsonObject(jmessage, "param", &jwifiParam)){
+            LOG(WARNING)<<"get param value error from"<<
+                          peer_id<< " msg"<<msg;
+            return;
+        }
+        std::string paramStr  = JsonValueToString(jwifiParam);
+        this->SetWifiInfo(peer_id,paramStr);
     }
     else{
-        LOG(WARNING)<<"receive unexpected command from "<<peer_id;
+        LOG(WARNING)<<"receive unexpected command from "<<
+                      peer_id<< " msg"<<msg;
+
     }
 
 }

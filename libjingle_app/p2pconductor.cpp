@@ -23,8 +23,7 @@ class DummySetSessionDescriptionObserver
         : public webrtc::SetSessionDescriptionObserver {
 public:
     static DummySetSessionDescriptionObserver* Create() {
-        return
-                new talk_base::RefCountedObject<DummySetSessionDescriptionObserver>();
+        return new talk_base::RefCountedObject<DummySetSessionDescriptionObserver>();
     }
     virtual void OnSuccess() {
         LOG(INFO) << __FUNCTION__;
@@ -75,7 +74,8 @@ void P2PConductor::DisconnectFromCurrentPeer()
 
     LOG(INFO) << __FUNCTION__;
     if(!tunnel_established_){
-        LOG(WARNING) << "the tunnel is not established, it maybe crash by two thread conflict";
+        LOG(WARNING) << "the tunnel is not established, "<<
+                        "it maybe crash by two thread conflict";
     }
     if (peer_connection_.get()) {
         SignalNeedSendToPeer(peer_id_,kByeMessage);
@@ -109,7 +109,9 @@ void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
 
 }
 
-void P2PConductor::AddIceServer(const std::string &uri, const std::string &username, const std::string &password)
+void P2PConductor::AddIceServer(const std::string &uri,
+                                const std::string &username,
+                                const std::string &password)
 {
     PeerTunnelInterface::IceServer server;
     server.uri = uri;
@@ -303,8 +305,8 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
         }
     } else if (peer_id != peer_id_) {
         ASSERT(!peer_id_.empty());
-        LOG(WARNING) << "Received a message from unknown peer while already in a "
-                        "conversation with a different peer.";
+        LOG(WARNING) << "Received a message from unknown peer while already in"
+                        " a conversation with a different peer.";
         return;
     }
 
@@ -320,7 +322,8 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
     GetStringFromJsonObject(jmessage, kSessionDescriptionTypeName, &type);
     if (!type.empty()) {
         std::string sdp;
-        if (!GetStringFromJsonObject(jmessage, kSessionDescriptionSdpName, &sdp)) {
+        if (!GetStringFromJsonObject(
+                    jmessage, kSessionDescriptionSdpName, &sdp)) {
             LOG(WARNING) << "Can't parse received session description message.";
             return;
         }

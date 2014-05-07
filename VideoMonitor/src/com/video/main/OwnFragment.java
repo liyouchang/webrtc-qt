@@ -133,18 +133,6 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				listSize = deviceList.size();
 				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
 				lv_list.setAdapter(deviceAdapter);
-				if (listSize == 0) {
-					noDeviceLayout.setVisibility(View.VISIBLE);
-				} else {
-					noDeviceLayout.setVisibility(View.INVISIBLE);
-				}
-			} else {
-				listSize = xmlData.getListSize();
-				if (listSize == 0) {
-					noDeviceLayout.setVisibility(View.VISIBLE);
-				} else {
-					noDeviceLayout.setVisibility(View.INVISIBLE);
-				}
 			}
 		}
 	}
@@ -566,6 +554,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			String id = bundle.getString("deviceId");
 			deviceList.add(xmlData.getItem(id));
 			deviceAdapter.notifyDataSetChanged();
+			
+			listSize = xmlData.getListSize();
+			if (listSize == 0) {
+				noDeviceLayout.setVisibility(View.VISIBLE);
+			} else {
+				noDeviceLayout.setVisibility(View.INVISIBLE);
+			}
 		}
 	}
 }

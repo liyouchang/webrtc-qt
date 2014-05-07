@@ -59,6 +59,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		Button button_setting = (Button)mView.findViewById(R.id.btn_setting);
 		button_setting.setOnClickListener(this);
 		
+		Button button_wifi = (Button)mView.findViewById(R.id.btn_wifi);
+		button_wifi.setOnClickListener(this);
+		
 		Button button_help = (Button)mView.findViewById(R.id.btn_help);
 		button_help.setOnClickListener(this);
 		
@@ -158,6 +161,10 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				break;
 			case R.id.btn_setting:
 				startActivity(new Intent(mActivity, SettingsActivity.class));
+				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
+				break;
+			case R.id.btn_wifi:
+				startActivity(new Intent(mActivity, WiFiActivity.class));
 				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_help:

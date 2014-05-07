@@ -39,7 +39,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
-        android:background="@drawable/button_updown_alone"
+        android:background="@drawable/button_up"
         android:drawablePadding="10dp"
         android:drawableRight="@drawable/icon_button_right"
         android:drawableLeft="@drawable/setting"
@@ -47,6 +47,23 @@
         android:paddingLeft="15dp"
         android:paddingRight="10dp"
         android:text="@string/setting"
+        android:textColor="@color/title_bg_black"
+        android:textSize="18dp" />
+    
+    <Button
+        android:id="@+id/btn_wifi"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/button_down"
+        android:drawableLeft="@drawable/wifi"
+        android:drawablePadding="10dp"
+        android:drawableRight="@drawable/icon_button_right"
+        android:gravity="center_vertical"
+        android:paddingLeft="15dp"
+        android:paddingRight="10dp"
+        android:text="@string/set_wifi"
         android:textColor="@color/title_bg_black"
         android:textSize="18dp" />
 
@@ -84,19 +101,6 @@
         android:text="@string/about"
         android:textColor="@color/title_bg_black"
         android:textSize="18dp" />
-    <!--
-    <Button
-        android:id="@+id/btn_test_login"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/button_style"
-        android:text="@string/login"
-        android:textColor="@color/white"
-        android:textSize="20dp" />
-    -->
 
     <Button
         android:id="@+id/btn_logout"

@@ -4,10 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +22,7 @@ import com.video.R;
 import com.video.data.Value;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
+import com.video.utils.MyAlertDialog;
 import com.video.utils.Utils;
 
 public class FindPwdActivity extends Activity implements OnClickListener {
@@ -134,17 +133,22 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	 * 显示操作的提示
 	 */
 	private void showHandleDialog(String info) {
-		AlertDialog aboutDialog = new AlertDialog.Builder(mContext)
-				.setTitle("温馨提示")
-				.setMessage(info)
-				.setCancelable(false)
-				.setPositiveButton("确定",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								dialog.dismiss();
-							}
-						}).create();
-		aboutDialog.show();
+		final MyAlertDialog myDialog=new MyAlertDialog(mContext);
+		myDialog.setTitle("温馨提示");
+		myDialog.setMessage(info);
+		myDialog.setPositiveButton("确认", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+				finish();
+			}
+		});
+		myDialog.setNegativeButton("返回", new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				myDialog.dismiss();
+			}
+		});
 	}
 	
 	private Handler handler = new Handler() {

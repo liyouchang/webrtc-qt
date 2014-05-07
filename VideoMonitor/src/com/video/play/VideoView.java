@@ -70,8 +70,10 @@ public class VideoView extends View {
 	 * 播放视频
 	 */
 	public void playVideo() {
+		runFlag = true;
+		TunnelCommunication.videoDataCache.clearBuffer();
 		if (playVideoThread == null) {
-			playVideoThread = new PlayVideoThread(true);
+			playVideoThread = new PlayVideoThread();
 			playVideoThread.start();
 			System.out.println("MyDebug: 【播放视频】");
 		}
@@ -107,10 +109,6 @@ public class VideoView extends View {
 	 * 播放视频线程
 	 */
 	private class PlayVideoThread extends Thread {
-		
-		public PlayVideoThread(boolean flag) {
-			runFlag = flag;
-		}
 
 		public void run() {
 			
@@ -127,9 +125,9 @@ public class VideoView extends View {
 						if (decodeLen >= 0) {
 							postInvalidate();
 						}
-						sleep(5);
-					} else {
 						sleep(10);
+					} else {
+						sleep(20);
 					}
 					if (!PlayerActivity.isTunnelOpened) {
 						sendHandlerMsg(PlayerActivity.playHandler, 2);

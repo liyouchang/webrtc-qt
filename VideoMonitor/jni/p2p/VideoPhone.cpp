@@ -78,15 +78,15 @@ jint naAskMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
 }
 
 
-jint naSendTalkData(JNIEnv *env, jobject thiz, jbyteArray talkBytes) {
+jint naSendTalkData(JNIEnv *env, jobject thiz, jbyteArray talkBytes,jint dataLen) {
 	LOGI("5. naSendTalkData()");
 	if (client == NULL) {
 		return -1;
 	}
     jbyte * talkData = env->GetByteArrayElements( talkBytes, 0);
-    jsize len = env->GetArrayLength(talkBytes);
+    //jsize len = env->GetArrayLength(talkBytes);
 
-    client->SendTalkData( (char *)talkData,len);
+    client->SendTalkData( (char *)talkData,dataLen);
 
     env->ReleaseByteArrayElements(talkBytes,talkData,0);
     return 0;
@@ -112,7 +112,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
 			{ "naCloseTunnel", "(Ljava/lang/String;)I", (void*) naCloseTunnel },
 			{ "naAskMediaData", "(Ljava/lang/String;)I", (void*) naAskMediaData },
 			{ "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I", (void*) naMessageFromPeer },
-			{ "naSendTalkData", "([B)I", (void*) naSendTalkData }
+			{ "naSendTalkData", "([BI)I", (void*) naSendTalkData }
 
 	};
 
