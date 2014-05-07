@@ -2,10 +2,13 @@
 #include "talk/base/json.h"
 #include "talk/base/logging.h"
 #include "talk/base/thread.h"
+#include "talk/base/timeutils.h"
+
+#include "libjingle_app/defaults.h"
 
 const int kHeartInterval = 60000;//ms
 CameraClient::CameraClient(std::string mac):
-    mac_(mac)
+    mac_(mac),messageServer("Backstage"),alarmServer("Alarm")
 {
     comm_thread_ = talk_base::Thread::Current();
 }
@@ -18,8 +21,25 @@ void CameraClient::Login()
     jmessage["MAC"] = mac_;
     std::string msg = writer.write(jmessage);
 
-    this->SendToPeer("Backstage",msg);
+    this->SendToPeer(messageServer,msg);
     comm_thread_->PostDelayed(kHeartInterval,this,MSG_LOGIN_TIMEOUT);
+}
+
+void CameraClient::SendAlarm(int alarmType, std::string alarmInfo,
+                             std::string picture)
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+
+    jmessage["type"] = "Terminal_Alarm";
+    jmessage["MAC"] = mac_;
+    jmessage["AlarmType"] = alarmType;
+    jmessage["AlarmInfo"] = alarmInfo;
+    jmessage["Picture"] = picture;
+    jmessage["DateTime"] = GetCurrentDatetime("%F %T");
+
+    std::string msg = writer.write(jmessage);
+    this->SendToPeer(alarmServer,msg);
 }
 
 void CameraClient::OnMessage(talk_base::Message *msg)

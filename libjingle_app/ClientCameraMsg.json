@@ -38,22 +38,22 @@ client-->camera
     "param":10 //the param need to send to camera,
     //for the move control this param is not useful
 }
+//no used
+//3. video clarity
+//client-->camera
+//{
+//    "type":"tunnel",
+//    "command":"video_clarity",
+//    "value":1,    //1:low,2:normal,3:high. 1~3 is to set clarity.
+//            //101:get camera clarity
+//}
 
-3. video clarity
-client-->camera
-{
-    "type":"tunnel",
-    "command":"video_clarity",
-    "value":1,    //1:low,2:normal,3:high. 1~3 is to set clarity.
-            //101:get camera clarity
-}
-
-camera-->client
-{
-    "type":"tunnel",
-            "command":"video_clarity",
-            "value":1,    //1:low,2:normal,3:high.
-}
+//camera-->client
+//{
+//    "type":"tunnel",
+//            "command":"video_clarity",
+//            "value":1,    //1:low,2:normal,3:high.
+//}
 
 4.get camera wifi info
 client-->camera
@@ -93,10 +93,18 @@ camera-->clent
     "command":"set_wifi",
     "result":1,//0 false,1 success
 }
+
 6. check online
 
 camera<-->clent
 {
     "type":"tunnel",
     "command":"echo"
+}
+
+7. camera restart
+client-->camera
+{
+    "type":"tunnel",
+    "command":"restart"
 }

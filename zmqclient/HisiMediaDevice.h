@@ -11,6 +11,8 @@ namespace talk_base {
 
 
 
+
+
 #define MEDIA_BUFFER_LENGTH 512*1024
 
 class HisiMediaDevice:talk_base::MessageHandler,public KeTunnelCamera
@@ -58,6 +60,19 @@ protected:
                                 const char *data, int len);
     virtual void RecvGetWifiInfo(std::string peer_id);
     virtual void SetWifiInfo(std::string peerId, std::string param);
+};
+
+
+
+class AlarmNotify{
+public:
+    void StartNotify();
+    sigslot::signal3<int,std::string,std::string> SignalTerminalAlarm;
+    static AlarmNotify *Instance(){
+        static AlarmNotify notify;
+        return &notify;
+    }
+    static int NotifyCallBack(int chn,int rea,int io);
 };
 
 #endif // HISIMEDIADEVICE_H

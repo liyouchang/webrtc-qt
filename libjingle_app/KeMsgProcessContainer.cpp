@@ -278,7 +278,6 @@ void KeTunnelClient::OnRecordFileData(const std::string &peer_id,
                                       const char *data, int len)
 {
     LOG(INFO)<<"KeTunnelClient::OnRecordFileData";
-
 }
 
 void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status)

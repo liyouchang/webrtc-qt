@@ -84,8 +84,8 @@ arm {
     INSTALLS  += target_config
 }eles{
 
-target_config.files  = $$OTHER_FILES
-target_config.path   = $$DESTDIR
-INSTALLS             += target_config
+    target_config.files  = $$OTHER_FILES
+    target_config.path   = $$DESTDIR
+    INSTALLS  += target_config
 
 }

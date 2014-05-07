@@ -29,6 +29,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctime>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -41,6 +42,7 @@
 #include "talk/base/scoped_ptr.h"
 #include "talk/base/pathutils.h"
 #include "talk/base/fileutils.h"
+#include "talk/base/timeutils.h"
 
 
 const char kAudioLabel[] = "audio_label";
@@ -139,3 +141,18 @@ std::string GetAppFilePath(std::string filename)
 //    *field2 = message.substr(pos + 1);
 //    return true;
 //}
+
+
+std::string GetCurrentDatetime(std::string format)
+{
+    std::string result;
+    struct tm time;
+    int microsecond;
+    talk_base::CurrentTmTime(&time,&microsecond);
+    char mbstr[100];
+
+    if (strftime(mbstr, sizeof(mbstr), format.c_str(), &time)) {
+        result = mbstr;
+    }
+    return result;
+}

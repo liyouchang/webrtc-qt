@@ -37,7 +37,11 @@ extern const char kStreamLabel[];
 
 
 
+
 extern const uint16 kDefaultServerPort;
+
+//yyyy-MM-dd hh:mm:ss---- %F %T
+std::string GetCurrentDatetime(std::string format);
 
 
 std::string GetEnvVarOrDefault(const char* env_var_name,
