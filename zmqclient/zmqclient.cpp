@@ -25,8 +25,6 @@ int main()
     //read config
     JsonConfig::Instance()->FromFile(GetAppFilePath("config.json"));
 
-
-
     Json::Value mac_value = JsonConfig::Instance()->Get("camera.mac","");
     Json::Value dealer_value = JsonConfig::Instance()->Get("dealerId","");
     Json::Value router_value = JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
@@ -34,24 +32,41 @@ int main()
     Json::Value jservers = JsonConfig::Instance()->Get("servers","");
     //Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
 
-    talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),NULL);
+    talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),
+                                            NULL);
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
 
     std::string serversStr  = JsonValueToString(jservers);
-
     kaerp2p::P2PConductor::AddIceServers(serversStr);
 
-    CameraClient client(mac_value.asString());
-    client.Connect(router_value.asString(),dealer_value.asString());
-    client.Login();
+
+    std::string strDealerId;
+    std::string strMac;
+    GetStringFromJson(mac_value,&strMac);
+    GetStringFromJson(dealer_value,&strDealerId);
 
 #ifndef ARM
+    CameraClient client(strMac);
+    client.Connect(router_value.asString(),strDealerId);
+    client.Login();
+
     KeVideoSimulator * simulator = new KeVideoSimulator();
     simulator->Init(&client);
     simulator->ReadVideoData("video.h264");
 #else
 
     HisiMediaDevice * device = new HisiMediaDevice();
+    if(strMac.empty()){
+        strMac = device->GetHardwareId();
+    }
+    if(strDealerId.empty()){
+        strDealerId = strMac + "-"+GetRandomString();
+    }
+
+    CameraClient client(strMac);
+    client.Connect(router_value.asString(),strDealerId);
+    client.Login();
+
 
     AlarmNotify::Instance()->SignalTerminalAlarm.connect(
                 &client,&CameraClient::SendAlarm);

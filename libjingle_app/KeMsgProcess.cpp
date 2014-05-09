@@ -6,6 +6,7 @@
 
 #include "peerterminal.h"
 #include "KeMessage.h"
+#include "p2pconductor.h"
 
 const int kHeartStop = 5; //5 time without receive heart
 const int kHeartDelay = 1000;  // 1000 milliseconds
@@ -188,6 +189,8 @@ KeMsgProcessContainer::~KeMsgProcessContainer()
 
 bool KeMsgProcessContainer::Init(PeerTerminalInterface *t)
 {
+    //add turn server
+
     this->terminal_ = t;
     t->SignalTunnelOpened.connect(this,&KeMsgProcessContainer::OnTunnelOpened);
     t->SignalTunnelClosed.connect(this,&KeMsgProcessContainer::OnTunnelClosed);
@@ -201,6 +204,7 @@ bool KeMsgProcessContainer::Init(kaerp2p::PeerConnectionClientInterface *client)
     PeerTerminal * t = new PeerTerminal();
     t->Initialize(client);
     this->has_terminal = true;
+
     return this->Init(t);
 }
 

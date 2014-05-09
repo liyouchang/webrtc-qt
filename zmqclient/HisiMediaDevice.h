@@ -2,7 +2,7 @@
 #define HISIMEDIADEVICE_H
 
 
-#include "libjingle_app/KeMsgProcessContainer.h"
+#include "libjingle_app/ketunnelcamera.h"
 #include "talk/base/messagehandler.h"
 namespace talk_base {
     class Thread;
@@ -34,6 +34,7 @@ public:
     void SetVideoResolution(std::string r);
     //video == 0 start video ,audio == 0 start audio
     int GetVideoFrameType(int level);
+    std::string GetHardwareId();
 protected:
 private:
     /**

@@ -17,7 +17,7 @@ struct KEFrameHead;
 class RecordReaderInterface:public talk_base::MessageHandler
 {
 public:
-    enum{
+    enum {
         MSG_RECORD_SEND
     };
     // MessageHandler interface

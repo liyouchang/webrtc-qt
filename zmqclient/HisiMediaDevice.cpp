@@ -45,6 +45,8 @@
 #define PTZ_MOVE_DOWN "ptz_move_down"
 #define PTZ_STOP "ptz_stop"
 
+#define HARDWARE_ID "hardware_id"
+
 const int kVideoSampleRate = 40;//40 ms per frame
 const int kAudioSampleRate = 20;//20 ms
 
@@ -62,6 +64,15 @@ struct MediaControlData : public talk_base::MessageData {
 HisiMediaDevice::HisiMediaDevice():
     media_thread_(0),video1_handle_(0),video2_handle_(0),audio_handle_(0)
 {
+    int ret = Raycomm_InitParam();
+    LOG(INFO)<<"Raycomm_InitParam : "<<ret;
+
+    ret = Raycomm_MediaDataInit();
+    LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
+
+    LOG(INFO)<<"vidoe1 frame type " << GetVideoFrameType(1);
+    LOG(INFO)<<"vidoe2 frame type " << GetVideoFrameType(2);
+
 }
 
 HisiMediaDevice::~HisiMediaDevice()
@@ -77,14 +88,6 @@ HisiMediaDevice::~HisiMediaDevice()
 bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
 {
 
-    int ret = Raycomm_InitParam();
-    LOG(INFO)<<"Raycomm_InitParam : "<<ret;
-
-    ret = Raycomm_MediaDataInit();
-    LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
-
-    LOG(INFO)<<"vidoe1 frame type " << GetVideoFrameType(1);
-    LOG(INFO)<<"vidoe2 frame type " << GetVideoFrameType(2);
 
     media_thread_ = new talk_base::Thread();
     media_thread_->Start();
@@ -92,11 +95,9 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
     //start get media
     media_thread_->Post(this,MSG_MEDIA_CONTROL,new MediaControlData(1,1,1));
 
-
-    KeTunnelCamera::Init(client);
-
     AlarmNotify::Instance()->StartNotify();
 
+    return KeTunnelCamera::Init(client);
 }
 
 
@@ -416,12 +417,23 @@ int HisiMediaDevice::GetVideoFrameType(int level)
     return frameType;
 }
 
+std::string HisiMediaDevice::GetHardwareId()
+{
+    char buf[1024];
+    memset(buf,0,1024);
+    Raycomm_GetParam(HARDWARE_ID,buf,0);
+    std::string result = buf;
+    return result;
+
+}
+
 
 
 void AlarmNotify::StartNotify()
 {
     //TODO: to start alarm notify
-    //int ret = Raycomm_Register_Callback(&AlarmNotify::NotifyCallBack);
+    int ret = Raycomm_Register_Callback(&AlarmNotify::NotifyCallBack);
+    LOG(INFO)<<"AlarmNotify::StartNotify---Raycomm_Register_Callback:"<<ret;
 }
 
 

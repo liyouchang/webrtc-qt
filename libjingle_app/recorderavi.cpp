@@ -362,7 +362,7 @@ RecorderAvi::~RecorderAvi()
 }
 
 
-bool RecorderAvi::StartRecord(const std::string & fileName)
+bool RecorderAvi::StartRecord(const std::string & filename)
 {
     bool ret = aviFile_->Open(filename,"w",NULL);
     if(!ret){
@@ -445,7 +445,7 @@ bool RecorderAvi::StartRecord(const std::string & fileName)
     head.AppendData("strh",4);
     len =sizeof(AVIStreamHeader);
     head.AppendData(&len,4);
-    AVIStreamHeader avistreamheader;
+//    AVIStreamHeader avistreamheader; //reuse
     memcpy(avistreamheader.fccType,"auds",4);
     memcpy(avistreamheader.fccHandler,"G711",4);
     avistreamheader.dwFlags = 0;
@@ -483,11 +483,11 @@ bool RecorderAvi::StartRecord(const std::string & fileName)
     head.AppendData("LIST~~~~movi",12);
 
 
-    (*index_len) = 0;
-    memcpy(index_buf+(*index_len),"idx1",4);(*index_len)+=4;
-    memset(index_buf+(*index_len),0x00,4);(*index_len)+=4;
-    len = (*ptr);
-    memcpy(index_buf+(*index_len),&len,4);(*index_len)+=4;
+//    (*index_len) = 0;
+//    memcpy(index_buf+(*index_len),"idx1",4);(*index_len)+=4;
+//    memset(index_buf+(*index_len),0x00,4);(*index_len)+=4;
+//    len = (*ptr);
+//    memcpy(index_buf+(*index_len),&len,4);(*index_len)+=4;
 
 }
 

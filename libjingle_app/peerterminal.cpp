@@ -9,7 +9,8 @@ PeerTerminal::PeerTerminal():
 
 }
 
-int PeerTerminal::Initialize(kaerp2p::PeerConnectionClientInterface * client, int max_tunnel)
+int PeerTerminal::Initialize(kaerp2p::PeerConnectionClientInterface * client,
+                             int max_tunnel)
 {
     max_tunnel_num_ = max_tunnel;
     this->client_ = client;
@@ -36,7 +37,8 @@ int PeerTerminal::CloseTunnel(const std::string &peer_id)
 
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
-        LOG(WARNING)<< "PeerTerminal::CloseTunnel-----tunnel not get "<< peer_id;
+        LOG(WARNING)<< "PeerTerminal::CloseTunnel-----tunnel not get "<<
+                       peer_id;
         return -1;
     }
     aTunnel->DisconnectFromCurrentPeer();
@@ -44,13 +46,15 @@ int PeerTerminal::CloseTunnel(const std::string &peer_id)
 }
 
 
-int PeerTerminal::SendByRouter(const std::string &peer_id, const std::string &data)
+int PeerTerminal::SendByRouter(const std::string &peer_id,
+                               const std::string &data)
 {
     client_->SendToPeer(peer_id,data);
     return 0;
 }
 
-int PeerTerminal::SendByTunnel(const std::string &peer_id,const std::string &data)
+int PeerTerminal::SendByTunnel(const std::string &peer_id,
+                               const std::string &data)
 {
 //    ASSERT(tunnel_stream_);
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
