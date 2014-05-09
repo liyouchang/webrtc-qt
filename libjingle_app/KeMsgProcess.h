@@ -4,18 +4,21 @@
 
 
 #include <string>
+#include <vector>
 
 #include "talk/base/buffer.h"
 #include "talk/base/sigslot.h"
 #include "talk/base/messagehandler.h"
+
+#include "PeerTerminalInterface.h"
+#include "PeerConnectionClinetInterface.h"
 
 namespace talk_base {
 class Thread;
 }
 
 class KeMsgProcessContainer;
-class KeTunnelCamera;
-class KeTunnelClient;
+
 class KeMsgProcess:public talk_base::MessageHandler,public sigslot::has_slots<>
 {
 public:
@@ -54,48 +57,38 @@ private:
 
 };
 
-class KeMessageProcessClient: public KeMsgProcess
+
+class KeMsgProcessContainer: public sigslot::has_slots<>
 {
+    friend class KeMsgProcess;
 public:
-    KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
+    KeMsgProcessContainer();
+    virtual ~KeMsgProcessContainer();
 
-    void AskVideo(int video, int listen, int talk);
-    void ReqestPlayFile(const char * file_name);
-    void OnTalkData(const char * data,int len);
-    sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
-    sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
-
-    sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;
-    sigslot::signal2<const std::string &,int > SignalRecordPlayStatus;
+    virtual bool Init(PeerTerminalInterface *t);
+    virtual bool Init(kaerp2p::PeerConnectionClientInterface * client);
+    virtual int OpenTunnel(const std::string &peer_id);
+    virtual int CloseTunnel(const std::string &peer_id);
+    virtual bool IsTunnelOpened(const std::string &peer_id);
+    virtual void OnTunnelOpened(PeerTerminalInterface * t,
+                                const std::string & peer_id);
+    virtual void OnTunnelClosed(PeerTerminalInterface * t,
+                                const std::string & peer_id);
+    virtual void OnTunnelMessage(const std::string &peer_id,
+                                 talk_base::Buffer &msg);
+    virtual void OnRouterMessage(const std::string &peer_id,
+                                 const std::string& msg);
 
 protected:
-    virtual void OnMessageRespond(talk_base::Buffer & msgData);
-    virtual void OnRecvRecordMsg(talk_base::Buffer & msgData);
-    virtual void RecvMediaData(talk_base::Buffer & msgData);
-};
+    virtual KeMsgProcess * GetProcess(const std::string & peer_id);
+    virtual void AddMsgProcess(KeMsgProcess * process);
+    virtual void OnProcessNeedSend(const std::string & peer_id,
+                                   const char * data,int len);
+    virtual void OnHeartStop(const std::string & peer_id);
 
-
-class KeMessageProcessCamera: public KeMsgProcess
-{
-public:
-    KeMessageProcessCamera(std::string peer_id,KeTunnelCamera * container);
-    void OnVideoData(const char *data, int len);
-    void OnAudioData(const char * data,int len);
-    void OnRecordData(const char * data,int len);
-
-    sigslot::signal2<const std::string &,const std::string & > SignalToPlayFile;
-    sigslot::signal3<const std::string &,const char *,int > SignalRecvTalkData;
-
-protected:
-    virtual void OnMessageRespond(talk_base::Buffer & msgData);
-    virtual void RecvAskMediaMsg(talk_base::Buffer &msgData);
-    virtual void RecvPlayFile(talk_base::Buffer &msgData);
-    virtual void RecvTalkData(talk_base::Buffer &msgData);
-private:
-    bool video_started_;
-    bool audio_started_;
-    bool talk_started_;
-
+    std::vector<KeMsgProcess *> processes_;
+    PeerTerminalInterface * terminal_;
+    bool has_terminal;
 };
 
 

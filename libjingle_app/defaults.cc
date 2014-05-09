@@ -49,6 +49,11 @@ const char kAudioLabel[] = "audio_label";
 const char kVideoLabel[] = "video_label";
 const char kStreamLabel[] = "stream_label";
 
+const char kKaerMsgTypeName[] = "type";
+const char kKaerMsgCommandName[] = "command";
+const char kKaerTunnelMsgTypeValue[] = "tunnel";
+const char kKaerPTZCommandValue[] = "ptz";
+
 
 const uint16 kDefaultServerPort = 8888;
 

@@ -36,6 +36,10 @@ extern const char kVideoLabel[];
 extern const char kStreamLabel[];
 
 
+extern const char kKaerMsgTypeName[];
+extern const char kKaerMsgCommandName[];
+extern const char kKaerTunnelMsgTypeValue[] ;
+extern const char kKaerPTZCommandValue[];
 
 
 extern const uint16 kDefaultServerPort;
