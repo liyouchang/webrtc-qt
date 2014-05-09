@@ -82,6 +82,7 @@ public :
     static void AddIceServer(const std::string &  uri,
                              const std::string & username,
                              const std::string & password);
+    static void AddIceServers(std::string jstrServers);
 
     static PeerTunnelInterface::IceServers g_servers;
 

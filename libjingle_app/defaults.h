@@ -36,8 +36,16 @@ extern const char kVideoLabel[];
 extern const char kStreamLabel[];
 
 
+extern const char kKaerMsgTypeName[];
+extern const char kKaerMsgCommandName[];
+extern const char kKaerTunnelMsgTypeValue[] ;
+extern const char kKaerPTZCommandValue[];
+
 
 extern const uint16 kDefaultServerPort;
+
+//yyyy-MM-dd hh:mm:ss---- %F %T
+std::string GetCurrentDatetime(std::string format);
 
 
 std::string GetEnvVarOrDefault(const char* env_var_name,

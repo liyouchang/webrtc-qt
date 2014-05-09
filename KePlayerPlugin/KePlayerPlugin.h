@@ -50,9 +50,10 @@ public slots:
     void SetDivision(int num);
     int PlayLocalFile();
     int Initialize(QString routerUrl);
+    int Initialize();
     int OpenTunnel(QString peer_id);
     int CloseTunnel(QString peer_id);
-    int StartVideo(QString peer_id);
+    int StartVideo(QString peer_id,int video);
     int StopVideo(QString peerId);
     int StartCut(QString peerId);
     int StopCut(QString peerId);

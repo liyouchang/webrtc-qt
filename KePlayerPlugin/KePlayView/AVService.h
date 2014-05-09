@@ -31,9 +31,9 @@ public:
     };
 public://静态方法
     int mCameraID;
-    //static int StartTalk();
-    //static int StopTalk();
-    //static int GetAudioData(char * pBuf);
+    static int StartTalk();
+    static int StopTalk();
+    static int GetAudioData(char * pBuf);
     static int Initialize();
     static int Cleanup();
 private:

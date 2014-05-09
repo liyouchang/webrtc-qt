@@ -18,14 +18,16 @@ public:
     };
     explicit CameraClient(std::string mac);
     virtual void Login();
-
+    virtual void SendAlarm(int alarmType, std::string alarmInfo,
+                           std::string picture);
     // MessageHandler interface
 public:
     void OnMessage(talk_base::Message *msg);
 private:
     talk_base::Thread * comm_thread_;
     std::string mac_;
-
+    std::string messageServer;
+    std::string alarmServer;
     // PeerConnectionClientInterface interface
 public:
     void OnMessageFromPeer(const std::string &peer_id, const std::string &message);

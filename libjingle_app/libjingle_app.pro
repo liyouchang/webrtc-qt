@@ -40,8 +40,11 @@ SOURCES += \
     ../talk/app/kaerp2p/kaer_session_client.cpp \
     peerterminal.cpp \
     KeMsgProcess.cpp \
-    KeMsgProcessContainer.cpp \
-    defaults.cc
+    defaults.cc \
+    jsonconfig.cpp \
+    ketunnelclient.cpp \
+    ketunnelcamera.cpp \
+    recorderavi.cpp
 
 
 HEADERS += \
@@ -62,9 +65,12 @@ HEADERS += \
     KeMessage.h \
     peerterminal.h \
     KeMsgProcess.h \
-    KeMsgProcessContainer.h \
     PeerTerminalInterface.h \
-    defaults.h
+    defaults.h \
+    jsonconfig.h \
+    ketunnelclient.h \
+    ketunnelcamera.h \
+    recorderavi.h
 
 OTHER_FILES += \
     ClientCameraMsg.json

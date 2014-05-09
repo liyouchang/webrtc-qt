@@ -49,7 +49,6 @@ SOURCES += \
     peerconnectionclientdealer.cpp \
     CameraClient.cpp \
     zmqclient.cpp \
-    jsonconfig.cpp \
     recordreader.cpp
 
 
@@ -57,7 +56,6 @@ HEADERS += \
     asyndealer.h \
     peerconnectionclientdealer.h \
     CameraClient.h \
-    jsonconfig.h \
     recordreader.h
 
 
@@ -86,8 +84,8 @@ arm {
     INSTALLS  += target_config
 }eles{
 
-target_config.files  = $$OTHER_FILES
-target_config.path   = $$DESTDIR
-INSTALLS             += target_config
+    target_config.files  = $$OTHER_FILES
+    target_config.path   = $$DESTDIR
+    INSTALLS  += target_config
 
 }

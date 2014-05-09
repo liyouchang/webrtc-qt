@@ -1,5 +1,7 @@
 #include "HisiMediaDevice.h"
 
+#include <sstream>
+
 #include "talk/base/bind.h"
 #include "talk/base/thread.h"
 #include "talk/base/timeutils.h"
@@ -11,7 +13,7 @@
 #include "keapi/keapi.h"
 #include "libjingle_app/KeMessage.h"
 #include "libjingle_app/KeMsgProcess.h"
-#include "jsonconfig.h"
+#include "libjingle_app/jsonconfig.h"
 #include "libjingle_app/defaults.h"
 
 #define VIDEO1_DATA				"video1_data"
@@ -45,6 +47,9 @@
 
 const int kVideoSampleRate = 40;//40 ms per frame
 const int kAudioSampleRate = 20;//20 ms
+
+
+
 
 struct MediaControlData : public talk_base::MessageData {
     int video1;//1 to request start video1 , 0 to request stop
@@ -89,6 +94,9 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
 
 
     KeTunnelCamera::Init(client);
+
+    AlarmNotify::Instance()->StartNotify();
+
 }
 
 
@@ -176,11 +184,6 @@ void HisiMediaDevice::OnRecvTalkData(const std::string &peer_id, const char *dat
 {
     KEFrameHead * head = (KEFrameHead *)data;
     int dataPos =  sizeof(KEFrameHead);
-    std::string hexdata = talk_base::hex_encode(data+dataPos,head->frameLen);
-
-    LOG(INFO)<<"HisiMediaDevice::OnRecvTalkData--- from "<<peer_id<<
-                " framelen="<<head->frameLen<<"  data is "<<hexdata;
-
     if(head->frameLen == len-dataPos){
         Raycomm_TalkPlay(0,const_cast<char *>(data+dataPos),head->frameLen,0,0);
     }else{
@@ -411,4 +414,55 @@ int HisiMediaDevice::GetVideoFrameType(int level)
     }
 
     return frameType;
+}
+
+
+
+void AlarmNotify::StartNotify()
+{
+    //TODO: to start alarm notify
+    //int ret = Raycomm_Register_Callback(&AlarmNotify::NotifyCallBack);
+}
+
+
+//通道号   chn = 1.2.3.4
+//移动侦测 rea = 1
+//遮挡报警 rea = 4
+//开关量   rea = 5
+//门磁    rea = 2，io = 20
+//人体红外 rea = 2，io = 21
+//烟感报警 rea = 2，io = 22
+int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
+{
+    //TODO: to signal alarm message
+    LOG(INFO)<<"AlarmNotify::NotifyCallBack--- chn:"<<chn<<
+               " rea:"<<rea<<" io:"<<io;
+
+    int type;
+    std::ostringstream infostream;
+
+    infostream<<"通道"<<chn;
+    if(rea == 1){
+        infostream<<" 移动侦测";
+    }else if(rea == 4){
+        infostream<<" 遮挡报警";
+    }else if(rea==5){
+        infostream<<" 开关量";
+    }else if(rea==2){
+        if(io == 20){
+            infostream<<" 门磁";
+        }else if(io == 21){
+            infostream<<" 人体红外";
+        }else if(io == 22){
+            infostream<<" 烟感报警";
+        }else{
+            infostream<<" unknown";
+        }
+    }else {
+        infostream<<" unknown";
+    }
+
+    AlarmNotify::Instance()->SignalTerminalAlarm(rea,infostream.str(),"");
+    return 0;
+
 }

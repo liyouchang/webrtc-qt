@@ -26,7 +26,7 @@ LIBS += -lStrmiids -lshell32 -lrpcrt4
     #QMAKE_CXXFLAGS += -std=c++11
 
     LIBS += -L$$output_dir/libs
-    LIBS +=   -ljingle_app  -ljingle_p2p  -ljingle
+    LIBS += -ljingle_app  -ljingle_p2p  -ljingle
     LIBS += -pthread -ldl
 }
 

@@ -4,9 +4,9 @@
 #include "talk/base/thread.h"
 #include "talk/base/logging.h"
 #include "talk/base/json.h"
-#include "jsonconfig.h"
-#include "CameraClient.h"
 
+#include "CameraClient.h"
+#include "libjingle_app/jsonconfig.h"
 #include "libjingle_app/defaults.h"
 #include "libjingle_app/p2pconductor.h"
 
@@ -32,25 +32,14 @@ int main()
     Json::Value router_value = JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
     Json::Value log_params_value = JsonConfig::Instance()->Get("logParams","tstamp thread info debug");
     Json::Value jservers = JsonConfig::Instance()->Get("servers","");
-    Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
+    //Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
 
     talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),NULL);
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
 
-    std::vector<Json::Value> jServersArray;
+    std::string serversStr  = JsonValueToString(jservers);
 
-    if(JsonArrayToValueVector(jservers,&jServersArray)){
-        for(int i=0;i<jServersArray.size();i++){
-            Json::Value jserver = jServersArray[i];
-            std::string uri,username,password;
-            GetStringFromJsonObject(jserver,"uri",&uri);
-            GetStringFromJsonObject(jserver,"username",&username);
-            GetStringFromJsonObject(jserver,"password",&password);
-            kaerp2p::P2PConductor::AddIceServer(uri,username,password);
-        }
-    }
-
-
+    kaerp2p::P2PConductor::AddIceServers(serversStr);
 
     CameraClient client(mac_value.asString());
     client.Connect(router_value.asString(),dealer_value.asString());
@@ -63,11 +52,11 @@ int main()
 #else
 
     HisiMediaDevice * device = new HisiMediaDevice();
-    int clarity = jclarity.asInt();
+
+    AlarmNotify::Instance()->SignalTerminalAlarm.connect(
+                &client,&CameraClient::SendAlarm);
 
     device->Init(&client);
-    //device->SetVideoClarity(clarity);
-    //device->SetVideoResolution("704,576");
 #endif //arm
 
     talk_base::Thread::Current()->Run();
