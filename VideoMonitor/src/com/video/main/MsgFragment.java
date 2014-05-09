@@ -101,6 +101,10 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		// TODO Auto-generated method stub
 		super.onResume();
 		ZmqHandler.setHandler(handler);
+		//初始化消息列表的显示
+		if (Value.isNeedReqAlarmListFlag) {
+			reqAlarmEvent();
+		}
 	}
 	
 	private void initView() {
@@ -141,28 +145,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		if ((msg_refresh_time != null) && (msg_refresh_terminal != null)) {
 			mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
 		}
-		//初始化消息列表的显示
-		if (Value.isNeedReqAlarmListFlag) {
-			reqAlarmEvent();
-		} else {
-			msgList = xmlData.readXml();
-			if (msgList != null) {
-				listSize = msgList.size();
-				msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
-				lv_list.setAdapter(msgAdapter);
-//				if (listSize == 0) {
-//					noMsgLayout.setVisibility(View.VISIBLE);
-//				} else {
-//					noMsgLayout.setVisibility(View.INVISIBLE);
-//				}
-			} else {
-//				listSize = xmlData.getListSize();
-//				if (listSize == 0) {
-//					noMsgLayout.setVisibility(View.VISIBLE);
-//				} else {
-//					noMsgLayout.setVisibility(View.INVISIBLE);
-//				}
-			}
+		
+		msgList = xmlData.readXml();
+		if (msgList != null) {
+			listSize = msgList.size();
+			msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
+			lv_list.setAdapter(msgAdapter);
 		}
 	}
 	

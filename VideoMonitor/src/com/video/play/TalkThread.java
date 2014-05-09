@@ -33,6 +33,7 @@ public class TalkThread extends Thread {
 		        audioRecord.release();
 		        audioRecord = null;
 			} catch (Exception e) {
+				System.out.println("MyDebug: 对讲反初始化异常！");
 				e.printStackTrace();
 			}
 		}
@@ -59,12 +60,13 @@ public class TalkThread extends Thread {
 				int bufferReadResult = audioRecord.read(buffer, 0, audioRecordBufferSize);
 				ulawDataLen = G711EnCoder(ulawData, buffer, bufferReadResult);
 				if (ulawDataLen > 0) {
-					TunnelCommunication.getInstance().sendTalkData(ulawData);
+					TunnelCommunication.getInstance().sendTalkData(ulawData, ulawDataLen);
 					sleep(10);
 				} else {
 					sleep(20);
 				}
 			} catch (Exception e) {
+				System.out.println("MyDebug: 对讲线程异常！");
 				e.printStackTrace();
 				uninitTalkThread();
 				initTalkThread();
@@ -110,7 +112,9 @@ public class TalkThread extends Thread {
 	 * G711音频编码函数，采用linear编码
 	 */
 	private int G711EnCoder(byte[] dst, byte[] src, int len) {
-		short[] buffer = new short[1024*2];
+		if (len <= 0)
+			return 0;
+		short[] buffer = new short[1024*10];
 		for (int i = 0; i < len / 2; i++) {
 			buffer[i] = (short) ((src[i * 2] & 0xff) | (src[i * 2 + 1] & 0xff) << 8);
 		}

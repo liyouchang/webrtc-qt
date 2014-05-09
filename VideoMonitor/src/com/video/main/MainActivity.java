@@ -57,7 +57,7 @@ public class MainActivity extends FragmentActivity {
 	private String userPwd = "";
 	private boolean isAppFirstTime = true;
 	private boolean isAutoLogin = false;
-	private static boolean isPlayAlarmMusic = true;
+	public static boolean isPlayAlarmMusic = true;
 	private boolean isTextViewShow = false;
 	private static TextView tv_alarm_msg = null;
 	

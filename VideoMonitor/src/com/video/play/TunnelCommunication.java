@@ -33,7 +33,7 @@ public class TunnelCommunication {
 	private native int naCloseTunnel(String peerId);
 	private native int naMessageFromPeer(String peerId, String msg);
 	private native int naAskMediaData(String peerId);
-	private native int naSendTalkData(byte[] ulawData);
+	private native int naSendTalkData(byte[] ulawData, int ulawDataLen);
 	
 	static 
 	{
@@ -114,8 +114,8 @@ public class TunnelCommunication {
 	/**
 	 * 发送对讲数据
 	 */
-	public int sendTalkData(byte[] ulawData) {
-		return naSendTalkData(ulawData);
+	public int sendTalkData(byte[] ulawData, int ulawDataLen) {
+		return naSendTalkData(ulawData, ulawDataLen);
 	}
 	
 	/**

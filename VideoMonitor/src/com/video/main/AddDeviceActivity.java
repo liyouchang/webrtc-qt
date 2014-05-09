@@ -8,7 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
@@ -56,7 +56,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	private Button button_delete_devicename;
 	private Button button_delete_id;
 	private RelativeLayout add_title;
-	private ProgressDialog progressDialog;
+	private Dialog mDialog;
 	//终端列表项
 	private String mDeviceName = null;
 	private String mDeviceId = null;
@@ -165,18 +165,6 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		return result;
 	}
 	
-	/**
-	 * 显示操作的进度条
-	 */
-	private void showProgressDialog(String info) {
-		progressDialog = new ProgressDialog(mContext);
-        progressDialog.setMessage(info); 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
-        progressDialog.setIndeterminate(false);     
-        progressDialog.setCancelable(false); 
-        progressDialog.show(); 
-	}
-	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -184,11 +172,12 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_ADDING:
-					showProgressDialog("正在添加... ");
+					mDialog = Utils.createLoadingDialog(mContext, "正在添加设备...");
+					mDialog.show();
 					break;
 				case ADD_TIMEOUT:
-					if (progressDialog != null)
-						progressDialog.dismiss();
+					if (mDialog != null)
+						mDialog.dismiss();
 					Toast.makeText(mContext, "添加终端失败，网络超时！", Toast.LENGTH_SHORT).show();
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
@@ -197,8 +186,8 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				case R.id.add_device_id:
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
-						if (progressDialog != null)
-							progressDialog.dismiss();
+						if (mDialog != null)
+							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
 							String dealerName = (String)msg.obj;

@@ -266,6 +266,8 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 						}
 						sendHandlerMsg(INIT_LOCAL_IMAGE_FINISH);
 					}
+				} else {
+					sendHandlerMsg(NO_LOCAL_IMAGE_FILE);
 				}
 			}
 		}

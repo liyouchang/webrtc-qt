@@ -89,10 +89,12 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 			case R.id.ib_play_music_switch:
 				if (isPlayAlarmMusic) {
 					isPlayAlarmMusic = false;
+					MainActivity.isPlayAlarmMusic = false;
 					preferData.writeData("PlayAlarmMusic", isPlayAlarmMusic);
 					playMusic.setBackgroundResource(R.drawable.icon_set_off);
 				} else {
 					isPlayAlarmMusic = true;
+					MainActivity.isPlayAlarmMusic = true;
 					preferData.writeData("PlayAlarmMusic", isPlayAlarmMusic);
 					playMusic.setBackgroundResource(R.drawable.icon_set_on);
 				}

@@ -108,7 +108,7 @@ public class DeviceItemAdapter extends BaseAdapter {
 						isProtectTraffic = preferData.readBoolean("ProtectTraffic");
 					}
 					
-					if (isProtectTraffic) {
+					if (!isProtectTraffic) {
 						//实时视频
 						Intent intent = new Intent(context, PlayerActivity.class);
 						intent.putExtra("deviceName", name);

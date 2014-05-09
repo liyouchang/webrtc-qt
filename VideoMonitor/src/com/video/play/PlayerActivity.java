@@ -231,7 +231,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						//【播放视频】
 						TunnelCommunication.getInstance().askMediaData(dealerName);
 						videoView.playVideo();
-						System.out.println("MyDebug: 【播放视频】");
 						if (mDialog != null) {
 							mDialog.dismiss();
 							mDialog = null;
@@ -244,8 +243,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					}
 					if (!isTunnelOpened) {
 						toastNotify(mContext, "请求视频超时，请重试！", Toast.LENGTH_SHORT);
-					} else {
-						toastNotify(mContext, "设备掉线啦！", Toast.LENGTH_SHORT);
 					}
 					isTunnelOpened = false;
 					break;
@@ -588,9 +585,16 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 
 	private void closePlayer() {
 		try {
-			videoView.stopVideo();
-			audioThread.stopAudioThread();
-			talkThread.stopTalkThread();
+			try {
+				videoView.stopVideo();
+				audioThread.stopAudioThread();
+				if (talkThread != null) {
+					talkThread.stopTalkThread();
+				}
+			} catch (Exception e) {
+				System.out.println("MyDebug: 关闭音视频对讲异常！");
+				e.printStackTrace();
+			}
 			
 			TunnelCommunication.getInstance().closeTunnel(dealerName);
 			TunnelCommunication.getInstance().tunnelTerminate();
@@ -605,6 +609,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			wakeLock.release(); //解除屏幕保持唤醒
 			wakeLock = null;
 		} catch (Exception e) {
+			System.out.println("MyDebug: 关闭实时播放器异常！");
 			e.printStackTrace();
 		}
 	}

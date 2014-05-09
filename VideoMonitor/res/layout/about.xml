@@ -147,6 +147,7 @@
                     android:textSize="20dp" />
 
                 <TextView
+                    android:id="@+id/about_kaer_content"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/about_kaer"
@@ -161,36 +162,18 @@
                     android:textSize="15dp" />
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/layout_copyright"
-                android:layout_width="fill_parent"
+            <TextView
+                android:id="@+id/about_kaer1"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/layout_about_kaer"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp" >
-
-                <ImageView
-                    android:id="@+id/kaer_logo"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="5dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/kaer_logo" />
-
-                <TextView
-                    android:id="@+id/about_kaer1"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/kaer_logo"
-                    android:layout_centerHorizontal="true"
-                    android:gravity="center"
-                    android:layout_marginTop="3dp"
-                    android:paddingBottom="20dp"
-                    android:text="@string/copyright"
-                    android:textColor="@color/light_black"
-                    android:textSize="18dp" />
-            </RelativeLayout>
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/layout_about_kaer"
+                android:gravity="center"
+                android:paddingTop="15dp"
+                android:paddingBottom="15dp"
+                android:text="@string/copyright"
+                android:textColor="@color/light_black"
+                android:textSize="18dp" />
         </RelativeLayout>
     </ScrollView>
 
