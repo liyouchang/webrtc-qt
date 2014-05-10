@@ -3,8 +3,10 @@
 #include "talk/base/timeutils.h"
 namespace kaerp2p {
 
+
+const int kWriteBufferSize = 512*1024;
 StreamProcess::StreamProcess(talk_base::Thread * stream_thread):
-    read_buf_(128*1024),write_buf_(512*1024)
+    read_buf_(128*1024),write_buf_(kWriteBufferSize),writeBufferFull(false)
 {
     stream_ = NULL;
     this->stream_thread_ = stream_thread;
@@ -119,14 +121,23 @@ void StreamProcess::Cleanup()
 bool StreamProcess::WriteStream(const char *data, int len)
 {
     size_t wlen =0 ;
-    int error;
     write_buf_.GetWriteRemaining(&wlen);
+    //if write buffer is full ,wait until the buffer has half space to write
+    if(writeBufferFull){
+        if(len > kWriteBufferSize/2){
+            writeBufferFull = false;
+        }else{
+            return false;
+        }
+    }
     if(len > wlen){
-        LOG(INFO) << __FUNCTION__<< "not enough space to write, write len" << len
-                  << " ,remainning "<<wlen;
+        LOG(WARNING) << "StreamProcess::WriteStream---"<<
+                     "not enough space to write, write len" << len<<
+                     " ,remainning "<<wlen<<".wait the buffer clear";
+        writeBufferFull = true;
         return false;
     }
-
+    int error;
     talk_base::StreamResult result = write_buf_.Write(data,len,&wlen,&error);
     if(result != talk_base::SR_SUCCESS){
         LOG(INFO) << __FUNCTION__<< "write_buf_ write buf error ";

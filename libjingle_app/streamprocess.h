@@ -10,7 +10,8 @@ class StreamProcess:public sigslot::has_slots<>
 {
 public:
     enum{
-        MSG_DATAWRITE
+        MSG_DATAWRITE,
+        ERROR_BUFFER_FULL = 3
     };
     StreamProcess(talk_base::Thread *stream_thread);
     virtual ~StreamProcess();
@@ -36,6 +37,7 @@ protected:
     size_t totalread;
     talk_base::FifoBuffer read_buf_;
     talk_base::FifoBuffer write_buf_;
+    bool writeBufferFull;
 };
 
 }

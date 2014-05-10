@@ -8,8 +8,8 @@
 #include "KeMessage.h"
 #include "p2pconductor.h"
 
-const int kHeartStop = 5; //5 time without receive heart
-const int kHeartDelay = 1000;  // 1000 milliseconds
+const int kHeartStop = 20; //10s without receive heart
+const int kHeartDelay = 500;  // 500 milliseconds
 
 
 KeMsgProcess::KeMsgProcess(std::string peer_id, KeMsgProcessContainer *container):

@@ -586,6 +586,11 @@ int TurnPort::Send(const void* data, size_t len,
 void TurnPort::UpdateHash() {
   VERIFY(ComputeStunCredentialHash(credentials_.username, realm_,
                                    credentials_.password, &hash_));
+
+  //lht add log
+  std::string hexhash = talk_base::hex_encode(hash_.c_str(),hash_.length());
+  LOG(WARNING)<<"TurnPort::UpdateHash---pwd:"<<credentials_.password<<
+                ",hash:"<<hexhash;
 }
 
 bool TurnPort::UpdateNonce(StunMessage* response) {
