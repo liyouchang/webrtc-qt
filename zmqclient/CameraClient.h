@@ -20,6 +20,7 @@ public:
     virtual void Login();
     virtual void SendAlarm(int alarmType, std::string alarmInfo,
                            std::string picture);
+
     // MessageHandler interface
 public:
     void OnMessage(talk_base::Message *msg);

@@ -1,7 +1,7 @@
 #ifndef KEVIDEOSIMULATOR_H
 #define KEVIDEOSIMULATOR_H
 
-#include "libjingle_app/KeMsgProcessContainer.h"
+#include "libjingle_app/ketunnelcamera.h"
 #include "talk/base/messagehandler.h"
 
 namespace talk_base {

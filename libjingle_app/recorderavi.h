@@ -1,10 +1,12 @@
 #ifndef RECORDERAVI_H
 #define RECORDERAVI_H
+
 #include <string>
 
-class talk_base::Buffer;
-class talk_base::FileStream;
-
+namespace talk_base{
+class Buffer;
+class FileStream;
+}
 
 class RecorderAvi
 {

@@ -30,6 +30,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctime>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -43,7 +46,50 @@
 #include "talk/base/pathutils.h"
 #include "talk/base/fileutils.h"
 #include "talk/base/timeutils.h"
+#include "talk/base/logging.h"
 
+
+#if defined(WIN32)||defined(WINCE)||defined(WIN64)
+#include <objbase.h>
+#endif
+
+std::string GetUUID(std::string& strUUID)
+{
+    strUUID = "";
+#if defined(WIN32)||defined(WINCE)||defined(WIN64)
+    GUID guid;
+    if ( !CoCreateGuid(&guid) )
+    {
+        char buffer[64] = {0};
+        _snprintf_s(buffer, sizeof(buffer),
+            //"%08X%04X%04X%02X%02X%02X%02X%02X%02X%02X%02X",    //大写
+            "%08x%04x%04x%02x%02x%02x%02x%02x%02x%02x%02x",        //小写
+            guid.Data1, guid.Data2, guid.Data3,
+            guid.Data4[0], guid.Data4[1], guid.Data4[2],
+            guid.Data4[3], guid.Data4[4], guid.Data4[5],
+            guid.Data4[6], guid.Data4[7]);
+        strUUID = buffer;
+    }
+#endif
+    return strUUID;
+}
+
+//  Provide random number from 0..(num-1)
+#if (!defined(__WINDOWS__))
+#define within(num) (int) ((float) (num) * random () / (RAND_MAX + 1.0))
+#else
+#define within(num) (int) ((float) (num) * rand () / (RAND_MAX + 1.0))
+#endif
+
+
+std::string GetRandomString()
+{
+    srand(time(0));
+    std::stringstream ss;
+    ss << std::hex << std::uppercase
+       << std::setw(4) << std::setfill('0') << within (0x10000);
+    return ss.str();
+}
 
 const char kAudioLabel[] = "audio_label";
 const char kVideoLabel[] = "video_label";

@@ -2,6 +2,7 @@
 
 #include "talk/base/json.h"
 #include "talk/base/logging.h"
+#include "talk/base/stringutils.h"
 
 #include "KeMessage.h"
 #include "defaults.h"

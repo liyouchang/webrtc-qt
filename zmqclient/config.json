@@ -1,14 +1,14 @@
 {
 
     "camera" : {
-        "mac" : "0090b01af67e"
+        "mac" : ""
     },
-    "dealerId" : "0090b01af67e",
+    "dealerId" : "",
     "routerUrl":"tcp://192.168.0.185:5555",
     "logParams":"tstamp thread info debug",
     "logSaveFile":"",
     "servers":[{"uri":"stun:192.168.0.185:5389"},
-               {"uri":"turn:192.168.40.195:5766","username":"lht","password":"123456"}
+               {"uri":"turn:192.168.40.195:5766","username":"","password":""}
               ],
     "clarity":2
 }

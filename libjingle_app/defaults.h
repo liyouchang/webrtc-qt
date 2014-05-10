@@ -44,6 +44,8 @@ extern const char kKaerPTZCommandValue[];
 
 extern const uint16 kDefaultServerPort;
 
+
+std::string GetRandomString();
 //yyyy-MM-dd hh:mm:ss---- %F %T
 std::string GetCurrentDatetime(std::string format);
 

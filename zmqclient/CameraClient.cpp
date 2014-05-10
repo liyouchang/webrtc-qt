@@ -8,7 +8,7 @@
 
 const int kHeartInterval = 60000;//ms
 CameraClient::CameraClient(std::string mac):
-    mac_(mac),messageServer("Backstage"),alarmServer("Alarm")
+    mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage")
 {
     comm_thread_ = talk_base::Thread::Current();
 }

@@ -115,8 +115,8 @@ void P2PConductor::AddIceServer(const std::string &uri,
 {
     PeerTunnelInterface::IceServer server;
     server.uri = uri;
-    server.username = username;
-    server.password = password;
+    server.username = username.empty()? "lht":username;
+    server.password = password.empty()? "123456":password;
     g_servers.push_back(server);
 
 }
@@ -149,10 +149,11 @@ void P2PConductor::AddIceServers(std::string jstrServers)
 bool P2PConductor::InitializePeerConnection()
 {
     if(g_servers.empty()){
-        PeerTunnelInterface::IceServer server;
-        server.uri = GetPeerConnectionString();
-        g_servers.push_back(server);
-
+//        PeerTunnelInterface::IceServer server;
+//        server.uri = GetPeerConnectionString();
+//        g_servers.push_back(server);
+        P2PConductor::AddIceServer("turn:222.174.213.185:5766",
+                                   "lht","123456");
     }
 
     stream_thread_ =  new talk_base::Thread();
@@ -164,11 +165,14 @@ bool P2PConductor::InitializePeerConnection()
     ASSERT(result);
 
     stream_process_.reset( new StreamProcess(stream_thread_));
-    stream_process_->SignalOpened.connect(this,&P2PConductor::OnTunnelEstablished);
-    stream_process_->SignalClosed.connect(this,&P2PConductor::OnTunnelTerminate);
+    stream_process_->SignalOpened.connect(
+                this,&P2PConductor::OnTunnelEstablished);
+    stream_process_->SignalClosed.connect(
+                this,&P2PConductor::OnTunnelTerminate);
 
     talk_base::scoped_refptr<PeerTunnel> pt (
-                new talk_base::RefCountedObject<PeerTunnel>(signal_thread_,stream_thread_));
+                new talk_base::RefCountedObject<PeerTunnel>(
+                    signal_thread_,stream_thread_));
     if(!pt->Initialize(g_servers,this)){
         return false;
     }

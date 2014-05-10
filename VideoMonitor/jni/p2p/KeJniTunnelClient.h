@@ -9,7 +9,7 @@
 #define KEJNITUNNELCLIENT_H_
 //#include "JniUtil.h"
 
-#include "libjingle_app/KeMsgProcessContainer.h"
+#include "libjingle_app/ketunnelclient.h"
 
 class KeJniTunnelClient :public KeTunnelClient{
 public:
