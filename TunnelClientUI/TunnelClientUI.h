@@ -54,6 +54,8 @@ private slots:
 
     void on_getwifi_clicked();
 
+    void on_stop_cut_clicked();
+
 private:
     void OnPtzMove(std::string side);
     void OnVideoClarity(int clarity);

@@ -187,6 +187,13 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="stop_cut">
+         <property name="text">
+          <string>stop save</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="btn_stop_video">
          <property name="text">
           <string>Stop Video</string>

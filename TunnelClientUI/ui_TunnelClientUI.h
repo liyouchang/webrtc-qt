@@ -52,6 +52,7 @@ public:
     QPushButton *btn_video;
     QPushButton *video2;
     QPushButton *btn_save_video;
+    QPushButton *stop_cut;
     QPushButton *btn_stop_video;
     QMenuBar *menubar;
     QStatusBar *statusbar;
@@ -181,6 +182,11 @@ public:
 
         verticalLayout->addWidget(btn_save_video);
 
+        stop_cut = new QPushButton(groupBox_2);
+        stop_cut->setObjectName(QStringLiteral("stop_cut"));
+
+        verticalLayout->addWidget(stop_cut);
+
         btn_stop_video = new QPushButton(groupBox_2);
         btn_stop_video->setObjectName(QStringLiteral("btn_stop_video"));
 
@@ -221,6 +227,7 @@ public:
         btn_video->setText(QApplication::translate("TunnelClientUI", "Ask Video", 0));
         video2->setText(QApplication::translate("TunnelClientUI", "ask video 2", 0));
         btn_save_video->setText(QApplication::translate("TunnelClientUI", "save video", 0));
+        stop_cut->setText(QApplication::translate("TunnelClientUI", "stop save", 0));
         btn_stop_video->setText(QApplication::translate("TunnelClientUI", "Stop Video", 0));
     } // retranslateUi
 

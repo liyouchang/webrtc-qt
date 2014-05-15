@@ -19,6 +19,11 @@ class Thread;
 
 class KeMsgProcessContainer;
 
+struct VideoInfo{
+    int frameRate_;
+    int frameType_;
+};
+
 class KeMsgProcess:public talk_base::MessageHandler,public sigslot::has_slots<>
 {
 public:
@@ -35,6 +40,9 @@ public:
 
     void StartHeartBeat();
     sigslot::signal1<const std::string &> SignalHeartStop;
+
+    VideoInfo videoInfo_;
+
 protected:
     virtual void ExtractMessage(talk_base::Buffer & allBytes);
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
@@ -54,7 +62,6 @@ private:
     //heart beat param
     talk_base::Thread * heart_thread_;
     int heart_count_;
-
 };
 
 
@@ -82,7 +89,7 @@ public:
 protected:
     virtual KeMsgProcess * GetProcess(const std::string & peer_id);
     virtual void AddMsgProcess(KeMsgProcess * process);
-    virtual void OnProcessNeedSend(const std::string & peer_id,
+    virtual void SendProcessData(const std::string & peer_id,
                                    const char * data,int len);
     virtual void OnHeartStop(const std::string & peer_id);
 

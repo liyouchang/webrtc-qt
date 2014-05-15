@@ -297,13 +297,13 @@ KeMsgProcess *KeMsgProcessContainer::GetProcess(const std::string &peer_id)
 void KeMsgProcessContainer::AddMsgProcess(KeMsgProcess *process)
 {
     process->SignalNeedSendData.connect(
-                this,&KeMsgProcessContainer::OnProcessNeedSend);
+                this,&KeMsgProcessContainer::SendProcessData);
     process->SignalHeartStop.connect(this,&KeMsgProcessContainer::OnHeartStop);
     process->StartHeartBeat();
     processes_.push_back(process);
 }
 
-void KeMsgProcessContainer::OnProcessNeedSend(const std::string &peer_id,
+void KeMsgProcessContainer::SendProcessData(const std::string &peer_id,
                                               const char *data, int len)
 {
     int ret = terminal_->SendByTunnel(peer_id,data,len);

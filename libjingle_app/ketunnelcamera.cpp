@@ -12,7 +12,6 @@ void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t,
     LOG(INFO)<<__FUNCTION__<<"---------"<<peer_id;
     KeMessageProcessCamera *process = new KeMessageProcessCamera(peer_id,this);
     this->AddMsgProcess(process);
-
 }
 
 void KeTunnelCamera::SetVideoClarity(int)
@@ -147,7 +146,7 @@ void KeMessageProcessCamera::OnMessageRespond(talk_base::Buffer &msgData)
     char msgType = msgData.data()[1];
     switch(msgType){
     case KEMSG_TYPE_VIDEOSERVER:
-        RecvAskMediaMsg(msgData);
+        RecvAskMediaReq(msgData);
         break;
     case KEMSG_REQUEST_PLAY_FILE:
         RecvPlayFile(msgData);
@@ -162,7 +161,7 @@ void KeMessageProcessCamera::OnMessageRespond(talk_base::Buffer &msgData)
 
 }
 
-void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
+void KeMessageProcessCamera::RecvAskMediaReq(talk_base::Buffer &msgData)
 {
     //send stream
     KEVideoServerReq * msg = (KEVideoServerReq *)msgData.data();
@@ -170,47 +169,8 @@ void KeMessageProcessCamera::RecvAskMediaMsg(talk_base::Buffer &msgData)
     LOG(INFO)<< "KeMessageProcessCamera::RecvAskMediaMsg---"
              <<"receive ask media msg : video-"<<msg->video<<
                " listen-"<<msg->listen<<" talk-"<<msg->talk;
+    ConnectMedia(msg->video,msg->listen,msg->talk);
 
-    KeTunnelCamera * camera = static_cast<KeTunnelCamera *>(container_);
-
-    int video = msg->video;
-    if(video == 0){//stop
-        camera->SignalVideoData1.disconnect(this);
-        camera->SignalVideoData2.disconnect(this);
-        this->video_started_ = false;
-    }
-    else if(!video_started_){
-        video_started_ = true;
-        if(video == 1){
-            camera->SignalVideoData1.connect(
-                        this , &KeMessageProcessCamera::OnVideoData);
-        }
-        else if(video == 2){
-            camera->SignalVideoData2.connect(
-                        this , &KeMessageProcessCamera::OnVideoData);
-        }
-    }
-
-    int audio = msg->listen;
-    if(audio == 0){
-        camera->SignalAudioData.disconnect(this);
-        this->audio_started_ = false;
-    }
-    else if(!audio_started_){
-        audio_started_ = true;
-        camera->SignalAudioData.connect(
-                    this,&KeMessageProcessCamera::OnAudioData);
-    }
-
-    int talk = msg->talk;
-    if(talk == 0){
-        this->SignalRecvTalkData.disconnect(camera);
-        this->talk_started_ = false;
-
-    }else if(!talk_started_){
-        this->SignalRecvTalkData.connect(camera,&KeTunnelCamera::OnRecvTalkData);
-        this->talk_started_ = true;
-    }
 
 }
 
@@ -219,10 +179,7 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
     KEPlayRecordFileReq * pMsg =
             reinterpret_cast<KEPlayRecordFileReq *>(msgData.data());
     LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile--"<<pMsg->fileData;
-
     this->SignalToPlayFile(this->peer_id(),pMsg->fileData);
-
-
 }
 
 void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
@@ -236,6 +193,66 @@ void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
     }else{
         LOG(WARNING)<<"KeMessageProcessCamera::RecvTalkData---"<<
                     "message type error";
+    }
+}
+
+void KeMessageProcessCamera::RespAskMediaReq(const VideoInfo &info)
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KEVideoServerResp);
+    sendBuf.SetLength(msgLen);
+    KEVideoServerResp * msg = (KEVideoServerResp *)sendBuf.data();
+    msg->protocal = PROTOCOL_HEAD;
+    msg->msgType = KEMSG_TYPE_VIDEOSERVER;
+    msg->msgLength = msgLen;
+    msg->videoID = 0;
+    msg->channelNo = 1;
+    msg->respType = RESP_ACK;
+    msg->frameRate = info.frameRate_;
+    msg->frameType = info.frameType_;
+
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+}
+
+void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
+{
+    KeTunnelCamera * camera = static_cast<KeTunnelCamera *>(container_);
+
+    camera->GetCameraVideoInfo(video,&this->videoInfo_);
+
+    if(video == 0){//stop
+        camera->SignalVideoData1.disconnect(this);
+        camera->SignalVideoData2.disconnect(this);
+        this->video_started_ = false;
+    }
+    else if(!video_started_){
+        video_started_ = true;
+        this->RespAskMediaReq(this->videoInfo_);
+        if(video == 1){
+            camera->SignalVideoData1.connect(
+                        this , &KeMessageProcessCamera::OnVideoData);
+        }
+        else if(video == 2){
+            camera->SignalVideoData2.connect(
+                        this , &KeMessageProcessCamera::OnVideoData);
+        }
+    }
+    if(audio == 0){
+        camera->SignalAudioData.disconnect(this);
+        this->audio_started_ = false;
+    }
+    else if(!audio_started_){
+        audio_started_ = true;
+        camera->SignalAudioData.connect(
+                    this,&KeMessageProcessCamera::OnAudioData);
+    }
+    if(talk == 0){
+        this->SignalRecvTalkData.disconnect(camera);
+        this->talk_started_ = false;
+
+    }else if(!talk_started_){
+        this->SignalRecvTalkData.connect(camera,&KeTunnelCamera::OnRecvTalkData);
+        this->talk_started_ = true;
     }
 }
 

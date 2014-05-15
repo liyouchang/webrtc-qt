@@ -2,7 +2,7 @@
 #define KEMSGPROCESSCLIENT_H
 
 #include <QObject>
-#include "libjingle_app/KeMsgProcessContainer.h"
+#include "libjingle_app/ketunnelclient.h"
 
 class KeQtTunnelClient : public QObject,public KeTunnelClient
 {
@@ -12,9 +12,6 @@ public:
     virtual void OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id);
     virtual void OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id);
     virtual void OnRouterMessage(const std::string &peer_id, const std::string &msg);
-public slots:
-    bool StartVideoCut(QString peerId, QString filename);
-    bool StopVideoCut(QString peerId);
 
 signals:
     void SigRecvVideoData(QString peer_id,QByteArray data);

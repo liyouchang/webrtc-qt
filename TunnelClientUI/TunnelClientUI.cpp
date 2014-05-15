@@ -209,3 +209,10 @@ void TunnelClientUI::on_getwifi_clicked()
 
     this->ui->playPlugin->SendCommand(peerId,msg.c_str());
 }
+
+void TunnelClientUI::on_stop_cut_clicked()
+{
+    QString peerId = ui->edit_peer_id->text();
+    this->ui->playPlugin->StopCut(peerId);
+
+}
