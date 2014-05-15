@@ -78,8 +78,8 @@ struct keRGBQUAD {
 
 //strf video info
 struct keBITMAPINFO {
-    BITMAPINFOHEADER    bmiHeader;
-    RGBQUAD             bmiColors[1];
+    keBITMAPINFOHEADER    bmiHeader;
+    keRGBQUAD             bmiColors[1];
 };
 
 //strf wave info
@@ -245,7 +245,7 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     bitmapinfoheader.biYPelsPerMeter = 0;
     bitmapinfoheader.biClrUsed = 0;
     bitmapinfoheader.biClrImportant = 0;
-    head.AppendData(&bitmapinfoheader,sizeof(BITMAPINFOHEADER));
+    head.AppendData(&bitmapinfoheader,sizeof(keBITMAPINFOHEADER));
 
     head.AppendData("LIST",4);//12
     len = 4 + 4*16 + 4*6 + 2;

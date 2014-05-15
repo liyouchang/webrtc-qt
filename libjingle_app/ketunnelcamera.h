@@ -19,8 +19,8 @@ public:
     virtual void SetPtz(std::string  ptz_key,int param);
     virtual void GetCameraVideoInfo(int level,VideoInfo * info) = 0;
 protected:
-    sigslot::signal2<const char *, int > SignalVideoData1;
-    sigslot::signal2<const char *, int > SignalVideoData2;
+    sigslot::signal2<const char *, int> SignalVideoData1;
+    sigslot::signal2<const char *, int> SignalVideoData2;
 
     sigslot::signal2<const char *, int > SignalAudioData;
     virtual void OnRecvVideoClarity(std::string peer_id,int clarity);
@@ -60,7 +60,6 @@ private:
     bool video_started_;
     bool audio_started_;
     bool talk_started_;
-
 
 };
 

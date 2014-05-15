@@ -2,6 +2,8 @@
 
 #include "talk/base/json.h"
 #include "talk/base/logging.h"
+#include "talk/base/timeutils.h"
+
 #include "KeMessage.h"
 #include "defaults.h"
 
@@ -189,10 +191,10 @@ void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
     int mediaDataLen = msgData.length() - sendStartPos;
     if(pMsg->msgType == KEMSG_TYPE_AUDIOSTREAM){
         SignalRecvTalkData(this->peer_id(),msgData.data() +
-                            sendStartPos,mediaDataLen);
+                           sendStartPos,mediaDataLen);
     }else{
         LOG(WARNING)<<"KeMessageProcessCamera::RecvTalkData---"<<
-                    "message type error";
+                      "message type error";
     }
 }
 
@@ -226,8 +228,9 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
         this->video_started_ = false;
     }
     else if(!video_started_){
-        video_started_ = true;
         this->RespAskMediaReq(this->videoInfo_);
+
+        video_started_ = true;
         if(video == 1){
             camera->SignalVideoData1.connect(
                         this , &KeMessageProcessCamera::OnVideoData);
@@ -259,15 +262,29 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
 void KeMessageProcessCamera::OnVideoData(const char *data, int len)
 {
     talk_base::Buffer sendBuf;
-    int msgLen = sizeof(KERTStreamHead)  + len;
-    sendBuf.SetLength(msgLen);
-    KERTStreamHead * head = (KERTStreamHead *)sendBuf.data();
-    head->protocal = PROTOCOL_HEAD;
-    head->msgType = KEMSG_TYPE_VIDEOSTREAM;
-    head->msgLength = msgLen;
-    head->channelNo = 1;
-    head->videoID = 0;
-    memcpy(sendBuf.data() + sizeof(KERTStreamHead),data,len);
+    int msgLen = sizeof(KERTStreamHead) +sizeof(KEFrameHead) + len;
+    KERTStreamHead  streamHead;
+    streamHead.protocal = PROTOCOL_HEAD;
+    streamHead.msgType = KEMSG_TYPE_VIDEOSTREAM;
+    streamHead.msgLength = msgLen;
+    streamHead.channelNo = 1;
+    streamHead.videoID = 0;
+    sendBuf.AppendData(&streamHead,sizeof(KERTStreamHead));
+
+    static unsigned short frameNo = 0;
+    KEFrameHead frameHead;
+    frameHead.frameNo = frameNo++;
+    frameHead.piecesNo = 1;
+    //time set
+    int ams = talk_base::Time();
+    frameHead.second = ams/1000;
+    frameHead.millisecond = (ams%1000)/10;
+    frameHead.frameType = this->videoInfo_.frameType_;
+    frameHead.frameLen = len;
+    sendBuf.AppendData(&frameHead,sizeof(KEFrameHead));
+
+    sendBuf.AppendData(data,len);
+
 
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 
@@ -275,16 +292,32 @@ void KeMessageProcessCamera::OnVideoData(const char *data, int len)
 
 void KeMessageProcessCamera::OnAudioData(const char *data, int len)
 {
+    const int kNalHeadLen = 4;
+    const char kNalhead[kNalHeadLen] = {0,0,0,1};
+
     talk_base::Buffer sendBuf;
-    int msgLen = sizeof(KERTStreamHead)  + len;
-    sendBuf.SetLength(msgLen);
-    KERTStreamHead * head = (KERTStreamHead *)sendBuf.data();
-    head->protocal = PROTOCOL_HEAD;
-    head->msgType = KEMSG_TYPE_AUDIOSTREAM;
-    head->msgLength = msgLen;
-    head->channelNo = 1;
-    head->videoID = 0;
-    memcpy(sendBuf.data() + sizeof(KERTStreamHead),data,len);
+    int msgLen = sizeof(KERTStreamHead)+sizeof(KEFrameHead)+kNalHeadLen+len;
+    KERTStreamHead streamHead;
+    streamHead.protocal = PROTOCOL_HEAD;
+    streamHead.msgType = KEMSG_TYPE_AUDIOSTREAM;
+    streamHead.msgLength = msgLen;
+    streamHead.channelNo = 1;
+    streamHead.videoID = 0;
+    sendBuf.AppendData(&streamHead,sizeof(KERTStreamHead));
+
+    KEFrameHead frameHead;
+    frameHead.frameNo = 0;
+    frameHead.piecesNo = 0;
+    //time set
+    int ams = talk_base::Time();
+    frameHead.second = ams/1000;
+    frameHead.millisecond = (ams%1000)/10;
+    frameHead.frameType = 80;//audio type
+    frameHead.frameLen = len+4;
+    sendBuf.AppendData(&frameHead,sizeof(KEFrameHead));
+
+    sendBuf.AppendData(kNalhead,kNalHeadLen);
+    sendBuf.AppendData(data,len);
 
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 

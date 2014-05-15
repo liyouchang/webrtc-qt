@@ -4,7 +4,6 @@
 
 #include "talk/base/bind.h"
 #include "talk/base/thread.h"
-#include "talk/base/timeutils.h"
 #include "talk/base/buffer.h"
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
@@ -108,51 +107,16 @@ bool HisiMediaDevice::InitDeviceVideoInfo()
 
 void HisiMediaDevice::SendVideoFrame(const char *data, int len, int level)
 {
-    static unsigned short frameNo = 0;
-    KEFrameHead frameHead;
-    frameHead.frameNo = frameNo++;
-    frameHead.piecesNo = 1;
-    //time set
-    int ams = talk_base::Time();
-    frameHead.second = ams/1000;
-    frameHead.millisecond = (ams%1000)/10;
-
     if(level == 1){
-        frameHead.frameType = video1_frame_type_;
+        SignalVideoData1(data,len);
     }else if(level == 2){
-        frameHead.frameType = video2_frame_type_;
+        SignalVideoData2(data,len);
     }
-
-    //frame type:2-CIF
-    frameHead.frameLen = len;
-    talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
-    frameBuf.AppendData(data,len);
-
-    if(level == 1){
-        SignalVideoData1(frameBuf.data(),frameBuf.length());
-    }else if(level == 2){
-        SignalVideoData2(frameBuf.data(),frameBuf.length());
-    }
-
 }
 
 void HisiMediaDevice::SendAudioFrame(const char *data, int len)
 {
-    KEFrameHead frameHead;
-    frameHead.frameNo = 0;
-    frameHead.piecesNo = 0;
-    //time set
-    int ams = talk_base::Time();
-    frameHead.second = ams/1000;
-    frameHead.millisecond = (ams%1000)/10;
-    //frame type:2-CIF
-    frameHead.frameType = 80;
-    frameHead.frameLen = len+4;
-    talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
-    const char nalhead[4] = {0,0,0,1};
-    frameBuf.AppendData(nalhead,4);
-    frameBuf.AppendData(data,len);
-    SignalAudioData(frameBuf.data(),frameBuf.length());
+    SignalAudioData(data,len);
 }
 
 void HisiMediaDevice::SetVideoClarity(int clarity)
@@ -410,6 +374,7 @@ int HisiMediaDevice::GetVideoFrameType(int level)
                       resolution;
         frameType = 2;
     }
+    //LOG(INFO)<<"HisiMediaDevice::GetVideoFrameType---"<<frameType;
     return frameType;
 }
 
@@ -425,6 +390,7 @@ int HisiMediaDevice::GetVideoFrameRate(int level)
     }
     Raycomm_GetParam(key,buf,0);
     int frameRate = atoi(buf);
+    //LOG(INFO)<<"HisiMediaDevice::GetVideoFrameRate---"<<frameRate;
     return frameRate;
 }
 
