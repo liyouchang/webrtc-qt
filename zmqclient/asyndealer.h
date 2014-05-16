@@ -1,3 +1,13 @@
+/*
+ *
+ * Copyright 2014 Kaer Electric Co.,Ltd
+ * Listens see <http://www.gnu.org/licenses/>.
+ * AUTHORS lht
+ *
+ * AsynDealer类实现了一个异步zmq dealer的通讯方法
+ *
+ */
+
 #ifndef ASYNDEALER_H
 #define ASYNDEALER_H
 
@@ -22,6 +32,7 @@ public:
     };
     AsynDealer();
     ~AsynDealer();
+    void OnMessage(talk_base::Message *msg);
     int initialize(const std::string & id,const std::string & router);
     void terminate();
     int send(const std::string & addr,const std::string & data);
@@ -29,25 +40,19 @@ public:
     std::string id(){return id_;}
     sigslot::signal2<const std::string &,const std::string &> SignalReadData;
     sigslot::signal0<> SignalSent;
-
-private:
+protected:
     int initialize_z(const std::string & id,const std::string & router);
     void terminate_z();
     int send_z(const std::string & addr,const std::string & data);
-
     int recv_z();
-
+private:
     talk_base::Thread * zmq_thread_;
     bool owns_ptrs_;
     bool beInit;
     zmq::context_t *context_;
     zmq::socket_t *socket_;
-    std::queue<talk_base::Buffer> msgQueue;
     std::string id_;
     std::string router_;
-    // MessageHandler interface
-public:
-    void OnMessage(talk_base::Message *msg);
 };
 
 #endif // ASYNDEALER_H

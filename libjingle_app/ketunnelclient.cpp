@@ -6,20 +6,21 @@
 
 #include "KeMessage.h"
 #include "defaults.h"
+#include "recorderavi.h"
 
 KeTunnelClient::KeTunnelClient()
 {
 
 }
 
-int KeTunnelClient::SendCommand(const std::string &peer_id,
-                                const std::string &command)
+bool KeTunnelClient::SendCommand(const std::string &peer_id,
+                                 const std::string &command)
 {
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(command, jmessage)) {
-        LOG(WARNING) << "command format error. " << command;
-        return 101;
+        LOG(WARNING) <<"command format error. " << command;
+        return false;
     }
     jmessage[kKaerMsgTypeName] = kKaerTunnelMsgTypeValue;
 
@@ -27,24 +28,59 @@ int KeTunnelClient::SendCommand(const std::string &peer_id,
     std::string msg = writer.write(jmessage);
 
     return this->terminal_->SendByRouter(peer_id,msg);
+    return true;
 }
 
-int KeTunnelClient::StartPeerMedia(std::string peer_id, int video)
+bool KeTunnelClient::StartPeerMedia(std::string peer_id, int video)
 {
     KeMessageProcessClient * process =
             dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
     if(process == NULL){
         LOG(WARNING) << "process not found "<<peer_id;
-        return -1;
+        return false;
     }
-    if(video == 0){
-        process->AskVideo(0,0,0);
+    process->AskVideo(0,0,0);
+    process->AskVideo(video,1,1);
+    return true;
+}
+
+bool KeTunnelClient::StopPeerMedia(std::string peer_id)
+{
+    KeMessageProcessClient * process =
+            dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peer_id));
+    if(process == NULL){
+        LOG(WARNING) << "process not found "<<peer_id;
+        return false;
     }
-    else{
-        process->AskVideo(0,0,0);
-        process->AskVideo(video,1,1);
+
+    process->AskVideo(0,0,0);
+    process->StopVideoCut();
+    return true;
+}
+
+bool KeTunnelClient::StartPeerVideoCut(const std::string & peer_id,
+                                       const std::string &filename)
+{
+    KeMessageProcessClient * process =
+            dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peer_id));
+    if(process == NULL){
+        LOG(WARNING) <<"KeTunnelClient::PeerVideoCut---"<<
+                       "process not found "<<peer_id;
+        return false;
     }
-    return 0;
+    return process->StartVideoCut(filename);
+}
+
+bool KeTunnelClient::StopPeerVideoCut(const std::string &peer_id)
+{
+    KeMessageProcessClient * process =
+            dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peer_id));
+    if(process == NULL){
+        LOG(WARNING) <<"KeTunnelClient::PeerVideoCut---"<<
+                       "process not found "<<peer_id;
+        return false;
+    }
+    return process->StopVideoCut();
 }
 
 bool KeTunnelClient::DownloadRemoteFile(std::string peer_id,
@@ -138,9 +174,16 @@ void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
 
 KeMessageProcessClient::KeMessageProcessClient(std::string peer_id,
                                                KeTunnelClient * container):
-    KeMsgProcess(peer_id,container)
+    KeMsgProcess(peer_id,container),cutter_(NULL)
 {
 
+}
+
+KeMessageProcessClient::~KeMessageProcessClient()
+{
+    if(cutter_){
+        delete cutter_;
+    }
 }
 
 void KeMessageProcessClient::AskVideo(int video, int listen, int talk)
@@ -203,12 +246,47 @@ void KeMessageProcessClient::OnTalkData(const char *data, int len)
 
 }
 
+bool KeMessageProcessClient::StartVideoCut(const std::string &filename)
+{
+    if(cutter_){
+        LOG(INFO)<<"KeMessageProcessClient::StartVideoCut---"<<
+                   "record already started";
+        return false;
+    }
+    cutter_ = new RecorderAvi(this->peer_id(),videoInfo_.frameRate_,
+                             videoInfo_.frameType_);
+    bool ret = cutter_->StartRecord(filename);
+    this->SignalRecvVideoData.connect(cutter_,&RecorderAvi::OnVideoData);
+    this->SignalRecvAudioData.connect(cutter_,&RecorderAvi::OnAudioData);
+    if(!ret){
+        delete cutter_;
+        cutter_ = NULL;
+    }
+    return ret;
+}
+
+bool KeMessageProcessClient::StopVideoCut()
+{
+    if(cutter_ == NULL){
+        LOG(INFO)<<"KeMessageProcessClient::StopVideoCut---"<<
+                   "video cut is not start";
+        return false;
+    }
+    this->SignalRecvVideoData.disconnect(cutter_);
+    this->SignalRecvAudioData.disconnect(cutter_);
+    bool ret = cutter_->StopRecord();
+    delete cutter_;
+    cutter_ = NULL;
+    return ret;
+}
+
 void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
 {
     char msgType = msgData.data()[1];
     switch(msgType)
     {
     case KEMSG_TYPE_VIDEOSERVER:
+        RecvAskMediaResp(msgData);
         break;
     case KEMSG_TYPE_MEDIATRANS:
         break;
@@ -259,6 +337,16 @@ void KeMessageProcessClient::RecvMediaData(talk_base::Buffer &msgData)
         SignalRecvAudioData(this->peer_id(),msgData.data() +
                             sendStartPos,mediaDataLen);
     }
+}
+
+void KeMessageProcessClient::RecvAskMediaResp(talk_base::Buffer &msgData)
+{
+
+    KEVideoServerResp * msg = (KEVideoServerResp *)msgData.data();
+    this->videoInfo_.frameRate_ = msg->frameRate;
+    this->videoInfo_.frameType_ = msg->frameType;
+    LOG(INFO)<<"KeMessageProcessClient::RecvAskMediaResp---"<<
+               msg->frameRate<<msg->frameType;
 }
 
 

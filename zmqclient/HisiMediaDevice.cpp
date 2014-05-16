@@ -4,7 +4,6 @@
 
 #include "talk/base/bind.h"
 #include "talk/base/thread.h"
-#include "talk/base/timeutils.h"
 #include "talk/base/buffer.h"
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
@@ -69,9 +68,9 @@ HisiMediaDevice::HisiMediaDevice():
 
     ret = Raycomm_MediaDataInit();
     LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
-
-    LOG(INFO)<<"vidoe1 frame type " << GetVideoFrameType(1);
-    LOG(INFO)<<"vidoe2 frame type " << GetVideoFrameType(2);
+    InitDeviceVideoInfo();
+//    LOG(INFO)<<"vidoe1 frame type " << GetVideoFrameType(1);
+//    LOG(INFO)<<"vidoe2 frame type " << GetVideoFrameType(2);
 
 }
 
@@ -87,68 +86,37 @@ HisiMediaDevice::~HisiMediaDevice()
 
 bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
 {
-
-
     media_thread_ = new talk_base::Thread();
     media_thread_->Start();
-
     //start get media
     media_thread_->Post(this,MSG_MEDIA_CONTROL,new MediaControlData(1,1,1));
-
     AlarmNotify::Instance()->StartNotify();
-
     return KeTunnelCamera::Init(client);
+}
+
+bool HisiMediaDevice::InitDeviceVideoInfo()
+{
+    video1_info_.frameRate_ = this->GetVideoFrameRate(1);
+    video1_info_.frameType_ = this->GetVideoFrameType(1);
+    video2_info_.frameRate_ = this->GetVideoFrameRate(2);
+    video2_info_.frameType_ = this->GetVideoFrameType(2);
+    return true;
 }
 
 
 
 void HisiMediaDevice::SendVideoFrame(const char *data, int len, int level)
 {
-    static unsigned short frameNo = 0;
-    KEFrameHead frameHead;
-    frameHead.frameNo = frameNo++;
-    frameHead.piecesNo = 1;
-    //time set
-    int ams = talk_base::Time();
-    frameHead.second = ams/1000;
-    frameHead.millisecond = (ams%1000)/10;
-
     if(level == 1){
-        frameHead.frameType = video1_frame_type_;
+        SignalVideoData1(data,len);
     }else if(level == 2){
-        frameHead.frameType = video2_frame_type_;
+        SignalVideoData2(data,len);
     }
-
-    //frame type:2-CIF
-    frameHead.frameLen = len;
-    talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
-    frameBuf.AppendData(data,len);
-
-    if(level == 1){
-        SignalVideoData1(frameBuf.data(),frameBuf.length());
-    }else if(level == 2){
-        SignalVideoData2(frameBuf.data(),frameBuf.length());
-    }
-
 }
 
 void HisiMediaDevice::SendAudioFrame(const char *data, int len)
 {
-    KEFrameHead frameHead;
-    frameHead.frameNo = 0;
-    frameHead.piecesNo = 0;
-    //time set
-    int ams = talk_base::Time();
-    frameHead.second = ams/1000;
-    frameHead.millisecond = (ams%1000)/10;
-    //frame type:2-CIF
-    frameHead.frameType = 80;
-    frameHead.frameLen = len+4;
-    talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
-    const char nalhead[4] = {0,0,0,1};
-    frameBuf.AppendData(nalhead,4);
-    frameBuf.AppendData(data,len);
-    SignalAudioData(frameBuf.data(),frameBuf.length());
+    SignalAudioData(data,len);
 }
 
 void HisiMediaDevice::SetVideoClarity(int clarity)
@@ -384,7 +352,6 @@ int HisiMediaDevice::GetVideoFrameType(int level)
     }else if(level == 2){
         key = VIDEO2_RESOLUTION;
     }
-
     Raycomm_GetParam(key,buf,0);
     int frameType;
     std::string resolution(buf);
@@ -407,14 +374,24 @@ int HisiMediaDevice::GetVideoFrameType(int level)
                       resolution;
         frameType = 2;
     }
-
-    if(level == 1){
-        this->video1_frame_type_ = frameType;
-    }else if(level == 2){
-        this->video2_frame_type_ = frameType;
-    }
-
+    //LOG(INFO)<<"HisiMediaDevice::GetVideoFrameType---"<<frameType;
     return frameType;
+}
+
+int HisiMediaDevice::GetVideoFrameRate(int level)
+{
+    char buf[1024];
+    memset(buf,0,1024);
+    char * key;
+    if(level == 1){
+        key = VIDEO1_FRAMERATE;
+    }else if(level == 2){
+        key = VIDEO2_FRAMERATE;
+    }
+    Raycomm_GetParam(key,buf,0);
+    int frameRate = atoi(buf);
+    //LOG(INFO)<<"HisiMediaDevice::GetVideoFrameRate---"<<frameRate;
+    return frameRate;
 }
 
 std::string HisiMediaDevice::GetHardwareId()
@@ -425,6 +402,15 @@ std::string HisiMediaDevice::GetHardwareId()
     std::string result = buf;
     return result;
 
+}
+
+void HisiMediaDevice::GetCameraVideoInfo(int level, VideoInfo *info)
+{
+    if(level == 1){
+        *info = this->video1_info_;
+    }else if(level == 2){
+        *info = this->video2_info_;
+    }
 }
 
 

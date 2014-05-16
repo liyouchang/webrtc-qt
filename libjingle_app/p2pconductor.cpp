@@ -195,11 +195,8 @@ void P2PConductor::DeletePeerConnection()
 
 void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
 {
-    LOG(INFO) << __FUNCTION__;
-
-    peer_connection_->SetLocalDescription(DummySetSessionDescriptionObserver::Create(),desc);
-
-
+    peer_connection_->SetLocalDescription(
+                DummySetSessionDescriptionObserver::Create(),desc);
     //get stream process
     talk_base::StreamInterface* stream = peer_connection_->GetStream();
     if(!stream_process_)
@@ -207,13 +204,12 @@ void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
         return ;
     }
     bool result = stream_thread_->Invoke<bool>(
-                talk_base::Bind(&StreamProcess::ProcessStream,this->GetStreamProcess(),stream));
+                talk_base::Bind(&StreamProcess::ProcessStream,
+                                this->GetStreamProcess(),stream));
     if(!result){
         LOG(WARNING)<<"stream process faild";
         return;
     }
-
-
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage[kSessionDescriptionTypeName] = desc->type();
@@ -221,36 +217,30 @@ void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
     desc->ToString(&sdp);
     jmessage[kSessionDescriptionSdpName] = sdp;
     std::string msg = writer.write(jmessage);
-    LOG(INFO) <<"session sdp is " << msg;
-
-    //client_->SendToPeer(peer_id_, msg);
+    LOG(INFO) << "P2PConductor::OnSuccess---" << "session sdp is " << msg;
     SignalNeedSendToPeer(peer_id_,msg);
-
 }
 
 void P2PConductor::OnFailure(const std::string &error)
 {
-    LOG(LERROR) <<__FUNCTION__<< error;
+    LOG(LERROR) <<"P2PConductor::OnFailure"<< error;
 }
 
 void P2PConductor::OnError()
 {
-    LOG(LS_ERROR) << __FUNCTION__ << "  offer error";
+    LOG(LS_ERROR) << "P2PConductor::OnError---" << "offer error";
     DeletePeerConnection();
-    //this->ClientThreadCallback(PEER_CONNECTION_ERROR, NULL);
 }
 
 void P2PConductor::OnRenegotiationNeeded()
 {
-    LOG(LS_ERROR) << __FUNCTION__;
+    LOG(LS_ERROR) << "P2PConductor::OnRenegotiationNeeded";
 }
 
 void P2PConductor::OnIceCandidate(const IceCandidateInterface *candidate)
 {
-    LOG(INFO) << __FUNCTION__ << " " << candidate->sdp_mline_index();
     Json::StyledWriter writer;
     Json::Value jmessage;
-
     jmessage[kCandidateSdpMidName] = candidate->sdp_mid();
     jmessage[kCandidateSdpMlineIndexName] = candidate->sdp_mline_index();
     std::string sdp;
@@ -259,10 +249,8 @@ void P2PConductor::OnIceCandidate(const IceCandidateInterface *candidate)
         return;
     }
     jmessage[kCandidateSdpName] = sdp;
-
     std::string msg = writer.write(jmessage);
-
-    //client_->SendToPeer(peer_id_,msg);
+    LOG(INFO) << "P2PConductor::OnIceCandidate---" << msg;
     SignalNeedSendToPeer(peer_id_,msg);
 }
 
@@ -283,8 +271,7 @@ void P2PConductor::OnMessage(talk_base::Message *msg)
 
 void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
 {
-    LOG(INFO) << __FUNCTION__;
-    //ASSERT(peer_id_ == peer_id || peer_id_.empty());
+    LOG(INFO) <<"P2PConductor::OnMessageFromPeer---";
     ASSERT(!message.empty());
     if(peer_id != peer_id_ && !peer_id_.empty()){
         LOG(WARNING)<<"peer id is wrong";
@@ -338,7 +325,9 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
             return;
         }
         LOG(INFO) << " Received session description :" << message;
-        peer_connection_->SetRemoteDescription(DummySetSessionDescriptionObserver::Create(),session_description);
+        peer_connection_->SetRemoteDescription(
+                    DummySetSessionDescriptionObserver::Create(),
+                    session_description);
         if (session_description->type() ==
                 webrtc::SessionDescriptionInterface::kOffer) {
             peer_connection_->CreateAnswer(this);
@@ -362,7 +351,6 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::stri
             return;
         }
         LOG(INFO) << " Received candidate :" << message;
-
         if (!peer_connection_->AddIceCandidate(candidate.get())) {
             LOG(WARNING) << "Failed to apply the received candidate";
             return;

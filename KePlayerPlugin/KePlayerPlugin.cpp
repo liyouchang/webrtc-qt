@@ -105,14 +105,13 @@ int KePlayerPlugin::Initialize()
 int KePlayerPlugin::StartVideo(QString peer_id, int video)
 {
     std::string str_id = peer_id.toStdString();
-    int ret =  tunnel_->StartPeerMedia(str_id,video);
-    if(ret != 0){
-        return ret;
+    if(!tunnel_->StartPeerMedia(str_id,video)){
+        return KE_VIDEO_START_FAILED;
     }
 
     int index = video_wall_->SetPeerPlay(peer_id);
     qDebug()<<"KePlayerPlugin::StartVideo play index is "<< index;
-
+    return KE_SUCCESS;
 
 }
 
@@ -121,10 +120,10 @@ int KePlayerPlugin::StopVideo(QString peerId)
     if(peerId.isEmpty()){
         return KE_PARAM_ERROR;
     }
-    tunnel_->StopVideoCut(peerId);
     video_wall_->StopPeerPlay(peerId);
     std::string strId = peerId.toStdString();
-    return tunnel_->StartPeerMedia(strId,0);
+    return tunnel_->StopPeerMedia(strId);
+    return KE_SUCCESS;
 }
 
 int KePlayerPlugin::StartCut(QString peerId)
@@ -136,12 +135,11 @@ int KePlayerPlugin::StartCut(QString peerId)
     if(!tunnel_->IsTunnelOpened(strId)){
         return KE_TUNNEL_NOT_OPEN;
     }
-    QString filename;
-    if(!tunnel_->StartVideoCut(peerId,filename)){
-        return KE_INIT_CUT_VIDEO_FAILED;
+    std::string filename = "test.avi";
+    if(!tunnel_->StartPeerVideoCut(strId,filename)){
+        return KE_VIDEO_CUT_FAILED;
     }
     return KE_SUCCESS;
-
 }
 
 int KePlayerPlugin::StopCut(QString peerId)
@@ -149,7 +147,10 @@ int KePlayerPlugin::StopCut(QString peerId)
     if(peerId.isEmpty()){
         return KE_PARAM_ERROR;
     }
-    tunnel_->StopVideoCut(peerId);
+    std::string strId = peerId.toStdString();
+    if(!tunnel_->StopPeerVideoCut(strId)){
+        return KE_VIDEO_CUT_FAILED;
+    }
     return KE_SUCCESS;
 }
 

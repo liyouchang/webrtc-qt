@@ -244,6 +244,8 @@ struct KEVideoServerResp
     int clientID;
     char channelNo;
     char respType;// ACK/NAK
+    char frameRate; //lht add frame rate and frametype
+    char frameType;
 };
 
 typedef struct _KEMsgMediaTransReq

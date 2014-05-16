@@ -28,14 +28,16 @@ public:
     HisiMediaDevice();
     ~HisiMediaDevice();
     virtual bool Init(kaerp2p::PeerConnectionClientInterface *client);
+    bool InitDeviceVideoInfo();
     virtual void SetVideoClarity(int);
-
     void OnMessage(talk_base::Message *msg);
     void SetVideoResolution(std::string r);
     //video == 0 start video ,audio == 0 start audio
-    int GetVideoFrameType(int level);
     std::string GetHardwareId();
+    virtual void GetCameraVideoInfo(int level,VideoInfo * info);
 protected:
+    int GetVideoFrameType(int level);
+    int GetVideoFrameRate(int level);
 private:
     /**
      * @brief SendVideoFrame
@@ -49,8 +51,8 @@ private:
     int video1_handle_;
     int video2_handle_;
     int audio_handle_;
-    int video1_frame_type_;
-    int video2_frame_type_;
+    VideoInfo video1_info_;
+    VideoInfo video2_info_;
     int video_clarity_;
     char media_buffer_[MEDIA_BUFFER_LENGTH];
     // KeTunnelCamera interface

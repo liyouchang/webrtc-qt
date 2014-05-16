@@ -17,10 +17,10 @@ public:
     virtual void SetVideoClarity(int);
     virtual int GetVideoClarity();
     virtual void SetPtz(std::string  ptz_key,int param);
-
+    virtual void GetCameraVideoInfo(int level,VideoInfo * info) = 0;
 protected:
-    sigslot::signal2<const char *, int > SignalVideoData1;
-    sigslot::signal2<const char *, int > SignalVideoData2;
+    sigslot::signal2<const char *, int> SignalVideoData1;
+    sigslot::signal2<const char *, int> SignalVideoData2;
 
     sigslot::signal2<const char *, int > SignalAudioData;
     virtual void OnRecvVideoClarity(std::string peer_id,int clarity);
@@ -49,9 +49,13 @@ public:
 
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
-    virtual void RecvAskMediaMsg(talk_base::Buffer &msgData);
+    virtual void RecvAskMediaReq(talk_base::Buffer &msgData);
     virtual void RecvPlayFile(talk_base::Buffer &msgData);
     virtual void RecvTalkData(talk_base::Buffer &msgData);
+
+protected:
+    virtual void RespAskMediaReq(const VideoInfo & info);
+    virtual void ConnectMedia(int video,int audio,int talk);
 private:
     bool video_started_;
     bool audio_started_;

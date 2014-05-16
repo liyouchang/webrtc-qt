@@ -275,6 +275,7 @@ void VideoWall::showNormalScreenWall()
 
 void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
 {
+
     int play_index = peer_play_map_.value(peer_id,-1);
     if(play_index != -1)
         this->players[play_index]->PlayMediaData(data);

@@ -1,3 +1,14 @@
+/*
+ *
+ * Copyright 2014 Kaer Electric Co.,Ltd
+ * Listens see <http://www.gnu.org/licenses/>.
+ * AUTHORS lht
+ *
+ * AsynDealer类实现了一个异步zmq dealer的通讯方法
+ * 通过talk_base::Thread的PostMessage方法实现读取和发送的时序交替，
+ * 通过Signal返回读取的数据
+ */
+
 #include "asyndealer.h"
 #include "talk/base/bind.h"
 #include "talk/base/logging.h"
@@ -42,6 +53,7 @@ void AsynDealer::terminate()
 
 int AsynDealer::send(const std::string & addr, const std::string & data)
 {
+    //TODO:use SendMessage
     return zmq_thread_->Invoke<int>(
                 talk_base::Bind(&AsynDealer::send_z, this,addr,data));
 }
@@ -92,14 +104,11 @@ void AsynDealer::terminate_z()
 int AsynDealer::send_z(const std::string & addr,const std::string & data)
 {
     ASSERT(zmq_thread_->IsCurrent());
-
     zmq::zmsg msg;
     msg.wrap(addr,"");
     msg.append(data);
     std::cout<<"send :"<<msg.GetBody()<<" data:"<<data<<std::endl;
-
     msg.send(*socket_);
-
     return 0;
 }
 
@@ -133,7 +142,6 @@ void AsynDealer::OnMessage(talk_base::Message *msg)
     {
         talk_base::scoped_ptr<PostZmqMessage>  pData(
             static_cast <PostZmqMessage*>(msg->pdata));
-
         zmq::zmsg * pzmsg = pData->data().get();
         pzmsg->send(*socket_);
         SignalSent();

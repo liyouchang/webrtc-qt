@@ -3,7 +3,7 @@
 
 #include "KeMsgProcess.h"
 
-
+class RecorderAvi;
 class KeTunnelClient:public KeMsgProcessContainer{
     friend class KeMessageProcessClient;
 
@@ -15,15 +15,19 @@ public:
      * @param command --- the message send to another peer
      * @return ---0 : success, 101 : command format error,
      */
-    int SendCommand(const std::string &peer_id,const std::string & command);
+    bool SendCommand(const std::string &peer_id,const std::string & command);
 
     /**
      * @brief StartPeerMedia
      * @param peer_id
-     * @param video---0:stop media,1:main stream media,2:sub stream media
+     * @param video---1:main stream media,2:sub stream media
      * @return
      */
-    virtual int StartPeerMedia( std::string  peer_id,int video);
+    virtual bool StartPeerMedia(std::string  peer_id,int video);
+    virtual bool StopPeerMedia(std::string peer_id);
+    virtual bool StartPeerVideoCut(const std::string &peer_id,
+                                   const std::string & filename);
+    virtual bool StopPeerVideoCut(const std::string & peer_id);
 
     //send talk data to camera
     sigslot::signal2<const char *, int > SignalTalkData;
@@ -50,20 +54,26 @@ class KeMessageProcessClient: public KeMsgProcess
 {
 public:
     KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
-
+    virtual ~KeMessageProcessClient();
     void AskVideo(int video, int listen, int talk);
     void ReqestPlayFile(const char * file_name);
     void OnTalkData(const char * data,int len);
 
+    bool StartVideoCut(const std::string &filename);
+    bool StopVideoCut();
+
     sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;
-    sigslot::signal2<const std::string &,int > SignalRecordPlayStatus;
+    sigslot::signal2<const std::string &,int> SignalRecordPlayStatus;
 
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     virtual void OnRecvRecordMsg(talk_base::Buffer & msgData);
     virtual void RecvMediaData(talk_base::Buffer & msgData);
+    virtual void RecvAskMediaResp(talk_base::Buffer & msgData);
+private:
+    RecorderAvi *cutter_;
 };
 
 

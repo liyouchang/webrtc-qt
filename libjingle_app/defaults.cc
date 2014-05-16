@@ -75,7 +75,7 @@ std::string GetUUID(std::string& strUUID)
 }
 
 //  Provide random number from 0..(num-1)
-#if (!defined(__WINDOWS__))
+#if (!defined(WIN32))
 #define within(num) (int) ((float) (num) * random () / (RAND_MAX + 1.0))
 #else
 #define within(num) (int) ((float) (num) * rand () / (RAND_MAX + 1.0))
