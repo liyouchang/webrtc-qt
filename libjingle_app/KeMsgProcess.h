@@ -34,6 +34,7 @@ public:
     void OnMessage(talk_base::Message *msg);
 
     KeMsgProcess(std::string peer_id,KeMsgProcessContainer * container);
+    virtual ~KeMsgProcess();
     sigslot::signal3<const std::string &,const char * ,int> SignalNeedSendData;
     void OnTunnelMessage(const std::string & peer_id,talk_base::Buffer & msg);
     std::string peer_id(){ return peer_id_;}

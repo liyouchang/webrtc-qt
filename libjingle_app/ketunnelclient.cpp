@@ -174,9 +174,16 @@ void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
 
 KeMessageProcessClient::KeMessageProcessClient(std::string peer_id,
                                                KeTunnelClient * container):
-    KeMsgProcess(peer_id,container),cutter(NULL)
+    KeMsgProcess(peer_id,container),cutter_(NULL)
 {
 
+}
+
+KeMessageProcessClient::~KeMessageProcessClient()
+{
+    if(cutter_){
+        delete cutter_;
+    }
 }
 
 void KeMessageProcessClient::AskVideo(int video, int listen, int talk)
@@ -241,35 +248,35 @@ void KeMessageProcessClient::OnTalkData(const char *data, int len)
 
 bool KeMessageProcessClient::StartVideoCut(const std::string &filename)
 {
-    if(cutter){
+    if(cutter_){
         LOG(INFO)<<"KeMessageProcessClient::StartVideoCut---"<<
                    "record already started";
         return false;
     }
-    cutter = new RecorderAvi(this->peer_id(),videoInfo_.frameRate_,
+    cutter_ = new RecorderAvi(this->peer_id(),videoInfo_.frameRate_,
                              videoInfo_.frameType_);
-    bool ret = cutter->StartRecord(filename);
-    this->SignalRecvVideoData.connect(cutter,&RecorderAvi::OnVideoData);
-    this->SignalRecvAudioData.connect(cutter,&RecorderAvi::OnAudioData);
+    bool ret = cutter_->StartRecord(filename);
+    this->SignalRecvVideoData.connect(cutter_,&RecorderAvi::OnVideoData);
+    this->SignalRecvAudioData.connect(cutter_,&RecorderAvi::OnAudioData);
     if(!ret){
-        delete cutter;
-        cutter = NULL;
+        delete cutter_;
+        cutter_ = NULL;
     }
     return ret;
 }
 
 bool KeMessageProcessClient::StopVideoCut()
 {
-    if(cutter == NULL){
+    if(cutter_ == NULL){
         LOG(INFO)<<"KeMessageProcessClient::StopVideoCut---"<<
                    "video cut is not start";
         return false;
     }
-    this->SignalRecvVideoData.disconnect(cutter);
-    this->SignalRecvAudioData.disconnect(cutter);
-    bool ret = cutter->StopRecord();
-    delete cutter;
-    cutter = NULL;
+    this->SignalRecvVideoData.disconnect(cutter_);
+    this->SignalRecvAudioData.disconnect(cutter_);
+    bool ret = cutter_->StopRecord();
+    delete cutter_;
+    cutter_ = NULL;
     return ret;
 }
 

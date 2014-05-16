@@ -1,3 +1,14 @@
+/*
+ *
+ * Copyright 2014 Kaer Electric Co.,Ltd
+ * Listens see <http://www.gnu.org/licenses/>.
+ * AUTHORS lht
+ *
+ * RecorderAvi 实现了视频数据存储成avi文件的功能
+ *
+ */
+
+
 #include "recorderavi.h"
 
 #include <stdlib.h>
@@ -14,18 +25,18 @@
 
 //avih
 struct MainAVIHeader{
-  uint32_t dwMicroSecPerFrame;//显示每桢所需的时间ns，定义avi的显示速率
-  uint32_t dwMaxBytesPerSec; // 最大的数据传输率
-  uint32_t dwPaddingGranularity; //记录块的长度需为此值的倍数，通常是2048
-  uint32_t dwFlages; //AVI文件的特殊属性，如是否包含索引块，音视频数据是否交叉存储
-  uint32_t dwTotalFrame; //文件中的总桢数
-  uint32_t dwInitialFrames; //说明在开始播放前需要多少桢
-  uint32_t dwStreams; //文件中包含的数据流种类
-  uint32_t dwSuggestedBufferSize; //建议使用的缓冲区的大小，
-                        //通常为存储一桢图像以及同步声音所需要的数据之和
-  uint32_t dwWidth; //图像宽
-  uint32_t dwHeight; //图像高
-  uint32_t dwReserved[4]; //保留值
+    uint32_t dwMicroSecPerFrame;//显示每桢所需的时间ns，定义avi的显示速率
+    uint32_t dwMaxBytesPerSec; // 最大的数据传输率
+    uint32_t dwPaddingGranularity; //记录块的长度需为此值的倍数，通常是2048
+    uint32_t dwFlages; //AVI文件的特殊属性，如是否包含索引块，音视频数据是否交叉存储
+    uint32_t dwTotalFrame; //文件中的总桢数
+    uint32_t dwInitialFrames; //说明在开始播放前需要多少桢
+    uint32_t dwStreams; //文件中包含的数据流种类
+    uint32_t dwSuggestedBufferSize; //建议使用的缓冲区的大小，
+    //通常为存储一桢图像以及同步声音所需要的数据之和
+    uint32_t dwWidth; //图像宽
+    uint32_t dwHeight; //图像高
+    uint32_t dwReserved[4]; //保留值
 };
 
 struct AVIRECT
@@ -56,24 +67,24 @@ struct AVIStreamHeader{
 
 
 struct keBITMAPINFOHEADER{
-        uint32_t      biSize;
-        long       biWidth;
-        long       biHeight;
-        uint16_t       biPlanes;
-        uint16_t       biBitCount;
-        uint32_t      biCompression;
-        uint32_t      biSizeImage;
-        long       biXPelsPerMeter;
-        long       biYPelsPerMeter;
-        uint32_t      biClrUsed;
-        uint32_t      biClrImportant;
+    uint32_t      biSize;
+    long       biWidth;
+    long       biHeight;
+    uint16_t       biPlanes;
+    uint16_t       biBitCount;
+    uint32_t      biCompression;
+    uint32_t      biSizeImage;
+    long       biXPelsPerMeter;
+    long       biYPelsPerMeter;
+    uint32_t      biClrUsed;
+    uint32_t      biClrImportant;
 };
 
 struct keRGBQUAD {
-        uint8_t    rgbBlue;
-        uint8_t    rgbGreen;
-        uint8_t    rgbRed;
-        uint8_t    rgbReserved;
+    uint8_t    rgbBlue;
+    uint8_t    rgbGreen;
+    uint8_t    rgbRed;
+    uint8_t    rgbReserved;
 };
 
 //strf video info
@@ -105,42 +116,42 @@ void Reso2WidthHeigh(int reso,int *width,int *high)
 {
     switch(reso)
     {
-        case 1:                     //QCIF
-            *width = 176;
-            *high = 144;
-            break;
-        case 2:                     //CIF
-            *width = 352;
-            *high = 288;
-            break;
-        case 3:                     //HD
-            *width = 704;
-            *high = 288;
-            break;
-        case 4:                     //QVGA
-            *width = 320;
-            *high = 240;
-            break;
-        case 7:						//VGA
-            *width = 640;
-            *high = 480;
-            break;
-        case 10:                    //720P
-            *width = 1280;
-            *high = 720;
-            break;
-        case 12:                    //960P
-            *width = 1280;
-            *high = 960;
-            break;
-        case 6:                     //1080P
-            *width = 1920;
-            *high = 1080;
-            break;
-        default:                    //D1
-            *width = 704;
-            *high = 576;
-            break;
+    case 1:                     //QCIF
+        *width = 176;
+        *high = 144;
+        break;
+    case 2:                     //CIF
+        *width = 352;
+        *high = 288;
+        break;
+    case 3:                     //HD
+        *width = 704;
+        *high = 288;
+        break;
+    case 4:                     //QVGA
+        *width = 320;
+        *high = 240;
+        break;
+    case 7:						//VGA
+        *width = 640;
+        *high = 480;
+        break;
+    case 10:                    //720P
+        *width = 1280;
+        *high = 720;
+        break;
+    case 12:                    //960P
+        *width = 1280;
+        *high = 960;
+        break;
+    case 6:                     //1080P
+        *width = 1920;
+        *high = 1080;
+        break;
+    default:                    //D1
+        *width = 704;
+        *high = 576;
+        break;
     }
 }
 
@@ -150,10 +161,15 @@ RecorderAvi::RecorderAvi(const std::string &peerId,int frameRate,int frameType):
 {
     aviIndex_ = new talk_base::Buffer();
     aviFile_ = new talk_base::FileStream();
+    this->moviListLen = 4;
+    this->recvIFrame = false;
+    this->frameCount = 0;
+
 }
 
 RecorderAvi::~RecorderAvi()
 {
+    StopRecord();
     delete aviIndex_;
     delete aviFile_;
 }
@@ -172,7 +188,7 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     head.AppendData("RIFF~~~~AVI ",12);//20
     head.AppendData("LIST",4);
     //len = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6+2;
-    int aviListLen = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6 + 2;//+2
+    int aviListLen = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6;
     head.AppendData(&aviListLen,4);
 
     head.AppendData("hdrl",4);//4
@@ -186,7 +202,7 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     avimainheader.dwMaxBytesPerSec = 0xffffffff;
     avimainheader.dwPaddingGranularity = 0;
     avimainheader.dwFlages = AVIF_HASINDEX|AVIF_ISINTERLEAVED|AVIF_TRUSTCKTYPE;
-    avimainheader.dwTotalFrame = 3000;
+    avimainheader.dwTotalFrame = 0;
     avimainheader.dwInitialFrames = 0;
     avimainheader.dwStreams = 2;
     avimainheader.dwSuggestedBufferSize = 1000000;
@@ -219,7 +235,7 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     avistreamheader.dwScale = 1000;
     avistreamheader.dwRate = this->frameRate_*1000;
     avistreamheader.dwStart = 0;
-    avistreamheader.dwLength = 3000;
+    avistreamheader.dwLength = 0;
     avistreamheader.dwSuggestedBufferSize = (1<<20);
     avistreamheader.dwQuality = -1;
     avistreamheader.dwSampleSize = width*height;
@@ -248,15 +264,15 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     head.AppendData(&bitmapinfoheader,sizeof(keBITMAPINFOHEADER));
 
     head.AppendData("LIST",4);//12
-    len = 4 + 4*16 + 4*6 + 2;
-    //len = 4 + 4*16 + 4*6 ;
+    //len = 4 + 4*16 + 4*6 + 2;
+    len = 4 + 4*16 + 4*6 ;
     head.AppendData(&len,4);
     head.AppendData("strl",4);
 
     head.AppendData("strh",4);//4*16
     len =sizeof(AVIStreamHeader);
     head.AppendData(&len,4);
-//    AVIStreamHeader avistreamheader; //reuse
+    //    AVIStreamHeader avistreamheader; //reuse
     memcpy(avistreamheader.fccType,"auds",4);
     memcpy(avistreamheader.fccHandler,"G711",4);
     avistreamheader.dwFlags = 0;
@@ -277,7 +293,7 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     head.AppendData(&avistreamheader,sizeof(AVIStreamHeader));
 
     head.AppendData("strf",4);//4*6
-    len = sizeof(WAVEFORMAT) + 2;//2
+    len = sizeof(WAVEFORMAT);
     head.AppendData(&len,4);
     WAVEFORMAT waveformat;
     waveformat.wFormatTag = 0x07;
@@ -288,13 +304,16 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     waveformat.biSize = 8;
     head.AppendData(&waveformat,sizeof(WAVEFORMAT));
     //这里原来有这个代码，不知有什么影响
-    int tmp = 0;
-    head.AppendData(&tmp,2);
+    //    int tmp = 0;
+    //    head.AppendData(&tmp,2);
     //+2
     head.AppendData("LIST~~~~movi",12);
+    //init variable
     this->moviListLen = 4;
     this->recvIFrame = false;
+    this->frameCount = 0;
 
+    //index
     aviIndex_->AppendData("idx1~~~~",8);
 
     talk_base::StreamResult result = aviFile_->WriteAll(
@@ -308,10 +327,15 @@ bool RecorderAvi::StartRecord(const std::string & filename)
 
 bool RecorderAvi::StopRecord()
 {
+    if(!recvIFrame){
+        return false;
+    }
+    recvIFrame = false;
     size_t indexDataLen = aviIndex_->length() - 8;
 
     memcpy(aviIndex_->data()+4,&indexDataLen,4);
-    talk_base::StreamResult result = aviFile_->WriteAll(aviIndex_->data(),aviIndex_->length(),NULL,NULL);
+    talk_base::StreamResult result = aviFile_->WriteAll(
+                aviIndex_->data(),aviIndex_->length(),NULL,NULL);
     if(result != talk_base::SR_SUCCESS){
         LOG(WARNING)<<"RecorderAvi::StopRecord---"<<"write file error ";
         return false;
@@ -326,7 +350,7 @@ bool RecorderAvi::StopRecord()
     totalLen -= 8;
     aviFile_->SetPosition(4);
     aviFile_->Write(&totalLen,4,NULL,NULL);
-    aviFile_->SetPosition(316+2);
+    aviFile_->SetPosition(316);
     aviFile_->Write(&moviListLen,4,NULL,NULL);
 
     aviFile_->Close();
@@ -354,16 +378,18 @@ bool RecorderAvi::AviFileWriteVideo(const char * mediaData,int mediaLen)
 
     if(!recvIFrame){
         if((mediaData[4]&0x1f)==0x07){
-            LOG(INFO)<<"receive iframe";
+            LOG(INFO)<<"RecorderAvi::AviFileWriteVideo---"<<
+                       "receive iframe, start record";
             recvIFrame = true;
         }else{
             return false;
         }
     }
+
     AVIINDEXENTRY aviindex;
     memcpy(&aviindex.ckid,"00dc",4);
     aviindex.dwFlags = ((mediaData[4]&0x1f)==0x07) ?0x10 :0 ;//判断idr帧
-    aviindex.dwChunkOffset = 320 + moviListLen + 2;
+    aviindex.dwChunkOffset = 320 + moviListLen;
     aviindex.dwChunkLength = mediaLen;
     aviIndex_->AppendData(&aviindex,sizeof(AVIINDEXENTRY));
 
@@ -383,18 +409,19 @@ bool RecorderAvi::AviFileWriteVideo(const char * mediaData,int mediaLen)
         LOG(WARNING)<<"RecorderAvi::aviFileWriteVideo---"<<"write file error ";
         return false;
     }
+    ++frameCount;
     return true;
 }
 
 bool RecorderAvi::AviFileWriteAudio(const char *mediaData, int mediaLen)
 {
     if(!recvIFrame){
-       return false;
+        return false;
     }
     AVIINDEXENTRY aviindex;
     memcpy(&aviindex.ckid,"01wb",4);
     aviindex.dwFlags = 0;
-    aviindex.dwChunkOffset = 320+2 + moviListLen;
+    aviindex.dwChunkOffset = 320 + moviListLen;
     aviindex.dwChunkLength = mediaLen;
     aviIndex_->AppendData(&aviindex,sizeof(AVIINDEXENTRY));
 

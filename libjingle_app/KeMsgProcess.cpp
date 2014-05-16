@@ -20,6 +20,10 @@ KeMsgProcess::KeMsgProcess(std::string peer_id, KeMsgProcessContainer *container
     to_read_ = 0;
 }
 
+KeMsgProcess::~KeMsgProcess()
+{
+}
+
 void KeMsgProcess::OnTunnelMessage(const std::string &peer_id,
                                    talk_base::Buffer &msg)
 {

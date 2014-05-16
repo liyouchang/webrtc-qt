@@ -54,7 +54,7 @@ class KeMessageProcessClient: public KeMsgProcess
 {
 public:
     KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
-
+    virtual ~KeMessageProcessClient();
     void AskVideo(int video, int listen, int talk);
     void ReqestPlayFile(const char * file_name);
     void OnTalkData(const char * data,int len);
@@ -65,7 +65,7 @@ public:
     sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;
-    sigslot::signal2<const std::string &,int > SignalRecordPlayStatus;
+    sigslot::signal2<const std::string &,int> SignalRecordPlayStatus;
 
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
@@ -73,7 +73,7 @@ protected:
     virtual void RecvMediaData(talk_base::Buffer & msgData);
     virtual void RecvAskMediaResp(talk_base::Buffer & msgData);
 private:
-    RecorderAvi * cutter;
+    RecorderAvi *cutter_;
 };
 
 
