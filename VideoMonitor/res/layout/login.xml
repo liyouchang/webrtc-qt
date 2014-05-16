@@ -8,15 +8,17 @@
         android:id="@+id/layout_login_input"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
         android:layout_centerVertical="true"
         android:layout_marginLeft="15.0dip"
         android:layout_marginRight="15.0dip"
+        android:layout_marginTop="50dp"
         android:orientation="vertical" >
 
         <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="50dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:background="@drawable/input_background" >
 
             <ImageView
@@ -27,8 +29,8 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10.0dip"
                 android:layout_marginRight="10.0dip"
-                android:contentDescription="@null"
                 android:background="@null"
+                android:contentDescription="@null"
                 android:scaleType="fitCenter"
                 android:src="@drawable/icon_username" />
 
@@ -60,6 +62,8 @@
             android:layout_width="fill_parent"
             android:layout_height="50dp"
             android:layout_marginTop="10.0dip"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
             android:background="@drawable/input_background" >
 
             <ImageView
@@ -70,8 +74,8 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="10.0dip"
                 android:layout_marginRight="10.0dip"
-                android:contentDescription="@null"
                 android:background="@null"
+                android:contentDescription="@null"
                 android:scaleType="fitCenter"
                 android:src="@drawable/icon_password" />
 
@@ -155,5 +159,16 @@
         android:text="@string/register"
         android:textColor="@color/blue"
         android:textSize="16.0sp" />
+
+    <ImageView
+        android:id="@+id/iv_login_demo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@null"
+        android:contentDescription="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_login_demo" />
 
 </RelativeLayout>

@@ -35,7 +35,7 @@ import com.video.data.Value;
 import com.video.data.XmlDevice;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.utils.MyAlertDialog;
+import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 import com.video.utils.WiFiAlertDialog;
 
@@ -344,7 +344,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	 * 配置设备WiFi温馨提示
 	 */
 	private void showSetTermWiFiTip() {
-		final MyAlertDialog myDialog=new MyAlertDialog(mContext);
+		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
 		myDialog.setTitle("温馨提示");
 		myDialog.setMessage("确认要配置的WiFi没有密码？");
 		myDialog.setPositiveButton("确认", new OnClickListener() {

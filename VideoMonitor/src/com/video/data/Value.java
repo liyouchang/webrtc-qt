@@ -65,7 +65,18 @@ public class Value {
 	 * 是否手动退出软件
 	 */
 	public static boolean isManulLogout = false;
-	
+	/**
+	 * 心跳失败标志
+	 */
+	public static boolean beatHeartFailFlag = false;
+	/**
+	 * 通道是否打开的标志
+	 */
+	public static boolean isTunnelOpened = false;
+	/**
+	 * 是否是共享的用户
+	 */
+	public static boolean isSharedUser = false;
 	
 	/**
 	 * 初始化应用程序的全局变量
@@ -78,5 +89,8 @@ public class Value {
 		requstAlarmCount = 5;
 		isPlayMp3 = false;
 		isManulLogout = true;
+		beatHeartFailFlag = false;
+		isTunnelOpened = false;
+		isSharedUser = false;
 	}
 }

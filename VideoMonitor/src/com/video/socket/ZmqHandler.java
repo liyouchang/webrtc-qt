@@ -15,6 +15,7 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.main.MainActivity;
 import com.video.main.OwnFragment;
+import com.video.utils.Utils;
 
 public class ZmqHandler extends Handler {
 	
@@ -25,16 +26,13 @@ public class ZmqHandler extends Handler {
 	}
 	
 	/**
-	 * 转换获得的状态，将int类型转为String类型
+	 * 转换获得的状态，将int类型转为String类型1: true、其它为false
 	 */
 	private String getState(int state) {
-	    String isActiveString = "false";
 	    if (state == 1) {
-	    	isActiveString = "true";
-	    } else {
-	    	isActiveString = "false";
+	    	return "true";
 	    }
-	    return isActiveString;
+	    return "false";
 	}
 	
 	/**
@@ -44,6 +42,9 @@ public class ZmqHandler extends Handler {
 		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 		HashMap<String, String> item = null;
 		int len = jsonArray.length();
+		if (len <= 0) {
+			return null;
+		}
 		  
 	    try {
 	    	for (int i=0; i<len; i++) { 
@@ -75,6 +76,9 @@ public class ZmqHandler extends Handler {
 		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 		HashMap<String, String> item = null;
 		int len = jsonArray.length();
+		if (len <= 0) {
+			return null;
+		}
 		  
 	    try {
 	    	for (int i=0; i<len; i++) { 
@@ -156,6 +160,42 @@ public class ZmqHandler extends Handler {
 		return null;
 	}
 	
+	/**
+	 * 发送Handler消息
+	 */
+	private void sendHandlerMsg(Handler handler, int what, String obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
+		handler.sendMessage(msg);
+	}
+	
+	/**
+	 * 生成JSON的登录字符串
+	 */
+	private String generateLoginJson() {
+		PreferData preferData = new PreferData(HandlerApplication.getInstance());
+		String userName = "";
+		String userPwd = "";
+		if (preferData.isExist("UserName")) {
+			userName = preferData.readString("UserName");
+		}
+		if (preferData.isExist("UserPwd")) {
+			userPwd = preferData.readString("UserPwd");
+		}
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_Login");
+			jsonObj.put("UserName", userName);
+			jsonObj.put("Pwd", Utils.CreateMD5Pwd(userPwd));
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			System.out.println("MyDebug: generateLoginJson()异常！");
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	@Override
 	public void handleMessage(Message msg) {
 		String recvData = (String)msg.obj;
@@ -182,171 +222,189 @@ public class ZmqHandler extends Handler {
 			    item.put("isOnline", getState(obj.getInt("Active")));
 				item.put("dealerName", obj.getString("DealerName"));
 				OwnFragment.ownHandler.obtainMessage(0, item).sendToTarget();
-//				SharedActivity.sharedHandler.obtainMessage(0, item).sendToTarget();
 			}
 			//客户端和服务器的心跳
 			else if (type.equals("Client_BeatHeart")) {
 				int resultCode = obj.getInt("Result");
 				if (resultCode != 0) {
 					Value.isLoginSuccess = false;
+					Value.beatHeartFailFlag = true;
+					Handler sendHandler = ZmqThread.zmqThreadHandler;
+					String data = generateLoginJson();
+					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+					System.out.println("MyDebug: 【正在重新登录...】");
 				}
 			}
-			//各个界面下的handler操作
-			else if (mHandler != null) {
-				//注册
-				if (type.equals("Client_Registration")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.register_id, resultCode, 0).sendToTarget();
+			else if ((Value.beatHeartFailFlag) && (type.equals("Client_Login"))) {
+				int resultCode = obj.getInt("Result");
+				if (resultCode == 0) {
+					Value.isLoginSuccess = true;
+					Value.beatHeartFailFlag = false;
+					System.out.println("MyDebug: 【重新登录成功】");
+				} else {
+					System.out.println("MyDebug: 【重新登录失败】");
+					Handler sendHandler = ZmqThread.zmqThreadHandler;
+					String data = generateLoginJson();
+					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 				}
-				//登录
-				else if (type.equals("Client_Login")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.login_id, resultCode, 0).sendToTarget();
-				}
-				//重置密码
-				else if (type.equals("Client_ResetPwd")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.find_pwd_id, resultCode, 0).sendToTarget();
-				}
-				//修改密码
-				else if (type.equals("Client_ChangePwd")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.modify_pwd_id, resultCode, 0).sendToTarget();
-				}
-				//添加终端
-				else if (type.equals("Client_AddTerm")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						String dealerName = obj.getString("DealerName");
-						mHandler.obtainMessage(R.id.add_device_id, resultCode, 0, dealerName).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.add_device_id, resultCode, 0).sendToTarget();
+			} else {
+				//各个界面下的handler操作
+				if (mHandler != null) {
+					//注册
+					if (type.equals("Client_Registration")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.register_id, resultCode, 0).sendToTarget();
 					}
-				}
-				//请求终端列表
-				else if (type.equals("Client_ReqTermList")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						JSONArray jsonArray = obj.getJSONArray("Terminal");
-						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, getReqTermList(jsonArray)).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, "请求终端列表失败").sendToTarget();
+					//登录
+					else if (type.equals("Client_Login")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.login_id, resultCode, 0).sendToTarget();
 					}
-				}
-				//修改终端名称
-				else if (type.equals("Client_ModifyTerm")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.modify_device_name_id, resultCode, 0).sendToTarget();
-				}
-				//删除终端绑定
-				else if (type.equals("Client_DelTerm")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.delete_device_item_id, resultCode, 0).sendToTarget();
-				}
-				//请求报警数据
-				else if (type.equals("Client_ReqAlarm")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						JSONArray jsonArray = obj.getJSONArray("AlarmData");
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, getReqAlarmList(jsonArray)).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "请求报警数据失败").sendToTarget();
+					//重置密码
+					else if (type.equals("Client_ResetPwd")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.find_pwd_id, resultCode, 0).sendToTarget();
 					}
-				}
-				//删除该条报警
-				else if (type.equals("Client_DelAlarm")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "删除该条报警失败").sendToTarget();
+					//修改密码
+					else if (type.equals("Client_ChangePwd")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.modify_pwd_id, resultCode, 0).sendToTarget();
 					}
-				}
-				//删除当前全部报警
-				else if (type.equals("Client_DelSelectAlarm")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "删除当前全部报警失败").sendToTarget();
-					}
-				}
-				//标记该条报警
-				else if (type.equals("Client_MarkAlarm")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "标记该条报警失败").sendToTarget();
-					}
-				}
-				//标记当前全部报警
-				else if (type.equals("Client_MarkSelectAlarm")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "标记当前全部报警失败").sendToTarget();
-					}
-				}
-				//上传背景图片
-				else if (type.equals("Client_PushBackPic")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						mHandler.obtainMessage(R.id.upload_back_image_id, resultCode, 0, obj.getString("PictureURL")).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.upload_back_image_id, resultCode, 0).sendToTarget();
-					}
-				}
-				//删除背景图片
-				else if (type.equals("Client_DelBackPic")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.delete_back_image_id, resultCode, 0).sendToTarget();
-				}
-				//添加终端分享
-				else if (type.equals("Client_AddShareTerm")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.add_device_share_id, resultCode, 0).sendToTarget();
-				}
-				//请求终端列表
-				else if (type.equals("Client_ReqShareList")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						JSONArray jsonArray = obj.getJSONArray("Terminal");
-						mHandler.obtainMessage(R.id.request_device_share_id, resultCode, 0, getReqTermList(jsonArray)).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.request_device_share_id, resultCode, 0, "请求分享列表失败").sendToTarget();
-					}
-				}
-				//删除终端分享
-				else if (type.equals("Client_DelShareTerm")) {
-					int resultCode = obj.getInt("Result");
-					mHandler.obtainMessage(R.id.delete_device_share_id, resultCode, 0).sendToTarget();
-				}
-				//请求指定终端分享用户列表
-				else if (type.equals("Client_ReqMAClist")) {
-					int resultCode = obj.getInt("Result");
-					if (resultCode == 0) {
-						JSONArray jsonArray = obj.getJSONArray("Terminal");
-						mHandler.obtainMessage(R.id.requst_device_share_user_id, resultCode, 0, getReqMACShareUserList(jsonArray)).sendToTarget();
-					} else {
-						mHandler.obtainMessage(R.id.requst_device_share_user_id, resultCode, 0).sendToTarget();
-					}
-				}
-				//接收到终端发回的数据
-				else if (type.equals("tunnel")) {
-					String resultCode = obj.getString("command");
-					if (resultCode.equals("wifi_info")) {
-						if (!obj.isNull("wifis")) {
-							JSONArray jsonArray = obj.getJSONArray("wifis");
-							mHandler.obtainMessage(R.id.requst_wifi_list_id, 0, 0, getTermWiFiList(jsonArray)).sendToTarget();
+					//添加终端
+					else if (type.equals("Client_AddTerm")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							String dealerName = obj.getString("DealerName");
+							mHandler.obtainMessage(R.id.add_device_id, resultCode, 0, dealerName).sendToTarget();
 						} else {
-							mHandler.obtainMessage(R.id.requst_wifi_list_id, -1, 0, "null").sendToTarget();
+							mHandler.obtainMessage(R.id.add_device_id, resultCode, 0).sendToTarget();
 						}
 					}
-					else if (resultCode.equals("set_wifi")) {
-						int result = obj.getInt("result");//0:失败  1:成功
-						mHandler.obtainMessage(R.id.set_term_wifi_id, result, 0).sendToTarget();
+					//请求终端列表
+					else if (type.equals("Client_ReqTermList")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							JSONArray jsonArray = obj.getJSONArray("Terminal");
+							mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, getReqTermList(jsonArray)).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, "请求终端列表失败").sendToTarget();
+						}
+					}
+					//修改终端名称
+					else if (type.equals("Client_ModifyTerm")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.modify_device_name_id, resultCode, 0).sendToTarget();
+					}
+					//删除终端绑定
+					else if (type.equals("Client_DelTerm")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.delete_device_item_id, resultCode, 0).sendToTarget();
+					}
+					//请求报警数据
+					else if (type.equals("Client_ReqAlarm")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							JSONArray jsonArray = obj.getJSONArray("AlarmData");
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, getReqAlarmList(jsonArray)).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "请求报警数据失败").sendToTarget();
+						}
+					}
+					//删除该条报警
+					else if (type.equals("Client_DelAlarm")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "删除该条报警失败").sendToTarget();
+						}
+					}
+					//删除当前全部报警
+					else if (type.equals("Client_DelSelectAlarm")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "删除当前全部报警失败").sendToTarget();
+						}
+					}
+					//标记该条报警
+					else if (type.equals("Client_MarkAlarm")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "标记该条报警失败").sendToTarget();
+						}
+					}
+					//标记当前全部报警
+					else if (type.equals("Client_MarkSelectAlarm")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "标记当前全部报警失败").sendToTarget();
+						}
+					}
+					//上传背景图片
+					else if (type.equals("Client_PushBackPic")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							mHandler.obtainMessage(R.id.upload_back_image_id, resultCode, 0, obj.getString("PictureURL")).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.upload_back_image_id, resultCode, 0).sendToTarget();
+						}
+					}
+					//删除背景图片
+					else if (type.equals("Client_DelBackPic")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.delete_back_image_id, resultCode, 0).sendToTarget();
+					}
+					//添加终端分享
+					else if (type.equals("Client_AddShareTerm")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.add_device_share_id, resultCode, 0).sendToTarget();
+					}
+					//请求终端列表
+					else if (type.equals("Client_ReqShareList")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							JSONArray jsonArray = obj.getJSONArray("Terminal");
+							mHandler.obtainMessage(R.id.request_device_share_id, resultCode, 0, getReqTermList(jsonArray)).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.request_device_share_id, resultCode, 0, "请求分享列表失败").sendToTarget();
+						}
+					}
+					//删除终端分享
+					else if (type.equals("Client_DelShareTerm")) {
+						int resultCode = obj.getInt("Result");
+						mHandler.obtainMessage(R.id.delete_device_share_id, resultCode, 0).sendToTarget();
+					}
+					//请求指定终端分享用户列表
+					else if (type.equals("Client_ReqMAClist")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							JSONArray jsonArray = obj.getJSONArray("Terminal");
+							mHandler.obtainMessage(R.id.requst_device_share_user_id, resultCode, 0, getReqMACShareUserList(jsonArray)).sendToTarget();
+						} else {
+							mHandler.obtainMessage(R.id.requst_device_share_user_id, resultCode, 0).sendToTarget();
+						}
+					}
+					//接收到终端发回的数据
+					else if (type.equals("tunnel")) {
+						String resultCode = obj.getString("command");
+						if (resultCode.equals("wifi_info")) {
+							if (!obj.isNull("wifis")) {
+								JSONArray jsonArray = obj.getJSONArray("wifis");
+								mHandler.obtainMessage(R.id.requst_wifi_list_id, 0, 0, getTermWiFiList(jsonArray)).sendToTarget();
+							} else {
+								mHandler.obtainMessage(R.id.requst_wifi_list_id, -1, 0, "null").sendToTarget();
+							}
+						}
+						else if (resultCode.equals("set_wifi")) {
+							int result = obj.getInt("result");//0:失败  1:成功
+							mHandler.obtainMessage(R.id.set_term_wifi_id, result, 0).sendToTarget();
+						}
 					}
 				}
 			}

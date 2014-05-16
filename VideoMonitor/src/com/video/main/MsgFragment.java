@@ -303,12 +303,18 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 							switch (reqAlarmType) {
 								//正常请求和下拉请求
 								case 0:
-									msgList = (ArrayList<HashMap<String, String>>) msg.obj;
-									if (msgList != null) {
-										xmlData.updateList(msgList);
+									ArrayList<HashMap<String, String>> listObj = (ArrayList<HashMap<String, String>>) msg.obj;
+									if (listObj != null) {
+										xmlData.updateList(listObj);
+										msgList = listObj;
 										msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
-										
 										lv_list.setAdapter(msgAdapter);
+									} else {
+										xmlData.deleteAllItem();
+										if (msgList != null) {
+											msgList.clear();
+											msgAdapter.notifyDataSetChanged();
+										}
 									}
 									Value.requstAlarmCount = 5;
 									break;
@@ -391,7 +397,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		Message msg = new Message();
 		msg.what = what;
 		msg.obj = obj;
-		handler.sendMessage(msg);
+		if (handler != null) {
+			handler.sendMessage(msg);
+		}
 	}
 	
 	public void reqAlarmEvent() {

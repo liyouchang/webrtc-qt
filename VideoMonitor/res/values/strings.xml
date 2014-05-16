@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">微视界</string>
-    <string name="app_version">版本: V1.0.6</string>
+    <string name="app_name">视界通</string>
+    <string name="app_version">版本: V1.0.7</string>
     <string name="company_website">公司网址: www.kaer.cn</string>
     <string name="company_phone">公司电话: 4006080787</string>
     <string name="company">山东卡尔电气股份有限公司</string>

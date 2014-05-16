@@ -57,6 +57,7 @@ public class BackstageService extends Service {
 			isRun = false;
 			thread = null;
 		}
+		System.out.println("MyDebug: 【停止服务】");
 	}
 
 	@Override

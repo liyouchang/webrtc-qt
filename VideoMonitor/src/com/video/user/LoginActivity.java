@@ -20,15 +20,18 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.main.MainActivity;
-import com.video.socket.HandlerApplication;
+import com.video.service.BackstageService;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
+import com.video.socket.ZmqThread;
+import com.video.utils.OkOnlyDialog;
 import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
 
@@ -41,6 +44,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private EditText et_pwd;
 	private boolean isAutoLogin = false;
 	private CheckBox cb_auto_login;
+	private int loginTimes = 0;
 	
 	private Button button_delete_username;
 	private Button button_delete_password;
@@ -51,6 +55,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	
 	private final int IS_LOGINNING = 1;
 	private final int LOGIN_TIMEOUT = 2;
+	private final int LOGIN_AGAIN = 3;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +136,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 			public void afterTextChanged(Editable s) {
 			}
 		});
+		ImageView login_demo = (ImageView) this.findViewById(R.id.iv_login_demo);
+		login_demo.setOnClickListener(this);
 	}
 	
 	private void initData() {
@@ -161,17 +168,17 @@ public class LoginActivity extends Activity implements OnClickListener {
 	 * 生成JSON的登录字符串
 	 */
 	private String generateLoginJson(String username, String pwd) {
-		String result = "";
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_Login");
 			jsonObj.put("UserName", username);
 			jsonObj.put("Pwd", Utils.CreateMD5Pwd(pwd));
+			return jsonObj.toString();
 		} catch (JSONException e) {
+			System.out.println("MyDebug: generateLoginJson()异常！");
 			e.printStackTrace();
 		}
-		result = jsonObj.toString();
-		return result;
+		return null;
 	}
 	
 	private Handler handler = new Handler() {
@@ -186,22 +193,40 @@ public class LoginActivity extends Activity implements OnClickListener {
 					mDialog.show();
 					break;
 				case LOGIN_TIMEOUT:
-					if (mDialog != null)
-						mDialog.dismiss();
+					loginTimes ++;
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
 					}
-					Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
 					//超时之后关闭服务，断开连接，再重启服务
-					sendHandlerMsg(R.id.close_zmq_socket_id);
+					ZmqCtrl.getInstance().exit();
+			    	stopService(new Intent(mContext, BackstageService.class));
 					Value.resetValues();
+					sendHandlerMsg(LOGIN_AGAIN, 2000);
+					break;
+				case LOGIN_AGAIN:
 					ZmqCtrl.getInstance().init();
+					if (loginTimes >= 2) {
+						loginTimes = 0;
+						if (mDialog != null) {
+							mDialog.dismiss();
+							mDialog = null;
+						}
+						Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
+					} else {
+						Handler sendHandler = ZmqThread.zmqThreadHandler;
+						String data = generateLoginJson(userName, userPwd);
+						sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+					}
 					break;
 				case R.id.login_id:
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
-						if (mDialog != null)
+						if (mDialog != null) {
 							mDialog.dismiss();
+							mDialog = null;
+						}
+						loginTimes = 0;
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
 							Value.isLoginSuccess = true;
@@ -263,7 +288,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				} else {
 					preferData.writeData("UserPwd", userPwd);
 				}
-				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateLoginJson(userName, userPwd);
 				sendHandlerMsg(IS_LOGINNING);
 				sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
@@ -292,6 +317,17 @@ public class LoginActivity extends Activity implements OnClickListener {
 				break;
 			case R.id.btn_login_password_del:
 				et_pwd.setText("");
+				break;
+			case R.id.iv_login_demo:
+				final OkOnlyDialog myDialog=new OkOnlyDialog(mContext);
+				myDialog.setTitle("温馨提示");
+				myDialog.setMessage("业务体验正在完善，敬请期待...");
+				myDialog.setPositiveButton("确认", new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						myDialog.dismiss();
+					}
+				});
 				break;
 		}
 	}

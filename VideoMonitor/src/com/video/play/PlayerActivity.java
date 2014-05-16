@@ -7,9 +7,10 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -52,6 +53,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private static AudioThread audioThread = null; //音频对象
 	private static TalkThread talkThread = null; //对讲对象
 	private WakeLock wakeLock = null; //锁屏对象
+	
+	public static int requestPlayerTimes = 0;
+	private PlayerReceiver playerReceiver; 
+	public static final String PLAYER_BROADCAST_ACTION = "com.video.play.PlayerActivity.PlayVideo";
+	public static final String REQUEST_TIMES_ACTION = "com.video.play.PlayerActivity.RequestTimes";
 
 	private TextView tv_title = null;
 	private static String deviceName = null;
@@ -62,11 +68,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private int titleHeight = 80;
 	private int bottomHeight = 100;
 	
-	public static boolean isTunnelOpened = false;
 	private boolean isVoiceEnable = true;
 	private boolean isTalkEnable = false;
 	private boolean isPlayMusic = false;
-	private boolean isFullScreen = false;
 	private boolean isPopupWindowShow = false;
 	private final int SHOW_TIME_MS = 6000;
 	private final int HIDE_POPUPWINDOW = 1;
@@ -168,30 +172,19 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				}
 				return super.onSingleTapConfirmed(e);
 			}
-			
-			//双击屏幕
-			@Override
-			public boolean onDoubleTap(MotionEvent e) {
-				// TODO Auto-generated method stub
-				int orientation = 0;
-				if(isFullScreen){
-		            //切换到竖屏小屏
-					isFullScreen = false;
-					orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-		        }else{
-		            //切换到横屏大屏
-		        	isFullScreen = true;
-		        	orientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE; 
-		        }
-				setRequestedOrientation(orientation); 
-				return super.onDoubleTap(e);
-			}
 		});
 	}
 	
 	private void initData() {
 		mContext = PlayerActivity.this;
 		getScreenSize();
+		
+		//注册广播
+		playerReceiver = new PlayerReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(PLAYER_BROADCAST_ACTION);
+		filter.addAction(REQUEST_TIMES_ACTION);
+		registerReceiver(playerReceiver, filter);
 		
 		Intent intent = this.getIntent();
 		deviceName = (String) intent.getCharSequenceExtra("deviceName");
@@ -225,7 +218,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case 0:
-					isTunnelOpened = true;
+					Value.isTunnelOpened = true;
 					String peerId = (String) msg.obj;
 					if (peerId.equals(dealerName)) {
 						//【播放视频】
@@ -241,16 +234,10 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					if (mDialog != null) {
 						mDialog.dismiss();
 					}
-					if (!isTunnelOpened) {
+					if (!Value.isTunnelOpened) {
 						toastNotify(mContext, "请求视频超时，请重试！", Toast.LENGTH_SHORT);
 					}
-					isTunnelOpened = false;
-					break;
-				case 2:
-					videoView.pauseVideo();
-					TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
-					TunnelCommunication.getInstance().openTunnel(dealerName);
-					toastNotify(mContext, "正在重新请求视频...", Toast.LENGTH_LONG);
+					Value.isTunnelOpened = false;
 					break;
 			}
 		}
@@ -429,21 +416,25 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				break;
 			//对讲
 			case R.id.btn_player_talkback:
-				playMyMusic(R.raw.di);
-				if (isTalkEnable) {
-					//停止对讲
-					isTalkEnable =false;
-					player_talkback.setBackgroundResource(R.drawable.player_talkstop_xml);
-					if (talkThread != null) {
-						talkThread.stopTalkThread();
-					}
+				if (Value.isSharedUser) {
+					toastNotify(mContext, "您无权使用对讲功能！", Toast.LENGTH_SHORT);
 				} else {
-					//开始对讲
-					isTalkEnable = true;
-					player_talkback.setBackgroundResource(R.drawable.player_talkback_xml);
-					talkThread = new TalkThread();
-					if (talkThread != null) {
-						talkThread.start();
+					playMyMusic(R.raw.di);
+					if (isTalkEnable) {
+						//停止对讲
+						isTalkEnable =false;
+						player_talkback.setBackgroundResource(R.drawable.player_talkstop_xml);
+						if (talkThread != null) {
+							talkThread.stopTalkThread();
+						}
+					} else {
+						//开始对讲
+						isTalkEnable = true;
+						player_talkback.setBackgroundResource(R.drawable.player_talkback_xml);
+						talkThread = new TalkThread();
+						if (talkThread != null) {
+							talkThread.start();
+						}
 					}
 				}
 				break;
@@ -520,52 +511,54 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		boolean result = mGestureDetector.onTouchEvent(event);
 
 		if (!result) {
-			switch (event.getAction()) {
-				case MotionEvent.ACTION_UP:
-					if (isPtzControling) {
-						//停止
+			if (!Value.isSharedUser) {
+				switch (event.getAction()) {
+					case MotionEvent.ACTION_UP:
+						if (isPtzControling) {
+							//停止
+							isPtzControling = false;
+							sendPtzControlOrder(PTZ_STOP);
+						}
+						break;
+					case MotionEvent.ACTION_DOWN:
 						isPtzControling = false;
-						sendPtzControlOrder(PTZ_STOP);
-					}
-					break;
-				case MotionEvent.ACTION_DOWN:
-					isPtzControling = false;
-					startTime = System.currentTimeMillis();
-					startPointX = event.getX();
-					startPointY = event.getY();
-					break;
-				case MotionEvent.ACTION_MOVE:
-					endTime = System.currentTimeMillis();
-					spaceTime = endTime - startTime;
-					if (!isPtzControling && (spaceTime > 100)) {
-						isPtzControling = true;
-						
-						endPointX = event.getX();
-						endPointY = event.getY();
-						spaceX = endPointX - startPointX;
-						spaceY = endPointY - startPointY;
-						
-						if (Math.abs(spaceX) >= Math.abs(spaceY)) {
-							if (spaceX < -1) {
-								//向左
-								sendPtzControlOrder(PTZ_LEFT);
-							} 
-							else if (spaceX > 1) {
-								//向右
-								sendPtzControlOrder(PTZ_RIGHT);
-							}
-						} else {
-							if (spaceY < -1) {
-								//向上
-								sendPtzControlOrder(PTZ_UP);
-							} 
-							else if (spaceY > 1) {
-								//向下
-								sendPtzControlOrder(PTZ_DOWN);
+						startTime = System.currentTimeMillis();
+						startPointX = event.getX();
+						startPointY = event.getY();
+						break;
+					case MotionEvent.ACTION_MOVE:
+						endTime = System.currentTimeMillis();
+						spaceTime = endTime - startTime;
+						if (!isPtzControling && (spaceTime > 100)) {
+							isPtzControling = true;
+							
+							endPointX = event.getX();
+							endPointY = event.getY();
+							spaceX = endPointX - startPointX;
+							spaceY = endPointY - startPointY;
+							
+							if (Math.abs(spaceX) >= Math.abs(spaceY)) {
+								if (spaceX < -1) {
+									//向左
+									sendPtzControlOrder(PTZ_LEFT);
+								} 
+								else if (spaceX > 1) {
+									//向右
+									sendPtzControlOrder(PTZ_RIGHT);
+								}
+							} else {
+								if (spaceY < -1) {
+									//向上
+									sendPtzControlOrder(PTZ_UP);
+								} 
+								else if (spaceY > 1) {
+									//向下
+									sendPtzControlOrder(PTZ_DOWN);
+								}
 							}
 						}
-					}
-					break;
+						break;
+				}
 			}
 			result = super.onTouchEvent(event);
 		}
@@ -573,16 +566,43 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	}
 	
 	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		closePlayer();
+		finish();
+	}
+
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		//注销广播
+		unregisterReceiver(playerReceiver);
+		//解除屏幕保持唤醒
+		wakeLock.release(); 
+		wakeLock = null;
+	}
+
+	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
-			//【关闭通道】
 			closePlayer();
 			finish();
 		}
 		return super.onKeyDown(keyCode, event);
 	}
 
+	/**
+	 * 关闭播放器
+	 */
 	private void closePlayer() {
 		try {
 			try {
@@ -596,8 +616,10 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				e.printStackTrace();
 			}
 			
-			TunnelCommunication.getInstance().closeTunnel(dealerName);
-			TunnelCommunication.getInstance().tunnelTerminate();
+			if (Value.isTunnelOpened) {
+				TunnelCommunication.getInstance().closeTunnel(dealerName);
+				TunnelCommunication.getInstance().tunnelTerminate();
+			}
 			Value.TerminalDealerName = null;
 			
 			if (titlePopupWindow != null) {
@@ -606,13 +628,51 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			if (bottomPopupWindow != null) {
 				bottomPopupWindow.dismiss();
 			}
-			wakeLock.release(); //解除屏幕保持唤醒
-			wakeLock = null;
 		} catch (Exception e) {
 			System.out.println("MyDebug: 关闭实时播放器异常！");
 			e.printStackTrace();
 		}
 	}
+	
+	public class PlayerReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			String action = intent.getAction();
+			if ((action.equals(PLAYER_BROADCAST_ACTION)) && (!Value.isTunnelOpened)) {
+				try {
+					videoView.stopVideo();
+					audioThread.stopAudioThread();
+					if (talkThread != null) {
+						talkThread.stopTalkThread();
+					}
+				} catch (Exception e) {
+					System.out.println("MyDebug: 关闭音视频对讲异常！");
+					e.printStackTrace();
+				}
+				//视频
+				videoView = new VideoView(mContext);
+				setContentView(videoView);
+				
+				//音频
+				audioThread = new AudioThread();
+				if (audioThread != null) {
+					audioThread.start();
+				}
+				TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
+				TunnelCommunication.getInstance().openTunnel(dealerName);
+				toastNotify(mContext, "正在重新请求视频...", Toast.LENGTH_LONG);
+				System.out.println("MyDebug: 正在重新请求视频...");
+			}
+			else if (action.equals(REQUEST_TIMES_ACTION)) {
+				closePlayer();
+				PlayerActivity.this.finish();
+			}
+		}
+	}
+	
+}
 	
 //	{
 //		private boolean isClarityPopupWindowShow = false;
@@ -679,4 +739,4 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 //			clarityPopupWindow.dismiss();
 //		}
 //	}
-}
+

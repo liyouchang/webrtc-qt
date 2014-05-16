@@ -421,6 +421,7 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 		//获取EditText输入框的字符串
 		shareName = et_name.getText().toString().trim();
 		
+		
 		if (shareName.equals("")) {
 			resultFlag = false;
 			et_name.setError("请输入用户名！");
@@ -428,6 +429,9 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 		else if ((shareName.length()<3) || (shareName.length()>20)) {
 			resultFlag = false;
 			et_name.setError("用户名长度范围3~20！");
+		} else if (userName.equals(shareName)) {
+			resultFlag = false;
+			et_name.setError("不能分享给自己！");
 		} else {
 			resultFlag = true;
 		}

@@ -51,9 +51,9 @@ public class TalkThread extends Thread {
 		initTalkThread();
 		runFlag = true;
 		byte[] buffer = new byte[audioRecordBufferSize];
-		audioRecord.startRecording();
-		byte[] ulawData = new byte[1024*2];
+		byte[] ulawData = new byte[1024*10];
 		int ulawDataLen = 0;
+		audioRecord.startRecording();
 		
 		while (runFlag) {
 			try {
@@ -112,8 +112,9 @@ public class TalkThread extends Thread {
 	 * G711音频编码函数，采用linear编码
 	 */
 	private int G711EnCoder(byte[] dst, byte[] src, int len) {
-		if (len <= 0)
+		if ((len <= 0) || (src.length <= 0)) {
 			return 0;
+		}
 		short[] buffer = new short[1024*10];
 		for (int i = 0; i < len / 2; i++) {
 			buffer[i] = (short) ((src[i * 2] & 0xff) | (src[i * 2 + 1] & 0xff) << 8);

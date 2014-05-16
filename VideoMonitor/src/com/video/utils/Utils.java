@@ -59,7 +59,7 @@ public class Utils {
 				result = "账号已存在！";
 				break;
 			case 5:
-				result = "不存在！";
+				result = "用户不存在！";
 				break;
 			case 6:
 				result = "该设备已被绑定！";
@@ -78,6 +78,9 @@ public class Utils {
 				break;
 			case 11:
 				result = "未知类型！";
+				break;
+			case 12:
+				result = "重复添加！";
 				break;
 			default: 
 				result = "不明原因！";
@@ -211,6 +214,16 @@ public class Utils {
 			e.printStackTrace();
 		}
 		return "";
+	}
+	
+	/**
+	 * 判断是否在线
+	 */
+	public static boolean getOnlineState(String state) {
+		if (state.equals("true")) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**

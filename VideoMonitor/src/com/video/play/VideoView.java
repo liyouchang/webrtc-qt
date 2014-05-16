@@ -6,20 +6,24 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
 import android.view.View;
 
+import com.video.data.Value;
 import com.video.utils.Utils;
 
 public class VideoView extends View {
 
+	private Context mContext;
     private static int width = 1280; 
     private static int height = 720;
     
@@ -52,6 +56,7 @@ public class VideoView extends View {
     
 	public VideoView(Context context) {
 		super(context);
+		this.mContext = context;
 	}
 	
 	public void initView() {
@@ -92,20 +97,6 @@ public class VideoView extends View {
 	}
 	
 	/**
-	 * 暂停播放
-	 */
-	public void pauseVideo() {
-		runFlag = false;
-		TunnelCommunication.videoDataCache.clearBuffer();
-	}
-	
-	private static void sendHandlerMsg(Handler handler, int what) {
-		Message msg = new Message();
-		msg.what = what;
-		handler.sendMessage(msg);
-	}
-	
-	/**
 	 * 播放视频线程
 	 */
 	private class PlayVideoThread extends Thread {
@@ -129,9 +120,30 @@ public class VideoView extends View {
 					} else {
 						sleep(20);
 					}
-					if (!PlayerActivity.isTunnelOpened) {
-						sendHandlerMsg(PlayerActivity.playHandler, 2);
-						sleep(1000);
+					if (!Value.isTunnelOpened) {
+						PlayerActivity.requestPlayerTimes = 0;
+						Intent intent = new Intent();
+						intent.setAction(PlayerActivity.REQUEST_TIMES_ACTION);
+						mContext.sendBroadcast(intent);
+//						if (PlayerActivity.requestPlayerTimes < 3) {
+//							if (!Value.isTunnelOpened) {
+//								PlayerActivity.requestPlayerTimes ++;
+//								Intent intent = new Intent();
+//								intent.setAction(PlayerActivity.PLAYER_BROADCAST_ACTION);
+//								mContext.sendBroadcast(intent);
+//								sleep(10000);
+//								System.out.println("MyDebug: 开始广播视频");
+//							}
+//						} else {
+//							if (!Value.isTunnelOpened) {
+//								PlayerActivity.requestPlayerTimes = 0;
+//								Intent intent = new Intent();
+//								intent.setAction(PlayerActivity.REQUEST_TIMES_ACTION);
+//								mContext.sendBroadcast(intent);
+//								System.out.println("MyDebug: 停止广播视频");
+//							}
+//						}
+						sleep(2000);
 					}
 				}catch(Exception ex){
 					ex.printStackTrace();
@@ -182,26 +194,39 @@ public class VideoView extends View {
 			srcRect.right = bitWidth;
 			srcRect.bottom = bitHeight;
 			
-			if (drawWidth <= drawHeight) {
-				dstRect.left = 0;
-				dstRect.top = (int) ((drawHeight - drawWidth / 1.2) / 4);
-				dstRect.right = drawWidth;
-				dstRect.bottom = (int) (drawWidth / 1.2 + (drawHeight - drawWidth / 1.2) / 4);
-			} else {
+			if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 				dstRect.left = 0;
 				dstRect.top = 0;
 				dstRect.right = drawWidth;
 				dstRect.bottom = drawHeight;
+			} else {
+				if (drawWidth <= drawHeight) {
+					dstRect.left = 0;
+					dstRect.top = (int) ((drawHeight - drawWidth / 1.2) / 4);
+					dstRect.right = drawWidth;
+					dstRect.bottom = (int) (drawWidth / 1.2 + (drawHeight - drawWidth / 1.2) / 4);
+				} else {
+					dstRect.left = 0;
+					dstRect.top = 0;
+					dstRect.right = drawWidth;
+					dstRect.bottom = drawHeight;
+				}
 			}
-
+			
 			// 绘制图像
 			canvas.drawBitmap(videoBmp, srcRect, dstRect, null);
 			if (mCanvas == null) {
 				mCanvas = canvas;
 			}
+			// 清空画布
+			if (!runFlag) {
+				Paint paint = new Paint();
+				paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
+				canvas.drawBitmap(videoBmp, srcRect, dstRect, paint);
+			}
 		} catch (Exception e) {
+			System.out.println("MyDebug: 绘制图像异常！");
 			e.printStackTrace();
-			Log.d("MYDEBUG", "OnDraw exception");
 		}
 	}
 	

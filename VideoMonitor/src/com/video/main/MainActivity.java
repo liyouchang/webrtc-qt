@@ -39,7 +39,7 @@ import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
 import com.video.user.LoginActivity;
-import com.video.utils.MyAlertDialog;
+import com.video.utils.OkCancelDialog;
 import com.video.utils.TabFactory;
 import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
@@ -83,6 +83,12 @@ public class MainActivity extends FragmentActivity {
 			if (preferData.isExist("AutoLogin")) {
 				isAutoLogin = preferData.readBoolean("AutoLogin");
 			}
+			if (!preferData.isExist("UserName")) {
+				isAutoLogin = false;
+			}
+			if (!preferData.isExist("UserPwd")) {
+				isAutoLogin = false;
+			}
 			new Handler().postDelayed(new Runnable(){   
 			    public void run() {
 			    	quitFullScreen();
@@ -121,7 +127,7 @@ public class MainActivity extends FragmentActivity {
 						}
 			    	}
 			    } 
-			 }, 2500); 
+			 }, 3000); 
 		} else {
 			//已登录成功
 			setContentView(R.layout.main);
@@ -285,11 +291,14 @@ public class MainActivity extends FragmentActivity {
 	public static void setAlarmIconAndText(int msg) {
 		if (msg <= 0) {
 			tv_alarm_msg.setText("消息");
+//			tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.white));
 		} else {
 			if (msg < 100) {
 				tv_alarm_msg.setText("消息("+msg+")");
+				tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.red));
 			} else {
 				tv_alarm_msg.setText("消息99+");
+				tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.red));
 			}
 		}
 	}
@@ -398,9 +407,9 @@ public class MainActivity extends FragmentActivity {
 	 * 退出微视界
 	 */
 	private void exitVideoMonitorApp() {
-		final MyAlertDialog myDialog=new MyAlertDialog(mContext);
+		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
 		myDialog.setTitle("温馨提示");
-		myDialog.setMessage("确认退出微视界？");
+		myDialog.setMessage("确认退出视界通？");
 		myDialog.setPositiveButton("确认", new OnClickListener() {
 			@Override
 			public void onClick(View v) {

@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -35,9 +36,11 @@ import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlShare;
+import com.video.play.PlayerActivity;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
 import com.video.utils.DeviceItemAdapter;
+import com.video.utils.OkCancelDialog;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
@@ -48,6 +51,7 @@ public class SharedActivity extends Activity implements OnClickListener {
 	private PreferData preferData = null;
 	private String userName = null;
 	//终端列表项
+	private static String mDeviceName = null;
 	private static String mDeviceId = null;
 	private static int listPosition = 0;
 	private static int listSize = 0;
@@ -83,6 +87,7 @@ public class SharedActivity extends Activity implements OnClickListener {
 		noDeviceLayout = (RelativeLayout) this.findViewById(R.id.rl_no_shared_list);
 		
 		lv_list = (ListView) this.findViewById(R.id.shared_list);
+		lv_list.setOnItemClickListener(new OnItemClickListenerImpl());
 		lv_list.setOnItemLongClickListener(new OnItemLongClickListenerImpl());
 	}
 	
@@ -92,6 +97,8 @@ public class SharedActivity extends Activity implements OnClickListener {
 		ZmqHandler.setHandler(handler);
 		xmlShare = new XmlShare(mContext);
 		preferData = new PreferData(mContext);
+		
+		Value.isSharedUser = true;
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
 		}
@@ -190,12 +197,20 @@ public class SharedActivity extends Activity implements OnClickListener {
 						}
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							sharedList = (ArrayList<HashMap<String, String>>) msg.obj;
-							if (sharedList != null) {
-								xmlShare.updateList(sharedList);
+							ArrayList<HashMap<String, String>> listObj = (ArrayList<HashMap<String, String>>) msg.obj;
+							if (listObj != null) {
+								xmlShare.updateList(listObj);
+								sharedList = listObj;
 								deviceAdapter = new DeviceItemAdapter(mContext, thumbnailsFile, sharedList);
 								lv_list.setAdapter(deviceAdapter);
 								listSize = sharedList.size();
+							} else {
+								listSize = 0;
+								xmlShare.deleteAllItem();
+								if (sharedList != null) {
+									sharedList.clear();
+									deviceAdapter.notifyDataSetChanged();
+								}
 							}
 						} else {
 							Toast.makeText(mContext, msg.obj+"，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
@@ -324,13 +339,86 @@ public class SharedActivity extends Activity implements OnClickListener {
 	}
 	
 	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		Value.isSharedUser = false;
+	}
+
+	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
+			Value.isSharedUser = false;
 			finish();
 			overridePendingTransition(R.anim.fragment_nochange, R.anim.up_out);
 		}
 		return super.onKeyDown(keyCode, event);
+	}
+	
+	/**
+	 * 设备项ListView的点击事件
+	 */
+	private class OnItemClickListenerImpl implements OnItemClickListener {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+			// TODO Auto-generated method stub
+			listPosition = position;
+			HashMap<String, String> item = sharedList.get(listPosition);
+			mDeviceName = item.get("deviceName");
+			mDeviceId = item.get("deviceID");
+			
+			if (Utils.isNetworkAvailable(mContext)) {
+				if (Utils.getOnlineState(sharedList.get(position).get("isOnline"))) {
+					//读取流量保护开关设置
+					boolean isProtectTraffic = true;
+					if (preferData.isExist("ProtectTraffic")) {
+						isProtectTraffic = preferData.readBoolean("ProtectTraffic");
+					}
+					
+					if (!isProtectTraffic) {
+						//实时视频
+						Intent intent = new Intent(mContext, PlayerActivity.class);
+						intent.putExtra("deviceName", mDeviceName);
+						intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
+						mContext.startActivity(intent);
+					} else {
+						if (Utils.isWiFiNetwork(mContext)) {
+							//实时视频
+							Intent intent = new Intent(mContext, PlayerActivity.class);
+							intent.putExtra("deviceName", mDeviceName);
+							intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
+							mContext.startActivity(intent);
+						} else {
+							final OkCancelDialog myDialog=new OkCancelDialog(mContext);
+							myDialog.setTitle("温馨提示");
+							myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
+							myDialog.setPositiveButton("确认", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog.dismiss();
+									//实时视频
+									Intent intent = new Intent(mContext, PlayerActivity.class);
+									intent.putExtra("deviceName", mDeviceName);
+									intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
+									mContext.startActivity(intent);
+								}
+							});
+							myDialog.setNegativeButton("取消", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog.dismiss();
+								}
+							});
+						}
+					}
+				} else {
+					Toast.makeText(mContext, "【"+mDeviceName+"】终端设备不在线！", Toast.LENGTH_SHORT).show();
+				}
+			} else {
+				Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			}
+		}
 	}
 	
 	/**

@@ -112,13 +112,13 @@ public class UpdateAPK {
 	 */
 	private void showUpgradeVersionDialog() {
 		StringBuffer info = new StringBuffer();
-		info.append("微视界更新信息\n");
+		info.append("视界通更新信息\n");
 		info.append("新版本号："+xmlHashMap.get("versionName")+"\n");
 		info.append("软件大小："+xmlHashMap.get("apkLeagth")+"\n");
-		info.append("更新原因："+xmlHashMap.get("upgradeReason"));
+		info.append(xmlHashMap.get("upgradeReason"));
 		
 		final DownloadAlertDialog myDialog=new DownloadAlertDialog(mContext);
-		myDialog.setTitle("微视界已更新");
+		myDialog.setTitle("视界通已更新");
 		myDialog.setMessage(""+info);
 		myDialog.setPositiveButton("现在升级", new OnClickListener() {
 			@Override
@@ -141,10 +141,10 @@ public class UpdateAPK {
 	 */
 	private void showDownloadDialog() {
 		StringBuffer info = new StringBuffer();
-		info.append("微视界更新信息\n");
+		info.append("视界通更新信息\n");
 		info.append("新版本号："+xmlHashMap.get("versionName")+"\n");
 		info.append("软件大小："+xmlHashMap.get("apkLeagth")+"\n");
-		info.append("更新原因："+xmlHashMap.get("upgradeReason"));
+		info.append(xmlHashMap.get("upgradeReason"));
 		
 		downLoadDialog = new DownloadAlertDialogProgressBar(mContext);
 		downLoadDialog.setProgressPercent(0);
@@ -289,7 +289,7 @@ public class UpdateAPK {
 						do {
 							//下载apk数据
 							int readCount = inputStream.read(buf);
-							sleep(5);
+							sleep(2);
 							//处理下载界面的显示
 							count += readCount;
 							int percent = (int)(((float)count/apkLeagth)*100);

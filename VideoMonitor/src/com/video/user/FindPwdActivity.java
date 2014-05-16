@@ -22,7 +22,7 @@ import com.video.R;
 import com.video.data.Value;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
-import com.video.utils.MyAlertDialog;
+import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 
 public class FindPwdActivity extends Activity implements OnClickListener {
@@ -133,7 +133,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	 * 显示操作的提示
 	 */
 	private void showHandleDialog(String info) {
-		final MyAlertDialog myDialog=new MyAlertDialog(mContext);
+		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
 		myDialog.setTitle("温馨提示");
 		myDialog.setMessage(info);
 		myDialog.setPositiveButton("确认", new OnClickListener() {

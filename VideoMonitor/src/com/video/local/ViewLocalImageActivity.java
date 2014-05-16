@@ -14,7 +14,7 @@ import android.widget.Gallery;
 import android.widget.ImageButton;
 
 import com.video.R;
-import com.video.utils.MyAlertDialog;
+import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 
 public class ViewLocalImageActivity extends Activity implements OnClickListener {
@@ -141,7 +141,7 @@ public class ViewLocalImageActivity extends Activity implements OnClickListener 
 	 * 删除照片的提示
 	 */
 	private void showDeleteImageDialog() {
-		final MyAlertDialog myDialog=new MyAlertDialog(mContext);
+		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
 		myDialog.setTitle("温馨提示");
 		myDialog.setMessage("确认删除该张图片？");
 		myDialog.setPositiveButton("确认", new OnClickListener() {

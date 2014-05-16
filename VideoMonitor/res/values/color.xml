@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <!-- 报警橙色 -->
-    <color name="alert_red">#ff0000</color> 
     <!-- 白色 -->
     <color name="white">#FFFFFF</color>
     <!-- 黑色 -->
     <color name="black">#000000</color>
     <!-- 浅黑 -->
     <color name="light_black">#696969</color>
+    <!-- 红色 -->
+    <color name="red">#ff0000</color>
     <!-- 海绿色 -->
     <color name="sea_green">#43CD80</color>
     <!-- 橙色 -->

@@ -213,10 +213,8 @@ public class RegisterActivity extends Activity implements OnClickListener {
 							Toast.makeText(mContext, "恭喜您，注册成功！", Toast.LENGTH_SHORT).show();
 							if (preferData.isExist("UserName")) {
 								preferData.deleteItem("UserName");
-								preferData.writeData("UserName", userName);
-							} else {
-								preferData.writeData("UserName", userName);
 							}
+							preferData.writeData("UserName", userName);
 							if (preferData.isExist("UserPwd")) {
 								preferData.deleteItem("UserPwd");
 							}

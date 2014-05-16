@@ -21,7 +21,7 @@ import com.video.data.Value;
 import com.video.socket.HandlerApplication;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
-import com.video.utils.MyAlertDialog;
+import com.video.utils.OkCancelDialog;
 
 public class MoreFragment extends Fragment implements OnClickListener {
 
@@ -77,9 +77,6 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
 		}
-		if (preferData.isExist("RememberPwd")) {
-			isRememberPwd = preferData.readBoolean("RememberPwd");
-		}
 	}
 	
 	/**
@@ -102,7 +99,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	 * 显示操作的提示
 	 */
 	private void showHandleDialog() {
-		final MyAlertDialog myDialog=new MyAlertDialog(mActivity);
+		final OkCancelDialog myDialog=new OkCancelDialog(mActivity);
 		myDialog.setTitle("温馨提示");
 		myDialog.setMessage("确认退出当前账号的登录？");
 		myDialog.setPositiveButton("确定", new OnClickListener() {
@@ -136,6 +133,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	 * 退出当前账号登录的处理
 	 */
 	private void ExitLogoutAPP() {
+		if (preferData.isExist("RememberPwd")) {
+			isRememberPwd = preferData.readBoolean("RememberPwd");
+		}
 		if (!isRememberPwd) {
 			if (preferData.isExist("UserPwd")) {
 				preferData.deleteItem("UserPwd");

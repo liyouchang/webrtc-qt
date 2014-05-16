@@ -45,7 +45,6 @@
         android:fadingEdge="none"
         android:fastScrollEnabled="true"
         android:listSelector="@null"
-        android:overScrollFooter="@null"
         android:scrollbarAlwaysDrawVerticalTrack="false"
         android:scrollbars="none"
         android:scrollingCache="false" />

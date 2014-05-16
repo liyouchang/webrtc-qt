@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -24,6 +25,7 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
+import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 
 public class ModifyPwdActivity extends Activity implements OnClickListener {
@@ -192,7 +194,27 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							Toast.makeText(mContext, "恭喜您，修改密码成功！", Toast.LENGTH_SHORT).show();
+							final OkCancelDialog myDialog2=new OkCancelDialog(mContext);
+							myDialog2.setTitle("温馨提示");
+							myDialog2.setMessage("修改密码成功，是否重新登录？");
+							myDialog2.setPositiveButton("确认", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog2.dismiss();
+									if (preferData.isExist("UserPwd")) {
+										preferData.deleteItem("UserPwd");
+									}
+									startActivity(new Intent(mContext, LoginActivity.class));
+									ModifyPwdActivity.this.finish();
+								}
+							});
+							myDialog2.setNegativeButton("取消", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog2.dismiss();
+									ModifyPwdActivity.this.finish();
+								}
+							});
 						} else {
 							Toast.makeText(mContext, "修改密码失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
@@ -288,7 +310,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 		}
 		else if (!userOldPwd.equals(userPwd)) {
 			resultFlag = false;
-			et_old_pwd.setError("旧密码与原密码不匹配！");
+			et_old_pwd.setError("旧密码输入错误！");
 		} else {
 			resultFlag = true;
 			if (userNewPwd.equals("")) {

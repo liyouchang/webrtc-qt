@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -36,7 +36,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	private String userName = null;
 	private EditText et_name;
 	private Button button_delete_devicename;
-	private ProgressDialog progressDialog;
+	private Dialog mDialog = null;
 	
 	private String mDeviceName = "";
 	private String mDeviceId = "";
@@ -118,18 +118,6 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		return result;
 	}
 	
-	/**
-	 * 显示操作的进度条
-	 */
-	private void showProgressDialog(String info) {
-		progressDialog = new ProgressDialog(mContext);
-        progressDialog.setMessage(info); 
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);  
-        progressDialog.setIndeterminate(false);     
-        progressDialog.setCancelable(false); 
-        progressDialog.show(); 
-	}
-	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -137,11 +125,12 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					showProgressDialog("正在提交修改...");
+					mDialog = Utils.createLoadingDialog(mContext, "正在提交修改...");
+					mDialog.show();
 					break;
 				case REQUEST_TIMEOUT:
-					if (progressDialog != null)
-						progressDialog.dismiss();
+					if (mDialog != null)
+						mDialog.dismiss();
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
@@ -151,10 +140,10 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 				case R.id.modify_device_name_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
+						if (mDialog != null)
+							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							if (progressDialog != null)
-								progressDialog.dismiss();
 							Toast.makeText(mContext, "修改终端名称成功！", Toast.LENGTH_SHORT).show();
 							xmlData.updateItemName(mDeviceId, mDeviceName);
 							
@@ -167,8 +156,6 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 							finish();
 							overridePendingTransition(0, R.anim.down_out);
 						} else {
-							if (progressDialog != null)
-								progressDialog.dismiss();
 							Toast.makeText(mContext, "修改终端名称失败，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
 						}
 					} else {
