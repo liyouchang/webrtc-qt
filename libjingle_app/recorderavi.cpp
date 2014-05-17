@@ -461,6 +461,11 @@ RecordReaderAvi::RecordReaderAvi(talk_base::Thread *thread):
     aviFile_ = new talk_base::FileStream();
 }
 
+RecordReaderAvi::~RecordReaderAvi()
+{
+
+}
+
 void RecordReaderAvi::OnMessage(talk_base::Message *msg)
 {
     if(msg->message_id == ReadFrame){
