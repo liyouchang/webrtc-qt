@@ -60,6 +60,7 @@ public class MainActivity extends FragmentActivity {
 	public static boolean isPlayAlarmMusic = true;
 	private boolean isTextViewShow = false;
 	private static TextView tv_alarm_msg = null;
+	private static String currentTab = "";
 	
 	private static Dialog mDialog = null;
 	private final static int IS_LOGINNING = 1;
@@ -220,6 +221,7 @@ public class MainActivity extends FragmentActivity {
 		mTabHost.addTab(tabSpec);
 		
 		mTabHost.setCurrentTab(0);
+		mTabHost.getCurrentTab();
 		
 		TabWidget tabWidget = mTabHost.getTabWidget();  
 		tabWidget.setStripEnabled(false);
@@ -243,7 +245,7 @@ public class MainActivity extends FragmentActivity {
             tv.setLayoutParams(paramsText);  
             tv.setTextColor(Color.WHITE); 
             tv.setTextSize(16);
-        }  
+        }
         updateTab(mTabHost);
         if (preferData.isExist("AlarmCount")) {
         	setAlarmIconAndText(preferData.readInt("AlarmCount"));
@@ -254,7 +256,7 @@ public class MainActivity extends FragmentActivity {
         fragments.add(new MsgFragment());
         fragments.add(new MoreFragment());
         
-        FragmentTabAdapter tabAdapter = new FragmentTabAdapter(this, fragments, android.R.id.tabcontent, mTabHost);
+        final FragmentTabAdapter tabAdapter = new FragmentTabAdapter(this, fragments, android.R.id.tabcontent, mTabHost);
         tabAdapter.setOnMyTabChangedListener(new OnMyTabChangedListener() {
 			@Override
 			public void MyTabChanged(FragmentTabAdapter adapter) {
@@ -271,12 +273,31 @@ public class MainActivity extends FragmentActivity {
 	}
 
 	private void updateTab(final TabHost _TabHost) {
+		
+		currentTab = mTabHost.getCurrentTabTag();
+        
 		for (int i = 0; i < _TabHost.getTabWidget().getChildCount(); i++) {
 			TextView tv = (TextView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
-			if (_TabHost.getCurrentTab() == i) {				
-				tv.setTextColor(this.getResources().getColorStateList(R.color.tab_text_color));
+    		if (_TabHost.getCurrentTab() == i) {
+    			if (i == 2) {
+    				if (preferData.readInt("AlarmCount") > 0) {
+    	        		tv.setTextColor(mContext.getResources().getColorStateList(R.color.red));
+    	        	} else {
+        				tv.setTextColor(this.getResources().getColorStateList(R.color.tab_text_color));
+        			}
+    			} else {
+    				tv.setTextColor(this.getResources().getColorStateList(R.color.tab_text_color));
+    			}
 			} else {
-				tv.setTextColor(this.getResources().getColorStateList(R.color.white));
+				if (i == 2) {
+    				if (preferData.readInt("AlarmCount") > 0) {
+    	        		tv.setTextColor(mContext.getResources().getColorStateList(R.color.red));
+    	        	} else {
+    	        		tv.setTextColor(this.getResources().getColorStateList(R.color.white));
+        			}
+    			} else {
+    				tv.setTextColor(this.getResources().getColorStateList(R.color.white));
+    			}
 			}
 			if (i ==2) {
 				tv_alarm_msg = (TextView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
@@ -291,7 +312,11 @@ public class MainActivity extends FragmentActivity {
 	public static void setAlarmIconAndText(int msg) {
 		if (msg <= 0) {
 			tv_alarm_msg.setText("消息");
-//			tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.white));
+			if (currentTab.equals("tab3")) {
+				tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.tab_text_color));
+			} else {
+				tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.white));
+			}
 		} else {
 			if (msg < 100) {
 				tv_alarm_msg.setText("消息("+msg+")");

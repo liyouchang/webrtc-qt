@@ -11,7 +11,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="visible" >
+        android:visibility="invisible" >
 
         <ImageView
             android:id="@+id/iv_local_file_video"

@@ -29,4 +29,9 @@
     <color name="viewfinder_laser">#ffff0000</color>
     <color name="viewfinder_mask">#60000000</color>
     
+    <!-- 本地播放器 -->
+    <color name="player_background">#FF000000</color>
+	<color name="player_control_back">#A0181818</color>
+	<color name="player_dialog_back">#A0181818</color>
+    
 </resources>

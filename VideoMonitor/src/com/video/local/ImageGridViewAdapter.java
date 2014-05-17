@@ -20,11 +20,11 @@ import android.widget.LinearLayout;
 import com.video.R;
 import com.video.utils.Utils;
 
-public class GridViewAdapter extends BaseAdapter {
+public class ImageGridViewAdapter extends BaseAdapter {
 	private Context mContext;
 	private List<HashMap<String, Object>> mList;
 
-	public GridViewAdapter(Context context, List<HashMap<String, Object>> list) {
+	public ImageGridViewAdapter(Context context, List<HashMap<String, Object>> list) {
 		super();
 		this.mContext = context;
 		this.mList = list;
@@ -80,7 +80,7 @@ public class GridViewAdapter extends BaseAdapter {
 					e.printStackTrace();
 				}
 				holder.imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-				holder.imageView.setLayoutParams(new LinearLayout.LayoutParams(Utils.screenWidth/3, (Utils.screenWidth-240)/3));
+				holder.imageView.setLayoutParams(new LinearLayout.LayoutParams(Utils.screenWidth/3, (Utils.screenWidth-150)/3));
 			    
 				holder.imageView.setOnClickListener(new OnClickListener() {
 					@Override

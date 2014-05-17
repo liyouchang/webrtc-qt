@@ -151,9 +151,9 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naMessageFromPeer },
         { "naSendTalkData", "([BI)I", (void*) naSendTalkData },
-        { "naOpenTunnel", "(Ljava/lang/String;Ljava/lang/String;)I",
+        { "naStartPeerVideoCut", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naStartPeerVideoCut },
-        { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naStopPeerVideoCut },
+        { "naStopPeerVideoCut", "(Ljava/lang/String;)I", (void*) naStopPeerVideoCut },
 
 
     };
