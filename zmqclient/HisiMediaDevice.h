@@ -15,7 +15,7 @@ namespace talk_base {
 
 #define MEDIA_BUFFER_LENGTH 512*1024
 
-class HisiMediaDevice:talk_base::MessageHandler,public KeTunnelCamera
+class HisiMediaDevice:talk_base::MessageHandler,public kaerp2p::KeTunnelCamera
 {
 public:
     enum{
@@ -34,7 +34,7 @@ public:
     void SetVideoResolution(std::string r);
     //video == 0 start video ,audio == 0 start audio
     std::string GetHardwareId();
-    virtual void GetCameraVideoInfo(int level,VideoInfo * info);
+    virtual void GetCameraVideoInfo(int level,kaerp2p::VideoInfo * info);
 protected:
     int GetVideoFrameType(int level);
     int GetVideoFrameRate(int level);
@@ -51,8 +51,8 @@ private:
     int video1_handle_;
     int video2_handle_;
     int audio_handle_;
-    VideoInfo video1_info_;
-    VideoInfo video2_info_;
+    kaerp2p::VideoInfo video1_info_;
+    kaerp2p::VideoInfo video2_info_;
     int video_clarity_;
     char media_buffer_[MEDIA_BUFFER_LENGTH];
     // KeTunnelCamera interface

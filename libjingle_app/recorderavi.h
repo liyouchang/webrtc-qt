@@ -50,16 +50,26 @@ private:
 class RecordReaderAvi : public talk_base::MessageHandler
 {
 public:
-    RecordReaderAvi();
+    enum {
+        ReadFrame
+    };
+    RecordReaderAvi(talk_base::Thread * thread);
     virtual ~RecordReaderAvi();
-    bool StartRead(const std::string & fileName);
+    void OnMessage(talk_base::Message *msg);
+
+    bool StartRead(const std::string & filename);
     bool StopRead();
     sigslot::signal0<> SignalRecordEnd;
     sigslot::signal2<const char *,int> SignalVideoData;
     sigslot::signal2<const char *,int> SignalAudioData;
 private:
     talk_base::Thread * readThread;
-    int delayTime;//million second
+    int audioFrameInterval;//million second, audio frame interval time,
+                            //20 is normal speed
+    talk_base::FileStream * aviFile_;
+
+
+public:
 };
 
 }

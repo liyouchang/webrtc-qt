@@ -404,7 +404,7 @@ std::string HisiMediaDevice::GetHardwareId()
 
 }
 
-void HisiMediaDevice::GetCameraVideoInfo(int level, VideoInfo *info)
+void HisiMediaDevice::GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info)
 {
     if(level == 1){
         *info = this->video1_info_;
