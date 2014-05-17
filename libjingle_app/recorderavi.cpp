@@ -18,6 +18,8 @@
 #include "talk/base/stream.h"
 #include "talk/base/stringencode.h"
 
+namespace kaerp2p {
+
 #define AVIF_HASINDEX       0x00000010  // Index at end of file?
 #define AVIF_ISINTERLEAVED  0x00000100
 #define AVIF_TRUSTCKTYPE    0x00000800  // Use CKType to find key frames?
@@ -174,6 +176,14 @@ RecorderAvi::~RecorderAvi()
     delete aviFile_;
 }
 
+const int kHdrlListLen = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6;//292
+const int kHdrlListLenPos = 16;
+
+const int kMoveListLenPos = kHdrlListLen + 20 + 4;//316
+const int kMoveListDataPos = kMoveListLenPos +4;//320
+const int kAviHeadTotalFramePos = 20 + 4 + 4*6;
+const int kRiffLenPos = 4;
+const int kStrhVidsLengthPos = 24 + 4*16 +12 + 10*4; //140
 
 bool RecorderAvi::StartRecord(const std::string & filename)
 {
@@ -185,13 +195,12 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     }
     unsigned int len = 0;
     talk_base::Buffer head;
-    head.AppendData("RIFF~~~~AVI ",12);//20
+    head.AppendData("RIFF~~~~AVI ",12);//24
     head.AppendData("LIST",4);
     //len = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6+2;
     int aviListLen = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6;
     head.AppendData(&aviListLen,4);
-
-    head.AppendData("hdrl",4);//4
+    head.AppendData("hdrl",4);
 
     head.AppendData("avih",4); //4*16
     len = sizeof(MainAVIHeader);
@@ -303,10 +312,7 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     waveformat.nBlockAlign = 1;
     waveformat.biSize = 8;
     head.AppendData(&waveformat,sizeof(WAVEFORMAT));
-    //这里原来有这个代码，不知有什么影响
-    //    int tmp = 0;
-    //    head.AppendData(&tmp,2);
-    //+2
+
     head.AppendData("LIST~~~~movi",12);
     //init variable
     this->moviListLen = 4;
@@ -332,7 +338,6 @@ bool RecorderAvi::StopRecord()
     }
     recvIFrame = false;
     size_t indexDataLen = aviIndex_->length() - 8;
-
     memcpy(aviIndex_->data()+4,&indexDataLen,4);
     talk_base::StreamResult result = aviFile_->WriteAll(
                 aviIndex_->data(),aviIndex_->length(),NULL,NULL);
@@ -348,16 +353,20 @@ bool RecorderAvi::StopRecord()
         return false;
     }
     totalLen -= 8;
-    aviFile_->SetPosition(4);
+    aviFile_->SetPosition(kRiffLenPos);
     aviFile_->Write(&totalLen,4,NULL,NULL);
-    aviFile_->SetPosition(316);
+//    aviFile_->SetPosition(kAviHeadTotalFramePos);
+//    aviFile_->Write(&this->frameCount,4,NULL,NULL);
+    aviFile_->SetPosition(kStrhVidsLengthPos);
+    aviFile_->Write(&this->frameCount,4,NULL,NULL);
+    aviFile_->SetPosition(kMoveListLenPos);
     aviFile_->Write(&moviListLen,4,NULL,NULL);
-
     aviFile_->Close();
     return true;
 }
 
-void RecorderAvi::OnVideoData(const std::string &peerId, const char *data, int len)
+void RecorderAvi::OnVideoData(const std::string &peerId,
+                              const char *data, int len)
 {
     if(this->peerId_ != peerId){
         return;
@@ -365,7 +374,8 @@ void RecorderAvi::OnVideoData(const std::string &peerId, const char *data, int l
     AviFileWriteVideo(data+12,len-12);
 }
 
-void RecorderAvi::OnAudioData(const std::string &peerId, const char *data, int len)
+void RecorderAvi::OnAudioData(const std::string &peerId,
+                              const char *data, int len)
 {
     if(this->peerId_ != peerId){
         return;
@@ -404,7 +414,8 @@ bool RecorderAvi::AviFileWriteVideo(const char * mediaData,int mediaLen)
         data.AppendData("0",1);
     }
     size_t written;
-    talk_base::StreamResult result = aviFile_->WriteAll(data.data(),data.length(),&written,NULL);
+    talk_base::StreamResult result = aviFile_->WriteAll(
+                data.data(),data.length(),&written,NULL);
     if(result != talk_base::SR_SUCCESS){
         LOG(WARNING)<<"RecorderAvi::aviFileWriteVideo---"<<"write file error ";
         return false;
@@ -442,4 +453,80 @@ bool RecorderAvi::AviFileWriteAudio(const char *mediaData, int mediaLen)
         return false;
     }
     return true;
+}
+
+RecordReaderAvi::RecordReaderAvi(talk_base::Thread *thread):
+    readThread(thread),audioFrameInterval(20)
+{
+    aviFile_ = new talk_base::FileStream();
+}
+
+void RecordReaderAvi::OnMessage(talk_base::Message *msg)
+{
+    if(msg->message_id == ReadFrame){
+        ASSERT(aviFile_->GetState() == talk_base::SS_OPEN);
+        char moviType[5] = {0};
+        int moviLen;
+        talk_base::StreamResult result;
+        aviFile_->Read(moviType,4,NULL,NULL);
+        if(strcmp(moviType,"00dc") == 0){//video
+            result = aviFile_->Read(&moviLen,4,NULL,NULL);
+            talk_base::scoped_ptr<char[]> moviBuf(new char[moviLen]);
+            result = aviFile_->ReadAll(moviBuf.get(),moviLen,NULL,NULL);
+            if(result != talk_base::SR_SUCCESS){
+                LOG(WARNING)<<"RecordReaderAvi::OnMessage---"<<
+                              "read file error ";
+                return ;
+            }
+            SignalVideoData(moviBuf.get(),moviLen);
+        }else if(strcmp(moviType,"01wb")){ // audio
+            result = aviFile_->Read(&moviLen,4,NULL,NULL);
+            talk_base::scoped_ptr<char[]> moviBuf(new char[moviLen]);
+            result = aviFile_->ReadAll(moviBuf.get(),moviLen,NULL,NULL);
+            if(result != talk_base::SR_SUCCESS){
+                LOG(WARNING)<<"RecordReaderAvi::OnMessage---"<<
+                              "read file error ";
+                return ;
+            }
+            SignalAudioData(moviBuf.get(),moviLen);
+        }else{
+            SignalRecordEnd();
+        }
+    }
+}
+
+bool RecordReaderAvi::StartRead(const std::string &filename)
+{
+    ASSERT(readThread);
+
+    bool ret = aviFile_->Open(filename,"rb",NULL);
+    if(!ret){
+        LOG(WARNING)<<"RecordReaderAvi::StartRead---"<<
+                      "open file error "<<filename;
+        return ret;
+    }
+    char listType[5] = {0};
+    aviFile_->SetPosition(kMoveListDataPos);
+    talk_base::StreamResult result = aviFile_->Read(listType,4,NULL,NULL);
+    if(result != talk_base::SR_SUCCESS){
+        LOG(WARNING)<<"RecordReaderAvi::StartRead---"<<
+                      "read file error ";
+        return false;
+    }
+    if(strcmp(listType,"movi") != 0 ){
+        LOG(WARNING)<<"RecordReaderAvi::StartRead---"<<
+                      "file type error "<<filename;
+        return false;
+    }
+
+    readThread->Post(this,ReadFrame);
+
+    return true;
+}
+
+bool RecordReaderAvi::StopRead()
+{
+    aviFile_->Close();
+}
+
 }

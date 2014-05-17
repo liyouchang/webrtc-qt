@@ -8,6 +8,9 @@
 #include "KeMessage.h"
 #include "p2pconductor.h"
 
+
+namespace kaerp2p{
+
 const int kHeartStop = 20; //10s without receive heart
 const int kHeartDelay = 500;  // 500 milliseconds
 
@@ -324,5 +327,5 @@ void KeMsgProcessContainer::OnHeartStop(const std::string &peer_id)
 }
 
 
-
+}
 

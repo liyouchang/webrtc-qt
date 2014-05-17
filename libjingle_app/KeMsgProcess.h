@@ -17,6 +17,9 @@ namespace talk_base {
 class Thread;
 }
 
+namespace kaerp2p{
+
+
 class KeMsgProcessContainer;
 
 struct VideoInfo{
@@ -99,6 +102,6 @@ protected:
     bool has_terminal;
 };
 
-
+}
 
 #endif // KEMSGPROCESS_H

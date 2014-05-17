@@ -13,11 +13,15 @@
 
 #include <string>
 #include "talk/base/sigslot.h"
-
+#include "talk/base/thread.h"
 namespace talk_base{
 class Buffer;
 class FileStream;
 }
+
+namespace kaerp2p {
+
+
 
 class RecorderAvi:public sigslot::has_slots<>
 {
@@ -43,4 +47,30 @@ private:
     int frameCount;
 };
 
+class RecordReaderAvi : public talk_base::MessageHandler
+{
+public:
+    enum {
+        ReadFrame
+    };
+    RecordReaderAvi(talk_base::Thread * thread);
+    virtual ~RecordReaderAvi();
+    void OnMessage(talk_base::Message *msg);
+
+    bool StartRead(const std::string & filename);
+    bool StopRead();
+    sigslot::signal0<> SignalRecordEnd;
+    sigslot::signal2<const char *,int> SignalVideoData;
+    sigslot::signal2<const char *,int> SignalAudioData;
+private:
+    talk_base::Thread * readThread;
+    int audioFrameInterval;//million second, audio frame interval time,
+                            //20 is normal speed
+    talk_base::FileStream * aviFile_;
+
+
+public:
+};
+
+}
 #endif // RECORDERAVI_H

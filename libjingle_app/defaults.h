@@ -30,6 +30,8 @@
 
 #include <string>
 #include "talk/base/basictypes.h"
+namespace kaerp2p{
+
 
 extern const char kAudioLabel[];
 extern const char kVideoLabel[];
@@ -59,5 +61,5 @@ std::string GetPeerName();
 std::string GetConfigFileString(std::string filename);
 
 std::string GetAppFilePath(std::string filename);
-
+}
 #endif  // PEERCONNECTION_SAMPLES_CLIENT_DEFAULTS_H_

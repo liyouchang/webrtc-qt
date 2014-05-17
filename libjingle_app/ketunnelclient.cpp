@@ -8,6 +8,9 @@
 #include "defaults.h"
 #include "recorderavi.h"
 
+namespace kaerp2p {
+
+
 KeTunnelClient::KeTunnelClient()
 {
 
@@ -341,7 +344,6 @@ void KeMessageProcessClient::RecvMediaData(talk_base::Buffer &msgData)
 
 void KeMessageProcessClient::RecvAskMediaResp(talk_base::Buffer &msgData)
 {
-
     KEVideoServerResp * msg = (KEVideoServerResp *)msgData.data();
     this->videoInfo_.frameRate_ = msg->frameRate;
     this->videoInfo_.frameType_ = msg->frameType;
@@ -349,4 +351,4 @@ void KeMessageProcessClient::RecvAskMediaResp(talk_base::Buffer &msgData)
                msg->frameRate<<msg->frameType;
 }
 
-
+}

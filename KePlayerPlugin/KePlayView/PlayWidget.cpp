@@ -77,7 +77,5 @@ void PlayWidget::paintEvent(QPaintEvent *event)
     p.drawText(10,10,QString::number(playIndex()));
     //qDebug()<<"PlayWidget::paintEvent "<<playIndex()<<" rect "<<r;
    // QWidget::paintEvent(event);
-
-
 }
 

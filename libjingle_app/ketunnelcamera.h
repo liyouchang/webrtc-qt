@@ -3,6 +3,8 @@
 
 #include "KeMsgProcess.h"
 
+namespace kaerp2p{
+
 
 
 
@@ -63,4 +65,5 @@ private:
 
 };
 
+}
 #endif // KETUNNELCAMERA_H
