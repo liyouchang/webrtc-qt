@@ -3,6 +3,8 @@
 
 #include "KeMsgProcess.h"
 
+namespace kaerp2p{
+
 class RecorderAvi;
 class KeTunnelClient:public KeMsgProcessContainer{
     friend class KeMessageProcessClient;
@@ -76,5 +78,5 @@ private:
     RecorderAvi *cutter_;
 };
 
-
+}
 #endif // KETUNNELCLIENT_H

@@ -18,7 +18,7 @@ public slots:
     void OnVideoData(const char * data,int len);
     void OnAudioData(const char * data,int len);
 private:
-    QFile * saveFile;
+    QFile *saveFile;
 };
 
 #endif // KEVIDEOCUTTER_H

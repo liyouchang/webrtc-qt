@@ -7,6 +7,9 @@
 #include "KeMessage.h"
 #include "defaults.h"
 
+namespace kaerp2p{
+
+
 void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t,
                                     const std::string &peer_id)
 {
@@ -323,3 +326,4 @@ void KeMessageProcessCamera::OnAudioData(const char *data, int len)
 
 }
 
+}

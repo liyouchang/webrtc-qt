@@ -53,6 +53,9 @@
 #include <objbase.h>
 #endif
 
+namespace  kaerp2p {
+
+
 std::string GetUUID(std::string& strUUID)
 {
     strUUID = "";
@@ -206,4 +209,6 @@ std::string GetCurrentDatetime(std::string format)
         result = mbstr;
     }
     return result;
+}
+
 }

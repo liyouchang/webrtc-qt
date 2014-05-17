@@ -18,6 +18,8 @@
 #include "talk/base/stream.h"
 #include "talk/base/stringencode.h"
 
+namespace kaerp2p {
+
 #define AVIF_HASINDEX       0x00000010  // Index at end of file?
 #define AVIF_ISINTERLEAVED  0x00000100
 #define AVIF_TRUSTCKTYPE    0x00000800  // Use CKType to find key frames?
@@ -174,7 +176,14 @@ RecorderAvi::~RecorderAvi()
     delete aviFile_;
 }
 
+const int kHdrlListLen = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6;//292
+const int kHdrlListLenPos = 16;
 
+const int kMoveListLenPos = kHdrlListLen + 20 + 4;//316
+const int kMoveListDataPos = kMoveListLenPos +4;//320
+const int kAviHeadTotalFramePos = 20 + 4 + 4*6;
+const int kRiffLenPos = 4;
+const int kStrhVidsLengthPos = 24 + 4*16 +12 + 10*4; //140
 bool RecorderAvi::StartRecord(const std::string & filename)
 {
     bool ret = aviFile_->Open(filename,"wb",NULL);
@@ -185,13 +194,12 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     }
     unsigned int len = 0;
     talk_base::Buffer head;
-    head.AppendData("RIFF~~~~AVI ",12);//20
+    head.AppendData("RIFF~~~~AVI ",12);//24
     head.AppendData("LIST",4);
     //len = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6+2;
     int aviListLen = 4 + 4*16 + 12 + 4*16 + 4*12 +12 + 4*16 + 4*6;
     head.AppendData(&aviListLen,4);
-
-    head.AppendData("hdrl",4);//4
+    head.AppendData("hdrl",4);
 
     head.AppendData("avih",4); //4*16
     len = sizeof(MainAVIHeader);
@@ -303,10 +311,7 @@ bool RecorderAvi::StartRecord(const std::string & filename)
     waveformat.nBlockAlign = 1;
     waveformat.biSize = 8;
     head.AppendData(&waveformat,sizeof(WAVEFORMAT));
-    //这里原来有这个代码，不知有什么影响
-    //    int tmp = 0;
-    //    head.AppendData(&tmp,2);
-    //+2
+
     head.AppendData("LIST~~~~movi",12);
     //init variable
     this->moviListLen = 4;
@@ -332,7 +337,6 @@ bool RecorderAvi::StopRecord()
     }
     recvIFrame = false;
     size_t indexDataLen = aviIndex_->length() - 8;
-
     memcpy(aviIndex_->data()+4,&indexDataLen,4);
     talk_base::StreamResult result = aviFile_->WriteAll(
                 aviIndex_->data(),aviIndex_->length(),NULL,NULL);
@@ -348,16 +352,20 @@ bool RecorderAvi::StopRecord()
         return false;
     }
     totalLen -= 8;
-    aviFile_->SetPosition(4);
+    aviFile_->SetPosition(kRiffLenPos);
     aviFile_->Write(&totalLen,4,NULL,NULL);
-    aviFile_->SetPosition(316);
+//    aviFile_->SetPosition(kAviHeadTotalFramePos);
+//    aviFile_->Write(&this->frameCount,4,NULL,NULL);
+    aviFile_->SetPosition(kStrhVidsLengthPos);
+    aviFile_->Write(&this->frameCount,4,NULL,NULL);
+    aviFile_->SetPosition(kMoveListLenPos);
     aviFile_->Write(&moviListLen,4,NULL,NULL);
-
     aviFile_->Close();
     return true;
 }
 
-void RecorderAvi::OnVideoData(const std::string &peerId, const char *data, int len)
+void RecorderAvi::OnVideoData(const std::string &peerId,
+                              const char *data, int len)
 {
     if(this->peerId_ != peerId){
         return;
@@ -365,7 +373,8 @@ void RecorderAvi::OnVideoData(const std::string &peerId, const char *data, int l
     AviFileWriteVideo(data+12,len-12);
 }
 
-void RecorderAvi::OnAudioData(const std::string &peerId, const char *data, int len)
+void RecorderAvi::OnAudioData(const std::string &peerId,
+                              const char *data, int len)
 {
     if(this->peerId_ != peerId){
         return;
@@ -404,7 +413,8 @@ bool RecorderAvi::AviFileWriteVideo(const char * mediaData,int mediaLen)
         data.AppendData("0",1);
     }
     size_t written;
-    talk_base::StreamResult result = aviFile_->WriteAll(data.data(),data.length(),&written,NULL);
+    talk_base::StreamResult result = aviFile_->WriteAll(
+                data.data(),data.length(),&written,NULL);
     if(result != talk_base::SR_SUCCESS){
         LOG(WARNING)<<"RecorderAvi::aviFileWriteVideo---"<<"write file error ";
         return false;
@@ -442,4 +452,6 @@ bool RecorderAvi::AviFileWriteAudio(const char *mediaData, int mediaLen)
         return false;
     }
     return true;
+}
+
 }

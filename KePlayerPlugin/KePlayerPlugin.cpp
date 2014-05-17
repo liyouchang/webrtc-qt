@@ -33,7 +33,6 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
 
 KePlayerPlugin::~KePlayerPlugin()
 {
-
 }
 
 void KePlayerPlugin::about()
@@ -82,24 +81,17 @@ int KePlayerPlugin::Initialize(QString routerUrl)
                      this,&KePlayerPlugin::RecordStatus);
     QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvPeerMsg,
                      this,&KePlayerPlugin::RecvPeerMsg);
-
-
-
-
     this->is_inited = true;
     return 0;
 }
 
 int KePlayerPlugin::Initialize()
 {
-    JsonConfig::Instance()->FromFile(GetAppFilePath("config.json"));
+    JsonConfig::Instance()->FromFile(kaerp2p::GetAppFilePath("config.json"));
     Json::Value routerValue = JsonConfig::Instance()->Get("routerUrl","tcp://222.174.213.185:5555");
     Json::Value jservers = JsonConfig::Instance()->Get("servers","");
-
     kaerp2p::P2PConductor::AddIceServers(jservers.asString());
-
     return this->Initialize(routerValue.asString().c_str());
-
 }
 //video:1 main stream 2 sub stream
 int KePlayerPlugin::StartVideo(QString peer_id, int video)
@@ -108,11 +100,9 @@ int KePlayerPlugin::StartVideo(QString peer_id, int video)
     if(!tunnel_->StartPeerMedia(str_id,video)){
         return KE_VIDEO_START_FAILED;
     }
-
     int index = video_wall_->SetPeerPlay(peer_id);
     qDebug()<<"KePlayerPlugin::StartVideo play index is "<< index;
     return KE_SUCCESS;
-
 }
 
 int KePlayerPlugin::StopVideo(QString peerId)

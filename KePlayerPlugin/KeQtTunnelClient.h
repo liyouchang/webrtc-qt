@@ -4,7 +4,7 @@
 #include <QObject>
 #include "libjingle_app/ketunnelclient.h"
 
-class KeQtTunnelClient : public QObject,public KeTunnelClient
+class KeQtTunnelClient : public QObject,public kaerp2p::KeTunnelClient
 {
     Q_OBJECT
 public:
