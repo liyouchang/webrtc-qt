@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_local_video_bg"
+    android:layout_width="100dp"
+    android:layout_height="90dp"
+    android:background="@drawable/message_image_default" >
+    
+    <ImageView
+        android:id="@+id/iv_local_video_bg"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/iv_local_video_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/icon_device_play_xml"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
+
+</RelativeLayout>

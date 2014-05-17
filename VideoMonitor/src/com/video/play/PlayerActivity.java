@@ -1,5 +1,6 @@
 package com.video.play;
 
+import java.io.File;
 import java.util.HashMap;
 
 import org.json.JSONException;
@@ -15,6 +16,7 @@ import android.content.res.Configuration;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -44,6 +46,7 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.Value;
 import com.video.socket.HandlerApplication;
+import com.video.utils.Utils;
 
 public class PlayerActivity  extends Activity implements OnClickListener  {
 
@@ -68,6 +71,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private int titleHeight = 80;
 	private int bottomHeight = 100;
 	
+	private boolean isRecordVideo = false;
 	private boolean isVoiceEnable = true;
 	private boolean isTalkEnable = false;
 	private boolean isPlayMusic = false;
@@ -412,7 +416,41 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				break;
 			//录像
 			case R.id.btn_player_record:
-				playMyMusic(R.raw.record);
+				if (!isRecordVideo) {
+					String videoName = videoView.captureThumbnails();
+					if (videoName != null) {
+						//开始录视频
+						isRecordVideo = true;
+						playMyMusic(R.raw.record);
+						toastNotify(mContext, "开始录像！", Toast.LENGTH_SHORT);
+						
+						String SDPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+						String filePath1 = SDPath + File.separator + "KaerVideo";
+						File videoFilePath1 = new File(filePath1);
+						if(!videoFilePath1.exists()){
+							videoFilePath1.mkdir();
+						} 
+						String filePath2 = filePath1 + File.separator + "video";
+						File videoFilePath2 = new File(filePath2);
+						if(!videoFilePath2.exists()){
+							videoFilePath2.mkdir();
+						} 
+						String filePath3 = filePath2 + File.separator +Utils.getNowTime("yyyy-MM-dd");
+						File videoFilePath3 = new File(filePath3);
+						if(!videoFilePath3.exists()){
+							videoFilePath3.mkdir();
+						} 
+						String videoFile = filePath3 + File.separator +videoName + ".avi";
+						TunnelCommunication.getInstance().startRecordVideo(dealerName, videoFile);
+					} else {
+						toastNotify(mContext, "录像失败！", Toast.LENGTH_SHORT);
+					}
+				} else {
+					//停止录视频
+					isRecordVideo = false;
+					TunnelCommunication.getInstance().stopRecordVideo(dealerName);
+					toastNotify(mContext, "停止录像！", Toast.LENGTH_SHORT);
+				}
 				break;
 			//对讲
 			case R.id.btn_player_talkback:
@@ -605,6 +643,12 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	 */
 	private void closePlayer() {
 		try {
+			//停止录视频
+			if (isRecordVideo) {
+				isRecordVideo = false;
+				TunnelCommunication.getInstance().stopRecordVideo(dealerName);
+			}
+			//关闭实时音视频
 			try {
 				videoView.stopVideo();
 				audioThread.stopAudioThread();
@@ -615,13 +659,13 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				System.out.println("MyDebug: 关闭音视频对讲异常！");
 				e.printStackTrace();
 			}
-			
+			//关闭通道
 			if (Value.isTunnelOpened) {
 				TunnelCommunication.getInstance().closeTunnel(dealerName);
 				TunnelCommunication.getInstance().tunnelTerminate();
 			}
 			Value.TerminalDealerName = null;
-			
+			//销毁弹出框
 			if (titlePopupWindow != null) {
 				titlePopupWindow.dismiss();
 			}

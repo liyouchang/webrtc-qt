@@ -252,6 +252,21 @@ public class Utils {
 	}
 	
 	/**
+	 * 判断是否为视频格式的文件
+	 * @param fileName 文件
+	 * @return true:是 false:不是
+	 */
+	public static boolean isVideoFile(String fileName) {
+	    String end = fileName.substring(fileName.lastIndexOf(".")+1, fileName.length()).toLowerCase(); 
+	    
+	    if(end.equals("avi")||end.equals("mp4")||end.equals("3gp")||
+	       end.equals("AVI")||end.equals("MP4")||end.equals("3GP")) {
+	    	return true;
+	    }
+	    return false; 
+	}
+	
+	/**
 	 * 将字符串转换成日期类型
 	 * @param date_string 日期字符串
 	 * @param format_string 要转换的日期格式
