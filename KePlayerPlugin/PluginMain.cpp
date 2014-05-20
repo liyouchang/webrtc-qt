@@ -2,6 +2,10 @@
 #include <QApplication>
 #include "qtbrowserplugin.h"
 
+#if _MSC_VER >= 1600
+#pragma execution_character_set("utf-8")
+#endif
+
 
 QTNPFACTORY_BEGIN("Qt-based player Plugin", "A Qt-based player plug-in to support kaer camera")
     QTNPCLASS(KePlayerPlugin)

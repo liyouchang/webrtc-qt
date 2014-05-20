@@ -42,7 +42,7 @@ private:
     long  m_lPause;
     HWND m_hPlayWnd;
     PlayStatus  playStatus; //0,无播放；1，播放视频
-    int m_iPlaySpeed;                       //播放速度 0、正常播放；-5、暂停
+    int m_iPlaySpeed; //播放速度 0、正常播放；-5、暂停
 public:
     static bool isInitailed ;
 

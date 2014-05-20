@@ -37,7 +37,7 @@ VideoWall::VideoWall(QWidget *parent) :
     setSelectedPlayer(0);
     SetDivision(ScreenDivision_One);
 
-    setAcceptDrops(true);
+   // setAcceptDrops(true);
 }
 
 VideoWall::~VideoWall()
@@ -243,6 +243,16 @@ void VideoWall::StopFilePlay(QString peer_id)
 
 }
 
+bool VideoWall::Capture(QString peer_id, QString fileName)
+{
+    int play_index = peer_play_map_.value(peer_id,-1);
+    if(play_index != -1){
+        return players[play_index]->Capture(fileName);
+    }
+    qWarning()<<"VideoWall::Capture---id "<<peer_id<<" not found";
+    return false;
+}
+
 
 
 void VideoWall::setSelectedPlayer(int newSelected)
@@ -275,7 +285,6 @@ void VideoWall::showNormalScreenWall()
 
 void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
 {
-
     int play_index = peer_play_map_.value(peer_id,-1);
     if(play_index != -1)
         this->players[play_index]->PlayMediaData(data);
@@ -330,40 +339,40 @@ void VideoWall::performDrag(PlayWidget *pw)
 
 void VideoWall::contextMenuEvent(QContextMenuEvent *event)
 {
-    qDebug()<<"VideoWall::contextMenuEvent";
-    PlayWidget *child = static_cast<PlayWidget*>(this->childAt(event->pos()));
-    if (!child){
-        qWarning()<<"VideoWall::contextMenuEvent--- no find PlayWidget";
-        return;
-    }
-    int playIndex = child->playIndex();
-    //this->setSelectedPlayer(playIndex);
+//    qDebug()<<"VideoWall::contextMenuEvent";
+//    PlayWidget *child = static_cast<PlayWidget*>(this->childAt(event->pos()));
+//    if (!child){
+//        qWarning()<<"VideoWall::contextMenuEvent--- no find PlayWidget";
+//        return;
+//    }
+//    int playIndex = child->playIndex();
+//    //this->setSelectedPlayer(playIndex);
 
-    itemMenu->exec(event->globalPos());
+//    itemMenu->exec(event->globalPos());
 
 }
 
 void VideoWall::paintEvent(QPaintEvent *)
 {
-    if(layout_changed_){
-        for(int i=0;i<MAX_AVPLAYER;i++){
-            //                    if(!this->players[i]->isVisible()){
-            //                        this->players[i]->setVisible(true);
+//    if(layout_changed_){
+//        for(int i=0;i<MAX_AVPLAYER;i++){
+//            //                    if(!this->players[i]->isVisible()){
+//            //                        this->players[i]->setVisible(true);
 
 
-            //}
-            this->players[i]->winId();
-            // this->players[i]->update();
-        }
-        //        for(int i=m_layoutList.size();i<MAX_AVPLAYER;i++){
-        //            //this->players[i]->winId();
-        //            //this->players[i]->setGeometry(-100,-100,0,0);
-        //            //this->players[i]->winId();
-        //            this->players[i]->setVisible(false);
+//            //}
+//           // this->players[i]->winId();
+//            // this->players[i]->update();
+//        }
+//        //        for(int i=m_layoutList.size();i<MAX_AVPLAYER;i++){
+//        //            //this->players[i]->winId();
+//        //            //this->players[i]->setGeometry(-100,-100,0,0);
+//        //            //this->players[i]->winId();
+//        //            this->players[i]->setVisible(false);
 
-        //        }
-        layout_changed_ = false;
-    }
+//        //        }
+//        layout_changed_ = false;
+//    }
 
 
 }

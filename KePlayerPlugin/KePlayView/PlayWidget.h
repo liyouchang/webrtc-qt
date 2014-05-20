@@ -23,7 +23,7 @@ public:
     void PlayMediaData(QByteArray & data);
     bool IsPlaying();
     void StopPlay();
-
+    bool Capture(QString file_name);
     void PlayFile(QString file_name,int file_size);
     void SetPlayFileSize(int size);
     void StopPlayFile();

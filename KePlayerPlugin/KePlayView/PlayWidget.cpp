@@ -60,21 +60,29 @@ void PlayWidget::StopPlay()
     this->update();
 }
 
+bool PlayWidget::Capture(QString file_name)
+{
+    QByteArray data = file_name.toLocal8Bit();
+    int ret = playSource->CapPic(data.constData());
+    qDebug()<<"PlayWidget::Capture---ret="<<ret;
+    return true;
+}
+
 void PlayWidget::paintEvent(QPaintEvent *event)
 {
-    QPainter p(this);
+//    QPainter p(this);
     //qDebug()<<"PlayWidget::paintEvent ---"<<this->winId();
 
-    if(this->selected){
-        p.setPen(Qt::yellow);
+//    if(this->selected){
+//        p.setPen(Qt::yellow);
 
-    }else{
-        p.setPen(Qt::black);
-    }
-    QRect r(event->rect());
-    r.adjust(0, 0, -1, -1);
-    p.drawRect(r);
-    p.drawText(10,10,QString::number(playIndex()));
+//    }else{
+//        p.setPen(Qt::black);
+//    }
+//    QRect r(event->rect());
+//    r.adjust(0, 0, -1, -1);
+//    p.drawRect(r);
+//    p.drawText(10,10,QString::number(playIndex()));
     //qDebug()<<"PlayWidget::paintEvent "<<playIndex()<<" rect "<<r;
    // QWidget::paintEvent(event);
 }

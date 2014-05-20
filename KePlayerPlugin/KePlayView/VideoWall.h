@@ -61,6 +61,7 @@ public:
     void StopPeerPlay(QString peer_id);
     bool SetLocalPlayFileSize(QString peer_id,int size);
     void StopFilePlay(QString peer_id);
+    bool Capture(QString peer_id,QString fileName);
 signals:
     void SigNeedStopPeerPlay(QString peer_id);
 public slots:
