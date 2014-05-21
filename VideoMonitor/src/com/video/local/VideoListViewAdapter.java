@@ -13,11 +13,11 @@ import android.widget.TextView;
 
 import com.video.R;
 
-public class ListViewAdapter extends BaseAdapter {
-	private List<ImageViewFileItem> mList;
+public class VideoListViewAdapter extends BaseAdapter {
+	private List<LocalFileItem> mList;
 	private Context mContext;
 
-	public ListViewAdapter(Context context, List<ImageViewFileItem> list) {
+	public VideoListViewAdapter(Context context, List<LocalFileItem> list) {
 		super();
 		this.mList = list;
 		this.mContext = context;
@@ -44,7 +44,7 @@ public class ListViewAdapter extends BaseAdapter {
 		
 		if (convertView == null) {
 			holder = new ViewHolder();
-			convertView = LayoutInflater.from(mContext).inflate(R.layout.local_image_listview_item, null);
+			convertView = LayoutInflater.from(mContext).inflate(R.layout.local_listview_item, null);
 			holder.textView = (TextView) convertView.findViewById(R.id.listview_item_textview);
 			holder.gridView = (GridView) convertView.findViewById(R.id.listview_item_gridview);
 			convertView.setTag(holder);
@@ -53,14 +53,14 @@ public class ListViewAdapter extends BaseAdapter {
 		}
 
 		if (this.mList != null) {
-			ImageViewFileItem fileItem = mList.get(position);
-			List<HashMap<String, Object>> imageViewList = mList.get(position).imageViews;
+			LocalFileItem fileItem = mList.get(position);
+			List<HashMap<String, Object>> videoViewList = mList.get(position).itemViews;
 			
 			if (holder.textView != null) {
 				holder.textView.setText(fileItem.fileName);
 			}
 			if (holder.gridView != null) {
-				GridViewAdapter gridViewAdapter = new GridViewAdapter(mContext, imageViewList);
+				VideoGridViewAdapter gridViewAdapter = new VideoGridViewAdapter(mContext, videoViewList);
 				holder.gridView.setAdapter(gridViewAdapter);
 			}
 		}

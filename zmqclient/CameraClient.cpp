@@ -36,7 +36,7 @@ void CameraClient::SendAlarm(int alarmType, std::string alarmInfo,
     jmessage["AlarmType"] = alarmType;
     jmessage["AlarmInfo"] = alarmInfo;
     jmessage["Picture"] = picture;
-    jmessage["DateTime"] = GetCurrentDatetime("%F %T");
+    jmessage["DateTime"] = kaerp2p::GetCurrentDatetime("%F %T");
 
     std::string msg = writer.write(jmessage);
     this->SendToPeer(alarmServer,msg);

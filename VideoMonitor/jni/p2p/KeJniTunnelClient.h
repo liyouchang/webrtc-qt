@@ -11,7 +11,7 @@
 
 #include "libjingle_app/ketunnelclient.h"
 
-class KeJniTunnelClient :public KeTunnelClient{
+class KeJniTunnelClient :public kaerp2p::KeTunnelClient{
 public:
 	KeJniTunnelClient();
 	virtual ~KeJniTunnelClient();

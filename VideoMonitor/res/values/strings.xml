@@ -94,6 +94,8 @@
     <string name="clarity_normal">标准</string>
     <string name="clarity_low">流畅</string>
     
+    <string name="local_player_time_init">00:00:00</string>
+    
     <string name="terminal_device_video">终端视频</string>
     <string name="device_item_name">名称: 门口摄像头</string>
     <string name="device_item_mac">ID: 009B684850022</string>

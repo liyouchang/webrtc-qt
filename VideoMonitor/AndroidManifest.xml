@@ -37,7 +37,7 @@
         </activity>
         <!-- 该软件的后台服务 -->
         <service android:name=".service.BackstageService" />
-        <!-- 直播 -->
+        <!-- 实时 -->
         <activity
             android:name=".main.OwnFragment"
             android:label="@string/app_name"
@@ -45,7 +45,7 @@
             android:launchMode="singleTask"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
-        <!-- 本地 -->
+        <!-- 历史 -->
         <activity
             android:name=".main.LocalFragment"
             android:label="@string/app_name"
@@ -170,6 +170,12 @@
         <activity
             android:name=".main.SharedActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 本地播放器 -->
+        <activity
+            android:name=".local.player.LocalPlayerActivity"
+            android:configChanges="keyboardHidden|orientation"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
     </application>

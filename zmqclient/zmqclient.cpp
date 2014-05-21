@@ -23,7 +23,7 @@ std::string ReadConfigFile();
 int main()
 {
     //read config
-    JsonConfig::Instance()->FromFile(GetAppFilePath("config.json"));
+    JsonConfig::Instance()->FromFile(kaerp2p::GetAppFilePath("config.json"));
 
     Json::Value mac_value = JsonConfig::Instance()->Get("camera.mac","");
     Json::Value dealer_value = JsonConfig::Instance()->Get("dealerId","");
@@ -60,7 +60,7 @@ int main()
         strMac = device->GetHardwareId();
     }
     if(strDealerId.empty()){
-        strDealerId = strMac + "-"+GetRandomString();
+        strDealerId = strMac + "-" + kaerp2p::GetRandomString();
     }
 
     CameraClient client(strMac);

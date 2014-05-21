@@ -230,6 +230,9 @@ public class VideoView extends View {
 		}
 	}
 	
+	/**
+	 * 抓拍图片
+	 */
 	public boolean captureVideo() {
 		if (mCanvas == null || !Utils.checkSDCard()) {
 			return false;
@@ -269,5 +272,56 @@ public class VideoView extends View {
             return false;
         } 
 		return true;
+	}
+	
+	/**
+	 * 抓拍录像的缩略图
+	 */
+	public String captureThumbnails() {
+		if (mCanvas == null || !Utils.checkSDCard()) {
+			return null;
+		}
+		Bitmap bm = Bitmap.createBitmap(videoBmp, 0, 0, bitWidth, bitHeight);
+		mCanvas.save(Canvas.ALL_SAVE_FLAG);  
+		mCanvas.restore();  
+		
+		String SDPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+		
+		String filePath1 = SDPath + File.separator + "KaerVideo";
+		File imageFilePath1 = new File(filePath1);
+		if(!imageFilePath1.exists()){
+			imageFilePath1.mkdir();
+		} 
+		
+		String filePath2 = filePath1 + File.separator + "video";
+		File imageFilePath2 = new File(filePath2);
+		if(!imageFilePath2.exists()){
+			imageFilePath2.mkdir();
+		} 
+		
+		String filePath3 = filePath2 + File.separator +Utils.getNowTime("yyyy-MM-dd");
+		File imageFilePath3 = new File(filePath3);
+		if(!imageFilePath3.exists()){
+			imageFilePath3.mkdir();
+		} 
+		
+		String filePath4 = filePath3 + File.separator +"thumbnails";
+		File imageFilePath4 = new File(filePath4);
+		if(!imageFilePath4.exists()){
+			imageFilePath4.mkdir();
+		}
+		
+		String thumbnailName = Utils.getNowTime("yyyyMMddhhmmss");
+		String imageFile = filePath4 + File.separator + thumbnailName + ".jpg";
+		File file = new File(imageFile);
+        FileOutputStream fos = null;  
+        try {  
+            fos = new FileOutputStream(file);
+            bm.compress(Bitmap.CompressFormat.JPEG, 100, fos);  
+        } catch (FileNotFoundException e) {  
+            e.printStackTrace(); 
+            return null;
+        } 
+		return thumbnailName;
 	}
 }
