@@ -1,7 +1,5 @@
 #ifndef HISIMEDIADEVICE_H
 #define HISIMEDIADEVICE_H
-
-
 #include "libjingle_app/ketunnelcamera.h"
 #include "talk/base/messagehandler.h"
 namespace talk_base {
@@ -9,11 +7,14 @@ namespace talk_base {
     class Buffer;
 }
 
-
-
-
-
 #define MEDIA_BUFFER_LENGTH 512*1024
+
+class KaerCameraProcess : public kaerp2p::KeMessageProcessCamera
+{
+public:
+    KaerCameraProcess(std::string peerId, KeTunnelCamera * container);
+};
+
 
 class HisiMediaDevice:talk_base::MessageHandler,public kaerp2p::KeTunnelCamera
 {
@@ -30,7 +31,7 @@ public:
     virtual bool Init(kaerp2p::PeerConnectionClientInterface *client);
     bool InitDeviceVideoInfo();
     virtual void SetVideoClarity(int);
-    void OnMessage(talk_base::Message *msg);
+    virtual void OnMessage(talk_base::Message *msg);
     void SetVideoResolution(std::string r);
     //video == 0 start video ,audio == 0 start audio
     std::string GetHardwareId();

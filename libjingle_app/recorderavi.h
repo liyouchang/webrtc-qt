@@ -11,9 +11,10 @@
 #ifndef RECORDERAVI_H
 #define RECORDERAVI_H
 
-#include <string>
-#include "talk/base/sigslot.h"
 #include "talk/base/thread.h"
+
+#include "recordinterface.h"
+
 namespace talk_base{
 class Buffer;
 class FileStream;
@@ -47,27 +48,23 @@ private:
     int frameCount;
 };
 
-class RecordReaderAvi : public talk_base::MessageHandler
+class RecordReaderAvi :
+        public RecordReaderInterface,
+        public talk_base::MessageHandler
 {
 public:
-    enum {
-        ReadFrame
-    };
-    RecordReaderAvi(talk_base::Thread * thread);
+    RecordReaderAvi(int audioInterval = 20,talk_base::Thread * thread = NULL);
     virtual ~RecordReaderAvi();
     void OnMessage(talk_base::Message *msg);
 
     bool StartRead(const std::string & filename);
     bool StopRead();
-    sigslot::signal0<> SignalRecordEnd;
-    sigslot::signal2<const char *,int> SignalVideoData;
-    sigslot::signal2<const char *,int> SignalAudioData;
 private:
+    talk_base::FileStream * aviFile_;
     talk_base::Thread * readThread;
     int audioFrameInterval;//million second, audio frame interval time,
                             //20 is normal speed
-    talk_base::FileStream * aviFile_;
-
+    bool ownThread;
 
 public:
 };

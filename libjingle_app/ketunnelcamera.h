@@ -44,25 +44,20 @@ public:
     KeMessageProcessCamera(std::string peer_id,KeTunnelCamera * container);
     void OnVideoData(const char *data, int len);
     void OnAudioData(const char * data,int len);
-    void OnRecordData(const char * data,int len);
-
-    sigslot::signal2<const std::string &,const std::string & > SignalToPlayFile;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvTalkData;
-
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     virtual void RecvAskMediaReq(talk_base::Buffer &msgData);
     virtual void RecvPlayFile(talk_base::Buffer &msgData);
     virtual void RecvTalkData(talk_base::Buffer &msgData);
-
 protected:
     virtual void RespAskMediaReq(const VideoInfo & info);
+    virtual void RespPlayFileReq(int resp);
     virtual void ConnectMedia(int video,int audio,int talk);
 private:
     bool video_started_;
     bool audio_started_;
     bool talk_started_;
-
 };
 
 }

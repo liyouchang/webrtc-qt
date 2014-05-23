@@ -70,7 +70,8 @@ HEADERS += \
     jsonconfig.h \
     ketunnelclient.h \
     ketunnelcamera.h \
-    recorderavi.h
+    recorderavi.h \
+    recordinterface.h
 
 OTHER_FILES += \
     ClientCameraMsg.json

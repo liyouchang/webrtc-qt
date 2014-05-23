@@ -24,7 +24,17 @@ class KeMsgProcessContainer;
 
 struct VideoInfo{
     int frameRate_;
-    int frameType_;
+    int frameType_;//a enumirate of FrameType
+};
+
+enum FrameType{
+    kFrameD1 = 0,
+    kFrameQCIF = 1,
+    kFrameCIF = 2,
+    kFrameHD1 = 3,
+    kFrameQVGA = 4,
+    kFrameVGA = 7,
+    kFrame720P = 10
 };
 
 class KeMsgProcess:public talk_base::MessageHandler,public sigslot::has_slots<>

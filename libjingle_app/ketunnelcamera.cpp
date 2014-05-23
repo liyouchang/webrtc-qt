@@ -6,6 +6,7 @@
 
 #include "KeMessage.h"
 #include "defaults.h"
+#include "recorderavi.h"
 
 namespace kaerp2p{
 
@@ -163,20 +164,16 @@ void KeMessageProcessCamera::OnMessageRespond(talk_base::Buffer &msgData)
         KeMsgProcess::OnMessageRespond(msgData);
         break;
     }
-
 }
 
 void KeMessageProcessCamera::RecvAskMediaReq(talk_base::Buffer &msgData)
 {
     //send stream
     KEVideoServerReq * msg = (KEVideoServerReq *)msgData.data();
-
     LOG(INFO)<< "KeMessageProcessCamera::RecvAskMediaMsg---"
              <<"receive ask media msg : video-"<<msg->video<<
                " listen-"<<msg->listen<<" talk-"<<msg->talk;
     ConnectMedia(msg->video,msg->listen,msg->talk);
-
-
 }
 
 void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
@@ -184,7 +181,17 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
     KEPlayRecordFileReq * pMsg =
             reinterpret_cast<KEPlayRecordFileReq *>(msgData.data());
     LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile--"<<pMsg->fileData;
-    this->SignalToPlayFile(this->peer_id(),pMsg->fileData);
+    int resp = 5;
+    std::string fileName = pMsg->fileData;
+    RecordReaderAvi * reader = new RecordReaderAvi(1);
+    if(!reader->StartRead(fileName)){
+        delete reader;
+        resp = 4;
+        RespPlayFileReq(resp);
+    }
+    reader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnAudioData);
+    reader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnVideoData);
+    RespPlayFileReq(resp);
 }
 
 void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
@@ -216,6 +223,21 @@ void KeMessageProcessCamera::RespAskMediaReq(const VideoInfo &info)
     msg->frameRate = info.frameRate_;
     msg->frameType = info.frameType_;
 
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+}
+
+void KeMessageProcessCamera::RespPlayFileReq(int resp)
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KEPlayRecordDataHead);
+    sendBuf.SetLength(msgLen);
+    KEPlayRecordDataHead * msg = (KEPlayRecordDataHead *)sendBuf.data();
+    msg->protocal = PROTOCOL_HEAD;
+    msg->msgType = KEMSG_REQUEST_PLAY_FILE;
+    msg->msgLength = msgLen;
+    msg->videoID = 0;
+    msg->channelNo = 1;
+    msg->resp = resp;
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
@@ -288,9 +310,7 @@ void KeMessageProcessCamera::OnVideoData(const char *data, int len)
 
     sendBuf.AppendData(data,len);
 
-
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
-
 }
 
 void KeMessageProcessCamera::OnAudioData(const char *data, int len)
