@@ -49,10 +49,15 @@ int main()
     CameraClient client(strMac);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
-
-    KeVideoSimulator * simulator = new KeVideoSimulator();
-    simulator->Init(&client);
-    simulator->ReadVideoData("video.h264");
+    Json::Value jsampleFile = JsonConfig::Instance()->Get("sampleFileName","sample.avi");
+    std::string sampleFileName;
+    if(!GetStringFromJson(jsampleFile,&sampleFileName)){
+        return 2;
+    }
+    KeVideoSimulator * simulator = new KeVideoSimulator(sampleFileName);
+    if(!simulator->Init(&client)){
+        return 1;
+    }
 #else
 
     HisiMediaDevice * device = new HisiMediaDevice();
