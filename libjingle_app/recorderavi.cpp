@@ -532,6 +532,7 @@ bool RecordReaderAvi::StartRead(const std::string &filename)
 bool RecordReaderAvi::StopRead()
 {
     aviFile_->Close();
+    return true;
 }
 
 }

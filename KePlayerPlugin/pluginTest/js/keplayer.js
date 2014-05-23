@@ -89,3 +89,9 @@ function GetCaptureFileData(){
                 200,150);
     g_infoDiv.textContent = retStr;
 }
+
+function StartCut(){
+    g_peer_id = PeerID.value;
+    var retStr = kePlayerObj.StartCut(g_peer_id);
+    g_infoDiv.textContent = retStr;
+}

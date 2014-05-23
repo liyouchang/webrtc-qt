@@ -52,7 +52,6 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
     qDebug("Start SetDivision %d",divType);
     int splitNum = 0;
     if(this->m_divType == divType) return;
-
     for(int i=0;i<m_layoutList.size();i++){
         int index = m_layoutList.at(i);
         mainLayout->removeWidget(this->players[index]);
@@ -72,11 +71,9 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
         qWarning("VideoWall::SetDivision-----devision type error");
         return;
     }
-
     if(m_selectedPlayer >= splitNum){
         this->setSelectedPlayer(0);
     }
-
     for(int i=0;i<splitNum;i++){
         if(!this->players[i]->isVisible()){
             this->players[i]->setVisible(true);
@@ -84,16 +81,13 @@ void VideoWall::SetDivision(ScreenDivisionType divType)
     }
     m_divType = divType;
     this->BuildLayout();
-
     for(int i=splitNum;i<MAX_AVPLAYER;i++){
         emit SigNeedStopPeerPlay(GetPeerPlay(i));
         this->players[i]->setVisible(false);
         //this->players[i]->resize(0,0);
-
     }
     layout_changed_ = true;
     this->update();
-
 }
 
 void VideoWall::SetDivision(int num)
@@ -112,7 +106,6 @@ void VideoWall::SetDivision(int num)
         if(num == AvailableScreenDivisionType[find]) break;
     }
     if(find == arrayLen) return;
-
     SetDivision(static_cast<ScreenDivisionType>(num));
 }
 

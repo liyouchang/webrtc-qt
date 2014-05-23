@@ -42,7 +42,6 @@ class KePlayerPlugin : public QWidget
 public:
     KePlayerPlugin(QWidget *parent = 0);
     ~KePlayerPlugin();
-    QString savePath() const;
 
 signals:
     void TunnelOpened(const QString &);
@@ -67,7 +66,10 @@ public slots:
 
     int PlayRecordFiles(QString peer_id,QString record_info_list);
     int StopPlayFile(QString peer_id);
+
     void setSavePath(const QString &path);
+    QString savePath() const;
+
     void OnRecordStatus(QString peer_id,int status);
     //saveType: 在保存路径(savePath)中的保存类型如 "CaptureFiles","RecordFiles"
     QString GetSaveDirList(QString saveType);
