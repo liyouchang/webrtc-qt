@@ -3,17 +3,17 @@
     android:id="@+id/rl_local_video_bg"
     android:layout_width="100dp"
     android:layout_height="90dp"
-    android:background="@drawable/message_image_default" >
-    
+    android:background="@color/white" >
+
     <ImageView
         android:id="@+id/iv_local_video_bg"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:contentDescription="@null"
         android:scaleType="fitXY" />
-
+    
     <ImageView
         android:id="@+id/iv_local_video_icon"
         android:layout_width="60dp"
@@ -23,5 +23,15 @@
         android:background="@drawable/icon_device_play_xml"
         android:contentDescription="@null"
         android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/iv_delete_local_video"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginBottom="2dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/delete_video"
+        android:contentDescription="@null" />
 
 </RelativeLayout>

@@ -43,8 +43,22 @@ public class ZmqSocket {
 			zmqThread = null;
 		}
 		if (zmq_socket != null) {
-			zmq_socket.disconnect(Value.BackstageIPPort);
-			zmq_socket = null;
+			new ExitSocketThread().start();
+			
+			new ZmqSocket();
+		}
+	}
+	
+	public class ExitSocketThread extends Thread {
+
+		@Override
+		public void run() {
+			try {
+				zmq_socket.disconnect(Value.BackstageIPPort);
+				zmq_socket = null;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

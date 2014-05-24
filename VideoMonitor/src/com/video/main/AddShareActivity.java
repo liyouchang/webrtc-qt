@@ -154,7 +154,7 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 	
 	private void initData() {
 		preferData = new PreferData(mContext);
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		Bundle bundle = this.getIntent().getExtras();
 		mDeviceName = bundle.getString("deviceName");
 		mDeviceId = bundle.getString("deviceID");
@@ -424,14 +424,18 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 		
 		if (shareName.equals("")) {
 			resultFlag = false;
-			et_name.setError("请输入用户名！");
+			Toast.makeText(mContext, "请输入用户名！", Toast.LENGTH_LONG).show();
+		}
+		else if (Utils.isChineseString(shareName)) {
+			resultFlag = false;
+			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_LONG).show();
 		}
 		else if ((shareName.length()<3) || (shareName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("用户名长度范围3~20！");
+			Toast.makeText(mContext, "用户名长度范围3~20！", Toast.LENGTH_LONG).show();
 		} else if (userName.equals(shareName)) {
 			resultFlag = false;
-			et_name.setError("不能分享给自己！");
+			Toast.makeText(mContext, "不能将设备分享给自己！", Toast.LENGTH_LONG).show();
 		} else {
 			resultFlag = true;
 		}

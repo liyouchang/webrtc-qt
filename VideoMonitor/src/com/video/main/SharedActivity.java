@@ -94,7 +94,7 @@ public class SharedActivity extends Activity implements OnClickListener {
 	private void initData() {
 		//初始化Activity要使用的参数
 		mContext = SharedActivity.this;
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		xmlShare = new XmlShare(mContext);
 		preferData = new PreferData(mContext);
 		

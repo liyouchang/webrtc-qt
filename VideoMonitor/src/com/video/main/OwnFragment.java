@@ -48,7 +48,7 @@ import com.video.utils.Utils;
 
 public class OwnFragment extends Fragment implements OnClickListener {
 	
-	private FragmentActivity mActivity;
+	private static FragmentActivity mActivity;
 	private View mView;
 	private static XmlDevice xmlData;
 	private PreferData preferData = null;
@@ -65,10 +65,10 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	private Dialog mDialog = null;
 	
 	private String thumbnailsPath = null;
-	private File thumbnailsFile = null;
+	private static File thumbnailsFile = null;
 	private static ArrayList<HashMap<String, String>> deviceList = null;
 	private static DeviceItemAdapter deviceAdapter = null;
-	private ListView lv_list;
+	private static ListView lv_list;
 	
 	private final int IS_REQUESTING = 1;
 	private final int REQUEST_TIMEOUT = 2;
@@ -85,7 +85,6 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		super.onActivityCreated(savedInstanceState);
 		mActivity = getActivity();
 		mView = getView();
-		
 		initView();
 		initData();
 	}
@@ -94,7 +93,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = deviceHandler;
 	}
 	
 	private void initView () {
@@ -113,7 +112,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	
 	private void initData() {
 		//初始化Activity要使用的参数
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = deviceHandler;
 		xmlData = new XmlDevice(mActivity);
 		preferData = new PreferData(mActivity);
 		if (preferData.isExist("UserName")) {
@@ -127,21 +126,28 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			thumbnailsFile.mkdirs();
 		}
 		
+		deviceList = new ArrayList<HashMap<String, String>>();
+		deviceList = xmlData.readXml();
+		listSize = deviceList.size();
+		
+		if (listSize > 1) {
+			deviceList = orderDeviceList(deviceList);
+			deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+			lv_list.setAdapter(deviceAdapter);
+		} else {
+			deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+			lv_list.setAdapter(deviceAdapter);
+		}
+		
+		if (listSize == 0) {
+			noDeviceLayout.setVisibility(View.VISIBLE);
+		} else {
+			noDeviceLayout.setVisibility(View.INVISIBLE);
+		}
+		
 		//初始化终端列表的显示
 		if (Value.isNeedReqTermListFlag) {
 			reqTermListEvent();
-		} else {
-			deviceList = xmlData.readXml();
-			if (deviceList != null) {
-				listSize = deviceList.size();
-				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
-				lv_list.setAdapter(deviceAdapter);
-			}
-			if (listSize == 0) {
-				noDeviceLayout.setVisibility(View.VISIBLE);
-			} else {
-				noDeviceLayout.setVisibility(View.INVISIBLE);
-			}
 		}
 	}
 	
@@ -213,7 +219,31 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		return result;
 	}
 	
-	private Handler handler = new Handler() {
+	/**
+	 * 将终端列表的设备排序，在线在前，不在线在后
+	 */
+	private static ArrayList<HashMap<String, String>> orderDeviceList(ArrayList<HashMap<String, String>> list) {
+		int len = list.size();
+		ArrayList<HashMap<String, String>> listObj = new ArrayList<HashMap<String, String>>();
+		
+		//在线设备
+		for (int i=0; i<len; i++) {
+			HashMap<String, String> item = list.get(i);
+			if (item.get("isOnline").equals("true")) {
+				listObj.add(item);
+			}
+		}
+		//不在线设备
+		for (int i=0; i<len; i++) {
+			HashMap<String, String> item = list.get(i);
+			if (!item.get("isOnline").equals("true")) {
+				listObj.add(item);
+			}
+		}
+		return listObj;
+	}
+	
+	private Handler deviceHandler = new Handler() {
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -230,16 +260,16 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						mDialog.dismiss();
 						mDialog = null;
 					}
-					if (handler.hasMessages(REQUEST_TIMEOUT)) {
-						handler.removeMessages(REQUEST_TIMEOUT);
+					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
+						deviceHandler.removeMessages(REQUEST_TIMEOUT);
 					}
 					Value.isNeedReqTermListFlag = true;
 					Toast.makeText(mActivity, ""+msg.obj, Toast.LENGTH_SHORT).show();
 					break;
 				//请求终端列表
 				case R.id.request_terminal_list_id:
-					if (handler.hasMessages(REQUEST_TIMEOUT)) {
-						handler.removeMessages(REQUEST_TIMEOUT);
+					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
+						deviceHandler.removeMessages(REQUEST_TIMEOUT);
 						if (mDialog != null) {
 							mDialog.dismiss();
 							mDialog = null;
@@ -251,9 +281,16 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							if (listObj != null) {
 								xmlData.updateList(listObj);
 								deviceList = listObj;
-								deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
-								lv_list.setAdapter(deviceAdapter);
 								listSize = deviceList.size();
+								
+								if (listSize > 1) {
+									deviceList = orderDeviceList(deviceList);
+									deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+									lv_list.setAdapter(deviceAdapter);
+								} else {
+									deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+									lv_list.setAdapter(deviceAdapter);
+								}
 							} else {
 								listSize = 0;
 								xmlData.deleteAllItem();
@@ -266,13 +303,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
-						handler.removeMessages(R.id.request_terminal_list_id);
+						deviceHandler.removeMessages(R.id.request_terminal_list_id);
 					}
 					break;
 				//删除终端绑定
 				case R.id.delete_device_item_id:
-					if (handler.hasMessages(REQUEST_TIMEOUT)) {
-						handler.removeMessages(REQUEST_TIMEOUT);
+					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
+						deviceHandler.removeMessages(REQUEST_TIMEOUT);
 						if (mDialog != null) {
 							mDialog.dismiss();
 							mDialog = null;
@@ -288,13 +325,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							Toast.makeText(mActivity, "删除终端绑定失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
-						handler.removeMessages(R.id.delete_device_item_id);
+						deviceHandler.removeMessages(R.id.delete_device_item_id);
 					}
 					break;
 				//上传背景图片
 				case R.id.upload_back_image_id:
-					if (handler.hasMessages(REQUEST_TIMEOUT)) {
-						handler.removeMessages(REQUEST_TIMEOUT);
+					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
+						deviceHandler.removeMessages(REQUEST_TIMEOUT);
 						if (mDialog != null) {
 							mDialog.dismiss();
 							mDialog = null;
@@ -313,13 +350,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							Toast.makeText(mActivity, "上传背景图片失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
-						handler.removeMessages(R.id.upload_back_image_id);
+						deviceHandler.removeMessages(R.id.upload_back_image_id);
 					}
 					break;
 				//删除背景图片
 				case R.id.delete_back_image_id:
-					if (handler.hasMessages(REQUEST_TIMEOUT)) {
-						handler.removeMessages(REQUEST_TIMEOUT);
+					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
+						deviceHandler.removeMessages(REQUEST_TIMEOUT);
 						if (mDialog != null) {
 							mDialog.dismiss();
 							mDialog = null;
@@ -338,7 +375,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							Toast.makeText(mActivity, "删除背景图片失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
-						handler.removeMessages(R.id.delete_back_image_id);
+						deviceHandler.removeMessages(R.id.delete_back_image_id);
 					}
 					break;
 			}
@@ -367,8 +404,14 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						break;
 					}
 				}
-				deviceAdapter.notifyDataSetChanged();
 				xmlData.updateItemState(mac, item.get("isOnline"), item.get("dealerName"));
+				if (listSize > 1) {
+					deviceList = orderDeviceList(deviceList);
+					deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+					lv_list.setAdapter(deviceAdapter);
+				} else {
+					deviceAdapter.notifyDataSetChanged();
+				}
 			}
 		}
 	};
@@ -391,13 +434,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		Message msg = new Message();
 		msg.what = what;
 		msg.obj = obj;
-		handler.sendMessage(msg);
+		deviceHandler.sendMessage(msg);
 	}
 	private void sendHandlerMsg(int what, String obj, int timeout) {
 		Message msg = new Message();
 		msg.what = what;
 		msg.obj = obj;
-		handler.sendMessageDelayed(msg, timeout);
+		deviceHandler.sendMessageDelayed(msg, timeout);
 	}
 	private void sendHandlerMsg(Handler handler, int what, String obj) {
 		Message msg = new Message();
@@ -666,9 +709,17 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			Bundle bundle = data.getExtras();
 			String id = bundle.getString("deviceId");
 			deviceList.add(xmlData.getItem(id));
-			deviceAdapter.notifyDataSetChanged();
-			
 			listSize = xmlData.getListSize();
+			
+			if (listSize > 1) {
+				deviceList = orderDeviceList(deviceList);
+				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+				lv_list.setAdapter(deviceAdapter);
+			} else {
+				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+				lv_list.setAdapter(deviceAdapter);
+			}
+			
 			if (listSize == 0) {
 				noDeviceLayout.setVisibility(View.VISIBLE);
 			} else {

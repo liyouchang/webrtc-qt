@@ -161,7 +161,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 
 	private void initData() {
 		mContext = RegisterActivity.this;
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		
 		preferData = new PreferData(mContext);
 	}
@@ -307,6 +307,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 			resultFlag = false;
 			et_name.setError("请输入用户名！");
 		}
+		else if (Utils.isChineseString(userName)) {
+			resultFlag = false;
+			et_name.setError("不支持中文！");
+		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
 			et_name.setError("用户名长度范围3~20！");
@@ -315,6 +319,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 			if (userEmail.equals("")) {
 				resultFlag = false;
 				et_email.setError("请输入电子邮箱！");
+			}
+			else if (Utils.isChineseString(userEmail)) {
+				resultFlag = false;
+				et_email.setError("不支持中文！");
 			}
 			else if ((userEmail.length()<6) || (userEmail.length()>20)) {
 				resultFlag = false;
@@ -333,6 +341,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 					resultFlag = false;
 					et_pwd.setError("请输入密码！");
 				}
+				else if (Utils.isChineseString(userPwd)) {
+					resultFlag = false;
+					et_pwd.setError("不支持中文！");
+				}
 				else if ((userPwd.length()<6) || (userPwd.length()>20)) {
 					resultFlag = false;
 					et_pwd.setError("密码长度范围6~20！");
@@ -341,6 +353,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 					if (userRepwd.equals("")) {
 						resultFlag = false;
 						et_repwd.setError("请输入确认密码！");
+					}
+					else if (Utils.isChineseString(userRepwd)) {
+						resultFlag = false;
+						et_repwd.setError("不支持中文！");
 					}
 					else if ((userRepwd.length()<6) || (userPwd.length()>20)) {
 						resultFlag = false;

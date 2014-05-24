@@ -120,7 +120,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	
 	private void initData() {
 		mContext = WiFiActivity.this;
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		xmlData = new XmlDevice(mContext);
 		onlineTermList = xmlData.getOnlineList();
 		if (onlineTermList == null) {

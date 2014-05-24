@@ -67,7 +67,7 @@ public class LocalPlayerActivity extends Activity {
 	private int maxVolume = 0;//最大声音
 	private int currentVolume = 0;//当前声音  
 	
-	private ImageButton bn1 = null;//全屏、标准
+	private ImageButton button_screen = null;//全屏、标准
 	private ImageButton bn2 = null;//上一个
 	private ImageButton bn3 = null;//播放、暂停
 	private ImageButton bn4 = null;//下一个
@@ -143,7 +143,7 @@ public class LocalPlayerActivity extends Activity {
         
         position = -1;
         
-        bn1 = (ImageButton) controlView.findViewById(R.id.button1);
+        button_screen = (ImageButton) controlView.findViewById(R.id.btn_full_screen);
         bn2 = (ImageButton) controlView.findViewById(R.id.button2);
         bn3 = (ImageButton) controlView.findViewById(R.id.button3);
         bn4 = (ImageButton) controlView.findViewById(R.id.button4);
@@ -180,18 +180,23 @@ public class LocalPlayerActivity extends Activity {
         	
         });
         
+        getVideoFile(playList, new File(videoFile+File.separator));//获得视频文件
+        
         if(videoPath != null){
         	vv.stopPlayback();//停止视频播放
         	vv.setVideoPath(videoPath); // 设置视频文件Path
         	isOnline = true;
-        	
         	bn3.setImageResource(R.drawable.local_player_pause);
+        	for (int i=0; i<playList.size(); i++) {
+            	if (playList.get(i).path.equals(videoPath)) {
+                	position = i;
+                	break;
+            	}
+            }
         }else{
         	bn3.setImageResource(R.drawable.local_player_play);
         }
 
-        getVideoFile(playList, new File(videoFile+File.separator));//获得视频文件
-        
         vv.setMySizeChangeLinstener(new MySizeChangeLinstener(){
 
 			@Override
@@ -202,7 +207,7 @@ public class LocalPlayerActivity extends Activity {
         	
         });
               
-        bn1.setAlpha(0xBB);
+        button_screen.setAlpha(0xBB);
         bn2.setAlpha(0xBB);  
         bn3.setAlpha(0xBB);
         bn4.setAlpha(0xBB);
@@ -212,12 +217,22 @@ public class LocalPlayerActivity extends Activity {
         currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         bn5.setAlpha(findAlphaFromSound());//设置声音按键透明度
         
-        bn1.setOnClickListener(new OnClickListener(){
+        button_screen.setOnClickListener(new OnClickListener(){
 
 			@Override
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
-				cancelDelayHide();//取消隐藏延迟
+				if(isFullScreen){
+					setVideoScale(SCREEN_DEFAULT);//设置视频显示尺寸
+				}else{
+					setVideoScale(SCREEN_FULL);//设置视频显示尺寸
+				}
+				isFullScreen = !isFullScreen;
+				
+				if(isControllerShow){
+					showController();//显示控制器
+				}
+				hideControllerDelay();//延迟隐藏控制器
 			}
         	
         });
@@ -355,7 +370,6 @@ public class LocalPlayerActivity extends Activity {
 					setVideoScale(SCREEN_FULL);//设置视频显示尺寸
 				}
 				isFullScreen = !isFullScreen;
-				Log.d(TAG, "onDoubleTap");
 				
 				if(isControllerShow){
 					showController();//显示控制器
@@ -512,7 +526,7 @@ public class LocalPlayerActivity extends Activity {
 					minute %= 60;
 					playedTextView.setText(String.format("%02d:%02d:%02d", hour,minute,second));
 					
-					sendEmptyMessageDelayed(PROGRESS_CHANGED, 100);
+					sendEmptyMessageDelayed(PROGRESS_CHANGED, 1000);
 					break;
 					
 				case HIDE_CONTROLER://隐藏控制器
@@ -641,17 +655,21 @@ public class LocalPlayerActivity extends Activity {
 	}
 	
 	private void hideControllerDelay(){//延迟隐藏控制器
+		if (myHandler.hasMessages(HIDE_CONTROLER)) {
+			myHandler.removeMessages(HIDE_CONTROLER);
+		}
 		myHandler.sendEmptyMessageDelayed(HIDE_CONTROLER, TIME);
 	}
 	
 	private void showController(){//显示控制器
 		controler.update(0,0,screenWidth, controlHeight);
-		
 		isControllerShow = true;
 	}
 	
 	private void cancelDelayHide(){//取消隐藏延迟
-		myHandler.removeMessages(HIDE_CONTROLER);
+		if (myHandler.hasMessages(HIDE_CONTROLER)) {
+			myHandler.removeMessages(HIDE_CONTROLER);
+		}
 	}
 
     private final static int SCREEN_FULL = 0;

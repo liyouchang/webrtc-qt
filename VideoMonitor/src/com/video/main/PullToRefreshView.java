@@ -1,10 +1,7 @@
 package com.video.main;
 
-import com.video.R;
-
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,9 +15,10 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.video.R;
+
 
 public class PullToRefreshView extends LinearLayout {
-	private static final String TAG = "PullToRefreshView";
 	// refresh states
 	private static final int PULL_TO_REFRESH = 2;
 	private static final int RELEASE_TO_REFRESH = 3;
@@ -194,17 +192,13 @@ public class PullToRefreshView extends LinearLayout {
 	private void addFooterView() {
 		// footer view
 		mFooterView = mInflater.inflate(R.layout.refresh_footer, this, false);
-		mFooterImageView = (ImageView) mFooterView
-				.findViewById(R.id.pull_to_load_image);
-		mFooterTextView = (TextView) mFooterView
-				.findViewById(R.id.pull_to_load_text);
-		mFooterProgressBar = (ProgressBar) mFooterView
-				.findViewById(R.id.pull_to_load_progress);
+		mFooterImageView = (ImageView) mFooterView.findViewById(R.id.pull_to_load_image);
+		mFooterTextView = (TextView) mFooterView.findViewById(R.id.pull_to_load_text);
+		mFooterProgressBar = (ProgressBar) mFooterView.findViewById(R.id.pull_to_load_progress);
 		// footer layout
 		measureView(mFooterView);
 		mFooterViewHeight = mFooterView.getMeasuredHeight();
-		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT,
-				mFooterViewHeight);
+		LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, mFooterViewHeight);
 		// int top = getHeight();
 		// params.topMargin
 		// =getHeight();//在这里getHeight()==0,但在onInterceptTouchEvent()方法里getHeight()已经有值了,不再是0;
@@ -310,12 +304,10 @@ public class PullToRefreshView extends LinearLayout {
 			int deltaY = y - mLastMotionY;
 			if (mPullState == PULL_DOWN_STATE) {
 				// PullToRefreshView执行下拉
-				Log.i(TAG, " pull down!parent view move!");
 				headerPrepareToRefresh(deltaY);
 				// setHeaderPadding(-mHeaderViewHeight);
 			} else if (mPullState == PULL_UP_STATE) {
 				// PullToRefreshView执行上拉
-				Log.i(TAG, "pull up!parent view move!");
 				footerPrepareToRefresh(deltaY);
 			}
 			mLastMotionY = y;
@@ -332,8 +324,7 @@ public class PullToRefreshView extends LinearLayout {
 					setHeaderTopMargin(-mHeaderViewHeight);
 				}
 			} else if (mPullState == PULL_UP_STATE) {
-				if (Math.abs(topMargin) >= mHeaderViewHeight
-						+ mFooterViewHeight) {
+				if (Math.abs(topMargin) >= mHeaderViewHeight + mFooterViewHeight) {
 					// 开始执行footer 刷新
 					footerRefreshing();
 				} else {
@@ -452,8 +443,7 @@ public class PullToRefreshView extends LinearLayout {
 		// 说明footer view 完全显示出来了，修改footer view 的提示状态
 		if (Math.abs(newTopMargin) >= (mHeaderViewHeight + mFooterViewHeight)
 				&& mFooterState != RELEASE_TO_REFRESH) {
-			mFooterTextView
-					.setText(R.string.pull_to_refresh_footer_release_label);
+			mFooterTextView.setText(R.string.pull_to_refresh_footer_release_label);
 			mFooterImageView.clearAnimation();
 			mFooterImageView.startAnimation(mFlipAnimation);
 			mFooterState = RELEASE_TO_REFRESH;
@@ -521,8 +511,7 @@ public class PullToRefreshView extends LinearLayout {
 		mFooterImageView.clearAnimation();
 		mFooterImageView.setImageDrawable(null);
 		mFooterProgressBar.setVisibility(View.VISIBLE);
-		mFooterTextView
-				.setText(R.string.pull_to_refresh_footer_refreshing_label);
+		mFooterTextView.setText(R.string.pull_to_refresh_footer_refreshing_label);
 		if (mOnFooterRefreshListener != null) {
 			mOnFooterRefreshListener.onFooterRefresh(this);
 		}

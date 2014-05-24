@@ -87,7 +87,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 	
 	private void initData() {
 		mContext = ModifyDeviceNameActivity.this;
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		xmlData = new XmlDevice(mContext);
 		preferData = new PreferData(mContext);
 		if (preferData.isExist("UserName")) {

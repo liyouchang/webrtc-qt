@@ -47,14 +47,19 @@
             android:textSize="20dp" />
     </RelativeLayout>
 
-    <com.video.local.NoScrollGridView
-        android:id="@+id/image_gridview"
+    <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:gravity="center"
-        android:horizontalSpacing="5dp"
-        android:numColumns="3"
-        android:stretchMode="columnWidth"
-        android:verticalSpacing="5dp" />
+        android:layout_height="fill_parent" >
+
+        <com.video.local.NoScrollGridView
+            android:id="@+id/image_gridview"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:horizontalSpacing="5dp"
+            android:numColumns="3"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="5dp" />
+    </ScrollView>
 
 </LinearLayout>

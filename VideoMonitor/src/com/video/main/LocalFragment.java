@@ -6,6 +6,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -23,8 +27,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.video.R;
-import com.video.local.LocalFileItem;
 import com.video.local.ImageListViewAdapter;
+import com.video.local.LocalFileItem;
 import com.video.local.VideoListViewAdapter;
 import com.video.utils.Utils;
 import com.video.utils.ViewPagerAdapter;
@@ -42,17 +46,21 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	private View video_page;
 	private View image_page;
 	
-	String SD_path = "";
+	private String SD_path = "";
 	
 	private final int INIT_LOCAL_IMAGE_FINISH = 1;
 	private final int NO_LOCAL_IMAGE_FILE = 2;
 	private final int INIT_LOCAL_VIDEO_FINISH = 3;
 	private final int NO_LOCAL_VIDEO_FILE = 4;
 	
+	private LocalReceiver localReceiver = null;
+	public static final String REFRESH_VIDEO_FILE = "com.video.main.LocalFragment.refresh_video_file";
+	
 	
 	//抓拍图片初始化
 	File currentImageFile = null;
 	File[] currentImageFileList = null;
+	private int imageFileCount = 0;
 	private ListView imageListView = null;
 	private ImageListViewAdapter imageListAdapter = null;
 	private List<LocalFileItem> imageLocalFile = null;
@@ -61,6 +69,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	//本地录像初始化
 	File currentVideoFile = null;
 	File[] currentVideoFileList = null;
+	private int videoFileCount = 0;
 	private ListView videoListView = null;
 	private VideoListViewAdapter videoListAdapter = null;
 	private List<LocalFileItem> videoLocalFile = null;
@@ -81,7 +90,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		mActivity = getActivity();
 		mView = getView();
 		
-		initViewPageView();
+		initViewPageView(0);
 		initView();
 	}
 	
@@ -95,7 +104,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	/**
 	 * 初始化该界面下要滑动的页面
 	 */
-	private void initViewPageView() {
+	private void initViewPageView(int whichPage) {
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		image_page = inflater.inflate(R.layout.local_image, null);
 		video_page = inflater.inflate(R.layout.local_video, null);
@@ -105,7 +114,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		mViewPager = (ViewPager)mView.findViewById(R.id.local_viewpager);
 		mViewPager.setOnPageChangeListener(this);
 		mViewPager.setAdapter(new ViewPagerAdapter(pageList));
-		mViewPager.setCurrentItem(0);
+		mViewPager.setCurrentItem(whichPage);
 	}
 	
 	private void initView() {
@@ -121,6 +130,12 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		//本地录像初始化
 		videoListView = (ListView) mView.findViewById(R.id.local_video_listView);
 		noVideoLayout = (RelativeLayout) mView.findViewById(R.id.rl_no_local_file_video);
+		
+		//注册广播
+		localReceiver = new LocalReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(REFRESH_VIDEO_FILE);
+		mActivity.registerReceiver(localReceiver, filter);
 	}
 	
 	private void initData() {
@@ -203,9 +218,23 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 				//抓拍图片
 				case INIT_LOCAL_IMAGE_FINISH:
 					if (imageLocalFile == null || imageLocalFile.size() == 0) {
-						noImageLayout.setVisibility(View.VISIBLE);
+						if (noImageLayout != null)
+							noImageLayout.setVisibility(View.VISIBLE);
+						System.out.println("MyDebug: --------------> 更新抓拍图片");
+						imageFileCount = 0;
+						if (imageLocalFile != null) {
+							imageLocalFile.clear();
+						}
+						if (imageListAdapter != null) {
+							imageListAdapter.notifyDataSetChanged();
+						}
+						initViewPageView(0);
+						initView();
+						initLocalImageData();
+						initLocalVideoData();
 					} else {
-						noImageLayout.setVisibility(View.INVISIBLE);
+						if (noImageLayout != null)
+							noImageLayout.setVisibility(View.INVISIBLE);
 						imageListAdapter = new ImageListViewAdapter(mActivity, imageLocalFile);
 						if ((imageListAdapter != null) && (imageListView != null)) {
 							imageListView.setAdapter(imageListAdapter);
@@ -213,14 +242,29 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 					}
 					break;
 				case NO_LOCAL_IMAGE_FILE:
-					noImageLayout.setVisibility(View.VISIBLE);
+					if (noImageLayout != null)
+						noImageLayout.setVisibility(View.VISIBLE);
 					break;
 				//本地录像
 				case INIT_LOCAL_VIDEO_FINISH:
 					if (videoLocalFile == null || videoLocalFile.size() == 0) {
-						noVideoLayout.setVisibility(View.VISIBLE);
+						if (noVideoLayout != null)
+							noVideoLayout.setVisibility(View.VISIBLE);
+						System.out.println("MyDebug: --------------> 更新本地录像");
+						videoFileCount = 0;
+						if (videoLocalFile != null) {
+							videoLocalFile.clear();
+						}
+						if (videoListAdapter != null) {
+							videoListAdapter.notifyDataSetChanged();
+						}
+						initViewPageView(1);
+						initView();
+						initLocalImageData();
+						initLocalVideoData();
 					} else {
-						noVideoLayout.setVisibility(View.INVISIBLE);
+						if (noVideoLayout != null)
+							noVideoLayout.setVisibility(View.INVISIBLE);
 						videoListAdapter = new VideoListViewAdapter(mActivity, videoLocalFile);
 						if ((videoListAdapter != null) && (videoListView != null)) {
 							videoListView.setAdapter(videoListAdapter);
@@ -228,7 +272,8 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 					}
 					break;
 				case NO_LOCAL_VIDEO_FILE:
-					noVideoLayout.setVisibility(View.VISIBLE);
+					if (noVideoLayout != null)
+						noVideoLayout.setVisibility(View.VISIBLE);
 					break;
 			}
 		}
@@ -258,8 +303,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	 */
 	private ArrayList<String> handleLocalFileName(File[] fileArray) {
 		int fileCount = fileArray.length;
-		if (fileCount == 0)
+		if (fileCount == 0) {
 			return null;
+		}
 		ArrayList<String> arrayString = new ArrayList<String>();
 		ArrayList<Integer> arrayInteger = sortImageFileName(fileArray);
 		fileCount = arrayInteger.size();
@@ -273,7 +319,27 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		return arrayString;
 	}
 
-	
+	/**
+	 * 删除文件夹的所有文件
+	 */
+	private void deleteFile(File file) {
+		if (file.isFile()) {
+			file.delete();
+			return ;
+		}
+
+		if (file.isDirectory()) {
+			File[] childFiles = file.listFiles();
+			if (childFiles == null || childFiles.length == 0) {
+				file.delete();
+				return ;
+			}
+			for (int i=0; i<childFiles.length; i++) {
+				deleteFile(childFiles[i]);
+			}
+			file.delete();
+		}
+	}
 	
 	//-----------------------------------------------------------------------------------
 	//抓拍图片处理
@@ -306,24 +372,28 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 				if (imageFileStringArray == null) {
 					sendHandlerMsg(NO_LOCAL_IMAGE_FILE);
 				} else {
-					int imageFileCount = imageFileStringArray.size();
-					for (int i=0; i<imageFileCount; i++) {
-						fileItem = new LocalFileItem();
-						//文件夹下的图片
-						File file = new File(currentImageFile.getPath()+File.separator+imageFileStringArray.get(i));
-						File[] files = file.listFiles();
-						ArrayList<HashMap<String, Object>> fileImages = listAllImageViews(files);
-						if (fileImages == null) {
-							if (file.exists())
-								file.delete();
-							continue;
+					imageFileCount = imageFileStringArray.size();
+					if (imageFileCount == 0) {
+						sendHandlerMsg(NO_LOCAL_IMAGE_FILE);
+					} else {
+						for (int i=0; i<imageFileCount; i++) {
+							fileItem = new LocalFileItem();
+							File file = new File(currentImageFile.getPath()+File.separator+imageFileStringArray.get(i));
+							File[] files = file.listFiles();
+							ArrayList<HashMap<String, Object>> fileImages = listAllImageViews(files);
+							if (fileImages == null) {
+								if (file.exists())
+									file.delete();
+								continue;
+							}
+							//文件夹名
+							fileItem.fileName = imageFileStringArray.get(i);
+							//文件夹下的图片
+							fileItem.itemViews = fileImages;
+							imageLocalFile.add(fileItem);
 						}
-						fileItem.itemViews = fileImages;
-						//文件夹名
-						fileItem.fileName = imageFileStringArray.get(i);
-						imageLocalFile.add(fileItem);
+						sendHandlerMsg(INIT_LOCAL_IMAGE_FINISH);
 					}
-					sendHandlerMsg(INIT_LOCAL_IMAGE_FINISH);
 				}
 			} else {
 				sendHandlerMsg(NO_LOCAL_IMAGE_FILE);
@@ -354,9 +424,13 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	 * @return 返回图片的文件集合
 	 */
 	private ArrayList<HashMap<String, Object>> listAllImageViews(File[] files) {
-		int count = files.length;
-		if (count == 0)
+		if (files == null) {
 			return null;
+		}
+		int count = files.length;
+		if (count == 0) {
+			return null;
+		}
 		ArrayList<HashMap<String, Object>> fileImages = new ArrayList<HashMap<String, Object>>();;
 		HashMap<String, Object> imageItem = null;
 		
@@ -401,24 +475,26 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 				if (videoFileStringArray == null) {
 					sendHandlerMsg(NO_LOCAL_VIDEO_FILE);
 				} else {
-					int videoFileCount = videoFileStringArray.size();
-					for (int i=0; i<videoFileCount; i++) {
-						fileItem = new LocalFileItem();
-						//文件夹下的录像
-						File file = new File(currentVideoFile.getPath()+File.separator+videoFileStringArray.get(i));
-						File[] files = file.listFiles();
-						ArrayList<HashMap<String, Object>> fileVideos = listAllVideoRecords(file, files);
-						if (fileVideos == null) {
-							if (file.exists())
-								file.delete();
-							continue;
+					videoFileCount = videoFileStringArray.size();
+					if (videoFileCount == 0) {
+						sendHandlerMsg(NO_LOCAL_VIDEO_FILE);
+					} else {
+						for (int i=0; i<videoFileCount; i++) {
+							fileItem = new LocalFileItem();
+							File file = new File(currentVideoFile.getPath()+File.separator+videoFileStringArray.get(i));
+							File[] files = file.listFiles();
+							ArrayList<HashMap<String, Object>> fileVideos = listAllVideoRecords(file, files);
+							if (fileVideos == null) {
+								continue;
+							}
+							//文件夹名
+							fileItem.fileName = videoFileStringArray.get(i);
+							//文件夹下的录像
+							fileItem.itemViews = fileVideos;
+							videoLocalFile.add(fileItem);
 						}
-						fileItem.itemViews = fileVideos;
-						//文件夹名
-						fileItem.fileName = videoFileStringArray.get(i);
-						videoLocalFile.add(fileItem);
+						sendHandlerMsg(INIT_LOCAL_VIDEO_FINISH);
 					}
-					sendHandlerMsg(INIT_LOCAL_VIDEO_FINISH);
 				}
 			} else {
 				sendHandlerMsg(NO_LOCAL_VIDEO_FILE);
@@ -449,9 +525,13 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	 * @return 返回录像的文件集合
 	 */
 	private ArrayList<HashMap<String, Object>> listAllVideoRecords(File file, File[] fileList) {
-		int count = fileList.length;
-		if (count == 0)
+		if (fileList == null) {
 			return null;
+		}
+		int count = fileList.length;
+		if (count == 0) {
+			return null;
+		}
 		ArrayList<HashMap<String, Object>> fileVideos = new ArrayList<HashMap<String, Object>>();;
 		HashMap<String, Object> videoItem = null;
 		
@@ -460,9 +540,13 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		int thumbnailsCount = 0;
 		File thumbnails = new File(file.getPath() + File.separator + "thumbnails");
 		if (thumbnails.exists()) {
-			isExists = true;
 			thumbnailsList = thumbnails.listFiles();
 			thumbnailsCount = thumbnailsList.length;
+			if (thumbnailsCount == 0) {
+				deleteFile(file);
+				return null;
+			}
+			isExists = true;
 		} else {
 			isExists = false;
 		}
@@ -499,4 +583,27 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		}
 		return fileVideos;
 	}
+	
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		//注销广播
+		mActivity.unregisterReceiver(localReceiver);
+	}
+
+	public class LocalReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			String action = intent.getAction();
+			
+			if (action.equals(REFRESH_VIDEO_FILE)) {
+				//本地录像初始化
+				new LocalVideoThread().start();
+			}
+		}
+	}
 }
+

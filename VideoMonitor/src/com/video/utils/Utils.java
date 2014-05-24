@@ -50,13 +50,13 @@ public class Utils {
 				result = "Block!";
 				break;
 			case 2:
-				result = "账号或密码错误！";
+				result = "用户名或密码错误！";
 				break;
 			case 3:
 				result = "服务器端查询数据库时错误！";
 				break;
 			case 4:
-				result = "账号已存在！";
+				result = "用户已存在！";
 				break;
 			case 5:
 				result = "用户不存在！";
@@ -65,13 +65,13 @@ public class Utils {
 				result = "该设备已被绑定！";
 				break;
 			case 7:
-				result = "账号和邮箱不匹配！";
+				result = "用户名和邮箱不匹配！";
 				break;
 			case 8:
 				result = "超出数量限制！";
 				break;
 			case 9:
-				result = "未登录！";
+				result = "用户未登录！";
 				break;
 			case 10:
 				result = "设备未注册！";
@@ -87,6 +87,34 @@ public class Utils {
 				break;
 		}
 		return result;
+	}
+
+	/**
+	 * 检测String中是否有中文
+	 */
+	public static boolean isChineseString(String name) {
+		boolean res = false;
+		char[] cTemp = name.toCharArray();
+		for (int i = 0; i < name.length(); i++) {
+			if (isChineseCharacter(cTemp[i])) {
+				res = true;
+				break;
+			}
+		}
+		return res;
+	}
+	
+	private static boolean isChineseCharacter(char c) {
+		Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+		if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+				|| ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+				|| ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+				|| ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
+				|| ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+				|| ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
+			return true;
+		}
+		return false;
 	}
 	
 	/**

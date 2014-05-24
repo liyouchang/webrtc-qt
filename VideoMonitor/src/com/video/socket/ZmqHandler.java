@@ -19,11 +19,7 @@ import com.video.utils.Utils;
 
 public class ZmqHandler extends Handler {
 	
-	private static Handler mHandler = null;
-	
-	public static void setHandler(Handler handler) {
-		mHandler = handler;
-	}
+	public static Handler mHandler = null;
 	
 	/**
 	 * 转换获得的状态，将int类型转为String类型1: true、其它为false
@@ -208,12 +204,13 @@ public class ZmqHandler extends Handler {
 				Value.isNeedReqAlarmListFlag = true;
 				Value.requstAlarmCount++;
 				PreferData preferData = new PreferData(MainActivity.mContext);
+				int alarmCount = 0;
 				if (preferData.isExist("AlarmCount")) {
-					int alarmCount = preferData.readInt("AlarmCount");
-					alarmCount++;
-					preferData.writeData("AlarmCount", alarmCount);
-					MainActivity.mainHandler.obtainMessage(0, alarmCount, 0).sendToTarget();
+					alarmCount = preferData.readInt("AlarmCount");
 				}
+				alarmCount++;
+				preferData.writeData("AlarmCount", alarmCount);
+				MainActivity.mainHandler.obtainMessage(0, alarmCount, 0).sendToTarget();
 			}
 			//终端上下线消息推送
 			else if (type.equals("Backstage_TermActive")) {

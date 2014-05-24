@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.video"
-    android:versionCode="7"
-    android:versionName="1.0.7" >
+    android:versionCode="8"
+    android:versionName="1.0.8" >
 
-    <uses-sdk android:minSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="14" />
     
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -157,7 +157,8 @@
         <!-- 视频播放 -->
         <activity
             android:name=".play.PlayerActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation"
             android:theme="@style/VideoPlayTheme" >
         </activity>
         <!-- 添加设备分享 -->
@@ -175,7 +176,7 @@
         <!-- 本地播放器 -->
         <activity
             android:name=".local.player.LocalPlayerActivity"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
     </application>

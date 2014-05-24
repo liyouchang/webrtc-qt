@@ -109,7 +109,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 
 	private void initData() {
 		mContext = FindPwdActivity.this;
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 	}
 	
 	/**
@@ -256,6 +256,10 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 			resultFlag = false;
 			et_name.setError("请输入用户名！");
 		}
+		else if (Utils.isChineseString(userName)) {
+			resultFlag = false;
+			et_name.setError("不支持中文！");
+		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
 			et_name.setError("用户名长度范围3~20！");
@@ -264,6 +268,10 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 			if (userEmail.equals("")) {
 				resultFlag = false;
 				et_email.setError("请输入电子邮箱！");
+			}
+			else if (Utils.isChineseString(userEmail)) {
+				resultFlag = false;
+				et_email.setError("不支持中文！");
 			}
 			else if ((userEmail.length()<6) || (userEmail.length()>20)) {
 				resultFlag = false;

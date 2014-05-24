@@ -100,9 +100,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		ZmqHandler.setHandler(handler);
 		//初始化消息列表的显示
 		if (Value.isNeedReqAlarmListFlag) {
+			ZmqHandler.mHandler = handler;
 			reqAlarmEvent();
 		}
 	}
@@ -120,7 +120,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	}
 	
 	private void initData() {
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		xmlData = new XmlMessage(mActivity);
 		preferData = new PreferData(mActivity);
 		
@@ -419,7 +419,8 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 */
 	@Override
 	public void onFooterRefresh(PullToRefreshView view) {
-		// TODO Auto-generated method stub
+		
+		ZmqHandler.mHandler = handler;
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -437,6 +438,8 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 */
 	@Override
 	public void onHeaderRefresh(PullToRefreshView view) {
+		
+		ZmqHandler.mHandler = handler;
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
@@ -450,7 +453,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
 			}
-		}, 1500);
+		}, 1000);
 	}
 	
 	@Override

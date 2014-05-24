@@ -51,7 +51,7 @@
         android:layout_marginRight="15dp"
         android:layout_marginTop="10dp"
         android:background="@drawable/button_updown_alone"
-        android:drawableLeft="@drawable/wifi"
+        android:drawableLeft="@drawable/icon_device_name"
         android:drawablePadding="10dp"
         android:drawableRight="@drawable/icon_button_right"
         android:gravity="center_vertical"

@@ -138,7 +138,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	
 	private void initData() {
 		mContext = AddDeviceActivity.this;
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		xmlData = new XmlDevice(mContext);
 		preferData = new PreferData(mContext);
 		

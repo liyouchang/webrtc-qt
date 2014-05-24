@@ -68,10 +68,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private static Dialog mDialog = null;
 	
 	private int screenWidth = 0;
+	private int screenHeight = 0;
 	private int titleHeight = 80;
 	private int bottomHeight = 100;
 	
-	private boolean isRecordVideo = false;
+	private static boolean isRecordVideo = false;
 	private boolean isVoiceEnable = true;
 	private boolean isTalkEnable = false;
 	private boolean isPlayMusic = false;
@@ -82,9 +83,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private GestureDetector mGestureDetector = null;//手势识别
 	
 	private View titleView = null;//标题视图
-	private PopupWindow titlePopupWindow = null;//标题弹出框
+	private static PopupWindow titlePopupWindow = null;//标题弹出框
 	private View bottomView = null;//底部视图
-	private PopupWindow bottomPopupWindow = null;//底部弹出框
+	private static PopupWindow bottomPopupWindow = null;//底部弹出框
 
 	
 	private Button player_capture = null;
@@ -311,6 +312,10 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private void getScreenSize() {
 		Display display = getWindowManager().getDefaultDisplay();
 		screenWidth = display.getWidth();
+		screenHeight = display.getHeight();
+		if (screenHeight > screenWidth) {
+			screenWidth = screenHeight;
+		}
 	}
 	
 	/**
@@ -409,47 +414,52 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			case R.id.btn_player_capture:
 				if (videoView.captureVideo()) {
 					playMyMusic(R.raw.capture);
-					toastNotify(mContext, "抓拍成功！", Toast.LENGTH_SHORT);
+					toastNotify(mContext, "抓拍成功", Toast.LENGTH_SHORT);
 				} else {
-					toastNotify(mContext, "抓拍失败！", Toast.LENGTH_SHORT);
+					toastNotify(mContext, "抓拍失败", Toast.LENGTH_SHORT);
 				}
 				break;
 			//录像
 			case R.id.btn_player_record:
-				if (!isRecordVideo) {
-					String videoName = videoView.captureThumbnails();
-					if (videoName != null) {
-						//开始录视频
-						isRecordVideo = true;
-						playMyMusic(R.raw.record);
-						toastNotify(mContext, "开始录像！", Toast.LENGTH_SHORT);
-						
-						String SDPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-						String filePath1 = SDPath + File.separator + "KaerVideo";
-						File videoFilePath1 = new File(filePath1);
-						if(!videoFilePath1.exists()){
-							videoFilePath1.mkdir();
-						} 
-						String filePath2 = filePath1 + File.separator + "video";
-						File videoFilePath2 = new File(filePath2);
-						if(!videoFilePath2.exists()){
-							videoFilePath2.mkdir();
-						} 
-						String filePath3 = filePath2 + File.separator +Utils.getNowTime("yyyy-MM-dd");
-						File videoFilePath3 = new File(filePath3);
-						if(!videoFilePath3.exists()){
-							videoFilePath3.mkdir();
-						} 
-						String videoFile = filePath3 + File.separator +videoName + ".avi";
-						TunnelCommunication.getInstance().startRecordVideo(dealerName, videoFile);
+				try {
+					if (!isRecordVideo) {
+						String videoName = videoView.captureThumbnails();
+						if (videoName != null) {
+							//开始录视频
+							isRecordVideo = true;
+							playMyMusic(R.raw.record);
+							player_record.setBackgroundResource(R.drawable.player_recording_xml);
+							
+							String SDPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+							String filePath1 = SDPath + File.separator + "KaerVideo";
+							File videoFilePath1 = new File(filePath1);
+							if(!videoFilePath1.exists()){
+								videoFilePath1.mkdir();
+							} 
+							String filePath2 = filePath1 + File.separator + "video";
+							File videoFilePath2 = new File(filePath2);
+							if(!videoFilePath2.exists()){
+								videoFilePath2.mkdir();
+							} 
+							String filePath3 = filePath2 + File.separator +Utils.getNowTime("yyyy-MM-dd");
+							File videoFilePath3 = new File(filePath3);
+							if(!videoFilePath3.exists()){
+								videoFilePath3.mkdir();
+							} 
+							String videoFile = filePath3 + File.separator +videoName + ".avi";
+							TunnelCommunication.getInstance().startRecordVideo(dealerName, videoFile);
+						} else {
+							toastNotify(mContext, "录像失败！", Toast.LENGTH_SHORT);
+						}
 					} else {
-						toastNotify(mContext, "录像失败！", Toast.LENGTH_SHORT);
+						//停止录视频
+						isRecordVideo = false;
+						TunnelCommunication.getInstance().stopRecordVideo(dealerName);
+						player_record.setBackgroundResource(R.drawable.player_record_xml);
 					}
-				} else {
-					//停止录视频
-					isRecordVideo = false;
-					TunnelCommunication.getInstance().stopRecordVideo(dealerName);
-					toastNotify(mContext, "停止录像！", Toast.LENGTH_SHORT);
+				} catch (Exception e) {
+					System.out.println("MyDebug: 录像异常！");
+					e.printStackTrace();
 				}
 				break;
 			//对讲

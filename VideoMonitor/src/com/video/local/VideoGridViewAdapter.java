@@ -1,5 +1,6 @@
 package com.video.local;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -17,6 +18,8 @@ import android.widget.RelativeLayout;
 
 import com.video.R;
 import com.video.local.player.LocalPlayerActivity;
+import com.video.main.LocalFragment;
+import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 
 public class VideoGridViewAdapter extends BaseAdapter {
@@ -80,7 +83,39 @@ public class VideoGridViewAdapter extends BaseAdapter {
 					e.printStackTrace();
 				}
 				holder.video_bg.setScaleType(ImageView.ScaleType.FIT_XY);
-				holder.video_bg.setLayoutParams(new RelativeLayout.LayoutParams(Utils.screenWidth/3, (Utils.screenWidth-150)/3));
+				holder.video_bg.setLayoutParams(new RelativeLayout.LayoutParams(Utils.screenWidth/3, (Utils.screenWidth-120)/3));
+				holder.video_bg.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						final OkCancelDialog myDialog=new OkCancelDialog(mContext);
+						myDialog.setTitle("温馨提示");
+						myDialog.setMessage("确认删除当前的本地录像？");
+						myDialog.setPositiveButton("确定", new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								myDialog.dismiss();
+								File fileVideo = new File((String) hashMap.get("videoPath"));
+								if (fileVideo.exists()) {
+									fileVideo.delete();
+								}
+								File fileBg = new File((String) hashMap.get("videoBg"));
+								if (fileBg.exists()) {
+									fileBg.delete();
+								}
+								Intent intent = new Intent();
+								intent.setAction(LocalFragment.REFRESH_VIDEO_FILE);
+								mContext.sendBroadcast(intent);
+							}
+						});
+						myDialog.setNegativeButton("取消", new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								myDialog.dismiss();
+							}
+						});
+					}
+				});
 			}
 			if (holder.video_view != null) {
 				holder.video_view.setOnClickListener(new OnClickListener() {

@@ -142,7 +142,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	
 	private void initData() {
 		mContext = LoginActivity.this;
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		preferData = new PreferData(mContext);
 		
 		if (preferData.isExist("AutoLogin")) {
@@ -276,6 +276,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkRegisterData()) {
 				if (preferData.isExist("UserName")) {
+					//切换账号
+					if (!userName.equals(preferData.readString("UserName"))) {
+						if (preferData.isExist("AlarmCount")) {
+							preferData.deleteItem("AlarmCount");
+				        }
+						MainActivity.setAlarmIconAndText(0);
+					}
 					preferData.deleteItem("UserName");
 					preferData.writeData("UserName", userName);
 				} else {
@@ -360,6 +367,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 			resultFlag = false;
 			et_name.setError("请输入用户名！");
 		}
+		else if (Utils.isChineseString(userName)) {
+			resultFlag = false;
+			et_name.setError("不支持中文！");
+		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
 			et_name.setError("用户名长度范围3~20！");
@@ -368,6 +379,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 			if (userPwd.equals("")) {
 				resultFlag = false;
 				et_pwd.setError("请输入密码！");
+			}
+			else if (Utils.isChineseString(userPwd)) {
+				resultFlag = false;
+				et_pwd.setError("不支持中文！");
 			}
 			else if ((userPwd.length()<6) || (userPwd.length()>20)) {
 				resultFlag = false;

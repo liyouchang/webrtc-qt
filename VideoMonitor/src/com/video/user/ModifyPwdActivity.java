@@ -139,7 +139,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	
 	private void initData() {
 		mContext = ModifyPwdActivity.this;
-		ZmqHandler.setHandler(handler);
+		ZmqHandler.mHandler = handler;
 		preferData = new PreferData(mContext);
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
@@ -308,6 +308,10 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 			resultFlag = false;
 			et_old_pwd.setError("请输入旧密码！");
 		}
+		else if (Utils.isChineseString(userOldPwd)) {
+			resultFlag = false;
+			et_old_pwd.setError("不支持中文！");
+		}
 		else if (!userOldPwd.equals(userPwd)) {
 			resultFlag = false;
 			et_old_pwd.setError("旧密码输入错误！");
@@ -317,6 +321,10 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 				resultFlag = false;
 				et_new_pwd.setError("请输入新密码！");
 			}
+			else if (Utils.isChineseString(userNewPwd)) {
+				resultFlag = false;
+				et_new_pwd.setError("不支持中文！");
+			}
 			else if ((userNewPwd.length()<6) || (userNewPwd.length()>20)) {
 				resultFlag = false;
 				et_new_pwd.setError("密码长度范围6~20！");
@@ -325,6 +333,10 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 				if (userNewRepwd.equals("")) {
 					resultFlag = false;
 					et_new_repwd.setError("请再次输入新密码！");
+				}
+				else if (Utils.isChineseString(userNewRepwd)) {
+					resultFlag = false;
+					et_new_repwd.setError("不支持中文！");
 				}
 				else if ((userNewRepwd.length()<6) || (userNewRepwd.length()>20)) {
 					resultFlag = false;

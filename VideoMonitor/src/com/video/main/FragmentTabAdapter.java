@@ -103,14 +103,13 @@ public class FragmentTabAdapter implements OnTabChangeListener {
 				// getCurrentFragment().onStop(); // 停止当前tab
 
 				if (fragment.isAdded()) {
-					// fragment.onStart(); // 启动目标tab的onStart()
+					//fragment.onStart(); // 启动目标tab的onStart()
 					fragment.onResume(); // 启动目标tab的onResume()
 				} else {
 					ft.add(fragmentId, fragment);
 				}
 				showTab(i); // 显示目标tab
 				ft.commit();
-
 			}
 		}
 	}

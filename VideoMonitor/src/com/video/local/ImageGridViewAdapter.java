@@ -80,7 +80,7 @@ public class ImageGridViewAdapter extends BaseAdapter {
 					e.printStackTrace();
 				}
 				holder.imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-				holder.imageView.setLayoutParams(new LinearLayout.LayoutParams(Utils.screenWidth/3, (Utils.screenWidth-150)/3));
+				holder.imageView.setLayoutParams(new LinearLayout.LayoutParams(Utils.screenWidth/3, (Utils.screenWidth-120)/3));
 			    
 				holder.imageView.setOnClickListener(new OnClickListener() {
 					@Override

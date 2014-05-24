@@ -109,7 +109,7 @@ public class SetDeviceBgActivity extends Activity implements OnClickListener {
 					int imageFileCount = currentFiles.length;
 					ArrayList<String> imageFileStringArray = handleImageFileName(currentFiles);
 					
-					if (imageFileStringArray.size() == 0) {
+					if (imageFileStringArray == null) {
 						Toast.makeText(mContext, "没有本地抓拍图片", Toast.LENGTH_SHORT).show();
 					} else {
 						for (int i=0; i<imageFileCount; i++) {

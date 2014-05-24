@@ -2,6 +2,14 @@ package com.video.data;
 
 
 public class Value {
+	
+	/**
+	 * 服务器ID和Port
+	 */
+//	public final static String BackstageIPPort = "tcp://192.168.0.185:5555";
+	public final static String BackstageIPPort = "tcp://222.174.213.185:5555";
+//	public final static String BackstageIPPort = "tcp://192.168.40.191:5555";
+//	public final static String BackstageIPPort = "tcp://218.56.11.182:5555";
 
 	/**
 	 * 设备服务器名称
@@ -17,14 +25,6 @@ public class Value {
 	 * 终端的Dealer名称
 	 */
 	public static String TerminalDealerName = null;
-	
-	/**
-	 * 服务器ID和Port
-	 */
-//	public final static String BackstageIPPort = "tcp://192.168.0.185:5555";
-	public final static String BackstageIPPort = "tcp://222.174.213.185:5555";
-//	public final static String BackstageIPPort = "tcp://192.168.40.191:5555";
-//	public final static String BackstageIPPort = "tcp://218.56.11.182:5555";
 	
 	/**
 	 * 服务器上比较版本的xml文件地址

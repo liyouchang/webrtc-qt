@@ -77,7 +77,7 @@ public class MainActivity extends FragmentActivity {
         if (!Value.isLoginSuccess) {
         	setFullScreen();
 			setContentView(R.layout.startup);
-			ZmqHandler.setHandler(handler);
+			ZmqHandler.mHandler = handler;
 			if (preferData.isExist("AppFirstTime")) {
 				isAppFirstTime = preferData.readBoolean("AppFirstTime");
 			}
@@ -249,6 +249,8 @@ public class MainActivity extends FragmentActivity {
         updateTab(mTabHost);
         if (preferData.isExist("AlarmCount")) {
         	setAlarmIconAndText(preferData.readInt("AlarmCount"));
+        } else {
+        	setAlarmIconAndText(0);
         }
         
         fragments.add(new OwnFragment());
@@ -275,12 +277,19 @@ public class MainActivity extends FragmentActivity {
 	private void updateTab(final TabHost _TabHost) {
 		
 		currentTab = mTabHost.getCurrentTabTag();
+		
+		int msgCount = 0;
+		if (preferData.isExist("AlarmCount")) {
+			msgCount = preferData.readInt("AlarmCount");
+		} else {
+			msgCount = 0;
+		}
         
 		for (int i = 0; i < _TabHost.getTabWidget().getChildCount(); i++) {
 			TextView tv = (TextView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
     		if (_TabHost.getCurrentTab() == i) {
     			if (i == 2) {
-    				if (preferData.readInt("AlarmCount") > 0) {
+    				if (msgCount > 0) {
     	        		tv.setTextColor(mContext.getResources().getColorStateList(R.color.red));
     	        	} else {
         				tv.setTextColor(this.getResources().getColorStateList(R.color.tab_text_color));
@@ -290,7 +299,7 @@ public class MainActivity extends FragmentActivity {
     			}
 			} else {
 				if (i == 2) {
-    				if (preferData.readInt("AlarmCount") > 0) {
+    				if (msgCount > 0) {
     	        		tv.setTextColor(mContext.getResources().getColorStateList(R.color.red));
     	        	} else {
     	        		tv.setTextColor(this.getResources().getColorStateList(R.color.white));
@@ -310,20 +319,22 @@ public class MainActivity extends FragmentActivity {
 	 * @param msg 多少条消息
 	 */
 	public static void setAlarmIconAndText(int msg) {
-		if (msg <= 0) {
-			tv_alarm_msg.setText("消息");
-			if (currentTab.equals("tab3")) {
-				tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.tab_text_color));
+		if (tv_alarm_msg != null) {
+			if (msg <= 0) {
+				tv_alarm_msg.setText("消息");
+				if (currentTab.equals("tab3")) {
+					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.tab_text_color));
+				} else {
+					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.white));
+				}
 			} else {
-				tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.white));
-			}
-		} else {
-			if (msg < 100) {
-				tv_alarm_msg.setText("消息("+msg+")");
-				tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.red));
-			} else {
-				tv_alarm_msg.setText("消息99+");
-				tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.red));
+				if (msg < 100) {
+					tv_alarm_msg.setText("消息("+msg+")");
+					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.red));
+				} else {
+					tv_alarm_msg.setText("消息99+");
+					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.red));
+				}
 			}
 		}
 	}

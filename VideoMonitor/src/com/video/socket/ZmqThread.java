@@ -155,8 +155,7 @@ public class ZmqThread extends Thread {
 						e.printStackTrace();
 					}
 					if (zmqThreadHandler.hasMessages(R.id.close_zmq_socket_id)) {
-						zmqThreadHandler
-								.removeMessages(R.id.close_zmq_socket_id);
+						zmqThreadHandler.removeMessages(R.id.close_zmq_socket_id);
 					}
 					break;
 				}
