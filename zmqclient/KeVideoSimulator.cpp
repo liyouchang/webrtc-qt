@@ -65,13 +65,11 @@ void KeVideoSimulator::OnRecvRecordQuery(std::string peer_id, std::string condit
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage["type"] = "tunnel";
-    jmessage["command"] = "query_record";
-    Json::Value jresult;
-    jresult["condition"] = condition;
-    jresult["total_num"] = 10;
+    jmessage["command"] = "queryRecord";
+    jmessage["condition"] = condition;
+    jmessage["totalNum"] = 10;
     Json::Value jrecord;
-    jresult["record_list"].append(jrecord);
-    jmessage["result"] = jresult;
+    jmessage["recordList"].append(jrecord);
     std::string msg = writer.write(jmessage);
     this->terminal_->SendByRouter(peer_id,msg);
 }

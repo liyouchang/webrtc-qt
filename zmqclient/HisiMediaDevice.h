@@ -25,7 +25,6 @@ public:
         MSG_SEND_AUDIO,
         MSG_MEDIA_CONTROL
     };
-
     HisiMediaDevice();
     ~HisiMediaDevice();
     virtual bool Init(kaerp2p::PeerConnectionClientInterface *client);
@@ -64,6 +63,7 @@ protected:
                                 const char *data, int len);
     virtual void RecvGetWifiInfo(std::string peer_id);
     virtual void SetWifiInfo(std::string peerId, std::string param);
+    virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
 };
 
 

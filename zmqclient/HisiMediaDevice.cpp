@@ -184,7 +184,6 @@ void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
         LOG(WARNING) << "Received unknown message. " << param;
         return;
     }
-
     t_WIFI_PARAM wifiParam;
     std::string ssid;
     GetStringFromJsonObject(jparam,"ssid",&ssid);
@@ -209,6 +208,42 @@ void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
     std::string msg = writer.write(jmessage);
 
     this->terminal_->SendByRouter(peerId,msg);
+}
+
+void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string condition)
+{
+    LOG(INFO)<<"KeVideoSimulator::OnRecvRecordQuery ---"<<
+               peer_id<<" query:"<<condition;
+
+    int totalNum = 0;
+    pt_VidRecFile_QueryInfo videoRecordList;
+
+    Json::Reader reader;
+    Json::Value jcondition;
+    if (!reader.parse(msg, jcondition)) {
+        LOG(WARNING) << "Received unknown message. " << condition;
+        totalNum = -1;
+    }else{
+        std::string startTime,endTime;
+        GetStringFromJsonObject(jcondition,"startTime",&startTime);
+        GetStringFromJsonObject(jcondition,"endTime",&endTime);
+        int offset,toQuery;
+        GetIntFromJsonObject(jcondition,"offset",&offset);
+        GetIntFromJsonObject(jcondition,"toQuery",&toQuery);
+        totalNum = Raycomm_QueryNVR(startTime.c_str(),endTime.c_str(),
+                                    videoRecordList,offset,toQuery);
+    }
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "query_record";
+    jmessage["condition"] = jcondition;
+    jmessage["totalNum"] = totalNum;
+    Json::Value jrecord;
+    jmessage["recordList"].append(jrecord);
+    std::string msg = writer.write(jmessage);
+    this->terminal_->SendByRouter(peer_id,msg);
+
 }
 
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)

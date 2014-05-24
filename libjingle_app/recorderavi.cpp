@@ -351,7 +351,8 @@ bool RecorderAvi::StartSave(const std::string & filename)
 
 bool RecorderAvi::StopSave()
 {
-    if(!recvIFrame){
+    if(talk_base::SS_CLOSED == aviFile_->GetState()){
+        LOG(WARNING)<<"RecorderAvi::StopSave---"<<"not start";
         return false;
     }
     recvIFrame = false;
@@ -373,8 +374,8 @@ bool RecorderAvi::StopSave()
     totalLen -= 8;
     aviFile_->SetPosition(kRiffLenPos);
     aviFile_->Write(&totalLen,4,NULL,NULL);
-    //    aviFile_->SetPosition(kAviHeadTotalFramePos);
-    //    aviFile_->Write(&this->frameCount,4,NULL,NULL);
+    //aviFile_->SetPosition(kAviHeadTotalFramePos);
+    //aviFile_->Write(&this->frameCount,4,NULL,NULL);
     aviFile_->SetPosition(kStrhVidsLengthPos);
     aviFile_->Write(&this->frameCount,4,NULL,NULL);
     aviFile_->SetPosition(kMoveListLenPos);
