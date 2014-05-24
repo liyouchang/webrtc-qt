@@ -35,14 +35,12 @@ SOURCES += \
     asyndealer.cpp \
     peerconnectionclientdealer.cpp \
     CameraClient.cpp \
-    zmqclient.cpp \
-    ke08recordreader.cpp
+    zmqclient.cpp
 
 HEADERS += \
     asyndealer.h \
     peerconnectionclientdealer.h \
-    CameraClient.h \
-    ke08recordreader.h
+    CameraClient.h
 
 arm{
     SOURCES += HisiMediaDevice.cpp

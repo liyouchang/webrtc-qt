@@ -15,11 +15,13 @@ function load(){
     kePlayerObj.RecvPeerMsg = function (peer,msg){
         infoDiv.textContent = "RecvPeerMsg "+ peer + " msg "+ msg;
     }
+    kePlayerObj.Initialize(routerUrl.value);
     eventFunction();
+}
+function InitializePlugin(url){
 }
 
 function SetDivision(num){
-
     KePlayerPlugin.SetDivision(num);
 }
 
@@ -33,7 +35,6 @@ var eventFunction = function(){
     function kePlayerObj::RecvPeerMsg(peer,msg) {
         kePlayerObj.RecvPeerMsg(peer,msg);
     }
-
 };
 
 function QueryCameraRemoteFile(){

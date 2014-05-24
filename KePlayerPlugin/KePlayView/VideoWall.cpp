@@ -183,7 +183,6 @@ int VideoWall::SetPeerPlay(QString peer_id)
         play_index = m_selectedPlayer;
         peer_play_map_.insert(peer_id,m_selectedPlayer);
         return play_index;//free to play
-
     }
     else {
         this->setSelectedPlayer(play_index);

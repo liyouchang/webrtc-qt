@@ -1,4 +1,4 @@
-#include "ke08recordreader.h"
+#include "ke08recorder.h"
 
 #include "talk/base/pathutils.h"
 #include "talk/base/bind.h"
@@ -7,6 +7,9 @@
 #include "talk/base/fileutils.h"
 
 #include "libjingle_app/KeMessage.h"
+
+
+namespace  kaerp2p {
 
 Ke08RecordReader::Ke08RecordReader()
 {
@@ -87,5 +90,54 @@ bool Ke08RecordReader::StopRead()
 
 void Ke08RecordReader::SendMediaMsg(const char *data, int len)
 {
+
+}
+
+
+Ke08RecordSaver::Ke08RecordSaver()
+{
+    saveFile = new talk_base::FileStream();
+}
+
+Ke08RecordSaver::~Ke08RecordSaver()
+{
+    delete saveFile;
+}
+
+bool Ke08RecordSaver::StartSave(const std::string &fileName)
+{
+    if(!saveFile->Open(fileName,"wb",NULL)){
+        LOG(WARNING)<<"Ke08RecordSaver::StartSave---"<<
+                      "open file error "<<fileName;
+        return false;
+    }
+    return true;
+}
+
+bool Ke08RecordSaver::StopSave()
+{
+    saveFile->Close();
+    return true;
+}
+
+void Ke08RecordSaver::OnVideoData(const std::string &peerId, const char *data, int len)
+{
+    size_t written;
+    talk_base::StreamResult result = saveFile->WriteAll(
+                data,len,&written,NULL);
+    if(result != talk_base::SR_SUCCESS){
+        LOG(WARNING)<<"Ke08RecordSaver::OnVideoData---"<<"write file error ";
+    }
+}
+
+void Ke08RecordSaver::OnAudioData(const std::string &peerId, const char *data, int len)
+{
+    size_t written;
+    talk_base::StreamResult result = saveFile->WriteAll(
+                data,len,&written,NULL);
+    if(result != talk_base::SR_SUCCESS){
+        LOG(WARNING)<<"Ke08RecordSaver::OnAudioData---"<<"write file error ";
+    }
+}
 
 }

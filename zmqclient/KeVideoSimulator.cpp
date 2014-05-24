@@ -1,4 +1,5 @@
 #include "KeVideoSimulator.h"
+
 #include "talk/base/pathutils.h"
 #include "talk/base/bind.h"
 #include "talk/base/logging.h"
@@ -8,6 +9,7 @@
 #include "talk/base/buffer.h"
 #include "talk/base/json.h"
 
+#include "libjingle_app/defaults.h"
 #include "libjingle_app/KeMessage.h"
 
 KeVideoSimulator::KeVideoSimulator(const std::string &fileName):
@@ -34,12 +36,12 @@ bool KeVideoSimulator::Init(kaerp2p::PeerConnectionClientInterface *client)
 
 void KeVideoSimulator::GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info)
 {
-    info->frameRate_ = 15;
-    info->frameType_ = kaerp2p::kFrame720P;
+    info->frameRate = 15;
+    info->frameResolution = kaerp2p::kFrame720P;
 }
 
 //restart again
-void KeVideoSimulator::OnFileReadEnd()
+void KeVideoSimulator::OnFileReadEnd(kaerp2p::RecordReaderInterface *)
 {
     reader->StopRead();
     reader->StartRead(fileName);
@@ -58,10 +60,11 @@ void KeVideoSimulator::OnFileAudioData(const char *data, int len)
 
 void KeVideoSimulator::OnRecvRecordQuery(std::string peer_id, std::string condition)
 {
-    LOG(INFO)<<"KeVideoSimulator::OnRecvRecordQuery ---" <<peer_id<<" query:"<<condition ;
+    LOG(INFO)<<"KeVideoSimulator::OnRecvRecordQuery ---"<<
+               peer_id<<" query:"<<condition;
     Json::StyledWriter writer;
     Json::Value jmessage;
-    jmessage["type"] ="tunnel";
+    jmessage["type"] = "tunnel";
     jmessage["command"] = "query_record";
     Json::Value jresult;
     jresult["condition"] = condition;

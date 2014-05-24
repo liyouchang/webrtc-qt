@@ -65,8 +65,6 @@ HisiMediaDevice::HisiMediaDevice():
     ret = Raycomm_MediaDataInit();
     LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
     InitDeviceVideoInfo();
-//    LOG(INFO)<<"vidoe1 frame type " << GetVideoFrameType(1);
-//    LOG(INFO)<<"vidoe2 frame type " << GetVideoFrameType(2);
 }
 
 HisiMediaDevice::~HisiMediaDevice()
@@ -90,10 +88,10 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
 
 bool HisiMediaDevice::InitDeviceVideoInfo()
 {
-    video1_info_.frameRate_ = this->GetVideoFrameRate(1);
-    video1_info_.frameType_ = this->GetVideoFrameType(1);
-    video2_info_.frameRate_ = this->GetVideoFrameRate(2);
-    video2_info_.frameType_ = this->GetVideoFrameType(2);
+    video1_info_.frameRate = this->GetVideoFrameRate(1);
+    video1_info_.frameResolution = this->GetVideoFrameType(1);
+    video2_info_.frameRate = this->GetVideoFrameRate(2);
+    video2_info_.frameResolution = this->GetVideoFrameType(2);
     return true;
 }
 

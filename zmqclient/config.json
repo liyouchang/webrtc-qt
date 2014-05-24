@@ -7,9 +7,7 @@
     "routerUrl":"tcp://192.168.0.185:5555",
     "logParams":"tstamp thread info debug",
     "logSaveFile":"",
-    "servers":[{"uri":"stun:192.168.0.185:5389"},
-               {"uri":"turn:192.168.40.195:5766","username":"","password":""}
-              ],
+    "servers":[],
     "clarity":2,
     "sampleFileName":"Sample.avi"
 }

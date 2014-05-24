@@ -77,8 +77,6 @@ int KePlayerPlugin::Initialize(QString routerUrl)
     if(is_inited){
         return 10002;
     }
-
-
     int ret = connection_->Connect(routerUrl.toStdString(),"");
     if(ret != 0){
         return ret;
@@ -204,7 +202,6 @@ int KePlayerPlugin::PlayRecordFiles(QString peer_id, QString record_info_list)
 {
     /*
     std::string str_id = peer_id.toStdString();
-
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(record_info_list.toStdString(), jmessage)) {
@@ -264,7 +261,7 @@ int KePlayerPlugin::PlayRecordFiles(QString peer_id, QString record_info_list)
 
 int KePlayerPlugin::StopPlayFile(QString peer_id)
 {
-    KeRecorder * recorder = this->findChild<KeRecorder *>(peer_id);
+    KeRecorder * recorder = this->findChild<KeRecorder*>(peer_id);
     if(recorder){
         delete recorder;
     }

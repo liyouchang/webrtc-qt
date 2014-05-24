@@ -24,15 +24,15 @@ namespace kaerp2p {
 
 
 
-class RecorderAvi:public sigslot::has_slots<>
+class RecorderAvi:public RecordSaverInterface,public sigslot::has_slots<>
 {
 public:
     RecorderAvi(const std::string &peerId, int frameRate, int frameType);
     virtual ~RecorderAvi();
-    bool StartRecord(const std::string & fileName);
-    bool StopRecord();
-    void OnVideoData(const std::string & peerId,const char *data,int len);
-    void OnAudioData(const std::string & peerId,const char *data,int len);
+    virtual bool StartSave(const std::string & fileName);
+    virtual bool StopSave();
+    virtual void OnVideoData(const std::string & peerId,const char *data,int len);
+    virtual void OnAudioData(const std::string & peerId,const char *data,int len);
 protected:
     bool AviFileWriteVideo(const char *mediaData, int mediaLen);
     bool AviFileWriteAudio(const char *mediaData, int mediaLen);
@@ -56,7 +56,8 @@ public:
     RecordReaderAvi(int audioInterval = 20,talk_base::Thread * thread = NULL);
     virtual ~RecordReaderAvi();
     void OnMessage(talk_base::Message *msg);
-
+    int frameResolution;
+    int frameRate;
     bool StartRead(const std::string & filename);
     bool StopRead();
 private:
@@ -65,7 +66,6 @@ private:
     int audioFrameInterval;//million second, audio frame interval time,
                             //20 is normal speed
     bool ownThread;
-
 public:
 };
 

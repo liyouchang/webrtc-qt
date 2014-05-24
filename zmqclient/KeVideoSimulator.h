@@ -20,7 +20,7 @@ public:
     virtual ~KeVideoSimulator();
     virtual bool Init(kaerp2p::PeerConnectionClientInterface *client);
     virtual void GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info);
-    void OnFileReadEnd();
+    void OnFileReadEnd(kaerp2p::RecordReaderInterface *);
     void OnFileVideoData(const char * data,int len);
     void OnFileAudioData(const char * data,int len);
 protected:

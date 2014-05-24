@@ -151,10 +151,10 @@ bool P2PConductor::InitializePeerConnection()
 //        PeerTunnelInterface::IceServer server;
 //        server.uri = GetPeerConnectionString();
 //        g_servers.push_back(server);
+        //lht TODO: turn server should get by the server
         P2PConductor::AddIceServer("turn:222.174.213.185:5766",
                                    "lht","123456");
     }
-
     stream_thread_ = new talk_base::Thread();
     bool result = stream_thread_->Start();
     ASSERT(result);
