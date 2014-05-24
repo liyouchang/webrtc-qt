@@ -2,10 +2,11 @@
 
 
 #include <QtWidgets>
+#include <QDir>
 
-#include "talk/base/json.h"
-#include "libjingle_app/jsonconfig.h"
-#include "libjingle_app/p2pconductor.h"
+//#include "talk/base/json.h"
+//#include "libjingle_app/jsonconfig.h"
+//#include "libjingle_app/p2pconductor.h"
 #include "libjingle_app/defaults.h"
 
 #include "VideoWall.h"
@@ -22,17 +23,29 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     vbox->setMargin(0);
     video_wall_ = new VideoWall(this);
     vbox->addWidget( video_wall_ );
-    m_savePath = QDir::currentPath();
-
     QObject::connect(video_wall_,&VideoWall::SigNeedStopPeerPlay,
                      this,&KePlayerPlugin::StopVideo);
     QObject::connect(this,&KePlayerPlugin::TunnelClosed,
                      video_wall_,&VideoWall::StopPeerPlay);
 
+    QDir configDir = QDir::home();
+    configDir.mkdir("ShijietongConfig");
+    configDir.cd("ShijietongConfig");
+    myconfig = new QSettings(configDir.absoluteFilePath("playerconfig.ini"),
+                             QSettings::IniFormat,this);
+    m_savePath = myconfig->value("plugin/save_path").toString();
+    if(savePath().isEmpty()){
+        QDir saveDir = QDir::home();
+        saveDir.mkdir("ShijietongData");
+        saveDir.cd("ShijietongData");
+        m_savePath = saveDir.absolutePath();
+        myconfig->setValue("plugin/save_path",savePath());
+    }
 }
 
 KePlayerPlugin::~KePlayerPlugin()
 {
+    qDebug()<<"KePlayerPlugin::~KePlayerPlugin";
 }
 
 void KePlayerPlugin::about()
@@ -85,19 +98,12 @@ int KePlayerPlugin::Initialize(QString routerUrl)
     return 0;
 }
 
-int KePlayerPlugin::Initialize()
-{
-    JsonConfig::Instance()->FromFile(kaerp2p::GetAppFilePath("config.json"));
-    Json::Value routerValue = JsonConfig::Instance()->Get("routerUrl","tcp://222.174.213.185:5555");
-    Json::Value jservers = JsonConfig::Instance()->Get("servers","");
-    kaerp2p::P2PConductor::AddIceServers(jservers.asString());
-    return this->Initialize(routerValue.asString().c_str());
-}
 //video:1 main stream 2 sub stream
 int KePlayerPlugin::StartVideo(QString peer_id, int video)
 {
     std::string str_id = peer_id.toStdString();
     if(!tunnel_->StartPeerMedia(str_id,video)){
+        qWarning()<<"KePlayerPlugin::StartVideo---"<<"start video failed";
         return KE_VIDEO_START_FAILED;
     }
     int index = video_wall_->SetPeerPlay(peer_id);
@@ -116,20 +122,36 @@ int KePlayerPlugin::StopVideo(QString peerId)
     return KE_SUCCESS;
 }
 
-int KePlayerPlugin::StartCut(QString peerId)
+QString KePlayerPlugin::StartCut(QString peerId)
 {
-    if(peerId.isEmpty()){
-        return KE_PARAM_ERROR;
-    }
-    std::string strId = peerId.toStdString();
-    if(!tunnel_->IsTunnelOpened(strId)){
-        return KE_TUNNEL_NOT_OPEN;
-    }
-    std::string filename = "test.avi";
-    if(!tunnel_->StartPeerVideoCut(strId,filename)){
-        return KE_VIDEO_CUT_FAILED;
-    }
-    return KE_SUCCESS;
+    bool result = true;
+    QString info;
+    do{
+        if(peerId.isEmpty()){
+            result = false;
+            break;
+        }
+        std::string strId = peerId.toStdString();
+        if(!tunnel_->IsTunnelOpened(strId)){
+            result = false;
+            break;
+        }
+        QDir fileDir(savePath());
+        fileDir.mkdir("RecordFiles");
+        fileDir.cd("RecordFiles");
+        QString fileName = KePlayerPlugin::GetTimeFileName(peerId,"avi",fileDir.path());
+        info = fileName;
+        if(!tunnel_->StartPeerVideoCut(strId,fileName.toLocal8Bit().constData())){
+            result = false;
+            break;
+        }
+    }while(false);
+
+    QJsonObject jreturn;
+    jreturn.insert("result",result);
+    jreturn.insert("info",info);
+    QJsonDocument jsondoc(jreturn);
+    return jsondoc.toJson();
 }
 
 int KePlayerPlugin::StopCut(QString peerId)
@@ -144,6 +166,31 @@ int KePlayerPlugin::StopCut(QString peerId)
     return KE_SUCCESS;
 }
 
+
+QString KePlayerPlugin::Capture(QString peerId)
+{
+    bool result = true;
+    QString info;
+    if(peerId.isEmpty()){
+        result = false;
+    }else{
+        QDir fileDir(savePath());
+        fileDir.mkdir("CaptureFiles");
+        fileDir.cd("CaptureFiles");
+        QString fileName = KePlayerPlugin::GetTimeFileName(peerId,"bmp",fileDir.path());
+        info = fileName;
+        bool ret = video_wall_->Capture(peerId,fileName);
+        if(!ret){
+            result = false;
+        }
+    }
+    QJsonObject jreturn;
+    jreturn.insert("result",result);
+    jreturn.insert("info",info);
+    QJsonDocument jsondoc(jreturn);
+    return jsondoc.toJson();
+}
+
 int KePlayerPlugin::SendCommand(QString peer_id, QString msg)
 {
     std::string str_id = peer_id.toStdString();
@@ -153,8 +200,8 @@ int KePlayerPlugin::SendCommand(QString peer_id, QString msg)
 
 int KePlayerPlugin::PlayRecordFiles(QString peer_id, QString record_info_list)
 {
+    /*
     std::string str_id = peer_id.toStdString();
-
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(record_info_list.toStdString(), jmessage)) {
@@ -208,13 +255,13 @@ int KePlayerPlugin::PlayRecordFiles(QString peer_id, QString record_info_list)
 
 
     recorder->OpenFile(first_record,m_savePath);
-
+*/
     return 0;
 }
 
 int KePlayerPlugin::StopPlayFile(QString peer_id)
 {
-    KeRecorder * recorder = this->findChild<KeRecorder *>(peer_id);
+    KeRecorder * recorder = this->findChild<KeRecorder*>(peer_id);
     if(recorder){
         delete recorder;
     }
@@ -245,6 +292,85 @@ void KePlayerPlugin::OnRecordStatus(QString peer_id, int status)
             emit RemoteFileDownloadEnd(peer_id);
         }
     }
+}
+
+QString KePlayerPlugin::GetSaveDirList(QString saveType)
+{
+    bool result = true;
+    QJsonArray jdateDirArray;
+
+    QDir fileDir(savePath());
+    if(!fileDir.cd(saveType)){
+        result = false;
+    }else{
+        QStringList dirList = fileDir.entryList(QDir::Dirs|QDir::NoDotAndDotDot);
+        jdateDirArray = QJsonArray::fromStringList(dirList);
+    }
+    QJsonObject jreturn;
+    jreturn.insert("result",result);
+    jreturn.insert("dirArray",jdateDirArray);
+    QJsonDocument jsondoc(jreturn);
+    return jsondoc.toJson();
+}
+
+QString KePlayerPlugin::GetSaveFileList(QString dateDir)
+{
+    bool result = true;
+    QJsonArray jfilesArray;
+    QDir fileDir(savePath());
+    if(!fileDir.cd(dateDir)){
+        result = false;
+    }else{
+        QStringList list = fileDir.entryList(QDir::Files);
+        jfilesArray = QJsonArray::fromStringList(list);
+    }
+    QJsonObject jreturn;
+    jreturn.insert("result",result);
+    jreturn.insert("files",jfilesArray);
+    QJsonDocument jsondoc(jreturn);
+    return jsondoc.toJson();
+}
+
+QString KePlayerPlugin::GetSaveFileData(QString fileName,int scaleWidth,int scaleHeight)
+{
+    bool result = true;
+    QString imageDataStr = "data:image/png;base64,";
+    QDir fileDir(savePath());
+    QString  filePath = fileDir.absoluteFilePath(fileName);
+    QImage imageFile(filePath);
+    if(imageFile.isNull()){
+        result = false;
+    }else{
+        QImage scaledImage = imageFile.scaled(scaleWidth,scaleHeight);
+        if(scaledImage.isNull()){
+            scaledImage = imageFile;
+        }
+        QByteArray fileRawData;
+        QBuffer buffer(&fileRawData);
+        buffer.open(QIODevice::WriteOnly);
+        scaledImage.save(&buffer, "PNG"); // writes image into fileRawData in PNG format
+        imageDataStr += fileRawData.toBase64(
+                    QByteArray::Base64Encoding|QByteArray::KeepTrailingEquals);
+    }
+    QJsonObject jreturn;
+    jreturn.insert("result",result);
+    jreturn.insert("dataImage",imageDataStr);
+    QJsonDocument jsondoc(jreturn);
+    return jsondoc.toJson();
+}
+
+QString KePlayerPlugin::GetTimeFileName(QString peerId, QString extName, QString path)
+{
+    QString dateStr = QDate::currentDate().toString("yyyy-MM-dd");
+    QString timeStr = QTime::currentTime().toString("hh-mm-ss-zzz");
+    QDir fileDir(path);
+    if(!fileDir.cd(dateStr)){
+        fileDir.mkdir(dateStr);
+        fileDir.cd(dateStr);
+    }
+    QString fileName = QString("%1_%2_%3.%4").
+            arg(peerId.left(12)).arg(dateStr).arg(timeStr).arg(extName);
+    return fileDir.filePath(fileName);
 }
 
 QString KePlayerPlugin::savePath() const

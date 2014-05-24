@@ -23,8 +23,14 @@ namespace kaerp2p{
 class KeMsgProcessContainer;
 
 struct VideoInfo{
-    int frameRate_;
-    int frameType_;
+    int frameRate;
+    int frameResolution;//a enumirate of FrameResolutionType
+};
+
+struct RecordInfo{
+    char fileName[80];
+    int startTime;
+    int endTime;
 };
 
 class KeMsgProcess:public talk_base::MessageHandler,public sigslot::has_slots<>
@@ -41,19 +47,14 @@ public:
     sigslot::signal3<const std::string &,const char * ,int> SignalNeedSendData;
     void OnTunnelMessage(const std::string & peer_id,talk_base::Buffer & msg);
     std::string peer_id(){ return peer_id_;}
-
     void StartHeartBeat();
     sigslot::signal1<const std::string &> SignalHeartStop;
-
     VideoInfo videoInfo_;
-
 protected:
     virtual void ExtractMessage(talk_base::Buffer & allBytes);
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     void SendHeart();
-
     KeMsgProcessContainer *container_;
-
 private:
     std::string peer_id_;
     //PeerTerminalInterface * terminal_;

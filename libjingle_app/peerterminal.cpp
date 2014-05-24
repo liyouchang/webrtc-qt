@@ -131,7 +131,8 @@ void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
  * @param peer_id
  * @param msg --- the message received by client_, the message should be a json string
  */
-void PeerTerminal::OnRouterReadData(const std::string & peer_id, const std::string & msg)
+void PeerTerminal::OnRouterReadData(const std::string & peer_id,
+                                    const std::string & msg)
 {
     Json::Reader reader;
     Json::Value jmessage;
@@ -157,10 +158,10 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id, const std::stri
     }else{
         LOG(WARNING)<<"receive unexpected message from "<<peer_id;
     }
-
 }
 
-void PeerTerminal::OnTunnelNeedSend(const std::string &peer_id, const std::string &msg)
+void PeerTerminal::OnTunnelNeedSend(const std::string &peer_id,
+                                    const std::string &msg)
 {
     LOG(INFO)<<"PeerTerminal::OnTunnelNeedSend----"<<peer_id;
     Json::StyledWriter writer;
@@ -169,7 +170,6 @@ void PeerTerminal::OnTunnelNeedSend(const std::string &peer_id, const std::strin
     jmessage["msg"] = msg;
     std::string data = writer.write(jmessage);
     this->SendByRouter(peer_id,data);
-
 }
 
 ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
@@ -196,7 +196,6 @@ ScopedTunnel PeerTerminal::GetTunnel(kaerp2p::StreamProcess *stream)
     if (it == tunnels_.end())
       return NULL;
     return *it;
-
 }
 
 int PeerTerminal::CountAvailableTunnels()
@@ -209,9 +208,7 @@ int PeerTerminal::CountAvailableTunnels()
         break;
       }
     }
-
     return notUsedNum;
-
 }
 
 ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
@@ -219,12 +216,12 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel){
         return aTunnel;
-    }else if(tunnels_.size() <= max_tunnel_num_ || max_tunnel_num_ == kInfiniteTunnel){
+    }else if(tunnels_.size() <= max_tunnel_num_ ||
+             max_tunnel_num_ == kInfiniteTunnel){
         aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
         aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
         aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
         aTunnel->SignalStreamClosed.connect(this,&PeerTerminal::OnTunnelClosed);
-
         tunnels_.push_back(aTunnel);
     }
     else{

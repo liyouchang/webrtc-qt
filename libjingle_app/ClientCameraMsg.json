@@ -4,10 +4,10 @@ client-->camera
     "type":"tunnel",
     "command":"query_record",
     "condition":{
-        "start_time":"20140417175100", //query start time
-        "end_time":"20140418175500",   //query stop time
+        "startTime":"20140417175100", //query start time
+        "endTime":"20140418175500",   //query stop time
         "offset":0,
-        "to_query":30
+        "toQuery":30
     }
 }
 
@@ -16,15 +16,15 @@ camera-->client
     "type":"tunnel",
     "command":"query_record",
     "condition":{
-        "start_time":"20140417175100", //query start time
-        "end_time":"20140418175500",   //query stop time
+        "startTime":"20140417175100", //query start time
+        "endTime":"20140418175500",   //query stop time
         "offset":0,
-        "to_query":30
+        "toQuery":30
     },
-    "total_num":100,    //the total records from startime to endtime
-    "record_list":[{"file_name":"",//the record dir stored in camera
-            "file_date":"20140417175100",//the record file start  time
-            "file_size":256,//record file size
+    "totalNum":100,    //the total records from startime to endtime
+    "recordList":[{"fileName":"",//the record dir stored in camera
+            "fileDate":"20140417175100",//the record file start  time
+            "fileSize":256,//record file size
      }]
 }
 

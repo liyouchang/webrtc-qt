@@ -1,8 +1,10 @@
 var kePlayerObj ;
 var g_peer_id;
+var g_infoDiv;
+
 function load(){
     var infoDiv = document.getElementById("textDiv");
-
+    g_infoDiv = document.getElementById("textDiv");
     kePlayerObj = document.getElementById("KePlayerPlugin");
     kePlayerObj.TunnelOpened = function (peer){
         infoDiv.textContent = "TunnelOpened "+ peer;
@@ -13,11 +15,13 @@ function load(){
     kePlayerObj.RecvPeerMsg = function (peer,msg){
         infoDiv.textContent = "RecvPeerMsg "+ peer + " msg "+ msg;
     }
+    kePlayerObj.Initialize(routerUrl.value);
     eventFunction();
+}
+function InitializePlugin(url){
 }
 
 function SetDivision(num){
-
     KePlayerPlugin.SetDivision(num);
 }
 
@@ -31,18 +35,15 @@ var eventFunction = function(){
     function kePlayerObj::RecvPeerMsg(peer,msg) {
         kePlayerObj.RecvPeerMsg(peer,msg);
     }
-
 };
 
 function QueryCameraRemoteFile(){
-
    g_peer_id =  PeerID.value;
     var query_command = {type:"tunnel",command:"query_record",
                 condition:{start_time:"20140417175100",
             end_time:"20140418175500",offset:0,to_query:30}};
     var query_str = JSON.stringify(query_command);
     kePlayerObj.SendCommand(g_peer_id,query_str);
-
 }
 
 function PlayCameraRemoteFile(){
@@ -55,4 +56,43 @@ function PlayCameraRemoteFile(){
     kePlayerObj.PlayRecordFiles(g_peer_id,record_str);
 }
 
+function GetWifiList(){
+    g_peer_id =  PeerID.value;
+    var wifiInfo =
+            {"type":"tunnel",
+             "command":"wifi_info"
+            };
+    var wifiInfoStr = JSON.stringify(wifiInfo);
+    kePlayerObj.SendCommand(g_peer_id,wifiInfoStr);
+}
 
+function CapturePictur(){
+    g_peer_id =  PeerID.value;
+    var retStr = kePlayerObj.Capture(g_peer_id);
+    var infoDiv = document.getElementById("textDiv");
+    infoDiv.textContent = "CapturePictur " + g_peer_id + " return " + retStr;
+}
+function GetCaptureDirList(){
+    g_peer_id = PeerID.value;
+    var retStr = kePlayerObj.GetSaveDirList("CaptureFiles/2014-05-20");
+    g_infoDiv.textContent = retStr;
+}
+function GetCaptureFileList(){
+    g_peer_id = PeerID.value;
+    var retStr = kePlayerObj.GetSaveFileList("CaptureFiles/2014-05-20");
+    g_infoDiv.textContent = retStr;
+}
+
+function GetCaptureFileData(){
+    g_peer_id = PeerID.value;
+    var retStr = kePlayerObj.GetSaveFileData(
+                "CaptureFiles/2014-05-20/0090B01AF67F_2014-05-20_13-36-37-012.bmp",
+                200,150);
+    g_infoDiv.textContent = retStr;
+}
+
+function StartCut(){
+    g_peer_id = PeerID.value;
+    var retStr = kePlayerObj.StartCut(g_peer_id);
+    g_infoDiv.textContent = retStr;
+}

@@ -49,9 +49,6 @@
 const int kVideoSampleRate = 40;//40 ms per frame
 const int kAudioSampleRate = 20;//20 ms
 
-
-
-
 struct MediaControlData : public talk_base::MessageData {
     int video1;//1 to request start video1 , 0 to request stop
     int video2;//1 to request start video2, 0 to request stop
@@ -65,13 +62,9 @@ HisiMediaDevice::HisiMediaDevice():
 {
     int ret = Raycomm_InitParam();
     LOG(INFO)<<"Raycomm_InitParam : "<<ret;
-
     ret = Raycomm_MediaDataInit();
     LOG(INFO)<<"Raycomm_MediaDataInit : "<<ret;
     InitDeviceVideoInfo();
-//    LOG(INFO)<<"vidoe1 frame type " << GetVideoFrameType(1);
-//    LOG(INFO)<<"vidoe2 frame type " << GetVideoFrameType(2);
-
 }
 
 HisiMediaDevice::~HisiMediaDevice()
@@ -81,7 +74,6 @@ HisiMediaDevice::~HisiMediaDevice()
     }
     Raycomm_MediaDataUnInit();
     Raycomm_UnInitParam();
-
 }
 
 bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
@@ -96,10 +88,10 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
 
 bool HisiMediaDevice::InitDeviceVideoInfo()
 {
-    video1_info_.frameRate_ = this->GetVideoFrameRate(1);
-    video1_info_.frameType_ = this->GetVideoFrameType(1);
-    video2_info_.frameRate_ = this->GetVideoFrameRate(2);
-    video2_info_.frameType_ = this->GetVideoFrameType(2);
+    video1_info_.frameRate = this->GetVideoFrameRate(1);
+    video1_info_.frameResolution = this->GetVideoFrameType(1);
+    video2_info_.frameRate = this->GetVideoFrameRate(2);
+    video2_info_.frameResolution = this->GetVideoFrameType(2);
     return true;
 }
 
@@ -121,7 +113,6 @@ void HisiMediaDevice::SendAudioFrame(const char *data, int len)
 
 void HisiMediaDevice::SetVideoClarity(int clarity)
 {
-
     if(clarity == 1){
         SetVideoResolution("352x288");
     }else if(clarity == 2){
@@ -140,7 +131,6 @@ int HisiMediaDevice::GetVideoClarity()
 {
     Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
     return jclarity.asInt();
-    //return video_clarity_;
 }
 
 void HisiMediaDevice::SetPtz(std::string ptz_key, int param)
@@ -153,13 +143,12 @@ void HisiMediaDevice::OnRecvTalkData(const std::string &peer_id, const char *dat
 {
     KEFrameHead * head = (KEFrameHead *)data;
     int dataPos =  sizeof(KEFrameHead);
-    if(head->frameLen == len-dataPos){
+    if(head->frameLen == len - dataPos){
         Raycomm_TalkPlay(0,const_cast<char *>(data+dataPos),head->frameLen,0,0);
     }else{
         LOG(WARNING)<<"HisiMediaDevice::OnRecvTalkData--- from "<<peer_id<<
                     " frame format error";
     }
-
 }
 
 void HisiMediaDevice::RecvGetWifiInfo(std::string peer_id)
@@ -169,11 +158,9 @@ void HisiMediaDevice::RecvGetWifiInfo(std::string peer_id)
     int count;
     int ret = Raycomm_GetWifiList(&count,wifiList);
     LOG(INFO)<<"Raycomm_GetWifiList ret-"<<ret<<" count-"<<count;
-
     Json::Value jmessage;
     jmessage["type"] = "tunnel";
     jmessage["command"] = "wifi_info";
-
     for(int i=0;i < count;++i){
         Json::Value jwifi;
         jwifi["ssid"] = wifiList[i].sSsID;
@@ -181,41 +168,34 @@ void HisiMediaDevice::RecvGetWifiInfo(std::string peer_id)
         jwifi["auth"] = wifiList[i].u32Auth;
         jwifi["enc"] = wifiList[i].u32Enc;
         jwifi["mode"] = wifiList[i].u32Mode;
-
         jmessage["wifis"].append(jwifi);
     }
     Json::StyledWriter writer;
     std::string msg = writer.write(jmessage);
-
     LOG(LS_VERBOSE)<<"send msg is "<< msg;
-
     this->terminal_->SendByRouter(peer_id,msg);
-
 }
 
 void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
 {
-
     Json::Reader reader;
     Json::Value jparam;
     if (!reader.parse(param,jparam)) {
         LOG(WARNING) << "Received unknown message. " << param;
         return;
     }
-
-
     t_WIFI_PARAM wifiParam;
     std::string ssid;
     GetStringFromJsonObject(jparam,"ssid",&ssid);
     talk_base::asccpyn(wifiParam.sSsID,32,ssid.c_str());
     std::string key;
     GetStringFromJsonObject(jparam,"key",&key);
-    talk_base::asccpyn(wifiParam.sKey,32,ssid.c_str());
+    talk_base::asccpyn(wifiParam.sKey,32,key.c_str());
     GetIntFromJsonObject(jparam,"enable",&wifiParam.u32Enable);
     GetIntFromJsonObject(jparam,"auth",&wifiParam.u32Auth);
     GetIntFromJsonObject(jparam,"enc",&wifiParam.u32Enc);
     GetIntFromJsonObject(jparam,"mode",&wifiParam.u32Mode);
-
+    LOG(INFO)<<"Raycomm_SetWifi --- param key "<<wifiParam.sKey;
     int ret = Raycomm_SetWifi(&wifiParam);
 
     LOG(INFO)<<"Raycomm_SetWifi --- ret:"<<ret<<" param:"<<param;
@@ -228,6 +208,42 @@ void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
     std::string msg = writer.write(jmessage);
 
     this->terminal_->SendByRouter(peerId,msg);
+}
+
+void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string condition)
+{
+    LOG(INFO)<<"KeVideoSimulator::OnRecvRecordQuery ---"<<
+               peer_id<<" query:"<<condition;
+
+    int totalNum = 0;
+    pt_VidRecFile_QueryInfo videoRecordList;
+
+    Json::Reader reader;
+    Json::Value jcondition;
+    if (!reader.parse(msg, jcondition)) {
+        LOG(WARNING) << "Received unknown message. " << condition;
+        totalNum = -1;
+    }else{
+        std::string startTime,endTime;
+        GetStringFromJsonObject(jcondition,"startTime",&startTime);
+        GetStringFromJsonObject(jcondition,"endTime",&endTime);
+        int offset,toQuery;
+        GetIntFromJsonObject(jcondition,"offset",&offset);
+        GetIntFromJsonObject(jcondition,"toQuery",&toQuery);
+        totalNum = Raycomm_QueryNVR(startTime.c_str(),endTime.c_str(),
+                                    videoRecordList,offset,toQuery);
+    }
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "query_record";
+    jmessage["condition"] = jcondition;
+    jmessage["totalNum"] = totalNum;
+    Json::Value jrecord;
+    jmessage["recordList"].append(jrecord);
+    std::string msg = writer.write(jmessage);
+    this->terminal_->SendByRouter(peer_id,msg);
+
 }
 
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)
@@ -401,7 +417,6 @@ std::string HisiMediaDevice::GetHardwareId()
     Raycomm_GetParam(HARDWARE_ID,buf,0);
     std::string result = buf;
     return result;
-
 }
 
 void HisiMediaDevice::GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info)
@@ -436,7 +451,6 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
     LOG(INFO)<<"AlarmNotify::NotifyCallBack--- chn:"<<chn<<
                " rea:"<<rea<<" io:"<<io;
 
-    int type;
     std::ostringstream infostream;
 
     infostream<<"通道"<<chn;
@@ -462,5 +476,13 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
 
     AlarmNotify::Instance()->SignalTerminalAlarm(rea,infostream.str(),"");
     return 0;
+
+}
+
+
+KaerCameraProcess::KaerCameraProcess(std::string peerId,
+                                     KeTunnelCamera *container):
+    kaerp2p::KeMessageProcessCamera(peerId,container)
+{
 
 }

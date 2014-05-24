@@ -335,16 +335,29 @@ struct KEPlayRecordFileReq
     char protocalType; //
     char fileData[80];
 };
-
-struct KEPlayRecordDataHead
+struct KEPlayRecordFileResp
 {
     unsigned char protocal;
-    unsigned char msgType;//0x55
+    unsigned char msgType;//0x55 & 0x54
     int msgLength;//
     int videoID;
     int clientID;
     char channelNo;
-    char resp;//13 后面有数据 ，6 数据结束,5 start download,4 no file
+    char resp;//5 start download,4 no file or file error
+    int frameResolution;
+    int frameRate;
+    char fileName[80];
+};
+
+struct KEPlayRecordDataHead
+{
+    unsigned char protocal;
+    unsigned char msgType;//0x55 & 0x54
+    int msgLength;//
+    int videoID;
+    int clientID;
+    char channelNo;
+    char resp;//13 后面有数据 ，6 数据结束,5 start download,4 no file or file error
 };
 
 //device ----> client

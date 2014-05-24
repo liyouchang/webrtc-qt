@@ -46,6 +46,18 @@ extern const char kKaerPTZCommandValue[];
 
 extern const uint16 kDefaultServerPort;
 
+enum FrameResolutionType{
+    kFrameD1 = 0,
+    kFrameQCIF = 1,
+    kFrameCIF = 2,
+    kFrameHD1 = 3,
+    kFrameQVGA = 4,
+    kFrame1080P = 6,
+    kFrameVGA = 7,
+    kFrame720P = 10,
+    kFrame920P = 12,
+};
+
 
 std::string GetRandomString();
 //yyyy-MM-dd hh:mm:ss---- %F %T

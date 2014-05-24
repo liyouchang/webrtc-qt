@@ -87,7 +87,16 @@ bool AVService::IsPlaying()
 
 int AVService::CapPic(const char * fileName)
 {
-    return AV_CapPic_Ex(m_lPlayHandle,fileName);
+    QString name = fileName;
+    name.replace(QRegExp("/"),"\\\\");
+    int ret = -100;
+    if(playStatus == 1){
+        qDebug()<<"AVService::CapPic"<<"playhandle"<<fileName;
+        ret = AV_CapPic_Ex(m_lPlayHandle,fileName);
+    }else if(playStatus == 2){
+        ret = AV_CapPic_Ex(m_fileHandle,fileName);
+    }
+    return ret;
 }
 /**
  * @brief AVService::PlayFile

@@ -11,9 +11,10 @@
 #ifndef RECORDERAVI_H
 #define RECORDERAVI_H
 
-#include <string>
-#include "talk/base/sigslot.h"
 #include "talk/base/thread.h"
+
+#include "recordinterface.h"
+
 namespace talk_base{
 class Buffer;
 class FileStream;
@@ -23,15 +24,15 @@ namespace kaerp2p {
 
 
 
-class RecorderAvi:public sigslot::has_slots<>
+class RecorderAvi:public RecordSaverInterface,public sigslot::has_slots<>
 {
 public:
     RecorderAvi(const std::string &peerId, int frameRate, int frameType);
     virtual ~RecorderAvi();
-    bool StartRecord(const std::string & fileName);
-    bool StopRecord();
-    void OnVideoData(const std::string & peerId,const char *data,int len);
-    void OnAudioData(const std::string & peerId,const char *data,int len);
+    virtual bool StartSave(const std::string & fileName);
+    virtual bool StopSave();
+    virtual void OnVideoData(const std::string & peerId,const char *data,int len);
+    virtual void OnAudioData(const std::string & peerId,const char *data,int len);
 protected:
     bool AviFileWriteVideo(const char *mediaData, int mediaLen);
     bool AviFileWriteAudio(const char *mediaData, int mediaLen);
@@ -47,28 +48,24 @@ private:
     int frameCount;
 };
 
-class RecordReaderAvi : public talk_base::MessageHandler
+class RecordReaderAvi :
+        public RecordReaderInterface,
+        public talk_base::MessageHandler
 {
 public:
-    enum {
-        ReadFrame
-    };
-    RecordReaderAvi(talk_base::Thread * thread);
+    RecordReaderAvi(int audioInterval = 20,talk_base::Thread * thread = NULL);
     virtual ~RecordReaderAvi();
     void OnMessage(talk_base::Message *msg);
-
+    int frameResolution;
+    int frameRate;
     bool StartRead(const std::string & filename);
     bool StopRead();
-    sigslot::signal0<> SignalRecordEnd;
-    sigslot::signal2<const char *,int> SignalVideoData;
-    sigslot::signal2<const char *,int> SignalAudioData;
 private:
+    talk_base::FileStream * aviFile_;
     talk_base::Thread * readThread;
     int audioFrameInterval;//million second, audio frame interval time,
                             //20 is normal speed
-    talk_base::FileStream * aviFile_;
-
-
+    bool ownThread;
 public:
 };
 

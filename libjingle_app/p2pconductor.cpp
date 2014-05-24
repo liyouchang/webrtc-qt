@@ -142,7 +142,6 @@ void P2PConductor::AddIceServers(std::string jstrServers)
             P2PConductor::AddIceServer(uri,username,password);
         }
     }
-
 }
 
 
@@ -152,11 +151,11 @@ bool P2PConductor::InitializePeerConnection()
 //        PeerTunnelInterface::IceServer server;
 //        server.uri = GetPeerConnectionString();
 //        g_servers.push_back(server);
+        //lht TODO: turn server should get by the server
         P2PConductor::AddIceServer("turn:222.174.213.185:5766",
                                    "lht","123456");
     }
-
-    stream_thread_ =  new talk_base::Thread();
+    stream_thread_ = new talk_base::Thread();
     bool result = stream_thread_->Start();
     ASSERT(result);
 
@@ -164,7 +163,7 @@ bool P2PConductor::InitializePeerConnection()
     result = signal_thread_->Start();
     ASSERT(result);
 
-    stream_process_.reset( new StreamProcess(stream_thread_));
+    stream_process_.reset(new StreamProcess(stream_thread_));
     stream_process_->SignalOpened.connect(
                 this,&P2PConductor::OnTunnelEstablished);
     stream_process_->SignalClosed.connect(
@@ -269,7 +268,8 @@ void P2PConductor::OnMessage(talk_base::Message *msg)
 }
 
 
-void P2PConductor::OnMessageFromPeer(const std::string &peer_id, const std::string &message)
+void P2PConductor::OnMessageFromPeer(const std::string &peer_id,
+                                     const std::string &message)
 {
     LOG(INFO) <<"P2PConductor::OnMessageFromPeer---";
     ASSERT(!message.empty());

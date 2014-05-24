@@ -147,7 +147,6 @@ void KeTunnelClient::SendTalkData(const char *data, int len)
     talk_base::Buffer frameBuf(&frameHead,sizeof(KEFrameHead));
     frameBuf.AppendData(data,len);
     SignalTalkData(frameBuf.data(),frameBuf.length());
-
 }
 
 void KeTunnelClient::OnRecvAudioData(const std::string &peer_id,
@@ -227,7 +226,6 @@ void KeMessageProcessClient::ReqestPlayFile(const char *file_name)
     pReqMsg->videoID = 0;
     pReqMsg->protocalType = 0;
     talk_base::strcpyn(pReqMsg->fileData,80,file_name);
-
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 
 }
@@ -244,7 +242,6 @@ void KeMessageProcessClient::OnTalkData(const char *data, int len)
     head->channelNo = 1;
     head->videoID = 0;
     memcpy(sendBuf.data() + sizeof(KERTStreamHead),data,len);
-
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 
 }
@@ -256,9 +253,9 @@ bool KeMessageProcessClient::StartVideoCut(const std::string &filename)
                    "record already started";
         return false;
     }
-    cutter_ = new RecorderAvi(this->peer_id(),videoInfo_.frameRate_,
-                             videoInfo_.frameType_);
-    bool ret = cutter_->StartRecord(filename);
+    cutter_ = new RecorderAvi(this->peer_id(),videoInfo_.frameRate,
+                             videoInfo_.frameResolution);
+    bool ret = cutter_->StartSave(filename);
     this->SignalRecvVideoData.connect(cutter_,&RecorderAvi::OnVideoData);
     this->SignalRecvAudioData.connect(cutter_,&RecorderAvi::OnAudioData);
     if(!ret){
@@ -277,7 +274,7 @@ bool KeMessageProcessClient::StopVideoCut()
     }
     this->SignalRecvVideoData.disconnect(cutter_);
     this->SignalRecvAudioData.disconnect(cutter_);
-    bool ret = cutter_->StopRecord();
+    bool ret = cutter_->StopSave();
     delete cutter_;
     cutter_ = NULL;
     return ret;
@@ -293,10 +290,16 @@ void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
         break;
     case KEMSG_TYPE_MEDIATRANS:
         break;
-    case KEMSG_TYPE_AUDIOSTREAM:
-    case KEMSG_TYPE_VIDEOSTREAM:{
-        RecvMediaData(msgData);
+    case KEMSG_TYPE_AUDIOSTREAM:{
+        RecvAudioData(msgData);
         break;
+    }
+    case KEMSG_TYPE_VIDEOSTREAM:{
+        RecvVideoData(msgData);
+        break;
+    }
+    case KEMSG_REQUEST_PLAY_FILE:{
+        RecvPlayFileResp(msgData);
     }
     case KEMSG_RecordPlayData:{
         OnRecvRecordMsg(msgData);
@@ -307,6 +310,23 @@ void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
         break;
     }
 
+}
+
+void KeMessageProcessClient::RecvVideoData(talk_base::Buffer &msgData)
+{
+    const int sendStartPos = 11;
+    int mediaDataLen = msgData.length() - sendStartPos;
+    SignalRecvVideoData(this->peer_id(),msgData.data() +
+                        sendStartPos,mediaDataLen);
+
+}
+
+void KeMessageProcessClient::RecvAudioData(talk_base::Buffer &msgData)
+{
+    const int sendStartPos = 11;
+    int mediaDataLen = msgData.length() - sendStartPos;
+    SignalRecvAudioData(this->peer_id(),msgData.data() +
+                        sendStartPos,mediaDataLen);
 }
 
 void KeMessageProcessClient::OnRecvRecordMsg(talk_base::Buffer &msgData)
@@ -328,27 +348,31 @@ void KeMessageProcessClient::OnRecvRecordMsg(talk_base::Buffer &msgData)
     }
 }
 
-void KeMessageProcessClient::RecvMediaData(talk_base::Buffer &msgData)
-{
-    KERTStreamHead * pMsg = (KERTStreamHead *)msgData.data();
-    const int sendStartPos = 11;
-    int mediaDataLen = msgData.length() - sendStartPos;
-    if(pMsg->msgType == KEMSG_TYPE_VIDEOSTREAM){
-        SignalRecvVideoData(this->peer_id(),msgData.data() +
-                            sendStartPos,mediaDataLen);
-    }else if(pMsg->msgType == KEMSG_TYPE_AUDIOSTREAM){
-        SignalRecvAudioData(this->peer_id(),msgData.data() +
-                            sendStartPos,mediaDataLen);
-    }
-}
 
 void KeMessageProcessClient::RecvAskMediaResp(talk_base::Buffer &msgData)
 {
     KEVideoServerResp * msg = (KEVideoServerResp *)msgData.data();
-    this->videoInfo_.frameRate_ = msg->frameRate;
-    this->videoInfo_.frameType_ = msg->frameType;
+    this->videoInfo_.frameRate = msg->frameRate;
+    this->videoInfo_.frameResolution = msg->frameType;
     LOG(INFO)<<"KeMessageProcessClient::RecvAskMediaResp---"<<
                msg->frameRate<<msg->frameType;
+}
+
+void KeMessageProcessClient::RecvPlayFileResp(talk_base::Buffer &msgData)
+{
+    KEPlayRecordFileResp *msg = (KEPlayRecordFileResp*)msgData.data();
+    LOG(INFO)<<"KeMessageProcessClient::RecvPlayFileResp---"<<msg->resp;
+    if(msg->resp == 5){
+        LOG(INFO)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
+                      "start playback";
+
+    }else if(msg->resp == 4){
+        LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
+                      "file error";
+    }else{
+        LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
+                      "message error";
+    }
 }
 
 }

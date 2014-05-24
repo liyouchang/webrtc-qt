@@ -3,9 +3,10 @@
 #include "talk/base/json.h"
 #include "talk/base/logging.h"
 #include "talk/base/timeutils.h"
-
+#include "talk/base/stringutils.h"
 #include "KeMessage.h"
 #include "defaults.h"
+#include "recorderavi.h"
 
 namespace kaerp2p{
 
@@ -37,7 +38,7 @@ void KeTunnelCamera::OnRecvRecordQuery( std::string peer_id,
 
 void KeTunnelCamera::SetPtz(std::string ptz_key, int param)
 {
-    LOG(INFO)<<"KeTunnelCamera::SetPtz---key:" <<ptz_key<<" param:"<<param ;
+    LOG(INFO)<<"KeTunnelCamera::SetPtz---key:" <<ptz_key<<" param:"<<param;
 }
 
 void KeTunnelCamera::RecvGetWifiInfo(std::string peer_id)
@@ -163,20 +164,16 @@ void KeMessageProcessCamera::OnMessageRespond(talk_base::Buffer &msgData)
         KeMsgProcess::OnMessageRespond(msgData);
         break;
     }
-
 }
 
 void KeMessageProcessCamera::RecvAskMediaReq(talk_base::Buffer &msgData)
 {
     //send stream
     KEVideoServerReq * msg = (KEVideoServerReq *)msgData.data();
-
     LOG(INFO)<< "KeMessageProcessCamera::RecvAskMediaMsg---"
              <<"receive ask media msg : video-"<<msg->video<<
                " listen-"<<msg->listen<<" talk-"<<msg->talk;
     ConnectMedia(msg->video,msg->listen,msg->talk);
-
-
 }
 
 void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
@@ -184,7 +181,19 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
     KEPlayRecordFileReq * pMsg =
             reinterpret_cast<KEPlayRecordFileReq *>(msgData.data());
     LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile--"<<pMsg->fileData;
-    this->SignalToPlayFile(this->peer_id(),pMsg->fileData);
+    int resp = 5;
+    std::string fileName = pMsg->fileData;
+    RecordReaderAvi * reader = new RecordReaderAvi(1);
+    if(!reader->StartRead(fileName)){
+        delete reader;
+        resp = 4;
+        RespPlayFileReq(resp,fileName.c_str());
+    }
+    this->recordInfo.frameRate = reader->frameRate;
+    this->recordInfo.frameResolution = reader->frameResolution;
+    reader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnRecordData);
+    reader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnRecordData);
+    RespPlayFileReq(resp,fileName.c_str());
 }
 
 void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
@@ -213,18 +222,34 @@ void KeMessageProcessCamera::RespAskMediaReq(const VideoInfo &info)
     msg->videoID = 0;
     msg->channelNo = 1;
     msg->respType = RESP_ACK;
-    msg->frameRate = info.frameRate_;
-    msg->frameType = info.frameType_;
+    msg->frameRate = info.frameRate;
+    msg->frameType = info.frameResolution;
 
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+}
+
+void KeMessageProcessCamera::RespPlayFileReq(int resp,const char * fileName)
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KEPlayRecordFileResp);
+    sendBuf.SetLength(msgLen);
+    KEPlayRecordFileResp * msg = (KEPlayRecordFileResp *)sendBuf.data();
+    msg->protocal = PROTOCOL_HEAD;
+    msg->msgType = KEMSG_REQUEST_PLAY_FILE;
+    msg->msgLength = msgLen;
+    msg->videoID = 0;
+    msg->channelNo = 1;
+    msg->resp = resp;
+    msg->frameRate = this->recordInfo.frameRate;
+    msg->frameResolution = this->recordInfo.frameResolution;
+    talk_base::strcpyn(msg->fileName,80,fileName);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
 void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
 {
     KeTunnelCamera * camera = static_cast<KeTunnelCamera *>(container_);
-
     camera->GetCameraVideoInfo(video,&this->videoInfo_);
-
     if(video == 0){//stop
         camera->SignalVideoData1.disconnect(this);
         camera->SignalVideoData2.disconnect(this);
@@ -232,7 +257,6 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
     }
     else if(!video_started_){
         this->RespAskMediaReq(this->videoInfo_);
-
         video_started_ = true;
         if(video == 1){
             camera->SignalVideoData1.connect(
@@ -255,7 +279,6 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
     if(talk == 0){
         this->SignalRecvTalkData.disconnect(camera);
         this->talk_started_ = false;
-
     }else if(!talk_started_){
         this->SignalRecvTalkData.connect(camera,&KeTunnelCamera::OnRecvTalkData);
         this->talk_started_ = true;
@@ -282,15 +305,13 @@ void KeMessageProcessCamera::OnVideoData(const char *data, int len)
     int ams = talk_base::Time();
     frameHead.second = ams/1000;
     frameHead.millisecond = (ams%1000)/10;
-    frameHead.frameType = this->videoInfo_.frameType_;
+    frameHead.frameType = this->videoInfo_.frameResolution;
     frameHead.frameLen = len;
     sendBuf.AppendData(&frameHead,sizeof(KEFrameHead));
 
     sendBuf.AppendData(data,len);
 
-
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
-
 }
 
 void KeMessageProcessCamera::OnAudioData(const char *data, int len)
@@ -318,12 +339,50 @@ void KeMessageProcessCamera::OnAudioData(const char *data, int len)
     frameHead.frameType = 80;//audio type
     frameHead.frameLen = len+4;
     sendBuf.AppendData(&frameHead,sizeof(KEFrameHead));
-
     sendBuf.AppendData(kNalhead,kNalHeadLen);
     sendBuf.AppendData(data,len);
-
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+}
 
+void KeMessageProcessCamera::OnRecordData(const char *data, int len)
+{
+    const int kNalHeadLen = 4;
+    const char kNalhead[kNalHeadLen] = {0,0,0,1};
+    int frameType  = 80;
+    if(data[0]==kNalhead[0] && data[1] ==kNalhead[0] &&
+            data[2] == kNalhead[0] && data[3] == kNalhead[1]){
+        frameType = this->recordInfo.frameResolution;
+    }
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KERTStreamHead)+sizeof(KEFrameHead)+kNalHeadLen+len;
+    KERTStreamHead streamHead;
+    streamHead.protocal = PROTOCOL_HEAD;
+    streamHead.msgType = KEMSG_RecordPlayData;
+    streamHead.msgLength = msgLen;
+    streamHead.channelNo = 1;
+    streamHead.videoID = 0;
+    sendBuf.AppendData(&streamHead,sizeof(KERTStreamHead));
+
+    KEFrameHead frameHead;
+    int ams = talk_base::Time();
+    frameHead.second = ams/1000;
+    frameHead.millisecond = (ams%1000)/10;
+    frameHead.frameType = frameType;
+    if(frameType == 80){
+        frameHead.frameNo = 0;
+        frameHead.piecesNo = 0;
+        frameHead.frameLen = len+4;
+        sendBuf.AppendData(&frameHead,sizeof(KEFrameHead));
+        sendBuf.AppendData(kNalhead,kNalHeadLen);
+    }else{
+        static unsigned short frameNo = 0;
+        frameHead.frameNo = frameNo++;
+        frameHead.piecesNo = 1;
+        frameHead.frameLen = len;
+        sendBuf.AppendData(&frameHead,sizeof(KEFrameHead));
+    }
+    sendBuf.AppendData(data,len);
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
 }
