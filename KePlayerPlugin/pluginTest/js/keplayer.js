@@ -96,3 +96,9 @@ function StartCut(){
     var retStr = kePlayerObj.StartCut(g_peer_id);
     g_infoDiv.textContent = retStr;
 }
+
+function GetLocalDirPath(){
+    var retStr = kePlayerObj.GetLocalPath();
+    g_infoDiv.textContent = retStr;
+
+}

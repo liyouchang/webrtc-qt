@@ -54,8 +54,9 @@ public slots:
     void about();
     void SetDivision(int num);
     int PlayLocalFile();
-    int GetLocalPlayPos();
-    void SetLocalPlayPos();
+    QString GetLocalPath(void);
+    //int GetLocalPlayPos();
+    //void SetLocalPlayPos();
 
     int Initialize(QString routerUrl);
     int OpenTunnel(QString peer_id);

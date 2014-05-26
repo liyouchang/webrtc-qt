@@ -45,6 +45,7 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
 
 KePlayerPlugin::~KePlayerPlugin()
 {
+    myconfig->setValue("plugin/save_path",savePath());
     qDebug()<<"KePlayerPlugin::~KePlayerPlugin";
 }
 
@@ -70,6 +71,13 @@ int KePlayerPlugin::PlayLocalFile()
         this->video_wall_->PlayLocalFile("",filename,0);
     }
     return 0;
+}
+
+QString KePlayerPlugin::GetLocalPath()
+{
+    return QFileDialog::getExistingDirectory(this,"选择路径",savePath(),
+                                             QFileDialog::ShowDirsOnly
+                                      | QFileDialog::DontResolveSymlinks);
 }
 
 int KePlayerPlugin::Initialize(QString routerUrl)
@@ -271,6 +279,10 @@ int KePlayerPlugin::StopPlayFile(QString peer_id)
 
 void KePlayerPlugin::setSavePath(const QString &path)
 {
+    qDebug()<<"KePlayerPlugin::setSavePath---path:"<<path;
+    if(path.isEmpty()){
+        return;
+    }
     this->m_savePath = path;
 }
 
