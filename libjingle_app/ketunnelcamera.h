@@ -5,13 +5,12 @@
 
 namespace kaerp2p{
 
+class RecordReaderInterface;
 
-
-
-class KeTunnelCamera:public KeMsgProcessContainer{
+class KeTunnelCamera:public KeMsgProcessContainer
+{
     friend class KeMessageProcessCamera;
 public:
-
     virtual void OnTunnelOpened(PeerTerminalInterface * t,
                                 const std::string & peer_id);
     virtual void OnRouterMessage(const std::string &peer_id,
@@ -23,7 +22,6 @@ public:
 protected:
     sigslot::signal2<const char *, int> SignalVideoData1;
     sigslot::signal2<const char *, int> SignalVideoData2;
-
     sigslot::signal2<const char *, int > SignalAudioData;
     virtual void OnRecvVideoClarity(std::string peer_id,int clarity);
     virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
@@ -33,9 +31,7 @@ protected:
                               const std::string &filename);
     virtual void OnRecvTalkData(const std::string & peer_id,
                                 const char * data,int len);
-
 };
-
 
 
 class KeMessageProcessCamera: public KeMsgProcess
@@ -45,6 +41,7 @@ public:
     void OnVideoData(const char *data, int len);
     void OnAudioData(const char * data,int len);
     void OnRecordData(const char * data,int len);
+    void OnRecordReadEnd(RecordReaderInterface *reader);
     sigslot::signal3<const std::string &,const char *,int > SignalRecvTalkData;
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);

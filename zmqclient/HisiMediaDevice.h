@@ -12,7 +12,7 @@ namespace talk_base {
 class KaerCameraProcess : public kaerp2p::KeMessageProcessCamera
 {
 public:
-    KaerCameraProcess(std::string peerId, KeTunnelCamera * container);
+    KaerCameraProcess(std::string peerId, kaerp2p::KeTunnelCamera * container);
 };
 
 

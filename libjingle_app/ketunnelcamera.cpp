@@ -57,12 +57,10 @@ void KeTunnelCamera::OnToPlayFile(const std::string &peer_id,
 {
     LOG(INFO) << "KeTunnelCamera::OnToPlayFile --- "
               <<peer_id<<" file name "<<filename ;
-
 }
 
 void KeTunnelCamera::OnRecvTalkData(const std::string &peer_id, const char *data, int len)
 {
-
 }
 
 void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
@@ -113,9 +111,7 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
     else{
         LOG(WARNING)<<"receive unexpected command from "<<
                       peer_id<< " msg"<<msg;
-
     }
-
 }
 
 void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
@@ -131,7 +127,6 @@ void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
         Json::StyledWriter writer;
         std::string msg = writer.write(jmessage);
         this->terminal_->SendByRouter(peer_id,msg);
-
     }else{
         this->SetVideoClarity(clarity);
     }
@@ -143,7 +138,6 @@ KeMessageProcessCamera::KeMessageProcessCamera(std::string peer_id,
     KeMsgProcess(peer_id,container),video_started_(false),audio_started_(false),
     talk_started_(false)
 {
-
 }
 
 
@@ -193,6 +187,7 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
     this->recordInfo.frameResolution = reader->frameResolution;
     reader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnRecordData);
     reader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnRecordData);
+    reader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
     RespPlayFileReq(resp,fileName.c_str());
 }
 
@@ -201,10 +196,10 @@ void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
     KERTStreamHead * pMsg = (KERTStreamHead *)msgData.data();
     const int sendStartPos = 11;
     int mediaDataLen = msgData.length() - sendStartPos;
-    if(pMsg->msgType == KEMSG_TYPE_AUDIOSTREAM){
+    if( pMsg->msgType == KEMSG_TYPE_AUDIOSTREAM ) {
         SignalRecvTalkData(this->peer_id(),msgData.data() +
                            sendStartPos,mediaDataLen);
-    }else{
+    } else {
         LOG(WARNING)<<"KeMessageProcessCamera::RecvTalkData---"<<
                       "message type error";
     }
@@ -224,7 +219,6 @@ void KeMessageProcessCamera::RespAskMediaReq(const VideoInfo &info)
     msg->respType = RESP_ACK;
     msg->frameRate = info.frameRate;
     msg->frameType = info.frameResolution;
-
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
@@ -296,7 +290,6 @@ void KeMessageProcessCamera::OnVideoData(const char *data, int len)
     streamHead.channelNo = 1;
     streamHead.videoID = 0;
     sendBuf.AppendData(&streamHead,sizeof(KERTStreamHead));
-
     static unsigned short frameNo = 0;
     KEFrameHead frameHead;
     frameHead.frameNo = frameNo++;
@@ -308,9 +301,7 @@ void KeMessageProcessCamera::OnVideoData(const char *data, int len)
     frameHead.frameType = this->videoInfo_.frameResolution;
     frameHead.frameLen = len;
     sendBuf.AppendData(&frameHead,sizeof(KEFrameHead));
-
     sendBuf.AppendData(data,len);
-
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
@@ -318,7 +309,6 @@ void KeMessageProcessCamera::OnAudioData(const char *data, int len)
 {
     const int kNalHeadLen = 4;
     const char kNalhead[kNalHeadLen] = {0,0,0,1};
-
     talk_base::Buffer sendBuf;
     int msgLen = sizeof(KERTStreamHead)+sizeof(KEFrameHead)+kNalHeadLen+len;
     KERTStreamHead streamHead;
@@ -328,7 +318,6 @@ void KeMessageProcessCamera::OnAudioData(const char *data, int len)
     streamHead.channelNo = 1;
     streamHead.videoID = 0;
     sendBuf.AppendData(&streamHead,sizeof(KERTStreamHead));
-
     KEFrameHead frameHead;
     frameHead.frameNo = 0;
     frameHead.piecesNo = 0;
@@ -362,7 +351,6 @@ void KeMessageProcessCamera::OnRecordData(const char *data, int len)
     streamHead.channelNo = 1;
     streamHead.videoID = 0;
     sendBuf.AppendData(&streamHead,sizeof(KERTStreamHead));
-
     KEFrameHead frameHead;
     int ams = talk_base::Time();
     frameHead.second = ams/1000;
@@ -383,6 +371,12 @@ void KeMessageProcessCamera::OnRecordData(const char *data, int len)
     }
     sendBuf.AppendData(data,len);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+}
+
+void KeMessageProcessCamera::OnRecordReadEnd(RecordReaderInterface *reader)
+{
+    reader->StopRead();
+    delete reader;
 }
 
 }

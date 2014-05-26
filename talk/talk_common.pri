@@ -27,7 +27,7 @@ Release {
 linux {
     DEFINES += POSIX LINUX
     output_dir = $$PWD/../out
-
+    DESTDIR = $$output_dir/libs
 }
 
 arm {

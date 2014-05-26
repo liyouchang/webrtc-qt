@@ -41,6 +41,7 @@ typedef struct
 	int u32Enc;
 	int u32Mode;
 }t_WIFI_PARAM,*pt_WIFI_PARAM;
+
 typedef struct
 {
 	char sSsID[32];

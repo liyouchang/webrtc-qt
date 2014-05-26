@@ -10,6 +10,7 @@
 #include "talk/base/stringencode.h"
 
 #include "keapi/keapi.h"
+
 #include "libjingle_app/KeMessage.h"
 #include "libjingle_app/KeMsgProcess.h"
 #include "libjingle_app/jsonconfig.h"
@@ -197,16 +198,13 @@ void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
     GetIntFromJsonObject(jparam,"mode",&wifiParam.u32Mode);
     LOG(INFO)<<"Raycomm_SetWifi --- param key "<<wifiParam.sKey;
     int ret = Raycomm_SetWifi(&wifiParam);
-
     LOG(INFO)<<"Raycomm_SetWifi --- ret:"<<ret<<" param:"<<param;
-
     Json::Value jmessage;
     jmessage["type"] = "tunnel";
     jmessage["command"] = "set_wifi";
     jmessage["result"] = ret;
     Json::StyledWriter writer;
     std::string msg = writer.write(jmessage);
-
     this->terminal_->SendByRouter(peerId,msg);
 }
 
@@ -220,7 +218,7 @@ void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string conditi
 
     Json::Reader reader;
     Json::Value jcondition;
-    if (!reader.parse(msg, jcondition)) {
+    if (!reader.parse(condition, jcondition)) {
         LOG(WARNING) << "Received unknown message. " << condition;
         totalNum = -1;
     }else{
@@ -230,8 +228,9 @@ void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string conditi
         int offset,toQuery;
         GetIntFromJsonObject(jcondition,"offset",&offset);
         GetIntFromJsonObject(jcondition,"toQuery",&toQuery);
-        totalNum = Raycomm_QueryNVR(startTime.c_str(),endTime.c_str(),
-                                    videoRecordList,offset,toQuery);
+        totalNum = Raycomm_QueryNVR(
+                    (char *)startTime.c_str(),(char *)endTime.c_str(),
+                    videoRecordList,offset,toQuery);
     }
     Json::StyledWriter writer;
     Json::Value jmessage;
@@ -239,8 +238,13 @@ void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string conditi
     jmessage["command"] = "query_record";
     jmessage["condition"] = jcondition;
     jmessage["totalNum"] = totalNum;
-    Json::Value jrecord;
-    jmessage["recordList"].append(jrecord);
+    for(int i = 0;i < videoRecordList->file_num;i++){
+        Json::Value jrecord;
+        jrecord["fileName"] = videoRecordList->rec_file[i].path;
+        jrecord["fileDate"] = videoRecordList->rec_file[i].date;
+        jrecord["fileSize"] = videoRecordList->rec_file[i].size;
+        jmessage["recordList"].append(jrecord);
+    }
     std::string msg = writer.write(jmessage);
     this->terminal_->SendByRouter(peer_id,msg);
 
@@ -349,13 +353,6 @@ void HisiMediaDevice::SetVideoResolution(std::string r)
     command+="=";
     command+=r;
     Raycomm_SetParam((char*)command.c_str(),0);
-
-    //    talk_base::Thread::SleepMs(2000);
-
-    //    GetVideoFrameType();
-    //    LOG(INFO)<<"HisiMediaDevice::SetVideoResolution ---" << command
-    //            << ";vidoe type now is "<<video_frame_type_;
-
 }
 
 int HisiMediaDevice::GetVideoFrameType(int level)
@@ -450,9 +447,7 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
     //TODO: to signal alarm message
     LOG(INFO)<<"AlarmNotify::NotifyCallBack--- chn:"<<chn<<
                " rea:"<<rea<<" io:"<<io;
-
     std::ostringstream infostream;
-
     infostream<<"通道"<<chn;
     if(rea == 1){
         infostream<<" 移动侦测";
@@ -476,12 +471,11 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
 
     AlarmNotify::Instance()->SignalTerminalAlarm(rea,infostream.str(),"");
     return 0;
-
 }
 
 
 KaerCameraProcess::KaerCameraProcess(std::string peerId,
-                                     KeTunnelCamera *container):
+                                     kaerp2p::KeTunnelCamera *container):
     kaerp2p::KeMessageProcessCamera(peerId,container)
 {
 

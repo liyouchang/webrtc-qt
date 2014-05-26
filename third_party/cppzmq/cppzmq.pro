@@ -8,7 +8,7 @@ QT       -= core gui
 
 TARGET = cppzmq
 TEMPLATE = lib
-CONFIG += staticlib
+#CONFIG += staticlib
 
 
 
