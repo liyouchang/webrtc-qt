@@ -445,7 +445,7 @@ void AlarmNotify::StartNotify()
 int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
 {
     //TODO: to signal alarm message
-    LOG(INFO)<<"AlarmNotify::NotifyCallBack--- chn:"<<chn<<
+    LOG(INFO)<<"AlarmNotify::NotifyCallBack---chn:"<<chn<<
                " rea:"<<rea<<" io:"<<io;
     std::ostringstream infostream;
     infostream<<"通道"<<chn;
@@ -471,6 +471,10 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
 
     AlarmNotify::Instance()->SignalTerminalAlarm(rea,infostream.str(),"");
     return 0;
+}
+//count 0 no pic 1, one pic
+int AlarmNotify::NotifyJPGCallBack(int count, const char *data, int len)
+{
 }
 
 

@@ -77,6 +77,7 @@ public:
         return &notify;
     }
     static int NotifyCallBack(int chn,int rea,int io);
+    static int NotifyJPGCallBack(int count,const char * data,int len);
 };
 
 #endif // HISIMEDIADEVICE_H
