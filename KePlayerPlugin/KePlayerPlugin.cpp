@@ -58,7 +58,7 @@ void KePlayerPlugin::SetDivision(int num)
 int KePlayerPlugin::PlayLocalFile()
 {
     QString filename = QFileDialog::getOpenFileName(
-                this,"Open Video File",QDir::currentPath(),
+                this,"Open Video File",savePath(),
                 "Video files (*.h264 *.264);;All files(*.*)");
     if (!filename.isNull()) {
         qDebug()<<QDir::currentPath();
@@ -227,11 +227,12 @@ int KePlayerPlugin::PlayRecordFiles(QString peerId, QString jstrRecordArray)
     QDir fileDir(savePath());
     fileDir.mkdir("RemoteFiles");
     fileDir.cd("RemoteFiles");
-    QString saveFilePath = QString("%1_%2.%3").
-        arg(peerId.left(12)).arg(fileDate).arg("h264");
+    QString saveFilePath = fileDir.filePath(QString("%1_%2.%3").
+        arg(peerId.left(12)).arg(fileDate).arg("h264"));
 
     bool result = tunnel_->DownloadRemoteFile(
-                strId,remoteFileName,saveFilePath.toLocal8Bit().constData());
+                strId,remoteFileName,saveFilePath.toLocal8Bit().constData(),
+                fileSize/10);
     if(!result){
         qWarning() << "tunnel DownloadRemoteFile error ";
         return 10005;

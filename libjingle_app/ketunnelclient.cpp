@@ -4,6 +4,8 @@
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
 
+#include <limits>
+
 #include "KeMessage.h"
 #include "defaults.h"
 #include "recorderavi.h"
@@ -89,7 +91,7 @@ bool KeTunnelClient::StopPeerVideoCut(const std::string &peer_id)
 
 bool KeTunnelClient::DownloadRemoteFile(std::string peerId,
                                         std::string remoteFileName,
-                                        std::string saveFileName)
+                                        std::string saveFileName,int playSize)
 {
     KeMessageProcessClient * process =
             dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peerId));
@@ -98,7 +100,8 @@ bool KeTunnelClient::DownloadRemoteFile(std::string peerId,
         return false;
     }
 
-    return  process->ReqestPlayFile(remoteFileName.c_str(),saveFileName.c_str());
+    return  process->ReqestPlayFile(
+                remoteFileName.c_str(),saveFileName.c_str(),playSize);
 }
 
 
@@ -176,7 +179,7 @@ void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
 
 KeMessageProcessClient::KeMessageProcessClient(std::string peer_id,
                                                KeTunnelClient * container):
-    KeMsgProcess(peer_id,container),recordSaver(NULL)
+    KeMsgProcess(peer_id,container),recordSaver(NULL),shouldPlaySize(INT_MAX)
 {
 
 }
@@ -209,8 +212,11 @@ void KeMessageProcessClient::AskVideo(int video, int listen, int talk)
 
 }
 
-bool KeMessageProcessClient::ReqestPlayFile(const char *remoteFile, const char *saveFile)
+bool KeMessageProcessClient::ReqestPlayFile(const char *remoteFile,
+                                            const char *saveFile,int playSize)
 {
+    LOG(INFO)<<"KeMessageProcessClient::ReqestPlayFile---"<<
+               "shouldplaySize="<<playSize;
     if(recordSaver){
         LOG(WARNING)<<"KeMessageProcessClient::ReqestPlayFile---"<<
                       "already start record";
@@ -222,6 +228,7 @@ bool KeMessageProcessClient::ReqestPlayFile(const char *remoteFile, const char *
                       "file start save error";
         return false;
     }
+    shouldPlaySize = playSize;
 
     talk_base::Buffer sendBuf;
     int msgLen = sizeof(KEPlayRecordFileReq);
@@ -310,6 +317,7 @@ void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
     }
     case KEMSG_REQUEST_PLAY_FILE:{
         RecvPlayFileResp(msgData);
+        break;
     }
     case KEMSG_RecordPlayData:{
         OnRecvRecordMsg(msgData);
@@ -342,18 +350,24 @@ void KeMessageProcessClient::RecvAudioData(talk_base::Buffer &msgData)
 void KeMessageProcessClient::OnRecvRecordMsg(talk_base::Buffer &msgData)
 {
     KEPlayRecordDataHead * phead = (KEPlayRecordDataHead *)msgData.data();
+
     KeTunnelClient *client  = static_cast< KeTunnelClient *>(container_);
 
     if(phead->resp == RESP_ACK){
         const int data_pos = sizeof(KEPlayRecordDataHead);
         int mediaDataLen = msgData.length() - data_pos;
-        //LOG(INFO)<<"KeMessageProcessClient::OnRecvRecordMsg---mediaLen="<<mediaDataLen;
-        recordSaver->OnVideoData(this->peer_id(),msgData.data()+data_pos,mediaDataLen);
-        //        client->OnRecordFileData(
-        //                    this->peer_id(),msgData.data()+data_pos,mediaDataLen);
-    }else if(phead->resp == RESP_END){
+        recordSaver->OnVideoData(
+                    this->peer_id(),msgData.data()+data_pos,mediaDataLen);
+
+        if(recordSaver->savedSize > this->shouldPlaySize){
+            shouldPlaySize = INT_MAX;
+            client->OnRecordStatus(this->peer_id(),kShouldPlay);
+
+        }
+    }
+    else if(phead->resp == RESP_END){
         LOG(INFO)<<"KeMessageProcessClient::OnRecvRecordMsg---end";
-        client->OnRecordStatus(this->peer_id(),6);
+        client->OnRecordStatus(this->peer_id(),kDownloadEnd);
         recordSaver->StopSave();
         delete recordSaver;
         recordSaver = NULL;
@@ -382,19 +396,23 @@ void KeMessageProcessClient::RecvPlayFileResp(talk_base::Buffer &msgData)
                    "start playback";
         if(!recordSaver){
             LOG(WARNING)<<"record saver not init";
+            client->OnRecordStatus(this->peer_id(),kRecordSaverError);
             return;
         }
-        client->OnRecordStatus(this->peer_id(),13);
-
+        client->OnRecordStatus(this->peer_id(),kRequestSuccess);
+        return;
     }else if(msg->resp == RESP_NAK){
         LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
                       "file error";
-        client->OnRecordStatus(this->peer_id(),5);
+        client->OnRecordStatus(this->peer_id(),kRequestFileError);
     }else{
         LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
                       "message error";
-        client->OnRecordStatus(this->peer_id(),5);
+        client->OnRecordStatus(this->peer_id(),kRequestMsgError);
     }
+    recordSaver->StopSave();
+    delete recordSaver;
+    recordSaver = NULL;
 }
 
 }

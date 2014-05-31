@@ -28,9 +28,11 @@ void KeQtTunnelClient::OnRecordFileData(const std::string &peer_id, const char *
     emit SigRecordFileData(peer_id.c_str(),mediaData);
 
 }
-//status --- 13 :start,6:stop,5,error
+
 void KeQtTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
 {
+    qDebug()<<"KeTunnelClient::OnRecordStatus---"<<peer_id.c_str()<<" status "<<status;
+
     emit SigRecordStatus(peer_id.c_str(),status);
 }
 

@@ -15,7 +15,7 @@ void KeTunnelCamera::OnTunnelOpened(PeerTerminalInterface *t,
                                     const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
-    LOG(INFO)<<__FUNCTION__<<"---------"<<peer_id;
+    LOG(INFO)<<"KeTunnelCamera::OnTunnelOpened"<<"---"<<peer_id;
     KeMessageProcessCamera *process = new KeMessageProcessCamera(peer_id,this);
     this->AddMsgProcess(process);
 }

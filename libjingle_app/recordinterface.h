@@ -25,13 +25,13 @@ protected:
 class RecordSaverInterface: public sigslot::has_slots<>
 {
 public:
-   virtual bool StartSave(const std::string & fileName) = 0;
-   virtual bool StopSave() = 0;
-   virtual void OnVideoData(const std::string & peerId,const char *data,int len) =0;
-   virtual void OnAudioData(const std::string & peerId,const char *data,int len) =0;
-
+    virtual bool StartSave(const std::string & fileName) = 0;
+    virtual bool StopSave() = 0;
+    virtual void OnVideoData(const std::string & peerId,const char *data,int len) =0;
+    virtual void OnAudioData(const std::string & peerId,const char *data,int len) =0;
+    int savedSize;
 protected:
-    RecordSaverInterface(){}
+    RecordSaverInterface():savedSize(0){}
 
 };
 

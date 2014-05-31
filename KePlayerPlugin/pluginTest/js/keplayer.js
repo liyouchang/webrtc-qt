@@ -15,6 +15,10 @@ function load(){
     kePlayerObj.RecvPeerMsg = function (peer,msg){
         infoDiv.textContent = "RecvPeerMsg "+ peer + " msg "+ msg;
     }
+    kePlayerObj.RecordStatus = function(peer,status){
+        infoDiv.textContent = "RecordStatus "+ peer + " status-"+ status;
+    }
+
     kePlayerObj.Initialize(routerUrl.value);
     eventFunction();
 }
@@ -34,6 +38,9 @@ var eventFunction = function(){
     }
     function kePlayerObj::RecvPeerMsg(peer,msg) {
         kePlayerObj.RecvPeerMsg(peer,msg);
+    }
+    function kePlayerObj::RecordStatus(peer,status){
+        kePlayerObj.RecordStatus(peer,status);
     }
 };
 
