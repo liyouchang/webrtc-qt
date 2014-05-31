@@ -85,7 +85,8 @@ bool Ke08RecordReader::StartRead(const std::string &filename)
 
 bool Ke08RecordReader::StopRead()
 {
-    return false;
+    media_thread_->Clear(this);
+    return true;
 }
 
 void Ke08RecordReader::SendMediaMsg(const char *data, int len)

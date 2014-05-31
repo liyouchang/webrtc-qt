@@ -57,7 +57,6 @@ private:
     bool video_started_;
     bool audio_started_;
     bool talk_started_;
-    VideoInfo recordInfo;
     RecordReaderInterface *recordReader;
 
 };

@@ -149,7 +149,9 @@ KeMessageProcessCamera::KeMessageProcessCamera(std::string peer_id,
 KeMessageProcessCamera::~KeMessageProcessCamera()
 {
     if(recordReader != NULL){
-        OnRecordReadEnd(this->recordReader);
+        recordReader->StopRead();
+        delete recordReader;
+        recordReader = NULL;
     }
 }
 
@@ -358,9 +360,9 @@ void KeMessageProcessCamera::OnRecordData(const char *data, int len)
     const char kNalhead[kNalHeadLen] = {0,0,0,1};
     int frameType  = 80;
     int msgLen = sizeof(KEPlayRecordDataHead)+sizeof(KEFrameHead)+kNalHeadLen+len;
-    if(data[0]==kNalhead[0] && data[1] ==kNalhead[0] &&
-            data[2] == kNalhead[0] && data[3] == kNalhead[1]){ // video data
-        frameType = this->recordInfo.frameResolution;
+    if(data[0]==kNalhead[0] && data[1] ==kNalhead[1] &&
+            data[2] == kNalhead[2] && data[3] == kNalhead[3]){ // video data
+        frameType = this->recordReader->recordInfo.frameResolution;
         msgLen = sizeof(KEPlayRecordDataHead)+sizeof(KEFrameHead)+len;
     }
     talk_base::Buffer sendBuf;
