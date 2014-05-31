@@ -39,7 +39,9 @@ static const char kSoftware[] = "libjingle TurnServer";
 class TurnFileAuth : public cricket::TurnAuthInterface {
  public:
   explicit TurnFileAuth(const std::string& path) : file_(path) {
-    file_.Load();
+    if(!file_.Load()){
+        std::cerr<<"file load error "<<path<<std::endl;
+    }
   }
   virtual bool GetKey(const std::string& username, const std::string& realm,
                       std::string* key) {
@@ -51,6 +53,8 @@ class TurnFileAuth : public cricket::TurnAuthInterface {
       char buf[32];
       size_t len = talk_base::hex_decode(buf, sizeof(buf), hex);
       *key = std::string(buf, len);
+    }else{
+         std::cerr<<"Get name value error"<<std::endl;
     }
     return ret;
   }
