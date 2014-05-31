@@ -12,6 +12,7 @@
 
 #include "PeerTerminalInterface.h"
 #include "PeerConnectionClinetInterface.h"
+#include "defaults.h"
 
 namespace talk_base {
 class Thread;
@@ -22,10 +23,7 @@ namespace kaerp2p{
 
 class KeMsgProcessContainer;
 
-struct VideoInfo{
-    int frameRate;
-    int frameResolution;//a enumirate of FrameResolutionType
-};
+
 
 struct RecordInfo{
     char fileName[80];

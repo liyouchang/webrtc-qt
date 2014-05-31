@@ -38,6 +38,7 @@ class KeMessageProcessCamera: public KeMsgProcess
 {
 public:
     KeMessageProcessCamera(std::string peer_id,KeTunnelCamera * container);
+    virtual ~KeMessageProcessCamera();
     void OnVideoData(const char *data, int len);
     void OnAudioData(const char * data,int len);
     void OnRecordData(const char * data,int len);
@@ -57,6 +58,7 @@ private:
     bool audio_started_;
     bool talk_started_;
     VideoInfo recordInfo;
+    RecordReaderInterface *recordReader;
 
 };
 

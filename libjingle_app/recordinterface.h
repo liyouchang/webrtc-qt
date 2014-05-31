@@ -3,7 +3,8 @@
 
 #include <string>
 #include "talk/base/sigslot.h"
-
+#include "KeMsgProcess.h"
+#include "defaults.h"
 
 namespace  kaerp2p {
 
@@ -15,6 +16,7 @@ public:
     sigslot::signal1<RecordReaderInterface *> SignalRecordEnd;
     sigslot::signal2<const char *,int> SignalVideoData;
     sigslot::signal2<const char *,int> SignalAudioData;
+    VideoInfo recordInfo;
 protected:
     RecordReaderInterface(){}
 };

@@ -40,7 +40,6 @@ int main()
     std::string serversStr  = JsonValueToString(jservers);
     kaerp2p::P2PConductor::AddIceServers(serversStr);
 
-
     std::string strDealerId;
     std::string strMac;
     GetStringFromJson(mac_value,&strMac);
