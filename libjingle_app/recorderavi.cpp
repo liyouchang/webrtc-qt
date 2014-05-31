@@ -522,7 +522,7 @@ void RecordReaderAvi::OnMessage(talk_base::Message *msg)
             return ;
         }
         SignalAudioData(moviBuf.get(),moviLen);
-        readThread->PostDelayed(20,this);
+        readThread->PostDelayed(audioFrameInterval,this);
     }else{
         LOG(INFO)<<"Read record end with no data";
         SignalRecordEnd(this);
@@ -552,10 +552,11 @@ bool RecordReaderAvi::StartRead(const std::string &filename)
     MainAVIHeader avih;
     aviFile_->SetPosition(kAVIHeaderPos);
     aviFile_->Read(&avih,sizeof(MainAVIHeader),NULL,NULL);
-    this->frameResolution = WH2Resolution(avih.dwWidth,avih.dwHeight);
-    this->frameRate = 1000000/avih.dwMicroSecPerFrame;
+    this->recordInfo.frameResolution = WH2Resolution(avih.dwWidth,avih.dwHeight);
+    this->recordInfo.frameRate = 1000000/avih.dwMicroSecPerFrame;
     LOG(INFO)<<"RecordReaderAvi::StartRead---The frame resolution is "<<
-               this->frameResolution << " frame rate is "<< this->frameRate;
+               this->recordInfo.frameResolution << " frame rate is "<<
+               this->recordInfo.frameRate;
 
     filePos += 4 + listLen + 8;
     aviFile_->SetPosition(filePos);

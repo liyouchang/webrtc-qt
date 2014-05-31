@@ -66,6 +66,7 @@ void KeTunnelCamera::OnRecvTalkData(const std::string &peer_id, const char *data
 void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
                                      const std::string &msg)
 {
+    LOG(INFO)<<"KeTunnelCamera::OnRouterMessage---" << msg;
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(msg, jmessage)) {
@@ -91,8 +92,13 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
         ptz_key += ptz_control;
         this->SetPtz(ptz_key,param);
     }else if(command.compare("query_record") == 0){
-        std::string condition;
-        GetStringFromJsonObject(jmessage,"condition",&condition);
+        Json::Value jcondition;
+        if(!GetValueFromJsonObject(jmessage, "condition", &jcondition)){
+            LOG(WARNING)<<"get param value error from"<<
+                          peer_id<< " msg"<<msg;
+            return;
+        }
+        std::string condition  = JsonValueToString(jcondition);
         OnRecvRecordQuery(peer_id,condition);
     }else if(command.compare("echo") == 0){
         this->terminal_->SendByRouter(peer_id,msg);
@@ -136,8 +142,15 @@ void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
 KeMessageProcessCamera::KeMessageProcessCamera(std::string peer_id,
                                                KeTunnelCamera *container):
     KeMsgProcess(peer_id,container),video_started_(false),audio_started_(false),
-    talk_started_(false)
+    talk_started_(false),recordReader(NULL)
 {
+}
+
+KeMessageProcessCamera::~KeMessageProcessCamera()
+{
+    if(recordReader != NULL){
+        OnRecordReadEnd(this->recordReader);
+    }
 }
 
 
@@ -175,20 +188,26 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
     KEPlayRecordFileReq * pMsg =
             reinterpret_cast<KEPlayRecordFileReq *>(msgData.data());
     LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile--"<<pMsg->fileData;
-    int resp = 5;
     std::string fileName = pMsg->fileData;
-    RecordReaderAvi * reader = new RecordReaderAvi(1);
-    if(!reader->StartRead(fileName)){
-        delete reader;
-        resp = 4;
-        RespPlayFileReq(resp,fileName.c_str());
+    if(recordReader != NULL){
+        LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
+                   "already start record read";
+        RespPlayFileReq(RESP_NAK,fileName.c_str());
+        return;
     }
-    this->recordInfo.frameRate = reader->frameRate;
-    this->recordInfo.frameResolution = reader->frameResolution;
-    reader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnRecordData);
-    reader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnRecordData);
-    reader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
-    RespPlayFileReq(resp,fileName.c_str());
+    recordReader = new RecordReaderAvi(1);
+    if(!recordReader->StartRead(fileName)){
+        LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
+                   "start read failed";
+        delete recordReader;
+        recordReader = NULL;
+        RespPlayFileReq(RESP_NAK,fileName.c_str());
+        return;
+    }
+    recordReader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnRecordData);
+    recordReader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnRecordData);
+    recordReader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
+    RespPlayFileReq(RESP_ACK,fileName.c_str());
 }
 
 void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
@@ -234,8 +253,8 @@ void KeMessageProcessCamera::RespPlayFileReq(int resp,const char * fileName)
     msg->videoID = 0;
     msg->channelNo = 1;
     msg->resp = resp;
-    msg->frameRate = this->recordInfo.frameRate;
-    msg->frameResolution = this->recordInfo.frameResolution;
+    msg->frameRate = recordReader->recordInfo.frameRate;
+    msg->frameResolution = recordReader->recordInfo.frameResolution;
     talk_base::strcpyn(msg->fileName,80,fileName);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
@@ -338,19 +357,21 @@ void KeMessageProcessCamera::OnRecordData(const char *data, int len)
     const int kNalHeadLen = 4;
     const char kNalhead[kNalHeadLen] = {0,0,0,1};
     int frameType  = 80;
+    int msgLen = sizeof(KEPlayRecordDataHead)+sizeof(KEFrameHead)+kNalHeadLen+len;
     if(data[0]==kNalhead[0] && data[1] ==kNalhead[0] &&
-            data[2] == kNalhead[0] && data[3] == kNalhead[1]){
+            data[2] == kNalhead[0] && data[3] == kNalhead[1]){ // video data
         frameType = this->recordInfo.frameResolution;
+        msgLen = sizeof(KEPlayRecordDataHead)+sizeof(KEFrameHead)+len;
     }
     talk_base::Buffer sendBuf;
-    int msgLen = sizeof(KERTStreamHead)+sizeof(KEFrameHead)+kNalHeadLen+len;
-    KERTStreamHead streamHead;
+    KEPlayRecordDataHead streamHead;
     streamHead.protocal = PROTOCOL_HEAD;
     streamHead.msgType = KEMSG_RecordPlayData;
     streamHead.msgLength = msgLen;
     streamHead.channelNo = 1;
     streamHead.videoID = 0;
-    sendBuf.AppendData(&streamHead,sizeof(KERTStreamHead));
+    streamHead.resp = RESP_ACK;
+    sendBuf.AppendData(&streamHead,sizeof(KEPlayRecordDataHead));
     KEFrameHead frameHead;
     int ams = talk_base::Time();
     frameHead.second = ams/1000;
@@ -375,8 +396,21 @@ void KeMessageProcessCamera::OnRecordData(const char *data, int len)
 
 void KeMessageProcessCamera::OnRecordReadEnd(RecordReaderInterface *reader)
 {
-    reader->StopRead();
-    delete reader;
+    ASSERT(recordReader == reader);
+    recordReader->StopRead();
+    delete recordReader;
+    recordReader = NULL;
+    int msgLen = sizeof(KEPlayRecordDataHead);
+    talk_base::Buffer sendBuf;
+    KEPlayRecordDataHead streamHead;
+    streamHead.protocal = PROTOCOL_HEAD;
+    streamHead.msgType = KEMSG_RecordPlayData;
+    streamHead.msgLength = msgLen;
+    streamHead.channelNo = 1;
+    streamHead.videoID = 0;
+    streamHead.resp = RESP_END;
+    sendBuf.AppendData(&streamHead,sizeof(KEPlayRecordDataHead));
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
 }

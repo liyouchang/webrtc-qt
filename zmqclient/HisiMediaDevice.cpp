@@ -210,12 +210,11 @@ void HisiMediaDevice::SetWifiInfo(std::string peerId, std::string param)
 
 void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string condition)
 {
-    LOG(INFO)<<"KeVideoSimulator::OnRecvRecordQuery ---"<<
+    LOG(INFO)<<"HisiMediaDevice::OnRecvRecordQuery ---"<<
                peer_id<<" query:"<<condition;
 
     int totalNum = 0;
-    pt_VidRecFile_QueryInfo videoRecordList;
-
+    t_VidRecFile_QueryInfo videoRecordList;
     Json::Reader reader;
     Json::Value jcondition;
     if (!reader.parse(condition, jcondition)) {
@@ -230,19 +229,20 @@ void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string conditi
         GetIntFromJsonObject(jcondition,"toQuery",&toQuery);
         totalNum = Raycomm_QueryNVR(
                     (char *)startTime.c_str(),(char *)endTime.c_str(),
-                    videoRecordList,offset,toQuery);
+                    &videoRecordList,offset,toQuery);
     }
+
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage["type"] = "tunnel";
     jmessage["command"] = "query_record";
     jmessage["condition"] = jcondition;
     jmessage["totalNum"] = totalNum;
-    for(int i = 0;i < videoRecordList->file_num;i++){
+    for(int i = 0;i < videoRecordList.file_num;i++){
         Json::Value jrecord;
-        jrecord["fileName"] = videoRecordList->rec_file[i].path;
-        jrecord["fileDate"] = videoRecordList->rec_file[i].date;
-        jrecord["fileSize"] = videoRecordList->rec_file[i].size;
+        jrecord["fileName"] = videoRecordList.rec_file[i].path;
+        jrecord["fileDate"] = videoRecordList.rec_file[i].date;
+        jrecord["fileSize"] = videoRecordList.rec_file[i].size;
         jmessage["recordList"].append(jrecord);
     }
     std::string msg = writer.write(jmessage);
@@ -442,11 +442,11 @@ void AlarmNotify::StartNotify()
 //门磁    rea = 2，io = 20
 //人体红外 rea = 2，io = 21
 //烟感报警 rea = 2，io = 22
-int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
+int AlarmNotify::NotifyCallBack(int chn, int rea, int io, int snapcount, int snapsize, char *snapbuf)
 {
     //TODO: to signal alarm message
     LOG(INFO)<<"AlarmNotify::NotifyCallBack---chn:"<<chn<<
-               " rea:"<<rea<<" io:"<<io;
+               " rea:"<<rea<<" io:"<<io << snapcount << snapsize;
     std::ostringstream infostream;
     infostream<<"通道"<<chn;
     if(rea == 1){
@@ -471,10 +471,6 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io)
 
     AlarmNotify::Instance()->SignalTerminalAlarm(rea,infostream.str(),"");
     return 0;
-}
-//count 0 no pic 1, one pic
-int AlarmNotify::NotifyJPGCallBack(int count, const char *data, int len)
-{
 }
 
 

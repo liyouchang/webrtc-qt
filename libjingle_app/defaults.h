@@ -58,6 +58,10 @@ enum FrameResolutionType{
     kFrame920P = 12,
 };
 
+struct VideoInfo{
+    int frameRate;
+    int frameResolution;//a enumirate of FrameResolutionType
+};
 
 std::string GetRandomString();
 //yyyy-MM-dd hh:mm:ss---- %F %T

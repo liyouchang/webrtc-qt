@@ -47,7 +47,7 @@ private:
      */
     void SendVideoFrame(const char *data, int len,int level);
     void SendAudioFrame(const char *data, int len);
-    talk_base::Thread * media_thread_;
+    talk_base::Thread *media_thread_;
     int video1_handle_;
     int video2_handle_;
     int audio_handle_;
@@ -67,7 +67,6 @@ protected:
 };
 
 
-
 class AlarmNotify{
 public:
     void StartNotify();
@@ -76,8 +75,8 @@ public:
         static AlarmNotify notify;
         return &notify;
     }
-    static int NotifyCallBack(int chn,int rea,int io);
-    static int NotifyJPGCallBack(int count,const char * data,int len);
+    static int NotifyCallBack(int chn,int rea,int io,
+                              int snapcount,int snapsize,char* snapbuf);
 };
 
 #endif // HISIMEDIADEVICE_H
