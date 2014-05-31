@@ -40,19 +40,23 @@ var eventFunction = function(){
 function QueryCameraRemoteFile(){
    g_peer_id =  PeerID.value;
     var query_command = {type:"tunnel",command:"query_record",
-                condition:{start_time:"20140417175100",
-            end_time:"20140418175500",offset:0,to_query:30}};
+                condition:{startTime:"20130417175100",
+            endTime:"20140618175500",offset:0,toQuery:3}};
     var query_str = JSON.stringify(query_command);
     kePlayerObj.SendCommand(g_peer_id,query_str);
 }
 
 function PlayCameraRemoteFile(){
     g_peer_id =  PeerID.value;
+    //"/mnt/sd/20140428/video/01/104953_1.avi",
     var record_list =
-            [{"file_name":"testfile1","file_date":"20140417175100","file_size":256},
-            {"file_name":"testfile2","file_date":"20140417175100","file_size":256}];
+            [{ "fileDate" : "20140428104953",
+                 "fileName" : "/mnt/sd/20140428/video/01/104953_1.avi",
+                 "fileSize" : 12136382 },
+           { "fileDate" : "20140428104750",
+                 "fileName" : "/mnt/sd/20140428/video/01/104750_1.avi",
+                 "fileSize" : 12323578 }];
     var record_str = JSON.stringify(record_list);
-
     kePlayerObj.PlayRecordFiles(g_peer_id,record_str);
 }
 
@@ -102,3 +106,5 @@ function GetLocalDirPath(){
     g_infoDiv.textContent = retStr;
 
 }
+
+

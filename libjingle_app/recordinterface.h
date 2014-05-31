@@ -20,7 +20,7 @@ protected:
 };
 
 
-class RecordSaverInterface
+class RecordSaverInterface: public sigslot::has_slots<>
 {
 public:
    virtual bool StartSave(const std::string & fileName) = 0;

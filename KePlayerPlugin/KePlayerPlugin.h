@@ -55,6 +55,7 @@ public slots:
     void SetDivision(int num);
     int PlayLocalFile();
     QString GetLocalPath(void);
+    void FullScreen();
     //int GetLocalPlayPos();
     //void SetLocalPlayPos();
 
@@ -68,7 +69,7 @@ public slots:
     QString Capture(QString peerId);
     int SendCommand(QString peer_id,QString msg);
 
-    int PlayRecordFiles(QString peer_id,QString record_info_list);
+    int PlayRecordFiles(QString peer_id,QString jstrRecordArray);
     int StopPlayFile(QString peer_id);
 
     void setSavePath(const QString &path);

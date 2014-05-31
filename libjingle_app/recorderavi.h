@@ -24,7 +24,7 @@ namespace kaerp2p {
 
 
 
-class RecorderAvi:public RecordSaverInterface,public sigslot::has_slots<>
+class RecorderAvi:public RecordSaverInterface
 {
 public:
     RecorderAvi(const std::string &peerId, int frameRate, int frameType);

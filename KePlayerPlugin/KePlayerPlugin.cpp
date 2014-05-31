@@ -1,21 +1,18 @@
 #include "KePlayerPlugin.h"
 
-
 #include <QtWidgets>
 #include <QDir>
+#include <vector>
 
-//#include "talk/base/json.h"
-//#include "libjingle_app/jsonconfig.h"
-//#include "libjingle_app/p2pconductor.h"
 #include "libjingle_app/defaults.h"
 
 #include "VideoWall.h"
 #include "ke_recorder.h"
-#include <vector>
+
 
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
-      connection_(new   PeerConnectionClientDealer()),
+      connection_(new PeerConnectionClientDealer()),
       tunnel_(new KeQtTunnelClient()),
       is_inited(false)
 {
@@ -27,7 +24,6 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
                      this,&KePlayerPlugin::StopVideo);
     QObject::connect(this,&KePlayerPlugin::TunnelClosed,
                      video_wall_,&VideoWall::StopPeerPlay);
-
     QDir configDir = QDir::home();
     configDir.mkdir("ShijietongConfig");
     configDir.cd("ShijietongConfig");
@@ -62,9 +58,7 @@ void KePlayerPlugin::SetDivision(int num)
 int KePlayerPlugin::PlayLocalFile()
 {
     QString filename = QFileDialog::getOpenFileName(
-                this,
-                "Open Video File",
-                QDir::currentPath(),
+                this,"Open Video File",QDir::currentPath(),
                 "Video files (*.h264 *.264);;All files(*.*)");
     if (!filename.isNull()) {
         qDebug()<<QDir::currentPath();
@@ -75,9 +69,14 @@ int KePlayerPlugin::PlayLocalFile()
 
 QString KePlayerPlugin::GetLocalPath()
 {
-    return QFileDialog::getExistingDirectory(this,"选择路径",savePath(),
-                                             QFileDialog::ShowDirsOnly
-                                      | QFileDialog::DontResolveSymlinks);
+    return QFileDialog::getExistingDirectory(
+                this,"选择路径",savePath(),
+                QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+}
+
+void KePlayerPlugin::FullScreen()
+{
+    this->video_wall_->showfullScreenWall();
 }
 
 int KePlayerPlugin::Initialize(QString routerUrl)
@@ -206,22 +205,38 @@ int KePlayerPlugin::SendCommand(QString peer_id, QString msg)
     return tunnel_->SendCommand(str_id,str_msg);
 }
 
-int KePlayerPlugin::PlayRecordFiles(QString peer_id, QString record_info_list)
+int KePlayerPlugin::PlayRecordFiles(QString peerId, QString jstrRecordArray)
 {
-    /*
-    std::string str_id = peer_id.toStdString();
-    Json::Reader reader;
-    Json::Value jmessage;
-    if (!reader.parse(record_info_list.toStdString(), jmessage)) {
-        qWarning() << "Received unknown message. " << record_info_list;
-        return 10001;
-    }
-    std::vector<Json::Value> record_vector;
-    if(!JsonArrayToValueVector(jmessage,&record_vector)){
-        qWarning() << "parse  record_info_list error. " << record_info_list;
-        return 10001;
-    }
 
+    std::string strId = peerId.toStdString();
+
+    QJsonParseError jparseerror;
+    QJsonDocument jsondoc(
+                QJsonDocument::fromJson(jstrRecordArray.toUtf8(),&jparseerror));
+    if(jparseerror.error != QJsonParseError::NoError){
+        return 10001;
+    }
+    QJsonArray jrecordArray = jsondoc.array();
+    QJsonObject jrecordObj = jrecordArray.first().toObject();
+    QString fileName = jrecordObj.value("fileName").toString();
+    QString fileDate = jrecordObj.value("fileDate").toString();
+    int fileSize = jrecordObj.value("fileSize").toInt();
+
+    std::string remoteFileName = fileName.toStdString();
+    qDebug()<<"fileName-"<<remoteFileName.c_str();
+    QDir fileDir(savePath());
+    fileDir.mkdir("RemoteFiles");
+    fileDir.cd("RemoteFiles");
+    QString saveFilePath = QString("%1_%2.%3").
+        arg(peerId.left(12)).arg(fileDate).arg("h264");
+
+    bool result = tunnel_->DownloadRemoteFile(
+                strId,remoteFileName,saveFilePath.toLocal8Bit().constData());
+    if(!result){
+        qWarning() << "tunnel DownloadRemoteFile error ";
+        return 10005;
+    }
+/*
     need_play_records_.clear();
     std::vector<Json::Value>::iterator it = record_vector.begin();
     for(;it != record_vector.end();++it){
@@ -288,22 +303,22 @@ void KePlayerPlugin::setSavePath(const QString &path)
 
 void KePlayerPlugin::OnRecordStatus(QString peer_id, int status)
 {
-    std::string str_id = peer_id.toStdString();
-    if(status == 6){//download end , download another file
-        if(!need_play_records_.empty()){
-            RecordFileInfo file = need_play_records_.dequeue();
-            ASSERT(str_id == file.peer_id);
-            tunnel_->DownloadRemoteFile(str_id,need_play_records_.at(0).remote_name);
 
-            KeRecorder * recorder = this->findChild<KeRecorder *>(peer_id);
-            if(recorder){
-                this->video_wall_->SetLocalPlayFileSize(peer_id,recorder->GetFileSize());
-            }
+//    std::string str_id = peer_id.toStdString();
+//    if(status == 6){//download end , download another file
+//        if(!need_play_records_.empty()){
+//            RecordFileInfo file = need_play_records_.dequeue();
+//            ASSERT(str_id == file.peer_id);
+//            tunnel_->DownloadRemoteFile(str_id,need_play_records_.at(0).remote_name);
 
-        }else{ //download end
-            emit RemoteFileDownloadEnd(peer_id);
-        }
-    }
+//            KeRecorder * recorder = this->findChild<KeRecorder *>(peer_id);
+//            if(recorder){
+//                this->video_wall_->SetLocalPlayFileSize(peer_id,recorder->GetFileSize());
+//            }
+//        }else{ //download end
+//            emit RemoteFileDownloadEnd(peer_id);
+//        }
+//    }
 }
 
 QString KePlayerPlugin::GetSaveDirList(QString saveType)
@@ -346,7 +361,7 @@ QString KePlayerPlugin::GetSaveFileList(QString dateDir)
 QString KePlayerPlugin::GetSaveFileData(QString fileName,int scaleWidth,int scaleHeight)
 {
     bool result = true;
-    QString imageDataStr = "data:image/png;base64,";
+    QString imageDataStr = "data:image/jpg;base64,";
     QDir fileDir(savePath());
     QString  filePath = fileDir.absoluteFilePath(fileName);
     QImage imageFile(filePath);
@@ -360,7 +375,7 @@ QString KePlayerPlugin::GetSaveFileData(QString fileName,int scaleWidth,int scal
         QByteArray fileRawData;
         QBuffer buffer(&fileRawData);
         buffer.open(QIODevice::WriteOnly);
-        scaledImage.save(&buffer, "PNG"); // writes image into fileRawData in PNG format
+        scaledImage.save(&buffer, "JPG"); // writes image into fileRawData in PNG format
         imageDataStr += fileRawData.toBase64(
                     QByteArray::Base64Encoding|QByteArray::KeepTrailingEquals);
     }
@@ -376,7 +391,7 @@ QString KePlayerPlugin::GetTimeFileName(QString peerId, QString extName, QString
     QString dateStr = QDate::currentDate().toString("yyyy-MM-dd");
     QString timeStr = QTime::currentTime().toString("hh-mm-ss-zzz");
     QDir fileDir(path);
-    if(!fileDir.cd(dateStr)){
+    if(!fileDir.cd(dateStr)) {
         fileDir.mkdir(dateStr);
         fileDir.cd(dateStr);
     }
@@ -389,7 +404,6 @@ QString KePlayerPlugin::savePath() const
 {
     return m_savePath;
 }
-
 
 int KePlayerPlugin::OpenTunnel(QString peer_id)
 {
