@@ -22,6 +22,8 @@ public:
 protected:
     virtual void OnRecvAudioData(const std::string & peer_id,const char * data,int len);
     virtual void OnRecvVideoData(const std::string & peer_id,const char * data,int len);
+    virtual void OnRecordStatus(const std::string & peer_id,int status);
+
 private:
 
     //talk_base::Thread *jni_thread;
