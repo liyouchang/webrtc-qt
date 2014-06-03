@@ -128,6 +128,27 @@ jint naStopPeerVideoCut(JNIEnv *env, jobject thiz,jstring peer_id){
     env->ReleaseStringUTFChars(peer_id,pid);
     return 0;
 }
+jint naDownloadRemoteFile(JNIEnv *env, jobject thiz,
+                          jstring peerId,jstring remoteFileName,
+                          jstring toSaveFileName,jint toPlaySize){
+    if (client == NULL){
+        return -1;
+    }
+    const char *pid = env->GetStringUTFChars(peerId, NULL);
+    const char *remoteFile = env->GetStringUTFChars(remoteFileName, NULL);
+    const char *saveFile = env->GetStringUTFChars(toSaveFileName, NULL);
+
+    bool result = client->DownloadRemoteFile(pid,remoteFile,saveFile,toPlaySize);
+    int returnValue = 0;
+    if(!result){
+        returnValue = -2;
+    }
+
+    env->ReleaseStringUTFChars(peerId,pid);
+    env->ReleaseStringUTFChars(remoteFileName,remoteFile);
+    env->ReleaseStringUTFChars(toSaveFileName,saveFile);
+    return returnValue;
+}
 
 
 #ifndef NELEM
@@ -154,7 +175,8 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naStartPeerVideoCut", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naStartPeerVideoCut },
         { "naStopPeerVideoCut", "(Ljava/lang/String;)I", (void*) naStopPeerVideoCut },
-
+        { "naDownloadRemoteFile", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)I",
+          (void*) naDownloadRemoteFile },
 
     };
 

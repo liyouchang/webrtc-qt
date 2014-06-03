@@ -24,7 +24,7 @@ namespace kaerp2p {
 
 
 
-class RecorderAvi:public RecordSaverInterface,public sigslot::has_slots<>
+class RecorderAvi:public RecordSaverInterface
 {
 public:
     RecorderAvi(const std::string &peerId, int frameRate, int frameType);
@@ -56,8 +56,6 @@ public:
     RecordReaderAvi(int audioInterval = 20,talk_base::Thread * thread = NULL);
     virtual ~RecordReaderAvi();
     void OnMessage(talk_base::Message *msg);
-    int frameResolution;
-    int frameRate;
     bool StartRead(const std::string & filename);
     bool StopRead();
 private:

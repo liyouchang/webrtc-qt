@@ -9,14 +9,16 @@
 
 </head>
 <body onload=load()>
-  <div id="textDiv"></div>
-    <p></p>
-    <object ID="KePlayerPlugin" TYPE="application/keplayer-plugin">
-    [Object not available! Did you forget to build and register the server?]
-    </object>
- <p></p>
-    <input type="button" value="About..." OnClick="KePlayerPlugin.about();"/>
-    <input type="button" value="play local file" OnClick="KePlayerPlugin.PlayLocalFile();"/>
+<div id="textDiv"></div>
+<p></p>
+<object ID="KePlayerPlugin" TYPE="application/keplayer-plugin">
+[Object not available! Did you forget to build and register the server?]
+</object>
+<p></p>
+<input type="button" value="About..." OnClick="KePlayerPlugin.about();"/>
+<input type="button" value="play local file" OnClick="KePlayerPlugin.PlayLocalFile();"/>
+<input type="button" value="choose dir" OnClick="GetLocalDirPath();"/>
+<input type="button" value="full screen" OnClick="KePlayerPlugin.FullScreen();"/>
 
     <p></p>
     <!--
@@ -28,7 +30,7 @@
     <input type="button" value="Initilize" OnClick="InitializePlugin(routerUrl.value);"/>
     <p></p>
 
-    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="0090B01AF67F-B687"/>
+    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="0090B01AF67F-0CCF"/>
     <input type="button" value="Open Tunnel" OnClick="KePlayerPlugin.OpenTunnel(PeerID.value);"/>
     <input type="button" value="Close Tunnel" OnClick="KePlayerPlugin.CloseTunnel(PeerID.value);"/>
     <p></p>
@@ -50,12 +52,13 @@
   <input type="button" value="Get file list" OnClick="GetCaptureFileList()"/>
   <input type="button" value="Get file data" OnClick="GetCaptureFileData()"/>
 
+
 </body>
 
-
+<!--
 <SCRIPT LANGUAGE=javascript FOR=KePlayerPlugin EVENT="TunnelOpened(peer)">
-    OnTunnelOpened(peer);
+OnTunnelOpened(peer);
 </SCRIPT>
-
+-->
 
 </html>

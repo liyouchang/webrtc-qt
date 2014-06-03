@@ -127,7 +127,8 @@ void KeMsgProcess::OnMessageRespond(talk_base::Buffer &msgData)
         }
         break;
     default:
-        KeMsgProcess::OnMessageRespond(msgData);
+        LOG(WARNING)<<"not supported message";
+        //KeMsgProcess::OnMessageRespond(msgData);
         break;
     }
 

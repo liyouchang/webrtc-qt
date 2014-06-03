@@ -6,6 +6,17 @@
 namespace kaerp2p{
 
 class RecorderAvi;
+class RecordSaverInterface;
+
+enum RecordStatus{
+    kRequestSuccess = 0,
+    kRecordSaverError = 1,
+    kRequestFileError = 2,
+    kDownloadEnd = 3,
+    kShouldPlay = 4,
+    kRequestMsgError
+};
+
 class KeTunnelClient:public KeMsgProcessContainer{
     friend class KeMessageProcessClient;
 public:
@@ -31,8 +42,9 @@ public:
     //send talk data to camera
     sigslot::signal2<const char *, int > SignalTalkData;
     virtual void SendTalkData(const char * data,int len);
-    virtual bool DownloadRemoteFile(std::string  peer_id,
-                                    std::string remote_file_name);
+    virtual bool DownloadRemoteFile(std::string  peerId,
+                                    std::string remoteFileName,
+                                    std::string saveFileName, int playSize);
     virtual void OnTunnelOpened(PeerTerminalInterface * t,
                                 const std::string & peer_id);
     virtual void OnRouterMessage(const std::string &peer_id,
@@ -54,7 +66,7 @@ public:
     KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
     virtual ~KeMessageProcessClient();
     void AskVideo(int video, int listen, int talk);
-    void ReqestPlayFile(const char * file_name);
+    bool ReqestPlayFile(const char *remoteFile,const char *saveFile,int playSize);
     void OnTalkData(const char * data,int len);
     bool StartVideoCut(const std::string &filename);
     bool StopVideoCut();
@@ -70,7 +82,9 @@ protected:
     virtual void RecvAskMediaResp(talk_base::Buffer & msgData);
     virtual void RecvPlayFileResp(talk_base::Buffer & msgData);
 private:
-    RecorderAvi *cutter_;
+    //RecorderAvi *cutter_;
+    int shouldPlaySize;
+    RecordSaverInterface *recordSaver;
     std::string requestReocrdFileName;
 };
 

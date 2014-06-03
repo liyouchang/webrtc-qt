@@ -19,12 +19,12 @@
 
 
 std::string ReadConfigFile();
+const char * kVersion = "V0.2";
 
 int main()
 {
     //read config
     JsonConfig::Instance()->FromFile(kaerp2p::GetAppFilePath("config.json"));
-
     Json::Value mac_value = JsonConfig::Instance()->Get("camera.mac","");
     Json::Value dealer_value = JsonConfig::Instance()->Get("dealerId","");
     Json::Value router_value = JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
@@ -35,10 +35,10 @@ int main()
     talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),
                                             NULL);
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
+    LOG(INFO)<<"zmqclient current version is "<<kVersion;
 
     std::string serversStr  = JsonValueToString(jservers);
     kaerp2p::P2PConductor::AddIceServers(serversStr);
-
 
     std::string strDealerId;
     std::string strMac;

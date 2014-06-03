@@ -18,6 +18,25 @@ extern "C" {
 #define NVR_PATH_LEN   128
 #define NVR_DATE_LEN   16
 
+#define DEBUG_PRINT_ENABLE
+#if defined(DEBUG_PRINT_ENABLE)
+
+#define DBG_PRINT(format,...)   printf(format,##__VA_ARGS__);printf("\n")
+#define DBG_PRINT_FILE_FUNC_LINE  printf("file = %s  func = %s line = %d \n",__FILE__,__FUNCTION__,__LINE__)
+#define DBG_PRINT_MEM(buf,len)       {int  i =0;char* p=(char*)buf;for(;i<len;printf("%x ",p[i]),i++);printf("\n");}
+#define DBG_PRINT_MEM_C(buf,len)       {int  i =0;char* p=(char*)buf;for(;i<len;printf("%c ",p[i]),i++);printf("\n");}
+#define DBG_PRINT_PTR(ptr)  printf("pointer to %p", ptr);printf("\n")
+#define DBG_PRINT_TIME(time)         { printf("year =%d month =%d day=%d hour=%d min=%d sec=%d",time.year,time.mon,time.day,time.hour,time.min,time.sec);}
+
+#else
+#define DBG_PRINT(format,...)
+#define DBG_PRINT_FILE_FUNC_LINE
+#define DBG_PRINT_MEM(buf,len)
+#define DBG_PRINT_MEM_C(buf,len)
+#define DBG_PRINT_PTR(ptr)
+#define DBG_PRINT_TIME(time)
+#endif
+
 
 typedef struct
 { 
@@ -74,8 +93,22 @@ int Raycomm_SetPtz(const char* keyword,int preset,int cam_id);
 //门磁     rea = 2，io = 20
 //人体红外 rea = 2，io = 21
 //烟感报警 rea = 2，io = 22
-typedef int (*NOTIFY_CALLBACK)(int chn,int rea,int io);
+typedef int (*NOTIFY_CALLBACK)(int chn,int rea,int io,int snapcount,int snapsize,char* snapbuf);
 int Raycomm_Register_Callback(NOTIFY_CALLBACK notify_callback);
+
+//typedef int (*SNAP_CALLBACK)(int iJpgSize, char* pBuf);
+//int Raycomm_SNAP_Callback(SNAP_CALLBACK snap_callback);
+
+int Raycomm_GetIP();
+
+int Raycomm_GetNetType();
+
+int Raycomm_Reboot(void);
+
+int Raycomm_SetTitle(char* pChnName);
+
+int Raycomm_SetAlarmEnable(char bEnable);
+
 
 #ifdef __cplusplus
 }

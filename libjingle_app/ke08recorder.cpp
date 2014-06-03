@@ -85,7 +85,8 @@ bool Ke08RecordReader::StartRead(const std::string &filename)
 
 bool Ke08RecordReader::StopRead()
 {
-    return false;
+    media_thread_->Clear(this);
+    return true;
 }
 
 void Ke08RecordReader::SendMediaMsg(const char *data, int len)
@@ -106,6 +107,7 @@ Ke08RecordSaver::~Ke08RecordSaver()
 
 bool Ke08RecordSaver::StartSave(const std::string &fileName)
 {
+    LOG(INFO)<<"Ke08RecordSaver::StartSave---"<<fileName;
     if(!saveFile->Open(fileName,"wb",NULL)){
         LOG(WARNING)<<"Ke08RecordSaver::StartSave---"<<
                       "open file error "<<fileName;
@@ -128,6 +130,7 @@ void Ke08RecordSaver::OnVideoData(const std::string &peerId, const char *data, i
     if(result != talk_base::SR_SUCCESS){
         LOG(WARNING)<<"Ke08RecordSaver::OnVideoData---"<<"write file error ";
     }
+    this->savedSize += written;
 }
 
 void Ke08RecordSaver::OnAudioData(const std::string &peerId, const char *data, int len)
