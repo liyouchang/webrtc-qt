@@ -243,12 +243,9 @@ bool JniUtil::JniTunnelOpened(const char * peer_id){
 
 	p_env->CallVoidMethod(g_obj_, mid, jni_pid);
 
-
 	p_env->DeleteLocalRef(callBackCls);
 
 	p_env->DeleteLocalRef(jni_pid);
-
-
 
 	if(attached){
 		g_vm_->DetachCurrentThread();
@@ -257,7 +254,7 @@ bool JniUtil::JniTunnelOpened(const char * peer_id){
     return true;
 }
 
-bool JniUtil::JniRecordStatus(const char *peer_id, int status)
+bool JniUtil::JniRecordStatus(const char *peer_id, int recordstatus)
 {
     if(g_vm_ == 0){
         LOGE("g_vm is null");
@@ -285,19 +282,16 @@ bool JniUtil::JniRecordStatus(const char *peer_id, int status)
     jmethodID mid = p_env->GetMethodID(callBackCls, methodName,
             "(Ljava/lang/String;I)V");
     if (!mid) {
-        LOGE("JniUtil::JniTunnelMethodCallback 1 ---get method %s error",methodName);
+        LOGE("JniUtil::JniRecordStatus ---get method %s error",methodName);
         return false;
     }
     jstring jni_pid = p_env->NewStringUTF(peer_id);
 
-    p_env->CallVoidMethod(g_obj_, mid, jni_pid,status);
-
+    p_env->CallVoidMethod(g_obj_, mid, jni_pid,recordstatus);
 
     p_env->DeleteLocalRef(callBackCls);
 
     p_env->DeleteLocalRef(jni_pid);
-
-
 
     if(attached){
         g_vm_->DetachCurrentThread();
@@ -356,12 +350,9 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
 
 	p_env->CallVoidMethod(g_obj_, mid, jni_pid);
 
-
 	p_env->DeleteLocalRef(callBackCls);
 
 	p_env->DeleteLocalRef(jni_pid);
-
-
 
 	if(attached){
 		g_vm_->DetachCurrentThread();
@@ -369,7 +360,7 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
 
 	return true;
 }
-//methodd callback for data
+//method callback for data
 bool JniUtil::JniTunnelMethodCallback(const char* methodName,
 		const char* peer_id, const char* data, int len) {
 	if(g_vm_ == 0){
