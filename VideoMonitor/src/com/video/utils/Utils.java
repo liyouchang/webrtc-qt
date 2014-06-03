@@ -20,6 +20,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
+import android.os.StatFs;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -262,6 +263,30 @@ public class Utils {
 		if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
 			return true;
 		return false;
+	}
+	
+	/**
+	 * 获取SD卡大小
+	 */
+	public static double getTotalSDSize() {
+		File path = Environment.getExternalStorageDirectory();
+		StatFs stat = new StatFs(path.getPath());
+		double blockSize = stat.getBlockSize();
+		double blockCount = stat.getBlockCount();
+		double size = (blockCount * blockSize)/1024/1024/1024;
+		return size;
+	}
+	
+	/**
+	 * 获取SD卡可用
+	 */
+	public static double getAvailableSDSize() {
+		File path = Environment.getExternalStorageDirectory();
+		StatFs stat = new StatFs(path.getPath());
+		double blockSize = stat.getBlockSize();
+		double availableBlock = stat.getAvailableBlocks();
+		double size = (availableBlock * blockSize)/1024/1024/1024;
+		return size;
 	}
 	
 	/**

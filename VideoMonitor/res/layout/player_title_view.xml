@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="@dimen/title_height_size"
-    android:background="@drawable/player_bg"
+    android:layout_height="50dp"
     android:paddingTop="5dp"
     android:paddingBottom="5dp"
+    android:background="@drawable/player_bg"
     android:orientation="horizontal" >
 
     <TextView
@@ -20,9 +20,9 @@
 
     <ImageButton
         android:id="@+id/ib_player_back"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginRight="10dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginRight="15dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:background="@null"

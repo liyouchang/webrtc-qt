@@ -1,7 +1,11 @@
 package com.video.socket;
 
+import java.util.ArrayList;
+
 import org.zeromq.ZMQ;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 
@@ -30,9 +34,25 @@ public class ZmqSocket {
 		if (zmqThread == null) {
         	zmqThread = new ZmqThread(zmq_socket);
         	zmqThread.start();
-    		Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
-        	HandlerApplication.getInstance().startService(intent);
         }
+		
+		if (!isServiceWorked()) {
+			System.out.println("MyDebug: 【启动服务】");
+			Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
+        	HandlerApplication.getInstance().startService(intent);
+		}
+	}
+	
+	private boolean isServiceWorked() {
+		ActivityManager manager = (ActivityManager) HandlerApplication.getInstance().getSystemService(Context.ACTIVITY_SERVICE);
+		ArrayList<ActivityManager.RunningServiceInfo> runningService = (ArrayList<ActivityManager.RunningServiceInfo>) 
+		manager.getRunningServices(50);
+		for (int i = 0; i < runningService.size(); i++) {
+			if (runningService.get(i).service.getClassName().toString().equals(Value.BackstageServicePackage)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -45,7 +65,7 @@ public class ZmqSocket {
 		if (zmq_socket != null) {
 			new ExitSocketThread().start();
 			
-			new ZmqSocket();
+//			new ZmqSocket();
 		}
 	}
 	

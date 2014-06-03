@@ -1,5 +1,6 @@
 package com.video.socket;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -7,12 +8,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.data.XmlMessage;
 import com.video.main.MainActivity;
 import com.video.main.OwnFragment;
 import com.video.utils.Utils;
@@ -94,6 +97,16 @@ public class ZmqHandler extends Handler {
 			System.out.println("MyDebug: getReqAlarmList()异常！");
 		}
 		return null;
+	}
+	
+	private int getAlarmCount(ArrayList<HashMap<String, String>> list, int listSize) {
+		int result = 0;
+		for (int i=0; i<listSize; i++) {
+			if (list.get(i).get("isReaded").equals("false")) {
+				result++;
+			}
+		}
+		return result;
 	}
 	
 	/**
@@ -192,6 +205,36 @@ public class ZmqHandler extends Handler {
 		return null;
 	}
 	
+	/**
+	 * 请求终端录像文件列表
+	 */
+	private ArrayList<HashMap<String, Object>> getTerminalFileList(JSONArray jsonArray) {
+		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
+		HashMap<String, Object> map = null;
+		int len = jsonArray.length();
+		  
+	    try {
+	    	for (int i=0; i<len; i++) { 
+		    	JSONObject obj = (JSONObject) jsonArray.get(i); 
+		    	map = new HashMap<String, Object>();
+		    	map.put("fileName", obj.getString("fileName"));
+		    	map.put("fileDate", obj.getString("fileDate"));
+
+		    	DecimalFormat df = new DecimalFormat("0.0");
+		    	int fileSizeInt = obj.getInt("fileSize");
+		    	double fileSizeDouble = fileSizeInt/1024/1024;
+		    	map.put("fileSize", df.format(fileSizeDouble)+"MB");
+		    	
+				list.add(map);
+	    	}
+	    	return list;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: getTerminalFileList()异常！");
+		}
+		return null;
+	}
+	
 	@Override
 	public void handleMessage(Message msg) {
 		String recvData = (String)msg.obj;
@@ -232,6 +275,7 @@ public class ZmqHandler extends Handler {
 					System.out.println("MyDebug: 【正在重新登录...】");
 				}
 			}
+			//重新登录
 			else if ((Value.beatHeartFailFlag) && (type.equals("Client_Login"))) {
 				int resultCode = obj.getInt("Result");
 				if (resultCode == 0) {
@@ -243,6 +287,39 @@ public class ZmqHandler extends Handler {
 					Handler sendHandler = ZmqThread.zmqThreadHandler;
 					String data = generateLoginJson();
 					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+				}
+			}
+			//请求报警数据
+			else if ((Value.ownFragmentRequestAlarmFlag) && (type.equals("Client_ReqAlarm"))) {
+				int resultCode = obj.getInt("Result");
+				if (resultCode == 0) {
+					Value.isNeedReqAlarmListFlag = false;
+					XmlMessage xmlData = new XmlMessage(HandlerApplication.getInstance());
+					JSONArray jsonArray = obj.getJSONArray("AlarmData");
+					ArrayList<HashMap<String, String>> msgList = new ArrayList<HashMap<String, String>>();
+					msgList = getReqAlarmList(jsonArray);
+					
+					int listSize = 0;
+					int unreadAlarmCount = 0;
+					if (msgList != null) {
+						xmlData.updateList(msgList);
+						listSize = xmlData.getListSize();
+						unreadAlarmCount = getAlarmCount(msgList, listSize);
+					} else {
+						xmlData.deleteAllItem();
+					}
+					
+					//更新未读报警消息的显示
+					PreferData preferData = new PreferData(HandlerApplication.getInstance());
+					preferData.writeData("AlarmCount", unreadAlarmCount);
+					
+					Intent intent = new Intent();
+					intent.setAction(OwnFragment.MSG_REFRESH_ACTION);
+					intent.putExtra("AlarmCount", unreadAlarmCount);
+					HandlerApplication.getInstance().sendBroadcast(intent);
+					System.out.println("MyDebug: 【请求报警数据成功】");
+				} else {
+					System.out.println("MyDebug: 【请求报警数据失败】");
 				}
 			} else {
 				//各个界面下的handler操作
@@ -401,6 +478,15 @@ public class ZmqHandler extends Handler {
 						else if (resultCode.equals("set_wifi")) {
 							int result = obj.getInt("result");//0:失败  1:成功
 							mHandler.obtainMessage(R.id.set_term_wifi_id, result, 0).sendToTarget();
+						}
+						else if (resultCode.equals("query_record")) {
+							int totalNum = obj.getInt("totalNum");//录像文件总数
+							if (totalNum == 0) {
+								mHandler.obtainMessage(R.id.request_terminal_video_list_id, totalNum, 0).sendToTarget();
+							} else {
+								JSONArray jsonArray = obj.getJSONArray("recordList");
+								mHandler.obtainMessage(R.id.request_terminal_video_list_id, totalNum, 0, getTerminalFileList(jsonArray)).sendToTarget();
+							}
 						}
 					}
 				}

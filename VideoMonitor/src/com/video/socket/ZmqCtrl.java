@@ -22,6 +22,7 @@ public class ZmqCtrl {
 	public void init() {
 		if (zmqSocketInstance == null) {
 			zmqSocketInstance = new ZmqSocket();
+			System.out.println("MyDebug: 初始化ZMQ, 启动相关线程");
 		}
 	}
 	

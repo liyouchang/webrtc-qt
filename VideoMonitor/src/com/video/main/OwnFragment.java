@@ -9,8 +9,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
@@ -38,11 +40,12 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlDevice;
 import com.video.play.PlayerActivity;
-import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
+import com.video.user.LoginActivity;
 import com.video.utils.DeviceItemAdapter;
 import com.video.utils.OkCancelDialog;
+import com.video.utils.OkOnlyDialog;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
@@ -73,6 +76,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	private final int IS_REQUESTING = 1;
 	private final int REQUEST_TIMEOUT = 2;
 	
+	private OwnReceiver ownReceiver;
+	public static final String MSG_REFRESH_ACTION = "com.video.main.OwnFragment.msg_refresh_action";
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -93,7 +99,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		ZmqHandler.mHandler = deviceHandler;
+		if (MainActivity.isCurrentTab(1)) {
+			ZmqHandler.mHandler = deviceHandler;
+		}
 	}
 	
 	private void initView () {
@@ -119,6 +127,12 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			userName = preferData.readString("UserName");
 		}
 		
+		//注册广播
+		ownReceiver = new OwnReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(MSG_REFRESH_ACTION);
+		mActivity.registerReceiver(ownReceiver, filter);
+		
 		String SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
 		thumbnailsPath = SD_path + File.separator + "KaerVideo" + File.separator + "thumbnails";
 		thumbnailsFile = new File(thumbnailsPath);
@@ -127,27 +141,29 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		}
 		
 		deviceList = new ArrayList<HashMap<String, String>>();
-		deviceList = xmlData.readXml();
-		listSize = deviceList.size();
 		
-		if (listSize > 1) {
-			deviceList = orderDeviceList(deviceList);
-			deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
-			lv_list.setAdapter(deviceAdapter);
-		} else {
-			deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
-			lv_list.setAdapter(deviceAdapter);
-		}
-		
-		if (listSize == 0) {
-			noDeviceLayout.setVisibility(View.VISIBLE);
-		} else {
-			noDeviceLayout.setVisibility(View.INVISIBLE);
-		}
-		
-		//初始化终端列表的显示
 		if (Value.isNeedReqTermListFlag) {
+			//从服务器请求设备列表
 			reqTermListEvent();
+		} else {
+			//加载本地的设备列表数据
+			deviceList = xmlData.readXml();
+			listSize = deviceList.size();
+			
+			if (listSize > 1) {
+				deviceList = orderDeviceList(deviceList);
+				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+				lv_list.setAdapter(deviceAdapter);
+			} else {
+				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+				lv_list.setAdapter(deviceAdapter);
+			}
+			
+			if (listSize == 0) {
+				noDeviceLayout.setVisibility(View.VISIBLE);
+			} else {
+				noDeviceLayout.setVisibility(View.INVISIBLE);
+			}
 		}
 	}
 	
@@ -220,6 +236,30 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
+	 * 生成JSON的请求报警数据字符串
+	 */
+	private String generateReqAlarmJson(int count) {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_ReqAlarm");
+			jsonObj.put("UserName", userName);
+			jsonObj.put("ID", 0);
+			jsonObj.put("Count", count);
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public void reqAlarmEvent() {
+		Value.ownFragmentRequestAlarmFlag = true;
+		Handler sendHandler = ZmqThread.zmqThreadHandler;
+		String data = generateReqAlarmJson(Value.requstAlarmCount);
+		sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
+	}
+	
+	/**
 	 * 将终端列表的设备排序，在线在前，不在线在后
 	 */
 	private static ArrayList<HashMap<String, String>> orderDeviceList(ArrayList<HashMap<String, String>> list) {
@@ -256,7 +296,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					mDialog.show();
 					break;
 				case REQUEST_TIMEOUT:
-					if (mDialog != null) {
+					if (mDialog.isShowing()) {
 						mDialog.dismiss();
 						mDialog = null;
 					}
@@ -265,17 +305,33 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					}
 					Value.isNeedReqTermListFlag = true;
 					Toast.makeText(mActivity, ""+msg.obj, Toast.LENGTH_SHORT).show();
+					
+					deviceList = xmlData.readXml();
+					listSize = deviceList.size();
+					if (listSize > 1) {
+						deviceList = orderDeviceList(deviceList);
+						deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+						lv_list.setAdapter(deviceAdapter);
+					} else {
+						deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+						lv_list.setAdapter(deviceAdapter);
+					}
 					break;
 				//请求终端列表
 				case R.id.request_terminal_list_id:
 					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
 						deviceHandler.removeMessages(REQUEST_TIMEOUT);
-						if (mDialog != null) {
+						if (mDialog.isShowing()) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
+						
+						//请求报警数据
+						reqAlarmEvent();
+						
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
+							//请求终端列表成功
 							Value.isNeedReqTermListFlag = false;
 							ArrayList<HashMap<String, String>> listObj = (ArrayList<HashMap<String, String>>) msg.obj;
 							if (listObj != null) {
@@ -310,7 +366,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				case R.id.delete_device_item_id:
 					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
 						deviceHandler.removeMessages(REQUEST_TIMEOUT);
-						if (mDialog != null) {
+						if (mDialog.isShowing()) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
@@ -332,7 +388,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				case R.id.upload_back_image_id:
 					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
 						deviceHandler.removeMessages(REQUEST_TIMEOUT);
-						if (mDialog != null) {
+						if (mDialog.isShowing()) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
@@ -357,7 +413,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				case R.id.delete_back_image_id:
 					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
 						deviceHandler.removeMessages(REQUEST_TIMEOUT);
-						if (mDialog != null) {
+						if (mDialog.isShowing()) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
@@ -456,7 +512,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	 */
 	public void reqTermListEvent() {
 		if (Utils.isNetworkAvailable(mActivity)) {
-			Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqTermListJson();
 			sendHandlerMsg(IS_REQUESTING, "正在请求终端列表...");
 			sendHandlerMsg(REQUEST_TIMEOUT, "请求终端列表失败，网络超时！", Value.requestTimeout);
@@ -512,47 +568,64 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				
 				if (Utils.getOnlineState(deviceList.get(position).get("isOnline"))) {
 					
-					//读取流量保护开关设置
-					boolean isProtectTraffic = true;
-					if (preferData.isExist("ProtectTraffic")) {
-						isProtectTraffic = preferData.readBoolean("ProtectTraffic");
-					}
-					
-					if (!isProtectTraffic) {
-						//实时视频
-						Intent intent = new Intent(mActivity, PlayerActivity.class);
-						intent.putExtra("deviceName", mDeviceName);
-						intent.putExtra("dealerName", deviceList.get(position).get("dealerName"));
-						mActivity.startActivity(intent);
-					} else {
-						if (Utils.isWiFiNetwork(mActivity)) {
+					if (Value.isLoginSuccess) {
+						//读取流量保护开关设置
+						boolean isProtectTraffic = true;
+						if (preferData.isExist("ProtectTraffic")) {
+							isProtectTraffic = preferData.readBoolean("ProtectTraffic");
+						}
+						
+						if (!isProtectTraffic) {
 							//实时视频
 							Intent intent = new Intent(mActivity, PlayerActivity.class);
 							intent.putExtra("deviceName", mDeviceName);
 							intent.putExtra("dealerName", deviceList.get(position).get("dealerName"));
 							mActivity.startActivity(intent);
 						} else {
-							final OkCancelDialog myDialog=new OkCancelDialog(mActivity);
-							myDialog.setTitle("温馨提示");
-							myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
-							myDialog.setPositiveButton("确认", new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									myDialog.dismiss();
-									//实时视频
-									Intent intent = new Intent(mActivity, PlayerActivity.class);
-									intent.putExtra("deviceName", mDeviceName);
-									intent.putExtra("dealerName", deviceList.get(position).get("dealerName"));
-									mActivity.startActivity(intent);
-								}
-							});
-							myDialog.setNegativeButton("取消", new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									myDialog.dismiss();
-								}
-							});
+							if (Utils.isWiFiNetwork(mActivity)) {
+								//实时视频
+								Intent intent = new Intent(mActivity, PlayerActivity.class);
+								intent.putExtra("deviceName", mDeviceName);
+								intent.putExtra("dealerName", deviceList.get(position).get("dealerName"));
+								mActivity.startActivity(intent);
+							} else {
+								final OkCancelDialog myDialog=new OkCancelDialog(mActivity);
+								myDialog.setTitle("温馨提示");
+								myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
+								myDialog.setPositiveButton("确认", new OnClickListener() {
+									@Override
+									public void onClick(View v) {
+										myDialog.dismiss();
+										//实时视频
+										Intent intent = new Intent(mActivity, PlayerActivity.class);
+										intent.putExtra("deviceName", mDeviceName);
+										intent.putExtra("dealerName", deviceList.get(position).get("dealerName"));
+										mActivity.startActivity(intent);
+									}
+								});
+								myDialog.setNegativeButton("取消", new OnClickListener() {
+									@Override
+									public void onClick(View v) {
+										myDialog.dismiss();
+									}
+								});
+							}
 						}
+					} else {
+						final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
+						myDialog.setTitle("温馨提示");
+						myDialog.setMessage("网络不稳定，请重新登录！");
+						myDialog.setPositiveButton("确认", new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								myDialog.dismiss();
+								if (Value.beatHeartFailFlag) {
+									Value.beatHeartFailFlag = false;
+								}
+								//登录界面
+								mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
+							}
+						});
 					}
 				} else {
 					Toast.makeText(mActivity, "【"+mDeviceName+"】终端设备不在线！", Toast.LENGTH_SHORT).show();
@@ -639,7 +712,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							@Override
 							public void onClick(View v) {
 								myDialog1.dismiss();
-								Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+								Handler sendHandler = ZmqThread.zmqThreadHandler;
 								String data = generateDeleteImageJson(mDeviceId);
 								sendHandlerMsg(IS_REQUESTING, "正在删除图片...");
 								sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.requestTimeout);
@@ -724,6 +797,27 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				noDeviceLayout.setVisibility(View.VISIBLE);
 			} else {
 				noDeviceLayout.setVisibility(View.INVISIBLE);
+			}
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		//注销广播
+		mActivity.unregisterReceiver(ownReceiver);
+	}
+
+	public class OwnReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			String action = intent.getAction();
+			//更新未读报警消息的显示
+			if (action.equals(MSG_REFRESH_ACTION)) {
+				MainActivity.setAlarmIconAndText(intent.getIntExtra("AlarmCount", 0));
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package com.video.main;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,14 +23,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.video.R;
+import com.video.data.XmlDevice;
 import com.video.local.ImageListViewAdapter;
 import com.video.local.LocalFileItem;
 import com.video.local.VideoListViewAdapter;
+import com.video.utils.DeviceItemAdapter;
+import com.video.utils.TextProgressBar;
 import com.video.utils.Utils;
 import com.video.utils.ViewPagerAdapter;
 
@@ -40,11 +46,14 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	
 	private TextView viewpage_video;
 	private TextView viewpage_image;
+	private TextView viewpage_terminal;
 	
 	private ViewPager mViewPager;
 	private List<View> pageList;
 	private View video_page;
 	private View image_page;
+	private View terminal_page;
+	private TextProgressBar progressBarSD;
 	
 	private String SD_path = "";
 	
@@ -74,6 +83,16 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	private VideoListViewAdapter videoListAdapter = null;
 	private List<LocalFileItem> videoLocalFile = null;
 	private RelativeLayout noVideoLayout = null;
+	
+	//终端录像初始化
+	private XmlDevice xmlData;
+	private String thumbnailsPath = null;
+	private File thumbnailsFile = null;
+	private ArrayList<HashMap<String, String>> deviceList = null;
+	private DeviceItemAdapter deviceAdapter = null;
+	private ListView terminalListView = null;
+	private int listSize = 0;
+	private RelativeLayout noDeviceLayout = null;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -108,9 +127,13 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		image_page = inflater.inflate(R.layout.local_image, null);
 		video_page = inflater.inflate(R.layout.local_video, null);
+		terminal_page = inflater.inflate(R.layout.local_terminal, null);
+		
 		pageList = new ArrayList<View>();
 		pageList.add(image_page);
 		pageList.add(video_page);
+		pageList.add(terminal_page);
+		
 		mViewPager = (ViewPager)mView.findViewById(R.id.local_viewpager);
 		mViewPager.setOnPageChangeListener(this);
 		mViewPager.setAdapter(new ViewPagerAdapter(pageList));
@@ -118,24 +141,45 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	private void initView() {
-		viewpage_video = (TextView)mView.findViewById(R.id.tv_vp_video);
-		viewpage_video.setOnClickListener(this);
 		viewpage_image = (TextView)mView.findViewById(R.id.tv_vp_image);
 		viewpage_image.setOnClickListener(this);
+		viewpage_video = (TextView)mView.findViewById(R.id.tv_vp_video);
+		viewpage_video.setOnClickListener(this);
+		viewpage_terminal = (TextView)mView.findViewById(R.id.tv_vp_terminal);
+		viewpage_terminal.setOnClickListener(this);
 		
 		//抓拍图片初始化
-		imageListView = (ListView) mView.findViewById(R.id.local_image_listView);
-		noImageLayout = (RelativeLayout) mView.findViewById(R.id.rl_no_local_file_image);
+		imageListView = (ListView) image_page.findViewById(R.id.local_image_listView);
+		noImageLayout = (RelativeLayout) image_page.findViewById(R.id.rl_no_local_file_image);
 				
 		//本地录像初始化
-		videoListView = (ListView) mView.findViewById(R.id.local_video_listView);
-		noVideoLayout = (RelativeLayout) mView.findViewById(R.id.rl_no_local_file_video);
+		videoListView = (ListView) video_page.findViewById(R.id.local_video_listView);
+		noVideoLayout = (RelativeLayout) video_page.findViewById(R.id.rl_no_local_file_video);
+		
+		//终端录像初始化
+		terminalListView = (ListView) terminal_page.findViewById(R.id.lv_local_device_list);
+		terminalListView.setOnItemClickListener(new OnItemClickListenerImpl());
+		noDeviceLayout = (RelativeLayout) terminal_page.findViewById(R.id.rl_no_local_device_list);
 		
 		//注册广播
 		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(REFRESH_VIDEO_FILE);
 		mActivity.registerReceiver(localReceiver, filter);
+		
+		xmlData = new XmlDevice(mActivity);
+		
+		if (Utils.checkSDCard()) {
+			//获得SD的信息
+			progressBarSD = (TextProgressBar) mActivity.findViewById(R.id.progressBar_sd);
+			progressBarSD.setMax(100);
+			double SDTotal = Utils.getTotalSDSize();
+			double SDAvailable = Utils.getAvailableSDSize();
+			int SDScale = (int) ((SDAvailable/SDTotal)*100);
+			DecimalFormat df = new DecimalFormat("0.00");
+			progressBarSD.setText("SD卡："+df.format(SDTotal)+"GB    可用："+df.format(SDAvailable)+"GB");
+			progressBarSD.setProgress(SDScale);
+		}
 	}
 	
 	private void initData() {
@@ -146,6 +190,30 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			
 			//本地录像初始化
 			new LocalVideoThread().start();
+			
+			//终端录像初始化
+			thumbnailsPath = SD_path + File.separator + "KaerVideo" + File.separator + "thumbnails";
+			thumbnailsFile = new File(thumbnailsPath);
+			if(!thumbnailsFile.exists()){
+				thumbnailsFile.mkdirs();
+			}
+			
+			deviceList = new ArrayList<HashMap<String, String>>();
+			deviceList = xmlData.getOnlineList();
+			if (deviceList != null) {
+				listSize = deviceList.size();
+				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+				terminalListView.setAdapter(deviceAdapter);
+			
+				if (listSize == 0) {
+					noDeviceLayout.setVisibility(View.VISIBLE);
+				} else {
+					noDeviceLayout.setVisibility(View.INVISIBLE);
+				}
+			} else {
+				listSize = 0;
+				noDeviceLayout.setVisibility(View.VISIBLE);
+			}
 		}
 	}
 	
@@ -156,12 +224,20 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			case R.id.tv_vp_image:
 				viewpage_image.setBackgroundResource(R.drawable.viewpage_selected);
 				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
+				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
 				mViewPager.setCurrentItem(0);
 				break;
 			case R.id.tv_vp_video:
 				viewpage_video.setBackgroundResource(R.drawable.viewpage_selected);
 				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
+				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
 				mViewPager.setCurrentItem(1);
+				break;
+			case R.id.tv_vp_terminal:
+				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_selected);
+				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
+				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
+				mViewPager.setCurrentItem(2);
 				break;
 		}
 	}
@@ -183,12 +259,20 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			case 0:
 				viewpage_image.setBackgroundResource(R.drawable.viewpage_selected);
 				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
+				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
 				mViewPager.setCurrentItem(0);
 				break;
 			case 1:
 				viewpage_video.setBackgroundResource(R.drawable.viewpage_selected);
 				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
+				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
 				mViewPager.setCurrentItem(1);
+				break;
+			case 2:
+				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_selected);
+				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
+				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
+				mViewPager.setCurrentItem(2);
 				break;
 		}
 	}
@@ -528,8 +612,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		if (fileList == null) {
 			return null;
 		}
-		int count = fileList.length;
-		if (count == 0) {
+		int recordsCount = 0;
+		int listCount = fileList.length;
+		if (listCount == 0) {
 			return null;
 		}
 		ArrayList<HashMap<String, Object>> fileVideos = new ArrayList<HashMap<String, Object>>();;
@@ -551,9 +636,10 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			isExists = false;
 		}
 		
-		for (int i=0; i<count; i++) {
+		for (int i=0; i<listCount; i++) {
 			if (!Utils.isVideoFile(fileList[i].getName()))
 				continue;
+			recordsCount ++;
 			videoItem = new HashMap<String, Object>();
 			videoItem.put("videoFile", file.getPath());
 			videoItem.put("videoPath", fileList[i].getPath());
@@ -581,7 +667,25 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			}
 			fileVideos.add(videoItem);
 		}
+		if (recordsCount == 0) {
+			deleteFile(file);
+		}
 		return fileVideos;
+	}
+	
+	//-----------------------------------------------------------------------------------
+	//终端录像处理
+	//-----------------------------------------------------------------------------------
+	private class OnItemClickListenerImpl implements OnItemClickListener {
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+			// TODO Auto-generated method stub
+			//请求终端录像
+			Intent intent = new Intent(mActivity, SetDateActivity.class);
+			intent.putExtra("dealerName", deviceList.get(position).get("dealerName"));
+			startActivity(intent);
+			mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
+		}
 	}
 	
 	@Override

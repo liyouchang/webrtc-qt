@@ -39,8 +39,10 @@ import com.video.data.XmlShare;
 import com.video.play.PlayerActivity;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
+import com.video.user.LoginActivity;
 import com.video.utils.DeviceItemAdapter;
 import com.video.utils.OkCancelDialog;
+import com.video.utils.OkOnlyDialog;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
@@ -370,47 +372,65 @@ public class SharedActivity extends Activity implements OnClickListener {
 			
 			if (Utils.isNetworkAvailable(mContext)) {
 				if (Utils.getOnlineState(sharedList.get(position).get("isOnline"))) {
-					//读取流量保护开关设置
-					boolean isProtectTraffic = true;
-					if (preferData.isExist("ProtectTraffic")) {
-						isProtectTraffic = preferData.readBoolean("ProtectTraffic");
-					}
 					
-					if (!isProtectTraffic) {
-						//实时视频
-						Intent intent = new Intent(mContext, PlayerActivity.class);
-						intent.putExtra("deviceName", mDeviceName);
-						intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
-						mContext.startActivity(intent);
-					} else {
-						if (Utils.isWiFiNetwork(mContext)) {
+					if (Value.isLoginSuccess) {
+						//读取流量保护开关设置
+						boolean isProtectTraffic = true;
+						if (preferData.isExist("ProtectTraffic")) {
+							isProtectTraffic = preferData.readBoolean("ProtectTraffic");
+						}
+						
+						if (!isProtectTraffic) {
 							//实时视频
 							Intent intent = new Intent(mContext, PlayerActivity.class);
 							intent.putExtra("deviceName", mDeviceName);
 							intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
 							mContext.startActivity(intent);
 						} else {
-							final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-							myDialog.setTitle("温馨提示");
-							myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
-							myDialog.setPositiveButton("确认", new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									myDialog.dismiss();
-									//实时视频
-									Intent intent = new Intent(mContext, PlayerActivity.class);
-									intent.putExtra("deviceName", mDeviceName);
-									intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
-									mContext.startActivity(intent);
-								}
-							});
-							myDialog.setNegativeButton("取消", new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									myDialog.dismiss();
-								}
-							});
+							if (Utils.isWiFiNetwork(mContext)) {
+								//实时视频
+								Intent intent = new Intent(mContext, PlayerActivity.class);
+								intent.putExtra("deviceName", mDeviceName);
+								intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
+								mContext.startActivity(intent);
+							} else {
+								final OkCancelDialog myDialog=new OkCancelDialog(mContext);
+								myDialog.setTitle("温馨提示");
+								myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
+								myDialog.setPositiveButton("确认", new OnClickListener() {
+									@Override
+									public void onClick(View v) {
+										myDialog.dismiss();
+										//实时视频
+										Intent intent = new Intent(mContext, PlayerActivity.class);
+										intent.putExtra("deviceName", mDeviceName);
+										intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
+										mContext.startActivity(intent);
+									}
+								});
+								myDialog.setNegativeButton("取消", new OnClickListener() {
+									@Override
+									public void onClick(View v) {
+										myDialog.dismiss();
+									}
+								});
+							}
 						}
+					} else {
+						final OkOnlyDialog myDialog=new OkOnlyDialog(mContext);
+						myDialog.setTitle("温馨提示");
+						myDialog.setMessage("网络不稳定，请重新登录！");
+						myDialog.setPositiveButton("确认", new OnClickListener() {
+							@Override
+							public void onClick(View v) {
+								myDialog.dismiss();
+								if (Value.beatHeartFailFlag) {
+									Value.beatHeartFailFlag = false;
+								}
+								//登录界面
+								mContext.startActivity(new Intent(mContext, LoginActivity.class));
+							}
+						});
 					}
 				} else {
 					Toast.makeText(mContext, "【"+mDeviceName+"】终端设备不在线！", Toast.LENGTH_SHORT).show();

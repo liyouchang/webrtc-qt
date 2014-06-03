@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,7 +41,10 @@ import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
+import com.video.socket.ZmqThread;
+import com.video.user.LoginActivity;
 import com.video.utils.MessageItemAdapter;
+import com.video.utils.OkOnlyDialog;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
@@ -100,10 +104,42 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		//初始化消息列表的显示
-		if (Value.isNeedReqAlarmListFlag) {
-			ZmqHandler.mHandler = handler;
-			reqAlarmEvent();
+		
+		if (Value.isLoginSuccess) {
+			if (MainActivity.isCurrentTab(3)) {
+				ZmqHandler.mHandler = handler;
+				
+				//需要请求报警消息
+				if (Value.isNeedReqAlarmListFlag) {
+					Value.ownFragmentRequestAlarmFlag = false;
+					reqAlarmEvent();
+				} else {
+					if (Value.ownFragmentRequestAlarmFlag) {
+						Value.ownFragmentRequestAlarmFlag = false;
+						msgList = xmlData.readXml();
+						if (msgList != null) {
+							listSize = msgList.size();
+							msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
+							lv_list.setAdapter(msgAdapter);
+						}
+					}
+				}
+			}
+		} else {
+			final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
+			myDialog.setTitle("温馨提示");
+			myDialog.setMessage("网络不稳定，请重新登录！");
+			myDialog.setPositiveButton("确认", new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					myDialog.dismiss();
+					if (Value.beatHeartFailFlag) {
+						Value.beatHeartFailFlag = false;
+					}
+					//登录界面
+					mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
+				}
+			});
 		}
 	}
 	
@@ -146,6 +182,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
 		}
 		
+		msgList = new ArrayList<HashMap<String, String>>();
 		msgList = xmlData.readXml();
 		if (msgList != null) {
 			listSize = msgList.size();
@@ -404,7 +441,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	
 	public void reqAlarmEvent() {
 		if (Utils.isNetworkAvailable(mActivity)) {
-			Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqAlarmJson(0, Value.requstAlarmCount);
 			sendHandlerMsg(IS_REQUESTING);
 			sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
@@ -425,7 +462,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			@Override
 			public void run() {
 				mPullToRefreshView.onFooterRefreshComplete();
-				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateReqAlarmJson(xmlData.getMinUpdateID(), 5);
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
@@ -435,6 +472,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	
 	/**
 	 * 下拉刷新
+	 * yyyy-MM-dd hh:mm:ss 12小时制  yyyy-MM-dd HH:mm:ss 24小时制
 	 */
 	@Override
 	public void onHeaderRefresh(PullToRefreshView view) {
@@ -443,12 +481,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				msg_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd hh:mm:ss");
+				msg_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
 				msg_refresh_terminal = "终端: "+Build.MODEL;
 				preferData.writeData("msgRefreshTime", msg_refresh_time);
 				preferData.writeData("msgRefreshTerminal", msg_refresh_terminal);
 				mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
-				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+				
+				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateReqAlarmJson(0, Value.requstAlarmCount);
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
@@ -476,7 +515,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			mMsgID = item.get("msgID");
 			String sendData = generateMarkThisItemJson(Integer.parseInt(mMsgID));
 			if (sendData != null) {
-				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 			}

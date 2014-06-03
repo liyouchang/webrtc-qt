@@ -2,6 +2,7 @@ package com.video.play;
 
 import java.util.HashMap;
 
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 
@@ -69,7 +70,13 @@ public class TunnelCommunication {
 	 */
 	public void TunnelOpened(String peerId) {
 		System.out.println("MyDebug: 【"+peerId+"】通道被打开");
-		sendHandlerMsg(PlayerActivity.playHandler, 0, peerId);
+		PlayerActivity.requestPlayerTimes = 0;
+		
+		Intent intent = new Intent();
+		intent.putExtra("TunnelEvent", 0);
+		intent.putExtra("PeerId", peerId);
+		intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
+		HandlerApplication.getInstance().sendBroadcast(intent);
 	}
 	
 	/**
@@ -77,7 +84,13 @@ public class TunnelCommunication {
 	 */
 	public void TunnelClosed(String peerId) {
 		System.out.println("MyDebug: 【"+peerId+"】通道被关闭");
-		sendHandlerMsg(PlayerActivity.playHandler, 1, peerId);
+		PlayerActivity.requestPlayerTimes = 0;
+		
+		Intent intent = new Intent();
+		intent.putExtra("TunnelEvent", 1);
+		intent.putExtra("PeerId", peerId);
+		intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
+		HandlerApplication.getInstance().sendBroadcast(intent);
 	}
 
 	/**

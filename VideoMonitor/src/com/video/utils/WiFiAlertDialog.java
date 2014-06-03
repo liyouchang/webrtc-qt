@@ -62,7 +62,7 @@ public class WiFiAlertDialog {
 		});
 	}
 	
-	public void setOnItemClickListenerButton(final View tv_name, final ArrayList<HashMap<String, Object>> list) {
+	public void setOnItemClickListenerButton(final View tv_name, final ArrayList<HashMap<String, String>> list) {
 		final Button button = (Button) tv_name;
 		wifiList.setOnItemClickListener(new OnItemClickListener() {
 			@Override

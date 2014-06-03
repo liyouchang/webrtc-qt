@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -24,7 +25,11 @@ import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.PreferData;
+import com.video.data.Value;
+import com.video.main.MainActivity;
+import com.video.main.SetDateActivity;
 import com.video.play.PlayerActivity;
+import com.video.user.LoginActivity;
 
 public class DeviceItemAdapter extends BaseAdapter {
 
@@ -92,48 +97,74 @@ public class DeviceItemAdapter extends BaseAdapter {
 				if (Utils.isNetworkAvailable(context)) {
 					final String name = list.get(position).get("deviceName");
 					if (Utils.getOnlineState(list.get(position).get("isOnline"))) {
-						//读取流量保护开关设置
-						boolean isProtectTraffic = true;
-						PreferData preferData = new PreferData(context);
-						if (preferData.isExist("ProtectTraffic")) {
-							isProtectTraffic = preferData.readBoolean("ProtectTraffic");
-						}
 						
-						if (!isProtectTraffic) {
-							//实时视频
-							Intent intent = new Intent(context, PlayerActivity.class);
-							intent.putExtra("deviceName", name);
-							intent.putExtra("dealerName", list.get(position).get("dealerName"));
-							context.startActivity(intent);
-						} else {
-							if (Utils.isWiFiNetwork(context)) {
-								//实时视频
-								Intent intent = new Intent(context, PlayerActivity.class);
-								intent.putExtra("deviceName", name);
+						if (Value.isLoginSuccess) {
+							if (MainActivity.isCurrentTab(2)) {
+								//请求终端录像
+								Intent intent = new Intent(context, SetDateActivity.class);
 								intent.putExtra("dealerName", list.get(position).get("dealerName"));
 								context.startActivity(intent);
+								((Activity) context).overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 							} else {
-								final OkCancelDialog myDialog=new OkCancelDialog(context);
-								myDialog.setTitle("温馨提示");
-								myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
-								myDialog.setPositiveButton("确认", new OnClickListener() {
-									@Override
-									public void onClick(View v) {
-										myDialog.dismiss();
+								//读取流量保护开关设置
+								boolean isProtectTraffic = true;
+								PreferData preferData = new PreferData(context);
+								if (preferData.isExist("ProtectTraffic")) {
+									isProtectTraffic = preferData.readBoolean("ProtectTraffic");
+								}
+								
+								if (!isProtectTraffic) {
+									//实时视频
+									Intent intent = new Intent(context, PlayerActivity.class);
+									intent.putExtra("deviceName", name);
+									intent.putExtra("dealerName", list.get(position).get("dealerName"));
+									context.startActivity(intent);
+								} else {
+									if (Utils.isWiFiNetwork(context)) {
 										//实时视频
 										Intent intent = new Intent(context, PlayerActivity.class);
 										intent.putExtra("deviceName", name);
 										intent.putExtra("dealerName", list.get(position).get("dealerName"));
 										context.startActivity(intent);
+									} else {
+										final OkCancelDialog myDialog=new OkCancelDialog(context);
+										myDialog.setTitle("温馨提示");
+										myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
+										myDialog.setPositiveButton("确认", new OnClickListener() {
+											@Override
+											public void onClick(View v) {
+												myDialog.dismiss();
+												//实时视频
+												Intent intent = new Intent(context, PlayerActivity.class);
+												intent.putExtra("deviceName", name);
+												intent.putExtra("dealerName", list.get(position).get("dealerName"));
+												context.startActivity(intent);
+											}
+										});
+										myDialog.setNegativeButton("取消", new OnClickListener() {
+											@Override
+											public void onClick(View v) {
+												myDialog.dismiss();
+											}
+										});
 									}
-								});
-								myDialog.setNegativeButton("取消", new OnClickListener() {
-									@Override
-									public void onClick(View v) {
-										myDialog.dismiss();
-									}
-								});
+								}
 							}
+						} else {
+							final OkOnlyDialog myDialog=new OkOnlyDialog(context);
+							myDialog.setTitle("温馨提示");
+							myDialog.setMessage("网络不稳定，请重新登录！");
+							myDialog.setPositiveButton("确认", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog.dismiss();
+									if (Value.beatHeartFailFlag) {
+										Value.beatHeartFailFlag = false;
+									}
+									//登录界面
+									context.startActivity(new Intent(context, LoginActivity.class));
+								}
+							});
 						}
 					} else {
 						Toast.makeText(context, "【"+name+"】终端设备不在线！", Toast.LENGTH_SHORT).show();

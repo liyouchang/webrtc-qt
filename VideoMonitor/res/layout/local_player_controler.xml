@@ -60,7 +60,7 @@
             android:src="@drawable/displaymode_fullscreen" />
 
         <ImageButton
-            android:id="@+id/button2"
+            android:id="@+id/ib_front_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -71,7 +71,7 @@
             android:src="@drawable/stepbackward" />
 
         <ImageButton
-            android:id="@+id/button3"
+            android:id="@+id/ib_play_pause"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -81,7 +81,7 @@
             android:scaleType="fitCenter" />
 
         <ImageButton
-            android:id="@+id/button4"
+            android:id="@+id/ib_back_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -92,7 +92,7 @@
             android:src="@drawable/stepforward" />
 
         <ImageButton
-            android:id="@+id/button5"
+            android:id="@+id/ib_voice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
