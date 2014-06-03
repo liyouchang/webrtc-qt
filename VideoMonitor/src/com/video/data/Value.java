@@ -32,6 +32,11 @@ public class Value {
 	public final static String ApkXmlPath = "http://222.174.213.185:8088/plugin/VideoMonitorXml.xml";
 	
 	/**
+	 * 服务的包名类名
+	 */
+	public final static String BackstageServicePackage = "com.video.service.BackstageService";
+	
+	/**
 	 * 超时时间
 	 */
 	public final static int requestTimeout = 10000;
@@ -65,18 +70,26 @@ public class Value {
 	 * 是否手动退出软件
 	 */
 	public static boolean isManulLogout = false;
+	
 	/**
 	 * 心跳失败标志
 	 */
 	public static boolean beatHeartFailFlag = false;
+	
 	/**
 	 * 通道是否打开的标志
 	 */
 	public static boolean isTunnelOpened = false;
+	
 	/**
 	 * 是否是共享的用户
 	 */
 	public static boolean isSharedUser = false;
+	
+	/**
+	 * 实时界面请求报警消息
+	 */
+	public static boolean ownFragmentRequestAlarmFlag = false;
 	
 	/**
 	 * 初始化应用程序的全局变量
@@ -92,5 +105,6 @@ public class Value {
 		beatHeartFailFlag = false;
 		isTunnelOpened = false;
 		isSharedUser = false;
+		ownFragmentRequestAlarmFlag = false;
 	}
 }

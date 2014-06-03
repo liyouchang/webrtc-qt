@@ -38,6 +38,7 @@ import com.video.service.BackstageService;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
+import com.video.socket.ZmqThread;
 import com.video.user.LoginActivity;
 import com.video.utils.OkCancelDialog;
 import com.video.utils.TabFactory;
@@ -63,8 +64,11 @@ public class MainActivity extends FragmentActivity {
 	private static String currentTab = "";
 	
 	private static Dialog mDialog = null;
+	private int loginTimes = 0;
+	
 	private final static int IS_LOGINNING = 1;
 	private final static int LOGIN_TIMEOUT = 2;
+	private final int LOGIN_AGAIN = 3;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -110,7 +114,7 @@ public class MainActivity extends FragmentActivity {
 								if (preferData.isExist("UserPwd")) {
 									userPwd = preferData.readString("UserPwd");
 								}
-								Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+								Handler sendHandler = ZmqThread.zmqThreadHandler;
 								String data = generateLoginJson(userName, userPwd);
 								sendHandlerMsg(IS_LOGINNING);
 								handler.sendEmptyMessageDelayed(LOGIN_TIMEOUT, Value.requestTimeout);
@@ -315,6 +319,18 @@ public class MainActivity extends FragmentActivity {
 	}
 	
 	/**
+	 * 判断是否在当前的Tab页
+	 * @param tabNum 1、2、3、4
+	 * @return 是返回true 否返回false
+	 */
+	public static boolean isCurrentTab(int tabNum) {
+		if (currentTab.equals("tab"+tabNum)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * 设置消息tab的报警显示
 	 * @param msg 多少条消息
 	 */
@@ -322,7 +338,7 @@ public class MainActivity extends FragmentActivity {
 		if (tv_alarm_msg != null) {
 			if (msg <= 0) {
 				tv_alarm_msg.setText("消息");
-				if (currentTab.equals("tab3")) {
+				if (isCurrentTab(3)) {
 					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.tab_text_color));
 				} else {
 					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.white));
@@ -348,28 +364,34 @@ public class MainActivity extends FragmentActivity {
 				case 0:
 					setAlarmIconAndText(msg.arg1);
 					
-					//播放报警语音
-					if (!Value.isPlayMp3 && isPlayAlarmMusic) {
-						Value.isPlayMp3 = true;
-						MediaPlayer mediaPlayer = null;
-						if (mediaPlayer == null) {
-							mediaPlayer = MediaPlayer.create(mContext, R.raw.alarm);
-							mediaPlayer.stop();
-						}
-						mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-							@Override
-							public void onCompletion(MediaPlayer mp) {
-								mp.release();
-								mp = null;
-								Value.isPlayMp3 = false;
+					try {
+						//播放报警语音
+						if (!Value.isPlayMp3 && isPlayAlarmMusic) {
+							Value.isPlayMp3 = true;
+							MediaPlayer mediaPlayer = null;
+							if (mediaPlayer == null) {
+								mediaPlayer = MediaPlayer.create(mContext, R.raw.alarm);
+								mediaPlayer.stop();
 							}
-						});
-						try {
-							mediaPlayer.prepare();
-							mediaPlayer.start();
-						} catch (Exception e) {
-							e.printStackTrace();
+							mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+								@Override
+								public void onCompletion(MediaPlayer mp) {
+									mp.release();
+									mp = null;
+									Value.isPlayMp3 = false;
+								}
+							});
+							try {
+								mediaPlayer.prepare();
+								mediaPlayer.start();
+							} catch (Exception e) {
+								System.out.println("MyDebug: mediaPlayer.prepare()异常！");
+								e.printStackTrace();
+							}
 						}
+					} catch (Exception e) {
+						System.out.println("MyDebug: MediaPlayer.create()异常！");
+						e.printStackTrace();
 					}
 					break;
 			}
@@ -389,14 +411,34 @@ public class MainActivity extends FragmentActivity {
 					break;
 				//登录超时
 				case LOGIN_TIMEOUT:
-					if (mDialog != null)
-						mDialog.dismiss();
+					loginTimes ++;
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
 					}
-					Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
-					startActivity(new Intent(mContext, LoginActivity.class));
-	    			MainActivity.this.finish();
+					//超时之后关闭服务，断开连接，再重启服务
+					ZmqCtrl.getInstance().exit();
+			    	stopService(new Intent(mContext, BackstageService.class));
+					Value.resetValues();
+					sendHandlerMsg(LOGIN_AGAIN, 2000);
+					break;
+				//重新登录
+				case LOGIN_AGAIN:
+					ZmqCtrl.getInstance().init();
+					if (loginTimes >= 3) {
+						loginTimes = 0;
+						if (mDialog != null) {
+							mDialog.dismiss();
+							mDialog = null;
+						}
+						Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
+						startActivity(new Intent(mContext, LoginActivity.class));
+		    			MainActivity.this.finish();
+					} else {
+						Handler sendHandler = ZmqThread.zmqThreadHandler;
+						String data = generateLoginJson(userName, userPwd);
+						sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+					}
 					break;
 				//接收登录响应
 				case R.id.login_id:
@@ -432,6 +474,11 @@ public class MainActivity extends FragmentActivity {
 		msg.what = what;
 		handler.sendMessage(msg);
 	}
+	private void sendHandlerMsg(int what, int timeout) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessageDelayed(msg, timeout);
+	}
 	private void sendHandlerMsg(Handler handler, int what, String obj) {
 		Message msg = new Message();
 		msg.what = what;
@@ -450,6 +497,7 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
+				Value.resetValues();
 				Intent intent = new Intent(HandlerApplication.getInstance(), BackstageService.class);
 		    	HandlerApplication.getInstance().stopService(intent);
 		    	finish();

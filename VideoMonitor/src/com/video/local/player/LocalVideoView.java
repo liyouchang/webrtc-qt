@@ -26,7 +26,6 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.net.Uri;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -37,11 +36,9 @@ import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 
 public class LocalVideoView extends SurfaceView implements MediaPlayerControl {
-    private String TAG = "VideoView";
     
     private Context mContext;
     
-    // settable by the client
     private Uri         mUri;//URI  视频地址
     private int         mDuration;//持续时间
 
@@ -233,7 +230,6 @@ public class LocalVideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.setOnPreparedListener(mPreparedListener);
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mIsPrepared = false;
-            Log.v(TAG, "reset duration to -1 in openVideo");
             mDuration = -1;
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
             mMediaPlayer.setOnErrorListener(mErrorListener);
@@ -246,10 +242,8 @@ public class LocalVideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.prepareAsync();// 为了不阻塞主线程而异步准备
             attachMediaController();//附加媒体控制器
         } catch (IOException ex) {
-            Log.w(TAG, "Unable to open content: " + mUri, ex);
             return;
         } catch (IllegalArgumentException ex) {
-            Log.w(TAG, "Unable to open content: " + mUri, ex);
             return;
         }
     }
@@ -359,7 +353,6 @@ public class LocalVideoView extends SurfaceView implements MediaPlayerControl {
     private MediaPlayer.OnErrorListener mErrorListener =
         new MediaPlayer.OnErrorListener() {
         public boolean onError(MediaPlayer mp, int framework_err, int impl_err) {
-            Log.d(TAG, "Error: " + framework_err + "," + impl_err);
             if (mMediaController != null) {
                 mMediaController.hide();
             }
@@ -625,7 +618,6 @@ public class LocalVideoView extends SurfaceView implements MediaPlayerControl {
 		return false;
 	}
 
-	@Override
 	public int getAudioSessionId() {
 		// TODO Auto-generated method stub
 		return 0;

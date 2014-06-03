@@ -20,12 +20,12 @@ import com.video.R;
 
 public class PullToRefreshView extends LinearLayout {
 	// refresh states
-	private static final int PULL_TO_REFRESH = 2;
-	private static final int RELEASE_TO_REFRESH = 3;
-	private static final int REFRESHING = 4;
+	public static final int PULL_TO_REFRESH = 2;
+	public static final int RELEASE_TO_REFRESH = 3;
+	public static final int REFRESHING = 4;
 	// pull state
-	private static final int PULL_UP_STATE = 0;
-	private static final int PULL_DOWN_STATE = 1;
+	public static final int PULL_UP_STATE = 0;
+	public static final int PULL_DOWN_STATE = 1;
 	/**
 	 * last y
 	 */
@@ -562,6 +562,10 @@ public class PullToRefreshView extends LinearLayout {
 		setLastUpdated(lastUpdated, terminal);
 		onHeaderRefreshComplete();
 	}
+	
+	public int getHeaderState() {
+		return mHeaderState;
+	}
 
 	/**
 	 * footer view 完成更新后恢复初始状态
@@ -574,6 +578,10 @@ public class PullToRefreshView extends LinearLayout {
 		mFooterProgressBar.setVisibility(View.GONE);
 		// mHeaderUpdateTextView.setText("");
 		mFooterState = PULL_TO_REFRESH;
+	}
+	
+	public int getFooterState() {
+		return mFooterState;
 	}
 
 	/**

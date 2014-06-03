@@ -80,4 +80,8 @@
 
    <!-- 配置终端WiFi -->
    <item name="set_term_wifi_id" type="id"/>
+   
+   <!-- 请求终端录像列表 -->
+   <item name="request_terminal_video_list_id" type="id"/>
+   
 </resources>

@@ -19,7 +19,7 @@ public class HandlerApplication extends Application {
 	
 	public static HandlerApplication getInstance() {  
         return AppInstance;  
-    } 
+    }
 	
 	@Override  
     public void onCreate() {  

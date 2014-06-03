@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.os.Message;
 import android.os.MessageQueue.IdleHandler;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.support.v4.view.ViewPager.LayoutParams;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -61,6 +63,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private PlayerReceiver playerReceiver; 
 	public static final String PLAYER_BROADCAST_ACTION = "com.video.play.PlayerActivity.PlayVideo";
 	public static final String REQUEST_TIMES_ACTION = "com.video.play.PlayerActivity.RequestTimes";
+	public static final String TUNNEL_REQUEST_ACTION = "com.video.play.PlayerActivity.TunnelRequest";
 
 	private TextView tv_title = null;
 	private static String deviceName = null;
@@ -86,14 +89,14 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private static PopupWindow titlePopupWindow = null;//标题弹出框
 	private View bottomView = null;//底部视图
 	private static PopupWindow bottomPopupWindow = null;//底部弹出框
+	private View recordView = null;//底部视图
+	private static PopupWindow recordPopupWindow = null;//底部弹出框
 
-	
 	private Button player_capture = null;
 	private Button player_record = null;
 	private Button player_talkback = null;
 	private Button player_sound = null;
 	private Button video_clarity = null;
-	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -118,7 +121,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		
 		//视频标题弹出框
 		titleView = getLayoutInflater().inflate(R.layout.player_title_view, null);
-		titlePopupWindow = new PopupWindow(titleView);
+		titlePopupWindow = new PopupWindow(titleView, screenWidth, titleHeight, false);
 		tv_title = (TextView) titleView.findViewById(R.id.tv_player_title);
 		tv_title.setText(deviceName);
 		ImageButton player_back = (ImageButton) titleView.findViewById(R.id.ib_player_back);
@@ -126,7 +129,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		
 		//视频底部弹出框
 		bottomView = getLayoutInflater().inflate(R.layout.player_bottom_view, null);
-		bottomPopupWindow = new PopupWindow(bottomView);
+		bottomPopupWindow = new PopupWindow(bottomView, screenWidth, bottomHeight, false);
 		player_capture = (Button) bottomView.findViewById(R.id.btn_player_capture);
 		player_capture.setOnClickListener(this);
 		player_record = (Button) bottomView.findViewById(R.id.btn_player_record);
@@ -138,20 +141,20 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		video_clarity = (Button) bottomView.findViewById(R.id.btn_player_clarity);
 		video_clarity.setOnClickListener(this);
 		
+		//视频底部弹出框
+		recordView = getLayoutInflater().inflate(R.layout.player_video_record_view, null);
+		recordPopupWindow = new PopupWindow(recordView, screenWidth, bottomHeight, false);
+		
 		//空闲的队列
 		Looper.myQueue().addIdleHandler(new IdleHandler() {
 			@Override
 			public boolean queueIdle() {
 				isPopupWindowShow = true;
 				if (titlePopupWindow != null && videoView.isShown()) {
-					titlePopupWindow.setAnimationStyle(R.style.PopupAnimationTop);
-					titlePopupWindow.showAtLocation(videoView, Gravity.TOP, 0, 0);
-					titlePopupWindow.update(0, 0, screenWidth, titleHeight);
+					showTitlePopupWindow();
 				}
 				if (bottomPopupWindow != null && videoView.isShown()) {
-					bottomPopupWindow.setAnimationStyle(R.style.PopupAnimationBottom);
-					bottomPopupWindow.showAtLocation(videoView, Gravity.BOTTOM, 0, 0);
-					bottomPopupWindow.update(0, 0, screenWidth, bottomHeight);
+					showBottomPopupWindow();
 				}
 				hidePopupWindowDelay();
 				return false;
@@ -162,20 +165,15 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 
 			//单击屏幕
 			@Override
-			public boolean onSingleTapConfirmed(MotionEvent e) {
+			public boolean onSingleTapUp(MotionEvent e) {
 				// TODO Auto-generated method stub
 				if (isPopupWindowShow) {
 					hidePopupWindow();
-					cancelDelayHide();
 				} else {
 					showPopupWindow();
-					cancelDelayHide();
 					hidePopupWindowDelay();
 				}
-				if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-					titlePopupWindow.update(0, 0, screenWidth, titleHeight);
-				}
-				return super.onSingleTapConfirmed(e);
+				return false;
 			}
 		});
 	}
@@ -189,6 +187,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(PLAYER_BROADCAST_ACTION);
 		filter.addAction(REQUEST_TIMES_ACTION);
+		filter.addAction(TUNNEL_REQUEST_ACTION);
 		registerReceiver(playerReceiver, filter);
 		
 		Intent intent = this.getIntent();
@@ -216,38 +215,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		}
 	};
 	
-	public static Handler playHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			// TODO Auto-generated method stub
-			super.handleMessage(msg);
-			switch (msg.what) {
-				case 0:
-					Value.isTunnelOpened = true;
-					String peerId = (String) msg.obj;
-					if (peerId.equals(dealerName)) {
-						//【播放视频】
-						TunnelCommunication.getInstance().askMediaData(dealerName);
-						videoView.playVideo();
-						if (mDialog != null) {
-							mDialog.dismiss();
-							mDialog = null;
-						}
-					}
-					break;
-				case 1:
-					if (mDialog != null) {
-						mDialog.dismiss();
-					}
-					if (!Value.isTunnelOpened) {
-						toastNotify(mContext, "请求视频超时，请重试！", Toast.LENGTH_SHORT);
-					}
-					Value.isTunnelOpened = false;
-					break;
-			}
-		}
-	};
-	
 	/**
 	 * 发送Handler消息
 	 */
@@ -255,11 +222,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		Message msg = new Message();
 		msg.what = what;
 		handler.sendMessage(msg);
-	}
-	public void sendHandlerMsg(int what, int timeout) {
-		Message msg = new Message();
-		msg.what = what;
-		playHandler.sendMessageDelayed(msg, timeout);
 	}
 	public void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
 		Message msg = new Message();
@@ -273,8 +235,60 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	 */
 	private void showPopupWindow() {
 		isPopupWindowShow = true;
-		titlePopupWindow.update(0, 0, screenWidth, titleHeight);
-		bottomPopupWindow.update(0, 0, screenWidth, bottomHeight);
+		cancelDelayHide();
+		showTitlePopupWindow();
+		showBottomPopupWindow();
+	}
+	
+	/**
+	 * 显示顶部PopupWindow
+	 */
+	private void showTitlePopupWindow() {
+		titlePopupWindow.setHeight(LayoutParams.WRAP_CONTENT);
+		titlePopupWindow.setBackgroundDrawable(new BitmapDrawable());
+		titlePopupWindow.setOutsideTouchable(true);
+
+		titlePopupWindow.setAnimationStyle(R.style.PopupAnimationTop);
+		titlePopupWindow.showAtLocation(videoView, Gravity.TOP, 0, 0);
+		titlePopupWindow.update();
+	}
+	
+	/**
+	 * 显示底部PopupWindow
+	 */
+	private void showBottomPopupWindow() {
+		bottomPopupWindow.setHeight(LayoutParams.WRAP_CONTENT); 
+		bottomPopupWindow.setBackgroundDrawable(new BitmapDrawable());
+		bottomPopupWindow.setOutsideTouchable(true);
+		
+		bottomPopupWindow.setAnimationStyle(R.style.PopupAnimationBottom);
+		bottomPopupWindow.showAtLocation(videoView, Gravity.BOTTOM, 0, 0);
+		bottomPopupWindow.update();
+	}
+	
+	/**
+	 * 显示录像PopupWindow
+	 */
+	private void showRecordPopupWindow() {
+		if (recordPopupWindow != null && videoView.isShown()) {
+			recordPopupWindow.setWidth(LayoutParams.WRAP_CONTENT);
+			recordPopupWindow.setHeight(LayoutParams.WRAP_CONTENT); 
+			recordPopupWindow.setBackgroundDrawable(new BitmapDrawable());
+			recordPopupWindow.setOutsideTouchable(false);
+			recordPopupWindow.setTouchable(true);
+			
+			recordPopupWindow.showAtLocation(videoView, Gravity.TOP | Gravity.LEFT, 30, 60);
+			recordPopupWindow.update();
+		}
+	}
+	
+	/**
+	 * 隐藏录像PopupWindow
+	 */
+	private void hideRecordPopupWindow() {
+		if (recordPopupWindow.isShowing()) {
+			recordPopupWindow.dismiss();
+		}
 	}
 	
 	/**
@@ -282,13 +296,12 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	 */
 	private void hidePopupWindow() {
 		isPopupWindowShow = false;
+		cancelDelayHide();
 		if (titlePopupWindow.isShowing()) {
-			if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-				titlePopupWindow.update(0, 0, 0, 0);
-			}
+			titlePopupWindow.dismiss();
 		}
 		if (bottomPopupWindow.isShowing()) {
-			bottomPopupWindow.update(0, 0, 0, 0);
+			bottomPopupWindow.dismiss();
 		}
 	}
 	
@@ -296,6 +309,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	 * 延迟隐藏控制器
 	 */
 	private void hidePopupWindowDelay() {
+		cancelDelayHide();
 		handler.sendEmptyMessageDelayed(HIDE_POPUPWINDOW, SHOW_TIME_MS);
 	}
 	
@@ -303,7 +317,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	 * 取消延迟隐藏
 	 */
 	private void cancelDelayHide() {
-		handler.removeMessages(HIDE_POPUPWINDOW);
+		if (handler.hasMessages(HIDE_POPUPWINDOW)) {
+			handler.removeMessages(HIDE_POPUPWINDOW);
+		}
 	}
 	
 	/**
@@ -363,14 +379,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
         getScreenSize();
         if (isPopupWindowShow) {
 			showPopupWindow();
-			cancelDelayHide();
 			hidePopupWindowDelay();
 		} else {
 			hidePopupWindow();
-			cancelDelayHide();
-		}
-        if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-			titlePopupWindow.update(0, 0, screenWidth, titleHeight);
 		}
 	}
 	
@@ -428,6 +439,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 							//开始录视频
 							isRecordVideo = true;
 							playMyMusic(R.raw.record);
+							showRecordPopupWindow();
 							player_record.setBackgroundResource(R.drawable.player_recording_xml);
 							
 							String SDPath = Environment.getExternalStorageDirectory().getAbsolutePath();
@@ -449,13 +461,14 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 							String videoFile = filePath3 + File.separator +videoName + ".avi";
 							TunnelCommunication.getInstance().startRecordVideo(dealerName, videoFile);
 						} else {
-							toastNotify(mContext, "录像失败！", Toast.LENGTH_SHORT);
+							toastNotify(mContext, "录像失败", Toast.LENGTH_SHORT);
 						}
 					} else {
 						//停止录视频
 						isRecordVideo = false;
-						TunnelCommunication.getInstance().stopRecordVideo(dealerName);
+						hideRecordPopupWindow();
 						player_record.setBackgroundResource(R.drawable.player_record_xml);
+						TunnelCommunication.getInstance().stopRecordVideo(dealerName);
 					}
 				} catch (Exception e) {
 					System.out.println("MyDebug: 录像异常！");
@@ -577,7 +590,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					case MotionEvent.ACTION_MOVE:
 						endTime = System.currentTimeMillis();
 						spaceTime = endTime - startTime;
-						if (!isPtzControling && (spaceTime > 100)) {
+						if (!isPtzControling && (spaceTime > 200)) {
 							isPtzControling = true;
 							
 							endPointX = event.getX();
@@ -625,6 +638,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	protected void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
+		destroyDialogView();
 	}
 
 	@Override
@@ -647,12 +661,30 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		}
 		return super.onKeyDown(keyCode, event);
 	}
+	
+	private void destroyDialogView() {
+		//销毁弹出框
+		if (mDialog.isShowing()) {
+			mDialog.dismiss();
+		}
+		if (titlePopupWindow.isShowing()) {
+			titlePopupWindow.dismiss();
+		}
+		if (bottomPopupWindow.isShowing()) {
+			bottomPopupWindow.dismiss();
+		}
+		if (recordPopupWindow.isShowing()) {
+			recordPopupWindow.dismiss();
+		}
+	}
 
 	/**
 	 * 关闭播放器
 	 */
 	private void closePlayer() {
 		try {
+			destroyDialogView();
+			
 			//停止录视频
 			if (isRecordVideo) {
 				isRecordVideo = false;
@@ -675,19 +707,16 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				TunnelCommunication.getInstance().tunnelTerminate();
 			}
 			Value.TerminalDealerName = null;
-			//销毁弹出框
-			if (titlePopupWindow != null) {
-				titlePopupWindow.dismiss();
-			}
-			if (bottomPopupWindow != null) {
-				bottomPopupWindow.dismiss();
-			}
 		} catch (Exception e) {
 			System.out.println("MyDebug: 关闭实时播放器异常！");
 			e.printStackTrace();
 		}
 	}
 	
+	/**
+	 * @author sunfusheng
+	 * 播放器的广播接收
+	 */
 	public class PlayerReceiver extends BroadcastReceiver {
 
 		@Override
@@ -722,6 +751,34 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			else if (action.equals(REQUEST_TIMES_ACTION)) {
 				closePlayer();
 				PlayerActivity.this.finish();
+			}
+			else if (action.equals(TUNNEL_REQUEST_ACTION)) {
+				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
+				switch (TunnelEvent) {
+					case 0:
+						Value.isTunnelOpened = true;
+						String peerId = (String) intent.getCharSequenceExtra("PeerId");
+						if (peerId.equals(dealerName)) {
+							//【播放视频】
+							TunnelCommunication.getInstance().askMediaData(dealerName);
+							videoView.playVideo();
+							if (mDialog.isShowing()) {
+								mDialog.dismiss();
+							}
+						}
+						break;
+					case 1:
+						if (mDialog.isShowing()) {
+							mDialog.dismiss();
+						}
+						if (!Value.isTunnelOpened) {
+							toastNotify(mContext, "请求视频超时，请重试！", Toast.LENGTH_SHORT);
+						}
+						Value.isTunnelOpened = false;
+						closePlayer();
+						PlayerActivity.this.finish();
+						break;
+				}
 			}
 		}
 	}

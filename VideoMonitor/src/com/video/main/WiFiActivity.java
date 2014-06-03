@@ -33,8 +33,8 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.Value;
 import com.video.data.XmlDevice;
-import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqHandler;
+import com.video.socket.ZmqThread;
 import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 import com.video.utils.WiFiAlertDialog;
@@ -43,7 +43,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
 	private static XmlDevice xmlData;
-	private ArrayList<HashMap<String, Object>> onlineTermList = null;
+	private ArrayList<HashMap<String, String>> onlineTermList = null;
 	private Button button_wifi_term_select;
 	public static String onlineDealerName = "";
 	public static HashMap<String, Object> selectedWiFi = null;
@@ -283,7 +283,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	 * 请求设备周围WiFi列表
 	 */
 	private void getWiFiListInfoEvent() {
-		Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+		Handler sendHandler = ZmqThread.zmqThreadHandler;
 		String data = generateGetWiFiInfoJson();
 		sendHandlerMsg(IS_REQUSTING);
 		sendHandlerMsg(REQUST_TIMEOUT, Value.requestTimeout);
@@ -298,7 +298,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	 * 配置设备WiFi网络
 	 */
 	private void setTermWiFiInfoEvent(String key) {
-		Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
+		Handler sendHandler = ZmqThread.zmqThreadHandler;
 		String data = generateSetTermWiFiInfoJson(key);
 		sendHandlerMsg(IS_SETTING);
 		sendHandlerMsg(SET_TIMEOUT, Value.requestTimeout);

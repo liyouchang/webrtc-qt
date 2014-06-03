@@ -219,7 +219,7 @@ public class VideoView extends View {
 				mCanvas = canvas;
 			}
 			// 清空画布
-			if (!runFlag) {
+			if ((!runFlag) || (!Value.isTunnelOpened)) {
 				Paint paint = new Paint();
 				paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
 				canvas.drawBitmap(videoBmp, srcRect, dstRect, paint);

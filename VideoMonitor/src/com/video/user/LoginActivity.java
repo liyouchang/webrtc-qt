@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.data.XmlMessage;
 import com.video.main.MainActivity;
 import com.video.service.BackstageService;
 import com.video.socket.ZmqCtrl;
@@ -205,7 +206,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					break;
 				case LOGIN_AGAIN:
 					ZmqCtrl.getInstance().init();
-					if (loginTimes >= 2) {
+					if (loginTimes >= 3) {
 						loginTimes = 0;
 						if (mDialog != null) {
 							mDialog.dismiss();
@@ -229,6 +230,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 						loginTimes = 0;
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
+							//登录成功
 							Value.isLoginSuccess = true;
 							startActivity(new Intent(mContext, MainActivity.class));
 							LoginActivity.this.finish();
@@ -283,6 +285,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 				        }
 						MainActivity.setAlarmIconAndText(0);
 					}
+					XmlMessage xmlData = new XmlMessage(mContext);
+					xmlData.deleteAllItem();
 					preferData.deleteItem("UserName");
 					preferData.writeData("UserName", userName);
 				} else {

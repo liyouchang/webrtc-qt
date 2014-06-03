@@ -9,6 +9,8 @@
     <color name="light_black">#696969</color>
     <!-- 红色 -->
     <color name="red">#ff0000</color>
+    <!-- 录像 -->
+    <color name="video_record_color">#c90000</color>
     <!-- 海绿色 -->
     <color name="sea_green">#43CD80</color>
     <!-- 橙色 -->

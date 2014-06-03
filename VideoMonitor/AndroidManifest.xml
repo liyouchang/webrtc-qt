@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.video"
-    android:versionCode="8"
-    android:versionName="1.0.8" >
+    android:versionCode="10"
+    android:versionName="1.1.0" >
 
     <uses-sdk android:minSdkVersion="14" />
     
@@ -176,7 +176,20 @@
         <!-- 本地播放器 -->
         <activity
             android:name=".local.player.LocalPlayerActivity"
+            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 请求终端录像  -->
+        <activity
+            android:name=".main.SetDateActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 终端录像文件列表  -->
+        <activity
+            android:name=".main.TerminalVideoListActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
     </application>

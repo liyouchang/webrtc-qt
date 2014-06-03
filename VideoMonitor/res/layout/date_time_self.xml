@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_bg"
+    android:gravity="top|center"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/set_date_title"
+        android:layout_width="fill_parent"
+        android:layout_height="60.0dip"
+        android:gravity="center"
+        android:text="@string/set_date_time"
+        android:textColor="@color/light_black"
+        android:textSize="25dp" />
+
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2.0dip"
+        android:background="@color/blue" />
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fadingEdge="vertical"
+        android:scrollbars="vertical" >
+
+        <LinearLayout
+            android:id="@+id/hottopics"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:scrollbars="vertical" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select_date"
+                android:textColor="@color/red"
+                android:textSize="18sp" />
+
+            <DatePicker
+                android:id="@+id/datepicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+            </DatePicker>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/select_time"
+                android:textColor="@color/red"
+                android:textSize="18sp" />
+
+            <TimePicker
+                android:id="@+id/timepicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal" >
+            </TimePicker>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="50.0dip"
+                android:layout_marginBottom="20dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal" >
+
+                <Button
+                    android:id="@+id/btn_date_time_ok"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_left"
+                    android:gravity="center"
+                    android:text="@string/btn_ok"
+                    android:textColor="@color/light_black"
+                    android:textSize="16dp" />
+
+                <Button
+                    android:id="@+id/btn_date_time_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_right"
+                    android:gravity="center"
+                    android:text="@string/btn_back"
+                    android:textColor="@color/light_black"
+                    android:textSize="16dp" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>
