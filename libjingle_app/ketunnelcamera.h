@@ -19,6 +19,7 @@ public:
     virtual int GetVideoClarity();
     virtual void SetPtz(std::string  ptz_key,int param);
     virtual void GetCameraVideoInfo(int level,VideoInfo * info) = 0;
+
 protected:
     sigslot::signal2<const char *, int> SignalVideoData1;
     sigslot::signal2<const char *, int> SignalVideoData2;

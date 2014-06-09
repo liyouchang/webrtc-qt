@@ -8,6 +8,7 @@
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
 #include "talk/base/stringencode.h"
+#include "talk/base/base64.h"
 
 #include "keapi/keapi.h"
 
@@ -82,7 +83,7 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
     media_thread_ = new talk_base::Thread();
     media_thread_->Start();
     //start get media
-    media_thread_->Post(this,MSG_MEDIA_CONTROL,new MediaControlData(1,1,1));
+    media_thread_->Post(this, MSG_MEDIA_CONTROL, new MediaControlData(1,1,1));
     AlarmNotify::Instance()->StartNotify();
     return KeTunnelCamera::Init(client);
 }
@@ -249,6 +250,7 @@ void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string conditi
     this->terminal_->SendByRouter(peer_id,msg);
 
 }
+
 
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)
 {
@@ -442,34 +444,41 @@ void AlarmNotify::StartNotify()
 //门磁    rea = 2，io = 20
 //人体红外 rea = 2，io = 21
 //烟感报警 rea = 2，io = 22
-int AlarmNotify::NotifyCallBack(int chn, int rea, int io, int snapcount, int snapsize, char *snapbuf)
+int AlarmNotify::NotifyCallBack(int chn, int rea, int io,
+                                int snapcount, int snapsize, char *snapbuf)
 {
     //TODO: to signal alarm message
-    LOG(INFO)<<"AlarmNotify::NotifyCallBack---chn:"<<chn<<
-               " rea:"<<rea<<" io:"<<io << " snapcout:"<<snapcount<<" snapsize:" << snapsize;
+    LOG(INFO)<<"AlarmNotify::NotifyCallBack---chn:"<<chn<<" rea:"<<rea
+            <<" io:"<<io << " snapcout:"<<snapcount<<" snapsize:" << snapsize;
     std::ostringstream infostream;
-    infostream<<"通道"<<chn;
+    infostream<<"发生";
     if(rea == 1){
-        infostream<<" 移动侦测";
+        infostream<<" 移动侦测报警";
     }else if(rea == 4){
         infostream<<" 遮挡报警";
     }else if(rea==5){
-        infostream<<" 开关量";
+        infostream<<" 开关量报警";
     }else if(rea==2){
         if(io == 20){
-            infostream<<" 门磁";
+            infostream<<" 门磁报警";
         }else if(io == 21){
-            infostream<<" 人体红外";
+            infostream<<" 人体红外报警";
         }else if(io == 22){
             infostream<<" 烟感报警";
         }else{
             infostream<<" unknown";
         }
-    }else {
+    } else {
         infostream<<" unknown";
     }
-
-    AlarmNotify::Instance()->SignalTerminalAlarm(rea,infostream.str(),"");
+    std::string picBase64Data;
+    if (snapsize > 0){
+        talk_base::Base64::EncodeFromArray(snapbuf,snapsize,&picBase64Data);
+    }
+    LOG(INFO)<<"picture base64 data:"<<picBase64Data;
+    int alarmType = rea;
+    AlarmNotify::Instance()->SignalTerminalAlarm(alarmType,infostream.str(),
+                                                 picBase64Data);
     return 0;
 }
 

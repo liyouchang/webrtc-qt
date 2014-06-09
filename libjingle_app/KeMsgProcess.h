@@ -75,6 +75,7 @@ private:
     int heart_count_;
 };
 
+//this class process the message from another peer
 
 class KeMsgProcessContainer: public sigslot::has_slots<>
 {
@@ -98,12 +99,12 @@ public:
                                  talk_base::Buffer &msg);
     virtual void SendSelfData(const std::string & peer_id,
                               const char * data,int len);
+    virtual void SendProcessData(const std::string & peer_id,
+                                   const char * data,int len);
 
 protected:
     virtual KeMsgProcess * GetProcess(const std::string & peer_id);
     virtual void AddMsgProcess(KeMsgProcess * process);
-    virtual void SendProcessData(const std::string & peer_id,
-                                   const char * data,int len);
     virtual void OnHeartStop(const std::string & peer_id);
 
     std::vector<KeMsgProcess *> processes_;

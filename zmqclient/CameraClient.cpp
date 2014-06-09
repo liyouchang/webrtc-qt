@@ -25,8 +25,8 @@ void CameraClient::Login()
     comm_thread_->PostDelayed(kHeartInterval,this,MSG_LOGIN_TIMEOUT);
 }
 
-void CameraClient::SendAlarm(int alarmType, std::string alarmInfo,
-                             std::string picture)
+void CameraClient::SendAlarm(int alarmType, const std::string &alarmInfo,
+                             const std::string &picture)
 {
     Json::StyledWriter writer;
     Json::Value jmessage;

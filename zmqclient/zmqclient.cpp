@@ -27,8 +27,10 @@ int main()
     JsonConfig::Instance()->FromFile(kaerp2p::GetAppFilePath("config.json"));
     Json::Value mac_value = JsonConfig::Instance()->Get("camera.mac","");
     Json::Value dealer_value = JsonConfig::Instance()->Get("dealerId","");
-    Json::Value router_value = JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
-    Json::Value log_params_value = JsonConfig::Instance()->Get("logParams","tstamp thread info debug");
+    Json::Value router_value =
+            JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
+    Json::Value log_params_value =
+            JsonConfig::Instance()->Get("logParams","tstamp thread info debug");
     Json::Value jservers = JsonConfig::Instance()->Get("servers","");
     //Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
 
@@ -50,7 +52,8 @@ int main()
     CameraClient client(strMac);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
-    Json::Value jsampleFile = JsonConfig::Instance()->Get("sampleFileName","sample.avi");
+    Json::Value jsampleFile =
+            JsonConfig::Instance()->Get("sampleFileName","sample.avi");
     std::string sampleFileName;
     if(!GetStringFromJson(jsampleFile,&sampleFileName)){
         return 2;
@@ -60,12 +63,11 @@ int main()
         return 1;
     }
 #else
-
     HisiMediaDevice * device = new HisiMediaDevice();
-    if(strMac.empty()){
+    if(strMac.empty()) {
         strMac = device->GetHardwareId();
     }
-    if(strDealerId.empty()){
+    if(strDealerId.empty()) {
         strDealerId = strMac + "-" + kaerp2p::GetRandomString();
     }
 
@@ -73,15 +75,13 @@ int main()
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
 
-
     AlarmNotify::Instance()->SignalTerminalAlarm.connect(
                 &client,&CameraClient::SendAlarm);
 
     device->Init(&client);
+
 #endif //arm
-
     talk_base::Thread::Current()->Run();
-
     return 0;
 }
 

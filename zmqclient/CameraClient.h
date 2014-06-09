@@ -15,8 +15,8 @@ public:
 
     explicit CameraClient(std::string mac);
     virtual void Login();
-    virtual void SendAlarm(int alarmType, std::string alarmInfo,
-                           std::string picture);
+    virtual void SendAlarm(int alarmType, const std::string &alarmInfo,
+                           const std::string &picture);
 
 public:
     enum

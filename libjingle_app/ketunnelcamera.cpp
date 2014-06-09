@@ -41,6 +41,7 @@ void KeTunnelCamera::SetPtz(std::string ptz_key, int param)
     LOG(INFO)<<"KeTunnelCamera::SetPtz---key:" <<ptz_key<<" param:"<<param;
 }
 
+
 void KeTunnelCamera::RecvGetWifiInfo(std::string peer_id)
 {
     LOG(INFO)<<"KeTunnelCamera::OnRecvGetWifiInfo---from:" <<peer_id;

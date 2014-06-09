@@ -48,7 +48,7 @@ typedef struct
 typedef struct
 { 
 	int file_num;
-	t_VidRec_FileInfo   rec_file[MAX_NVR_QUERYNUM];
+    t_VidRec_FileInfo rec_file[MAX_NVR_QUERYNUM];
 }t_VidRecFile_QueryInfo, *pt_VidRecFile_QueryInfo;
 
 typedef struct
