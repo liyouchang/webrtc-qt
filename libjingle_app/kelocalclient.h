@@ -41,6 +41,7 @@ private:
     talk_base::AsyncUDPSocket * broadcastSocket;
     talk_base::AsyncRawTCPSocket * localSocket;
     talk_base::Thread* socketThread_;
+    bool ownThread;
 };
 
 class KeLocalMessage;

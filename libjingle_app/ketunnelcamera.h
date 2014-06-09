@@ -20,10 +20,6 @@ public:
     virtual void SetPtz(std::string  ptz_key,int param);
     virtual void GetCameraVideoInfo(int level,VideoInfo * info) = 0;
 
-    virtual void TerminalAlarm(const std::string & peerId,int alarmType,
-                               const std::string & alarmInfo,
-                               const std::string & picture);
-
 protected:
     sigslot::signal2<const char *, int> SignalVideoData1;
     sigslot::signal2<const char *, int> SignalVideoData2;

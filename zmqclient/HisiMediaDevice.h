@@ -73,7 +73,7 @@ enum AlarmType{
 class AlarmNotify{
 public:
     void StartNotify();
-    sigslot::signal3<int,std::string,std::string> SignalTerminalAlarm;
+    sigslot::signal3<int,const std::string &,const std::string &> SignalTerminalAlarm;
     static AlarmNotify *Instance(){
         static AlarmNotify notify;
         return &notify;

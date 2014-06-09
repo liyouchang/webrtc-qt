@@ -6,11 +6,13 @@
 
 namespace kaerp2p{
 
-LocalTerminal::LocalTerminal():broadcastSocket(NULL),localSocket(NULL)
+LocalTerminal::LocalTerminal():
+    broadcastSocket(NULL),localSocket(NULL),ownThread(false)
 {
     //socket的执行必须和socket创建在一个线程,否则socket消息接收不到,
     //若需使用不同线程,可以考虑使用proxy
-    //this->socketThread_ = talk_base::Thread::Current();
+ //   this->socketThread_ = talk_base::Thread::Current();
+//    if(thread == NULL)
     this->socketThread_ = new talk_base::Thread();
     this->socketThread_->Start();
 }
@@ -24,7 +26,7 @@ LocalTerminal::~LocalTerminal()
         localSocket->Close();
         delete localSocket;
     }
-    delete this->socketThread_;
+    //delete this->socketThread_;
 }
 
 const int kBroadSocketStartPort = 22555;
@@ -173,8 +175,11 @@ bool KeLocalClient::Init(PeerTerminalInterface *t)
     this->has_terminal = true;
 
     broadcastMsg.reset(new KeLocalMessage("broadcast",this));
-    broadcastMsg->SignalNeedSendData.connect((KeMsgProcessContainer*)this,&KeMsgProcessContainer::SendSelfData);
-    broadcastMsg->SignalNetDeviceInfo.connect(this,&KeLocalClient::OnSearchedDeviceInfo);
+    broadcastMsg->SignalNeedSendData.connect(
+                (KeMsgProcessContainer*)this,
+                &KeMsgProcessContainer::SendSelfData);
+    broadcastMsg->SignalNetDeviceInfo.connect(
+                this,&KeLocalClient::OnSearchedDeviceInfo);
 
     return true;
 }
