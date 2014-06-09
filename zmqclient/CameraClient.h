@@ -12,17 +12,17 @@ class CameraClient: public PeerConnectionClientDealer,
         public talk_base::MessageHandler
 {
 public:
-    enum
-    {
-        MSG_LOGIN_TIMEOUT
-    };
+
     explicit CameraClient(std::string mac);
     virtual void Login();
     virtual void SendAlarm(int alarmType, std::string alarmInfo,
                            std::string picture);
 
-    // MessageHandler interface
 public:
+    enum
+    {
+        MSG_LOGIN_TIMEOUT
+    };
     void OnMessage(talk_base::Message *msg);
 private:
     talk_base::Thread * comm_thread_;

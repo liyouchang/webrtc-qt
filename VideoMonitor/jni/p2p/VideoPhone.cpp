@@ -11,6 +11,7 @@
 
 KeJniTunnelClient * client = NULL;
 JniPeerConnection * jniPeer = NULL;
+KeJniLocalClient * localClient = NULL;
 
 jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
     LOGI("1. naInitialize()");
@@ -20,8 +21,11 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
 
     jniPeer = new JniPeerConnection();
     client = new KeJniTunnelClient();
-
     client->Init(jniPeer);
+
+    kaerp2p::LocalTerminal * lt = new kaerp2p::LocalTerminal();
+    lt->Initialize();
+    localClient->Init(lt);
 
     return 0;
 }
@@ -35,7 +39,10 @@ jint naTerminate(JNIEnv *env, jobject thiz) {
         delete client;
         client = NULL;
     }
-
+    if(localClient){
+        delete localClient;
+        localClient = NULL;
+    }
     return 0;
 }
 
@@ -44,10 +51,13 @@ jint naOpenTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
     if (client == NULL) {
         return -1;
     }
-
+    int ret = 0;
     const char * pid = env->GetStringUTFChars(peer_id, NULL);
-
-    return client->OpenTunnel(pid);
+    if(!client->OpenTunnel(pid)){
+        ret = -2;
+    }
+    env->ReleaseStringUTFChars(peer_id,pid);
+    return ret;
 }
 jint naMessageFromPeer(JNIEnv *env, jobject thiz,
                        jstring peer_id, jstring message){
@@ -67,8 +77,13 @@ jint naCloseTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
     if (client == NULL) {
         return -1;
     }
+    int ret = 0;
     const char * pid = env->GetStringUTFChars(peer_id, NULL);
-    return client->CloseTunnel(pid);
+    if(!client->CloseTunnel(pid)){
+        ret = -2;
+    }
+    env->ReleaseStringUTFChars(peer_id,pid);
+    return ret;
 }
 
 jint naAskMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
@@ -150,6 +165,58 @@ jint naDownloadRemoteFile(JNIEnv *env, jobject thiz,
     return returnValue;
 }
 
+jint naSearchLocalDevice(JNIEnv *env, jobject thiz){
+    localClient->SearchLocalDevice();
+}
+
+jint naConnectLocalDevice(JNIEnv *env, jobject thiz, jstring peerAddr){
+    if (localClient == NULL) {
+        return -1;
+    }
+    int ret = 0;
+    const char * pid = env->GetStringUTFChars(peerAddr, NULL);
+    if(!localClient->OpenTunnel(pid)){
+        ret = -2;
+    }
+    env->ReleaseStringUTFChars(peerAddr,pid);
+    return ret;
+}
+jint naDisconnectLocalDevice(JNIEnv *env, jobject thiz, jstring peerAddr){
+    if (localClient == NULL) {
+        return -1;
+    }
+    int ret = 0;
+    const char * pid = env->GetStringUTFChars(peerAddr, NULL);
+    if(!localClient->CloseTunnel(pid)){
+        ret = -2;
+    }
+    env->ReleaseStringUTFChars(peerAddr,pid);
+    return ret;
+}
+jint naStartLocalVideo(JNIEnv *env, jobject thiz, jstring peerAddr){
+    if (localClient == NULL) {
+        return -1;
+    }
+    int ret = 0;
+    const char * pid = env->GetStringUTFChars(peerAddr, NULL);
+    if(!localClient->StartPeerMedia(pid)){
+        ret = -2;
+    }
+    env->ReleaseStringUTFChars(peerAddr,pid);
+    return ret;
+}
+jint naStopLocalVideo(JNIEnv *env, jobject thiz, jstring peerAddr){
+    if (localClient == NULL) {
+        return -1;
+    }
+    int ret = 0;
+    const char * pid = env->GetStringUTFChars(peerAddr, NULL);
+    if(!localClient->StopPeerMedia(pid)){
+        ret = -2;
+    }
+    env->ReleaseStringUTFChars(peerAddr,pid);
+    return ret;
+}
 
 #ifndef NELEM
 #define NELEM(x) ((int)(sizeof(x)/sizeof((x)[0])))

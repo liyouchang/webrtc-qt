@@ -56,9 +56,10 @@ public:
     virtual void OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id);
     virtual void OnRouterMessage(const std::string &peer_id, talk_base::Buffer &msg);
     bool SearchLocalDevice();
-    virtual void OnSearchedDeviceInfo(const std::string &devInfo);
 
 protected:
+    virtual void OnSearchedDeviceInfo(const std::string &devInfo);
+
     virtual void OnRecvAudioData(const std::string & peer_id,
                                  const char * data,int len);
     virtual void OnRecvVideoData(const std::string & peer_id,

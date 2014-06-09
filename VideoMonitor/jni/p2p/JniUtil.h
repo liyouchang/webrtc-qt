@@ -30,7 +30,7 @@ public:
     bool JniRecordStatus(const char * peer_id, int recordstatus);
 
 	//method call back
-	bool JniTunnelMethodCallback(const char * methodName,const char * peer_id);
+    bool JniTunnelMethodCallback(const char * methodName, const char * strParam);
 	bool JniTunnelMethodCallback(const char * methodName,const char * peer_id,const char* data, int len);
 	bool getSendToPeerMethod(JNIEnv *env, jobject obj);
 	JavaVM * g_vm_;

@@ -7,7 +7,6 @@ TARGET = p2p
 
 INCLUDEPATH += $$PWD/../../..
 
-# Input
 HEADERS += JniPeerConnection.h \
            JniUtil.h \
            KeJniTunnelClient.h
