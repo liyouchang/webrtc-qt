@@ -9,12 +9,12 @@ class RecorderAvi;
 class RecordSaverInterface;
 
 enum RecordStatus{
-    kRequestSuccess = 0,
-    kRecordSaverError = 1,
-    kRequestFileError = 2,
-    kDownloadEnd = 3,
-    kShouldPlay = 4,
-    kRequestMsgError
+    kRequestSuccess = 0,//请求录像下载成功
+    kRecordSaverError = 1,//录像保存失败
+    kRequestFileError = 2,//请求录像文件错误
+    kDownloadEnd = 3,//下载结束
+    kShouldPlay = 4,//下载数据达到播放阈值
+    kRequestMsgError//请求消息错误
 };
 
 class KeTunnelClient:public KeMsgProcessContainer{
@@ -49,11 +49,11 @@ public:
                                 const std::string & peer_id);
     virtual void OnRouterMessage(const std::string &peer_id,
                                  const std::string& msg);
-protected:
     virtual void OnRecvAudioData(const std::string & peer_id,
                                  const char * data,int len);
     virtual void OnRecvVideoData(const std::string & peer_id,
                                  const char * data,int len);
+protected:
     virtual void OnRecordFileData(const std::string & peer_id,
                                   const char * data,int len);
     virtual void OnRecordStatus(const std::string & peer_id,int status);
@@ -65,7 +65,7 @@ class KeMessageProcessClient: public KeMsgProcess
 public:
     KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
     virtual ~KeMessageProcessClient();
-    void AskVideo(int video, int listen, int talk);
+    virtual void AskVideo(int video, int listen, int talk);
     bool ReqestPlayFile(const char *remoteFile,const char *saveFile,int playSize);
     void OnTalkData(const char * data,int len);
     bool StartVideoCut(const std::string &filename);

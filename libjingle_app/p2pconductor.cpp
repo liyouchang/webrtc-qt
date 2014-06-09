@@ -71,9 +71,8 @@ int P2PConductor::ConnectToPeer(const std::string &peer_id)
 
 void P2PConductor::DisconnectFromCurrentPeer()
 {
-
     LOG(INFO) << __FUNCTION__;
-    if(!tunnel_established_){
+    if (!tunnel_established_){
         LOG(WARNING) << "the tunnel is not established, "<<
                         "it maybe crash by two thread conflict";
     }
@@ -256,7 +255,6 @@ void P2PConductor::OnIceCandidate(const IceCandidateInterface *candidate)
 void P2PConductor::OnIceGatheringChange(IceObserver::IceGatheringState new_state)
 {
     LOG(INFO) << __FUNCTION__ <<"-----------"<<new_state;
-
 }
 
 void P2PConductor::OnMessage(talk_base::Message *msg)

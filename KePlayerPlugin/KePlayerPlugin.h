@@ -6,6 +6,7 @@
 #include <QString>
 #include "zmqclient/peerconnectionclientdealer.h"
 #include "KeQtTunnelClient.h"
+#include "libjingle_app/kelocalclient.h"
 //
 QT_BEGIN_NAMESPACE
 class QSettings;
@@ -49,6 +50,7 @@ signals:
     void RecordStatus(const QString &,int );
     void RecvPeerMsg(const QString &,const QString &);
     void RemoteFileDownloadEnd(QString peer_id);
+    void LocalDeviceInfo(const QString & devInfo);
 
 public slots:
     void about();
@@ -84,12 +86,22 @@ public slots:
     //如"CaptureFiles/2014-05-20/0090B01AF67F_2014-05-20_13-36-37-012.bmp"
     //width,height : 文件扩展大小,0时返回原始图片
     QString GetSaveFileData(QString fileName,int scaleWidth,int scaleHeight);
+
+    int SearchLocalDevice();
+    int OpenLocalDevice(QString peerAddr);
+    int CloseLocalDevice(QString peerAddr);
+    int StartLocalVideo(QString peerAddr);
+    int StopLocalVideo(QString peerId);
+
 private:
     static QString GetTimeFileName(QString peerId,QString extName,QString path);
     QQueue<RecordFileInfo> need_play_records_;
     VideoWall * video_wall_;
     talk_base::scoped_ptr<KeQtTunnelClient> tunnel_;
     talk_base::scoped_ptr<PeerConnectionClientDealer> connection_;
+
+    KeQtLocalClient * localClient_;
+
     QString m_savePath;
     bool is_inited;
     QSettings *myconfig;

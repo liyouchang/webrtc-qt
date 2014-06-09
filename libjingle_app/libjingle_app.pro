@@ -45,7 +45,8 @@ SOURCES += \
     ketunnelclient.cpp \
     ketunnelcamera.cpp \
     recorderavi.cpp \
-    ke08recorder.cpp
+    ke08recorder.cpp \
+    kelocalclient.cpp
 
 
 HEADERS += \
@@ -73,7 +74,8 @@ HEADERS += \
     ketunnelcamera.h \
     recorderavi.h \
     recordinterface.h \
-    ke08recorder.h
+    ke08recorder.h \
+    kelocalclient.h
 
 OTHER_FILES += \
     ClientCameraMsg.json
