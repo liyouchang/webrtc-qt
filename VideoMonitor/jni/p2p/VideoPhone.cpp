@@ -59,6 +59,7 @@ jint naOpenTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
     env->ReleaseStringUTFChars(peer_id,pid);
     return ret;
 }
+
 jint naMessageFromPeer(JNIEnv *env, jobject thiz,
                        jstring peer_id, jstring message){
     if (jniPeer == NULL) {
@@ -72,6 +73,7 @@ jint naMessageFromPeer(JNIEnv *env, jobject thiz,
     return 0;
 
 }
+
 jint naCloseTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
     LOGI("4. naCloseTunnel()");
     if (client == NULL) {
@@ -143,6 +145,7 @@ jint naStopPeerVideoCut(JNIEnv *env, jobject thiz,jstring peer_id){
     env->ReleaseStringUTFChars(peer_id,pid);
     return 0;
 }
+
 jint naDownloadRemoteFile(JNIEnv *env, jobject thiz,
                           jstring peerId,jstring remoteFileName,
                           jstring toSaveFileName,jint toPlaySize){
@@ -166,7 +169,11 @@ jint naDownloadRemoteFile(JNIEnv *env, jobject thiz,
 }
 
 jint naSearchLocalDevice(JNIEnv *env, jobject thiz){
+    if (localClient == NULL) {
+        return -1;
+    }
     localClient->SearchLocalDevice();
+    return 0;
 }
 
 jint naConnectLocalDevice(JNIEnv *env, jobject thiz, jstring peerAddr){
@@ -181,6 +188,7 @@ jint naConnectLocalDevice(JNIEnv *env, jobject thiz, jstring peerAddr){
     env->ReleaseStringUTFChars(peerAddr,pid);
     return ret;
 }
+
 jint naDisconnectLocalDevice(JNIEnv *env, jobject thiz, jstring peerAddr){
     if (localClient == NULL) {
         return -1;
@@ -193,6 +201,7 @@ jint naDisconnectLocalDevice(JNIEnv *env, jobject thiz, jstring peerAddr){
     env->ReleaseStringUTFChars(peerAddr,pid);
     return ret;
 }
+
 jint naStartLocalVideo(JNIEnv *env, jobject thiz, jstring peerAddr){
     if (localClient == NULL) {
         return -1;
@@ -205,6 +214,7 @@ jint naStartLocalVideo(JNIEnv *env, jobject thiz, jstring peerAddr){
     env->ReleaseStringUTFChars(peerAddr,pid);
     return ret;
 }
+
 jint naStopLocalVideo(JNIEnv *env, jobject thiz, jstring peerAddr){
     if (localClient == NULL) {
         return -1;
@@ -244,7 +254,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naStopPeerVideoCut", "(Ljava/lang/String;)I", (void*) naStopPeerVideoCut },
         { "naDownloadRemoteFile", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)I",
           (void*) naDownloadRemoteFile },
-        {"naSearchLocalDevice","()I",(void*)naSearchLocalDevice},
+        { "naSearchLocalDevice","()I",(void*) naSearchLocalDevice},
         { "naConnectLocalDevice", "(Ljava/lang/String;)I", (void*) naConnectLocalDevice },
         { "naDisconnectLocalDevice", "(Ljava/lang/String;)I", (void*) naDisconnectLocalDevice },
         { "naStartLocalVideo", "(Ljava/lang/String;)I", (void*) naStartLocalVideo },

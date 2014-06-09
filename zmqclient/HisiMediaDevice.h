@@ -66,6 +66,9 @@ protected:
     virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
 };
 
+enum AlarmType{
+    kAlarmMove = 1,
+};
 
 class AlarmNotify{
 public:

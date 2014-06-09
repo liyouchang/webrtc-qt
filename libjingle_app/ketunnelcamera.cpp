@@ -41,6 +41,24 @@ void KeTunnelCamera::SetPtz(std::string ptz_key, int param)
     LOG(INFO)<<"KeTunnelCamera::SetPtz---key:" <<ptz_key<<" param:"<<param;
 }
 
+void KeTunnelCamera::TerminalAlarm(const std::string &peerId, int alarmType, const std::string &alarmInfo, const std::string &picture)
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+
+    jmessage["type"] = "Terminal_Alarm";
+    jmessage["MAC"] = mac_;
+    jmessage["AlarmType"] = alarmType;
+    jmessage["AlarmInfo"] = alarmInfo;
+    jmessage["Picture"] = picture;
+    jmessage["DateTime"] = kaerp2p::GetCurrentDatetime("%F %T");
+
+    std::string msg = writer.write(jmessage);
+    terminal_->SendByRouter(peerId,msg);
+
+}
+
+
 void KeTunnelCamera::RecvGetWifiInfo(std::string peer_id)
 {
     LOG(INFO)<<"KeTunnelCamera::OnRecvGetWifiInfo---from:" <<peer_id;

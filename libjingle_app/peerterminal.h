@@ -15,7 +15,9 @@ const int kInfiniteTunnel = -1;
 
 typedef talk_base::scoped_refptr<kaerp2p::P2PConductor> ScopedTunnel;
 
-
+//this is a abstraction for communication of peer to peer
+//implate a terminal that use P2PConductor to communicate with another terminal by p2p connection
+//use a kaerp2p::PeerConnectionClientInterface to commucate with  another terminal from server
 class PeerTerminal:public PeerTerminalInterface
 {
 public:

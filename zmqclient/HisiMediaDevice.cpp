@@ -82,7 +82,7 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
     media_thread_ = new talk_base::Thread();
     media_thread_->Start();
     //start get media
-    media_thread_->Post(this,MSG_MEDIA_CONTROL,new MediaControlData(1,1,1));
+    media_thread_->Post(this, MSG_MEDIA_CONTROL, new MediaControlData(1,1,1));
     AlarmNotify::Instance()->StartNotify();
     return KeTunnelCamera::Init(client);
 }
@@ -249,6 +249,7 @@ void HisiMediaDevice::OnRecvRecordQuery(std::string peer_id, std::string conditi
     this->terminal_->SendByRouter(peer_id,msg);
 
 }
+
 
 void HisiMediaDevice::OnMessage(talk_base::Message *msg)
 {
@@ -442,11 +443,12 @@ void AlarmNotify::StartNotify()
 //门磁    rea = 2，io = 20
 //人体红外 rea = 2，io = 21
 //烟感报警 rea = 2，io = 22
-int AlarmNotify::NotifyCallBack(int chn, int rea, int io, int snapcount, int snapsize, char *snapbuf)
+int AlarmNotify::NotifyCallBack(int chn, int rea, int io,
+                                int snapcount, int snapsize, char *snapbuf)
 {
     //TODO: to signal alarm message
-    LOG(INFO)<<"AlarmNotify::NotifyCallBack---chn:"<<chn<<
-               " rea:"<<rea<<" io:"<<io << " snapcout:"<<snapcount<<" snapsize:" << snapsize;
+    LOG(INFO)<<"AlarmNotify::NotifyCallBack---chn:"<<chn<<" rea:"<<rea
+            <<" io:"<<io << " snapcout:"<<snapcount<<" snapsize:" << snapsize;
     std::ostringstream infostream;
     infostream<<"通道"<<chn;
     if(rea == 1){
@@ -465,7 +467,7 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io, int snapcount, int sna
         }else{
             infostream<<" unknown";
         }
-    }else {
+    } else {
         infostream<<" unknown";
     }
 

@@ -131,7 +131,10 @@ void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
     this->SignalTunnelMessage(aTunnel->GetPeerID(),data);
 }
 /**
- * @brief PeerTerminal::OnRouterReadData
+ * @brief PeerTerminal::OnRouterReadData,we process message received by client_,
+ *        just process the "p2p" type message and the "tunnel" type message
+ *        the "p2p" type message is handled by PeerTerminal itself and
+ *          the tunnel type message is emit SignalRouterMessage
  * @param peer_id
  * @param msg --- the message received by client_, the message should be a json string
  */
