@@ -10,7 +10,7 @@ DESTDIR = $$output_dir/$$TARGET
 
 message("DESTDIR is "$$DESTDIR)
 
-INCLUDEPATH     +=  \
+INCLUDEPATH  +=  \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
     ../third_party/cppzmq/include
 

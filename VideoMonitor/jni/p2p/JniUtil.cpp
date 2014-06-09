@@ -254,7 +254,7 @@ bool JniUtil::JniTunnelOpened(const char * peer_id){
     return true;
 }
 
-bool JniUtil::JniRecordStatus(const char *peer_id, int recordstatus)
+bool JniUtil::JniRecordStatus(const char *peer_id, int status)
 {
     if(g_vm_ == 0){
         LOGE("g_vm is null");
@@ -287,7 +287,7 @@ bool JniUtil::JniRecordStatus(const char *peer_id, int recordstatus)
     }
     jstring jni_pid = p_env->NewStringUTF(peer_id);
 
-    p_env->CallVoidMethod(g_obj_, mid, jni_pid,recordstatus);
+    p_env->CallVoidMethod(g_obj_, mid, jni_pid,status);
 
     p_env->DeleteLocalRef(callBackCls);
 

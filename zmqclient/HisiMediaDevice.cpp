@@ -446,7 +446,7 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io, int snapcount, int sna
 {
     //TODO: to signal alarm message
     LOG(INFO)<<"AlarmNotify::NotifyCallBack---chn:"<<chn<<
-               " rea:"<<rea<<" io:"<<io << snapcount << snapsize;
+               " rea:"<<rea<<" io:"<<io << " snapcout:"<<snapcount<<" snapsize:" << snapsize;
     std::ostringstream infostream;
     infostream<<"通道"<<chn;
     if(rea == 1){

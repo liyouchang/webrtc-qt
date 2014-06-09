@@ -32,8 +32,9 @@ int main()
     Json::Value jservers = JsonConfig::Instance()->Get("servers","");
     //Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
 
-    talk_base::LogMessage::ConfigureLogging(log_params_value.asString().c_str(),
-                                            NULL);
+    talk_base::LogMessage::ConfigureLogging(
+                log_params_value.asString().c_str(),NULL);
+
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
     LOG(INFO)<<"zmqclient current version is "<<kVersion;
 
