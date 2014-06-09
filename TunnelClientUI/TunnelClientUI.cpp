@@ -216,3 +216,35 @@ void TunnelClientUI::on_stop_cut_clicked()
     this->ui->playPlugin->StopCut(peerId);
 
 }
+
+void TunnelClientUI::on_searchDevice_clicked()
+{
+    this->ui->playPlugin->SearchLocalDevice();
+}
+
+void TunnelClientUI::on_connectLocal_clicked()
+{
+    QString peerAddr = ui->editAddr->text();
+    this->ui->playPlugin->OpenLocalDevice(peerAddr);
+}
+
+void TunnelClientUI::on_disconnectLocal_clicked()
+{
+    QString peerAddr = ui->editAddr->text();
+    this->ui->playPlugin->CloseLocalDevice(peerAddr);
+
+}
+
+void TunnelClientUI::on_startLocalMedia_clicked()
+{
+    QString peerAddr = ui->editAddr->text();
+    this->ui->playPlugin->StartLocalVideo(peerAddr);
+
+}
+
+void TunnelClientUI::on_stopLocalMedia_clicked()
+{
+    QString peerAddr = ui->editAddr->text();
+    this->ui->playPlugin->StopLocalVideo(peerAddr);
+
+}

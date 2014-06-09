@@ -111,7 +111,7 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
                           peer_id<< " msg"<<msg;
             return;
         }
-        std::string paramStr  = JsonValueToString(jwifiParam);
+        std::string paramStr = JsonValueToString(jwifiParam);
         this->SetWifiInfo(peer_id,paramStr);
     }
     else{

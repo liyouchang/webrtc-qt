@@ -54,7 +54,7 @@ bool KeTunnelClient::StopPeerMedia(std::string peer_id)
 {
     KeMessageProcessClient * process =
             dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peer_id));
-    if(process == NULL){
+    if (process == NULL) {
         LOG(WARNING) << "process not found "<<peer_id;
         return false;
     }

@@ -56,6 +56,16 @@ private slots:
 
     void on_stop_cut_clicked();
 
+    void on_searchDevice_clicked();
+
+    void on_connectLocal_clicked();
+
+    void on_disconnectLocal_clicked();
+
+    void on_startLocalMedia_clicked();
+
+    void on_stopLocalMedia_clicked();
+
 private:
     void OnPtzMove(std::string side);
     void OnVideoClarity(int clarity);

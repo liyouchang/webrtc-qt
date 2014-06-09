@@ -2,6 +2,9 @@
 #include "KeMessage.h"
 #include "talk/base/json.h"
 
+namespace kaerp2p {
+
+
 
 PeerTerminal::PeerTerminal():
     client_(0)
@@ -20,18 +23,18 @@ int PeerTerminal::Initialize(kaerp2p::PeerConnectionClientInterface * client,
 }
 
 
-int PeerTerminal::OpenTunnel(const std::string & peer_id)
+bool PeerTerminal::OpenTunnel(const std::string & peer_id)
 {
     ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
     if(aTunnel== NULL){
         LOG(WARNING)<< "not avaliable tunnel";
-        return -1;
+        return false;
     }
     bool ret = aTunnel->ConnectToPeer(peer_id);
     return ret;
 }
 
-int PeerTerminal::CloseTunnel(const std::string &peer_id)
+bool PeerTerminal::CloseTunnel(const std::string &peer_id)
 {
     LOG(INFO)<< "PeerTerminal::CloseTunnel" << peer_id;
 
@@ -39,42 +42,43 @@ int PeerTerminal::CloseTunnel(const std::string &peer_id)
     if(aTunnel == NULL){
         LOG(WARNING)<< "PeerTerminal::CloseTunnel-----tunnel not get "<<
                        peer_id;
-        return -1;
+        return false;
     }
     aTunnel->DisconnectFromCurrentPeer();
-    return 0;
+    return true;
 }
 
 
-int PeerTerminal::SendByRouter(const std::string &peer_id,
+bool PeerTerminal::SendByRouter(const std::string &peer_id,
                                const std::string &data)
 {
-    client_->SendToPeer(peer_id,data);
-    return 0;
+    return client_->SendToPeer(peer_id,data);
 }
 
-int PeerTerminal::SendByTunnel(const std::string &peer_id,
+bool PeerTerminal::SendByRouter(const std::string &peer_id, const char *data, size_t len)
+{
+    std::string dataStr(data,len);
+    return client_->SendToPeer(peer_id,dataStr);
+}
+
+bool PeerTerminal::SendByTunnel(const std::string &peer_id,
                                const std::string &data)
 {
-//    ASSERT(tunnel_stream_);
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
-        return -1;
+        return false;
     }
-    aTunnel->GetStreamProcess()->WriteStream(data.c_str(),data.length());
-    return 0;
+    return aTunnel->GetStreamProcess()->WriteStream(data.c_str(),data.length());
 }
 
-int PeerTerminal::SendByTunnel(const std::string &peer_id,
+bool PeerTerminal::SendByTunnel(const std::string &peer_id,
                                const char *data, size_t len)
 {
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
-
-        return -1;
+        return false;
     }
-    aTunnel->GetStreamProcess()->WriteStream(data,len);
-    return 0;
+    return aTunnel->GetStreamProcess()->WriteStream(data,len);
 }
 
 
@@ -154,7 +158,8 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
     }
     else if(type.compare("tunnel") == 0){
         //dispath tunnel message
-        SignalRouterMessage(peer_id,msg);
+        talk_base::Buffer buffer(msg.c_str(),msg.length());
+        SignalRouterMessage(peer_id,buffer);
     }else{
         LOG(WARNING)<<"receive unexpected message from "<<peer_id;
     }
@@ -230,5 +235,6 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
     return aTunnel;
 }
 
+}
 
 

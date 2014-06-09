@@ -36,14 +36,14 @@ void KeQtTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
     emit SigRecordStatus(peer_id.c_str(),status);
 }
 
-void KeQtTunnelClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peer_id)
+void KeQtTunnelClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id)
 {
     qDebug()<<"KeQtTunnelClient::OnTunnelOpened";
     KeTunnelClient::OnTunnelOpened(t,peer_id);
     emit SigTunnelOpened(peer_id.c_str());
 }
 
-void KeQtTunnelClient::OnTunnelClosed(PeerTerminalInterface *t, const std::string &peer_id)
+void KeQtTunnelClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id)
 {
     qDebug()<<"KeQtTunnelClient::OnTunnelClosed";
     KeTunnelClient::OnTunnelClosed(t,peer_id);
@@ -140,3 +140,43 @@ void KeQtTunnelClient::OnRouterMessage(const std::string &peer_id, const std::st
 //        break;
 //    }
 //}
+
+
+KeQtLocalClient::KeQtLocalClient(QObject *parent): QObject(parent)
+{
+
+}
+
+void KeQtLocalClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peerAddr)
+{
+    qDebug()<<"KeQtLocalClient::OnTunnelOpened";
+    KeLocalClient::OnTunnelOpened(t,peerAddr);
+    emit SigTunnelOpened(peerAddr.c_str());
+
+}
+
+void KeQtLocalClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface *t, const std::string &peerAddr)
+{
+    qDebug()<<"KeQtLocalClient::OnTunnelClosed";
+    KeLocalClient::OnTunnelClosed(t,peerAddr);
+    emit SigTunnelClosed(peerAddr.c_str());
+}
+
+void KeQtLocalClient::OnRecvAudioData(const std::string &peer_id, const char *data, int len)
+{
+    QByteArray mediaData(data,len);
+    emit SigRecvAudioData(peer_id.c_str(),mediaData);
+}
+
+void KeQtLocalClient::OnRecvVideoData(const std::string &peer_id, const char *data, int len)
+{
+    QByteArray mediaData(data,len);
+    emit SigRecvVideoData(peer_id.c_str(),mediaData);
+}
+
+void KeQtLocalClient::OnSearchedDeviceInfo(const std::string &devInfo)
+{
+    qDebug()<<"KeQtLocalClient::OnSearchedDeviceInfo---"<<devInfo.c_str();
+    emit SigSearchedDeviceInfo(devInfo.c_str());
+
+}

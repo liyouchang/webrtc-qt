@@ -7,6 +7,8 @@
 #include "PeerConnectionClinetInterface.h"
 #include <vector>
 //one terminal contains one PeerConnectionClient and some P2PConductor
+namespace kaerp2p{
+
 
 const int kInfiniteTunnel = -1;
 
@@ -14,20 +16,20 @@ const int kInfiniteTunnel = -1;
 typedef talk_base::scoped_refptr<kaerp2p::P2PConductor> ScopedTunnel;
 
 
-class PeerTerminal:public PeerTerminalInterface, public sigslot::has_slots<>
+class PeerTerminal:public PeerTerminalInterface
 {
 public:
     PeerTerminal();
     //need a client that has been login
     int Initialize(kaerp2p::PeerConnectionClientInterface * client,int max_tunnel = kInfiniteTunnel);
 
-    virtual int OpenTunnel(const std::string &peer_id);
-    virtual int CloseTunnel(const std::string &peer_id);
+    virtual bool OpenTunnel(const std::string &peer_id);
+    virtual bool CloseTunnel(const std::string &peer_id);
     //virtual bool TunnelOpened();
-
-    virtual int SendByRouter(const std::string & peer_id,const std::string & data);
-    virtual int SendByTunnel(const std::string &peer_id,const std::string & data);
-    virtual int SendByTunnel(const std::string &peer_id,const char *data,size_t len);
+    virtual bool SendByRouter(const std::string & peer_id,const std::string & data);
+    virtual bool SendByRouter(const std::string & peer_id,const char *data,size_t len);
+    virtual bool SendByTunnel(const std::string &peer_id,const std::string & data);
+    virtual bool SendByTunnel(const std::string &peer_id,const char *data,size_t len);
 
     //int AskTunnelVideo();
 protected:
@@ -48,5 +50,5 @@ private:
     int max_tunnel_num_;
 
 };
-
+}
 #endif // PEERTERMINAL_H

@@ -11,13 +11,14 @@
 
 namespace kaerp2p{
 
-const int kHeartStop = 20; //10s without receive heart
-const int kHeartDelay = 500;  // 500 milliseconds
+const int kHeartStop = 20; //20s without receive heart
+const int kHeartDelay = 1000;  // 500 milliseconds
+const int kMsgMaxLen = 512*1024;
 
 
 KeMsgProcess::KeMsgProcess(std::string peer_id, KeMsgProcessContainer *container):
-    peer_id_(peer_id),kMsgMaxLen(512*1024),heart_thread_(0),heart_count_(0),
-    container_(container)
+    peer_id_(peer_id),recvMsgMaxLen(kMsgMaxLen),heart_thread_(0),heart_count_(0),
+    container_(container),heartSendDelay(kHeartDelay),heartMissStop(kHeartStop)
 {
     buf_position_ = 0;
     to_read_ = 0;
@@ -27,10 +28,10 @@ KeMsgProcess::~KeMsgProcess()
 {
 }
 
-void KeMsgProcess::OnTunnelMessage(const std::string &peer_id,
+void KeMsgProcess::OnProcessMessage(const std::string &peer_id,
                                    talk_base::Buffer &msg)
 {
-    ASSERT(this->peer_id_ == peer_id);
+    //ASSERT(this->peer_id_ == peer_id);
     ASSERT(msg.length() > 0);
     this->ExtractMessage(msg);
 }
@@ -70,7 +71,7 @@ void KeMsgProcess::ExtractMessage(talk_base::Buffer &allBytes)
             //int msgLen= *((int*)&headBuf[2]); //arm will failed with this
             int msgLen;
             memcpy(&msgLen,&head_buffer_[2],4);
-            if (protocal != PROTOCOL_HEAD ||  msgLen > kMsgMaxLen)
+            if (protocal != PROTOCOL_HEAD ||  msgLen > recvMsgMaxLen || msgLen < 0)
             {
                 LOG(WARNING)<<"The message Protocal Head "<< read_bytes
                            <<" error, msg len "<<msgLen
@@ -114,7 +115,6 @@ void KeMsgProcess::ExtractMessage(talk_base::Buffer &allBytes)
             buf_position_ = 0;
         }
     }
-
 }
 
 void KeMsgProcess::OnMessageRespond(talk_base::Buffer &msgData)
@@ -131,8 +131,6 @@ void KeMsgProcess::OnMessageRespond(talk_base::Buffer &msgData)
         //KeMsgProcess::OnMessageRespond(msgData);
         break;
     }
-
-
 }
 
 void KeMsgProcess::SendHeart()
@@ -146,11 +144,9 @@ void KeMsgProcess::SendHeart()
     pReqMsg->msgType = DevMsg_HeartBeat;
     pReqMsg->msgLength = msgLen;
     pReqMsg->videoID = 0;
-
     SignalNeedSendData(this->peer_id_,sendBuf.data(),sendBuf.length());
-
     if(heart_thread_){
-        heart_thread_->PostDelayed(kHeartDelay,this,MSG_HEART_SENDED);
+        heart_thread_->PostDelayed(heartSendDelay,this,MSG_HEART_SENDED);
     }
 }
 
@@ -160,8 +156,9 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
     switch(msg->message_id){
     case MSG_HEART_SENDED:{
         LOG(LS_VERBOSE)<<"heart beat "<<heart_count_;
-        if(heart_count_++ > kHeartStop){
-            SignalHeartStop(peer_id_);
+        if(++heart_count_ > heartMissStop){
+            //SignalHeartStop(peer_id_);
+            this->container_->OnHeartStop(peer_id_);
             break;
         }
         SendHeart();
@@ -174,6 +171,7 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
 
     }
 }
+
 
 
 
@@ -198,7 +196,6 @@ KeMsgProcessContainer::~KeMsgProcessContainer()
 bool KeMsgProcessContainer::Init(PeerTerminalInterface *t)
 {
     //add turn server
-
     this->terminal_ = t;
     t->SignalTunnelOpened.connect(this,&KeMsgProcessContainer::OnTunnelOpened);
     t->SignalTunnelClosed.connect(this,&KeMsgProcessContainer::OnTunnelClosed);
@@ -212,21 +209,16 @@ bool KeMsgProcessContainer::Init(kaerp2p::PeerConnectionClientInterface *client)
     PeerTerminal * t = new PeerTerminal();
     t->Initialize(client);
     this->has_terminal = true;
-
     return this->Init(t);
 }
 
-int KeMsgProcessContainer::OpenTunnel(const std::string & peer_id)
+bool KeMsgProcessContainer::OpenTunnel(const std::string & peer_id)
 {
     ASSERT(terminal_);
-    int ret =  terminal_->OpenTunnel(peer_id);
-    if(ret == 0){//start opened
-
-    }
-    return ret;
+    return terminal_->OpenTunnel(peer_id);
 }
 
-int KeMsgProcessContainer::CloseTunnel(const std::string &peer_id)
+bool KeMsgProcessContainer::CloseTunnel(const std::string &peer_id)
 {
     ASSERT(terminal_);
     return terminal_->CloseTunnel(peer_id);
@@ -241,6 +233,7 @@ bool KeMsgProcessContainer::IsTunnelOpened(const std::string &peer_id)
 void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t,
                                            const std::string &peer_id)
 {
+    LOG(INFO)<<"KeMsgProcessContainer::OnTunnelOpened";
     ASSERT(terminal_ == t);
     KeMsgProcess *process = new KeMsgProcess(peer_id,this);
     this->AddMsgProcess(process);
@@ -277,15 +270,14 @@ void KeMsgProcessContainer::OnTunnelMessage(const std::string &peer_id,
         LOG(WARNING)<< "peer id "<< peer_id<<" not found";
         return;
     }
-    process->OnTunnelMessage(peer_id,msg);
-
+    process->OnProcessMessage(peer_id,msg);
 }
 
 void KeMsgProcessContainer::OnRouterMessage(const std::string &peer_id,
-                                            const std::string &msg)
+                                            talk_base::Buffer &msg)
 {
     LOG(INFO)<<"KeMsgProcessContainer::OnRouterMessage"
-            <<"---- peer_id = "<<peer_id<<" msg = "<<msg;
+            <<"---- peer_id = "<<peer_id;
 
 }
 
@@ -314,11 +306,19 @@ void KeMsgProcessContainer::AddMsgProcess(KeMsgProcess *process)
 void KeMsgProcessContainer::SendProcessData(const std::string &peer_id,
                                               const char *data, int len)
 {
-    int ret = terminal_->SendByTunnel(peer_id,data,len);
-    if(ret != 0){
-        LOG(LS_VERBOSE)<<"Send to tunnel failed";
-    }
+    if(!terminal_->SendByTunnel(peer_id,data,len)){
+        LOG(LS_VERBOSE)<<"KeMsgProcessContainer::SendSelfData---"<<
+                         "Send to tunnel failed";
 
+    }
+}
+
+void KeMsgProcessContainer::SendSelfData(const std::string &peer_id, const char *data, int len)
+{
+    if(!terminal_->SendByRouter(peer_id,data,len)){
+        LOG(LS_VERBOSE)<<"KeMsgProcessContainer::SendSelfData---"<<
+                         "Send to router failed";
+    }
 }
 
 void KeMsgProcessContainer::OnHeartStop(const std::string &peer_id)

@@ -47,8 +47,6 @@ public:
     //when connect success ,this signal will be emit
     sigslot::signal1<StreamProcess *> SignalStreamOpened;
     sigslot::signal1<StreamProcess *> SignalStreamClosed;
-
-
     // CreateSessionDescriptionObserver interface
     void OnSuccess(SessionDescriptionInterface *desc);
     void OnFailure(const std::string &error);
@@ -58,15 +56,11 @@ public:
     void OnRenegotiationNeeded();
     void OnIceCandidate(const IceCandidateInterface *candidate);
     void OnIceGatheringChange(IceObserver::IceGatheringState new_state);
-
     // MessageHandler interface
     void OnMessage(talk_base::Message *msg);
-
-
 protected:
     bool InitializePeerConnection();
     void DeletePeerConnection();
-
     void OnTunnelEstablished();
     void OnTunnelTerminate(StreamProcess * stream);
 

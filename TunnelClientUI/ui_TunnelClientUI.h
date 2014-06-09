@@ -54,6 +54,14 @@ public:
     QPushButton *btn_save_video;
     QPushButton *stop_cut;
     QPushButton *btn_stop_video;
+    QGroupBox *local;
+    QVBoxLayout *verticalLayout_2;
+    QPushButton *searchDevice;
+    QLineEdit *editAddr;
+    QPushButton *connectLocal;
+    QPushButton *disconnectLocal;
+    QPushButton *startLocalMedia;
+    QPushButton *stopLocalMedia;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -61,7 +69,8 @@ public:
     {
         if (TunnelClientUI->objectName().isEmpty())
             TunnelClientUI->setObjectName(QStringLiteral("TunnelClientUI"));
-        TunnelClientUI->resize(620, 460);
+        TunnelClientUI->resize(750, 464);
+        TunnelClientUI->setToolButtonStyle(Qt::ToolButtonIconOnly);
         centralwidget = new QWidget(TunnelClientUI);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
         horizontalLayout = new QHBoxLayout(centralwidget);
@@ -195,10 +204,53 @@ public:
 
         horizontalLayout->addWidget(groupBox_2);
 
+        local = new QGroupBox(centralwidget);
+        local->setObjectName(QStringLiteral("local"));
+        QSizePolicy sizePolicy5(QSizePolicy::Maximum, QSizePolicy::Fixed);
+        sizePolicy5.setHorizontalStretch(0);
+        sizePolicy5.setVerticalStretch(0);
+        sizePolicy5.setHeightForWidth(local->sizePolicy().hasHeightForWidth());
+        local->setSizePolicy(sizePolicy5);
+        local->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop);
+        verticalLayout_2 = new QVBoxLayout(local);
+        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
+        searchDevice = new QPushButton(local);
+        searchDevice->setObjectName(QStringLiteral("searchDevice"));
+
+        verticalLayout_2->addWidget(searchDevice);
+
+        editAddr = new QLineEdit(local);
+        editAddr->setObjectName(QStringLiteral("editAddr"));
+
+        verticalLayout_2->addWidget(editAddr);
+
+        connectLocal = new QPushButton(local);
+        connectLocal->setObjectName(QStringLiteral("connectLocal"));
+
+        verticalLayout_2->addWidget(connectLocal);
+
+        disconnectLocal = new QPushButton(local);
+        disconnectLocal->setObjectName(QStringLiteral("disconnectLocal"));
+
+        verticalLayout_2->addWidget(disconnectLocal);
+
+        startLocalMedia = new QPushButton(local);
+        startLocalMedia->setObjectName(QStringLiteral("startLocalMedia"));
+
+        verticalLayout_2->addWidget(startLocalMedia);
+
+        stopLocalMedia = new QPushButton(local);
+        stopLocalMedia->setObjectName(QStringLiteral("stopLocalMedia"));
+
+        verticalLayout_2->addWidget(stopLocalMedia);
+
+
+        horizontalLayout->addWidget(local);
+
         TunnelClientUI->setCentralWidget(centralwidget);
         menubar = new QMenuBar(TunnelClientUI);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 620, 23));
+        menubar->setGeometry(QRect(0, 0, 750, 23));
         TunnelClientUI->setMenuBar(menubar);
         statusbar = new QStatusBar(TunnelClientUI);
         statusbar->setObjectName(QStringLiteral("statusbar"));
@@ -215,7 +267,7 @@ public:
         groupBox->setTitle(QApplication::translate("TunnelClientUI", "VideoWall", 0));
         groupBox_2->setTitle(QApplication::translate("TunnelClientUI", "Control", 0));
         btn_init->setText(QApplication::translate("TunnelClientUI", "Init", 0));
-        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "1234567", 0));
+        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "0090B0D41909-10E1", 0));
         btn_connect->setText(QApplication::translate("TunnelClientUI", "ConnectToPeer", 0));
         btn_disconnect->setText(QApplication::translate("TunnelClientUI", "DisConnectToPeer", 0));
         getwifi->setText(QApplication::translate("TunnelClientUI", "get wifi", 0));
@@ -229,6 +281,13 @@ public:
         btn_save_video->setText(QApplication::translate("TunnelClientUI", "save video", 0));
         stop_cut->setText(QApplication::translate("TunnelClientUI", "stop save", 0));
         btn_stop_video->setText(QApplication::translate("TunnelClientUI", "Stop Video", 0));
+        local->setTitle(QApplication::translate("TunnelClientUI", "local", 0));
+        searchDevice->setText(QApplication::translate("TunnelClientUI", "search device", 0));
+        editAddr->setText(QApplication::translate("TunnelClientUI", "192.168.40.192:22616", 0));
+        connectLocal->setText(QApplication::translate("TunnelClientUI", "connect local", 0));
+        disconnectLocal->setText(QApplication::translate("TunnelClientUI", "disconnect local", 0));
+        startLocalMedia->setText(QApplication::translate("TunnelClientUI", "start media", 0));
+        stopLocalMedia->setText(QApplication::translate("TunnelClientUI", "stop media", 0));
     } // retranslateUi
 
 };

@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>620</width>
-    <height>460</height>
+    <width>750</width>
+    <height>464</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="toolButtonStyle">
+   <enum>Qt::ToolButtonIconOnly</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -73,7 +76,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>1234567</string>
+          <string>0090B0D41909-10E1</string>
          </property>
         </widget>
        </item>
@@ -203,6 +206,66 @@
       </layout>
      </widget>
     </item>
+    <item>
+     <widget class="QGroupBox" name="local">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="title">
+       <string>local</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QPushButton" name="searchDevice">
+         <property name="text">
+          <string>search device</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="editAddr">
+         <property name="text">
+          <string>192.168.40.192:22616</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="connectLocal">
+         <property name="text">
+          <string>connect local</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="disconnectLocal">
+         <property name="text">
+          <string>disconnect local</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="startLocalMedia">
+         <property name="text">
+          <string>start media</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="stopLocalMedia">
+         <property name="text">
+          <string>stop media</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -210,7 +273,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>620</width>
+     <width>750</width>
      <height>23</height>
     </rect>
    </property>
