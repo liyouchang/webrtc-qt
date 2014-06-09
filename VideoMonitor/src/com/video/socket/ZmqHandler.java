@@ -64,6 +64,9 @@ public class ZmqHandler extends Handler {
 		} catch (JSONException e) {
 			e.printStackTrace();
 			System.out.println("MyDebug: getReqTermList()异常！");
+			if ((list != null) && (list.size() > 0)) {
+				return list;
+			}
 		}
 		return null;
 	}
@@ -86,7 +89,13 @@ public class ZmqHandler extends Handler {
 			    item.put("msgMAC", "来自: "+obj.getString("MAC")); 
 			    item.put("msgEvent", "事件: "+obj.getString("AlarmInfo"));
 				item.put("msgTime", obj.getString("DateTime"));
-				item.put("imageURL", obj.getString("PictureURL"));
+				String pictureURL = "null";
+				if (obj.isNull("PictureURL")) {
+					pictureURL = "null";
+				} else {
+					pictureURL = obj.getString("PictureURL");
+				}
+				item.put("imageURL", pictureURL);
 				item.put("msgID", obj.getString("ID"));
 				item.put("isReaded", getState(obj.getInt("IsUsed")));
 				list.add(item);
@@ -95,6 +104,9 @@ public class ZmqHandler extends Handler {
 		} catch (JSONException e) {
 			e.printStackTrace();
 			System.out.println("MyDebug: getReqAlarmList()异常！");
+			if ((list != null) && (list.size() > 0)) {
+				return list;
+			}
 		}
 		return null;
 	}
@@ -220,10 +232,11 @@ public class ZmqHandler extends Handler {
 		    	map.put("fileName", obj.getString("fileName"));
 		    	map.put("fileDate", obj.getString("fileDate"));
 
-		    	DecimalFormat df = new DecimalFormat("0.0");
-		    	int fileSizeInt = obj.getInt("fileSize");
-		    	double fileSizeDouble = fileSizeInt/1024/1024;
+		    	DecimalFormat df = new DecimalFormat("0.00");
+		    	double fileSize = obj.getInt("fileSize");
+		    	double fileSizeDouble = fileSize/1024/1024;
 		    	map.put("fileSize", df.format(fileSizeDouble)+"MB");
+		    	map.put("fileSizeInt", ""+obj.getInt("fileSize"));
 		    	
 				list.add(map);
 	    	}

@@ -25,6 +25,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ import com.video.data.XmlDevice;
 import com.video.local.ImageListViewAdapter;
 import com.video.local.LocalFileItem;
 import com.video.local.VideoListViewAdapter;
+import com.video.terminal.player.TestPlayerActivity;
 import com.video.utils.DeviceItemAdapter;
 import com.video.utils.TextProgressBar;
 import com.video.utils.Utils;
@@ -161,6 +163,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		terminalListView.setOnItemClickListener(new OnItemClickListenerImpl());
 		noDeviceLayout = (RelativeLayout) terminal_page.findViewById(R.id.rl_no_local_device_list);
 		
+		Button test = (Button) terminal_page.findViewById(R.id.btn_test);
+		test.setOnClickListener(this);
+		
 		//注册广播
 		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
@@ -171,7 +176,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		
 		if (Utils.checkSDCard()) {
 			//获得SD的信息
-			progressBarSD = (TextProgressBar) mActivity.findViewById(R.id.progressBar_sd);
+			progressBarSD = (TextProgressBar) mView.findViewById(R.id.progressBar_sd);
 			progressBarSD.setMax(100);
 			double SDTotal = Utils.getTotalSDSize();
 			double SDAvailable = Utils.getAvailableSDSize();
@@ -207,6 +212,8 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			
 				if (listSize == 0) {
 					noDeviceLayout.setVisibility(View.VISIBLE);
+					deviceList.clear();
+					deviceAdapter.notifyDataSetChanged();
 				} else {
 					noDeviceLayout.setVisibility(View.INVISIBLE);
 				}
@@ -238,6 +245,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
 				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
 				mViewPager.setCurrentItem(2);
+				break;
+			case R.id.btn_test:
+				startActivity(new Intent(mActivity, TestPlayerActivity.class));
 				break;
 		}
 	}
@@ -401,28 +411,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			arrayString.add(fileString);
 		}
 		return arrayString;
-	}
-
-	/**
-	 * 删除文件夹的所有文件
-	 */
-	private void deleteFile(File file) {
-		if (file.isFile()) {
-			file.delete();
-			return ;
-		}
-
-		if (file.isDirectory()) {
-			File[] childFiles = file.listFiles();
-			if (childFiles == null || childFiles.length == 0) {
-				file.delete();
-				return ;
-			}
-			for (int i=0; i<childFiles.length; i++) {
-				deleteFile(childFiles[i]);
-			}
-			file.delete();
-		}
 	}
 	
 	//-----------------------------------------------------------------------------------
@@ -628,7 +616,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			thumbnailsList = thumbnails.listFiles();
 			thumbnailsCount = thumbnailsList.length;
 			if (thumbnailsCount == 0) {
-				deleteFile(file);
+				Utils.deleteFile(file);
 				return null;
 			}
 			isExists = true;
@@ -668,7 +656,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			fileVideos.add(videoItem);
 		}
 		if (recordsCount == 0) {
-			deleteFile(file);
+			Utils.deleteFile(file);
 		}
 		return fileVideos;
 	}

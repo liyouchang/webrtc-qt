@@ -266,6 +266,28 @@ public class Utils {
 	}
 	
 	/**
+	 * 删除文件夹的所有文件
+	 */
+	public static void deleteFile(File file) {
+		if (file.isFile()) {
+			file.delete();
+			return ;
+		}
+
+		if (file.isDirectory()) {
+			File[] childFiles = file.listFiles();
+			if (childFiles == null || childFiles.length == 0) {
+				file.delete();
+				return ;
+			}
+			for (int i=0; i<childFiles.length; i++) {
+				deleteFile(childFiles[i]);
+			}
+			file.delete();
+		}
+	}
+	
+	/**
 	 * 获取SD卡大小
 	 */
 	public static double getTotalSDSize() {

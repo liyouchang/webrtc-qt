@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/player_control_back"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dip"
+        android:layout_marginTop="3dip"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/has_played"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="5dip"
+            android:text="@string/terminal_player_played_size" />
+
+        <SeekBar
+            android:id="@+id/seekbar"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dip"
+            android:layout_marginRight="5dip"
+            android:layout_weight="1"
+            android:maxHeight="7dip"
+            android:paddingLeft="7dip"
+            android:paddingRight="7dip"
+            android:thumb="@drawable/seek_thumb" />
+
+        <TextView
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="5dip"
+            android:text="@string/terminal_player_total_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#0000003D"
+        android:gravity="center"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/ib_front_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="#0000003D"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/stepbackward" />
+
+        <ImageButton
+            android:id="@+id/ib_play_slow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="#0000003D"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/playslow" />
+
+        <ImageButton
+            android:id="@+id/ib_play_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="#0000003D"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/local_player_pause" />
+
+        <ImageButton
+            android:id="@+id/ib_play_fast"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="#0000003D"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/playfast" />
+
+        <ImageButton
+            android:id="@+id/ib_back_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+            android:background="#0000003D"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/stepforward" />
+    </LinearLayout>
+
+</LinearLayout>

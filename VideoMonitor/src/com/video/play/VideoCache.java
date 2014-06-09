@@ -60,7 +60,7 @@ public class VideoCache {
 	 * 获得最大可以读取的数据
 	 * @return 返回最大可以读取的数据
 	 */
-	private int getMaxReadLen() {
+	public int getMaxReadLen() {
 		int result = 0;
 
 		if (mBuffer == null) {

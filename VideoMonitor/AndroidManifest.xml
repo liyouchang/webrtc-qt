@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.video"
-    android:versionCode="10"
-    android:versionName="1.1.0" >
+    android:versionCode="12"
+    android:versionName="1.1.2" >
 
     <uses-sdk android:minSdkVersion="14" />
     
@@ -191,6 +191,20 @@
             android:name=".main.TerminalVideoListActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 终端录像播放器  -->
+        <activity
+            android:name=".terminal.player.TerminalPlayerActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/AppThemeFullscreen" >
+        </activity>
+        <!-- 测试录像播放器  -->
+        <activity
+            android:name=".terminal.player.TestPlayerActivity"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/AppThemeFullscreen" >
         </activity>
     </application>
 

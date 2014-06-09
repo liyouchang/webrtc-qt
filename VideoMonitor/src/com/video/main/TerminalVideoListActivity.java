@@ -19,6 +19,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
@@ -32,6 +34,7 @@ import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
+import com.video.terminal.player.TerminalPlayerActivity;
 import com.video.utils.Utils;
 
 public class TerminalVideoListActivity extends Activity implements
@@ -70,6 +73,7 @@ public class TerminalVideoListActivity extends Activity implements
 
 	private void initView() {
 		lv_list = (ListView) this.findViewById(R.id.terminal_video_file_list);
+		lv_list.setOnItemClickListener(new OnItemClickListenerImpl());
 
 		ImageButton back = (ImageButton) this.findViewById(R.id.ib_terminal_video_file_back);
 		back.setOnClickListener(this);
@@ -257,6 +261,18 @@ public class TerminalVideoListActivity extends Activity implements
 				Toast.makeText(mContext, "前面没有了 ", Toast.LENGTH_LONG).show();
 			}
 		}, 1000);
+	}
+	
+	private class OnItemClickListenerImpl implements OnItemClickListener {
+
+		@Override
+		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+			Intent intent = new Intent(mContext, TerminalPlayerActivity.class);
+			intent.putExtra("fileIndex", arg2);
+			intent.putExtra("fileList", fileList);
+			intent.putExtra("dealerName", dealerName);
+			startActivity(intent);
+		}
 	}
 
 	@Override

@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">视界通</string>
-    <string name="app_version">版本: V1.1.0</string>
+    <string name="app_version">版本: V1.1.2</string>
     <string name="company_website">公司网址: www.kaer.cn</string>
     <string name="company_phone">公司电话: 4006080787</string>
     <string name="company">山东卡尔电气股份有限公司</string>
@@ -107,6 +107,10 @@
     <string name="clarity_low">流畅</string>
     
     <string name="local_player_time_init">00:00:00</string>
+    <string name="terminal_player_play_normal">正常播放</string>
+    <string name="terminal_player_played_size">已播放: 0000000B</string>
+    <string name="terminal_player_total_size">总大小: 0000000B</string>
+    <string name="terminal_player_download_size">已缓冲: 0B</string>
     
     <string name="terminal_device_video">终端视频</string>
     <string name="device_item_name">名称: 门口摄像头</string>

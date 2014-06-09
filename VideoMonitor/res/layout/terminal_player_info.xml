@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@null"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:padding="5dp" >
 
     <TextView
@@ -13,10 +13,18 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:background="@null"
-        android:drawableLeft="@drawable/video_record_icon"
-        android:drawablePadding="5dp"
-        android:text="@string/video_record_view_rec"
+        android:text="@string/terminal_player_play_normal"
         android:textColor="@color/video_record_color"
         android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/tv_info_download"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:background="@null"
+        android:text="@string/terminal_player_download_size"
+        android:textColor="@color/green"
+        android:textSize="12dp" />
 
 </LinearLayout>

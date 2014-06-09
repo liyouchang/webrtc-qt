@@ -83,14 +83,14 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private final int SHOW_TIME_MS = 6000;
 	private final int HIDE_POPUPWINDOW = 1;
 	
-	private GestureDetector mGestureDetector = null;//手势识别
+	private GestureDetector mGestureDetector = null; // 手势识别
 	
-	private View titleView = null;//标题视图
-	private static PopupWindow titlePopupWindow = null;//标题弹出框
-	private View bottomView = null;//底部视图
-	private static PopupWindow bottomPopupWindow = null;//底部弹出框
-	private View recordView = null;//底部视图
-	private static PopupWindow recordPopupWindow = null;//底部弹出框
+	private View titleView = null; // 标题视图
+	private static PopupWindow titlePopupWindow = null; // 标题弹出框
+	private View bottomView = null;// 底部视图
+	private static PopupWindow bottomPopupWindow = null; // 底部弹出框
+	private View recordView = null; // 录像视图
+	private static PopupWindow recordPopupWindow = null; // 录像弹出框
 
 	private Button player_capture = null;
 	private Button player_record = null;
@@ -104,22 +104,22 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		super.onCreate(savedInstanceState);
 		PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
 		wakeLock = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP|PowerManager.FULL_WAKE_LOCK, "WakeLock");
-		wakeLock.acquire(); //设置屏幕保持唤醒
+		wakeLock.acquire(); // 设置屏幕保持唤醒
 		
 		initData();
 		
-		//视频
+		// 视频
 		videoView = new VideoView(this);
 		setContentView(videoView);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		
-		//音频
+		// 音频
 		audioThread = new AudioThread();
 		if (audioThread != null) {
 			audioThread.start();
 		}
 		
-		//视频标题弹出框
+		// 视频标题弹出框
 		titleView = getLayoutInflater().inflate(R.layout.player_title_view, null);
 		titlePopupWindow = new PopupWindow(titleView, screenWidth, titleHeight, false);
 		tv_title = (TextView) titleView.findViewById(R.id.tv_player_title);
@@ -127,7 +127,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		ImageButton player_back = (ImageButton) titleView.findViewById(R.id.ib_player_back);
 		player_back.setOnClickListener(this);
 		
-		//视频底部弹出框
+		// 视频底部弹出框
 		bottomView = getLayoutInflater().inflate(R.layout.player_bottom_view, null);
 		bottomPopupWindow = new PopupWindow(bottomView, screenWidth, bottomHeight, false);
 		player_capture = (Button) bottomView.findViewById(R.id.btn_player_capture);
@@ -141,7 +141,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		video_clarity = (Button) bottomView.findViewById(R.id.btn_player_clarity);
 		video_clarity.setOnClickListener(this);
 		
-		//视频底部弹出框
+		// 录像弹出框
 		recordView = getLayoutInflater().inflate(R.layout.player_video_record_view, null);
 		recordPopupWindow = new PopupWindow(recordView, screenWidth, bottomHeight, false);
 		

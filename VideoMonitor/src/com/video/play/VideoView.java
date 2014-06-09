@@ -42,7 +42,8 @@ public class VideoView extends View {
     private Canvas mCanvas = null;
     
     private PlayVideoThread playVideoThread = null; //播放视频线程
-    private boolean runFlag = false;
+    private boolean runFlag = false; // 运行标志
+    public boolean isPlayVideo = false; // 是否播放
     
     //视频解码库JNI接口
     private native int initDecoder(int width, int height); 
@@ -76,6 +77,7 @@ public class VideoView extends View {
 	 */
 	public void playVideo() {
 		runFlag = true;
+		isPlayVideo = true;
 		TunnelCommunication.videoDataCache.clearBuffer();
 		if (playVideoThread == null) {
 			playVideoThread = new PlayVideoThread();
@@ -89,8 +91,10 @@ public class VideoView extends View {
 	 */
 	public void stopVideo() {
 		runFlag = false;
+		isPlayVideo = false;
 		TunnelCommunication.videoDataCache.clearBuffer();
 		if (playVideoThread != null) {
+			playVideoThread.interrupt();
 			playVideoThread = null;
 			System.out.println("MyDebug: 【停止播放】");
 		}
@@ -110,6 +114,12 @@ public class VideoView extends View {
 			
 			while (runFlag) {
 				try{
+					// 播放、暂停
+					if (!isPlayVideo) {
+						sleep(100);
+						continue;
+					}
+					
 					naluDataLen = TunnelCommunication.videoDataCache.pop(naluData);
 					if (naluDataLen > 0) {
 						decodeLen = decodeNalu(naluData, naluDataLen, decodeData);
@@ -120,30 +130,36 @@ public class VideoView extends View {
 					} else {
 						sleep(20);
 					}
-					if (!Value.isTunnelOpened) {
-						PlayerActivity.requestPlayerTimes = 0;
-						Intent intent = new Intent();
-						intent.setAction(PlayerActivity.REQUEST_TIMES_ACTION);
-						mContext.sendBroadcast(intent);
-//						if (PlayerActivity.requestPlayerTimes < 3) {
-//							if (!Value.isTunnelOpened) {
-//								PlayerActivity.requestPlayerTimes ++;
-//								Intent intent = new Intent();
-//								intent.setAction(PlayerActivity.PLAYER_BROADCAST_ACTION);
-//								mContext.sendBroadcast(intent);
-//								sleep(10000);
-//								System.out.println("MyDebug: 开始广播视频");
+					if (Value.playTerminalVideoFileFlag) {
+						//终端录像
+						
+					} else {
+						//实时录像
+						if (!Value.isTunnelOpened) {
+							PlayerActivity.requestPlayerTimes = 0;
+							Intent intent = new Intent();
+							intent.setAction(PlayerActivity.REQUEST_TIMES_ACTION);
+							mContext.sendBroadcast(intent);
+//							if (PlayerActivity.requestPlayerTimes < 3) {
+//								if (!Value.isTunnelOpened) {
+//									PlayerActivity.requestPlayerTimes ++;
+//									Intent intent = new Intent();
+//									intent.setAction(PlayerActivity.PLAYER_BROADCAST_ACTION);
+//									mContext.sendBroadcast(intent);
+//									sleep(10000);
+//									System.out.println("MyDebug: 开始广播视频");
+//								}
+//							} else {
+//								if (!Value.isTunnelOpened) {
+//									PlayerActivity.requestPlayerTimes = 0;
+//									Intent intent = new Intent();
+//									intent.setAction(PlayerActivity.REQUEST_TIMES_ACTION);
+//									mContext.sendBroadcast(intent);
+//									System.out.println("MyDebug: 停止广播视频");
+//								}
 //							}
-//						} else {
-//							if (!Value.isTunnelOpened) {
-//								PlayerActivity.requestPlayerTimes = 0;
-//								Intent intent = new Intent();
-//								intent.setAction(PlayerActivity.REQUEST_TIMES_ACTION);
-//								mContext.sendBroadcast(intent);
-//								System.out.println("MyDebug: 停止广播视频");
-//							}
-//						}
-						sleep(2000);
+							sleep(2000);
+						}
 					}
 				}catch(Exception ex){
 					ex.printStackTrace();
@@ -218,11 +234,16 @@ public class VideoView extends View {
 			if (mCanvas == null) {
 				mCanvas = canvas;
 			}
-			// 清空画布
-			if ((!runFlag) || (!Value.isTunnelOpened)) {
-				Paint paint = new Paint();
-				paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
-				canvas.drawBitmap(videoBmp, srcRect, dstRect, paint);
+			if (Value.playTerminalVideoFileFlag) {
+				//终端录像
+				
+			} else {
+				// 清空画布
+				if ((!runFlag) || (!Value.isTunnelOpened)) {
+					Paint paint = new Paint();
+					paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
+					canvas.drawBitmap(videoBmp, srcRect, dstRect, paint);
+				}
 			}
 		} catch (Exception e) {
 			System.out.println("MyDebug: 绘制图像异常！");

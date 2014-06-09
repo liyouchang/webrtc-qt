@@ -11,6 +11,8 @@
     <color name="red">#ff0000</color>
     <!-- 录像 -->
     <color name="video_record_color">#c90000</color>
+    <!-- 绿色 -->
+    <color name="green">#00FF00</color>
     <!-- 海绿色 -->
     <color name="sea_green">#43CD80</color>
     <!-- 橙色 -->

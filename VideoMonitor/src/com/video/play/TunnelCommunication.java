@@ -7,7 +7,9 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.video.R;
+import com.video.data.Value;
 import com.video.socket.HandlerApplication;
+import com.video.terminal.player.TerminalPlayerActivity;
 import com.video.utils.Tools;
 
 public class TunnelCommunication {
@@ -20,8 +22,8 @@ public class TunnelCommunication {
 	//视频
 	public static byte videoFrameType; 
 	public static VideoCache videoDataCache = null;
-	private static byte[] naluData = new byte[width*height*3];
-	private static int naluDataLen = 4;
+	public static byte[] naluData = new byte[width*height*3];
+	public static int naluDataLen = 4;
 	
 	//音频
 	public static byte audioFrameType; 
@@ -37,6 +39,7 @@ public class TunnelCommunication {
 	private native int naSendTalkData(byte[] ulawData, int ulawDataLen);
 	private native int naStartPeerVideoCut(String peerId, String filepath);
 	private native int naStopPeerVideoCut(String peerId);
+	private native int naDownloadRemoteFile(String peerId, String remoteFileName, String saveFilePath, int playSize);
 	
 	static 
 	{
@@ -75,8 +78,13 @@ public class TunnelCommunication {
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 0);
 		intent.putExtra("PeerId", peerId);
-		intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
-		HandlerApplication.getInstance().sendBroadcast(intent);
+		if (Value.playTerminalVideoFileFlag) {
+			intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
+			HandlerApplication.getInstance().sendBroadcast(intent);
+		} else {
+			intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
+			HandlerApplication.getInstance().sendBroadcast(intent);
+		}
 	}
 	
 	/**
@@ -89,8 +97,13 @@ public class TunnelCommunication {
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 1);
 		intent.putExtra("PeerId", peerId);
-		intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
-		HandlerApplication.getInstance().sendBroadcast(intent);
+		if (Value.playTerminalVideoFileFlag) {
+			intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
+			HandlerApplication.getInstance().sendBroadcast(intent);
+		} else {
+			intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
+			HandlerApplication.getInstance().sendBroadcast(intent);
+		}
 	}
 
 	/**
@@ -145,6 +158,33 @@ public class TunnelCommunication {
 	 */
 	public int sendTalkData(byte[] ulawData, int ulawDataLen) {
 		return naSendTalkData(ulawData, ulawDataLen);
+	}
+	
+	/**
+	 * 下载终端录像文件
+	 */
+	public int downloadRemoteFile(String peerId, String remoteFileName, String saveFilePath, int playSize) {
+		return naDownloadRemoteFile(peerId, remoteFileName, saveFilePath, playSize);
+	}
+	
+	/**
+	 * 下载终端录像文件(回调)
+	 * status的值如下:
+	 * 0:请求录像成功
+	 * 1:保存录像失败
+	 * 2:请求文件错误
+	 * 3:下载录像完成
+	 * 4:达到播放阀值
+	 * 5:请求消息错误
+	 */
+	public void RecordStatus(String peerId, int status) {
+		System.out.println("MyDebug: 【"+peerId+"】下载终端录像文件回调值："+status);
+		
+		Intent intent = new Intent();
+		intent.putExtra("PeerId", peerId);
+		intent.putExtra("RecordStatus", status);
+		intent.setAction(TerminalPlayerActivity.REQUEST_TERMINAL_VIDEO_ACTION);
+		HandlerApplication.getInstance().sendBroadcast(intent);
 	}
 	
 	/**

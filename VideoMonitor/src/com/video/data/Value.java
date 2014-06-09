@@ -6,6 +6,7 @@ public class Value {
 	/**
 	 * 服务器ID和Port
 	 */
+//	public final static String BackstageIPPort = "tcp://192.168.60.198:5555";
 //	public final static String BackstageIPPort = "tcp://192.168.0.185:5555";
 	public final static String BackstageIPPort = "tcp://222.174.213.185:5555";
 //	public final static String BackstageIPPort = "tcp://192.168.40.191:5555";
@@ -92,6 +93,11 @@ public class Value {
 	public static boolean ownFragmentRequestAlarmFlag = false;
 	
 	/**
+	 * 播放终端视频文件
+	 */
+	public static boolean playTerminalVideoFileFlag = false;
+	
+	/**
 	 * 初始化应用程序的全局变量
 	 */
 	public static void resetValues() {
@@ -106,5 +112,6 @@ public class Value {
 		isTunnelOpened = false;
 		isSharedUser = false;
 		ownFragmentRequestAlarmFlag = false;
+		playTerminalVideoFileFlag = false;
 	}
 }

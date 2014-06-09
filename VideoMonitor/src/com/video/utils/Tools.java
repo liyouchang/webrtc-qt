@@ -35,11 +35,11 @@ public class Tools {
 	/**
 	 * 获得short的值
 	 */
-	public static short getWordValue(byte[] buffer, int offset) {
-		short result = 0;
+	public static int getWordValue(byte[] buffer, int offset) {
+		int result = 0;
 		result = (byte) (0xFF & buffer[offset + 1]);
-		result = (short) ((result << 8) & 0xFF00);
-		result += (short) (buffer[offset] & 0x00FF);
+		result = (int) ((result << 8) & 0x0000FF00);
+		result += (int) (buffer[offset] & 0x000000FF);
 		return result;
 	}
 	

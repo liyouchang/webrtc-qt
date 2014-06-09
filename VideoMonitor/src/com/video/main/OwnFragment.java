@@ -352,7 +352,8 @@ public class OwnFragment extends Fragment implements OnClickListener {
 								xmlData.deleteAllItem();
 								if (deviceList != null) {
 									deviceList.clear();
-									deviceAdapter.notifyDataSetChanged();
+									deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+									lv_list.setAdapter(deviceAdapter);
 								}
 							}
 						} else {

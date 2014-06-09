@@ -441,6 +441,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	
 	public void reqAlarmEvent() {
 		if (Utils.isNetworkAvailable(mActivity)) {
+			if (Value.requstAlarmCount > 99) {
+				Value.requstAlarmCount = 99;
+			}
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqAlarmJson(0, Value.requstAlarmCount);
 			sendHandlerMsg(IS_REQUESTING);
