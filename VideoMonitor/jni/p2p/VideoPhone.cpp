@@ -25,6 +25,7 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
 
     kaerp2p::LocalTerminal * lt = new kaerp2p::LocalTerminal();
     lt->Initialize();
+    localClient = new KeJniLocalClient();
     localClient->Init(lt);
 
     return 0;

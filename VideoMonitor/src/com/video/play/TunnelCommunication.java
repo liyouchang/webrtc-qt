@@ -5,6 +5,7 @@ import java.util.HashMap;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.video.R;
 import com.video.data.Value;
@@ -40,6 +41,11 @@ public class TunnelCommunication {
 	private native int naStartPeerVideoCut(String peerId, String filepath);
 	private native int naStopPeerVideoCut(String peerId);
 	private native int naDownloadRemoteFile(String peerId, String remoteFileName, String saveFilePath, int playSize);
+	private native int naSearchLocalDevice();
+	private native int naConnectLocalDevice(String peerAddr);
+	private native int naDisconnectLocalDevice(String peerAddr);
+	private native int naStartLocalVideo(String peerAddr);
+	private native int naStopLocalVideo(String peerAddr);
 	
 	static 
 	{
@@ -58,7 +64,10 @@ public class TunnelCommunication {
 	 * 初始化通道
 	 */
 	public int tunnelInitialize(String classPath) {
-		return naInitialize(classPath);
+		Log.i("tag","tunnelInitialize start");
+		naInitialize(classPath);
+		Log.i("tag","tunnelInitialize end");
+		return 0;
 	}
 
 	/**
