@@ -187,6 +187,10 @@ public class TunnelCommunication {
 		HandlerApplication.getInstance().sendBroadcast(intent);
 	}
 	
+	public void SearchedDevice(String devInfo) {
+		System.out.println("MyDebug: 【搜索设备信息】"+devInfo);
+	}
+	
 	/**
 	 * 发送handler消息
 	 */
