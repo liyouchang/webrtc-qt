@@ -244,6 +244,11 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naStopPeerVideoCut", "(Ljava/lang/String;)I", (void*) naStopPeerVideoCut },
         { "naDownloadRemoteFile", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)I",
           (void*) naDownloadRemoteFile },
+        {"naSearchLocalDevice","()I",(void*)naSearchLocalDevice},
+        { "naConnectLocalDevice", "(Ljava/lang/String;)I", (void*) naConnectLocalDevice },
+        { "naDisconnectLocalDevice", "(Ljava/lang/String;)I", (void*) naDisconnectLocalDevice },
+        { "naStartLocalVideo", "(Ljava/lang/String;)I", (void*) naStartLocalVideo },
+        { "naStopLocalVideo", "(Ljava/lang/String;)I", (void*) naStopLocalVideo },
 
     };
 
