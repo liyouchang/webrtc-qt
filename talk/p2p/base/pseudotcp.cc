@@ -27,8 +27,9 @@
 
 #include "talk/p2p/base/pseudotcp.h"
 
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <set>
 
 #include "talk/base/basictypes.h"
@@ -81,7 +82,6 @@ const uint32 MAX_PACKET = 65535;
 const uint32 MIN_PACKET = 296;
 
 const uint32 IP_HEADER_SIZE = 20; // (+ up to 40 bytes of options?)
-const uint32 ICMP_HEADER_SIZE = 8;
 const uint32 UDP_HEADER_SIZE = 8;
 // TODO: Make JINGLE_HEADER_SIZE transparent to this code?
 const uint32 JINGLE_HEADER_SIZE = 64; // when relay framing is in use
@@ -118,7 +118,6 @@ const uint32 DEFAULT_SND_BUF_SIZE = 90 * 1024;
 
 #define PSEUDO_KEEPALIVE 0
 
-const uint32 MAX_SEQ = 0xFFFFFFFF;
 const uint32 HEADER_SIZE = 24;
 const uint32 PACKET_OVERHEAD = HEADER_SIZE + UDP_HEADER_SIZE + IP_HEADER_SIZE + JINGLE_HEADER_SIZE;
 
@@ -131,22 +130,12 @@ const uint8 FLAG_CTL = 0x02;
 const uint8 FLAG_RST = 0x04;
 
 const uint8 CTL_CONNECT = 0;
-//const uint8 CTL_REDIRECT = 1;
-const uint8 CTL_EXTRA = 255;
 
 // TCP options.
 const uint8 TCP_OPT_EOL = 0;  // End of list.
 const uint8 TCP_OPT_NOOP = 1;  // No-op.
 const uint8 TCP_OPT_MSS = 2;  // Maximum segment size.
 const uint8 TCP_OPT_WND_SCALE = 3;  // Window scale factor.
-
-/*
-const uint8 FLAG_FIN = 0x01;
-const uint8 FLAG_SYN = 0x02;
-const uint8 FLAG_ACK = 0x10;
-*/
-
-const uint32 CTRL_BOUND = 0x80000000;
 
 const long DEFAULT_TIMEOUT = 4000; // If there are no pending clocks, wake up every 4 seconds
 const long CLOSED_TIMEOUT = 60 * 1000; // If the connection is closed, once per minute
@@ -728,13 +717,16 @@ bool PseudoTcp::process(Segment& seg) {
   if ((seg.ack > m_snd_una) && (seg.ack <= m_snd_nxt)) {
     // Calculate round-trip time
     if (seg.tsecr) {
-      long rtt = talk_base::TimeDiff(now, seg.tsecr);
+      int32 rtt = talk_base::TimeDiff(now, seg.tsecr);
       if (rtt >= 0) {
         if (m_rx_srtt == 0) {
           m_rx_srtt = rtt;
           m_rx_rttvar = rtt / 2;
         } else {
-          m_rx_rttvar = (3 * m_rx_rttvar + abs(long(rtt - m_rx_srtt))) / 4;
+          uint32 unsigned_rtt = static_cast<uint32>(rtt);
+          uint32 abs_err = unsigned_rtt > m_rx_srtt ? unsigned_rtt - m_rx_srtt
+                                                    : m_rx_srtt - unsigned_rtt;
+          m_rx_rttvar = (3 * m_rx_rttvar + abs_err) / 4;
           m_rx_srtt = (7 * m_rx_srtt + rtt) / 8;
         }
         m_rx_rto = bound(MIN_RTO, m_rx_srtt +

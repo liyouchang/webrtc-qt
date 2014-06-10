@@ -26,6 +26,7 @@
  */
 
 #include "talk/app/webrtc/fakeportallocatorfactory.h"
+#include "talk/app/webrtc/test/fakedtlsidentityservice.h"
 #include "talk/app/webrtc/test/fakeperiodicvideocapturer.h"
 #include "talk/app/webrtc/test/mockpeerconnectionobservers.h"
 #include "talk/app/webrtc/test/peerconnectiontestwrapper.h"
@@ -35,7 +36,7 @@
 static const char kStreamLabelBase[] = "stream_label";
 static const char kVideoTrackLabelBase[] = "video_track";
 static const char kAudioTrackLabelBase[] = "audio_track";
-static const int kMaxWait = 5000;
+static const int kMaxWait = 10000;
 static const int kTestAudioFrameCount = 3;
 static const int kTestVideoFrameCount = 3;
 
@@ -93,8 +94,11 @@ bool PeerConnectionTestWrapper::CreatePc(
   webrtc::PeerConnectionInterface::IceServer ice_server;
   ice_server.uri = "stun:stun.l.google.com:19302";
   ice_servers.push_back(ice_server);
+  FakeIdentityService* dtls_service =
+      talk_base::SSLStreamAdapter::HaveDtlsSrtp() ?
+          new FakeIdentityService() : NULL;
   peer_connection_ = peer_connection_factory_->CreatePeerConnection(
-      ice_servers, constraints, allocator_factory_.get(), NULL, this);
+      ice_servers, constraints, allocator_factory_.get(), dtls_service, this);
 
   return peer_connection_.get() != NULL;
 }

@@ -27,11 +27,14 @@
 
 #import <Foundation/Foundation.h>
 
+#import "RTCDataChannel.h"
 #import "RTCPeerConnectionDelegate.h"
 
 // Observer of PeerConnection events, used by RTCPeerConnectionTest to check
 // expectations.
-@interface RTCPeerConnectionSyncObserver : NSObject<RTCPeerConnectionDelegate>
+@interface RTCPeerConnectionSyncObserver
+    : NSObject<RTCPeerConnectionDelegate, RTCDataChannelDelegate>
+@property(nonatomic) RTCDataChannel* dataChannel;
 // TODO(hughv): Add support for RTCVideoRendererDelegate when Video is enabled.
 
 // Transfer received ICE candidates to the caller.
@@ -46,6 +49,9 @@
 - (void)expectICECandidates:(int)count;
 - (void)expectICEConnectionChange:(RTCICEConnectionState)state;
 - (void)expectICEGatheringChange:(RTCICEGatheringState)state;
+- (void)expectDataChannel:(NSString*)label;
+- (void)expectStateChange:(RTCDataChannelState)state;
+- (void)expectMessage:(NSData*)message isBinary:(BOOL)isBinary;
 
 // Wait until all registered expectations above have been observed.
 - (void)waitForAllExpectationsToBeSatisfied;

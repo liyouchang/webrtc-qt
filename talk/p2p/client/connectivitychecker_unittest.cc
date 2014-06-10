@@ -23,8 +23,6 @@ static const talk_base::SocketAddress kStunAddr("44.44.44.44", 4444);
 static const talk_base::SocketAddress kRelayAddr("55.55.55.55", 5555);
 static const talk_base::SocketAddress kProxyAddr("66.66.66.66", 6666);
 static const talk_base::ProxyType kProxyType = talk_base::PROXY_HTTPS;
-static const char kChannelName[] = "rtp_test";
-static const int kComponent = 1;
 static const char kRelayHost[] = "relay.google.com";
 static const char kRelayToken[] =
     "CAESFwoOb2phQGdvb2dsZS5jb20Q043h47MmGhBTB1rbfIXkhuarDCZe+xF6";
@@ -75,7 +73,7 @@ class FakeStunPort : public StunPort {
 
   // Just set external address and signal that we are done.
   virtual void PrepareAddress() {
-    AddAddress(kExternalAddr, kExternalAddr, "udp",
+    AddAddress(kExternalAddr, kExternalAddr, talk_base::SocketAddress(), "udp",
                STUN_PORT_TYPE, ICE_TYPE_PREFERENCE_SRFLX, true);
     SignalPortComplete(this);
   }

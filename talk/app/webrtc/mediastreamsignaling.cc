@@ -198,14 +198,8 @@ void MediaStreamSignaling::TearDown() {
 bool MediaStreamSignaling::IsSctpSidAvailable(int sid) const {
   if (sid < 0 || sid > static_cast<int>(cricket::kMaxSctpSid))
     return false;
-  for (SctpDataChannels::const_iterator iter = sctp_data_channels_.begin();
-       iter != sctp_data_channels_.end();
-       ++iter) {
-    if ((*iter)->id() == sid) {
-      return false;
-    }
-  }
-  return true;
+
+  return FindDataChannelBySid(sid) < 0;
 }
 
 // Gets the first unused odd/even id based on the DTLS role. If |role| is
@@ -321,8 +315,29 @@ bool MediaStreamSignaling::AddLocalStream(MediaStreamInterface* local_stream) {
 
 void MediaStreamSignaling::RemoveLocalStream(
     MediaStreamInterface* local_stream) {
-  local_streams_->RemoveStream(local_stream);
+  AudioTrackVector audio_tracks = local_stream->GetAudioTracks();
+  for (AudioTrackVector::const_iterator it = audio_tracks.begin();
+       it != audio_tracks.end(); ++it) {
+    const TrackInfo* track_info = FindTrackInfo(local_audio_tracks_,
+                                                local_stream->label(),
+                                                (*it)->id());
+    if (track_info) {
+      stream_observer_->OnRemoveLocalAudioTrack(local_stream, *it,
+                                                track_info->ssrc);
+    }
+  }
+  VideoTrackVector video_tracks = local_stream->GetVideoTracks();
+  for (VideoTrackVector::const_iterator it = video_tracks.begin();
+       it != video_tracks.end(); ++it) {
+    const TrackInfo* track_info = FindTrackInfo(local_video_tracks_,
+                                                local_stream->label(),
+                                                (*it)->id());
+    if (track_info) {
+      stream_observer_->OnRemoveLocalVideoTrack(local_stream, *it);
+    }
+  }
 
+  local_streams_->RemoveStream(local_stream);
   stream_observer_->OnRemoveLocalStream(local_stream);
 }
 
@@ -725,7 +740,8 @@ void MediaStreamSignaling::UpdateLocalTracks(
     cricket::StreamParams params;
     if (!cricket::GetStreamBySsrc(streams, info.ssrc, &params) ||
         params.id != info.track_id || params.sync_label != info.stream_label) {
-      OnLocalTrackRemoved(info.stream_label, info.track_id, media_type);
+      OnLocalTrackRemoved(info.stream_label, info.track_id, info.ssrc,
+                          media_type);
       track_it = current_tracks->erase(track_it);
     } else {
       ++track_it;
@@ -787,6 +803,7 @@ void MediaStreamSignaling::OnLocalTrackSeen(
 void MediaStreamSignaling::OnLocalTrackRemoved(
     const std::string& stream_label,
     const std::string& track_id,
+    uint32 ssrc,
     cricket::MediaType media_type) {
   MediaStreamInterface* stream = local_streams_->find(stream_label);
   if (!stream) {
@@ -803,7 +820,7 @@ void MediaStreamSignaling::OnLocalTrackRemoved(
     if (!audio_track) {
       return;
     }
-    stream_observer_->OnRemoveLocalAudioTrack(stream, audio_track);
+    stream_observer_->OnRemoveLocalAudioTrack(stream, audio_track, ssrc);
   } else if (media_type == cricket::MEDIA_TYPE_VIDEO) {
     VideoTrackInterface* video_track = stream->FindVideoTrack(track_id);
     if (!video_track) {
@@ -930,6 +947,17 @@ void MediaStreamSignaling::OnDtlsRoleReadyForSctp(talk_base::SSLRole role) {
   }
 }
 
+
+void MediaStreamSignaling::OnRemoteSctpDataChannelClosed(uint32 sid) {
+  int index = FindDataChannelBySid(sid);
+  if (index < 0) {
+    LOG(LS_WARNING) << "Unexpected sid " << sid
+                    << " of the remotely closed DataChannel.";
+    return;
+  }
+  sctp_data_channels_[index]->Close();
+}
+
 const MediaStreamSignaling::TrackInfo*
 MediaStreamSignaling::FindTrackInfo(
     const MediaStreamSignaling::TrackInfos& infos,
@@ -942,6 +970,15 @@ MediaStreamSignaling::FindTrackInfo(
       return &*it;
   }
   return NULL;
+}
+
+int MediaStreamSignaling::FindDataChannelBySid(int sid) const {
+  for (size_t i = 0; i < sctp_data_channels_.size(); ++i) {
+    if (sctp_data_channels_[i]->id() == sid) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
 }
 
 }  // namespace webrtc

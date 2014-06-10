@@ -298,7 +298,8 @@ class MockSignalingObserver : public webrtc::MediaStreamSignalingObserver {
   }
 
   virtual void OnRemoveLocalAudioTrack(MediaStreamInterface* stream,
-                                       AudioTrackInterface* audio_track) {
+                                       AudioTrackInterface* audio_track,
+                                       uint32 ssrc) {
     RemoveTrack(&local_audio_tracks_, stream, audio_track);
   }
 
@@ -1191,4 +1192,23 @@ TEST_F(MediaStreamSignalingTest, DuplicatedLabelFromOpenMessageAllowed) {
   cricket::ReceiveDataParams params;
   params.ssrc = config.id;
   EXPECT_TRUE(signaling_->AddDataChannelFromOpenMessage(params, payload));
+}
+
+// Verifies that a DataChannel closed remotely is closed locally.
+TEST_F(MediaStreamSignalingTest,
+       SctpDataChannelClosedLocallyWhenClosedRemotely) {
+  webrtc::InternalDataChannelInit config;
+  config.id = 0;
+
+  talk_base::scoped_refptr<webrtc::DataChannel> data_channel =
+      webrtc::DataChannel::Create(
+          data_channel_provider_.get(), cricket::DCT_SCTP, "a", config);
+  ASSERT_TRUE(data_channel.get() != NULL);
+  EXPECT_EQ(webrtc::DataChannelInterface::kConnecting,
+            data_channel->state());
+
+  EXPECT_TRUE(signaling_->AddDataChannel(data_channel.get()));
+
+  signaling_->OnRemoteSctpDataChannelClosed(config.id);
+  EXPECT_EQ(webrtc::DataChannelInterface::kClosed, data_channel->state());
 }

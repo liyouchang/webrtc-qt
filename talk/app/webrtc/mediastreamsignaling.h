@@ -37,6 +37,7 @@
 #include "talk/app/webrtc/peerconnectioninterface.h"
 #include "talk/app/webrtc/streamcollection.h"
 #include "talk/base/scoped_ref_ptr.h"
+#include "talk/base/sigslot.h"
 #include "talk/session/media/mediasession.h"
 
 namespace talk_base {
@@ -92,7 +93,8 @@ class MediaStreamSignalingObserver {
 
   // Triggered when the local SessionDescription has removed an audio track.
   virtual void OnRemoveLocalAudioTrack(MediaStreamInterface* stream,
-                                       AudioTrackInterface* audio_track) = 0;
+                                       AudioTrackInterface* audio_track,
+                                       uint32 ssrc) = 0;
 
   // Triggered when the local SessionDescription has removed a video track.
   virtual void OnRemoveLocalVideoTrack(MediaStreamInterface* stream,
@@ -156,7 +158,7 @@ class MediaStreamSignalingObserver {
 //    DataChannel label or SSRC. The DataChannel SSRC is updated with SSRC=0.
 //    The DataChannel change state to kClosed.
 
-class MediaStreamSignaling {
+class MediaStreamSignaling : public sigslot::has_slots<> {
  public:
   MediaStreamSignaling(talk_base::Thread* signaling_thread,
                        MediaStreamSignalingObserver* stream_observer,
@@ -247,6 +249,7 @@ class MediaStreamSignaling {
   }
   void OnDataTransportCreatedForSctp();
   void OnDtlsRoleReadyForSctp(talk_base::SSLRole role);
+  void OnRemoteSctpDataChannelClosed(uint32 sid);
 
  private:
   struct RemotePeerInfo {
@@ -354,6 +357,7 @@ class MediaStreamSignaling {
   // MediaStreamTrack in a MediaStream in |local_streams_|.
   void OnLocalTrackRemoved(const std::string& stream_label,
                            const std::string& track_id,
+                           uint32 ssrc,
                            cricket::MediaType media_type);
 
   void UpdateLocalRtpDataChannels(const cricket::StreamParamsVec& streams);
@@ -365,6 +369,10 @@ class MediaStreamSignaling {
   const TrackInfo* FindTrackInfo(const TrackInfos& infos,
                                  const std::string& stream_label,
                                  const std::string track_id) const;
+
+  // Returns the index of the specified SCTP DataChannel in sctp_data_channels_,
+  // or -1 if not found.
+  int FindDataChannelBySid(int sid) const;
 
   RemotePeerInfo remote_info_;
   talk_base::Thread* signaling_thread_;
@@ -386,6 +394,7 @@ class MediaStreamSignaling {
   typedef std::map<std::string, talk_base::scoped_refptr<DataChannel> >
       RtpDataChannels;
   typedef std::vector<talk_base::scoped_refptr<DataChannel> > SctpDataChannels;
+
   RtpDataChannels rtp_data_channels_;
   SctpDataChannels sctp_data_channels_;
 };

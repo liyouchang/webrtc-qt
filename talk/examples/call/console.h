@@ -28,7 +28,7 @@
 #ifndef TALK_EXAMPLES_CALL_CONSOLE_H_
 #define TALK_EXAMPLES_CALL_CONSOLE_H_
 
-#include <cstdio>
+#include <stdio.h>
 
 #include "talk/base/thread.h"
 #include "talk/base/messagequeue.h"
@@ -64,6 +64,7 @@ class Console : public talk_base::MessageHandler {
   CallClient *client_;
   talk_base::Thread *client_thread_;
   talk_base::scoped_ptr<talk_base::Thread> console_thread_;
+  bool stopped_;
 };
 
 #endif // TALK_EXAMPLES_CALL_CONSOLE_H_

@@ -76,6 +76,7 @@
 #include "talk/app/webrtc/jsep.h"
 #include "talk/app/webrtc/mediastreaminterface.h"
 #include "talk/app/webrtc/statstypes.h"
+#include "talk/app/webrtc/umametrics.h"
 #include "talk/base/fileutils.h"
 #include "talk/base/socketaddress.h"
 
@@ -116,6 +117,16 @@ class StatsObserver : public talk_base::RefCountInterface {
 
  protected:
   virtual ~StatsObserver() {}
+};
+
+class UMAObserver : public talk_base::RefCountInterface {
+ public:
+  virtual void IncrementCounter(PeerConnectionUMAMetricsCounter type) = 0;
+  virtual void AddHistogramSample(PeerConnectionUMAMetricsName type,
+                                  int value) = 0;
+
+ protected:
+  virtual ~UMAObserver() {}
 };
 
 class PeerConnectionInterface : public talk_base::RefCountInterface {
@@ -166,6 +177,21 @@ class PeerConnectionInterface : public talk_base::RefCountInterface {
   };
   typedef std::vector<IceServer> IceServers;
 
+  enum IceTransportsType {
+    kNone,
+    kRelay,
+    kNoHost,
+    kAll
+  };
+
+  struct RTCConfiguration {
+    IceTransportsType type;
+    IceServers servers;
+
+    RTCConfiguration() : type(kAll) {}
+    explicit RTCConfiguration(IceTransportsType type) : type(type) {}
+  };
+
   // Used by GetStats to decide which stats to include in the stats reports.
   // |kStatsOutputLevelStandard| includes the standard stats for Javascript API;
   // |kStatsOutputLevelDebug| includes both the standard stats and additional
@@ -198,10 +224,6 @@ class PeerConnectionInterface : public talk_base::RefCountInterface {
   // Otherwise returns NULL.
   virtual talk_base::scoped_refptr<DtmfSenderInterface> CreateDtmfSender(
       AudioTrackInterface* track) = 0;
-
-  // TODO(jiayl): remove the old API once all Chrome overrides are updated.
-  virtual bool GetStats(StatsObserver* observer,
-                        MediaStreamTrackInterface* track) = 0;
 
   virtual bool GetStats(StatsObserver* observer,
                         MediaStreamTrackInterface* track,
@@ -243,6 +265,8 @@ class PeerConnectionInterface : public talk_base::RefCountInterface {
   // TODO(ronghuawu): Consider to change this so that the AddIceCandidate will
   // take the ownership of the |candidate|.
   virtual bool AddIceCandidate(const IceCandidateInterface* candidate) = 0;
+
+  virtual void RegisterUMAObserver(UMAObserver* observer) = 0;
 
   // Returns the current SignalingState.
   virtual SignalingState signaling_state() = 0;
@@ -416,19 +440,34 @@ class PeerConnectionFactoryInterface : public talk_base::RefCountInterface {
   };
 
   virtual void SetOptions(const Options& options) = 0;
+
   virtual talk_base::scoped_refptr<PeerConnectionInterface>
-     CreatePeerConnection(
-         const PeerConnectionInterface::IceServers& configuration,
-         const MediaConstraintsInterface* constraints,
-         DTLSIdentityServiceInterface* dtls_identity_service,
-         PeerConnectionObserver* observer) = 0;
-  virtual talk_base::scoped_refptr<PeerConnectionInterface>
+      CreatePeerConnection(
+          const PeerConnectionInterface::RTCConfiguration& configuration,
+          const MediaConstraintsInterface* constraints,
+          PortAllocatorFactoryInterface* allocator_factory,
+          DTLSIdentityServiceInterface* dtls_identity_service,
+          PeerConnectionObserver* observer) = 0;
+
+  // TODO(mallinath) : Remove below versions after clients are updated
+  // to above method.
+  // In latest W3C WebRTC draft, PC constructor will take RTCConfiguration,
+  // and not IceServers. RTCConfiguration is made up of ice servers and
+  // ice transport type.
+  // http://dev.w3.org/2011/webrtc/editor/webrtc.html
+  inline talk_base::scoped_refptr<PeerConnectionInterface>
       CreatePeerConnection(
           const PeerConnectionInterface::IceServers& configuration,
           const MediaConstraintsInterface* constraints,
           PortAllocatorFactoryInterface* allocator_factory,
           DTLSIdentityServiceInterface* dtls_identity_service,
-          PeerConnectionObserver* observer) = 0;
+          PeerConnectionObserver* observer) {
+      PeerConnectionInterface::RTCConfiguration rtc_config;
+      rtc_config.servers = configuration;
+      return CreatePeerConnection(rtc_config, constraints, allocator_factory,
+                                  dtls_identity_service, observer);
+  }
+
   virtual talk_base::scoped_refptr<MediaStreamInterface>
       CreateLocalMediaStream(const std::string& label) = 0;
 

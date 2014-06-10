@@ -240,8 +240,11 @@ void RelayPort::SetReady() {
     for (iter = external_addr_.begin();
          iter != external_addr_.end(); ++iter) {
       std::string proto_name = ProtoToString(iter->proto);
-      AddAddress(iter->address, iter->address, proto_name,
-                 RELAY_PORT_TYPE, ICE_TYPE_PREFERENCE_RELAY, false);
+      // In case of Gturn, related address is set to null socket address.
+      // This is due to as mapped address stun attribute is used for allocated
+      // address.
+      AddAddress(iter->address, iter->address, talk_base::SocketAddress(),
+                 proto_name, RELAY_PORT_TYPE, ICE_TYPE_PREFERENCE_RELAY, false);
     }
     ready_ = true;
     SignalPortComplete(this);
@@ -258,8 +261,9 @@ bool RelayPort::HasMagicCookie(const char* data, size_t size) {
   if (size < 24 + sizeof(TURN_MAGIC_COOKIE_VALUE)) {
     return false;
   } else {
-    return 0 == std::memcmp(data + 24, TURN_MAGIC_COOKIE_VALUE,
-                            sizeof(TURN_MAGIC_COOKIE_VALUE));
+    return memcmp(data + 24,
+                  TURN_MAGIC_COOKIE_VALUE,
+                  sizeof(TURN_MAGIC_COOKIE_VALUE)) == 0;
   }
 }
 
@@ -430,7 +434,7 @@ void RelayConnection::OnSendPacket(const void* data, size_t size,
   int sent = socket_->SendTo(data, size, GetAddress(), options);
   if (sent <= 0) {
     LOG(LS_VERBOSE) << "OnSendPacket: failed sending to " << GetAddress() <<
-        std::strerror(socket_->GetError());
+        strerror(socket_->GetError());
     ASSERT(sent < 0);
   }
 }
@@ -547,10 +551,6 @@ void RelayEntry::OnConnect(const talk_base::SocketAddress& mapped_addr,
             << " @ " << mapped_addr.ToSensitiveString();
   connected_ = true;
 
-  // In case of Gturn related address is set to null socket address.
-  // This is due to mapped address stun attribute is used for allocated
-  // address.
-  port_->set_related_address(talk_base::SocketAddress());
   port_->AddExternalAddress(ProtocolAddress(mapped_addr, proto));
   port_->SetReady();
 }

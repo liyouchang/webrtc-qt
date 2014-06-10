@@ -145,20 +145,18 @@ struct ThreadInit {
 Thread::Thread(SocketServer* ss)
     : MessageQueue(ss),
       priority_(PRIORITY_NORMAL),
-      started_(false),
+      running_(true, false),
 #if defined(WIN32)
       thread_(NULL),
       thread_id_(0),
 #endif
-      owned_(true),
-      delete_self_when_complete_(false) {
+      owned_(true) {
   SetName("Thread", this);  // default name
 }
 
 Thread::~Thread() {
   Stop();
-  if (active_)
-    Clear(NULL);
+  Clear(NULL);
 }
 
 bool Thread::SleepMs(int milliseconds) {
@@ -181,7 +179,7 @@ bool Thread::SleepMs(int milliseconds) {
 }
 
 bool Thread::SetName(const std::string& name, const void* obj) {
-  if (started_) return false;
+  if (running()) return false;
   name_ = name;
   if (obj) {
     char buf[16];
@@ -193,7 +191,7 @@ bool Thread::SetName(const std::string& name, const void* obj) {
 
 bool Thread::SetPriority(ThreadPriority priority) {
 #if defined(WIN32)
-  if (started_) {
+  if (running()) {
     BOOL ret = FALSE;
     if (priority == PRIORITY_NORMAL) {
       ret = ::SetThreadPriority(thread_, THREAD_PRIORITY_NORMAL);
@@ -212,7 +210,7 @@ bool Thread::SetPriority(ThreadPriority priority) {
   return true;
 #else
   // TODO: Implement for Linux/Mac if possible.
-  if (started_) return false;
+  if (running()) return false;
   priority_ = priority;
   return true;
 #endif
@@ -221,8 +219,8 @@ bool Thread::SetPriority(ThreadPriority priority) {
 bool Thread::Start(Runnable* runnable) {
   ASSERT(owned_);
   if (!owned_) return false;
-  ASSERT(!started_);
-  if (started_) return false;
+  ASSERT(!running());
+  if (running()) return false;
 
   Restart();  // reset fStop_ if the thread is being restarted
 
@@ -241,7 +239,7 @@ bool Thread::Start(Runnable* runnable) {
   thread_ = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)PreRun, init, flags,
                          &thread_id_);
   if (thread_) {
-    started_ = true;
+    running_.Set();
     if (priority_ != PRIORITY_NORMAL) {
       SetPriority(priority_);
       ::ResumeThread(thread_);
@@ -289,13 +287,13 @@ bool Thread::Start(Runnable* runnable) {
     LOG(LS_ERROR) << "Unable to create pthread, error " << error_code;
     return false;
   }
-  started_ = true;
+  running_.Set();
 #endif
   return true;
 }
 
 void Thread::Join() {
-  if (started_) {
+  if (running()) {
     ASSERT(!IsCurrent());
 #if defined(WIN32)
     WaitForSingleObject(thread_, INFINITE);
@@ -306,7 +304,7 @@ void Thread::Join() {
     void *pv;
     pthread_join(thread_, &pv);
 #endif
-    started_ = false;
+    running_.Reset();
   }
 }
 
@@ -357,10 +355,6 @@ void* Thread::PreRun(void* pv) {
     } else {
       init->thread->Run();
     }
-    if (init->thread->delete_self_when_complete_) {
-      init->thread->started_ = false;
-      delete init->thread;
-    }
     delete init;
     return NULL;
   }
@@ -403,7 +397,6 @@ void Thread::Send(MessageHandler *phandler, uint32 id, MessageData *pdata) {
   bool ready = false;
   {
     CritScope cs(&crit_);
-    EnsureActive();
     _SendMessage smsg;
     smsg.thread = current_thread;
     smsg.msg = msg;
@@ -523,7 +516,7 @@ bool Thread::WrapCurrent() {
 }
 
 bool Thread::WrapCurrentWithThreadManager(ThreadManager* thread_manager) {
-  if (started_)
+  if (running())
     return false;
 #if defined(WIN32)
   // We explicitly ask for no rights other than synchronization.
@@ -538,7 +531,7 @@ bool Thread::WrapCurrentWithThreadManager(ThreadManager* thread_manager) {
   thread_ = pthread_self();
 #endif
   owned_ = false;
-  started_ = true;
+  running_.Set();
   thread_manager->SetCurrentThread(this);
   return true;
 }
@@ -551,7 +544,7 @@ void Thread::UnwrapCurrent() {
     LOG_GLE(LS_ERROR) << "When unwrapping thread, failed to close handle.";
   }
 #endif
-  started_ = false;
+  running_.Reset();
 }
 
 

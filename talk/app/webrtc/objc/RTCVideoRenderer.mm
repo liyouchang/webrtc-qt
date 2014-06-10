@@ -29,46 +29,74 @@
 #error "This file requires ARC support."
 #endif
 
-#import "RTCVideoRenderer+internal.h"
+#import "RTCVideoRenderer+Internal.h"
 
 #if TARGET_OS_IPHONE
-#import <UIKit/UIKit.h>
+#import "RTCEAGLVideoView+Internal.h"
 #endif
+#import "RTCI420Frame+Internal.h"
 
-#import "RTCI420Frame.h"
-#import "RTCVideoRendererDelegate.h"
+namespace webrtc {
 
-@implementation RTCVideoRenderer
+class RTCVideoRendererAdapter : public VideoRendererInterface {
+ public:
+  RTCVideoRendererAdapter(RTCVideoRenderer* renderer) { _renderer = renderer; }
 
-@synthesize delegate = _delegate;
+  virtual void SetSize(int width, int height) OVERRIDE {
+    [_renderer.delegate renderer:_renderer
+                      didSetSize:CGSizeMake(width, height)];
+  }
 
-+ (RTCVideoRenderer *)videoRenderGUIWithFrame:(CGRect)frame {
-  // TODO (hughv): Implement.
-  return nil;
+  virtual void RenderFrame(const cricket::VideoFrame* frame) OVERRIDE {
+    if (!_renderer.delegate) {
+      return;
+    }
+    RTCI420Frame* i420Frame = [[RTCI420Frame alloc] initWithVideoFrame:frame];
+    [_renderer.delegate renderer:_renderer didReceiveFrame:i420Frame];
+  }
+
+ private:
+  __weak RTCVideoRenderer* _renderer;
+};
 }
 
-- (id)initWithDelegate:(id<RTCVideoRendererDelegate>)delegate {
-  if ((self = [super init])) {
+@implementation RTCVideoRenderer {
+  talk_base::scoped_ptr<webrtc::RTCVideoRendererAdapter> _adapter;
+#if TARGET_OS_IPHONE
+  RTCEAGLVideoView* _videoView;
+#endif
+}
+
+- (instancetype)initWithDelegate:(id<RTCVideoRendererDelegate>)delegate {
+  if (self = [super init]) {
     _delegate = delegate;
-    // TODO (hughv): Create video renderer.
+    _adapter.reset(new webrtc::RTCVideoRendererAdapter(self));
   }
   return self;
 }
+
+#if TARGET_OS_IPHONE
+// TODO(tkchin): remove shim for deprecated method.
+- (instancetype)initWithView:(UIView*)view {
+  if (self = [super init]) {
+    _videoView = [[RTCEAGLVideoView alloc] initWithFrame:view.bounds];
+    _videoView.autoresizingMask =
+        UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    _videoView.translatesAutoresizingMaskIntoConstraints = YES;
+    [view addSubview:_videoView];
+    self.delegate = _videoView;
+    _adapter.reset(new webrtc::RTCVideoRendererAdapter(self));
+  }
+  return self;
+}
+#endif
 
 @end
 
 @implementation RTCVideoRenderer (Internal)
 
-- (id)initWithVideoRenderer:(webrtc::VideoRendererInterface *)videoRenderer {
-  if ((self = [super init])) {
-    // TODO (hughv): Implement.
-  }
-  return self;
-}
-
-- (webrtc::VideoRendererInterface *)videoRenderer {
-  // TODO (hughv): Implement.
-  return NULL;
+- (webrtc::VideoRendererInterface*)videoRenderer {
+  return _adapter.get();
 }
 
 @end

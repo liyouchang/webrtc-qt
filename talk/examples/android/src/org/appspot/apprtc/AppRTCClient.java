@@ -45,8 +45,6 @@ import java.net.URLConnection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Negotiates signaling for chatting with apprtc.appspot.com "rooms".
@@ -215,6 +213,8 @@ public class AppRTCClient {
       }
       try {
         return getParametersForRoomUrl(urls[0]);
+      } catch (JSONException e) {
+        throw new RuntimeException(e);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -231,33 +231,26 @@ public class AppRTCClient {
       iceServersObserver.onIceServers(appRTCSignalingParameters.iceServers);
     }
 
-    // Fetches |url| and fishes the signaling parameters out of the HTML via
-    // regular expressions.
-    //
-    // TODO(fischman): replace this hackery with a dedicated JSON-serving URL in
-    // apprtc so that this isn't necessary (here and in other future apps that
-    // want to interop with apprtc).
+    // Fetches |url| and fishes the signaling parameters out of the JSON.
     private AppRTCSignalingParameters getParametersForRoomUrl(String url)
-        throws IOException {
-      final Pattern fullRoomPattern = Pattern.compile(
-          ".*\n *Sorry, this room is full\\..*");
+        throws IOException, JSONException {
+      url = url + "&t=json";
+      JSONObject roomJson = new JSONObject(
+          drainStream((new URL(url)).openConnection().getInputStream()));
 
-      String roomHtml =
-          drainStream((new URL(url)).openConnection().getInputStream());
-
-      Matcher fullRoomMatcher = fullRoomPattern.matcher(roomHtml);
-      if (fullRoomMatcher.find()) {
-        throw new IOException("Room is full!");
+      if (roomJson.has("error")) {
+        JSONArray errors = roomJson.getJSONArray("error_messages");
+        throw new IOException(errors.toString());
       }
 
       String gaeBaseHref = url.substring(0, url.indexOf('?'));
-      String token = getVarValue(roomHtml, "channelToken", true);
+      String token = roomJson.getString("token");
       String postMessageUrl = "/message?r=" +
-          getVarValue(roomHtml, "roomKey", true) + "&u=" +
-          getVarValue(roomHtml, "me", true);
-      boolean initiator = getVarValue(roomHtml, "initiator", false).equals("1");
+          roomJson.getString("room_key") + "&u=" +
+          roomJson.getString("me");
+      boolean initiator = roomJson.getInt("initiator") == 1;
       LinkedList<PeerConnection.IceServer> iceServers =
-          iceServersFromPCConfigJSON(getVarValue(roomHtml, "pcConfig", false));
+          iceServersFromPCConfigJSON(roomJson.getString("pc_config"));
 
       boolean isTurnPresent = false;
       for (PeerConnection.IceServer server : iceServers) {
@@ -267,25 +260,45 @@ public class AppRTCClient {
         }
       }
       if (!isTurnPresent) {
-        iceServers.add(
-            requestTurnServer(getVarValue(roomHtml, "turnUrl", true)));
+        iceServers.add(requestTurnServer(roomJson.getString("turn_url")));
       }
 
       MediaConstraints pcConstraints = constraintsFromJSON(
-          getVarValue(roomHtml, "pcConstraints", false));
+          roomJson.getString("pc_constraints"));
+      addDTLSConstraintIfMissing(pcConstraints);
       Log.d(TAG, "pcConstraints: " + pcConstraints);
       MediaConstraints videoConstraints = constraintsFromJSON(
           getAVConstraints("video",
-              getVarValue(roomHtml, "mediaConstraints", false)));
+              roomJson.getString("media_constraints")));
       Log.d(TAG, "videoConstraints: " + videoConstraints);
       MediaConstraints audioConstraints = constraintsFromJSON(
           getAVConstraints("audio",
-              getVarValue(roomHtml, "mediaConstraints", false)));
+              roomJson.getString("media_constraints")));
       Log.d(TAG, "audioConstraints: " + audioConstraints);
 
       return new AppRTCSignalingParameters(
           iceServers, gaeBaseHref, token, postMessageUrl, initiator,
           pcConstraints, videoConstraints, audioConstraints);
+    }
+
+    // Mimic Chrome and set DtlsSrtpKeyAgreement to true if not set to false by
+    // the web-app.
+    private void addDTLSConstraintIfMissing(
+        MediaConstraints pcConstraints) {
+      for (MediaConstraints.KeyValuePair pair : pcConstraints.mandatory) {
+        if (pair.getKey().equals("DtlsSrtpKeyAgreement")) {
+          return;
+        }
+      }
+      for (MediaConstraints.KeyValuePair pair : pcConstraints.optional) {
+        if (pair.getKey().equals("DtlsSrtpKeyAgreement")) {
+          return;
+        }
+      }
+      // DTLS isn't being suppressed (e.g. for debug=loopback calls), so enable
+      // it by default.
+      pcConstraints.optional.add(
+          new MediaConstraints.KeyValuePair("DtlsSrtpKeyAgreement", "true"));
     }
 
     // Return the constraints specified for |type| of "audio" or "video" in
@@ -348,27 +361,6 @@ public class AppRTCClient {
       }
     }
 
-    // Scan |roomHtml| for declaration & assignment of |varName| and return its
-    // value, optionally stripping outside quotes if |stripQuotes| requests it.
-    private String getVarValue(
-        String roomHtml, String varName, boolean stripQuotes)
-        throws IOException {
-      final Pattern pattern = Pattern.compile(
-          ".*\n *var " + varName + " = ([^\n]*);\n.*");
-      Matcher matcher = pattern.matcher(roomHtml);
-      if (!matcher.find()) {
-        throw new IOException("Missing " + varName + " in HTML: " + roomHtml);
-      }
-      String varValue = matcher.group(1);
-      if (matcher.find()) {
-        throw new IOException("Too many " + varName + " in HTML: " + roomHtml);
-      }
-      if (stripQuotes) {
-        varValue = varValue.substring(1, varValue.length() - 1);
-      }
-      return varValue;
-    }
-
     // Requests & returns a TURN ICE Server based on a request URL.  Must be run
     // off the main thread!
     private PeerConnection.IceServer requestTurnServer(String url) {
@@ -401,7 +393,7 @@ public class AppRTCClient {
           new LinkedList<PeerConnection.IceServer>();
       for (int i = 0; i < servers.length(); ++i) {
         JSONObject server = servers.getJSONObject(i);
-        String url = server.getString("url");
+        String url = server.getString("urls");
         String credential =
             server.has("credential") ? server.getString("credential") : "";
         ret.add(new PeerConnection.IceServer(url, "", credential));

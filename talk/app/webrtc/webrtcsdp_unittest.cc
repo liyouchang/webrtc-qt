@@ -299,6 +299,19 @@ static const char kSdpSctpDataChannelWithCandidatesString[] =
     "a=mid:data_content_name\r\n"
     "a=sctpmap:5000 webrtc-datachannel 1024\r\n";
 
+static const char kSdpConferenceString[] =
+    "v=0\r\n"
+    "o=- 18446744069414584320 18446462598732840960 IN IP4 127.0.0.1\r\n"
+    "s=-\r\n"
+    "t=0 0\r\n"
+    "a=msid-semantic: WMS\r\n"
+    "m=audio 1 RTP/SAVPF 111 103 104\r\n"
+    "c=IN IP4 0.0.0.0\r\n"
+    "a=x-google-flag:conference\r\n"
+    "m=video 1 RTP/SAVPF 120\r\n"
+    "c=IN IP4 0.0.0.0\r\n"
+    "a=x-google-flag:conference\r\n";
+
 
 // One candidate reference string as per W3c spec.
 // candidate:<blah> not a=candidate:<blah>CRLF
@@ -388,14 +401,31 @@ static void Replace(const std::string& line,
                              newlines.c_str(), newlines.length(), message);
 }
 
-static void ReplaceAndTryToParse(const char* search, const char* replace) {
+// Expect fail to parase |bad_sdp| and expect |bad_part| be part of the error
+// message.
+static void ExpectParseFailure(const std::string& bad_sdp,
+                               const std::string& bad_part) {
   JsepSessionDescription desc(kDummyString);
-  std::string sdp = kSdpFullString;
-  Replace(search, replace, &sdp);
   SdpParseError error;
-  bool ret = webrtc::SdpDeserialize(sdp, &desc, &error);
+  bool ret = webrtc::SdpDeserialize(bad_sdp, &desc, &error);
   EXPECT_FALSE(ret);
-  EXPECT_NE(std::string::npos, error.line.find(replace));
+  EXPECT_NE(std::string::npos, error.line.find(bad_part.c_str()));
+}
+
+// Expect fail to parse kSdpFullString if replace |good_part| with |bad_part|.
+static void ExpectParseFailure(const char* good_part, const char* bad_part) {
+  std::string bad_sdp = kSdpFullString;
+  Replace(good_part, bad_part, &bad_sdp);
+  ExpectParseFailure(bad_sdp, bad_part);
+}
+
+// Expect fail to parse kSdpFullString if add |newlines| after |injectpoint|.
+static void ExpectParseFailureWithNewLines(const std::string& injectpoint,
+                                           const std::string& newlines,
+                                           const std::string& bad_part) {
+  std::string bad_sdp = kSdpFullString;
+  InjectAfter(injectpoint, newlines, &bad_sdp);
+  ExpectParseFailure(bad_sdp, bad_part);
 }
 
 static void ReplaceDirection(cricket::MediaContentDirection direction,
@@ -1123,6 +1153,15 @@ class WebRtcSdpTest : public testing::Test {
        << "a=maxptime:" << params.max_ptime << "\r\n";
     sdp += os.str();
 
+    os.clear();
+    os.str("");
+    // Pl type 100 preferred.
+    os << "m=video 1 RTP/SAVPF 99 95\r\n"
+       << "a=rtpmap:99 VP8/90000\r\n"
+       << "a=rtpmap:95 RTX/90000\r\n"
+       << "a=fmtp:95 apt=99;rtx-time=1000\r\n";
+    sdp += os.str();
+
     // Deserialize
     SdpParseError error;
     EXPECT_TRUE(webrtc::SdpDeserialize(sdp, jdesc_output, &error));
@@ -1153,6 +1192,19 @@ class WebRtcSdpTest : public testing::Test {
         }
       }
     }
+
+    const ContentInfo* vc = GetFirstVideoContent(jdesc_output->description());
+    ASSERT_TRUE(vc != NULL);
+    const VideoContentDescription* vcd =
+        static_cast<const VideoContentDescription*>(vc->description);
+    ASSERT_FALSE(vcd->codecs().empty());
+    cricket::VideoCodec vp8 = vcd->codecs()[0];
+    EXPECT_EQ("VP8", vp8.name);
+    EXPECT_EQ(99, vp8.id);
+    cricket::VideoCodec rtx = vcd->codecs()[1];
+    EXPECT_EQ("RTX", rtx.name);
+    EXPECT_EQ(95, rtx.id);
+    VerifyCodecParameter(rtx.params, "apt", vp8.id);
   }
 
   void TestDeserializeRtcpFb(JsepSessionDescription* jdesc_output,
@@ -1436,6 +1488,37 @@ TEST_F(WebRtcSdpTest, SerializeSessionDescriptionWithSctpDataChannel) {
   EXPECT_EQ(message, expected_sdp);
 }
 
+TEST_F(WebRtcSdpTest, SerializeWithSctpDataChannelAndNewPort) {
+  AddSctpDataChannel();
+  JsepSessionDescription jsep_desc(kDummyString);
+
+  ASSERT_TRUE(jsep_desc.Initialize(desc_.Copy(), kSessionId, kSessionVersion));
+  DataContentDescription* dcdesc = static_cast<DataContentDescription*>(
+      jsep_desc.description()->GetContentDescriptionByName(kDataContentName));
+
+  const int kNewPort = 1234;
+  cricket::DataCodec codec(
+        cricket::kGoogleSctpDataCodecId, cricket::kGoogleSctpDataCodecName, 0);
+  codec.SetParam(cricket::kCodecParamPort, kNewPort);
+  dcdesc->AddOrReplaceCodec(codec);
+
+  std::string message = webrtc::SdpSerialize(jsep_desc);
+
+  std::string expected_sdp = kSdpString;
+  expected_sdp.append(kSdpSctpDataChannelString);
+
+  char default_portstr[16];
+  char new_portstr[16];
+  talk_base::sprintfn(default_portstr, sizeof(default_portstr), "%d",
+                      kDefaultSctpPort);
+  talk_base::sprintfn(new_portstr, sizeof(new_portstr), "%d", kNewPort);
+  talk_base::replace_substrs(default_portstr, strlen(default_portstr),
+                             new_portstr, strlen(new_portstr),
+                             &expected_sdp);
+
+  EXPECT_EQ(expected_sdp, message);
+}
+
 TEST_F(WebRtcSdpTest, SerializeSessionDescriptionWithDataChannelAndBandwidth) {
   AddRtpDataChannel();
   data_desc_->set_bandwidth(100*1000);
@@ -1474,6 +1557,21 @@ TEST_F(WebRtcSdpTest, SerializeSessionDescriptionWithExtmap) {
   EXPECT_EQ(sdp_with_extmap, message);
 }
 
+TEST_F(WebRtcSdpTest, SerializeSessionDescriptionWithBufferLatency) {
+  VideoContentDescription* vcd = static_cast<VideoContentDescription*>(
+      GetFirstVideoContent(&desc_)->description);
+  vcd->set_buffered_mode_latency(128);
+
+  ASSERT_TRUE(jdesc_.Initialize(desc_.Copy(),
+                                jdesc_.session_id(),
+                                jdesc_.session_version()));
+  std::string message = webrtc::SdpSerialize(jdesc_);
+  std::string sdp_with_buffer_latency = kSdpFullString;
+  InjectAfter("a=rtpmap:120 VP8/90000\r\n",
+              "a=x-google-buffer-latency:128\r\n",
+              &sdp_with_buffer_latency);
+  EXPECT_EQ(sdp_with_buffer_latency, message);
+}
 
 TEST_F(WebRtcSdpTest, SerializeCandidates) {
   std::string message = webrtc::SdpSerializeCandidate(*jcandidate_);
@@ -1545,6 +1643,37 @@ TEST_F(WebRtcSdpTest, DeserializeSessionDescriptionWithoutRtpmap) {
   ref_codecs.push_back(AudioCodec(18, "G729", 16000, 0, 1, 2));
   ref_codecs.push_back(AudioCodec(103, "ISAC", 16000, 32000, 1, 1));
   EXPECT_EQ(ref_codecs, audio->codecs());
+}
+
+TEST_F(WebRtcSdpTest, DeserializeSessionDescriptionWithoutRtpmapButWithFmtp) {
+  static const char kSdpNoRtpmapString[] =
+      "v=0\r\n"
+      "o=- 11 22 IN IP4 127.0.0.1\r\n"
+      "s=-\r\n"
+      "t=0 0\r\n"
+      "m=audio 49232 RTP/AVP 18 103\r\n"
+      "a=fmtp:18 annexb=yes\r\n"
+      "a=rtpmap:103 ISAC/16000\r\n";
+
+  JsepSessionDescription jdesc(kDummyString);
+  EXPECT_TRUE(SdpDeserialize(kSdpNoRtpmapString, &jdesc));
+  cricket::AudioContentDescription* audio =
+    static_cast<AudioContentDescription*>(
+        jdesc.description()->GetContentDescriptionByName(cricket::CN_AUDIO));
+
+  cricket::AudioCodec g729 = audio->codecs()[0];
+  EXPECT_EQ("G729", g729.name);
+  EXPECT_EQ(8000, g729.clockrate);
+  EXPECT_EQ(18, g729.id);
+  cricket::CodecParameterMap::iterator found =
+      g729.params.find("annexb");
+  ASSERT_TRUE(found != g729.params.end());
+  EXPECT_EQ(found->second, "yes");
+
+  cricket::AudioCodec isac = audio->codecs()[1];
+  EXPECT_EQ("ISAC", isac.name);
+  EXPECT_EQ(103, isac.id);
+  EXPECT_EQ(16000, isac.clockrate);
 }
 
 // Ensure that we can deserialize SDP with a=fingerprint properly.
@@ -1654,6 +1783,23 @@ TEST_F(WebRtcSdpTest, DeserializeSessionDescriptionWithUfragPwd) {
   EXPECT_TRUE(CompareSessionDescription(jdesc_, jdesc_with_ufrag_pwd));
 }
 
+TEST_F(WebRtcSdpTest, DeserializeSessionDescriptionWithBufferLatency) {
+  JsepSessionDescription jdesc_with_buffer_latency(kDummyString);
+  std::string sdp_with_buffer_latency = kSdpFullString;
+  InjectAfter("a=rtpmap:120 VP8/90000\r\n",
+              "a=x-google-buffer-latency:128\r\n",
+              &sdp_with_buffer_latency);
+
+  EXPECT_TRUE(
+      SdpDeserialize(sdp_with_buffer_latency, &jdesc_with_buffer_latency));
+  VideoContentDescription* vcd = static_cast<VideoContentDescription*>(
+      GetFirstVideoContent(&desc_)->description);
+  vcd->set_buffered_mode_latency(128);
+  ASSERT_TRUE(jdesc_.Initialize(desc_.Copy(),
+                                jdesc_.session_id(),
+                                jdesc_.session_version()));
+  EXPECT_TRUE(CompareSessionDescription(jdesc_, jdesc_with_buffer_latency));
+}
 
 TEST_F(WebRtcSdpTest, DeserializeSessionDescriptionWithRecvOnlyContent) {
   EXPECT_TRUE(TestDeserializeDirection(cricket::MD_RECVONLY));
@@ -1783,6 +1929,18 @@ TEST_F(WebRtcSdpTest, DeserializeSdpWithSctpDataChannels) {
   EXPECT_TRUE(CompareSessionDescription(jdesc, jdesc_output));
 }
 
+// For crbug/344475.
+TEST_F(WebRtcSdpTest, DeserializeSdpWithCorruptedSctpDataChannels) {
+  std::string sdp_with_data = kSdpString;
+  sdp_with_data.append(kSdpSctpDataChannelString);
+  // Remove the "\n" at the end.
+  sdp_with_data = sdp_with_data.substr(0, sdp_with_data.size() - 1);
+  JsepSessionDescription jdesc_output(kDummyString);
+
+  EXPECT_FALSE(SdpDeserialize(sdp_with_data, &jdesc_output));
+  // No crash is a pass.
+}
+
 TEST_F(WebRtcSdpTest, DeserializeSdpWithSctpDataChannelAndNewPort) {
   AddSctpDataChannel();
   const uint16 kUnusualSctpPort = 9556;
@@ -1793,6 +1951,7 @@ TEST_F(WebRtcSdpTest, DeserializeSdpWithSctpDataChannelAndNewPort) {
   talk_base::sprintfn(unusual_portstr, sizeof(unusual_portstr), "%d",
                       kUnusualSctpPort);
 
+  // First setup the expected JsepSessionDescription.
   JsepSessionDescription jdesc(kDummyString);
   // take our pre-built session description and change the SCTP port.
   cricket::SessionDescription* mutant = desc_.Copy();
@@ -1802,11 +1961,13 @@ TEST_F(WebRtcSdpTest, DeserializeSdpWithSctpDataChannelAndNewPort) {
   EXPECT_EQ(codecs.size(), 1UL);
   EXPECT_EQ(codecs[0].id, cricket::kGoogleSctpDataCodecId);
   codecs[0].SetParam(cricket::kCodecParamPort, kUnusualSctpPort);
+  dcdesc->set_codecs(codecs);
 
   // note: mutant's owned by jdesc now.
   ASSERT_TRUE(jdesc.Initialize(mutant, kSessionId, kSessionVersion));
   mutant = NULL;
 
+  // Then get the deserialized JsepSessionDescription.
   std::string sdp_with_data = kSdpString;
   sdp_with_data.append(kSdpSctpDataChannelString);
   talk_base::replace_substrs(default_portstr, strlen(default_portstr),
@@ -1892,6 +2053,24 @@ TEST_F(WebRtcSdpTest, DeserializeCandidateOldFormat) {
   EXPECT_TRUE(jcandidate.candidate().IsEquivalent(ref_candidate));
 }
 
+TEST_F(WebRtcSdpTest, DeserializeSdpWithConferenceFlag) {
+  JsepSessionDescription jdesc(kDummyString);
+
+  // Deserialize
+  EXPECT_TRUE(SdpDeserialize(kSdpConferenceString, &jdesc));
+
+  // Verify
+  cricket::AudioContentDescription* audio =
+    static_cast<AudioContentDescription*>(
+      jdesc.description()->GetContentDescriptionByName(cricket::CN_AUDIO));
+  EXPECT_TRUE(audio->conference_mode());
+
+  cricket::VideoContentDescription* video =
+    static_cast<VideoContentDescription*>(
+      jdesc.description()->GetContentDescriptionByName(cricket::CN_VIDEO));
+  EXPECT_TRUE(video->conference_mode());
+}
+
 TEST_F(WebRtcSdpTest, DeserializeBrokenSdp) {
   const char kSdpDestroyer[] = "!@#$%^&";
   const char kSdpInvalidLine1[] = " =candidate";
@@ -1911,28 +2090,67 @@ TEST_F(WebRtcSdpTest, DeserializeBrokenSdp) {
       "4A:AD:B9:B1:3F:82:18:3B:54:02:12:DF:3E:5D:49:6B";
 
   // Broken session description
-  ReplaceAndTryToParse("v=", kSdpDestroyer);
-  ReplaceAndTryToParse("o=", kSdpDestroyer);
-  ReplaceAndTryToParse("s=-", kSdpDestroyer);
+  ExpectParseFailure("v=", kSdpDestroyer);
+  ExpectParseFailure("o=", kSdpDestroyer);
+  ExpectParseFailure("s=-", kSdpDestroyer);
   // Broken time description
-  ReplaceAndTryToParse("t=", kSdpDestroyer);
+  ExpectParseFailure("t=", kSdpDestroyer);
 
   // Broken media description
-  ReplaceAndTryToParse("m=audio", "c=IN IP4 74.125.224.39");
-  ReplaceAndTryToParse("m=video", kSdpDestroyer);
+  ExpectParseFailure("m=audio", "c=IN IP4 74.125.224.39");
+  ExpectParseFailure("m=video", kSdpDestroyer);
 
   // Invalid lines
-  ReplaceAndTryToParse("a=candidate", kSdpInvalidLine1);
-  ReplaceAndTryToParse("a=candidate", kSdpInvalidLine2);
-  ReplaceAndTryToParse("a=candidate", kSdpInvalidLine3);
+  ExpectParseFailure("a=candidate", kSdpInvalidLine1);
+  ExpectParseFailure("a=candidate", kSdpInvalidLine2);
+  ExpectParseFailure("a=candidate", kSdpInvalidLine3);
 
   // Bogus fingerprint replacing a=sendrev. We selected this attribute
   // because it's orthogonal to what we are replacing and hence
   // safe.
-  ReplaceAndTryToParse("a=sendrecv", kSdpInvalidLine4);
-  ReplaceAndTryToParse("a=sendrecv", kSdpInvalidLine5);
-  ReplaceAndTryToParse("a=sendrecv", kSdpInvalidLine6);
-  ReplaceAndTryToParse("a=sendrecv", kSdpInvalidLine7);
+  ExpectParseFailure("a=sendrecv", kSdpInvalidLine4);
+  ExpectParseFailure("a=sendrecv", kSdpInvalidLine5);
+  ExpectParseFailure("a=sendrecv", kSdpInvalidLine6);
+  ExpectParseFailure("a=sendrecv", kSdpInvalidLine7);
+}
+
+TEST_F(WebRtcSdpTest, DeserializeSdpWithInvalidAttributeValue) {
+  // ssrc
+  ExpectParseFailure("a=ssrc:1", "a=ssrc:badvalue");
+  ExpectParseFailure("a=ssrc-group:FEC 5 6", "a=ssrc-group:FEC badvalue 6");
+  // crypto
+  ExpectParseFailure("a=crypto:1 ", "a=crypto:badvalue ");
+  // rtpmap
+  ExpectParseFailure("a=rtpmap:111 ", "a=rtpmap:badvalue ");
+  ExpectParseFailure("opus/48000/2", "opus/badvalue/2");
+  ExpectParseFailure("opus/48000/2", "opus/48000/badvalue");
+  // candidate
+  ExpectParseFailure("1 udp 2130706432", "badvalue udp 2130706432");
+  ExpectParseFailure("1 udp 2130706432", "1 udp badvalue");
+  ExpectParseFailure("192.168.1.5 1234", "192.168.1.5 badvalue");
+  ExpectParseFailure("rport 2346", "rport badvalue");
+  ExpectParseFailure("rport 2346 generation 2",
+                     "rport 2346 generation badvalue");
+  // m line
+  ExpectParseFailure("m=audio 2345 RTP/SAVPF 111 103 104",
+                     "m=audio 2345 RTP/SAVPF 111 badvalue 104");
+
+  // bandwidth
+  ExpectParseFailureWithNewLines("a=mid:video_content_name\r\n",
+                                 "b=AS:badvalue\r\n",
+                                 "b=AS:badvalue");
+  // rtcp-fb
+  ExpectParseFailureWithNewLines("a=mid:video_content_name\r\n",
+                                 "a=rtcp-fb:badvalue nack\r\n",
+                                 "a=rtcp-fb:badvalue nack");
+  // extmap
+  ExpectParseFailureWithNewLines("a=mid:video_content_name\r\n",
+                                 "a=extmap:badvalue http://example.com\r\n",
+                                 "a=extmap:badvalue http://example.com");
+  // x-google-buffer-latency
+  ExpectParseFailureWithNewLines("a=mid:video_content_name\r\n",
+                                 "a=x-google-buffer-latency:badvalue\r\n",
+                                 "a=x-google-buffer-latency:badvalue");
 }
 
 TEST_F(WebRtcSdpTest, DeserializeSdpWithReorderedPltypes) {
