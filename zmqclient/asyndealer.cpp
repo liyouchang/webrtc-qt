@@ -97,8 +97,10 @@ void AsynDealer::terminate_z()
 {
     ASSERT(zmq_thread_->IsCurrent());
     ASSERT(beInit);
+    socket_->disconnect(router_.c_str());
     delete socket_;
     beInit = false;
+    delete context_;
 }
 
 int AsynDealer::send_z(const std::string & addr,const std::string & data)

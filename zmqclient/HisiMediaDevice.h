@@ -1,3 +1,13 @@
+/* HisiMediaDevice.h
+ * HisiMediaDevice 用来对设备进行操作，封装了设备操作函数，实现KeTunnelCamera接口
+ * copyright: Kaer inc. 2014
+ * auth: lht
+ *
+ *
+ */
+
+
+
 #ifndef HISIMEDIADEVICE_H
 #define HISIMEDIADEVICE_H
 #include "libjingle_app/ketunnelcamera.h"
@@ -23,7 +33,8 @@ public:
         MSG_SEND_VIDEO,
         MSG_SEND_VIDEO_SUB,
         MSG_SEND_AUDIO,
-        MSG_MEDIA_CONTROL
+        MSG_MEDIA_CONTROL,
+        MSG_NET_CHECK
     };
     HisiMediaDevice();
     ~HisiMediaDevice();
@@ -32,12 +43,15 @@ public:
     virtual void SetVideoClarity(int);
     virtual void OnMessage(talk_base::Message *msg);
     void SetVideoResolution(std::string r);
-    //video == 0 start video ,audio == 0 start audio
     std::string GetHardwareId();
     virtual void GetCameraVideoInfo(int level,kaerp2p::VideoInfo * info);
+    sigslot::signal0<> SignalNetStatusChange;
+
+
 protected:
     int GetVideoFrameType(int level);
     int GetVideoFrameRate(int level);
+    void CheckNetStatus();
 private:
     /**
      * @brief SendVideoFrame
@@ -55,6 +69,8 @@ private:
     kaerp2p::VideoInfo video2_info_;
     int video_clarity_;
     char media_buffer_[MEDIA_BUFFER_LENGTH];
+    int oldNetType;
+    int oldIp;
     // KeTunnelCamera interface
 protected:
     virtual int GetVideoClarity();

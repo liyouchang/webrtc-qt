@@ -438,10 +438,10 @@ void BasicPortAllocatorSession::DoAllocate() {
         continue;
       }
         //lht
-      if(networks[i]->prefix().ToString().compare("192.168.254.0")==0){
-          LOG(WARNING)<<"No 192.168.254.230 should be work;";
-          continue;
-      }
+//      if(networks[i]->prefix().ToString().compare("192.168.254.0")==0){
+//          LOG(WARNING)<<"No 192.168.254.230 should be work;";
+//          continue;
+//      }
 
       AllocationSequence* sequence =
           new AllocationSequence(this, networks[i], config, sequence_flags);

@@ -60,7 +60,8 @@ struct MediaControlData : public talk_base::MessageData {
 
 
 HisiMediaDevice::HisiMediaDevice():
-    media_thread_(0),video1_handle_(0),video2_handle_(0),audio_handle_(0)
+    media_thread_(0),video1_handle_(0),video2_handle_(0),audio_handle_(0),
+    oldNetType(-1),oldIp(-1)
 {
     int ret = Raycomm_InitParam();
     LOG(INFO)<<"Raycomm_InitParam : "<<ret;
@@ -84,6 +85,7 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
     media_thread_->Start();
     //start get media
     media_thread_->Post(this, MSG_MEDIA_CONTROL, new MediaControlData(1,1,1));
+    media_thread_->PostDelayed(10000,this,MSG_NET_CHECK);
     AlarmNotify::Instance()->StartNotify();
     return KeTunnelCamera::Init(client);
 }
@@ -344,6 +346,11 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         }
         break;
     }
+    case HisiMediaDevice::MSG_NET_CHECK:{
+        this->CheckNetStatus();
+        media_thread_->PostDelayed(10000,this,MSG_NET_CHECK);
+        break;
+    }
     default:
         break;
     }
@@ -407,6 +414,23 @@ int HisiMediaDevice::GetVideoFrameRate(int level)
     int frameRate = atoi(buf);
     //LOG(INFO)<<"HisiMediaDevice::GetVideoFrameRate---"<<frameRate;
     return frameRate;
+}
+
+void HisiMediaDevice::CheckNetStatus()
+{
+    LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---oldip"<<oldIp<<
+               " oldNet"<<oldNetType;
+    int ip = Raycomm_GetIP();
+    int net = Raycomm_GetNetType();
+    if(ip != oldIp && oldIp != -1){
+        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---Ip changed new ip is "<<ip;
+        this->SignalNetStatusChange();
+    } else if( net != oldNetType && oldNetType != -1 ){
+        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---net changed new net is "<<net;
+        this->SignalNetStatusChange();
+    }
+    oldIp = ip;
+    oldNetType = net;
 }
 
 std::string HisiMediaDevice::GetHardwareId()
@@ -475,7 +499,6 @@ int AlarmNotify::NotifyCallBack(int chn, int rea, int io,
     if (snapsize > 0){
         talk_base::Base64::EncodeFromArray(snapbuf,snapsize,&picBase64Data);
     }
-    LOG(INFO)<<"picture base64 data:"<<picBase64Data;
     int alarmType = rea;
     AlarmNotify::Instance()->SignalTerminalAlarm(alarmType,infostream.str(),
                                                  picBase64Data);

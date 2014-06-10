@@ -48,7 +48,7 @@ public:
     virtual void OnTunnelOpened(PeerTerminalInterface * t,
                                 const std::string & peer_id);
     virtual void OnRouterMessage(const std::string &peer_id,
-                                 const std::string& msg);
+                                 talk_base::Buffer &msg);
     virtual void OnRecvAudioData(const std::string & peer_id,
                                  const char * data,int len);
     virtual void OnRecvVideoData(const std::string & peer_id,

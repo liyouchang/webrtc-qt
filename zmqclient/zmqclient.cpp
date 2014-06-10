@@ -19,7 +19,7 @@
 
 
 std::string ReadConfigFile();
-const char * kVersion = "V0.2";
+const char * kVersion = "V0.21";
 
 int main()
 {
@@ -74,6 +74,10 @@ int main()
     CameraClient client(strMac);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
+    device->SignalNetStatusChange.connect(
+                 (PeerConnectionClientDealer*)&client,
+                 &PeerConnectionClientDealer::Reconnect);
+
 
     AlarmNotify::Instance()->SignalTerminalAlarm.connect(
                 &client,&CameraClient::SendAlarm);
