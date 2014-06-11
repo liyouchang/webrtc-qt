@@ -54,6 +54,7 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
 		LOGE("g_vm is null");
 		return false;
 	}
+
 	JNIEnv *p_env;
 	bool attached = false;
 	int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);

@@ -68,17 +68,11 @@ int main()
     if(strMac.empty()) {
         strMac = device->GetHardwareId();
     }
-    if(strDealerId.empty()) {
-        strDealerId = strMac + "-" + kaerp2p::GetRandomString();
-    }
 
     CameraClient client(strMac);
     client.Connect(router_value.asString(),strDealerId);
-    client.Login();
-    device->SignalNetStatusChange.connect(
-                 (PeerConnectionClientDealer*)&client,
-                 &PeerConnectionClientDealer::Reconnect);
-
+    //client.Login();
+    device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
 
     AlarmNotify::Instance()->SignalTerminalAlarm.connect(
                 &client,&CameraClient::SendAlarm);

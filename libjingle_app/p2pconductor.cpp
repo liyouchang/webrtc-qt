@@ -5,7 +5,7 @@
 #include "defaults.h"
 namespace  kaerp2p {
 
-const int kConnectTimeout = 60000; // close DeletePeerConnection after 10s without connect
+const int kConnectTimeout = 30000; // close DeletePeerConnection after 30s without connect
 
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";

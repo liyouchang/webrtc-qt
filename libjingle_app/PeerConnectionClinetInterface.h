@@ -15,15 +15,9 @@ public:
     virtual  void OnMessageFromPeer(const std::string& peer_id, const std::string& message){
         SignalMessageFromPeer(peer_id,message);
     }
-
-    virtual const std::string & GetID() const {return my_id_;}
-    virtual void SetID(const std::string & id){ this->my_id_ = id;}
     sigslot::signal2<const std::string &,const std::string &> SignalMessageFromPeer;
-
 protected:
-    std::string my_id_;
     virtual ~PeerConnectionClientInterface() {}
-
 };
 
 

@@ -8,21 +8,20 @@
 
 const int kHeartInterval = 60000;//ms
 CameraClient::CameraClient(std::string mac):
-    mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage")
+    mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),heartCount(0)
 {
     comm_thread_ = talk_base::Thread::Current();
 }
 
 void CameraClient::Login()
 {
+    LOG(INFO)<<"CameraClient::Login---"<<mac_;
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage["type"] = "Terminal_Login";
     jmessage["MAC"] = mac_;
     std::string msg = writer.write(jmessage);
-
     this->SendToPeer(messageServer,msg);
-    comm_thread_->PostDelayed(kHeartInterval,this,MSG_LOGIN_TIMEOUT);
 }
 
 void CameraClient::SendAlarm(int alarmType, const std::string &alarmInfo,
@@ -42,19 +41,50 @@ void CameraClient::SendAlarm(int alarmType, const std::string &alarmInfo,
     this->SendToPeer(alarmServer,msg);
 }
 
+bool CameraClient::Connect(const std::string &router, const std::string &id)
+{
+    std::string strDealerId = id;
+    if(strDealerId.empty()) {
+        strDealerId = mac_ + "-" + kaerp2p::GetRandomString();
+    }
+    if(PeerConnectionClientDealer::Connect(router,strDealerId)){
+        comm_thread_->Post(this,MSG_LOGIN_HEART);
+        return true;
+    }
+    return false;
+
+}
+
+void CameraClient::Reconnect()
+{
+    std::string strDealerId = mac_ + "-" + kaerp2p::GetRandomString();
+    std::string oldAddr = dealer_->addr();
+    LOG(INFO)<<"CameraClient::Reconnect---with id "<<strDealerId;
+    dealer_->terminate();
+    dealer_->initialize(strDealerId,oldAddr);
+    this->Login();
+}
+
+
 void CameraClient::OnMessage(talk_base::Message *msg)
 {
     switch (msg->message_id) {
-    case MSG_LOGIN_TIMEOUT:{
-        //LOG(INFO)<<"Log in timeout,relogin";
+    case MSG_LOGIN_HEART:{
+        if(++heartCount > 2){
+            LOG(INFO)<<"heart count is "<<heartCount;
+            //this->Reconnect();
+            heartCount = 0;
+        }
         this->Login();
+        comm_thread_->PostDelayed(kHeartInterval,this,MSG_LOGIN_HEART);
+        break;
+    }
+    case MSG_RECEIVE_HEART:{
+        LOG(INFO)<<"receive heart at count "<<heartCount;
+        heartCount = 0;
         break;
     }
     case MSG_RECONNECT:{
-//        LOG(INFO)<<"CameraClient::OnMessage---reconnect to server";
-//        this->Reconnect();
-//        comm_thread_->PostDelayed(3000,this,MSG_RECONNECT);
-
         break;
     }
     default:
@@ -78,9 +108,8 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
             int result;
             GetIntFromJsonObject(jmessage, "Result", &result);
             if(result == 0){
-                LOG(INFO) <<"Login success";
-                comm_thread_->Clear(this,MSG_LOGIN_TIMEOUT);
             }
+            comm_thread_->Post(this,MSG_RECEIVE_HEART);
         }
     }else{
         SignalMessageFromPeer(peer_id,message);
