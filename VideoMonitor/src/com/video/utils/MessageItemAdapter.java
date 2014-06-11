@@ -81,16 +81,19 @@ public class MessageItemAdapter extends BaseAdapter {
 		holder.msg_mac.setText(list.get(position).get("msgMAC"));
 		holder.msg_time.setText(list.get(position).get("msgTime"));
 		
-		String path = "http://222.174.213.185:8088/plugin/2014-04-09/10021_0_20140403192854_000_23.jpg";
-		AsyncImageTask task = new AsyncImageTask(holder.iv_image, path);
-		task.execute();
+		String msg_image_url = list.get(position).get("imageURL");
+		if (!msg_image_url.equals("null")) {
+//			System.out.println("MyDebug: Image Url: "+msg_image_url);
+			AsyncImageTask task = new AsyncImageTask(holder.iv_image, msg_image_url);
+			task.execute();
+		}
 
 		holder.iv_image.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
-//				String UrlPath = list.get(position).get("imageURL");
-				String filePath = imageCache+File.separator+"10021_0_20140403192854_000_23.jpg";//UrlPath.substring(UrlPath.lastIndexOf("/")+1);
+				String UrlPath = list.get(position).get("imageURL");
+				String filePath = imageCache+File.separator+UrlPath.substring(UrlPath.lastIndexOf("/")+1);
 				Intent intent = new Intent(context, AlarmImageViewActivity.class);
 				intent.putExtra("imagePath", filePath);
 				context.startActivity(intent);
@@ -126,6 +129,7 @@ public class MessageItemAdapter extends BaseAdapter {
 				return getCacheImageUri(imagePath, imageCache);
 			} catch (Exception e) {
 				e.printStackTrace();
+				System.out.println("MyDebug: getCacheImageUri()异常！");
 			}
 			return null;
 		}

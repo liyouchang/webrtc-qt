@@ -199,13 +199,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppThemeFullscreen" >
         </activity>
-        <!-- 测试录像播放器  -->
-        <activity
-            android:name=".terminal.player.TestPlayerActivity"
-            android:screenOrientation="landscape"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:theme="@style/AppThemeFullscreen" >
-        </activity>
     </application>
 
 </manifest>

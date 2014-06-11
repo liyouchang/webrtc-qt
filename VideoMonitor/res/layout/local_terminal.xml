@@ -37,20 +37,6 @@
             android:textSize="16.0sp" />
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/btn_test"
-        android:layout_width="fill_parent"
-        android:layout_height="50dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/button_updown_alone"
-        android:gravity="center_vertical|center_horizontal"
-        android:text="播放终端录像文件"
-        android:textColor="@color/title_bg_black"
-        android:textSize="20dp" />
-
     <ListView
         android:id="@+id/lv_local_device_list"
         android:layout_marginTop="100dp"

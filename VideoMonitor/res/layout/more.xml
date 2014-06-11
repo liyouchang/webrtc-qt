@@ -59,6 +59,22 @@
                 android:text="@string/setting"
                 android:textColor="@color/title_bg_black"
                 android:textSize="18dp" />
+            <Button
+                android:id="@+id/btn_local_device"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/button_updown_middle"
+                android:drawableLeft="@drawable/icon_device_name"
+                android:drawablePadding="10dp"
+                android:drawableRight="@drawable/icon_button_right"
+                android:gravity="center_vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="10dp"
+                android:text="@string/local_device"
+                android:textColor="@color/title_bg_black"
+                android:textSize="18dp" />
 
             <Button
                 android:id="@+id/btn_wifi"
