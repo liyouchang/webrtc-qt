@@ -87,9 +87,11 @@ int Raycomm_GetNetType();
 
 int Raycomm_Reboot(void);
 
-int Raycomm_SetTitle(char* pChnName);
+int Raycomm_SetTitle(const char* pChnName);
 
 int Raycomm_SetAlarmEnable(char bEnable);
+//return 1 enable 0 disable
+int Raycomm_GetAlarmEnable();
 
 
 #ifdef __cplusplus
