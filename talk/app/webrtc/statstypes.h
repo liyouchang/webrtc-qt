@@ -57,6 +57,8 @@ class StatsReport {
   void AddValue(const std::string& name, const std::vector<T>& value);
   void AddBoolean(const std::string& name, bool value);
 
+  void ReplaceValue(const std::string& name, const std::string& value);
+
   double timestamp;  // Time since 1970-01-01T00:00:00Z in milliseconds.
   typedef std::vector<Value> Values;
   Values values;
@@ -159,6 +161,7 @@ class StatsReport {
   static const char kStatsValueNameJitterBufferMs[];
   static const char kStatsValueNameMinPlayoutDelayMs[];
   static const char kStatsValueNameRenderDelayMs[];
+  static const char kStatsValueNameCaptureStartNtpTimeMs[];
   static const char kStatsValueNameFrameRateInput[];
   static const char kStatsValueNameFrameRateSent[];
   static const char kStatsValueNameFrameWidthInput[];
@@ -167,6 +170,9 @@ class StatsReport {
   static const char kStatsValueNameJitterReceived[];
   static const char kStatsValueNameNacksReceived[];
   static const char kStatsValueNameNacksSent[];
+  static const char kStatsValueNamePlisReceived[];
+  static const char kStatsValueNamePlisSent[];
+  static const char kStatsValueNamePreferredJitterBufferMs[];
   static const char kStatsValueNameRtt[];
   static const char kStatsValueNameAvailableSendBandwidth[];
   static const char kStatsValueNameAvailableReceiveBandwidth[];
@@ -194,6 +200,12 @@ class StatsReport {
   static const char kStatsValueNameRecvPacketGroupArrivalTimeDebug[];
   static const char kStatsValueNameRecvPacketGroupPropagationDeltaDebug[];
   static const char kStatsValueNameRecvPacketGroupPropagationDeltaSumDebug[];
+  static const char kStatsValueNameDecodingCTSG[];
+  static const char kStatsValueNameDecodingCTN[];
+  static const char kStatsValueNameDecodingNormal[];
+  static const char kStatsValueNameDecodingPLC[];
+  static const char kStatsValueNameDecodingCNG[];
+  static const char kStatsValueNameDecodingPLCCNG[];
 };
 
 typedef std::vector<StatsReport> StatsReports;

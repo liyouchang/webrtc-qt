@@ -259,8 +259,9 @@ class PeerConnectionInterfaceTest : public testing::Test {
 
     port_allocator_factory_ = FakePortAllocatorFactory::Create();
 
-    // TODO(jiayl): we should always pass a FakeIdentityService so that DTLS
-    // is enabled by default like in Chrome (issue 2838).
+    // DTLS does not work in a loopback call, so is disabled for most of the
+    // tests in this file. We only create a FakeIdentityService if the test
+    // explicitly sets the constraint.
     FakeIdentityService* dtls_service = NULL;
     bool dtls;
     if (FindConstraint(constraints,
@@ -300,7 +301,7 @@ class PeerConnectionInterfaceTest : public testing::Test {
     EXPECT_EQ(0u, port_allocator_factory_->turn_configs().size());
 
     CreatePeerConnection(kTurnIceServerUri, kTurnPassword, NULL);
-    EXPECT_EQ(1u, port_allocator_factory_->stun_configs().size());
+    EXPECT_EQ(0u, port_allocator_factory_->stun_configs().size());
     EXPECT_EQ(1u, port_allocator_factory_->turn_configs().size());
     EXPECT_EQ(kTurnUsername,
               port_allocator_factory_->turn_configs()[0].username);
@@ -308,8 +309,6 @@ class PeerConnectionInterfaceTest : public testing::Test {
               port_allocator_factory_->turn_configs()[0].password);
     EXPECT_EQ(kTurnHostname,
               port_allocator_factory_->turn_configs()[0].server.hostname());
-    EXPECT_EQ(kTurnHostname,
-              port_allocator_factory_->stun_configs()[0].server.hostname());
   }
 
   void ReleasePeerConnection() {
@@ -410,7 +409,8 @@ class PeerConnectionInterfaceTest : public testing::Test {
   bool DoGetStats(MediaStreamTrackInterface* track) {
     talk_base::scoped_refptr<MockStatsObserver> observer(
         new talk_base::RefCountedObject<MockStatsObserver>());
-    if (!pc_->GetStats(observer, track))
+    if (!pc_->GetStats(
+        observer, track, PeerConnectionInterface::kStatsOutputLevelStandard))
       return false;
     EXPECT_TRUE_WAIT(observer->called(), kTimeout);
     return observer->called();
@@ -946,23 +946,28 @@ TEST_F(PeerConnectionInterfaceTest, CreateSctpDataChannel) {
       pc_->CreateDataChannel("1", &config);
   EXPECT_TRUE(channel != NULL);
   EXPECT_TRUE(channel->reliable());
+  EXPECT_TRUE(observer_.renegotiation_needed_);
+  observer_.renegotiation_needed_ = false;
 
   config.ordered = false;
   channel = pc_->CreateDataChannel("2", &config);
   EXPECT_TRUE(channel != NULL);
   EXPECT_TRUE(channel->reliable());
+  EXPECT_FALSE(observer_.renegotiation_needed_);
 
   config.ordered = true;
   config.maxRetransmits = 0;
   channel = pc_->CreateDataChannel("3", &config);
   EXPECT_TRUE(channel != NULL);
   EXPECT_FALSE(channel->reliable());
+  EXPECT_FALSE(observer_.renegotiation_needed_);
 
   config.maxRetransmits = -1;
   config.maxRetransmitTime = 0;
   channel = pc_->CreateDataChannel("4", &config);
   EXPECT_TRUE(channel != NULL);
   EXPECT_FALSE(channel->reliable());
+  EXPECT_FALSE(observer_.renegotiation_needed_);
 }
 
 // This tests that no data channel is returned if both maxRetransmits and
@@ -1010,6 +1015,23 @@ TEST_F(PeerConnectionInterfaceTest,
   config.id = cricket::kMaxSctpSid + 1;
   channel = pc_->CreateDataChannel("x", &config);
   EXPECT_TRUE(channel == NULL);
+}
+
+// This test verifies that OnRenegotiationNeeded is fired for every new RTP
+// DataChannel.
+TEST_F(PeerConnectionInterfaceTest, RenegotiationNeededForNewRtpDataChannel) {
+  FakeConstraints constraints;
+  constraints.SetAllowRtpDataChannels();
+  CreatePeerConnection(&constraints);
+
+  scoped_refptr<DataChannelInterface> dc1  =
+      pc_->CreateDataChannel("test1", NULL);
+  EXPECT_TRUE(observer_.renegotiation_needed_);
+  observer_.renegotiation_needed_ = false;
+
+  scoped_refptr<DataChannelInterface> dc2  =
+      pc_->CreateDataChannel("test2", NULL);
+  EXPECT_TRUE(observer_.renegotiation_needed_);
 }
 
 // This test that a data channel closes when a PeerConnection is deleted/closed.

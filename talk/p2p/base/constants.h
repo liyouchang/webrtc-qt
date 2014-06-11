@@ -42,7 +42,6 @@ namespace cricket {
 //   these are useful when you need to find a tag
 //   that has different namespaces (like <description> or <transport>)
 
-
 extern const char NS_EMPTY[];
 extern const char NS_JINGLE[];
 extern const char NS_JINGLE_DRAFT[];
@@ -179,6 +178,10 @@ extern const char ICE_CANDIDATE_TYPE_PEER_STUN[];
 extern const char ICE_CANDIDATE_TYPE_SERVER_STUN[];
 extern const int ICE_UFRAG_LENGTH;
 extern const int ICE_PWD_LENGTH;
+extern const size_t ICE_UFRAG_MIN_LENGTH;
+extern const size_t ICE_PWD_MIN_LENGTH;
+extern const size_t ICE_UFRAG_MAX_LENGTH;
+extern const size_t ICE_PWD_MAX_LENGTH;
 extern const int ICE_CANDIDATE_COMPONENT_RTP;
 extern const int ICE_CANDIDATE_COMPONENT_RTCP;
 extern const int ICE_CANDIDATE_COMPONENT_DEFAULT;

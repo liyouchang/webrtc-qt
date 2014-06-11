@@ -42,6 +42,7 @@
 #include "talk/session/media/mediasession.h"
 
 namespace cricket {
+
 class BaseChannel;
 class ChannelManager;
 class DataChannel;
@@ -50,10 +51,13 @@ class Transport;
 class VideoCapturer;
 class VideoChannel;
 class VoiceChannel;
+
 }  // namespace cricket
 
 namespace webrtc {
+
 class IceRestartAnswerLatch;
+class JsepIceCandidate;
 class MediaStreamSignaling;
 class WebRtcSessionDescriptionFactory;
 
@@ -63,7 +67,8 @@ extern const char kInvalidCandidates[];
 extern const char kInvalidSdp[];
 extern const char kMlineMismatch[];
 extern const char kPushDownTDFailed[];
-extern const char kSdpWithoutCrypto[];
+extern const char kSdpWithoutDtlsFingerprint[];
+extern const char kSdpWithoutSdesCrypto[];
 extern const char kSdpWithoutIceUfragPwd[];
 extern const char kSdpWithoutSdesAndDtlsDisabled[];
 extern const char kSessionError[];
@@ -109,7 +114,8 @@ class WebRtcSession : public cricket::BaseSession,
 
   bool Initialize(const PeerConnectionFactoryInterface::Options& options,
                   const MediaConstraintsInterface* constraints,
-                  DTLSIdentityServiceInterface* dtls_identity_service);
+                  DTLSIdentityServiceInterface* dtls_identity_service,
+                  PeerConnectionInterface::IceTransportsType ice_transport);
   // Deletes the voice, video and data channel and changes the session state
   // to STATE_RECEIVEDTERMINATE.
   void Terminate();
@@ -128,8 +134,8 @@ class WebRtcSession : public cricket::BaseSession,
     return data_channel_.get();
   }
 
-  void SetSecurePolicy(cricket::SecureMediaPolicy secure_policy);
-  cricket::SecureMediaPolicy SecurePolicy() const;
+  void SetSdesPolicy(cricket::SecurePolicy secure_policy);
+  cricket::SecurePolicy SdesPolicy() const;
 
   // Get current ssl role from transport.
   bool GetSslRole(talk_base::SSLRole* role);
@@ -149,6 +155,9 @@ class WebRtcSession : public cricket::BaseSession,
   bool SetRemoteDescription(SessionDescriptionInterface* desc,
                             std::string* err_desc);
   bool ProcessIceMessage(const IceCandidateInterface* ice_candidate);
+
+  bool UpdateIce(PeerConnectionInterface::IceTransportsType type);
+
   const SessionDescriptionInterface* local_description() const {
     return local_desc_.get();
   }
@@ -317,8 +326,6 @@ class WebRtcSession : public cricket::BaseSession,
   // If the remote peer is using a older version of implementation.
   bool older_version_remote_peer_;
   bool dtls_enabled_;
-  // Flag will be set based on the constraint value.
-  bool dscp_enabled_;
   // Specifies which kind of data channel is allowed. This is controlled
   // by the chrome command-line flag and constraints:
   // 1. If chrome command-line switch 'enable-sctp-data-channels' is enabled,
@@ -335,6 +342,10 @@ class WebRtcSession : public cricket::BaseSession,
   sigslot::signal0<> SignalVoiceChannelDestroyed;
   sigslot::signal0<> SignalVideoChannelDestroyed;
   sigslot::signal0<> SignalDataChannelDestroyed;
+
+  // Member variables for caching global options.
+  cricket::AudioOptions audio_options_;
+  cricket::VideoOptions video_options_;
 
   DISALLOW_COPY_AND_ASSIGN(WebRtcSession);
 };

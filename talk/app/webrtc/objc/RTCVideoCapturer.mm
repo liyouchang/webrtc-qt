@@ -29,17 +29,17 @@
 #error "This file requires ARC support."
 #endif
 
-#import "RTCVideoCapturer+internal.h"
+#import "RTCVideoCapturer+Internal.h"
 
 #include "talk/media/base/videocapturer.h"
 #include "talk/media/devices/devicemanager.h"
 
 @implementation RTCVideoCapturer {
-  talk_base::scoped_ptr<cricket::VideoCapturer>_capturer;
+  talk_base::scoped_ptr<cricket::VideoCapturer> _capturer;
 }
 
-+ (RTCVideoCapturer *)capturerWithDeviceName:(NSString *)deviceName {
-  const std::string &device_name = std::string([deviceName UTF8String]);
++ (RTCVideoCapturer*)capturerWithDeviceName:(NSString*)deviceName {
+  const std::string& device_name = std::string([deviceName UTF8String]);
   talk_base::scoped_ptr<cricket::DeviceManagerInterface> device_manager(
       cricket::DeviceManagerFactory::Create());
   bool initialized = device_manager->Init();
@@ -51,7 +51,7 @@
   }
   talk_base::scoped_ptr<cricket::VideoCapturer> capturer(
       device_manager->CreateVideoCapturer(device));
-  RTCVideoCapturer *rtcCapturer =
+  RTCVideoCapturer* rtcCapturer =
       [[RTCVideoCapturer alloc] initWithCapturer:capturer.release()];
   return rtcCapturer;
 }
@@ -60,17 +60,15 @@
 
 @implementation RTCVideoCapturer (Internal)
 
-- (id)initWithCapturer:(cricket::VideoCapturer *)capturer {
+- (id)initWithCapturer:(cricket::VideoCapturer*)capturer {
   if ((self = [super init])) {
     _capturer.reset(capturer);
   }
   return self;
 }
 
-// TODO(hughv):  When capturer is implemented, this needs to return
-// _capturer.release() instead.  For now, this isn't used.
-- (const talk_base::scoped_ptr<cricket::VideoCapturer> &)capturer {
-  return _capturer;
+- (cricket::VideoCapturer*)takeNativeCapturer {
+  return _capturer.release();
 }
 
 @end

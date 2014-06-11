@@ -19,7 +19,7 @@
 
 
 std::string ReadConfigFile();
-const char * kVersion = "V0.2";
+const char * kVersion = "V0.21";
 
 int main()
 {
@@ -29,13 +29,14 @@ int main()
     Json::Value dealer_value = JsonConfig::Instance()->Get("dealerId","");
     Json::Value router_value =
             JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
-    Json::Value log_params_value =
+    Json::Value logParamsValue =
             JsonConfig::Instance()->Get("logParams","tstamp thread info debug");
     Json::Value jservers = JsonConfig::Instance()->Get("servers","");
     //Json::Value jclarity = JsonConfig::Instance()->Get("clarity",2);
+    Json::Value jlogsaveFile = JsonConfig::Instance()->Get("logSaveFile","");
 
-    talk_base::LogMessage::ConfigureLogging(
-                log_params_value.asString().c_str(),NULL);
+    talk_base::LogMessage::ConfigureLogging(logParamsValue.asString().c_str(),
+                                            jlogsaveFile.asString().c_str());
 
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
     LOG(INFO)<<"zmqclient current version is "<<kVersion;
@@ -74,6 +75,10 @@ int main()
     CameraClient client(strMac);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
+    device->SignalNetStatusChange.connect(
+                 (PeerConnectionClientDealer*)&client,
+                 &PeerConnectionClientDealer::Reconnect);
+
 
     AlarmNotify::Instance()->SignalTerminalAlarm.connect(
                 &client,&CameraClient::SendAlarm);

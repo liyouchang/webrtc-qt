@@ -33,10 +33,10 @@
 
 #import "RTCSessionDescription.h"
 
-@interface RTCSessionDescriptionSyncObserver()
+@interface RTCSessionDescriptionSyncObserver ()
 
 // CondVar used to wait for, and signal arrival of, an SDP-related callback.
-@property(nonatomic, strong) NSCondition *condition;
+@property(nonatomic, strong) NSCondition* condition;
 // Whether an SDP-related callback has fired; cleared before wait returns.
 @property(atomic, assign) BOOL signaled;
 
@@ -71,10 +71,10 @@
   [self.condition unlock];
 }
 
-#pragma mark - RTCSessionDescriptonDelegate methods
-- (void)peerConnection:(RTCPeerConnection *)peerConnection
-    didCreateSessionDescription:(RTCSessionDescription *)sdp
-                          error:(NSError *)error {
+#pragma mark - RTCSessionDescriptionDelegate methods
+- (void)peerConnection:(RTCPeerConnection*)peerConnection
+    didCreateSessionDescription:(RTCSessionDescription*)sdp
+                          error:(NSError*)error {
   [self.condition lock];
   if (error) {
     self.success = NO;
@@ -87,8 +87,8 @@
   [self.condition unlock];
 }
 
-- (void)peerConnection:(RTCPeerConnection *)peerConnection
-    didSetSessionDescriptionWithError:(NSError *)error {
+- (void)peerConnection:(RTCPeerConnection*)peerConnection
+    didSetSessionDescriptionWithError:(NSError*)error {
   [self.condition lock];
   if (error) {
     self.success = NO;

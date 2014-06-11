@@ -25,25 +25,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-@class RTCPeerConnection;
-@class RTCSessionDescription;
-
-extern NSString* const kRTCSessionDescriptionDelegateErrorDomain;
-extern int const kRTCSessionDescriptionDelegateErrorCode;
-
-// RTCSessionDescriptonDelegate is a protocol for listening to callback messages
-// when RTCSessionDescriptions are created or set.
-@protocol RTCSessionDescriptonDelegate<NSObject>
-
-// Called when creating a session.
-- (void)peerConnection:(RTCPeerConnection *)peerConnection
-    didCreateSessionDescription:(RTCSessionDescription *)sdp
-                          error:(NSError *)error;
-
-// Called when setting a local or remote description.
-- (void)peerConnection:(RTCPeerConnection *)peerConnection
-    didSetSessionDescriptionWithError:(NSError *)error;
-
+// The main application class of the AppRTCDemo iOS app demonstrating
+// interoperability between the Objective C implementation of PeerConnection
+// and the apprtc.appspot.com demo webapp.
+@interface APPRTCAppDelegate : NSObject<UIApplicationDelegate>
 @end

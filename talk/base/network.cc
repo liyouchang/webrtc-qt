@@ -60,8 +60,9 @@
 #include <Iphlpapi.h>
 #endif
 
+#include <stdio.h>
+
 #include <algorithm>
-#include <cstdio>
 
 #include "talk/base/logging.h"
 #include "talk/base/scoped_ptr.h"
@@ -109,6 +110,24 @@ bool SortNetworks(const Network* a, const Network* b) {
 
   // Networks are sorted last by key.
   return a->key() > b->key();
+}
+
+std::string AdapterTypeToString(AdapterType type) {
+  switch (type) {
+    case ADAPTER_TYPE_UNKNOWN:
+      return "Unknown";
+    case ADAPTER_TYPE_ETHERNET:
+      return "Ethernet";
+    case ADAPTER_TYPE_WIFI:
+      return "Wifi";
+    case ADAPTER_TYPE_CELLULAR:
+      return "Cellular";
+    case ADAPTER_TYPE_VPN:
+      return "VPN";
+    default:
+      ASSERT(false);
+      return std::string();
+  }
 }
 
 }  // namespace
@@ -291,8 +310,7 @@ void BasicNetworkManager::ConvertIfAddrs(struct ifaddrs* interfaces,
       scoped_ptr<Network> network(new Network(cursor->ifa_name,
                                               cursor->ifa_name,
                                               prefix,
-                                              prefix_length,
-                                              key));
+                                              prefix_length));
       network->set_scope_id(scope_id);
       network->AddIP(ip);
       bool ignored = ((cursor->ifa_flags & IFF_LOOPBACK) ||
@@ -438,8 +456,7 @@ bool BasicNetworkManager::CreateNetworks(bool include_ignored,
           scoped_ptr<Network> network(new Network(name,
                                                   description,
                                                   prefix,
-                                                  prefix_length,
-                                                  key));
+                                                  prefix_length));
           network->set_scope_id(scope_id);
           network->AddIP(ip);
           bool ignore = ((adapter_addrs->IfType == IF_TYPE_SOFTWARE_LOOPBACK) ||
@@ -607,20 +624,19 @@ void BasicNetworkManager::DumpNetworks(bool include_ignored) {
 }
 
 Network::Network(const std::string& name, const std::string& desc,
-                 const IPAddress& prefix, int prefix_length,
-                 const std::string& key)
+                 const IPAddress& prefix, int prefix_length)
     : name_(name), description_(desc), prefix_(prefix),
-      prefix_length_(prefix_length), key_(key), scope_id_(0), ignored_(false),
-      uniform_numerator_(0), uniform_denominator_(0), exponential_numerator_(0),
-      exponential_denominator_(0), type_(ADAPTER_TYPE_UNKNOWN), preference_(0) {
+      prefix_length_(prefix_length),
+      key_(MakeNetworkKey(name, prefix, prefix_length)), scope_id_(0),
+      ignored_(false), type_(ADAPTER_TYPE_UNKNOWN), preference_(0) {
 }
 
 Network::Network(const std::string& name, const std::string& desc,
-                 const IPAddress& prefix, int prefix_length)
+                 const IPAddress& prefix, int prefix_length, AdapterType type)
     : name_(name), description_(desc), prefix_(prefix),
-      prefix_length_(prefix_length), scope_id_(0), ignored_(false),
-      uniform_numerator_(0), uniform_denominator_(0), exponential_numerator_(0),
-      exponential_denominator_(0), type_(ADAPTER_TYPE_UNKNOWN), preference_(0) {
+      prefix_length_(prefix_length),
+      key_(MakeNetworkKey(name, prefix, prefix_length)), scope_id_(0),
+      ignored_(false), type_(type), preference_(0) {
 }
 
 std::string Network::ToString() const {
@@ -628,7 +644,8 @@ std::string Network::ToString() const {
   // Print out the first space-terminated token of the network desc, plus
   // the IP address.
   ss << "Net[" << description_.substr(0, description_.find(' '))
-     << ":" << prefix_.ToSensitiveString() << "/" << prefix_length_ << "]";
+     << ":" << prefix_.ToSensitiveString() << "/" << prefix_length_
+     << ":" << AdapterTypeToString(type_) << "]";
   return ss.str();
 }
 

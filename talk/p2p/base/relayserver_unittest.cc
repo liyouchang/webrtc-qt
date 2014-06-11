@@ -32,6 +32,7 @@
 #include "talk/base/logging.h"
 #include "talk/base/physicalsocketserver.h"
 #include "talk/base/socketaddress.h"
+#include "talk/base/ssladapter.h"
 #include "talk/base/testclient.h"
 #include "talk/base/thread.h"
 #include "talk/p2p/base/relayserver.h"
@@ -53,8 +54,13 @@ static const char* msg2 = "Lobster Thermidor a Crevette with a mornay sauce...";
 class RelayServerTest : public testing::Test {
  public:
   static void SetUpTestCase() {
-    talk_base::InitRandom(NULL, 0);
+    talk_base::InitializeSSL();
   }
+
+  static void TearDownTestCase() {
+    talk_base::CleanupSSL();
+  }
+
   RelayServerTest()
       : main_(talk_base::Thread::Current()), ss_(main_->socketserver()),
         username_(talk_base::CreateRandomString(12)),
@@ -191,7 +197,7 @@ class RelayServerTest : public testing::Test {
 TEST_F(RelayServerTest, TestBadRequest) {
   talk_base::scoped_ptr<StunMessage> res;
 
-  SendRaw1(bad, static_cast<int>(std::strlen(bad)));
+  SendRaw1(bad, static_cast<int>(strlen(bad)));
   res.reset(Receive1());
 
   ASSERT_TRUE(!res);
@@ -334,7 +340,7 @@ TEST_F(RelayServerTest, TestRemoteBadRequest) {
   Allocate();
   Bind();
 
-  SendRaw1(bad, static_cast<int>(std::strlen(bad)));
+  SendRaw1(bad, static_cast<int>(strlen(bad)));
   EXPECT_TRUE(Receive1() == NULL);
   EXPECT_TRUE(Receive2() == NULL);
 }
@@ -480,7 +486,7 @@ TEST_F(RelayServerTest, TestSendRaw) {
 
     Send1(req.get());
     EXPECT_EQ(msg1, ReceiveRaw2());
-    SendRaw2(msg2, static_cast<int>(std::strlen(msg2)));
+    SendRaw2(msg2, static_cast<int>(strlen(msg2)));
     res.reset(Receive1());
 
     ASSERT_TRUE(res);
@@ -533,6 +539,6 @@ TEST_F(RelayServerTest, TestExpiration) {
   EXPECT_EQ("Operation Not Supported", err->reason());
 
   // Also verify that traffic from the external client is ignored.
-  SendRaw2(msg2, static_cast<int>(std::strlen(msg2)));
+  SendRaw2(msg2, static_cast<int>(strlen(msg2)));
   EXPECT_TRUE(ReceiveRaw1().empty());
 }

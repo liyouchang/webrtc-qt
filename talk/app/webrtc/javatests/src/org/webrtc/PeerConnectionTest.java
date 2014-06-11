@@ -175,17 +175,13 @@ public class PeerConnectionTest extends TestCase {
     @Override
     public synchronized void onIceConnectionChange(
         IceConnectionState newState) {
-      // This is a bit crazy.  The offerer goes CHECKING->CONNECTED->COMPLETED
-      // mostly, but sometimes the middle CONNECTED is delivered as COMPLETED.
-      // Assuming a bug in underlying libjingle but compensating for it here to
-      // green the tree.
-      // TODO(fischman): either remove the craxy logic below when libjingle is
-      // fixed or rewrite the comment above if what libjingle is doing is
-      // actually legit.
-      assertTrue(
-          expectedIceConnectionChanges.remove(newState) ||
-          (newState == IceConnectionState.COMPLETED &&
-           expectedIceConnectionChanges.remove(IceConnectionState.CONNECTED)));
+      // TODO(bemasc): remove once delivery of ICECompleted is reliable
+      // (https://code.google.com/p/webrtc/issues/detail?id=3021).
+      if (newState.equals(IceConnectionState.COMPLETED)) {
+        return;
+      }
+
+      assertEquals(expectedIceConnectionChanges.removeFirst(), newState);
     }
 
     public synchronized void expectIceGatheringChange(
@@ -505,6 +501,28 @@ public class PeerConnectionTest extends TestCase {
 
   @Test
   public void testCompleteSession() throws Exception {
+    doTest();
+  }
+
+  @Test
+  public void testCompleteSessionOnNonMainThread() throws Exception {
+    final Exception[] exceptionHolder = new Exception[1];
+    Thread nonMainThread = new Thread("PeerConnectionTest-nonMainThread") {
+        @Override public void run() {
+          try {
+            doTest();
+          } catch (Exception e) {
+            exceptionHolder[0] = e;
+          }
+        }
+      };
+    nonMainThread.start();
+    nonMainThread.join();
+    if (exceptionHolder[0] != null)
+      throw exceptionHolder[0];
+  }
+
+  private void doTest() throws Exception {
     CountDownLatch testDone = new CountDownLatch(1);
     System.gc();  // Encourage any GC-related threads to start up.
     //TreeSet<String> threadsBeforeTest = allThreads();
@@ -634,8 +652,11 @@ public class PeerConnectionTest extends TestCase {
         IceConnectionState.CHECKING);
     offeringExpectations.expectIceConnectionChange(
         IceConnectionState.CONNECTED);
-    offeringExpectations.expectIceConnectionChange(
-        IceConnectionState.COMPLETED);
+    // TODO(bemasc): uncomment once delivery of ICECompleted is reliable
+    // (https://code.google.com/p/webrtc/issues/detail?id=3021).
+    //
+    // offeringExpectations.expectIceConnectionChange(
+    //     IceConnectionState.COMPLETED);
     answeringExpectations.expectIceConnectionChange(
         IceConnectionState.CHECKING);
     answeringExpectations.expectIceConnectionChange(

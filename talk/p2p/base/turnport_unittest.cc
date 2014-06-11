@@ -24,6 +24,9 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#if defined(POSIX)
+#include <dirent.h>
+#endif
 
 #include "talk/base/asynctcpsocket.h"
 #include "talk/base/buffer.h"
@@ -71,7 +74,7 @@ static const char kIcePwd1[] = "TESTICEPWD00000000000001";
 static const char kIcePwd2[] = "TESTICEPWD00000000000002";
 static const char kTurnUsername[] = "test";
 static const char kTurnPassword[] = "test";
-static const int kTimeout = 1000;
+static const unsigned int kTimeout = 1000;
 
 static const cricket::ProtocolAddress kTurnUdpProtoAddr(
     kTurnUdpIntAddr, cricket::PROTO_UDP);
@@ -80,8 +83,26 @@ static const cricket::ProtocolAddress kTurnTcpProtoAddr(
 static const cricket::ProtocolAddress kTurnUdpIPv6ProtoAddr(
     kTurnUdpIPv6IntAddr, cricket::PROTO_UDP);
 
+static const unsigned int MSG_TESTFINISH = 0;
+
+#if defined(LINUX)
+static int GetFDCount() {
+  struct dirent *dp;
+  int fd_count = 0;
+  DIR *dir = opendir("/proc/self/fd/");
+  while ((dp = readdir(dir)) != NULL) {
+    if (dp->d_name[0] == '.')
+      continue;
+    ++fd_count;
+  }
+  closedir(dir);
+  return fd_count;
+}
+#endif
+
 class TurnPortTest : public testing::Test,
-                     public sigslot::has_slots<> {
+                     public sigslot::has_slots<>,
+                     public talk_base::MessageHandler {
  public:
   TurnPortTest()
       : main_(talk_base::Thread::Current()),
@@ -95,8 +116,15 @@ class TurnPortTest : public testing::Test,
         turn_error_(false),
         turn_unknown_address_(false),
         turn_create_permission_success_(false),
-        udp_ready_(false) {
+        udp_ready_(false),
+        test_finish_(false) {
     network_.AddIP(talk_base::IPAddress(INADDR_ANY));
+  }
+
+  virtual void OnMessage(talk_base::Message* msg) {
+    ASSERT(msg->message_id == MSG_TESTFINISH);
+    if (msg->message_id == MSG_TESTFINISH)
+      test_finish_ = true;
   }
 
   void OnTurnPortComplete(Port* port) {
@@ -129,7 +157,13 @@ class TurnPortTest : public testing::Test,
                        const talk_base::PacketTime& packet_time) {
     udp_packets_.push_back(talk_base::Buffer(data, size));
   }
-
+  void OnSocketReadPacket(talk_base::AsyncPacketSocket* socket,
+                          const char* data, size_t size,
+                          const talk_base::SocketAddress& remote_addr,
+                          const talk_base::PacketTime& packet_time) {
+    turn_port_->HandleIncomingPacket(socket, data, size, remote_addr,
+                                     packet_time);
+  }
   talk_base::AsyncSocket* CreateServerSocket(const SocketAddress addr) {
     talk_base::AsyncSocket* socket = ss_->CreateAsyncSocket(SOCK_STREAM);
     EXPECT_GE(socket->Bind(addr), 0);
@@ -151,6 +185,39 @@ class TurnPortTest : public testing::Test,
                                  local_address.ipaddr(), 0, 0,
                                  kIceUfrag1, kIcePwd1,
                                  server_address, credentials));
+    // Set ICE protocol type to ICEPROTO_RFC5245, as port by default will be
+    // in Hybrid mode. Protocol type is necessary to send correct type STUN ping
+    // messages.
+    // This TURN port will be the controlling.
+    turn_port_->SetIceProtocolType(cricket::ICEPROTO_RFC5245);
+    turn_port_->SetIceRole(cricket::ICEROLE_CONTROLLING);
+    ConnectSignals();
+  }
+
+  void CreateSharedTurnPort(const std::string& username,
+                            const std::string& password,
+                            const cricket::ProtocolAddress& server_address) {
+    ASSERT(server_address.proto == cricket::PROTO_UDP);
+
+    socket_.reset(socket_factory_.CreateUdpSocket(
+        talk_base::SocketAddress(kLocalAddr1.ipaddr(), 0), 0, 0));
+    ASSERT_TRUE(socket_ != NULL);
+    socket_->SignalReadPacket.connect(this, &TurnPortTest::OnSocketReadPacket);
+
+    cricket::RelayCredentials credentials(username, password);
+    turn_port_.reset(cricket::TurnPort::Create(
+        main_, &socket_factory_, &network_, socket_.get(),
+        kIceUfrag1, kIcePwd1, server_address, credentials));
+    // Set ICE protocol type to ICEPROTO_RFC5245, as port by default will be
+    // in Hybrid mode. Protocol type is necessary to send correct type STUN ping
+    // messages.
+    // This TURN port will be the controlling.
+    turn_port_->SetIceProtocolType(cricket::ICEPROTO_RFC5245);
+    turn_port_->SetIceRole(cricket::ICEROLE_CONTROLLING);
+    ConnectSignals();
+  }
+
+  void ConnectSignals() {
     turn_port_->SignalPortComplete.connect(this,
         &TurnPortTest::OnTurnPortComplete);
     turn_port_->SignalPortError.connect(this,
@@ -164,6 +231,10 @@ class TurnPortTest : public testing::Test,
     udp_port_.reset(UDPPort::Create(main_, &socket_factory_, &network_,
                                     kLocalAddr2.ipaddr(), 0, 0,
                                     kIceUfrag2, kIcePwd2));
+    // Set protocol type to RFC5245, as turn port is also in same mode.
+    // UDP port will be controlled.
+    udp_port_->SetIceProtocolType(cricket::ICEPROTO_RFC5245);
+    udp_port_->SetIceRole(cricket::ICEROLE_CONTROLLED);
     udp_port_->SignalPortComplete.connect(
         this, &TurnPortTest::OnUdpPortComplete);
   }
@@ -234,8 +305,8 @@ class TurnPortTest : public testing::Test,
       for (size_t j = 0; j < i + 1; ++j) {
         buf[j] = 0xFF - j;
       }
-      conn1->Send(buf, i + 1, talk_base::DSCP_NO_CHANGE);
-      conn2->Send(buf, i + 1, talk_base::DSCP_NO_CHANGE);
+      conn1->Send(buf, i + 1, options);
+      conn2->Send(buf, i + 1, options);
       main_->ProcessMessages(0);
     }
 
@@ -256,6 +327,7 @@ class TurnPortTest : public testing::Test,
   talk_base::SocketServerScope ss_scope_;
   talk_base::Network network_;
   talk_base::BasicPacketSocketFactory socket_factory_;
+  talk_base::scoped_ptr<talk_base::AsyncPacketSocket> socket_;
   cricket::TestTurnServer turn_server_;
   talk_base::scoped_ptr<TurnPort> turn_port_;
   talk_base::scoped_ptr<UDPPort> udp_port_;
@@ -264,8 +336,10 @@ class TurnPortTest : public testing::Test,
   bool turn_unknown_address_;
   bool turn_create_permission_success_;
   bool udp_ready_;
+  bool test_finish_;
   std::vector<talk_base::Buffer> turn_packets_;
   std::vector<talk_base::Buffer> udp_packets_;
+  talk_base::PacketOptions options;
 };
 
 // Do a normal TURN allocation.
@@ -306,6 +380,12 @@ TEST_F(TurnPortTest, TestTurnAllocateBadPassword) {
 // outside. It should now work as well.
 TEST_F(TurnPortTest, TestTurnConnection) {
   CreateTurnPort(kTurnUsername, kTurnPassword, kTurnUdpProtoAddr);
+  TestTurnConnection();
+}
+
+// Similar to above, except that this test will use the shared socket.
+TEST_F(TurnPortTest, TestTurnConnectionUsingSharedSocket) {
+  CreateSharedTurnPort(kTurnUsername, kTurnPassword, kTurnUdpProtoAddr);
   TestTurnConnection();
 }
 
@@ -377,4 +457,25 @@ TEST_F(TurnPortTest, TestTurnLocalIPv6AddressServerIPv6ExtenalIPv4) {
             turn_port_->Candidates()[0].address().ipaddr());
   EXPECT_NE(0, turn_port_->Candidates()[0].address().port());
 }
+
+// This test verifies any FD's are not leaked after TurnPort is destroyed.
+// https://code.google.com/p/webrtc/issues/detail?id=2651
+#if defined(LINUX)
+TEST_F(TurnPortTest, TestResolverShutdown) {
+  turn_server_.AddInternalSocket(kTurnUdpIPv6IntAddr, cricket::PROTO_UDP);
+  int last_fd_count = GetFDCount();
+  // Need to supply unresolved address to kick off resolver.
+  CreateTurnPort(kLocalIPv6Addr, kTurnUsername, kTurnPassword,
+                 cricket::ProtocolAddress(talk_base::SocketAddress(
+                    "stun.l.google.com", 3478), cricket::PROTO_UDP));
+  turn_port_->PrepareAddress();
+  ASSERT_TRUE_WAIT(turn_error_, kTimeout);
+  EXPECT_TRUE(turn_port_->Candidates().empty());
+  turn_port_.reset();
+  talk_base::Thread::Current()->Post(this, MSG_TESTFINISH);
+  // Waiting for above message to be processed.
+  ASSERT_TRUE_WAIT(test_finish_, kTimeout);
+  EXPECT_EQ(last_fd_count, GetFDCount());
+}
+#endif
 

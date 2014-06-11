@@ -21,7 +21,8 @@ public:
 public:
     enum
     {
-        MSG_LOGIN_TIMEOUT
+        MSG_LOGIN_TIMEOUT,
+        MSG_RECONNECT
     };
     void OnMessage(talk_base::Message *msg);
 private:

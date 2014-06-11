@@ -42,7 +42,6 @@ namespace cricket {
 static const size_t kDtlsRecordHeaderLen = 13;
 static const size_t kMaxDtlsPacketLen = 2048;
 static const size_t kMinRtpPacketLen = 12;
-static const size_t kDefaultVideoAndDataCryptos = 1;
 
 static bool IsDtlsPacket(const char* data, size_t len) {
   const uint8* u = reinterpret_cast<const uint8*>(data);
@@ -157,14 +156,15 @@ void DtlsTransportChannelWrapper::Reset() {
 
 bool DtlsTransportChannelWrapper::SetLocalIdentity(
     talk_base::SSLIdentity* identity) {
-  if (dtls_state_ == STATE_OPEN && identity == local_identity_) {
-    return true;
-  }
-
-  // TODO(ekr@rtfm.com): Forbid this if Connect() has been called.
   if (dtls_state_ != STATE_NONE) {
-    LOG_J(LS_ERROR, this) << "Can't set DTLS local identity in this state";
-    return false;
+    if (identity == local_identity_) {
+      // This may happen during renegotiation.
+      LOG_J(LS_INFO, this) << "Ignoring identical DTLS identity";
+      return true;
+    } else {
+      LOG_J(LS_ERROR, this) << "Can't change DTLS local identity in this state";
+      return false;
+    }
   }
 
   if (identity) {
@@ -211,8 +211,11 @@ bool DtlsTransportChannelWrapper::SetRemoteFingerprint(
 
   talk_base::Buffer remote_fingerprint_value(digest, digest_len);
 
-  if ((dtls_state_ == STATE_OPEN) &&
-      (remote_fingerprint_value_ == remote_fingerprint_value)) {
+  if (dtls_state_ != STATE_NONE &&
+      remote_fingerprint_value_ == remote_fingerprint_value &&
+      !digest_alg.empty()) {
+    // This may happen during renegotiation.
+    LOG_J(LS_INFO, this) << "Ignoring identical remote DTLS fingerprint";
     return true;
   }
 
@@ -364,7 +367,7 @@ int DtlsTransportChannelWrapper::SendPacket(
       if (flags & PF_SRTP_BYPASS) {
         ASSERT(!srtp_ciphers_.empty());
         if (!IsRtpPacket(data, size)) {
-          result = false;
+          result = -1;
           break;
         }
 

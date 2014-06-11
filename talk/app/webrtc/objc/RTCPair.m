@@ -32,12 +32,16 @@
 @synthesize key = _key;
 @synthesize value = _value;
 
-- (id)initWithKey:(NSString *)key value:(NSString *)value {
+- (id)initWithKey:(NSString*)key value:(NSString*)value {
   if ((self = [super init])) {
     _key = [key copy];
     _value = [value copy];
   }
   return self;
+}
+
+- (NSString*)description {
+  return [NSString stringWithFormat:@"%@: %@", _key, _value];
 }
 
 @end

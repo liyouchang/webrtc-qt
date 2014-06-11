@@ -63,6 +63,18 @@ const char StatsReport::kStatsValueNameComponent[] = "googComponent";
 const char StatsReport::kStatsValueNameContentName[] = "googContentName";
 const char StatsReport::kStatsValueNameCpuLimitedResolution[] =
     "googCpuLimitedResolution";
+const char StatsReport::kStatsValueNameDecodingCTSG[] =
+    "googDecodingCTSG";
+const char StatsReport::kStatsValueNameDecodingCTN[] =
+    "googDecodingCTN";
+const char StatsReport::kStatsValueNameDecodingNormal[] =
+    "googDecodingNormal";
+const char StatsReport::kStatsValueNameDecodingPLC[] =
+    "googDecodingPLC";
+const char StatsReport::kStatsValueNameDecodingCNG[] =
+    "googDecodingCNG";
+const char StatsReport::kStatsValueNameDecodingPLCCNG[] =
+    "googDecodingPLCCNG";
 const char StatsReport::kStatsValueNameDer[] = "googDerBase64";
 // Echo metrics from the audio processing module.
 const char StatsReport::kStatsValueNameEchoCancellationQualityMin[] =
@@ -105,6 +117,9 @@ const char StatsReport::kStatsValueNameMinPlayoutDelayMs[] =
     "googMinPlayoutDelayMs";
 const char StatsReport::kStatsValueNameRenderDelayMs[] = "googRenderDelayMs";
 
+const char StatsReport::kStatsValueNameCaptureStartNtpTimeMs[] =
+    "googCaptureStartNtpTimeMs";
+
 const char StatsReport::kStatsValueNameFrameRateInput[] = "googFrameRateInput";
 const char StatsReport::kStatsValueNameFrameRateSent[] = "googFrameRateSent";
 const char StatsReport::kStatsValueNameFrameWidthInput[] =
@@ -122,9 +137,13 @@ const char StatsReport::kStatsValueNameLocalCertificateId[] =
     "googLocalCertificateId";
 const char StatsReport::kStatsValueNameNacksReceived[] = "googNacksReceived";
 const char StatsReport::kStatsValueNameNacksSent[] = "googNacksSent";
+const char StatsReport::kStatsValueNamePlisReceived[] = "googPlisReceived";
+const char StatsReport::kStatsValueNamePlisSent[] = "googPlisSent";
 const char StatsReport::kStatsValueNamePacketsReceived[] = "packetsReceived";
 const char StatsReport::kStatsValueNamePacketsSent[] = "packetsSent";
 const char StatsReport::kStatsValueNamePacketsLost[] = "packetsLost";
+const char StatsReport::kStatsValueNamePreferredJitterBufferMs[] =
+    "googPreferredJitterBufferMs";
 const char StatsReport::kStatsValueNameReadable[] = "googReadable";
 const char StatsReport::kStatsValueNameRecvPacketGroupArrivalTimeDebug[] =
     "googReceivedPacketGroupArrivalTimeDebug";
@@ -199,6 +218,19 @@ void StatsReport::AddBoolean(const std::string& name, bool value) {
   AddValue(name, value ? "true" : "false");
 }
 
+void StatsReport::ReplaceValue(const std::string& name,
+                               const std::string& value) {
+  for (Values::iterator it = values.begin(); it != values.end(); ++it) {
+    if ((*it).name == name) {
+      it->value = value;
+      return;
+    }
+  }
+  // It is not reachable here, add an ASSERT to make sure the overwriting is
+  // always a success.
+  ASSERT(false);
+}
+
 namespace {
 typedef std::map<std::string, StatsReport> StatsMap;
 
@@ -241,12 +273,32 @@ void ExtractStats(const cricket::VoiceReceiverInfo& info, StatsReport* report) {
                    info.bytes_rcvd);
   report->AddValue(StatsReport::kStatsValueNameJitterReceived,
                    info.jitter_ms);
+  report->AddValue(StatsReport::kStatsValueNameJitterBufferMs,
+                   info.jitter_buffer_ms);
+  report->AddValue(StatsReport::kStatsValueNamePreferredJitterBufferMs,
+                   info.jitter_buffer_preferred_ms);
+  report->AddValue(StatsReport::kStatsValueNameCurrentDelayMs,
+                   info.delay_estimate_ms);
   report->AddValue(StatsReport::kStatsValueNameExpandRate,
                    talk_base::ToString<float>(info.expand_rate));
   report->AddValue(StatsReport::kStatsValueNamePacketsReceived,
                    info.packets_rcvd);
   report->AddValue(StatsReport::kStatsValueNamePacketsLost,
                    info.packets_lost);
+  report->AddValue(StatsReport::kStatsValueNameDecodingCTSG,
+                   info.decoding_calls_to_silence_generator);
+  report->AddValue(StatsReport::kStatsValueNameDecodingCTN,
+                   info.decoding_calls_to_neteq);
+  report->AddValue(StatsReport::kStatsValueNameDecodingNormal,
+                   info.decoding_normal);
+  report->AddValue(StatsReport::kStatsValueNameDecodingPLC,
+                   info.decoding_plc);
+  report->AddValue(StatsReport::kStatsValueNameDecodingCNG,
+                   info.decoding_cng);
+  report->AddValue(StatsReport::kStatsValueNameDecodingPLCCNG,
+                   info.decoding_plc_cng);
+  report->AddValue(StatsReport::kStatsValueNameCaptureStartNtpTimeMs,
+                   info.capture_start_ntp_time_ms);
 }
 
 void ExtractStats(const cricket::VoiceSenderInfo& info, StatsReport* report) {
@@ -256,6 +308,8 @@ void ExtractStats(const cricket::VoiceSenderInfo& info, StatsReport* report) {
                    info.bytes_sent);
   report->AddValue(StatsReport::kStatsValueNamePacketsSent,
                    info.packets_sent);
+  report->AddValue(StatsReport::kStatsValueNamePacketsLost,
+                   info.packets_lost);
   report->AddValue(StatsReport::kStatsValueNameJitterReceived,
                    info.jitter_ms);
   report->AddValue(StatsReport::kStatsValueNameRtt, info.rtt_ms);
@@ -284,6 +338,8 @@ void ExtractStats(const cricket::VideoReceiverInfo& info, StatsReport* report) {
 
   report->AddValue(StatsReport::kStatsValueNameFirsSent,
                    info.firs_sent);
+  report->AddValue(StatsReport::kStatsValueNamePlisSent,
+                   info.plis_sent);
   report->AddValue(StatsReport::kStatsValueNameNacksSent,
                    info.nacks_sent);
   report->AddValue(StatsReport::kStatsValueNameFrameWidthReceived,
@@ -311,6 +367,9 @@ void ExtractStats(const cricket::VideoReceiverInfo& info, StatsReport* report) {
                    info.min_playout_delay_ms);
   report->AddValue(StatsReport::kStatsValueNameRenderDelayMs,
                    info.render_delay_ms);
+
+  report->AddValue(StatsReport::kStatsValueNameCaptureStartNtpTimeMs,
+                   info.capture_start_ntp_time_ms);
 }
 
 void ExtractStats(const cricket::VideoSenderInfo& info, StatsReport* report) {
@@ -318,9 +377,13 @@ void ExtractStats(const cricket::VideoSenderInfo& info, StatsReport* report) {
                    info.bytes_sent);
   report->AddValue(StatsReport::kStatsValueNamePacketsSent,
                    info.packets_sent);
+  report->AddValue(StatsReport::kStatsValueNamePacketsLost,
+                   info.packets_lost);
 
   report->AddValue(StatsReport::kStatsValueNameFirsReceived,
                    info.firs_rcvd);
+  report->AddValue(StatsReport::kStatsValueNamePlisReceived,
+                   info.plis_rcvd);
   report->AddValue(StatsReport::kStatsValueNameNacksReceived,
                    info.nacks_rcvd);
   report->AddValue(StatsReport::kStatsValueNameFrameWidthInput,
@@ -450,6 +513,32 @@ void StatsCollector::AddStream(MediaStreamInterface* stream) {
                                        &reports_);
   CreateTrackReports<VideoTrackVector>(stream->GetVideoTracks(),
                                        &reports_);
+}
+
+void StatsCollector::AddLocalAudioTrack(AudioTrackInterface* audio_track,
+                                        uint32 ssrc) {
+  ASSERT(audio_track != NULL);
+#ifdef _DEBUG
+  for (LocalAudioTrackVector::iterator it = local_audio_tracks_.begin();
+       it != local_audio_tracks_.end(); ++it) {
+    ASSERT(it->first != audio_track || it->second != ssrc);
+  }
+#endif
+  local_audio_tracks_.push_back(std::make_pair(audio_track, ssrc));
+}
+
+void StatsCollector::RemoveLocalAudioTrack(AudioTrackInterface* audio_track,
+                                           uint32 ssrc) {
+  ASSERT(audio_track != NULL);
+  for (LocalAudioTrackVector::iterator it = local_audio_tracks_.begin();
+       it != local_audio_tracks_.end(); ++it) {
+    if (it->first == audio_track && it->second == ssrc) {
+      local_audio_tracks_.erase(it);
+      return;
+    }
+  }
+
+  ASSERT(false);
 }
 
 bool StatsCollector::GetStats(MediaStreamTrackInterface* track,
@@ -778,6 +867,8 @@ void StatsCollector::ExtractVoiceInfo() {
   }
   ExtractStatsFromList(voice_info.receivers, transport_id, this);
   ExtractStatsFromList(voice_info.senders, transport_id, this);
+
+  UpdateStatsFromExistingLocalAudioTracks();
 }
 
 void StatsCollector::ExtractVideoInfo(
@@ -834,19 +925,91 @@ bool StatsCollector::GetTransportIdFromProxy(const std::string& proxy,
   return true;
 }
 
-StatsReport* StatsCollector::GetOrCreateReport(const std::string& type,
-                                               const std::string& id) {
+StatsReport* StatsCollector::GetReport(const std::string& type,
+                                       const std::string& id) {
   std::string statsid = StatsId(type, id);
   StatsReport* report = NULL;
   std::map<std::string, StatsReport>::iterator it = reports_.find(statsid);
-  if (it == reports_.end()) {
+  if (it != reports_.end())
+    report = &(it->second);
+
+  return report;
+}
+
+StatsReport* StatsCollector::GetOrCreateReport(const std::string& type,
+                                               const std::string& id) {
+  StatsReport* report = GetReport(type, id);
+  if (report == NULL) {
+    std::string statsid = StatsId(type, id);
     report = &reports_[statsid];  // Create new element.
     report->id = statsid;
     report->type = type;
-  } else {
-    report = &(it->second);
   }
+
   return report;
+}
+
+void StatsCollector::UpdateStatsFromExistingLocalAudioTracks() {
+  // Loop through the existing local audio tracks.
+  for (LocalAudioTrackVector::const_iterator it = local_audio_tracks_.begin();
+       it != local_audio_tracks_.end(); ++it) {
+    AudioTrackInterface* track = it->first;
+    uint32 ssrc = it->second;
+    std::string ssrc_id = talk_base::ToString<uint32>(ssrc);
+    StatsReport* report = GetReport(StatsReport::kStatsReportTypeSsrc,
+                                    ssrc_id);
+    if (report == NULL) {
+      // This can happen if a local audio track is added to a stream on the
+      // fly and the report has not been set up yet. Do nothing in this case.
+      LOG(LS_ERROR) << "Stats report does not exist for ssrc " << ssrc;
+      continue;
+    }
+
+    // The same ssrc can be used by both local and remote audio tracks.
+    std::string track_id;
+    if (!ExtractValueFromReport(*report,
+                                StatsReport::kStatsValueNameTrackId,
+                                &track_id) ||
+        track_id != track->id()) {
+      continue;
+    }
+
+    UpdateReportFromAudioTrack(track, report);
+  }
+}
+
+void StatsCollector::UpdateReportFromAudioTrack(AudioTrackInterface* track,
+                                                StatsReport* report) {
+  ASSERT(track != NULL);
+  if (report == NULL)
+    return;
+
+  int signal_level = 0;
+  if (track->GetSignalLevel(&signal_level)) {
+    report->ReplaceValue(StatsReport::kStatsValueNameAudioInputLevel,
+                         talk_base::ToString<int>(signal_level));
+  }
+
+  talk_base::scoped_refptr<AudioProcessorInterface> audio_processor(
+      track->GetAudioProcessor());
+  if (audio_processor.get() == NULL)
+    return;
+
+  AudioProcessorInterface::AudioProcessorStats stats;
+  audio_processor->GetStats(&stats);
+  report->ReplaceValue(StatsReport::kStatsValueNameTypingNoiseState,
+                       stats.typing_noise_detected ? "true" : "false");
+  report->ReplaceValue(StatsReport::kStatsValueNameEchoReturnLoss,
+                       talk_base::ToString<int>(stats.echo_return_loss));
+  report->ReplaceValue(
+      StatsReport::kStatsValueNameEchoReturnLossEnhancement,
+      talk_base::ToString<int>(stats.echo_return_loss_enhancement));
+  report->ReplaceValue(StatsReport::kStatsValueNameEchoDelayMedian,
+                       talk_base::ToString<int>(stats.echo_delay_median_ms));
+  report->ReplaceValue(StatsReport::kStatsValueNameEchoCancellationQualityMin,
+                       talk_base::ToString<float>(stats.aec_quality_min));
+  report->ReplaceValue(StatsReport::kStatsValueNameEchoDelayStdDev,
+                       talk_base::ToString<int>(stats.echo_delay_std_ms));
 }
 
 }  // namespace webrtc

@@ -1,6 +1,6 @@
 /*
  * libjingle
- * Copyright 2004--2005, Google Inc.
+ * Copyright 2004, Google Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -93,6 +93,22 @@ static std::string IceProtoToString(TransportProtocol proto) {
       break;
   }
   return proto_str;
+}
+
+static bool VerifyIceParams(const TransportDescription& desc) {
+  // For legacy protocols.
+  if (desc.ice_ufrag.empty() && desc.ice_pwd.empty())
+    return true;
+
+  if (desc.ice_ufrag.length() < ICE_UFRAG_MIN_LENGTH ||
+      desc.ice_ufrag.length() > ICE_UFRAG_MAX_LENGTH) {
+    return false;
+  }
+  if (desc.ice_pwd.length() < ICE_PWD_MIN_LENGTH ||
+      desc.ice_pwd.length() > ICE_PWD_MAX_LENGTH) {
+    return false;
+  }
+  return true;
 }
 
 bool BadTransportDescription(const std::string& desc, std::string* err_desc) {
@@ -406,6 +422,12 @@ bool Transport::VerifyCandidate(const Candidate& cand, std::string* error) {
 
   // Disallow all ports below 1024, except for 80 and 443 on public addresses.
   int port = cand.address().port();
+  if (port == 0) {
+    // Expected for active-only candidates per
+    // http://tools.ietf.org/html/rfc6544#section-4.5 so no error.
+    *error = "";
+    return false;
+  }
   if (port < 1024) {
     if ((port != 80) && (port != 443)) {
       *error = "candidate has port below 1024, but not 80 or 443";
@@ -613,6 +635,8 @@ void Transport::OnChannelCandidatesAllocationDone(
       return;
   }
   signaling_thread_->Post(this, MSG_CANDIDATEALLOCATIONCOMPLETE);
+
+  MaybeCompleted_w();
 }
 
 void Transport::OnChannelCandidatesAllocationDone_s() {
@@ -627,15 +651,17 @@ void Transport::OnRoleConflict(TransportChannelImpl* channel) {
 
 void Transport::OnChannelConnectionRemoved(TransportChannelImpl* channel) {
   ASSERT(worker_thread()->IsCurrent());
-  // Determine if the Transport should move to Completed or Failed.  These
-  // states are only available in the Controlling ICE role.
+  MaybeCompleted_w();
+
+  // Check if the state is now Failed.
+  // Failed is only available in the Controlling ICE role.
   if (channel->GetIceRole() != ICEROLE_CONTROLLING) {
     return;
   }
 
   ChannelMap::iterator iter = channels_.find(channel->component());
   ASSERT(iter != channels_.end());
-  // Completed and Failed can only occur after candidate allocation has stopped.
+  // Failed can only occur after candidate allocation has stopped.
   if (!iter->second.candidates_allocated()) {
     return;
   }
@@ -645,28 +671,27 @@ void Transport::OnChannelConnectionRemoved(TransportChannelImpl* channel) {
     // A Transport has failed if any of its channels have no remaining
     // connections.
     signaling_thread_->Post(this, MSG_FAILED);
-  } else if (connections == 1 && completed()) {
-    signaling_thread_->Post(this, MSG_COMPLETED);
   }
 }
 
-bool Transport::completed() const {
+void Transport::MaybeCompleted_w() {
+  ASSERT(worker_thread()->IsCurrent());
+
   // A Transport's ICE process is completed if all of its channels are writable,
   // have finished allocating candidates, and have pruned all but one of their
   // connections.
-  if (!all_channels_writable())
-    return false;
-
   ChannelMap::const_iterator iter;
   for (iter = channels_.begin(); iter != channels_.end(); ++iter) {
     const TransportChannelImpl* channel = iter->second.get();
-    if (!(channel->GetConnectionCount() == 1 &&
+    if (!(channel->writable() &&
+          channel->GetConnectionCount() == 1 &&
           channel->GetIceRole() == ICEROLE_CONTROLLING &&
           iter->second.candidates_allocated())) {
-      return false;
+      return;
     }
   }
-  return true;
+
+  signaling_thread_->Post(this, MSG_COMPLETED);
 }
 
 void Transport::SetIceRole_w(IceRole role) {
@@ -694,8 +719,13 @@ bool Transport::SetLocalTransportDescription_w(
     std::string* error_desc) {
   bool ret = true;
   talk_base::CritScope cs(&crit_);
-  local_description_.reset(new TransportDescription(desc));
 
+  if (!VerifyIceParams(desc)) {
+    return BadTransportDescription("Invalid ice-ufrag or ice-pwd length",
+                                   error_desc);
+  }
+
+  local_description_.reset(new TransportDescription(desc));
   for (ChannelMap::iterator iter = channels_.begin();
        iter != channels_.end(); ++iter) {
     ret &= ApplyLocalTransportDescription_w(iter->second.get(), error_desc);
@@ -716,8 +746,13 @@ bool Transport::SetRemoteTransportDescription_w(
     std::string* error_desc) {
   bool ret = true;
   talk_base::CritScope cs(&crit_);
-  remote_description_.reset(new TransportDescription(desc));
 
+  if (!VerifyIceParams(desc)) {
+    return BadTransportDescription("Invalid ice-ufrag or ice-pwd length",
+                                   error_desc);
+  }
+
+  remote_description_.reset(new TransportDescription(desc));
   for (ChannelMap::iterator iter = channels_.begin();
        iter != channels_.end(); ++iter) {
     ret &= ApplyRemoteTransportDescription_w(iter->second.get(), error_desc);

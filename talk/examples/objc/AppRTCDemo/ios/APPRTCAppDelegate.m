@@ -25,16 +25,41 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIKit.h>
+#import "APPRTCAppDelegate.h"
 
-// The view controller that is displayed when AppRTCDemo is loaded.
-@interface APPRTCViewController : UIViewController<UITextFieldDelegate>
+#import "APPRTCViewController.h"
+#import "RTCPeerConnectionFactory.h"
 
-@property (weak, nonatomic) IBOutlet UITextField *textField;
-@property (weak, nonatomic) IBOutlet UITextView *textInstructions;
-@property (weak, nonatomic) IBOutlet UITextView *textOutput;
+@implementation APPRTCAppDelegate {
+  UIWindow* _window;
+}
 
-- (void)displayText:(NSString *)text;
-- (void)resetUI;
+#pragma mark - UIApplicationDelegate methods
+
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  [RTCPeerConnectionFactory initializeSSL];
+  _window =  [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+  APPRTCViewController* viewController =
+      [[APPRTCViewController alloc] initWithNibName:@"APPRTCViewController"
+                                             bundle:nil];
+  _window.rootViewController = viewController;
+  [_window makeKeyAndVisible];
+  return YES;
+}
+
+- (void)applicationWillResignActive:(UIApplication*)application {
+  [[self appRTCViewController] applicationWillResignActive:application];
+}
+
+- (void)applicationWillTerminate:(UIApplication*)application {
+  [RTCPeerConnectionFactory deinitializeSSL];
+}
+
+#pragma mark - Private
+
+- (APPRTCViewController*)appRTCViewController {
+  return (APPRTCViewController*)_window.rootViewController;
+}
 
 @end

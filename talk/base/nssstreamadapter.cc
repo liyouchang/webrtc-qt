@@ -784,7 +784,13 @@ SECStatus NSSStreamAdapter::AuthCertificateHook(void *arg,
                                                 PRBool checksig,
                                                 PRBool isServer) {
   LOG(LS_INFO) << "NSSStreamAdapter::AuthCertificateHook";
-  NSSCertificate peer_cert(SSL_PeerCertificate(fd));
+  // SSL_PeerCertificate returns a pointer that is owned by the caller, and
+  // the NSSCertificate constructor copies its argument, so |raw_peer_cert|
+  // must be destroyed in this function.
+  CERTCertificate* raw_peer_cert = SSL_PeerCertificate(fd);
+  NSSCertificate peer_cert(raw_peer_cert);
+  CERT_DestroyCertificate(raw_peer_cert);
+
   NSSStreamAdapter *stream = reinterpret_cast<NSSStreamAdapter *>(arg);
   stream->cert_ok_ = false;
 
@@ -819,7 +825,7 @@ SECStatus NSSStreamAdapter::AuthCertificateHook(void *arg,
     LOG(LS_INFO) << "Checking against specified digest";
     // The peer certificate digest was specified
     unsigned char digest[64];  // Maximum size
-    std::size_t digest_length;
+    size_t digest_length;
 
     if (!peer_cert.ComputeDigest(
             stream->peer_certificate_digest_algorithm_,

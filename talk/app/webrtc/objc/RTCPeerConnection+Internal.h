@@ -28,7 +28,6 @@
 #import "RTCPeerConnection.h"
 
 #import "RTCPeerConnectionDelegate.h"
-#import "RTCPeerConnectionObserver.h"
 
 #include "talk/app/webrtc/peerconnectioninterface.h"
 
@@ -37,8 +36,8 @@
 @property(nonatomic, assign, readonly)
     talk_base::scoped_refptr<webrtc::PeerConnectionInterface> peerConnection;
 
-- (id)initWithPeerConnection:(
-    talk_base::scoped_refptr<webrtc::PeerConnectionInterface>)peerConnection
-                    observer:(webrtc::RTCPeerConnectionObserver *)observer;
+- (instancetype)initWithFactory:(webrtc::PeerConnectionFactoryInterface*)factory
+     iceServers:(const webrtc::PeerConnectionInterface::IceServers&)iceServers
+    constraints:(const webrtc::MediaConstraintsInterface*)constraints;
 
 @end

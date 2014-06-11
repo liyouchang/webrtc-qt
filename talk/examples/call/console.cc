@@ -27,12 +27,14 @@
 
 #define _CRT_SECURE_NO_DEPRECATE 1
 
+#include <assert.h>
+
 #ifdef POSIX
 #include <signal.h>
 #include <termios.h>
 #include <unistd.h>
 #endif  // POSIX
-#include <cassert>
+
 #include "talk/base/logging.h"
 #include "talk/base/messagequeue.h"
 #include "talk/base/stringutils.h"
@@ -46,28 +48,29 @@ static void DoNothing(int unused) {}
 Console::Console(talk_base::Thread *thread, CallClient *client) :
   client_(client),
   client_thread_(thread),
-  console_thread_(new talk_base::Thread()) {}
+  stopped_(false) {}
 
 Console::~Console() {
   Stop();
 }
 
 void Console::Start() {
-  if (!console_thread_) {
+  if (stopped_) {
     // stdin was closed in Stop(), so we can't restart.
     LOG(LS_ERROR) << "Cannot re-start";
     return;
   }
-  if (console_thread_->started()) {
+  if (console_thread_) {
     LOG(LS_WARNING) << "Already started";
     return;
   }
+  console_thread_.reset(new talk_base::Thread());
   console_thread_->Start();
   console_thread_->Post(this, MSG_START);
 }
 
 void Console::Stop() {
-  if (console_thread_ && console_thread_->started()) {
+  if (console_thread_) {
 #ifdef WIN32
     CloseHandle(GetStdHandle(STD_INPUT_HANDLE));
 #else
@@ -78,6 +81,7 @@ void Console::Stop() {
 #endif
     console_thread_->Stop();
     console_thread_.reset();
+    stopped_ = true;
   }
 }
 

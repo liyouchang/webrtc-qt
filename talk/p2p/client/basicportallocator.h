@@ -204,7 +204,6 @@ class BasicPortAllocatorSession : public PortAllocatorSession,
   talk_base::Thread* network_thread_;
   talk_base::scoped_ptr<talk_base::PacketSocketFactory> owned_socket_factory_;
   talk_base::PacketSocketFactory* socket_factory_;
-  bool configuration_done_;
   bool allocation_started_;
   bool network_manager_started_;
   bool running_;  // set when StartGetAllPorts is called
@@ -233,8 +232,13 @@ struct PortConfiguration : public talk_base::MessageData {
   void AddRelay(const RelayServerConfig& config);
 
   // Determines whether the given relay server supports the given protocol.
-  static bool SupportsProtocol(const RelayServerConfig& relay,
-                               ProtocolType type);
+  bool SupportsProtocol(const RelayServerConfig& relay,
+                        ProtocolType type) const;
+  bool SupportsProtocol(RelayType turn_type, ProtocolType type) const;
+  // Helper method returns the first server address for the matching
+  // RelayType and Protocol type.
+  talk_base::SocketAddress GetFirstRelayServerAddress(
+      RelayType turn_type, ProtocolType type) const;
 };
 
 }  // namespace cricket

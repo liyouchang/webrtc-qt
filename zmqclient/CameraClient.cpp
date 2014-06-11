@@ -50,6 +50,13 @@ void CameraClient::OnMessage(talk_base::Message *msg)
         this->Login();
         break;
     }
+    case MSG_RECONNECT:{
+//        LOG(INFO)<<"CameraClient::OnMessage---reconnect to server";
+//        this->Reconnect();
+//        comm_thread_->PostDelayed(3000,this,MSG_RECONNECT);
+
+        break;
+    }
     default:
         break;
     }

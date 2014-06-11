@@ -14,7 +14,7 @@ public:
     virtual void OnTunnelOpened(PeerTerminalInterface * t,
                                 const std::string & peer_id);
     virtual void OnRouterMessage(const std::string &peer_id,
-                                 const std::string &msg);
+                                 talk_base::Buffer &msg);
     virtual void SetVideoClarity(int);
     virtual int GetVideoClarity();
     virtual void SetPtz(std::string  ptz_key,int param);

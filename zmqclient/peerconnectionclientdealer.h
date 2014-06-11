@@ -21,6 +21,7 @@ private:
 public:
     //router
     int Connect(const std::string & router,const std::string & id);
+    void Reconnect();
     //server
     void SendEcho(const std::string & data);
     //peer

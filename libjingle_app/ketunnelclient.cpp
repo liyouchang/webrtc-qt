@@ -4,7 +4,7 @@
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
 
-#include <limits>
+#include <limits.h>
 
 #include "KeMessage.h"
 #include "defaults.h"
@@ -118,18 +118,19 @@ void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t,
 }
 
 void KeTunnelClient::OnRouterMessage(const std::string &peer_id,
-                                     const std::string &msg)
+                                     talk_base::Buffer &msg)
 {
+    std::string strMsg(msg.data(),msg.length());
     Json::Reader reader;
     Json::Value jmessage;
-    if (!reader.parse(msg, jmessage)) {
-        LOG(WARNING) << "Received unknown message. " << msg;
+    if (!reader.parse(strMsg, jmessage)) {
+        LOG(WARNING) << "Received unknown message. " << strMsg;
         return;
     }
     std::string command;
     bool ret = GetStringFromJsonObject(jmessage, kKaerMsgCommandName, &command);
     if(!ret){
-        LOG(WARNING)<<"get command error"<<peer_id;
+        LOG(WARNING)<<"get command error"<<peer_id<<" Msg "<<strMsg;
         return;
     }
 

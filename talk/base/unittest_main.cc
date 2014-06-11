@@ -12,7 +12,6 @@
 #include "talk/base/fileutils.h"
 #include "talk/base/gunit.h"
 #include "talk/base/logging.h"
-#include "talk/base/pathutils.h"
 
 DEFINE_bool(help, false, "prints this message");
 DEFINE_string(log, "", "logging options to use");
@@ -46,28 +45,6 @@ int TestCrtReportHandler(int report_type, char* msg, int* retval) {
   }
 }
 #endif  // WIN32
-
-talk_base::Pathname GetTalkDirectory() {
-  // Locate talk directory.
-  talk_base::Pathname path = talk_base::Filesystem::GetCurrentDirectory();
-  std::string talk_folder_name("talk");
-  talk_folder_name += path.folder_delimiter();
-  while (path.folder_name() != talk_folder_name && !path.empty()) {
-    path.SetFolder(path.parent_folder());
-  }
-
-  // If not running inside "talk" folder, then assume running in its parent
-  // folder.
-  if (path.empty()) {
-    path = talk_base::Filesystem::GetCurrentDirectory();
-    path.AppendFolder("talk");
-    // Make sure the folder exist.
-    if (!talk_base::Filesystem::IsFolder(path)) {
-      path.clear();
-    }
-  }
-  return path;
-}
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);

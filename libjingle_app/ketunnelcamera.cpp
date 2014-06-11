@@ -60,18 +60,20 @@ void KeTunnelCamera::OnToPlayFile(const std::string &peer_id,
               <<peer_id<<" file name "<<filename ;
 }
 
-void KeTunnelCamera::OnRecvTalkData(const std::string &peer_id, const char *data, int len)
+void KeTunnelCamera::OnRecvTalkData(const std::string &peer_id,
+                                    const char *data, int len)
 {
 }
 
 void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
-                                     const std::string &msg)
+                                     talk_base::Buffer &msg)
 {
-    LOG(INFO)<<"KeTunnelCamera::OnRouterMessage---" << msg;
+    std::string strMsg(msg.data(),msg.length());
+    LOG(INFO)<<"KeTunnelCamera::OnRouterMessage---";
     Json::Reader reader;
     Json::Value jmessage;
-    if (!reader.parse(msg, jmessage)) {
-        LOG(WARNING) << "Received unknown message. " << msg;
+    if (!reader.parse(strMsg, jmessage)) {
+        LOG(WARNING) << "Received unknown message. ";
         return;
     }
     std::string command;
@@ -95,21 +97,21 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
     }else if(command.compare("query_record") == 0){
         Json::Value jcondition;
         if(!GetValueFromJsonObject(jmessage, "condition", &jcondition)){
-            LOG(WARNING)<<"get param value error from"<<
-                          peer_id<< " msg"<<msg;
+            LOG(WARNING)<<"get query_record value error from"<<
+                          peer_id<< " msg"<<strMsg;
             return;
         }
         std::string condition  = JsonValueToString(jcondition);
         OnRecvRecordQuery(peer_id,condition);
     }else if(command.compare("echo") == 0){
-        this->terminal_->SendByRouter(peer_id,msg);
+        this->terminal_->SendByRouter(peer_id,strMsg);
     }else if(command.compare("wifi_info") == 0){
         this->RecvGetWifiInfo(peer_id);
     }else if(command.compare("set_wifi") == 0){
         Json::Value jwifiParam;
         if(!GetValueFromJsonObject(jmessage, "param", &jwifiParam)){
-            LOG(WARNING)<<"get param value error from"<<
-                          peer_id<< " msg"<<msg;
+            LOG(WARNING)<<"get set_wifi value error from"<<
+                          peer_id<< " msg"<<strMsg;
             return;
         }
         std::string paramStr = JsonValueToString(jwifiParam);
@@ -117,7 +119,7 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
     }
     else{
         LOG(WARNING)<<"receive unexpected command from "<<
-                      peer_id<< " msg"<<msg;
+                      peer_id<< " msg"<<strMsg;
     }
 }
 

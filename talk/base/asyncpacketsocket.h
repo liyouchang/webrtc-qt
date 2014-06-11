@@ -28,7 +28,6 @@
 #ifndef TALK_BASE_ASYNCPACKETSOCKET_H_
 #define TALK_BASE_ASYNCPACKETSOCKET_H_
 
-#include "talk/base/buffer.h"
 #include "talk/base/dscp.h"
 #include "talk/base/sigslot.h"
 #include "talk/base/socket.h"
@@ -45,10 +44,10 @@ struct PacketTimeUpdateParams {
         srtp_packet_index(-1) {
   }
 
-  int rtp_sendtime_extension_id;  // extension header id present in packet.
-  Buffer srtp_auth_key;           // Authentication key.
-  int srtp_auth_tag_len;          // Authentication tag length.
-  int64 srtp_packet_index;        // Required for Rtp Packet authentication.
+  int rtp_sendtime_extension_id;    // extension header id present in packet.
+  std::vector<char> srtp_auth_key;  // Authentication key.
+  int srtp_auth_tag_len;            // Authentication tag length.
+  int64 srtp_packet_index;          // Required for Rtp Packet authentication.
 };
 
 // This structure holds meta information for the packet which is about to send

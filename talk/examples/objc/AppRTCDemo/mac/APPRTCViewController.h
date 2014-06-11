@@ -1,6 +1,6 @@
 /*
  * libjingle
- * Copyright 2013, Google Inc.
+ * Copyright 2014, Google Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,31 +25,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 
-#import "GAEChannelClient.h"
+@interface APPRTCViewController : NSViewController
 
-// Called when there are RTCICEServers.
-@protocol ICEServerDelegate<NSObject>
-
-- (void)onICEServers:(NSArray*)servers;
-
-@end
-
-// Negotiates signaling for chatting with apprtc.appspot.com "rooms".
-// Uses the client<->server specifics of the apprtc AppEngine webapp.
-//
-// To use: create an instance of this object (registering a message handler) and
-// call connectToRoom().  apprtc.appspot.com will signal that is successful via
-// onOpen through the browser channel.  Then you should call sendData() and wait
-// for the registered handler to be called with received messages.
-@interface APPRTCAppClient : NSObject<NSURLConnectionDataDelegate>
-
-@property(nonatomic, assign) id<ICEServerDelegate> ICEServerDelegate;
-@property(nonatomic, assign) id<GAEMessageHandler> messageHandler;
-@property(nonatomic, assign) BOOL initiator;
-
-- (void)connectToRoom:(NSURL *)room;
-- (void)sendData:(NSData *)data;
+- (void)windowWillClose:(NSNotification*)notification;
 
 @end

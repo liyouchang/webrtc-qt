@@ -29,23 +29,40 @@
 #error "This file requires ARC support."
 #endif
 
-#import "RTCMediaStreamTrack+internal.h"
+#import "RTCMediaStreamTrack+Internal.h"
 #import "RTCEnumConverter.h"
+
+namespace webrtc {
+
+class RTCMediaStreamTrackObserver : public ObserverInterface {
+ public:
+  RTCMediaStreamTrackObserver(RTCMediaStreamTrack* track) { _track = track; }
+
+  virtual void OnChanged() OVERRIDE {
+    [_track.delegate mediaStreamTrackDidChange:_track];
+  }
+
+ private:
+  __weak RTCMediaStreamTrack* _track;
+};
+}
 
 @implementation RTCMediaStreamTrack {
   talk_base::scoped_refptr<webrtc::MediaStreamTrackInterface> _mediaTrack;
+  talk_base::scoped_ptr<webrtc::RTCMediaStreamTrackObserver> _observer;
 }
 
 @synthesize label;
 
 - (BOOL)isEqual:(id)other {
   // Equality is purely based on the label just like the C++ implementation.
-  if (self == other) return YES;
+  if (self == other)
+    return YES;
   if (![other isKindOfClass:[self class]] ||
       ![self isKindOfClass:[other class]]) {
     return NO;
   }
-  RTCMediaStreamTrack *otherMediaStream = (RTCMediaStreamTrack *)other;
+  RTCMediaStreamTrack* otherMediaStream = (RTCMediaStreamTrack*)other;
   return [self.label isEqual:otherMediaStream.label];
 }
 
@@ -53,11 +70,11 @@
   return [self.label hash];
 }
 
-- (NSString *)kind {
+- (NSString*)kind {
   return @(self.mediaTrack->kind().c_str());
 }
 
-- (NSString *)label {
+- (NSString*)label {
   return @(self.mediaTrack->id().c_str());
 }
 
@@ -82,18 +99,25 @@
 
 @implementation RTCMediaStreamTrack (Internal)
 
-- (id)initWithMediaTrack:(
-    talk_base::scoped_refptr<webrtc::MediaStreamTrackInterface>)mediaTrack {
+- (id)initWithMediaTrack:
+          (talk_base::scoped_refptr<webrtc::MediaStreamTrackInterface>)
+      mediaTrack {
   if (!mediaTrack) {
     NSAssert(NO, @"nil arguments not allowed");
     self = nil;
     return nil;
   }
-  if ((self = [super init])) {
+  if (self = [super init]) {
     _mediaTrack = mediaTrack;
     label = @(mediaTrack->id().c_str());
+    _observer.reset(new webrtc::RTCMediaStreamTrackObserver(self));
+    _mediaTrack->RegisterObserver(_observer.get());
   }
   return self;
+}
+
+- (void)dealloc {
+  _mediaTrack->UnregisterObserver(_observer.get());
 }
 
 - (talk_base::scoped_refptr<webrtc::MediaStreamTrackInterface>)mediaTrack {

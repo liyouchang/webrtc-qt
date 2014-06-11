@@ -1,6 +1,6 @@
 /*
  * libjingle
- * Copyright 2013, Google Inc.
+ * Copyright 2014, Google Inc.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -25,32 +25,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
 
-#import "GAEChannelClient.h"
-#import "APPRTCAppClient.h"
-#import "RTCSessionDescriptonDelegate.h"
+#import "RTCEAGLVideoView.h"
+#import "RTCVideoRenderer.h"
 
-// Used to send a message to an apprtc.appspot.com "room".
-@protocol APPRTCSendMessage<NSObject>
-
-- (void)sendData:(NSData *)data;
-// Logging helper.
-- (void)displayLogMessage:(NSString *)message;
-@end
-
-@class APPRTCViewController;
-
-// The main application class of the AppRTCDemo iOS app demonstrating
-// interoperability between the Objcective C implementation of PeerConnection
-// and the apprtc.appspot.com demo webapp.
-@interface APPRTCAppDelegate : UIResponder<ICEServerDelegate,
-                                           GAEMessageHandler,
-                                           APPRTCSendMessage,
-                                           RTCSessionDescriptonDelegate,
-                                           UIApplicationDelegate>
-
-@property (strong, nonatomic) UIWindow *window;
-@property (strong, nonatomic) APPRTCViewController *viewController;
-
+// TODO(tkchin): Move declaration to implementation file. Exposed here in order
+// to support deprecated methods in RTCVideoRenderer.
+@interface RTCEAGLVideoView (Internal) <RTCVideoRendererDelegate>
 @end

@@ -37,10 +37,10 @@ AsynDealer::~AsynDealer()
 
 int AsynDealer::initialize(const std::string &id, const std::string &router)
 {
-    if(!zmq_thread_->started()){
-        std::cout<<"zmq thread not start"<<std::endl;
-        return -1;
-    }
+//    if(!zmq_thread_->started()){
+//        std::cout<<"zmq thread not start"<<std::endl;
+//        return -1;
+//    }
     return zmq_thread_->Invoke<int>(
                 talk_base::Bind(&AsynDealer::initialize_z,this,id,router));
 }
@@ -97,8 +97,10 @@ void AsynDealer::terminate_z()
 {
     ASSERT(zmq_thread_->IsCurrent());
     ASSERT(beInit);
+    socket_->disconnect(router_.c_str());
     delete socket_;
     beInit = false;
+    delete context_;
 }
 
 int AsynDealer::send_z(const std::string & addr,const std::string & data)

@@ -38,9 +38,8 @@ namespace webrtc {
 class RTCPeerConnectionObserver : public PeerConnectionObserver {
 
  public:
-  explicit RTCPeerConnectionObserver(id<RTCPeerConnectionDelegate> delegate);
-
-  void SetPeerConnection(RTCPeerConnection *peerConnection);
+  RTCPeerConnectionObserver(RTCPeerConnection* peerConnection);
+  virtual ~RTCPeerConnectionObserver();
 
   virtual void OnError() OVERRIDE;
 
@@ -72,8 +71,7 @@ class RTCPeerConnectionObserver : public PeerConnectionObserver {
   virtual void OnIceCandidate(const IceCandidateInterface* candidate) OVERRIDE;
 
  private:
-  id<RTCPeerConnectionDelegate> _delegate;
-  RTCPeerConnection *_peerConnection;
+  __weak RTCPeerConnection* _peerConnection;
 };
 
 } // namespace webrtc

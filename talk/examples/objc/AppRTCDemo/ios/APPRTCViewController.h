@@ -25,20 +25,16 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
-@class RTCI420Frame;
-@class RTCVideoRenderer;
+// The view controller that is displayed when AppRTCDemo is loaded.
+@interface APPRTCViewController : UIViewController<UITextFieldDelegate>
 
-// RTCVideoRendererDelegate is a protocol for an object that must be
-// implemented to get messages when rendering.
-@protocol RTCVideoRendererDelegate<NSObject>
+@property(weak, nonatomic) IBOutlet UITextField* roomInput;
+@property(weak, nonatomic) IBOutlet UITextView* instructionsView;
+@property(weak, nonatomic) IBOutlet UITextView* logView;
+@property(weak, nonatomic) IBOutlet UIView* blackView;
 
-// The size of the frame.
-- (void)videoRenderer:(RTCVideoRenderer *)videoRenderer setSize:(CGSize)size;
-
-// The frame to be displayed.
-- (void)videoRenderer:(RTCVideoRenderer *)videoRenderer
-          renderFrame:(RTCI420Frame *)frame;
+- (void)applicationWillResignActive:(UIApplication*)application;
 
 @end
