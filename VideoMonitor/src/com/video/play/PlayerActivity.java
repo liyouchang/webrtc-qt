@@ -165,7 +165,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		
 		mGestureDetector = new GestureDetector(new SimpleOnGestureListener(){
 
-			//单击屏幕
+			// 单击屏幕
 			@Override
 			public boolean onSingleTapUp(MotionEvent e) {
 				// TODO Auto-generated method stub
@@ -175,6 +175,14 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					showPopupWindow();
 					hidePopupWindowDelay();
 				}
+				return false;
+			}
+
+			// 双击屏幕
+			@Override
+			public boolean onDoubleTap(MotionEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println("MyDebug: 【双击屏幕】");
 				return false;
 			}
 		});
@@ -404,7 +412,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		if (!isPlayMusic) {
 			MediaPlayer mediaPlayer = null;
 			if (mediaPlayer == null) {
-				mediaPlayer = MediaPlayer.create(mContext, resid);
+				mediaPlayer = MediaPlayer.create(HandlerApplication.getInstance(), resid);
 				mediaPlayer.stop();
 			}
 			mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
@@ -713,10 +721,16 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				System.out.println("MyDebug: 关闭音视频对讲异常！");
 				e.printStackTrace();
 			}
-			//关闭通道
 			if (Value.isTunnelOpened) {
-				TunnelCommunication.getInstance().closeTunnel(dealerName);
-			}
+				if (!isLocalDevice) {
+					// 关闭通道
+					TunnelCommunication.getInstance().closeTunnel(dealerName);
+				} else {
+					// 本地设备
+						TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
+						TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort)
+;					}
+				}
 			Value.TerminalDealerName = null;
 		} catch (Exception e) {
 			System.out.println("MyDebug: 关闭实时播放器异常！");
