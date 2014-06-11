@@ -25,7 +25,6 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -35,7 +34,6 @@ import com.video.data.XmlDevice;
 import com.video.local.ImageListViewAdapter;
 import com.video.local.LocalFileItem;
 import com.video.local.VideoListViewAdapter;
-import com.video.terminal.player.TestPlayerActivity;
 import com.video.utils.DeviceItemAdapter;
 import com.video.utils.TextProgressBar;
 import com.video.utils.Utils;
@@ -163,9 +161,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		terminalListView.setOnItemClickListener(new OnItemClickListenerImpl());
 		noDeviceLayout = (RelativeLayout) terminal_page.findViewById(R.id.rl_no_local_device_list);
 		
-		Button test = (Button) terminal_page.findViewById(R.id.btn_test);
-		test.setOnClickListener(this);
-		
 		//注册广播
 		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
@@ -245,9 +240,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
 				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
 				mViewPager.setCurrentItem(2);
-				break;
-			case R.id.btn_test:
-				startActivity(new Intent(mActivity, TestPlayerActivity.class));
 				break;
 		}
 	}

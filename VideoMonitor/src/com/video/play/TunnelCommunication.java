@@ -2,6 +2,9 @@ package com.video.play;
 
 import java.util.HashMap;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -15,7 +18,7 @@ import com.video.utils.Tools;
 
 public class TunnelCommunication {
 
-	private static TunnelCommunication tunnel = null; //
+	private static TunnelCommunication tunnel = null; 
 	
 	public static int width = 1280; 
 	public static int height = 720;
@@ -46,12 +49,6 @@ public class TunnelCommunication {
 	private native int naDisconnectLocalDevice(String peerAddr);
 	private native int naStartLocalVideo(String peerAddr);
 	private native int naStopLocalVideo(String peerAddr);
-	
-	static 
-	{
-		System.loadLibrary("gnustl_shared");
-		System.loadLibrary("p2p");
-	}
 
 	synchronized public static TunnelCommunication getInstance() {
 		if (tunnel == null) {
@@ -196,8 +193,67 @@ public class TunnelCommunication {
 		HandlerApplication.getInstance().sendBroadcast(intent);
 	}
 	
+	/**
+	 * 搜索本地设备(回调)
+	 */
 	public void SearchedDevice(String devInfo) {
-		System.out.println("MyDebug: 【搜索设备信息】"+devInfo);
+		try {
+			JSONObject jsonObj = new JSONObject(devInfo);
+			String mac = jsonObj.getString("sn");
+			String ip = jsonObj.getString("ip");
+			int port = jsonObj.getInt("port");
+			String gateway = jsonObj.getString("gateway");
+			String mask = jsonObj.getString("mask");
+			
+			Intent intent = new Intent();
+			intent.putExtra("MAC", mac);
+			intent.putExtra("IP", ip);
+			intent.putExtra("Port", port);
+			intent.putExtra("Gateway", gateway);
+			intent.putExtra("Mask", mask);
+			intent.setAction(Value.SEARCH_LOCAL_DEVICE_ACTION);
+			HandlerApplication.getInstance().sendBroadcast(intent);
+			
+			System.out.println("MyDebug: 【本地设备信息】 mac:"+mac+" ip:"+ip+" port:"+port+" gateway: "+gateway+" mask:"+mask);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 搜索本地设备
+	 */
+	public void searchLocalDevice() {
+		naSearchLocalDevice();
+		System.out.println("MyDebug: 正在搜索本地设备...");
+	}
+
+	/**
+	 * 连接本地设备
+	 */
+	public void connectLocalDevice(String peerAddr) {
+		naConnectLocalDevice(peerAddr);
+	}
+	
+	/**
+	 * 断开本地设备连接
+	 */
+	public void disconnectLocalDevice(String peerAddr) {
+		naDisconnectLocalDevice(peerAddr);
+	}
+	
+	/**
+	 * 打开本地设备视频
+	 */
+	public void startLocalVideo(String peerAddr) {
+		naStartLocalVideo(peerAddr);
+	}
+	
+	/**
+	 * 关闭本地设备视频
+	 */
+	public void stopLocalVideo(String peerAddr) {
+		naStopLocalVideo(peerAddr);
 	}
 	
 	/**

@@ -38,6 +38,11 @@ public class Value {
 	public final static String BackstageServicePackage = "com.video.service.BackstageService";
 	
 	/**
+	 * 搜索本地设备的广播
+	 */
+	public final static String SEARCH_LOCAL_DEVICE_ACTION = "Value.search_local_device";
+	
+	/**
 	 * 超时时间
 	 */
 	public final static int requestTimeout = 10000;

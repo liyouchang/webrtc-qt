@@ -50,11 +50,6 @@ public class VideoView extends View {
     private native int uninitDecoder();
     private native int decodeNalu(byte[] in, int insize, byte[] out);
     
-    static 
-	{
-        System.loadLibrary("h264");
-    }
-    
 	public VideoView(Context context) {
 		super(context);
 		this.mContext = context;
