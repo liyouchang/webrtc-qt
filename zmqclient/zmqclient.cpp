@@ -19,7 +19,7 @@
 
 
 std::string ReadConfigFile();
-const char * kVersion = "V0.21";
+const char * kVersion = "V0.30";
 
 int main()
 {
@@ -52,7 +52,7 @@ int main()
 #ifndef ARM
     CameraClient client(strMac);
     client.Connect(router_value.asString(),strDealerId);
-    client.Login();
+    //client.Login();
     Json::Value jsampleFile =
             JsonConfig::Instance()->Get("sampleFileName","sample.avi");
     std::string sampleFileName;
