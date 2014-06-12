@@ -370,7 +370,7 @@ public class MainActivity extends FragmentActivity {
 							Value.isPlayMp3 = true;
 							MediaPlayer mediaPlayer = null;
 							if (mediaPlayer == null) {
-								mediaPlayer = MediaPlayer.create(mContext, R.raw.alarm);
+								mediaPlayer = MediaPlayer.create(HandlerApplication.getInstance(), R.raw.alarm);
 								mediaPlayer.stop();
 							}
 							mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
@@ -385,7 +385,6 @@ public class MainActivity extends FragmentActivity {
 								mediaPlayer.prepare();
 								mediaPlayer.start();
 							} catch (Exception e) {
-								System.out.println("MyDebug: mediaPlayer.prepare()异常！");
 								e.printStackTrace();
 							}
 						}
