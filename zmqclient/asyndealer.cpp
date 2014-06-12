@@ -17,12 +17,10 @@
 
 typedef talk_base::ScopedMessageData<zmq::zmsg> PostZmqMessage;
 
-AsynDealer::AsynDealer()
+AsynDealer::AsynDealer():context_(NULL),socket_(NULL)
 {
     zmq_thread_ = new talk_base::Thread();
     zmq_thread_->Start();
-    owns_ptrs_ = true;
-    beInit = false;
 }
 
 AsynDealer::~AsynDealer()
@@ -30,18 +28,12 @@ AsynDealer::~AsynDealer()
     zmq_thread_->Clear(this);
     zmq_thread_->Invoke<void>(
                 talk_base::Bind(&AsynDealer::terminate_z, this));
-    if(owns_ptrs_){
-        delete zmq_thread_;
-    }
+    delete zmq_thread_;
 }
 
-int AsynDealer::initialize(const std::string &id, const std::string &router)
+bool AsynDealer::initialize(const std::string &id, const std::string &router)
 {
-//    if(!zmq_thread_->started()){
-//        std::cout<<"zmq thread not start"<<std::endl;
-//        return -1;
-//    }
-    return zmq_thread_->Invoke<int>(
+    return zmq_thread_->Invoke<bool>(
                 talk_base::Bind(&AsynDealer::initialize_z,this,id,router));
 }
 
@@ -51,10 +43,10 @@ void AsynDealer::terminate()
                 talk_base::Bind(&AsynDealer::terminate_z, this));
 }
 
-int AsynDealer::send(const std::string & addr, const std::string & data)
+bool AsynDealer::send(const std::string & addr, const std::string & data)
 {
     //TODO:use SendMessage
-    return zmq_thread_->Invoke<int>(
+    return zmq_thread_->Invoke<bool>(
                 talk_base::Bind(&AsynDealer::send_z, this,addr,data));
 }
 
@@ -67,7 +59,7 @@ void AsynDealer::AsynSend(const std::string &addr, const std::string &data)
     zmq_thread_->Post(this,MSG_TOSEND,msgData);
 }
 
-int AsynDealer::initialize_z(const std::string &id, const std::string &router)
+bool AsynDealer::initialize_z(const std::string &id, const std::string &router)
 {
     ASSERT(zmq_thread_->IsCurrent());
     try{
@@ -84,38 +76,41 @@ int AsynDealer::initialize_z(const std::string &id, const std::string &router)
         socket_->connect(router.c_str());
         this->router_ = router;
         zmq_thread_->PostDelayed(10,this,MSG_TOREAD);
-
     }catch(zmq::error_t e){
-        LOG(WARNING) << __FUNCTION__ << " error :" <<e.what();
-        return e.num();
+        LOG(WARNING) << "AsynDealer::initialize_z---" <<
+                        "failed , enum:"<<e.num()<<" edes:" <<e.what();
+        return false;
     }
-    beInit = true;
-    return 0;
+    return true;
 }
 
 void AsynDealer::terminate_z()
 {
     ASSERT(zmq_thread_->IsCurrent());
-    ASSERT(beInit);
-    socket_->disconnect(router_.c_str());
-    delete socket_;
-    beInit = false;
-    delete context_;
+    if(socket_){
+        socket_->disconnect(router_.c_str());
+        delete socket_;
+        socket_ = NULL;
+    }
+    if(context_){
+        delete context_;
+        context_ = NULL;
+    }
 }
 
-int AsynDealer::send_z(const std::string & addr,const std::string & data)
+bool AsynDealer::send_z(const std::string & addr,const std::string & data)
 {
     ASSERT(zmq_thread_->IsCurrent());
     zmq::zmsg msg;
     msg.wrap(addr,"");
     msg.append(data);
-    std::cout<<"send :"<<msg.GetBody()<<" data:"<<data<<std::endl;
+    //std::cout<<"send :"<<msg.GetBody()<<" data:"<<data<<std::endl;
     msg.send(*socket_);
-    return 0;
+    return true;
 }
 
 
-int AsynDealer::recv_z()
+void AsynDealer::recv_z()
 {
     ASSERT(zmq_thread_->IsCurrent());
     zmq_pollitem_t  items [] = {{*socket_,0,ZMQ_POLLIN,0}};
@@ -125,11 +120,8 @@ int AsynDealer::recv_z()
         msg.recv(*socket_);
         std::string addr = msg.GetAddress();
         std::string data = msg.GetBody();
-        //LOG(INFO) <<"Client "<<this->id_ << " :Receive "<<addr<<data;
-
         SignalReadData(addr,data);
     }
-    return 0;
 }
 
 void AsynDealer::OnMessage(talk_base::Message *msg)
@@ -143,7 +135,7 @@ void AsynDealer::OnMessage(talk_base::Message *msg)
     case MSG_TOSEND:
     {
         talk_base::scoped_ptr<PostZmqMessage>  pData(
-            static_cast <PostZmqMessage*>(msg->pdata));
+                    static_cast <PostZmqMessage*>(msg->pdata));
         zmq::zmsg * pzmsg = pData->data().get();
         pzmsg->send(*socket_);
         SignalSent();

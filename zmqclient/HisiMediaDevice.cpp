@@ -418,15 +418,17 @@ int HisiMediaDevice::GetVideoFrameRate(int level)
 
 void HisiMediaDevice::CheckNetStatus()
 {
-    LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---oldip"<<oldIp<<
-               " oldNet"<<oldNetType;
+//    LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---oldip"<<oldIp<<
+//               " oldNet"<<oldNetType;
     int ip = Raycomm_GetIP();
     int net = Raycomm_GetNetType();
-    if(ip != oldIp && oldIp != -1){
-        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---Ip changed new ip is "<<ip;
+    if (ip != oldIp && oldIp != -1) {
+        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---"<<
+                   "Ip changed new ip is "<<ip <<", old ip is "<<oldIp;
         this->SignalNetStatusChange();
-    } else if( net != oldNetType && oldNetType != -1 ){
-        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---net changed new net is "<<net;
+    } else if( net != oldNetType && oldNetType != -1 ) {
+        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---"<<
+                   "net changed new net is "<<net<<" old net is "<<oldNetType;
         this->SignalNetStatusChange();
     }
     oldIp = ip;

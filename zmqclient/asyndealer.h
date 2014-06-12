@@ -33,23 +33,21 @@ public:
     AsynDealer();
     ~AsynDealer();
     void OnMessage(talk_base::Message *msg);
-    int initialize(const std::string & id,const std::string & router);
+    bool initialize(const std::string & id,const std::string & router);
     void terminate();
-    int send(const std::string & addr,const std::string & data);
+    bool send(const std::string & addr,const std::string & data);
     void AsynSend(const std::string & addr,const std::string & data);
     std::string id(){return id_;}
     std::string addr(){return router_;}
     sigslot::signal2<const std::string &,const std::string &> SignalReadData;
     sigslot::signal0<> SignalSent;
 protected:
-    int initialize_z(const std::string & id,const std::string & router);
+    bool initialize_z(const std::string & id,const std::string & router);
     void terminate_z();
-    int send_z(const std::string & addr,const std::string & data);
-    int recv_z();
+    bool send_z(const std::string & addr,const std::string & data);
+    void recv_z();
 private:
     talk_base::Thread * zmq_thread_;
-    bool owns_ptrs_;
-    bool beInit;
     zmq::context_t *context_;
     zmq::socket_t *socket_;
     std::string id_;

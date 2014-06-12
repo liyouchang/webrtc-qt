@@ -11,17 +11,14 @@ PeerConnectionClientDealer::PeerConnectionClientDealer()
 {
 }
 
-int PeerConnectionClientDealer::Connect(const std::string &router,
+bool PeerConnectionClientDealer::Connect(const std::string &router,
                                         const std::string &id)
 {
     dealer_.reset(new AsynDealer());
     dealer_->SignalReadData.connect(
                 this,&PeerConnectionClientDealer::OnMessageFromPeer);
-    //dealer_->SignalSent.connect(this,&PeerConnectionClientDealer::OnMessageSent);
     LOG(INFO)<<"connect to "<<router<<"  with id "<<id;
-    int ret = dealer_->initialize(id,router);
-    this->my_id_ = dealer_->id();
-    return ret;
+    return  dealer_->initialize(id,router);
 }
 
 void PeerConnectionClientDealer::Reconnect()

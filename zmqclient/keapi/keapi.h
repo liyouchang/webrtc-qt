@@ -18,24 +18,6 @@ extern "C" {
 #define NVR_PATH_LEN   128
 #define NVR_DATE_LEN   16
 
-#define DEBUG_PRINT_ENABLE
-#if defined(DEBUG_PRINT_ENABLE)
-
-#define DBG_PRINT(format,...)   printf(format,##__VA_ARGS__);printf("\n")
-#define DBG_PRINT_FILE_FUNC_LINE  printf("file = %s  func = %s line = %d \n",__FILE__,__FUNCTION__,__LINE__)
-#define DBG_PRINT_MEM(buf,len)       {int  i =0;char* p=(char*)buf;for(;i<len;printf("%x ",p[i]),i++);printf("\n");}
-#define DBG_PRINT_MEM_C(buf,len)       {int  i =0;char* p=(char*)buf;for(;i<len;printf("%c ",p[i]),i++);printf("\n");}
-#define DBG_PRINT_PTR(ptr)  printf("pointer to %p", ptr);printf("\n")
-#define DBG_PRINT_TIME(time)         { printf("year =%d month =%d day=%d hour=%d min=%d sec=%d",time.year,time.mon,time.day,time.hour,time.min,time.sec);}
-
-#else
-#define DBG_PRINT(format,...)
-#define DBG_PRINT_FILE_FUNC_LINE
-#define DBG_PRINT_MEM(buf,len)
-#define DBG_PRINT_MEM_C(buf,len)
-#define DBG_PRINT_PTR(ptr)
-#define DBG_PRINT_TIME(time)
-#endif
 
 
 typedef struct
@@ -48,7 +30,7 @@ typedef struct
 typedef struct
 { 
 	int file_num;
-    t_VidRec_FileInfo rec_file[MAX_NVR_QUERYNUM];
+	t_VidRec_FileInfo   rec_file[MAX_NVR_QUERYNUM];
 }t_VidRecFile_QueryInfo, *pt_VidRecFile_QueryInfo;
 
 typedef struct
@@ -105,9 +87,11 @@ int Raycomm_GetNetType();
 
 int Raycomm_Reboot(void);
 
-int Raycomm_SetTitle(char* pChnName);
+int Raycomm_SetTitle(const char* pChnName);
 
 int Raycomm_SetAlarmEnable(char bEnable);
+//return 1 enable 0 disable
+int Raycomm_GetAlarmEnable();
 
 
 #ifdef __cplusplus

@@ -58,7 +58,7 @@ KeJniLocalClient::~KeJniLocalClient()
 void KeJniLocalClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t,
                                       const std::string &peer_id)
 {
-    KeJniLocalClient::OnTunnelOpened(t,peer_id);
+    kaerp2p::KeLocalClient::OnTunnelOpened(t,peer_id);
     JniUtil::GetInstance()->JniTunnelMethodCallback("TunnelOpened",
                                                     peer_id.c_str());
 
@@ -67,7 +67,7 @@ void KeJniLocalClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t,
 void KeJniLocalClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface *t,
                                       const std::string &peer_id)
 {
-    KeJniLocalClient::OnTunnelOpened(t,peer_id);
+    kaerp2p::KeLocalClient::OnTunnelClosed(t,peer_id);
     JniUtil::GetInstance()->JniTunnelMethodCallback("TunnelClosed",
                                                     peer_id.c_str());
 }

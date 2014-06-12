@@ -17,6 +17,7 @@ import android.os.Message;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.play.TunnelCommunication;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqThread;
@@ -31,10 +32,19 @@ public class BackstageService extends Service {
 	private PreferData preferData = null;
 	private String userName = null;
 	
+	static 
+	{
+		System.loadLibrary("gnustl_shared");
+		System.loadLibrary("p2p");
+		System.loadLibrary("h264");
+	}
+	
 	@Override
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
+		// 初始化通道
+		TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
 	}
 	
 	@Override
@@ -83,8 +93,10 @@ public class BackstageService extends Service {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//注销广播
+		// 注销广播
 		unregisterReceiver(serviceReceiver);
+		// 注销通道
+		TunnelCommunication.getInstance().tunnelTerminate();
 	}
 	
 	/**

@@ -50,6 +50,7 @@
     <string name="modify_pwd">修改密码</string>
     <string name="remember_pwd">记住密码</string>
     <string name="setting">功能设置</string>
+    <string name="local_device">本地设备</string>
     <string name="set_wifi">终端WiFi配置</string>
     <string name="help">帮助</string>
     <string name="about">关于</string>

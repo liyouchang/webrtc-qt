@@ -4,10 +4,13 @@
         "mac" : ""
     },
     "dealerId" : "",
-    "routerUrl":"tcp://192.168.0.185:5555",
-    "logParams":"tstamp thread info debug",
-    "logSaveFile":"",
-    "servers":[],
+    "routerUrl":"tcp://222.174.213.185:5555",
+    "logParams":"tstamp thread info debug file",
+    "logSaveFile":"/tmp/zmqclient.log",
+
+    "servers":[{"uri":"stun:222.174.213.185:5389"},
+        {"uri":"turn:222.174.213.185:5766"}],
     "clarity":2,
+
     "sampleFileName":"Sample.avi"
 }

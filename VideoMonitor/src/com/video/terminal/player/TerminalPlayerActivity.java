@@ -244,7 +244,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 				fileInfo.fileCachePath = videoPath2 + File.separator + fileInfo.currentFileDate + ".h264";
 				
 				//【打开通道】
-				TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
 				TunnelCommunication.getInstance().openTunnel(dealerName);
 				
 				mDialog = createLoadingDialog("正在请求终端录像...");
@@ -758,7 +757,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 						}
 					} else {
 						//【打开通道】
-						TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
 						TunnelCommunication.getInstance().openTunnel(dealerName);
 					}
 					mDialog = createLoadingDialog("正在请求前一个终端录像...");
@@ -821,7 +819,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 						}
 					} else {
 						//【打开通道】
-						TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
 						TunnelCommunication.getInstance().openTunnel(dealerName);
 					}
 					mDialog = createLoadingDialog("正在请求后一个终端录像...");
@@ -1199,7 +1196,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 			//关闭通道
 			if (Value.isTunnelOpened) {
 				TunnelCommunication.getInstance().closeTunnel(dealerName);
-				TunnelCommunication.getInstance().tunnelTerminate();
 			}
 			Value.TerminalDealerName = null;
 			

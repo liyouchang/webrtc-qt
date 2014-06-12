@@ -59,14 +59,14 @@ struct SetSessionDescriptionMsg : public talk_base::MessageData {
     std::string error;
 };
 struct CreateSessionParams : public talk_base::MessageData {
-  CreateSessionParams(
-      cricket::PortAllocator * port_allocator)
-      :
-        port_allocator(port_allocator),
-        result(true)
-        {}
-  cricket::PortAllocator * port_allocator;
-  bool result;
+    CreateSessionParams(
+            cricket::PortAllocator * port_allocator)
+        :
+          port_allocator(port_allocator),
+          result(true)
+    {}
+    cricket::PortAllocator * port_allocator;
+    bool result;
 };
 
 PeerTunnel::PeerTunnel()
@@ -103,22 +103,22 @@ talk_base::StreamInterface *PeerTunnel::GetStream()
 bool GetServiceTypeAndHostnameFromUri(const std::string& in_str,
                                       ServiceType* service_type,
                                       std::string* hostname) {
-  std::string::size_type colonpos = in_str.find(':');
-  if (colonpos == std::string::npos) {
-    return false;
-  }
-  std::string type = in_str.substr(0, colonpos);
-  for (size_t i = 0; i < ARRAY_SIZE(kValidIceServiceTypes); ++i) {
-    if (type.compare(kValidIceServiceTypes[i]) == 0) {
-      *service_type = static_cast<ServiceType>(i);
-      break;
+    std::string::size_type colonpos = in_str.find(':');
+    if (colonpos == std::string::npos) {
+        return false;
     }
-  }
-  if (*service_type == INVALID) {
-    return false;
-  }
-  *hostname = in_str.substr(colonpos + 1, std::string::npos);
-  return true;
+    std::string type = in_str.substr(0, colonpos);
+    for (size_t i = 0; i < ARRAY_SIZE(kValidIceServiceTypes); ++i) {
+        if (type.compare(kValidIceServiceTypes[i]) == 0) {
+            *service_type = static_cast<ServiceType>(i);
+            break;
+        }
+    }
+    if (*service_type == INVALID) {
+        return false;
+    }
+    *hostname = in_str.substr(colonpos + 1, std::string::npos);
+    return true;
 }
 
 // This method parses IPv6 and IPv4 literal strings, along with hostnames in
@@ -129,160 +129,160 @@ bool GetServiceTypeAndHostnameFromUri(const std::string& in_str,
 bool ParseHostnameAndPortFromString(const std::string& in_str,
                                     std::string* host,
                                     int* port) {
-  if (in_str.at(0) == '[') {
-    std::string::size_type closebracket = in_str.rfind(']');
-    if (closebracket != std::string::npos) {
-      *host = in_str.substr(1, closebracket - 1);
-      std::string::size_type colonpos = in_str.find(':', closebracket);
-      if (std::string::npos != colonpos) {
-        if (!talk_base::FromString(
-            in_str.substr(closebracket + 2, std::string::npos), port)) {
-          return false;
+    if (in_str.at(0) == '[') {
+        std::string::size_type closebracket = in_str.rfind(']');
+        if (closebracket != std::string::npos) {
+            *host = in_str.substr(1, closebracket - 1);
+            std::string::size_type colonpos = in_str.find(':', closebracket);
+            if (std::string::npos != colonpos) {
+                if (!talk_base::FromString(
+                            in_str.substr(closebracket + 2, std::string::npos), port)) {
+                    return false;
+                }
+            }
+        } else {
+            return false;
         }
-      }
     } else {
-      return false;
+        std::string::size_type colonpos = in_str.find(':');
+        if (std::string::npos != colonpos) {
+            *host = in_str.substr(0, colonpos);
+            if (!talk_base::FromString(
+                        in_str.substr(colonpos + 1, std::string::npos), port)) {
+                return false;
+            }
+        } else {
+            *host = in_str;
+        }
     }
-  } else {
-    std::string::size_type colonpos = in_str.find(':');
-    if (std::string::npos != colonpos) {
-      *host = in_str.substr(0, colonpos);
-      if (!talk_base::FromString(
-          in_str.substr(colonpos + 1, std::string::npos), port)) {
-        return false;
-      }
-    } else {
-      *host = in_str;
-    }
-  }
-  return true;
+    return true;
 }
 
 typedef webrtc::PortAllocatorFactoryInterface::StunConfiguration
-    StunConfiguration;
+StunConfiguration;
 typedef webrtc::PortAllocatorFactoryInterface::TurnConfiguration
-    TurnConfiguration;
+TurnConfiguration;
 
 bool ParseIceServers(const PeerTunnelInterface::IceServers& configuration,
                      std::vector<StunConfiguration>* stun_config,
                      std::vector<TurnConfiguration>* turn_config) {
-  // draft-nandakumar-rtcweb-stun-uri-01
-  // stunURI       = scheme ":" stun-host [ ":" stun-port ]
-  // scheme        = "stun" / "stuns"
-  // stun-host     = IP-literal / IPv4address / reg-name
-  // stun-port     = *DIGIT
+    // draft-nandakumar-rtcweb-stun-uri-01
+    // stunURI       = scheme ":" stun-host [ ":" stun-port ]
+    // scheme        = "stun" / "stuns"
+    // stun-host     = IP-literal / IPv4address / reg-name
+    // stun-port     = *DIGIT
 
-  // draft-petithuguenin-behave-turn-uris-01
-  // turnURI       = scheme ":" turn-host [ ":" turn-port ]
-  //                 [ "?transport=" transport ]
-  // scheme        = "turn" / "turns"
-  // transport     = "udp" / "tcp" / transport-ext
-  // transport-ext = 1*unreserved
-  // turn-host     = IP-literal / IPv4address / reg-name
-  // turn-port     = *DIGIT
-  for (size_t i = 0; i < configuration.size(); ++i) {
-    PeerTunnelInterface::IceServer server = configuration[i];
-    if (server.uri.empty()) {
-      LOG(WARNING) << "Empty uri.";
-      continue;
-    }
-    std::vector<std::string> tokens;
-    std::string turn_transport_type = kUdpTransportType;
-    talk_base::tokenize(server.uri, '?', &tokens);
-    std::string uri_without_transport = tokens[0];
-    // Let's look into transport= param, if it exists.
-    if (tokens.size() == kTurnTransportTokensNum) {  // ?transport= is present.
-      std::string uri_transport_param = tokens[1];
-      talk_base::tokenize(uri_transport_param, '=', &tokens);
-      if (tokens[0] == kTransport) {
-        // As per above grammar transport param will be consist of lower case
-        // letters.
-        if (tokens[1] != kUdpTransportType && tokens[1] != kTcpTransportType) {
-          LOG(LS_WARNING) << "Transport param should always be udp or tcp.";
-          continue;
+    // draft-petithuguenin-behave-turn-uris-01
+    // turnURI       = scheme ":" turn-host [ ":" turn-port ]
+    //                 [ "?transport=" transport ]
+    // scheme        = "turn" / "turns"
+    // transport     = "udp" / "tcp" / transport-ext
+    // transport-ext = 1*unreserved
+    // turn-host     = IP-literal / IPv4address / reg-name
+    // turn-port     = *DIGIT
+    for (size_t i = 0; i < configuration.size(); ++i) {
+        PeerTunnelInterface::IceServer server = configuration[i];
+        if (server.uri.empty()) {
+            LOG(WARNING) << "Empty uri.";
+            continue;
         }
-        turn_transport_type = tokens[1];
-      }
-    }
-
-    std::string hoststring;
-    ServiceType service_type = INVALID;
-    if (!GetServiceTypeAndHostnameFromUri(uri_without_transport,
-                                         &service_type,
-                                         &hoststring)) {
-      LOG(LS_WARNING) << "Invalid transport parameter in ICE URI: "
-                      << uri_without_transport;
-      continue;
-    }
-
-    // Let's break hostname.
-    tokens.clear();
-    talk_base::tokenize(hoststring, '@', &tokens);
-    hoststring = tokens[0];
-    if (tokens.size() == kTurnHostTokensNum) {
-      server.username = talk_base::s_url_decode(tokens[0]);
-      hoststring = tokens[1];
-    }
-
-    int port = kDefaultStunPort;
-    if (service_type == TURNS) {
-      port = kDefaultStunTlsPort;
-      turn_transport_type = kTcpTransportType;
-    }
-
-    std::string address;
-    if (!ParseHostnameAndPortFromString(hoststring, &address, &port)) {
-      LOG(WARNING) << "Invalid Hostname format: " << uri_without_transport;
-      continue;
-    }
-
-
-    if (port <= 0 || port > 0xffff) {
-      LOG(WARNING) << "Invalid port: " << port;
-      continue;
-    }
-
-    switch (service_type) {
-      case STUN:
-      case STUNS:
-        stun_config->push_back(StunConfiguration(address, port));
-        break;
-      case TURN:
-      case TURNS: {
-        if (server.username.empty()) {
-          // Turn url example from the spec |url:"turn:user@turn.example.org"|.
-          std::vector<std::string> turn_tokens;
-          talk_base::tokenize(address, '@', &turn_tokens);
-          if (turn_tokens.size() == kTurnHostTokensNum) {
-            server.username = talk_base::s_url_decode(turn_tokens[0]);
-            address = turn_tokens[1];
-          }
+        std::vector<std::string> tokens;
+        std::string turn_transport_type = kUdpTransportType;
+        talk_base::tokenize(server.uri, '?', &tokens);
+        std::string uri_without_transport = tokens[0];
+        // Let's look into transport= param, if it exists.
+        if (tokens.size() == kTurnTransportTokensNum) {  // ?transport= is present.
+            std::string uri_transport_param = tokens[1];
+            talk_base::tokenize(uri_transport_param, '=', &tokens);
+            if (tokens[0] == kTransport) {
+                // As per above grammar transport param will be consist of lower case
+                // letters.
+                if (tokens[1] != kUdpTransportType && tokens[1] != kTcpTransportType) {
+                    LOG(LS_WARNING) << "Transport param should always be udp or tcp.";
+                    continue;
+                }
+                turn_transport_type = tokens[1];
+            }
         }
 
-        bool secure = (service_type == TURNS);
+        std::string hoststring;
+        ServiceType service_type = INVALID;
+        if (!GetServiceTypeAndHostnameFromUri(uri_without_transport,
+                                              &service_type,
+                                              &hoststring)) {
+            LOG(LS_WARNING) << "Invalid transport parameter in ICE URI: "
+                            << uri_without_transport;
+            continue;
+        }
 
-        turn_config->push_back(TurnConfiguration(
-                                   address, port,
-                                                 server.username,
-                                                 server.password,
-                                                 turn_transport_type,
-                                                 secure));
-        // STUN functionality is part of TURN.
-        // Note: If there is only TURNS is supplied as part of configuration,
-        // we will have problem in fetching server reflexive candidate, as
-        // currently we don't have support of TCP/TLS in stunport.cc.
-        // In that case we should fetch server reflexive addess from
-        // TURN allocate response.
-        stun_config->push_back(StunConfiguration(address, port));
-        break;
-      }
-      case INVALID:
-      default:
-        LOG(WARNING) << "Configuration not supported: " << server.uri;
-        return false;
+        // Let's break hostname.
+        tokens.clear();
+        talk_base::tokenize(hoststring, '@', &tokens);
+        hoststring = tokens[0];
+        if (tokens.size() == kTurnHostTokensNum) {
+            server.username = talk_base::s_url_decode(tokens[0]);
+            hoststring = tokens[1];
+        }
+
+        int port = kDefaultStunPort;
+        if (service_type == TURNS) {
+            port = kDefaultStunTlsPort;
+            turn_transport_type = kTcpTransportType;
+        }
+
+        std::string address;
+        if (!ParseHostnameAndPortFromString(hoststring, &address, &port)) {
+            LOG(WARNING) << "Invalid Hostname format: " << uri_without_transport;
+            continue;
+        }
+
+
+        if (port <= 0 || port > 0xffff) {
+            LOG(WARNING) << "Invalid port: " << port;
+            continue;
+        }
+
+        switch (service_type) {
+        case STUN:
+        case STUNS:
+            stun_config->push_back(StunConfiguration(address, port));
+            break;
+        case TURN:
+        case TURNS: {
+            if (server.username.empty()) {
+                // Turn url example from the spec |url:"turn:user@turn.example.org"|.
+                std::vector<std::string> turn_tokens;
+                talk_base::tokenize(address, '@', &turn_tokens);
+                if (turn_tokens.size() == kTurnHostTokensNum) {
+                    server.username = talk_base::s_url_decode(turn_tokens[0]);
+                    address = turn_tokens[1];
+                }
+            }
+
+            bool secure = (service_type == TURNS);
+
+            turn_config->push_back(TurnConfiguration(
+                                       address, port,
+                                       server.username,
+                                       server.password,
+                                       turn_transport_type,
+                                       secure));
+            // STUN functionality is part of TURN.
+            // Note: If there is only TURNS is supplied as part of configuration,
+            // we will have problem in fetching server reflexive candidate, as
+            // currently we don't have support of TCP/TLS in stunport.cc.
+            // In that case we should fetch server reflexive addess from
+            // TURN allocate response.
+            stun_config->push_back(StunConfiguration(address, port));
+            break;
+        }
+        case INVALID:
+        default:
+            LOG(WARNING) << "Configuration not supported: " << server.uri;
+            return false;
+        }
     }
-  }
-  return true;
+    return true;
 }
 
 bool PeerTunnel::Initialize(const IceServers &configuration,
@@ -308,7 +308,11 @@ bool PeerTunnel::Initialize(const IceServers &configuration,
 
     // To handle both internal and externally created port allocator, we will
     // enable BUNDLE here.
-    int portallocator_flags = cricket::PORTALLOCATOR_ENABLE_BUNDLE |
+    //    int portallocator_flags = cricket::PORTALLOCATOR_ENABLE_BUNDLE |
+    //            cricket::PORTALLOCATOR_ENABLE_SHARED_UFRAG |
+    //            cricket::PORTALLOCATOR_ENABLE_SHARED_SOCKET;
+    int portallocator_flags = cricket::PORTALLOCATOR_ENABLE_BUNDLE|
+            cricket::PORTALLOCATOR_DISABLE_TCP|
             cricket::PORTALLOCATOR_ENABLE_SHARED_UFRAG |
             cricket::PORTALLOCATOR_ENABLE_SHARED_SOCKET;
 
@@ -459,8 +463,8 @@ void PeerTunnel::OnMessage(talk_base::Message *msg)
         CreateSessionParams * params = static_cast<CreateSessionParams *>(msg->pdata);
 
         session_.reset(new KaerSession(this->signaling_thread_,
-                                        this->worker_thread_,
-                                         params->port_allocator));
+                                       this->worker_thread_,
+                                       params->port_allocator));
 
         // Initialize the WebRtcSession. It creates transport channels etc.
         if (!session_->Initialize()){
@@ -514,29 +518,29 @@ void PeerTunnel::OnIceCandidate(const IceCandidateInterface *candidate)
 void PeerTunnel::OnSessionStateChange(cricket::BaseSession *session, cricket::BaseSession::State state)
 {
     switch (state) {
-      case cricket::BaseSession::STATE_INIT:
+    case cricket::BaseSession::STATE_INIT:
         ChangeSignalingState(kStable);
         break;
-      case cricket::BaseSession::STATE_SENTINITIATE:
+    case cricket::BaseSession::STATE_SENTINITIATE:
         ChangeSignalingState(kHaveLocalOffer);
         break;
-      case cricket::BaseSession::STATE_SENTPRACCEPT:
+    case cricket::BaseSession::STATE_SENTPRACCEPT:
         ChangeSignalingState(kHaveLocalPrAnswer);
         break;
-      case cricket::BaseSession::STATE_RECEIVEDINITIATE:
+    case cricket::BaseSession::STATE_RECEIVEDINITIATE:
         ChangeSignalingState(kHaveRemoteOffer);
         break;
-      case cricket::BaseSession::STATE_RECEIVEDPRACCEPT:
+    case cricket::BaseSession::STATE_RECEIVEDPRACCEPT:
         ChangeSignalingState(kHaveRemotePrAnswer);
         break;
-      case cricket::BaseSession::STATE_SENTACCEPT:
-      case cricket::BaseSession::STATE_RECEIVEDACCEPT:
+    case cricket::BaseSession::STATE_SENTACCEPT:
+    case cricket::BaseSession::STATE_RECEIVEDACCEPT:
         ChangeSignalingState(kStable);
         break;
-      case cricket::BaseSession::STATE_RECEIVEDTERMINATE:
+    case cricket::BaseSession::STATE_RECEIVEDTERMINATE:
         ChangeSignalingState(kClosed);
         break;
-      default:
+    default:
         break;
     }
 }
@@ -545,12 +549,12 @@ void PeerTunnel::ChangeSignalingState(SignalingState signaling_state)
 {
     signaling_state_ = signaling_state;
     if (signaling_state == kClosed) {
-      ice_connection_state_ = kIceConnectionClosed;
-      observer_->OnIceConnectionChange(ice_connection_state_);
-      if (ice_gathering_state_ != kIceGatheringComplete) {
-        ice_gathering_state_ = kIceGatheringComplete;
-        observer_->OnIceGatheringChange(ice_gathering_state_);
-      }
+        ice_connection_state_ = kIceConnectionClosed;
+        observer_->OnIceConnectionChange(ice_connection_state_);
+        if (ice_gathering_state_ != kIceGatheringComplete) {
+            ice_gathering_state_ = kIceGatheringComplete;
+            observer_->OnIceGatheringChange(ice_gathering_state_);
+        }
     }
     observer_->OnSignalingChange(signaling_state_);
 

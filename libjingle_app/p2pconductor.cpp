@@ -5,7 +5,7 @@
 #include "defaults.h"
 namespace  kaerp2p {
 
-const int kConnectTimeout = 60000; // close DeletePeerConnection after 10s without connect
+const int kConnectTimeout = 30000; // close DeletePeerConnection after 30s without connect
 
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -147,9 +147,6 @@ void P2PConductor::AddIceServers(std::string jstrServers)
 bool P2PConductor::InitializePeerConnection()
 {
     if(g_servers.empty()){
-//        PeerTunnelInterface::IceServer server;
-//        server.uri = GetPeerConnectionString();
-//        g_servers.push_back(server);
         //lht TODO: turn server should get by the server
         P2PConductor::AddIceServer("stun:222.174.213.185:5389","","");
 

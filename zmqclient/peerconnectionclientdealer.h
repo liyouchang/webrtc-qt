@@ -12,26 +12,17 @@ class PeerConnectionClientDealer :
 {
 public:
     PeerConnectionClientDealer();
-
-private:
-    talk_base::scoped_ptr<AsynDealer> dealer_;
-    std::string peer_id_;
-
-    // PeerConnectionClientInterface interface
-public:
     //router
-    int Connect(const std::string & router,const std::string & id);
-    void Reconnect();
+    virtual bool Connect(const std::string & router,const std::string & id);
+    virtual void Reconnect();
     //server
     void SendEcho(const std::string & data);
     //peer
     bool SendToPeer(const std::string &peer_id, const std::string &message);
     bool IsSendingMessage();
     void OnMessageFromPeer(const std::string& peer_id, const std::string& message);
-
 protected:
-    //message is use client to get and send
-    //void OnMessageSent();
+    talk_base::scoped_ptr<AsynDealer> dealer_;
 };
 
 

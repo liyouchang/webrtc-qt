@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 
 import com.video.R;
 import com.video.main.WiFiActivity;
+import com.video.play.PlayerActivity;
 
 public class WiFiAlertDialog {
 	
@@ -36,6 +38,14 @@ public class WiFiAlertDialog {
 		
 		titleView = (TextView) window.findViewById(R.id.title);
 		wifiList = (ListView) window.findViewById(R.id.wifi_list);
+	}
+	
+	public boolean isShowing() {
+		return alertDialog.isShowing();
+	}
+	
+	public void setCancelable(boolean isCancelable) {
+		alertDialog.setCancelable(isCancelable);
 	}
 
 	public void setTitle(int resId) {
@@ -57,6 +67,33 @@ public class WiFiAlertDialog {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				editText.setText((CharSequence) list.get(position).get("WiFiSSID"));
 				WiFiActivity.selectedWiFi = list.get(position);
+				dismiss();
+			}
+		});
+	}
+	
+	public void setOnItemClickListenerLocalDevice(final View et_ssid, final ArrayList<String> list) {
+		final EditText editText = (EditText) et_ssid;
+		wifiList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				editText.setText((CharSequence) list.get(position));
+				dismiss();
+			}
+		});
+	}
+	
+	public void setOnItemClickListenerLocalDevice(final ArrayList<HashMap<String, String>> list) {
+		wifiList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				//实时视频
+				Intent intent = new Intent(mContext, PlayerActivity.class);
+				intent.putExtra("deviceName", list.get(position).get("MAC"));
+				intent.putExtra("dealerName", list.get(position).get("dealerName"));
+				intent.putExtra("isLocalDevice", true);
+				intent.putExtra("localDeviceIPandPort", list.get(position).get("IP")+":"+list.get(position).get("Port"));
+				mContext.startActivity(intent);
 				dismiss();
 			}
 		});
