@@ -199,7 +199,7 @@ public class SetDateActivity extends Activity implements OnClickListener {
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateTerminalVideoFileList();
 			sendHandlerMsg(IS_REQUSTING);
-			sendHandlerMsg(REQUST_TIMEOUT, Value.requestTimeout);
+			sendHandlerMsg(REQUST_TIMEOUT, Value.REQ_TIME_10S);
 			HashMap<String, String> map = new HashMap<String, String>();
 			map.put("peerId", dealerName);
 			map.put("peerData", data);

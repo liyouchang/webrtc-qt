@@ -199,23 +199,50 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			}
 			
 			deviceList = new ArrayList<HashMap<String, String>>();
-			deviceList = xmlData.getOnlineList();
-			if (deviceList != null) {
-				listSize = deviceList.size();
-				deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
-				terminalListView.setAdapter(deviceAdapter);
-			
-				if (listSize == 0) {
-					noDeviceLayout.setVisibility(View.VISIBLE);
-					deviceList.clear();
-					deviceAdapter.notifyDataSetChanged();
-				} else {
-					noDeviceLayout.setVisibility(View.INVISIBLE);
-				}
-			} else {
-				listSize = 0;
-				noDeviceLayout.setVisibility(View.VISIBLE);
+			ArrayList<HashMap<String, String>> readList = xmlData.getOnlineList();
+			if (readList != null) {
+				deviceList = readList;
 			}
+			listSize = deviceList.size();
+			if (listSize == 0) {
+				deviceList.clear();
+				noDeviceLayout.setVisibility(View.VISIBLE);
+			} else {
+				noDeviceLayout.setVisibility(View.INVISIBLE);
+			}
+			deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+			terminalListView.setAdapter(deviceAdapter);
+		}
+	}
+	
+	/**
+	 * 改变ViewPage页和标题显示
+	 */
+	private void changeViewPage(int index) {
+		viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
+		viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
+		viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
+		
+		viewpage_image.setTextColor(getResources().getColorStateList(R.color.white));
+		viewpage_video.setTextColor(getResources().getColorStateList(R.color.white));
+		viewpage_terminal.setTextColor(getResources().getColorStateList(R.color.white));
+		
+		switch (index) {
+			case 0:
+				viewpage_image.setBackgroundResource(R.drawable.viewpage_selected);
+				viewpage_image.setTextColor(getResources().getColorStateList(R.color.orange));
+				mViewPager.setCurrentItem(0);
+				break;
+			case 1:
+				viewpage_video.setBackgroundResource(R.drawable.viewpage_selected);
+				viewpage_video.setTextColor(getResources().getColorStateList(R.color.orange));
+				mViewPager.setCurrentItem(1);
+				break;
+			case 2:
+				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_selected);
+				viewpage_terminal.setTextColor(getResources().getColorStateList(R.color.orange));
+				mViewPager.setCurrentItem(2);
+				break;
 		}
 	}
 	
@@ -223,23 +250,14 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
-			case R.id.tv_vp_image:
-				viewpage_image.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
-				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(0);
+			case R.id.tv_vp_image: 
+				changeViewPage(0); 
 				break;
 			case R.id.tv_vp_video:
-				viewpage_video.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
-				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(1);
+				changeViewPage(1);
 				break;
 			case R.id.tv_vp_terminal:
-				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
-				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(2);
+				changeViewPage(2);
 				break;
 		}
 	}
@@ -247,36 +265,15 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	@Override
 	public void onPageScrollStateChanged(int arg0) {
 		// TODO Auto-generated method stub
-		
 	}
 	@Override
 	public void onPageScrolled(int arg0, float arg1, int arg2) {
 		// TODO Auto-generated method stub
-		
 	}
 	@Override
 	public void onPageSelected(int arg0) {
 		// TODO Auto-generated method stub
-		switch (arg0) {
-			case 0:
-				viewpage_image.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
-				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(0);
-				break;
-			case 1:
-				viewpage_video.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
-				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(1);
-				break;
-			case 2:
-				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
-				viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(2);
-				break;
-		}
+		changeViewPage(arg0);
 	}
 	
 	/**

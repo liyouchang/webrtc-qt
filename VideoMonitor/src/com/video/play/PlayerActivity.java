@@ -182,7 +182,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			@Override
 			public boolean onDoubleTap(MotionEvent e) {
 				// TODO Auto-generated method stub
-				System.out.println("MyDebug: 【双击屏幕】");
 				return false;
 			}
 		});
@@ -436,12 +435,12 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
-			//关闭播放器
+			// 关闭播放器
 			case R.id.ib_player_back:
 				closePlayer();
 				finish();
 				break;
-			//截屏
+			// 截屏
 			case R.id.btn_player_capture:
 				if (videoView.captureVideo()) {
 					playMyMusic(R.raw.capture);
@@ -450,13 +449,13 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					toastNotify(mContext, "抓拍失败", Toast.LENGTH_SHORT);
 				}
 				break;
-			//录像
+			// 录像
 			case R.id.btn_player_record:
 				try {
 					if (!isRecordVideo) {
 						String videoName = videoView.captureThumbnails();
 						if (videoName != null) {
-							//开始录视频
+							// 开始录视频
 							isRecordVideo = true;
 							playMyMusic(R.raw.record);
 							showRecordPopupWindow();
@@ -484,7 +483,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 							toastNotify(mContext, "录像失败", Toast.LENGTH_SHORT);
 						}
 					} else {
-						//停止录视频
+						// 停止录视频
 						isRecordVideo = false;
 						hideRecordPopupWindow();
 						player_record.setBackgroundResource(R.drawable.player_record_xml);
@@ -495,21 +494,21 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					e.printStackTrace();
 				}
 				break;
-			//对讲
+			// 对讲
 			case R.id.btn_player_talkback:
 				if (Value.isSharedUser) {
 					toastNotify(mContext, "您无权使用对讲功能！", Toast.LENGTH_SHORT);
 				} else {
 					playMyMusic(R.raw.di);
 					if (isTalkEnable) {
-						//停止对讲
+						// 停止对讲
 						isTalkEnable =false;
 						player_talkback.setBackgroundResource(R.drawable.player_talkstop_xml);
 						if (talkThread != null) {
 							talkThread.stopTalkThread();
 						}
 					} else {
-						//开始对讲
+						// 开始对讲
 						isTalkEnable = true;
 						player_talkback.setBackgroundResource(R.drawable.player_talkback_xml);
 						talkThread = new TalkThread();
@@ -519,15 +518,15 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					}
 				}
 				break;
-			//声音
+			// 声音
 			case R.id.btn_player_sound:
 				if (isVoiceEnable) {
 					isVoiceEnable = false;
-					player_sound.setBackgroundResource(R.drawable.player_sound_disable_xml);
+					player_sound.setBackgroundResource(R.drawable.player_sound_disable);
 					audioThread.closeAudioTrackVolume();
 				} else {
 					isVoiceEnable = true;
-					player_sound.setBackgroundResource(R.drawable.player_sound_enable_xml);
+					player_sound.setBackgroundResource(R.drawable.player_sound_enable);
 					audioThread.openAudioTrackVolume();
 				}
 				break;
@@ -591,57 +590,61 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		// TODO Auto-generated method stub
 		boolean result = mGestureDetector.onTouchEvent(event);
 
-		if (!result) {
-			if (!Value.isSharedUser) {
-				switch (event.getAction()) {
-					case MotionEvent.ACTION_UP:
-						if (isPtzControling) {
-							//停止
+		if (!isLocalDevice) {
+			if (!result) {
+				if (!Value.isSharedUser) {
+					switch (event.getAction()) {
+						case MotionEvent.ACTION_UP:
+							if (isPtzControling) {
+								//停止
+								isPtzControling = false;
+								sendPtzControlOrder(PTZ_STOP);
+							}
+							break;
+						case MotionEvent.ACTION_DOWN:
 							isPtzControling = false;
-							sendPtzControlOrder(PTZ_STOP);
-						}
-						break;
-					case MotionEvent.ACTION_DOWN:
-						isPtzControling = false;
-						startTime = System.currentTimeMillis();
-						startPointX = event.getX();
-						startPointY = event.getY();
-						break;
-					case MotionEvent.ACTION_MOVE:
-						endTime = System.currentTimeMillis();
-						spaceTime = endTime - startTime;
-						if (!isPtzControling && (spaceTime > 200)) {
-							isPtzControling = true;
-							
-							endPointX = event.getX();
-							endPointY = event.getY();
-							spaceX = endPointX - startPointX;
-							spaceY = endPointY - startPointY;
-							
-							if (Math.abs(spaceX) >= Math.abs(spaceY)) {
-								if (spaceX < -1) {
-									//向左
-									sendPtzControlOrder(PTZ_LEFT);
-								} 
-								else if (spaceX > 1) {
-									//向右
-									sendPtzControlOrder(PTZ_RIGHT);
-								}
-							} else {
-								if (spaceY < -1) {
-									//向上
-									sendPtzControlOrder(PTZ_UP);
-								} 
-								else if (spaceY > 1) {
-									//向下
-									sendPtzControlOrder(PTZ_DOWN);
+							startTime = System.currentTimeMillis();
+							startPointX = event.getX();
+							startPointY = event.getY();
+							break;
+						case MotionEvent.ACTION_MOVE:
+							endTime = System.currentTimeMillis();
+							spaceTime = endTime - startTime;
+							if (!isPtzControling && (spaceTime > 200)) {
+								isPtzControling = true;
+								
+								endPointX = event.getX();
+								endPointY = event.getY();
+								spaceX = endPointX - startPointX;
+								spaceY = endPointY - startPointY;
+								
+								if (Math.abs(spaceX) >= Math.abs(spaceY)) {
+									if (spaceX < -1) {
+										//向左
+										sendPtzControlOrder(PTZ_LEFT);
+									} 
+									else if (spaceX > 1) {
+										//向右
+										sendPtzControlOrder(PTZ_RIGHT);
+									}
+								} else {
+									if (spaceY < -1) {
+										//向上
+										sendPtzControlOrder(PTZ_UP);
+									} 
+									else if (spaceY > 1) {
+										//向下
+										sendPtzControlOrder(PTZ_DOWN);
+									}
 								}
 							}
-						}
-						break;
+							break;
+					}
 				}
+				result = super.onTouchEvent(event);
 			}
-			result = super.onTouchEvent(event);
+		} else {
+			
 		}
 		return result;
 	}
@@ -792,6 +795,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						} else {
 							//【本地设备】
 							TunnelCommunication.getInstance().startLocalVideo(localDeviceIPandPort);
+							videoView.playVideo();
 						}
 						break;
 					case 1:

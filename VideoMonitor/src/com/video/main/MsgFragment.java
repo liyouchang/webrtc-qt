@@ -447,7 +447,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqAlarmJson(0, Value.requstAlarmCount);
 			sendHandlerMsg(IS_REQUESTING);
-			sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+			sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
 		} else {
 			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
@@ -467,7 +467,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 				mPullToRefreshView.onFooterRefreshComplete();
 				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateReqAlarmJson(xmlData.getMinUpdateID(), 5);
-				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
 			}
 		}, 1000);
@@ -492,7 +492,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 				
 				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateReqAlarmJson(0, Value.requstAlarmCount);
-				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
 			}
 		}, 1000);
@@ -519,7 +519,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			String sendData = generateMarkThisItemJson(Integer.parseInt(mMsgID));
 			if (sendData != null) {
 				Handler sendHandler = ZmqThread.zmqThreadHandler;
-				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 			}
 		}
@@ -575,12 +575,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 				switch (position) {
 					case 0: //删除该条报警
 						sendData = generateDeleteThisItemJson(Integer.parseInt(mMsgID));
-						sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 						break;
 					case 1: //删除当前全部报警
 						sendData = generateDeleteThisListJson();
-						sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 						break;
 					case 2: //标记该条报警
@@ -588,7 +588,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 						if (sendData == null) {
 							Toast.makeText(mActivity, "该条报警已标记！", Toast.LENGTH_SHORT).show();
 						} else {
-							sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+							sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 							sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 						}
 						break;
@@ -597,7 +597,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 						if (sendData == null) {
 							Toast.makeText(mActivity, "当前全部报警已标记！", Toast.LENGTH_SHORT).show();
 						} else {
-							sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+							sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 							sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
 						}
 						break;

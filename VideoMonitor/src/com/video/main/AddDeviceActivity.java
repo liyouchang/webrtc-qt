@@ -262,7 +262,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateAddDeviceJson(userName, termMac, termName);
 				sendHandlerMsg(IS_ADDING);
-				sendHandlerMsg(ADD_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(ADD_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
@@ -396,7 +396,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 						TunnelCommunication.getInstance().searchLocalDevice();
 						mDialog = Utils.createLoadingDialog(mContext, "正在搜索设备...");
 						mDialog.show();
-						sendHandlerMsg(SEARCH_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(SEARCH_TIMEOUT, Value.REQ_TIME_10S);
 						break;
 				}
 				if (mPopupWindow.isShowing()) {

@@ -258,7 +258,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateRegisterJson(userName, userPwd, userEmail);
 				sendHandlerMsg(IS_REGISTERING);
-				sendHandlerMsg(REGISTER_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(REGISTER_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {

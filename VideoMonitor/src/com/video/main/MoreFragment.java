@@ -220,7 +220,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				TunnelCommunication.getInstance().searchLocalDevice();
 				mDialog = Utils.createLoadingDialog(mActivity, "正在搜索设备...");
 				mDialog.show();
-				sendHandlerMsg(SEARCH_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(SEARCH_TIMEOUT, Value.REQ_TIME_10S);
 				break;
 			case R.id.btn_wifi:
 				startActivity(new Intent(mActivity, WiFiActivity.class));

@@ -215,7 +215,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateFindPwdJson(userName, userEmail);
 				sendHandlerMsg(IS_SUBMITTING);
-				sendHandlerMsg(SUBMIT_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(SUBMIT_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {

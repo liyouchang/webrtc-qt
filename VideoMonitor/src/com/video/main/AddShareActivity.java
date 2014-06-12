@@ -341,7 +341,7 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateAddShareTermJson(mDeviceId);
 				sendHandlerMsg(IS_ADDING);
-				sendHandlerMsg(ADD_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(ADD_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
@@ -352,8 +352,32 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 	public void reqMACShareListEvent() {
 		Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 		String data = generateReqMacShareListJson(mDeviceId);
-		sendHandlerMsg(REQ_TIMEOUT, Value.requestTimeout);
+		sendHandlerMsg(REQ_TIMEOUT, Value.REQ_TIME_10S);
 		sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+	}
+	
+	/**
+	 * 改变ViewPage页和标题显示
+	 */
+	private void changeViewPage(int index) {
+		viewpage_device.setBackgroundResource(R.drawable.viewpage_unselected);
+		viewpage_user.setBackgroundResource(R.drawable.viewpage_unselected);
+		
+		viewpage_device.setTextColor(getResources().getColorStateList(R.color.white));
+		viewpage_user.setTextColor(getResources().getColorStateList(R.color.white));
+		
+		switch (index) {
+			case 0:
+				viewpage_device.setBackgroundResource(R.drawable.viewpage_selected);
+				viewpage_device.setTextColor(getResources().getColorStateList(R.color.orange));
+				mViewPager.setCurrentItem(0);
+				break;
+			case 1:
+				viewpage_user.setBackgroundResource(R.drawable.viewpage_selected);
+				viewpage_user.setTextColor(getResources().getColorStateList(R.color.orange));
+				mViewPager.setCurrentItem(1);
+				break;
+		}
 	}
 	
 	@Override
@@ -367,16 +391,7 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 	@Override
 	public void onPageSelected(int arg0) {
 		// TODO Auto-generated method stub
-		switch (arg0) {
-			case 0:
-				viewpage_device.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_user.setBackgroundResource(R.drawable.viewpage_unselected);
-				break;
-			case 1:
-				viewpage_user.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_device.setBackgroundResource(R.drawable.viewpage_unselected);
-				break;
-		}
+		changeViewPage(arg0);
 	}
 	
 	@Override
@@ -390,14 +405,10 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 				et_name.setText("");
 				break;
 			case R.id.tv_vp_share_device:
-				viewpage_device.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_user.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(0);
+				changeViewPage(0);
 				break;
 			case R.id.tv_vp_share_user:
-				viewpage_user.setBackgroundResource(R.drawable.viewpage_selected);
-				viewpage_device.setBackgroundResource(R.drawable.viewpage_unselected);
-				mViewPager.setCurrentItem(1);
+				changeViewPage(1);
 				break;
 		}
 	}
@@ -521,7 +532,7 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 						Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 						String data = generateDelShareTermItemJson(userListName, mDeviceId);
 						sendHandlerMsg(IS_DELETING);
-						sendHandlerMsg(DELETE_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(DELETE_TIMEOUT, Value.REQ_TIME_10S);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 						break;
 				}

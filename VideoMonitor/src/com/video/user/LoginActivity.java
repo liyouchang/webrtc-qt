@@ -202,11 +202,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 					ZmqCtrl.getInstance().exit();
 			    	stopService(new Intent(mContext, BackstageService.class));
 					Value.resetValues();
-					sendHandlerMsg(LOGIN_AGAIN, 2000);
+					sendHandlerMsg(LOGIN_AGAIN, 3000);
 					break;
 				case LOGIN_AGAIN:
 					ZmqCtrl.getInstance().init();
-					if (loginTimes >= 3) {
+					if (loginTimes >= 4) {
 						loginTimes = 0;
 						if (mDialog != null) {
 							mDialog.dismiss();
@@ -216,7 +216,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					} else {
 						Handler sendHandler = ZmqThread.zmqThreadHandler;
 						String data = generateLoginJson(userName, userPwd);
-						sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 					}
 					break;
@@ -302,7 +302,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateLoginJson(userName, userPwd);
 				sendHandlerMsg(IS_LOGINNING);
-				sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {

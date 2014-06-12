@@ -117,7 +117,7 @@ public class MainActivity extends FragmentActivity {
 								Handler sendHandler = ZmqThread.zmqThreadHandler;
 								String data = generateLoginJson(userName, userPwd);
 								sendHandlerMsg(IS_LOGINNING);
-								handler.sendEmptyMessageDelayed(LOGIN_TIMEOUT, Value.requestTimeout);
+								handler.sendEmptyMessageDelayed(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 								sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 							} else {
 								//无可用网络
@@ -145,7 +145,7 @@ public class MainActivity extends FragmentActivity {
 	 * 设置全屏
 	 */
 	private void setFullScreen() {
-		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 	}
 	
 	/**
@@ -418,12 +418,12 @@ public class MainActivity extends FragmentActivity {
 					ZmqCtrl.getInstance().exit();
 			    	stopService(new Intent(mContext, BackstageService.class));
 					Value.resetValues();
-					sendHandlerMsg(LOGIN_AGAIN, 2000);
+					sendHandlerMsg(LOGIN_AGAIN, 3000);
 					break;
 				//重新登录
 				case LOGIN_AGAIN:
 					ZmqCtrl.getInstance().init();
-					if (loginTimes >= 3) {
+					if (loginTimes >= 4) {
 						loginTimes = 0;
 						if (mDialog != null) {
 							mDialog.dismiss();
@@ -435,7 +435,7 @@ public class MainActivity extends FragmentActivity {
 					} else {
 						Handler sendHandler = ZmqThread.zmqThreadHandler;
 						String data = generateLoginJson(userName, userPwd);
-						sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 					}
 					break;

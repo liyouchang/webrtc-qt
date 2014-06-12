@@ -28,7 +28,7 @@
             android:background="@drawable/viewpage_unselected"
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/local_video"
-            android:textColor="@color/orange"
+            android:textColor="@color/white"
             android:textSize="16dp" />
         
         <TextView
@@ -39,7 +39,7 @@
             android:background="@drawable/viewpage_unselected"
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/terminal_video"
-            android:textColor="@color/orange"
+            android:textColor="@color/white"
             android:textSize="16dp" />
     </LinearLayout>
     

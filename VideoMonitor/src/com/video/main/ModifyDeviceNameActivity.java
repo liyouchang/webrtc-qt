@@ -192,7 +192,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateModifyTermNameJson();
 				sendHandlerMsg(IS_REQUESTING);
-				sendHandlerMsg(REQUEST_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
