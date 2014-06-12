@@ -61,7 +61,9 @@ void CameraClient::Reconnect()
     std::string oldAddr = dealer_->addr();
     LOG(INFO)<<"CameraClient::Reconnect---with id "<<strDealerId;
     dealer_->terminate();
+    LOG(INFO)<<"CameraClient::Reconnect--1";
     dealer_->initialize(strDealerId,oldAddr);
+    LOG(INFO)<<"CameraClient::Reconnect--2";
     this->Login();
 }
 

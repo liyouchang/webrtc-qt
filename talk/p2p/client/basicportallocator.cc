@@ -449,7 +449,7 @@ void BasicPortAllocatorSession::DoAllocate() {
         // New AllocationSequence would have nothing to do, so don't make it.
         continue;
       }
-        //lht
+      // lht add to avoid the 192.168.254.230 use the stun port
 //      if(networks[i]->prefix().ToString().compare("192.168.254.0")==0){
 //          LOG(WARNING)<<"No 192.168.254.230 should be work;";
 //          continue;
