@@ -23,7 +23,7 @@ TunnelClientUI::TunnelClientUI(QWidget *parent) :
 {
     ui->setupUi(this);
 
-
+    QString configStr = "";
     this->ui->playPlugin->Initialize("tcp://192.168.0.185:5555");
 
     //connection_ = new   PeerConnectionClientDealer();

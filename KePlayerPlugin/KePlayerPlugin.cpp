@@ -83,6 +83,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::Initialize(QString routerUrl)
 {
+
     if(is_inited){
         return 10002;
     }
