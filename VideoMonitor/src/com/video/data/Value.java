@@ -45,7 +45,8 @@ public class Value {
 	/**
 	 * 超时时间
 	 */
-	public final static int requestTimeout = 10000;
+	public final static int REQ_TIME_6S = 6000;
+	public final static int REQ_TIME_10S = 10000;
 	
 	/**
 	 * 是否需要请求报警记录的标志

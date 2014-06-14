@@ -252,7 +252,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 				Handler sendHandler = HandlerApplication.getInstance().getMyHandler();
 				String data = generateModifyPwdJson(userName, userOldPwd, userNewPwd);
 				sendHandlerMsg(IS_MODIFYING);
-				sendHandlerMsg(MODIFY_TIMEOUT, Value.requestTimeout);
+				sendHandlerMsg(MODIFY_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {

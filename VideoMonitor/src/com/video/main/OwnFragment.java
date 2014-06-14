@@ -516,7 +516,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateReqTermListJson();
 			sendHandlerMsg(IS_REQUESTING, "正在请求终端列表...");
-			sendHandlerMsg(REQUEST_TIMEOUT, "请求终端列表失败，网络超时！", Value.requestTimeout);
+			sendHandlerMsg(REQUEST_TIMEOUT, "请求终端列表失败，网络超时！", Value.REQ_TIME_10S);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		} else {
 			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
@@ -531,7 +531,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			Handler sendHandler = ZmqThread.zmqThreadHandler;
 			String data = generateDelTermItemJson(id);
 			sendHandlerMsg(IS_REQUESTING, "正在删除终端绑定...");
-			sendHandlerMsg(REQUEST_TIMEOUT, "删除终端绑定失败，网络超时！", Value.requestTimeout);
+			sendHandlerMsg(REQUEST_TIMEOUT, "删除终端绑定失败，网络超时！", Value.REQ_TIME_10S);
 			sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 		} else {
 			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
@@ -716,7 +716,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 								Handler sendHandler = ZmqThread.zmqThreadHandler;
 								String data = generateDeleteImageJson(mDeviceId);
 								sendHandlerMsg(IS_REQUESTING, "正在删除图片...");
-								sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.requestTimeout);
+								sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
 								sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 							}
 						});

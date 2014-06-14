@@ -8,7 +8,6 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.video.R;
 import com.video.data.Value;
@@ -61,16 +60,25 @@ public class TunnelCommunication {
 	 * 初始化通道
 	 */
 	public int tunnelInitialize(String classPath) {
-		Log.i("tag","tunnelInitialize start");
-		naInitialize(classPath);
-		Log.i("tag","tunnelInitialize end");
-		return 0;
+		if (videoDataCache == null) {
+			videoDataCache = new VideoCache(1024*1024*3);
+		}
+		if (audioDataCache == null) {
+			audioDataCache = new AudioCache(1024*1024);
+		}
+		return naInitialize(classPath);
 	}
 
 	/**
 	 * 结束通道
 	 */
 	public int tunnelTerminate() {
+		if (videoDataCache != null) {
+			videoDataCache.clearBuffer();
+		}
+		if (audioDataCache != null) {
+			audioDataCache.clearBuffer();
+		}
 		return naTerminate();
 	}
 	
@@ -116,12 +124,6 @@ public class TunnelCommunication {
 	 * 打开通道
 	 */
 	public int openTunnel(String peerId) {
-		if (videoDataCache == null) {
-			videoDataCache = new VideoCache(1024*1024*3);
-		}
-		if (audioDataCache == null) {
-			audioDataCache = new AudioCache(1024*1024);
-		}
 		return naOpenTunnel(peerId);
 	}
 	
@@ -129,12 +131,6 @@ public class TunnelCommunication {
 	 * 关闭通道
 	 */
 	public int closeTunnel(String peerId) {
-		if (videoDataCache != null) {
-			videoDataCache.clearBuffer();
-		}
-		if (audioDataCache != null) {
-			audioDataCache.clearBuffer();
-		} 
 		return naCloseTunnel(peerId);
 	}
 	

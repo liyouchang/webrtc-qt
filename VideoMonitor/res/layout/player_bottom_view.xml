@@ -46,7 +46,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/btn_player_talkback"
-        android:background="@drawable/player_sound_enable_xml"
+        android:background="@drawable/player_sound_enable"
         android:contentDescription="@null" />
 
     <Button

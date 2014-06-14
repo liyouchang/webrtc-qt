@@ -67,7 +67,9 @@ private:
     int audio_handle_;
     kaerp2p::VideoInfo video1_info_;
     kaerp2p::VideoInfo video2_info_;
-    int video_clarity_;
+    int video1_clarity_;
+    int video2_clarity_;
+
     char media_buffer_[MEDIA_BUFFER_LENGTH];
     int oldNetType;
     int oldIp;

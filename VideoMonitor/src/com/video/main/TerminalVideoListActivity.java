@@ -144,7 +144,7 @@ public class TerminalVideoListActivity extends Activity implements
 	private void requestTerminalVideoFile(int offset) {
 		Handler sendHandler = ZmqThread.zmqThreadHandler;
 		String data = generateTerminalVideoFileList(offset);
-		sendHandlerMsg(REQUST_TIMEOUT, Value.requestTimeout);
+		sendHandlerMsg(REQUST_TIMEOUT, Value.REQ_TIME_10S);
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", dealerName);
 		map.put("peerData", data);

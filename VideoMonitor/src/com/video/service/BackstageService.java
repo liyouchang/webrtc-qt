@@ -21,7 +21,6 @@ import com.video.play.TunnelCommunication;
 import com.video.socket.HandlerApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqThread;
-import com.video.user.LoginActivity;
 import com.video.utils.Utils;
 
 public class BackstageService extends Service {
@@ -221,26 +220,23 @@ public class BackstageService extends Service {
 					}
 					if (!Value.isLoginSuccess) {
 						loginTimes ++;
-						
 						//超时之后关闭服务，断开连接，再重启服务
-						stopSelf();
-						sendHandlerMsg(LOGIN_AGAIN, 2000);
+						ZmqCtrl.getInstance().exit();
+				    	stopService(new Intent(BackstageService.this, BackstageService.class));
+						Value.resetValues();
+						sendHandlerMsg(LOGIN_AGAIN, 3000);
 					}
 					break;
 				//重新登录
 				case LOGIN_AGAIN:
 					ZmqCtrl.getInstance().init();
-					if (loginTimes >= 3) {
+					if (loginTimes >= 4) {
 						loginTimes = 0;
-						if (Value.beatHeartFailFlag) {
-							Intent intent = new Intent(BackstageService.this, LoginActivity.class);
-							intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-							startActivity(intent);
-						}
 					} else {
+						Value.beatHeartFailFlag = true;
 						Handler sendHandler = ZmqThread.zmqThreadHandler;
 						String data = generateLoginJson();
-						sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
+						sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 					}
 					break;
@@ -269,11 +265,11 @@ public class BackstageService extends Service {
 					String name = info.getTypeName();
 					System.out.println("MyDebug: 【当前网络名称】" + name);
 					
-					//重新登录
+					// 重新登录
 					Value.beatHeartFailFlag = true;
 					Handler sendHandler = ZmqThread.zmqThreadHandler;
 					String data = generateLoginJson();
-					sendHandlerMsg(LOGIN_TIMEOUT, Value.requestTimeout);
+					sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 				} 
 				else if (Value.isLoginSuccess) {

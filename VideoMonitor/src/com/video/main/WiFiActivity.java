@@ -286,7 +286,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		Handler sendHandler = ZmqThread.zmqThreadHandler;
 		String data = generateGetWiFiInfoJson();
 		sendHandlerMsg(IS_REQUSTING);
-		sendHandlerMsg(REQUST_TIMEOUT, Value.requestTimeout);
+		sendHandlerMsg(REQUST_TIMEOUT, Value.REQ_TIME_10S);
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", onlineDealerName);
 		map.put("peerData", data);
@@ -301,7 +301,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		Handler sendHandler = ZmqThread.zmqThreadHandler;
 		String data = generateSetTermWiFiInfoJson(key);
 		sendHandlerMsg(IS_SETTING);
-		sendHandlerMsg(SET_TIMEOUT, Value.requestTimeout);
+		sendHandlerMsg(SET_TIMEOUT, Value.REQ_TIME_10S);
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", onlineDealerName);
 		map.put("peerData", data);

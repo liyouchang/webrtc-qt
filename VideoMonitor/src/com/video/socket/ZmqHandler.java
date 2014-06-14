@@ -255,7 +255,7 @@ public class ZmqHandler extends Handler {
 		try {
 			obj = new JSONObject(recvData);
 			String type = obj.getString("type");
-			//报警消息推送
+			// 报警消息推送
 			if (type.equals("Backstage_message")) {
 				Value.isNeedReqAlarmListFlag = true;
 				Value.requstAlarmCount++;
@@ -268,7 +268,7 @@ public class ZmqHandler extends Handler {
 				preferData.writeData("AlarmCount", alarmCount);
 				MainActivity.mainHandler.obtainMessage(0, alarmCount, 0).sendToTarget();
 			}
-			//终端上下线消息推送
+			// 终端上下线消息推送
 			else if (type.equals("Backstage_TermActive")) {
 				HashMap<String, String> item = new HashMap<String, String>();
 			    item.put("deviceID", obj.getString("MAC"));
@@ -276,7 +276,7 @@ public class ZmqHandler extends Handler {
 				item.put("dealerName", obj.getString("DealerName"));
 				OwnFragment.ownHandler.obtainMessage(0, item).sendToTarget();
 			}
-			//客户端和服务器的心跳
+			// 客户端和服务器的心跳
 			else if (type.equals("Client_BeatHeart")) {
 				int resultCode = obj.getInt("Result");
 				if (resultCode != 0) {
@@ -288,7 +288,7 @@ public class ZmqHandler extends Handler {
 					System.out.println("MyDebug: 【正在重新登录...】");
 				}
 			}
-			//重新登录
+			// 重新登录
 			else if ((Value.beatHeartFailFlag) && (type.equals("Client_Login"))) {
 				int resultCode = obj.getInt("Result");
 				if (resultCode == 0) {
@@ -302,7 +302,7 @@ public class ZmqHandler extends Handler {
 					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 				}
 			}
-			//请求报警数据
+			// 请求报警数据
 			else if ((Value.ownFragmentRequestAlarmFlag) && (type.equals("Client_ReqAlarm"))) {
 				int resultCode = obj.getInt("Result");
 				if (resultCode == 0) {
@@ -322,7 +322,7 @@ public class ZmqHandler extends Handler {
 						xmlData.deleteAllItem();
 					}
 					
-					//更新未读报警消息的显示
+					// 更新未读报警消息的显示
 					PreferData preferData = new PreferData(HandlerApplication.getInstance());
 					preferData.writeData("AlarmCount", unreadAlarmCount);
 					
@@ -345,6 +345,10 @@ public class ZmqHandler extends Handler {
 					//登录
 					else if (type.equals("Client_Login")) {
 						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							Value.isLoginSuccess = true;
+							Value.beatHeartFailFlag = false;
+						}
 						mHandler.obtainMessage(R.id.login_id, resultCode, 0).sendToTarget();
 					}
 					//重置密码

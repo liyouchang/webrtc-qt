@@ -28,10 +28,16 @@ public:
     enum {
         MSG_CONNECT_TIMEOUT
     };
+    enum TunnelState {
+        kConnecting,
+        kEstablished,
+        kDisconnecting,
+        kClosed
+    };
 
     P2PConductor();
     ~P2PConductor();
-    virtual int ConnectToPeer(const std::string & peer_id);
+    virtual bool ConnectToPeer(const std::string & peer_id);
     virtual void DisconnectFromCurrentPeer();
 
     virtual StreamProcess * GetStreamProcess();
@@ -63,13 +69,14 @@ protected:
     void DeletePeerConnection();
     void OnTunnelEstablished();
     void OnTunnelTerminate(StreamProcess * stream);
-
+    void OnMessageFromPeer_s(const std::string &peerId,
+                             const std::string &message);
 private:
     talk_base::scoped_refptr<PeerTunnelInterface> peer_connection_;
     talk_base::Thread * stream_thread_;
     talk_base::Thread * signal_thread_;
     talk_base::scoped_ptr<StreamProcess> stream_process_;
-    bool tunnel_established_;
+    TunnelState tunnelState;
     //maybe conflict
     std::string peer_id_;
 public :

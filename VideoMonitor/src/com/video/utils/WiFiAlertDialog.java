@@ -90,7 +90,7 @@ public class WiFiAlertDialog {
 				//实时视频
 				Intent intent = new Intent(mContext, PlayerActivity.class);
 				intent.putExtra("deviceName", list.get(position).get("MAC"));
-				intent.putExtra("dealerName", list.get(position).get("dealerName"));
+				intent.putExtra("dealerName", list.get(position).get("MAC"));
 				intent.putExtra("isLocalDevice", true);
 				intent.putExtra("localDeviceIPandPort", list.get(position).get("IP")+":"+list.get(position).get("Port"));
 				mContext.startActivity(intent);
