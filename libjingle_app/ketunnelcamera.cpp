@@ -268,6 +268,8 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
 {
     KeTunnelCamera * camera = static_cast<KeTunnelCamera *>(container_);
     camera->GetCameraVideoInfo(video,&this->videoInfo_);
+    LOG(INFO)<<"KeMessageProcessCamera::ConnectMedia---frameResolution="<<
+               this->videoInfo_.frameResolution;
     if(video == 0){//stop
         camera->SignalVideoData1.disconnect(this);
         camera->SignalVideoData2.disconnect(this);

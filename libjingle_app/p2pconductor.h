@@ -31,7 +31,7 @@ public:
 
     P2PConductor();
     ~P2PConductor();
-    virtual int ConnectToPeer(const std::string & peer_id);
+    virtual bool ConnectToPeer(const std::string & peer_id);
     virtual void DisconnectFromCurrentPeer();
 
     virtual StreamProcess * GetStreamProcess();

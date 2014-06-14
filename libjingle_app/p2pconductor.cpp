@@ -38,9 +38,8 @@ protected:
 };
 
 P2PConductor::P2PConductor():
-    stream_thread_(NULL),signal_thread_(NULL)
+    stream_thread_(NULL),signal_thread_(NULL),tunnel_established_(false)
 {
-    tunnel_established_ = false;
 }
 
 P2PConductor::~P2PConductor()
@@ -52,11 +51,16 @@ P2PConductor::~P2PConductor()
 }
 
 
-int P2PConductor::ConnectToPeer(const std::string &peer_id)
+bool P2PConductor::ConnectToPeer(const std::string &peer_id)
 {
+    if(tunnel_established_){
+        LOG(LS_INFO) <<"peer connection already estatblished";
+
+        return true;
+    }
     if (peer_connection_.get()) {
-        LOG(LS_INFO) <<"peer connection all ready connect";
-        return -2;
+        LOG(LS_INFO) <<"peer connection already connect";
+        return false;
     }
     if (InitializePeerConnection()) {
         peer_id_ = peer_id;
@@ -64,9 +68,9 @@ int P2PConductor::ConnectToPeer(const std::string &peer_id)
         peer_connection_->CreateOffer(this);
     } else {
         LOG(LS_INFO) <<"initialize connection error";
-        return -3;
+        return false;
     }
-    return 0;
+    return true;
 }
 
 void P2PConductor::DisconnectFromCurrentPeer()
@@ -185,6 +189,7 @@ bool P2PConductor::InitializePeerConnection()
 void P2PConductor::DeletePeerConnection()
 {
     LOG(INFO) << "P2PConductor::DeletePeerConnection";
+    signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     //when close peer_connection the session will terminate and destroy the channels
     //the channel destroy will make the StreamProcess clean up
     peer_connection_->Close();
