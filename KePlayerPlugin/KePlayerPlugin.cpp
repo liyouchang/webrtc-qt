@@ -85,11 +85,11 @@ int KePlayerPlugin::Initialize(QString routerUrl)
 {
 
     if(is_inited){
-        return 10002;
+        return KE_SUCCESS;
     }
-    int ret = connection_->Connect(routerUrl.toStdString(),"");
-    if(ret != 0){
-        return ret;
+    if(!connection_->Connect(routerUrl.toStdString(),"")){
+        qWarning()<<"KePlayerPlugin::Initialize---connect error";
+        return KE_FAILED;
     }
     tunnel_->Init(connection_.get());
     QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvVideoData,

@@ -185,6 +185,7 @@ bool P2PConductor::InitializePeerConnection()
 void P2PConductor::DeletePeerConnection()
 {
     LOG(INFO) << "P2PConductor::DeletePeerConnection";
+    signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     //when close peer_connection the session will terminate and destroy the channels
     //the channel destroy will make the StreamProcess clean up
     peer_connection_->Close();
