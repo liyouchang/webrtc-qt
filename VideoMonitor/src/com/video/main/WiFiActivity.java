@@ -9,8 +9,6 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,7 +24,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,8 +45,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	public static String onlineDealerName = "";
 	public static HashMap<String, Object> selectedWiFi = null;
 	
-	private RelativeLayout rl_wifi_name;
-	private EditText et_wifi_name;
+	private Button btn_wifi_name;
 	private EditText et_wifi_pwd;
 	private Button button_delete_wifi_password;
 	private Dialog mDialog = null;
@@ -76,25 +72,15 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		button_wifi_term_select = (Button) super.findViewById(R.id.btn_wifi_term_list);
 		button_wifi_term_select.setOnClickListener(this);
 		
-		rl_wifi_name = (RelativeLayout) this.findViewById(R.id.rl_wifi_name);
-		rl_wifi_name.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onlineTermList = xmlData.getOnlineList();
-				if (onlineTermList == null) {
-					Toast.makeText(mContext, "没有在线设备，无法请求WiFi列表！ ", Toast.LENGTH_SHORT).show();
-				} else {
-					getWiFiListInfoEvent();
-				}
-			}
-		});
+		btn_wifi_name = (Button) this.findViewById(R.id.btn_wifi_name);
+		btn_wifi_name.setOnClickListener(this);
 		
-		et_wifi_name = (EditText)super.findViewById(R.id.et_wifi_name);
+		btn_wifi_name = (Button) super.findViewById(R.id.btn_wifi_name);
 		
 		button_delete_wifi_password = (Button) this.findViewById(R.id.btn_wifi_password_del);
 		button_delete_wifi_password.setOnClickListener(this);
 		
-		et_wifi_pwd = (EditText)super.findViewById(R.id.et_wifi_password);
+		et_wifi_pwd = (EditText) super.findViewById(R.id.et_wifi_password);
 		et_wifi_pwd.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -129,16 +115,6 @@ public class WiFiActivity extends Activity implements OnClickListener {
 			button_wifi_term_select.setText((CharSequence) onlineTermList.get(0).get("deviceName"));
 			onlineDealerName = ""+onlineTermList.get(0).get("dealerName");
 		}
-		
-		WifiManager wifiManager = (WifiManager) this.getSystemService(WIFI_SERVICE);
-		WifiInfo wifiInfo = wifiManager.getConnectionInfo();
-		if (wifiInfo.getBSSID() != null) {
-			String ssid = wifiInfo.getSSID();
-			if (ssid != null) {
-				ssid = ssid.replace("\"", "");
-				et_wifi_name.setText(ssid);
-			}
-		}
 	}
 	
 	/**
@@ -171,14 +147,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 			jsonObj.put("command", "set_wifi");
 			JSONObject subObj = new JSONObject();
 				subObj.put("enable", 1); //1:打开WiFi  0:关闭WiFi
-				if (selectedWiFi == null) {
-					String wifiSSID = et_wifi_name.getText().toString().trim();
-					subObj.put("ssid", wifiSSID);
-					subObj.put("key", key);
-					subObj.put("auth", 0);
-					subObj.put("enc", 0);
-					subObj.put("mode", 1);
-				} else {
+				if (selectedWiFi != null) {
 					subObj.put("ssid", selectedWiFi.get("WiFiSSID"));
 					subObj.put("key", key);
 					subObj.put("auth", selectedWiFi.get("WiFAuth"));
@@ -291,7 +260,6 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		map.put("peerId", onlineDealerName);
 		map.put("peerData", data);
 		sendHandlerMsg(sendHandler, R.id.send_to_peer_id, map);
-		System.out.println("MyDebug: requst dealer name: "+onlineDealerName);
 	}
 	
 	/**
@@ -306,7 +274,6 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		map.put("peerId", onlineDealerName);
 		map.put("peerData", data);
 		sendHandlerMsg(sendHandler, R.id.send_to_peer_id, map);
-		System.out.println("MyDebug: requst dealer name: "+onlineDealerName);
 	}
 	
 	/**
@@ -337,7 +304,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		wifiDialog.setTitle("WiFi列表");
 		WiFiAdapter adapter = new WiFiAdapter(mContext, list);
 		wifiDialog.setAdapter(adapter);
-		wifiDialog.setOnItemClickListenerEditText(et_wifi_name, list);
+		wifiDialog.setOnItemClickListenerWiFiButton(btn_wifi_name, list);
 	}
 	
 	/**
@@ -373,7 +340,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 			case R.id.btn_wifi_term_list:
 				onlineTermList = xmlData.getOnlineList();
 				if (onlineTermList == null) {
-					Toast.makeText(mContext, "没有在线设备！ ", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "没有在线设备 ", Toast.LENGTH_SHORT).show();
 				} else {
 					showOnlineTermList();
 					System.out.println("MyDebug: dealerName："+onlineDealerName);
@@ -382,12 +349,23 @@ public class WiFiActivity extends Activity implements OnClickListener {
 			case R.id.btn_wifi_password_del:
 				et_wifi_pwd.setText("");	
 				break;
+			case R.id.btn_wifi_name:
+				onlineTermList = xmlData.getOnlineList();
+				if (onlineTermList == null) {
+					Toast.makeText(mContext, "没有在线设备，无法请求WiFi列表！ ", Toast.LENGTH_SHORT).show();
+				} else {
+					getWiFiListInfoEvent();
+				}
+				break;
 			case R.id.btn_wifi_submit:
 				if (onlineTermList == null) {
-					Toast.makeText(mContext, "设备不在线，无法配置网络！ ", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "设备不在线，无法配置网络 ", Toast.LENGTH_SHORT).show();
 				} else {
 					String pwd = et_wifi_pwd.getText().toString().trim();
-					if (pwd.length() == 0) {
+					if (selectedWiFi == null) {
+						Toast.makeText(mContext, "请先搜索WiFi，再配置", Toast.LENGTH_SHORT).show();
+					}
+					else if (pwd.length() == 0) {
 						showSetTermWiFiTip();
 					} else {
 						setTermWiFiInfoEvent(pwd);
@@ -397,6 +375,13 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		}
 	}
 	
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		selectedWiFi = null;
+	}
+
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub

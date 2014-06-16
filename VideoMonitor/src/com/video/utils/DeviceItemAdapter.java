@@ -11,6 +11,9 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
@@ -79,7 +82,7 @@ public class DeviceItemAdapter extends BaseAdapter {
 			AsyncImageTask task = new AsyncImageTask(holder.device_bg, path);
 			task.execute();
 		} else {
-			holder.device_bg.setBackgroundResource(R.drawable.device_item_view_bg);
+			holder.device_bg.setBackgroundResource(R.drawable.device_item_bg);
 		}
 		boolean termState = Utils.getOnlineState(list.get(position).get("isOnline"));
 		if (termState) {
@@ -201,10 +204,10 @@ public class DeviceItemAdapter extends BaseAdapter {
 		@Override
 		protected String doInBackground(String... params) {
 			try {
-				return getCacheImageUri(imagePath, thumbnailsFile);
+				return getCacheImageLocalPath(imagePath, thumbnailsFile);
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("MyDebug: doInBackground()异常！");
+				System.out.println("MyDebug: getCacheImageLocalPath()异常！");
 			}
 			return null;
 		}
@@ -214,16 +217,30 @@ public class DeviceItemAdapter extends BaseAdapter {
 		protected void onPostExecute(String path) {
 			super.onPostExecute(path);
 			if (deviceBg != null && path != null) {
-				Drawable d = Drawable.createFromPath(path);
-				deviceBg.setBackgroundDrawable(d);
+				BitmapFactory.Options opts = new BitmapFactory.Options();
+				opts.inJustDecodeBounds = true;
+				BitmapFactory.decodeFile(path, opts);
+				opts.inJustDecodeBounds = false;
+				opts.inSampleSize = Utils.computeSampleSize(opts, -1, 128*128);
+				try {
+					Bitmap bm = BitmapFactory.decodeFile(path, opts);
+					Drawable drawable =new BitmapDrawable(bm);
+					deviceBg.setBackgroundDrawable(drawable);
+				} catch (OutOfMemoryError e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 	
 	/**
-	 * 选择从本地或网上加载图片
+	 * 获得图片缓存的本地路径
+	 * @param path 网络上图片的路径
+	 * @param cache 本地缓存文件夹
+	 * @return 返回缓存的本地路径
+	 * @throws Exception 
 	 */
-	public String getCacheImageUri(String path, File cache) throws Exception {
+	public String getCacheImageLocalPath(String path, File cache) throws Exception {
 		String name = path.substring(path.lastIndexOf("/")+1);
 		File file = new File(cache, name);
 		if (file.exists()) {

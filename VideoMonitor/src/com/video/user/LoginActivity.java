@@ -144,7 +144,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private void initData() {
 		mContext = LoginActivity.this;
 		ZmqHandler.mHandler = handler;
-		preferData = new PreferData(mContext);
+		if (preferData == null) {
+			preferData = new PreferData(mContext);
+		}
 		
 		if (preferData.isExist("AutoLogin")) {
 			isAutoLogin = preferData.readBoolean("AutoLogin");
@@ -270,6 +272,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 		@Override
 		public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 			// TODO Auto-generated method stub
+			if (preferData == null) {
+				preferData = new PreferData(mContext);
+			}
 			preferData.writeData("AutoLogin", isChecked);
 		}
 	}
@@ -369,28 +374,28 @@ public class LoginActivity extends Activity implements OnClickListener {
 		
 		if (userName.equals("")) {
 			resultFlag = false;
-			et_name.setError("请输入用户名！");
+			Toast.makeText(mContext, "请输入用户名！", Toast.LENGTH_SHORT).show();
 		}
 		else if (Utils.isChineseString(userName)) {
 			resultFlag = false;
-			et_name.setError("不支持中文！");
+			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("用户名长度范围3~20！");
+			Toast.makeText(mContext, "用户名长度范围3~20！", Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			if (userPwd.equals("")) {
 				resultFlag = false;
-				et_pwd.setError("请输入密码！");
+				Toast.makeText(mContext, "请输入密码！", Toast.LENGTH_SHORT).show();
 			}
 			else if (Utils.isChineseString(userPwd)) {
 				resultFlag = false;
-				et_pwd.setError("不支持中文！");
+				Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 			}
 			else if ((userPwd.length()<6) || (userPwd.length()>20)) {
 				resultFlag = false;
-				et_pwd.setError("密码长度范围6~20！");
+				Toast.makeText(mContext, "密码长度范围6~20！", Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 			}

@@ -10,8 +10,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -56,6 +58,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private PreferData preferData = null;
 	private int unreadAlarmCount = 0;
 	private Dialog mDialog = null;
+	
+	private BackstageMessageReceiver backstageMessageReceiver = null;
+	public final static String READ_MESSAGE_ACTION = "MsgFragment.read_message_action";
 	
 	/**
 	 * 0:正常请求和下拉请求  1:上拖请求  2:删除该条报警  3:删除当前全部报警  4:标记该条报警  5:标记当前全部报警
@@ -159,6 +164,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		ZmqHandler.mHandler = handler;
 		xmlData = new XmlMessage(mActivity);
 		preferData = new PreferData(mActivity);
+		
+		//注册广播
+		backstageMessageReceiver = new BackstageMessageReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(READ_MESSAGE_ACTION);
+		filter.addAction(Value.BACKSTAGE_MESSAGE_ACTION);
+		mActivity.registerReceiver(backstageMessageReceiver, filter);
 		
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
@@ -327,6 +339,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
+					if (mPullToRefreshView.getHeaderState() == PullToRefreshView.REFRESHING) {
+						mPullToRefreshView.onHeaderRefreshComplete();
+					}
+					if (mPullToRefreshView.getFooterState() == PullToRefreshView.REFRESHING) {
+						mPullToRefreshView.onFooterRefreshComplete();
+					}
 					Toast.makeText(mActivity, "请求报警数据失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.request_alarm_id:
@@ -340,6 +358,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 							switch (reqAlarmType) {
 								//正常请求和下拉请求
 								case 0:
+									if (mPullToRefreshView.getHeaderState() == PullToRefreshView.REFRESHING) {
+										msg_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
+										msg_refresh_terminal = "终端: "+Build.MODEL;
+										preferData.writeData("msgRefreshTime", msg_refresh_time);
+										preferData.writeData("msgRefreshTerminal", msg_refresh_terminal);
+										mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
+									}
 									ArrayList<HashMap<String, String>> listObj = (ArrayList<HashMap<String, String>>) msg.obj;
 									if (listObj != null) {
 										xmlData.updateList(listObj);
@@ -357,6 +382,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 									break;
 								//上拖请求
 								case 1:
+									if (mPullToRefreshView.getFooterState() == PullToRefreshView.REFRESHING) {
+										mPullToRefreshView.onFooterRefreshComplete();
+									}
 									ArrayList<HashMap<String, String>> list = (ArrayList<HashMap<String, String>>) msg.obj;
 									if (list != null) {
 										int len = list.size();
@@ -372,12 +400,15 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 									msgList.remove(listPosition);
 									xmlData.deleteItem(mMsgID);
 									msgAdapter.notifyDataSetChanged();
+									Value.requstAlarmCount = listSize;
+									reqAlarmEvent();
 									break;
 								//删除当前全部报警
 								case 3:
 									msgList.removeAll(msgList);
 									xmlData.deleteAllItem();
 									msgAdapter.notifyDataSetChanged();
+									reqAlarmEvent();
 									break;
 								//标记该条报警
 								case 4:
@@ -464,7 +495,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				mPullToRefreshView.onFooterRefreshComplete();
 				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateReqAlarmJson(xmlData.getMinUpdateID(), 5);
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
@@ -484,12 +514,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				msg_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
-				msg_refresh_terminal = "终端: "+Build.MODEL;
-				preferData.writeData("msgRefreshTime", msg_refresh_time);
-				preferData.writeData("msgRefreshTerminal", msg_refresh_terminal);
-				mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
-				
 				Handler sendHandler = ZmqThread.zmqThreadHandler;
 				String data = generateReqAlarmJson(0, Value.requstAlarmCount);
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
@@ -548,7 +572,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		
 		List<String> item_list = new ArrayList<String>();
 		item_list.add("删除该条报警");
-		item_list.add("删除全部报警");
+		item_list.add("删除该页报警");
 		item_list.add("标记该条已读");
 		item_list.add("全部标记已读");
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mActivity, item_list);
@@ -608,17 +632,61 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			}
 		});
 	}
+	
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		//清空缓存
+//      File[] files = imageCache.listFiles();
+//      for(File file :files){
+//          file.delete();
+//      }
+//      imageCache.delete();
+		mActivity.unregisterReceiver(backstageMessageReceiver);
+	}
 
 	@Override
 	public void onDestroyView() {
 		// TODO Auto-generated method stub
 		super.onDestroyView();
-		 //清空缓存
-//        File[] files = imageCache.listFiles();
-//        for(File file :files){
-//            file.delete();
-//        }
-//        imageCache.delete();
+	}
+	
+	/**
+	 * @author sunfusheng
+	 * 报警消息的广播接收
+	 */
+	public class BackstageMessageReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			String action = intent.getAction();
+			if ((Value.isNeedReqAlarmListFlag) && (action.equals(Value.BACKSTAGE_MESSAGE_ACTION))) {
+				// 需要请求报警消息
+				Value.ownFragmentRequestAlarmFlag = false;
+				reqAlarmEvent();
+			}
+			else if (action.equals(READ_MESSAGE_ACTION)) {
+				// 标记为已读
+				HashMap<String, String> item = null;
+				String id = (String) intent.getCharSequenceExtra("listMsgID");
+				for (int i=0; i<listSize; i++) {
+					item = msgList.get(i);
+					if (id.equals(item.get("msgID"))) {
+						mMsgID = item.get("msgID");
+						listPosition = i;
+						break;
+					}
+				}
+				String sendData = generateMarkThisItemJson(Integer.parseInt(mMsgID));
+				if (sendData != null) {
+					Handler sendHandler = ZmqThread.zmqThreadHandler;
+					sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
+					sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
+				}
+			}
+		}
 	}
 
 }

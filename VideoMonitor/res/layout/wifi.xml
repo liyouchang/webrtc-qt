@@ -60,55 +60,24 @@
         android:text="@string/wifi_term_list"
         android:textColor="@color/light_black"
         android:textSize="18.0sp" />
-
-    <RelativeLayout
-        android:id="@+id/rl_wifi_name"
+    
+    <Button
+        android:id="@+id/btn_wifi_name"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
-        android:layout_marginLeft="15.0dip"
-        android:layout_marginRight="15.0dip"
-        android:layout_marginTop="10.0dip"
-        android:background="@drawable/button_up" >
-
-        <ImageView
-            android:id="@+id/iv_wifi_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="10.0dip"
-            android:layout_marginRight="10.0dip"
-            android:background="@null"
-            android:contentDescription="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/wifi" />
-
-        <EditText
-            android:id="@+id/et_wifi_name"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="20dp"
-            android:layout_toLeftOf="@+id/btn_wifi_name_more"
-            android:layout_toRightOf="@+id/iv_wifi_name"
-            android:background="@null"
-            android:hint="@string/hint_wifi_ssid"
-            android:inputType="none"
-            android:textColor="@color/light_black"
-            android:textSize="18.0sp" />
-
-        <ImageView
-            android:id="@+id/btn_wifi_name_more"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="10.0dip"
-            android:background="@null"
-            android:contentDescription="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/icon_button_right" />
-    </RelativeLayout>
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_up"
+        android:drawableLeft="@drawable/wifi"
+        android:drawablePadding="10dp"
+        android:drawableRight="@drawable/icon_button_right"
+        android:gravity="center_vertical"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:text="@string/hint_wifi_ssid"
+        android:textColor="@color/light_black"
+        android:textSize="18.0sp" />
 
     <RelativeLayout
         android:layout_width="fill_parent"

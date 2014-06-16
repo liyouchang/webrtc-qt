@@ -9,6 +9,7 @@
         android:layout_height="fill_parent" />
 
     <LinearLayout
+        android:id="@+id/viewpager_index"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
@@ -47,14 +48,6 @@
             android:layout_width="10.0dip"
             android:layout_height="10.0dip"
             android:layout_marginRight="10.0dip"
-            android:scaleType="fitXY"
-            android:background="@drawable/image_unfocused"
-            android:contentDescription="@null" />
-
-        <ImageView
-            android:id="@+id/iv_help5"
-            android:layout_width="10.0dip"
-            android:layout_height="10.0dip"
             android:scaleType="fitXY"
             android:background="@drawable/image_unfocused"
             android:contentDescription="@null" />

@@ -15,6 +15,7 @@ import android.os.Message;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.data.XmlDevice;
 import com.video.data.XmlMessage;
 import com.video.main.MainActivity;
 import com.video.main.OwnFragment;
@@ -81,14 +82,31 @@ public class ZmqHandler extends Handler {
 		if (len <= 0) {
 			return null;
 		}
+		XmlDevice xmlData = new XmlDevice(HandlerApplication.getInstance());
+		ArrayList<HashMap<String, String>> deviceList = xmlData.readXml();
+		int deviceCount = 0;
+		if (deviceList != null) {
+			deviceCount = deviceList.size();
+		} else {
+			deviceCount = 0;
+		}
 		  
 	    try {
 	    	for (int i=0; i<len; i++) { 
 		    	JSONObject obj = (JSONObject) jsonArray.get(i); 
 		    	item = new HashMap<String, String>();
-			    item.put("msgMAC", "来自: "+obj.getString("MAC")); 
+		    	String alarmDevice = obj.getString("MAC");
+		    	
+		    	for (int j=0; j<deviceCount; j++) {
+		    		if (deviceList.get(j).get("deviceID").equals(alarmDevice)) {
+		    			alarmDevice = deviceList.get(j).get("deviceName");
+		    			break;
+		    		}
+		    	}
+			    item.put("msgMAC", "来自: "+alarmDevice); 
 			    item.put("msgEvent", "事件: "+obj.getString("AlarmInfo"));
 				item.put("msgTime", obj.getString("DateTime"));
+				
 				String pictureURL = "null";
 				if (obj.isNull("PictureURL")) {
 					pictureURL = "null";
@@ -267,6 +285,12 @@ public class ZmqHandler extends Handler {
 				alarmCount++;
 				preferData.writeData("AlarmCount", alarmCount);
 				MainActivity.mainHandler.obtainMessage(0, alarmCount, 0).sendToTarget();
+				
+				if (MainActivity.isCurrentTab(3)) {
+					Intent intent = new Intent();
+					intent.setAction(Value.BACKSTAGE_MESSAGE_ACTION);
+					HandlerApplication.getInstance().sendBroadcast(intent);
+				}
 			}
 			// 终端上下线消息推送
 			else if (type.equals("Backstage_TermActive")) {

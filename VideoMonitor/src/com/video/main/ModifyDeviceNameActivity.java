@@ -228,11 +228,11 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		
 		if (newDeviceName.equals("")) {
 			resultFlag = false;
-			et_name.setError("请输入设备名称！");
+			Toast.makeText(mContext, "请输入设备名称！", Toast.LENGTH_SHORT).show();
 		}
 		else if ((newDeviceName.length()<2) || (newDeviceName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("设备名称长度范围2~20！");
+			Toast.makeText(mContext, "设备名称长度范围2~20！", Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			mDeviceName = newDeviceName;

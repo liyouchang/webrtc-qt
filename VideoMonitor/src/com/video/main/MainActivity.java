@@ -58,6 +58,8 @@ public class MainActivity extends FragmentActivity {
 	private String userPwd = "";
 	private boolean isAppFirstTime = true;
 	private boolean isAutoLogin = false;
+	private boolean isActivityShow = false;
+	private boolean isStartupThreadRun = false;
 	public static boolean isPlayAlarmMusic = true;
 	private boolean isTextViewShow = false;
 	private static TextView tv_alarm_msg = null;
@@ -96,6 +98,7 @@ public class MainActivity extends FragmentActivity {
 			}
 			new Handler().postDelayed(new Runnable(){   
 			    public void run() {
+			    	isStartupThreadRun = true;
 			    	quitFullScreen();
 			    	if (isAppFirstTime) {
 			    		//第一次使用该软件的帮助图片
@@ -131,16 +134,24 @@ public class MainActivity extends FragmentActivity {
 							MainActivity.this.finish();
 						}
 			    	}
-			    } 
+			    }
 			 }, 3000); 
 		} else {
+			isStartupThreadRun = false;
 			//已登录成功
 			setContentView(R.layout.main);
-	        initData();
-	        initView();
+			initData();
+			initView();
 		}
     }
-	
+
+	@Override
+	protected void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+		isActivityShow = true;
+	}
+
 	/**
 	 * 设置全屏
 	 */
@@ -261,7 +272,7 @@ public class MainActivity extends FragmentActivity {
         fragments.add(new LocalFragment());
         fragments.add(new MsgFragment());
         fragments.add(new MoreFragment());
-        
+    
         final FragmentTabAdapter tabAdapter = new FragmentTabAdapter(this, fragments, android.R.id.tabcontent, mTabHost);
         tabAdapter.setOnMyTabChangedListener(new OnMyTabChangedListener() {
 			@Override
@@ -405,8 +416,10 @@ public class MainActivity extends FragmentActivity {
 			switch (msg.what) {
 				//正在登录
 				case IS_LOGINNING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在登录...");
-					mDialog.show();
+					if (isActivityShow) {
+						mDialog = Utils.createLoadingDialog(mContext, "正在登录...");
+						mDialog.show();
+					}
 					break;
 				//登录超时
 				case LOGIN_TIMEOUT:
@@ -445,17 +458,19 @@ public class MainActivity extends FragmentActivity {
 						handler.removeMessages(LOGIN_TIMEOUT);
 						if (mDialog != null)
 							mDialog.dismiss();
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
-							Value.isLoginSuccess = true;
-							setContentView(R.layout.main);
-					        initData();
-					        initView();
-					        new UpdateAPK(mContext).startCheckUpgadeThread();
-						} else {
-							Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
-							startActivity(new Intent(mContext, LoginActivity.class));
-			    			MainActivity.this.finish();
+						if (isStartupThreadRun) {
+							int resultCode = msg.arg1;
+							if (resultCode == 0) {
+								Value.isLoginSuccess = true;
+								setContentView(R.layout.main);
+						        initData();
+						        initView();
+						        new UpdateAPK(mContext).startCheckUpgadeThread();
+							} else {
+								Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+								startActivity(new Intent(mContext, LoginActivity.class));
+				    			MainActivity.this.finish();
+							}
 						}
 					} else {
 						handler.removeMessages(R.id.login_id);
@@ -543,14 +558,28 @@ public class MainActivity extends FragmentActivity {
 				hideExitView();
 			}
 		} else if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
-			if (isTextViewShow) {
+			if ((!isStartupThreadRun) && (!Value.isLoginSuccess)) {
+				return false;
+			}
+			else if (isTextViewShow) {
 				hideExitView();
-				return true;
+				return false;
 			}
 		}
 		return super.onKeyDown(keyCode, event);
 	}
 	
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		if ((mDialog != null) && (mDialog.isShowing())) {
+			mDialog.dismiss();
+		}
+		isActivityShow = false;
+		isStartupThreadRun = false;
+	}
+
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub

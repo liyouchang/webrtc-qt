@@ -92,13 +92,8 @@ public class TunnelCommunication {
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 0);
 		intent.putExtra("PeerId", peerId);
-		if (Value.playTerminalVideoFileFlag) {
-			intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
-			HandlerApplication.getInstance().sendBroadcast(intent);
-		} else {
-			intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
-			HandlerApplication.getInstance().sendBroadcast(intent);
-		}
+		intent.setAction(Value.TUNNEL_REQUEST_ACTION);
+		HandlerApplication.getInstance().sendBroadcast(intent);
 	}
 	
 	/**
@@ -111,13 +106,8 @@ public class TunnelCommunication {
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 1);
 		intent.putExtra("PeerId", peerId);
-		if (Value.playTerminalVideoFileFlag) {
-			intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
-			HandlerApplication.getInstance().sendBroadcast(intent);
-		} else {
-			intent.setAction(PlayerActivity.TUNNEL_REQUEST_ACTION);
-			HandlerApplication.getInstance().sendBroadcast(intent);
-		}
+		intent.setAction(Value.TUNNEL_REQUEST_ACTION);
+		HandlerApplication.getInstance().sendBroadcast(intent);
 	}
 
 	/**

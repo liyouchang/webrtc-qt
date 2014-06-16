@@ -41,12 +41,21 @@ public class Value {
 	 * 搜索本地设备的广播
 	 */
 	public final static String SEARCH_LOCAL_DEVICE_ACTION = "Value.search_local_device";
+	/**
+	 * 接收报警消息的广播
+	 */
+	public final static String BACKSTAGE_MESSAGE_ACTION = "Value.backstage_message";
+	/**
+	 * 通道是否被打开回调的广播
+	 */
+	public static final String TUNNEL_REQUEST_ACTION = "Value.Player.TunnelRequest";
 	
 	/**
 	 * 超时时间
 	 */
 	public final static int REQ_TIME_6S = 6000;
 	public final static int REQ_TIME_10S = 10000;
+	public final static int REQ_TIME_30S = 30000;
 	
 	/**
 	 * 是否需要请求报警记录的标志

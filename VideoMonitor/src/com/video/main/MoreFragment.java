@@ -228,6 +228,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				break;
 			case R.id.btn_help:
 				startActivity(new Intent(mActivity, HelpActivity.class));
+				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_about:
 				startActivity(new Intent(mActivity, AboutActivity.class));

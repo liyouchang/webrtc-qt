@@ -306,45 +306,45 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 		
 		if (userOldPwd.equals("")) {
 			resultFlag = false;
-			et_old_pwd.setError("请输入旧密码！");
+			Toast.makeText(mContext, "请输入旧密码！", Toast.LENGTH_SHORT).show();
 		}
 		else if (Utils.isChineseString(userOldPwd)) {
 			resultFlag = false;
-			et_old_pwd.setError("不支持中文！");
+			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 		}
 		else if (!userOldPwd.equals(userPwd)) {
 			resultFlag = false;
-			et_old_pwd.setError("旧密码输入错误！");
+			Toast.makeText(mContext, "旧密码输入错误！", Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			if (userNewPwd.equals("")) {
 				resultFlag = false;
-				et_new_pwd.setError("请输入新密码！");
+				Toast.makeText(mContext, "请输入新密码！", Toast.LENGTH_SHORT).show();
 			}
 			else if (Utils.isChineseString(userNewPwd)) {
 				resultFlag = false;
-				et_new_pwd.setError("不支持中文！");
+				Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 			}
 			else if ((userNewPwd.length()<6) || (userNewPwd.length()>20)) {
 				resultFlag = false;
-				et_new_pwd.setError("密码长度范围6~20！");
+				Toast.makeText(mContext, "密码长度范围6~20！", Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 				if (userNewRepwd.equals("")) {
 					resultFlag = false;
-					et_new_repwd.setError("请再次输入新密码！");
+					Toast.makeText(mContext, "请再次输入新密码！", Toast.LENGTH_SHORT).show();
 				}
 				else if (Utils.isChineseString(userNewRepwd)) {
 					resultFlag = false;
-					et_new_repwd.setError("不支持中文！");
+					Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 				}
 				else if ((userNewRepwd.length()<6) || (userNewRepwd.length()>20)) {
 					resultFlag = false;
-					et_new_repwd.setError("确认密码长度范围6~20！");
+					Toast.makeText(mContext, "确认密码长度范围6~20！", Toast.LENGTH_SHORT).show();
 				}
 				else if (!userNewPwd.equals(userNewRepwd)) {
 					resultFlag = false;
-					et_new_repwd.setError("两次输入的密码不一致！");
+					Toast.makeText(mContext, "两次输入的密码不一致！", Toast.LENGTH_SHORT).show();
 				} else {
 					resultFlag = true;
 				}
