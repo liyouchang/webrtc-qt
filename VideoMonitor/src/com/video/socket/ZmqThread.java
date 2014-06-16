@@ -61,20 +61,18 @@ public class ZmqThread extends Thread {
 			message_byte2 = zmq_socket.recv(0);
 			String message_str1 = new String(message_byte1);
 			String message_str2 = new String(message_byte2);
-			if (message_str1.equals(Value.TerminalDealerName)) {
-				JSONObject obj = null;
-				try {
-					obj = new JSONObject(message_str2);
-					String type = obj.getString("type");
-					if ((type.equals("p2p")) || (type.equals("tunnel"))) {
-						TunnelCommunication.getInstance().messageFromPeer(
-								Value.TerminalDealerName, message_str2);
-					}
-				} catch (JSONException e) {
-					e.printStackTrace();
+			JSONObject obj = null;
+			try {
+				obj = new JSONObject(message_str2);
+				String type = obj.getString("type");
+				if ((type.equals("p2p")) || (type.equals("tunnel"))) {
+					TunnelCommunication.getInstance().messageFromPeer(
+							message_str1, message_str2);
+				} else {
+					result = message_str2;
 				}
-			} else {
-				result = message_str2;
+			} catch (JSONException e) {
+				e.printStackTrace();
 			}
 		}
 		return result;
@@ -117,7 +115,7 @@ public class ZmqThread extends Thread {
 						zmqThreadHandler.removeMessages(R.id.zmq_recv_data_id);
 					}
 					break;
-				// ZMQ向后台服务器发送数据
+					// ZMQ向后台服务器发送数据
 				case R.id.zmq_send_data_id:
 					sendZmqData(Value.DeviceBackstageName, (String) msg.obj);
 					System.out.println("MyDebug: \n");
@@ -126,7 +124,7 @@ public class ZmqThread extends Thread {
 						zmqThreadHandler.removeMessages(R.id.zmq_send_data_id);
 					}
 					break;
-				// ZMQ向报警服务器发送数据
+					// ZMQ向报警服务器发送数据
 				case R.id.zmq_send_alarm_id:
 					sendZmqData(Value.AlarmBackstageName, (String) msg.obj);
 					System.out.println("MyDebug: \n");
@@ -135,7 +133,7 @@ public class ZmqThread extends Thread {
 						zmqThreadHandler.removeMessages(R.id.zmq_send_alarm_id);
 					}
 					break;
-				// ZMQ向终端服务器发送数据
+					// ZMQ向终端服务器发送数据
 				case R.id.send_to_peer_id:
 					HashMap<String, String> mapData = (HashMap<String, String>) msg.obj;
 					String peerId = mapData.get("peerId");
@@ -147,7 +145,7 @@ public class ZmqThread extends Thread {
 						zmqThreadHandler.removeMessages(R.id.send_to_peer_id);
 					}
 					break;
-				// 关闭ZMQ Socket
+					// 关闭ZMQ Socket
 				case R.id.close_zmq_socket_id:
 					try {
 						ZmqCtrl.getInstance().exit();

@@ -136,6 +136,7 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
             SignalNeedSendToPeer(peer_id_,kEndMsg);
             setTunnelState(kClosed);
             peer_id_.clear();
+            signal_thread_->Clear(this);
         }
         return;
     }
