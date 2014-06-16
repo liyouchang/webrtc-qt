@@ -307,6 +307,9 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		if ((localDeviceDialog != null) && (localDeviceDialog.isShowing())) {
+			localDeviceDialog.dismiss();
+		}
 		unregisterReceiver(localDeviceReceiver);
 	}
 
@@ -322,21 +325,21 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		
 		if (termName.equals("")) {
 			resultFlag = false;
-			et_name.setError("请输入设备名称！");
+			Toast.makeText(mContext, "请输入设备名称！", Toast.LENGTH_SHORT).show();
 		}
 		else if ((termName.length()<2) || (termName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("设备名称长度范围2~20！");
+			Toast.makeText(mContext, "设备名称长度范围2~20！", Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			mDeviceName = termName;
 			if (termMac.equals("")) {
 				resultFlag = false;
-				et_id.setError("请输入设备ID，您可以通过扫描二维码或搜索设备输入设备ID！");
+				Toast.makeText(mContext, "请输入设备ID，您可以通过扫描二维码或搜索设备输入设备ID！", Toast.LENGTH_SHORT).show();
 			}
 			else if ((termMac.length()<3) || (termMac.length()>20)) {
 				resultFlag = false;
-				et_id.setError("设备ID长度范围3~20！");
+				Toast.makeText(mContext, "设备ID长度范围3~20！", Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 				mDeviceId = termMac;

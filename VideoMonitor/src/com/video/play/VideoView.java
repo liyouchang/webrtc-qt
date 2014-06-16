@@ -35,9 +35,9 @@ public class VideoView extends View {
     private Rect dstRect = new Rect(0, 0, 0, 0) ;
     private int drawWidth = 0;
     private int drawHeight = 0;  
-    private int videoType = 2;
-    private int bitWidth = 352;
-    private int bitHeight = 288;
+    private int videoType = 0;
+    private int bitWidth = 704;
+    private int bitHeight = 576;
     
     private Canvas mCanvas = null;
     
@@ -45,6 +45,7 @@ public class VideoView extends View {
     private boolean runFlag = false; // 运行标志
     public boolean isPlayVideo = false; // 是否播放
 //    public boolean isFullScreen = true; // 是否全屏
+    private boolean isDisplayView = false;
     
     //视频解码库JNI接口
     private native int initDecoder(int width, int height); 
@@ -239,6 +240,19 @@ public class VideoView extends View {
 					Paint paint = new Paint();
 					paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
 					canvas.drawBitmap(videoBmp, srcRect, dstRect, paint);
+					paint.setXfermode(new PorterDuffXfermode(Mode.SRC));
+				} else {
+					if (!isDisplayView) {
+						isDisplayView = true;
+//						Intent intent = new Intent();
+//						intent.setAction(PlayerActivity.DISPLAY_VIDEO_ACTION);
+//						mContext.sendBroadcast(intent);
+						Thread.sleep(3000);
+						Paint paint = new Paint();
+						paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
+						canvas.drawBitmap(videoBmp, srcRect, dstRect, paint);
+						paint.setXfermode(new PorterDuffXfermode(Mode.SRC));
+					}
 				}
 			}
 		} catch (Exception e) {

@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.video.R;
 import com.video.data.PreferData;
@@ -26,20 +27,19 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 	private PreferData preferData = null;
 	private boolean isAppFirstTime = true;
 	
+	private LinearLayout viewPager_index;
 	private ViewPager mViewPager = null;
 	private List<View> pageList = null;
 	private static View help_page1;
 	private static View help_page2;
 	private static View help_page3;
 	private static View help_page4;
-	private static View help_page5;
 	
 	private static ImageView cur_imageView;
 	private static ImageView imageView_help1;
 	private static ImageView imageView_help2;
 	private static ImageView imageView_help3;
 	private static ImageView imageView_help4;
-	private static ImageView imageView_help5;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,11 +59,11 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 	}
 	
 	private void initView() {
-		imageView_help1 = (ImageView)super.findViewById(R.id.iv_help1);
-		imageView_help2 = (ImageView)super.findViewById(R.id.iv_help2);
-		imageView_help3 = (ImageView)super.findViewById(R.id.iv_help3);
-		imageView_help4 = (ImageView)super.findViewById(R.id.iv_help4);
-		imageView_help5 = (ImageView)super.findViewById(R.id.iv_help5);
+		viewPager_index = (LinearLayout)this.findViewById(R.id.viewpager_index);
+		imageView_help1 = (ImageView)this.findViewById(R.id.iv_help1);
+		imageView_help2 = (ImageView)this.findViewById(R.id.iv_help2);
+		imageView_help3 = (ImageView)this.findViewById(R.id.iv_help3);
+		imageView_help4 = (ImageView)this.findViewById(R.id.iv_help4);
 		cur_imageView = imageView_help1;
 	}
 	
@@ -80,19 +80,17 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 		help_page2 = inflater.inflate(R.layout.help_introduce2, null);
 		help_page3 = inflater.inflate(R.layout.help_introduce3, null);
 		help_page4 = inflater.inflate(R.layout.help_introduce4, null);
-		help_page5 = inflater.inflate(R.layout.help_introduce5, null);
 		pageList.add(help_page1);
 		pageList.add(help_page2);
 		pageList.add(help_page3);
 		pageList.add(help_page4);
-		pageList.add(help_page5);
 		mViewPager = (ViewPager)super.findViewById(R.id.viewpager_help);
 		mViewPager.setAdapter(new ViewPagerAdapter(pageList));
 		mViewPager.setOnPageChangeListener(this);
 		mViewPager.setCurrentItem(0);
 		
 		preferData = new PreferData(HelpActivity.this);
-		Button useNow = (Button) help_page5.findViewById(R.id.btn_use_now);
+		Button useNow = (Button) help_page4.findViewById(R.id.btn_use_now);
 		if (preferData.isExist("AppFirstTime")) {
 			isAppFirstTime = preferData.readBoolean("AppFirstTime");
 		}
@@ -123,6 +121,7 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 	@Override
 	public void onPageSelected(int arg0) {
 		// TODO Auto-generated method stub
+		viewPager_index.setVisibility(View.VISIBLE);
 		switch (arg0) {
 			case 0:
 				cur_imageView.setBackgroundResource(R.drawable.image_unfocused);
@@ -143,11 +142,9 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 				cur_imageView.setBackgroundResource(R.drawable.image_unfocused);
 				imageView_help4.setBackgroundResource(R.drawable.image_focused);
 				cur_imageView = imageView_help4;
-				break;
-			case 4:
-				cur_imageView.setBackgroundResource(R.drawable.image_unfocused);
-				imageView_help5.setBackgroundResource(R.drawable.image_focused);
-				cur_imageView = imageView_help5;
+				if (isAppFirstTime) {
+					viewPager_index.setVisibility(View.INVISIBLE);
+				}
 				break;
 		}
 	}
@@ -172,6 +169,7 @@ public class HelpActivity extends Activity implements OnPageChangeListener  {
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
 			if (!isAppFirstTime) {
 				HelpActivity.this.finish();
+				overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 			} else {
 				return false;
 			}
