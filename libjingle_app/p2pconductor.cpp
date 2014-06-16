@@ -6,7 +6,7 @@
 namespace  kaerp2p {
 
 const int kConnectTimeout = 30000; // close DeletePeerConnection after 30s without connect
-const int kDisConnectTimeout = 5000;
+const int kDisConnectTimeout = 3000;
 
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -61,9 +61,13 @@ P2PConductor::~P2PConductor()
 
 bool P2PConductor::ConnectToPeer(const std::string &peer_id)
 {
+    if(this->tunnelState == kDisconnecting){
+        LOG(INFO)<<"the tunnel is disconnecting,should not connect!";
+        return false;
+    }
     if (peer_connection_.get()) {
         LOG(LS_INFO) <<"peer connection already connect";
-        return false;
+        return true;
     }
     if (InitializePeerConnection()) {
         peer_id_ = peer_id;
@@ -131,6 +135,7 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
             DeletePeerConnection();
             SignalNeedSendToPeer(peer_id_,kEndMsg);
             setTunnelState(kClosed);
+            peer_id_.clear();
         }
         return;
     }
@@ -380,6 +385,7 @@ void P2PConductor::OnMessage(talk_base::Message *msg)
     }else if(msg->message_id == MSG_DISCONNECT){
         this->DeletePeerConnection();
     }else if(msg->message_id == MSG_DISCONNECT_TIMEOUT){
+        LOG(WARNING)<<"P2PConductor::OnMessage-----"<<"disconnect timeout";
         this->peer_id_.clear();
         this->setTunnelState(kClosed);
     }

@@ -72,7 +72,7 @@ public:
     {
         if (TunnelClientUI->objectName().isEmpty())
             TunnelClientUI->setObjectName(QStringLiteral("TunnelClientUI"));
-        TunnelClientUI->resize(750, 464);
+        TunnelClientUI->resize(750, 537);
         TunnelClientUI->setToolButtonStyle(Qt::ToolButtonIconOnly);
         centralwidget = new QWidget(TunnelClientUI);
         centralwidget->setObjectName(QStringLiteral("centralwidget"));
@@ -179,7 +179,7 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 56, 16));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 73, 65));
         scrollArea->setWidget(scrollAreaWidgetContents);
 
         gridLayout->addWidget(scrollArea, 1, 3, 1, 1);
@@ -280,7 +280,7 @@ public:
         groupBox->setTitle(QApplication::translate("TunnelClientUI", "VideoWall", 0));
         groupBox_2->setTitle(QApplication::translate("TunnelClientUI", "Control", 0));
         btn_init->setText(QApplication::translate("TunnelClientUI", "Init", 0));
-        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "97654321", 0));
+        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "0090B0D41803-21DA", 0));
         btn_connect->setText(QApplication::translate("TunnelClientUI", "ConnectToPeer", 0));
         btn_disconnect->setText(QApplication::translate("TunnelClientUI", "DisConnectToPeer", 0));
         getwifi->setText(QApplication::translate("TunnelClientUI", "get wifi", 0));
