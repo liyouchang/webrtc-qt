@@ -21,6 +21,7 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QScrollArea>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
@@ -49,6 +50,8 @@ public:
     QPushButton *ptz_right;
     QPushButton *ptz_up;
     QPushButton *ptz_down;
+    QScrollArea *scrollArea;
+    QWidget *scrollAreaWidgetContents;
     QPushButton *btn_video;
     QPushButton *video2;
     QPushButton *btn_save_video;
@@ -171,6 +174,16 @@ public:
 
         gridLayout->addWidget(ptz_down, 0, 3, 1, 1);
 
+        scrollArea = new QScrollArea(groupBox_ptz);
+        scrollArea->setObjectName(QStringLiteral("scrollArea"));
+        scrollArea->setWidgetResizable(true);
+        scrollAreaWidgetContents = new QWidget();
+        scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 56, 16));
+        scrollArea->setWidget(scrollAreaWidgetContents);
+
+        gridLayout->addWidget(scrollArea, 1, 3, 1, 1);
+
 
         verticalLayout->addWidget(groupBox_ptz);
 
@@ -267,7 +280,7 @@ public:
         groupBox->setTitle(QApplication::translate("TunnelClientUI", "VideoWall", 0));
         groupBox_2->setTitle(QApplication::translate("TunnelClientUI", "Control", 0));
         btn_init->setText(QApplication::translate("TunnelClientUI", "Init", 0));
-        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "0090B0D41909-10E1", 0));
+        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "97654321", 0));
         btn_connect->setText(QApplication::translate("TunnelClientUI", "ConnectToPeer", 0));
         btn_disconnect->setText(QApplication::translate("TunnelClientUI", "DisConnectToPeer", 0));
         getwifi->setText(QApplication::translate("TunnelClientUI", "get wifi", 0));

@@ -15,7 +15,6 @@ CameraClient::CameraClient(std::string mac):
 
 void CameraClient::Login()
 {
-    LOG(INFO)<<"CameraClient::Login---"<<mac_;
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage["type"] = "Terminal_Login";
@@ -61,9 +60,7 @@ void CameraClient::Reconnect()
     std::string oldAddr = dealer_->addr();
     LOG(INFO)<<"CameraClient::Reconnect---with id "<<strDealerId;
     dealer_->terminate();
-    LOG(INFO)<<"CameraClient::Reconnect--1";
     dealer_->initialize(strDealerId,oldAddr);
-    LOG(INFO)<<"CameraClient::Reconnect--2";
     this->Login();
 }
 
@@ -74,7 +71,7 @@ void CameraClient::OnMessage(talk_base::Message *msg)
     case MSG_LOGIN_HEART:{
         if(++heartCount > 2){
             LOG(INFO)<<"heart count is "<<heartCount;
-            //this->Reconnect();
+            this->Reconnect();
             heartCount = 0;
         }
         this->Login();
@@ -82,7 +79,7 @@ void CameraClient::OnMessage(talk_base::Message *msg)
         break;
     }
     case MSG_RECEIVE_HEART:{
-        LOG(INFO)<<"receive heart at count "<<heartCount;
+        //LOG(INFO)<<"receive heart at count "<<heartCount;
         heartCount = 0;
         break;
     }

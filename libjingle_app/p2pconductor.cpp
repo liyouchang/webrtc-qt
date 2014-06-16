@@ -6,6 +6,7 @@
 namespace  kaerp2p {
 
 const int kConnectTimeout = 30000; // close DeletePeerConnection after 30s without connect
+const int kDisConnectTimeout = 5000;
 
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -17,7 +18,7 @@ const char kSessionDescriptionTypeName[] = "type";
 const char kSessionDescriptionSdpName[] = "sdp";
 
 const char kByeMessage[] = "BYE";
-
+const char kEndMsg[] = "SEEYOU";
 
 class DummySetSessionDescriptionObserver
         : public webrtc::SetSessionDescriptionObserver {
@@ -38,9 +39,15 @@ protected:
 };
 
 P2PConductor::P2PConductor():
-    stream_thread_(NULL),signal_thread_(NULL)
+    stream_thread_(NULL),signal_thread_(NULL),tunnelState(kNew)
 {
-    tunnel_established_ = false;
+    stream_thread_ = new talk_base::Thread();
+    bool result = stream_thread_->Start();
+    ASSERT(result);
+
+    signal_thread_ = new talk_base::Thread();
+    result = signal_thread_->Start();
+    ASSERT(result);
 }
 
 P2PConductor::~P2PConductor()
@@ -52,33 +59,27 @@ P2PConductor::~P2PConductor()
 }
 
 
-int P2PConductor::ConnectToPeer(const std::string &peer_id)
+bool P2PConductor::ConnectToPeer(const std::string &peer_id)
 {
     if (peer_connection_.get()) {
-        LOG(LS_INFO) <<"peer connection all ready connect";
-        return -2;
+        LOG(LS_INFO) <<"peer connection already connect";
+        return false;
     }
     if (InitializePeerConnection()) {
         peer_id_ = peer_id;
-        tunnel_established_ = false;
         peer_connection_->CreateOffer(this);
     } else {
         LOG(LS_INFO) <<"initialize connection error";
-        return -3;
+        return false;
     }
-    return 0;
+    return true;
 }
 
 void P2PConductor::DisconnectFromCurrentPeer()
 {
-    LOG(INFO) << __FUNCTION__;
-    if (!tunnel_established_){
-        LOG(WARNING) << "the tunnel is not established, "<<
-                        "it maybe crash by two thread conflict";
-    }
     if (peer_connection_.get()) {
+        signal_thread_->Post(this,MSG_DISCONNECT);
         SignalNeedSendToPeer(peer_id_,kByeMessage);
-        DeletePeerConnection();
     }
 }
 
@@ -90,12 +91,12 @@ StreamProcess *P2PConductor::GetStreamProcess()
 
 void P2PConductor::OnTunnelEstablished()
 {
-    LOG(INFO) << __FUNCTION__;
     ASSERT(stream_process_);
 
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     SignalStreamOpened(this->GetStreamProcess());
-    tunnel_established_ = true;
+
+    this->setTunnelState(kEstablished);
 }
 
 void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
@@ -103,9 +104,115 @@ void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
     LOG(INFO) << "P2PConductor::OnTunnelTerminate";
     ASSERT(this->GetStreamProcess() == stream);
     SignalStreamClosed(stream);
+    this->signal_thread_->PostDelayed(kDisConnectTimeout,this,MSG_DISCONNECT_TIMEOUT);
+}
 
-    peer_id_.clear();
+void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
+                                       const std::string &message)
+{
+    if (tunnelState == kDisconnecting) {
+        if(message.length() == (sizeof(kEndMsg) - 1) &&
+                message.compare(kEndMsg) == 0) {
+            LOG(INFO)<<"receive end message from "<<peerId <<",tunnel is end";
+            setTunnelState(kClosed);
+            peer_id_.clear();
+            signal_thread_->Clear(this);
+        } else {
+            LOG(WARNING)<<"P2PConductor::OnMessageFromPeer---"<<
+                      "should not receive message when tunnel is closing";
+        }
+        return;
+    }
 
+    if (message.length() == (sizeof(kByeMessage) - 1) &&
+            message.compare(kByeMessage) == 0) {
+        LOG(INFO)<<"receive bye message from "<<peerId;
+        if (peerId == peer_id_ && peer_connection_.get()) {
+            DeletePeerConnection();
+            SignalNeedSendToPeer(peer_id_,kEndMsg);
+            setTunnelState(kClosed);
+        }
+        return;
+    }
+
+
+    if(!peer_connection_.get()) {
+        if(!this->peer_id_.empty()){
+            LOG(LS_ERROR) << "peer_id_ is not empty when peer_connection_ is not set";
+            return;
+        }
+        peer_id_ = peerId;
+        if (!InitializePeerConnection()) {
+            LOG(LS_ERROR) << "Failed to initialize our PeerConnection instance";
+            return;
+        }
+    } else if (peerId != peer_id_) {
+        ASSERT(!peer_id_.empty());
+        LOG(WARNING) << "Received a message from unknown peer while already in"
+                        " a conversation with a different peer.";
+        return;
+    }
+
+    Json::Reader reader;
+    Json::Value jmessage;
+    if (!reader.parse(message, jmessage)) {
+        LOG(WARNING) << "Received unknown message. " << message;
+        return;
+    }
+    std::string type;
+
+    GetStringFromJsonObject(jmessage, kSessionDescriptionTypeName, &type);
+    if (!type.empty()) {
+        std::string sdp;
+        if (!GetStringFromJsonObject(
+                    jmessage, kSessionDescriptionSdpName, &sdp)) {
+            LOG(WARNING) << "Can't parse received session description message.";
+            return;
+        }
+        webrtc::SessionDescriptionInterface* session_description(
+                    webrtc::CreateSessionDescription(type, sdp));
+        if (!session_description) {
+            LOG(WARNING) << "Can't parse received session description message.";
+            return;
+        }
+        LOG(INFO) << " Received session description :" << message;
+        peer_connection_->SetRemoteDescription(
+                    DummySetSessionDescriptionObserver::Create(),
+                    session_description);
+        if (session_description->type() ==
+                webrtc::SessionDescriptionInterface::kOffer) {
+            peer_connection_->CreateAnswer(this);
+        }
+        return;
+    } else {
+        std::string sdp_mid;
+        int sdp_mlineindex = 0;
+        std::string sdp;
+        if (!GetStringFromJsonObject(jmessage, kCandidateSdpMidName, &sdp_mid) ||
+                !GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,
+                                      &sdp_mlineindex) ||
+                !GetStringFromJsonObject(jmessage, kCandidateSdpName, &sdp)) {
+            LOG(WARNING) << "Can't parse received message.";
+            return;
+        }
+        talk_base::scoped_ptr<webrtc::IceCandidateInterface> candidate(
+                    webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp));
+        if (!candidate.get()) {
+            LOG(WARNING) << "Can't parse received candidate message.";
+            return;
+        }
+        LOG(INFO) << " Received candidate :" << message;
+        if (!peer_connection_->AddIceCandidate(candidate.get())) {
+            LOG(WARNING) << "Failed to apply the received candidate";
+            return;
+        }
+        return;
+    }
+}
+
+void P2PConductor::setTunnelState(P2PConductor::TunnelState state)
+{
+    tunnelState = state;
 }
 
 void P2PConductor::AddIceServer(const std::string &uri,
@@ -155,13 +262,6 @@ bool P2PConductor::InitializePeerConnection()
         P2PConductor::AddIceServer("turn:222.174.213.185:5766",
                                    "lht","123456");
     }
-    stream_thread_ = new talk_base::Thread();
-    bool result = stream_thread_->Start();
-    ASSERT(result);
-
-    signal_thread_ = new talk_base::Thread();
-    result = signal_thread_->Start();
-    ASSERT(result);
 
     stream_process_.reset(new StreamProcess(stream_thread_));
     stream_process_->SignalOpened.connect(
@@ -175,20 +275,23 @@ bool P2PConductor::InitializePeerConnection()
     if(!pt->Initialize(g_servers,this)){
         return false;
     }
+    setTunnelState(kConnecting);
 
     peer_connection_ = PeerTunnelProxy::Create(pt->signaling_thread(), pt);
 
     signal_thread_->PostDelayed(kConnectTimeout,this,MSG_CONNECT_TIMEOUT);
+
     return true;
 }
 
 void P2PConductor::DeletePeerConnection()
 {
-    LOG(INFO) << "P2PConductor::DeletePeerConnection";
+    LOG(INFO) << "P2PConductor::DeletePeerConnection---" << this->peer_id_;
+    setTunnelState(kDisconnecting);
+    signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     //when close peer_connection the session will terminate and destroy the channels
     //the channel destroy will make the StreamProcess clean up
     peer_connection_->Close();
-    //stream_process_.reset();
     peer_connection_.release();
 }
 
@@ -255,107 +358,50 @@ void P2PConductor::OnIceCandidate(const IceCandidateInterface *candidate)
 
 void P2PConductor::OnIceGatheringChange(IceObserver::IceGatheringState new_state)
 {
-    LOG(INFO) << __FUNCTION__ <<"-----------"<<new_state;
+    LOG(INFO) << "P2PConductor::OnIceGatheringChange---" <<new_state;
 }
+
+struct PeerMessageParams : public talk_base::MessageData {
+  PeerMessageParams(std::string id,std::string msg):peerId(id),message(msg) {}
+  ~PeerMessageParams() {}
+  std::string peerId;
+  std::string message;
+};
 
 void P2PConductor::OnMessage(talk_base::Message *msg)
 {
     if(msg->message_id == MSG_CONNECT_TIMEOUT){
         LOG(INFO)<<"P2PConductor::OnMessage-----"<<"connect is timeout";
         DeletePeerConnection();
+    }else if(msg->message_id == MSG_PEER_MESSAGE){
+        PeerMessageParams * param = static_cast<PeerMessageParams*>(msg->pdata);
+        this->OnMessageFromPeer_s(param->peerId,param->message);
+        delete param;
+    }else if(msg->message_id == MSG_DISCONNECT){
+        this->DeletePeerConnection();
+    }else if(msg->message_id == MSG_DISCONNECT_TIMEOUT){
+        this->peer_id_.clear();
+        this->setTunnelState(kClosed);
     }
 }
+
 
 
 void P2PConductor::OnMessageFromPeer(const std::string &peer_id,
                                      const std::string &message)
 {
-    LOG(INFO) <<"P2PConductor::OnMessageFromPeer---";
     ASSERT(!message.empty());
     if(peer_id != peer_id_ && !peer_id_.empty()){
-        LOG(WARNING)<<"peer id is wrong";
+        LOG(WARNING)<<"P2PConductor::OnMessageFromPeer---peer id is wrong";
         return;
     }
-    if(message.length() == (sizeof(kByeMessage) - 1) &&
-            message.compare(kByeMessage) == 0){
-        LOG(INFO)<<"receiv bye message from "<<peer_id;
-        if (peer_id == peer_id_ && peer_connection_.get()) {
-            DeletePeerConnection();
-        }
-        return;
-    }
-
-    if(!peer_connection_.get()) {
-        ASSERT(peer_id_.empty());
-        peer_id_ = peer_id;
-        if (!InitializePeerConnection()) {
-            LOG(LS_ERROR) << "Failed to initialize our PeerConnection instance";
-            //client_->SignOut();
-            return;
-        }
-    } else if (peer_id != peer_id_) {
-        ASSERT(!peer_id_.empty());
-        LOG(WARNING) << "Received a message from unknown peer while already in"
-                        " a conversation with a different peer.";
-        return;
-    }
-
-    Json::Reader reader;
-    Json::Value jmessage;
-    if (!reader.parse(message, jmessage)) {
-        LOG(WARNING) << "Received unknown message. " << message;
-        return;
-    }
-    std::string type;
-    //std::string json_object;
-
-    GetStringFromJsonObject(jmessage, kSessionDescriptionTypeName, &type);
-    if (!type.empty()) {
-        std::string sdp;
-        if (!GetStringFromJsonObject(
-                    jmessage, kSessionDescriptionSdpName, &sdp)) {
-            LOG(WARNING) << "Can't parse received session description message.";
-            return;
-        }
-        webrtc::SessionDescriptionInterface* session_description(
-                    webrtc::CreateSessionDescription(type, sdp));
-        if (!session_description) {
-            LOG(WARNING) << "Can't parse received session description message.";
-            return;
-        }
-        LOG(INFO) << " Received session description :" << message;
-        peer_connection_->SetRemoteDescription(
-                    DummySetSessionDescriptionObserver::Create(),
-                    session_description);
-        if (session_description->type() ==
-                webrtc::SessionDescriptionInterface::kOffer) {
-            peer_connection_->CreateAnswer(this);
-        }
-        return;
-    } else {
-        std::string sdp_mid;
-        int sdp_mlineindex = 0;
-        std::string sdp;
-        if (!GetStringFromJsonObject(jmessage, kCandidateSdpMidName, &sdp_mid) ||
-                !GetIntFromJsonObject(jmessage, kCandidateSdpMlineIndexName,
-                                      &sdp_mlineindex) ||
-                !GetStringFromJsonObject(jmessage, kCandidateSdpName, &sdp)) {
-            LOG(WARNING) << "Can't parse received message.";
-            return;
-        }
-        talk_base::scoped_ptr<webrtc::IceCandidateInterface> candidate(
-                    webrtc::CreateIceCandidate(sdp_mid, sdp_mlineindex, sdp));
-        if (!candidate.get()) {
-            LOG(WARNING) << "Can't parse received candidate message.";
-            return;
-        }
-        LOG(INFO) << " Received candidate :" << message;
-        if (!peer_connection_->AddIceCandidate(candidate.get())) {
-            LOG(WARNING) << "Failed to apply the received candidate";
-            return;
-        }
-        return;
-    }
+    //为了防止tunnelState的冲突，我们将tunnelstate的操作放在signal_thread中.
+    PeerMessageParams * param = new PeerMessageParams(peer_id,message);
+    signal_thread_->Post(this,MSG_PEER_MESSAGE,param);
+//    signal_thread_->Invoke<void>(
+//                talk_base::Bind(&P2PConductor::OnMessageFromPeer_s,
+//                                this,peer_id,message));
+    return;
 }
 
 PeerTunnelInterface::IceServers P2PConductor::g_servers;

@@ -33,12 +33,14 @@ AsynDealer::~AsynDealer()
 
 bool AsynDealer::initialize(const std::string &id, const std::string &router)
 {
+
     return zmq_thread_->Invoke<bool>(
                 talk_base::Bind(&AsynDealer::initialize_z,this,id,router));
 }
 
 void AsynDealer::terminate()
 {
+    LOG(INFO)<<"AsynDealer::terminate---";
     zmq_thread_->Invoke<void>(
                 talk_base::Bind(&AsynDealer::terminate_z, this));
 }
@@ -72,7 +74,7 @@ bool AsynDealer::initialize_z(const std::string &id, const std::string &router)
             socket_->setsockopt(ZMQ_IDENTITY,id.c_str(),id.length());
             id_ = id;
         }
-        LOG(INFO) << "dealer id is "<<id_;
+        LOG(INFO) << "AsynDealer::initialize_z---dealer id is "<<id_;
         socket_->connect(router.c_str());
         this->router_ = router;
         zmq_thread_->PostDelayed(10,this,MSG_TOREAD);

@@ -171,7 +171,7 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
 void PeerTerminal::OnTunnelNeedSend(const std::string &peer_id,
                                     const std::string &msg)
 {
-    LOG(INFO)<<"PeerTerminal::OnTunnelNeedSend----"<<peer_id;
+    LOG(INFO)<<"PeerTerminal::OnTunnelNeedSend----"<<peer_id.c_str();
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage["type"] = "p2p";
