@@ -212,11 +212,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		if (!isLocalDevice) {
 			//【打开通道】
 			TunnelCommunication.getInstance().openTunnel(dealerName);
-			System.out.println("MyDebug: ------> 【打开通道...】");
 		} else {
 			//【本地设备】
 			TunnelCommunication.getInstance().connectLocalDevice(localDeviceIPandPort);
-			System.out.println("MyDebug: ------> 【连接本地设备...】");
 		}
 		mDialog = createLoadingDialog("正在请求视频...");
 		mDialog.show();
@@ -779,7 +777,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
 				}
 			}
-			Value.TerminalDealerName = null;
+//			Value.TerminalDealerName = null;
 		} catch (Exception e) {
 			System.out.println("MyDebug: 关闭实时播放器异常！");
 			e.printStackTrace();
@@ -841,6 +839,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						} else {
 							//【本地设备】
 							TunnelCommunication.getInstance().startLocalVideo(localDeviceIPandPort);
+							if (videoView != null) {
+								videoView.isDisplayView = true;
+							}
 						}
 						videoView.playVideo();
 						if (audioThread != null) {

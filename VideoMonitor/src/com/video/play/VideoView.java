@@ -45,7 +45,7 @@ public class VideoView extends View {
     private boolean runFlag = false; // 运行标志
     public boolean isPlayVideo = false; // 是否播放
 //    public boolean isFullScreen = true; // 是否全屏
-    private boolean isDisplayView = false;
+    public boolean isDisplayView = false;
     
     //视频解码库JNI接口
     private native int initDecoder(int width, int height); 

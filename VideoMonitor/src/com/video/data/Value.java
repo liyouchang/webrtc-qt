@@ -25,7 +25,7 @@ public class Value {
 	/**
 	 * 终端的Dealer名称
 	 */
-	public static String TerminalDealerName = null;
+	public static String TerminalDealerName1 = null;
 	
 	/**
 	 * 服务器上比较版本的xml文件地址
