@@ -151,7 +151,6 @@ bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
 		g_vm_->DetachCurrentThread();
 	}
 	return true;
-
 }
 
 
