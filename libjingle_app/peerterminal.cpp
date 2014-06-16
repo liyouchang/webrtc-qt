@@ -50,7 +50,7 @@ bool PeerTerminal::CloseTunnel(const std::string &peer_id)
 
 
 bool PeerTerminal::SendByRouter(const std::string &peer_id,
-                               const std::string &data)
+                                const std::string &data)
 {
     return client_->SendToPeer(peer_id,data);
 }
@@ -62,7 +62,7 @@ bool PeerTerminal::SendByRouter(const std::string &peer_id, const char *data, si
 }
 
 bool PeerTerminal::SendByTunnel(const std::string &peer_id,
-                               const std::string &data)
+                                const std::string &data)
 {
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
@@ -72,7 +72,7 @@ bool PeerTerminal::SendByTunnel(const std::string &peer_id,
 }
 
 bool PeerTerminal::SendByTunnel(const std::string &peer_id,
-                               const char *data, size_t len)
+                                const char *data, size_t len)
 {
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
@@ -184,12 +184,12 @@ ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
 {
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
-      if ((*it)->GetPeerID().compare(peer_id) == 0) {
-        break;
-      }
+        if ((*it)->GetPeerID().compare(peer_id) == 0) {
+            break;
+        }
     }
     if (it == tunnels_.end())
-      return NULL;
+        return NULL;
     return *it;
 }
 
@@ -197,12 +197,12 @@ ScopedTunnel PeerTerminal::GetTunnel(kaerp2p::StreamProcess *stream)
 {
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
-      if ((*it)->GetStreamProcess() == stream) {
-        break;
-      }
+        if ((*it)->GetStreamProcess() == stream) {
+            break;
+        }
     }
     if (it == tunnels_.end())
-      return NULL;
+        return NULL;
     return *it;
 }
 
@@ -211,10 +211,10 @@ int PeerTerminal::CountAvailableTunnels()
     int notUsedNum = max_tunnel_num_ - tunnels_.size();
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
-      if ((*it)->GetPeerID().empty()) {
-        notUsedNum++;
-        break;
-      }
+        if ((*it)->GetPeerID().empty()) {
+            notUsedNum++;
+            break;
+        }
     }
     return notUsedNum;
 }
@@ -224,16 +224,26 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel){
         return aTunnel;
-    }else if(tunnels_.size() <= max_tunnel_num_ ||
-             max_tunnel_num_ == kInfiniteTunnel){
+    }
+    aTunnel = this->GetTunnel("");
+    if(aTunnel){
+        LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<
+                   "reuse a empty tunnel, total is "<<tunnels_.size();
+        return aTunnel;
+    }
+    if(tunnels_.size() <= max_tunnel_num_ ||
+            max_tunnel_num_ == kInfiniteTunnel){
         aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
         aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
         aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
         aTunnel->SignalStreamClosed.connect(this,&PeerTerminal::OnTunnelClosed);
         tunnels_.push_back(aTunnel);
-    }
-    else{
-        aTunnel = this->GetTunnel("");
+        LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<
+                   "create a new tunnel, total tunnel num is "<< tunnels_.size();
+    } else {
+        LOG(WARNING) <<"PeerTerminal::GetOrCreateTunnel---"<<
+                       "tunnel number is more than the max number "<<
+                       tunnels_.size();
     }
     return aTunnel;
 }
