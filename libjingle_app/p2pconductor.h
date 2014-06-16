@@ -26,7 +26,8 @@ class P2PConductor:
 {
 public:
     enum {
-        MSG_CONNECT_TIMEOUT
+        MSG_CONNECT_TIMEOUT,
+        MSG_PEER_MESSAGE
     };
     enum TunnelState {
         kConnecting,

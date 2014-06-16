@@ -267,7 +267,7 @@ public:
         groupBox->setTitle(QApplication::translate("TunnelClientUI", "VideoWall", 0));
         groupBox_2->setTitle(QApplication::translate("TunnelClientUI", "Control", 0));
         btn_init->setText(QApplication::translate("TunnelClientUI", "Init", 0));
-        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "0090B0D41803-43FC", 0));
+        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "0090B0D41803-8F8F", 0));
         btn_connect->setText(QApplication::translate("TunnelClientUI", "ConnectToPeer", 0));
         btn_disconnect->setText(QApplication::translate("TunnelClientUI", "DisConnectToPeer", 0));
         getwifi->setText(QApplication::translate("TunnelClientUI", "get wifi", 0));
