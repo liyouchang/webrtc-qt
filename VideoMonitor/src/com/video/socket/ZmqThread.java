@@ -61,13 +61,15 @@ public class ZmqThread extends Thread {
 			message_byte2 = zmq_socket.recv(0);
 			String message_str1 = new String(message_byte1);
 			String message_str2 = new String(message_byte2);
-			JSONObject obj = null;
 			try {
-				obj = new JSONObject(message_str2);
-				String type = obj.getString("type");
-				if ((type.equals("p2p")) || (type.equals("tunnel"))) {
-					TunnelCommunication.getInstance().messageFromPeer(
-							message_str1, message_str2);
+				JSONObject obj = new JSONObject(message_str2);
+				if (obj.has("type")) {
+					String type = obj.getString("type");
+					if ((type.equals("p2p")) || (type.equals("tunnel"))) {
+						TunnelCommunication.getInstance().messageFromPeer(message_str1, message_str2);
+					} else {
+						result = message_str2;
+					}
 				} else {
 					result = message_str2;
 				}

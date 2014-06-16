@@ -46,12 +46,20 @@ public class AudioThread extends Thread {
 		TunnelCommunication.audioDataCache.clearBuffer();
 		if (audioTrack != null) {
 			try {
-				audioTrack.stop();
-				audioTrack.release();
+				System.out.println("MyDebug: ------> 1.audioTrack");
+				if ((audioTrack != null) && (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_STOPPED )) {
+					audioTrack.stop();
+					System.out.println("MyDebug: ------> 2.audioTrack");
+					audioTrack.release();
+					System.out.println("MyDebug: ------> 3.audioTrack");
+				}
 				audioTrack = null;
 				readBuf = null;
 				writeBuf = null;
+				System.out.println("MyDebug: ------> 4.audioTrack");
 			} catch (Exception e) {
+				audioTrack = null;
+				System.out.println("MyDebug: uninitAudioThread()异常！");
 				e.printStackTrace();
 			}
 		}
@@ -75,7 +83,7 @@ public class AudioThread extends Thread {
 				if (readBufLen > 0) {
 					readBufLen = G711Decoder(writeBuf, readBuf, readBufLen);
 					int playPosition = 0;
-					while (readBufLen > playPosition) {
+					while ((audioTrack != null) && (readBufLen > playPosition)) {
 						if (readBufLen - playPosition > audioTrackPlaySize) {
 							audioTrack.write(writeBuf, playPosition, audioTrackPlaySize);
 							playPosition = playPosition + audioTrackPlaySize;
