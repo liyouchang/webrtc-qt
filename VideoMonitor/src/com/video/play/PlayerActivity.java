@@ -67,7 +67,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private PlayerReceiver playerReceiver; 
 	public static final String PLAYER_BROADCAST_ACTION = "com.video.play.PlayerActivity.PlayVideo";
 	public static final String REQUEST_TIMES_ACTION = "com.video.play.PlayerActivity.RequestTimes";
-	public static final String DISPLAY_VIDEO_ACTION = "com.video.play.PlayerActivity.DisplayVideo";
 
 	private TextView tv_title = null;
 	private static String deviceName = null;
@@ -196,7 +195,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(PLAYER_BROADCAST_ACTION);
 		filter.addAction(REQUEST_TIMES_ACTION);
-		filter.addAction(DISPLAY_VIDEO_ACTION);
 		filter.addAction(Value.TUNNEL_REQUEST_ACTION);
 		registerReceiver(playerReceiver, filter);
 		
@@ -408,6 +406,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			public void onCancel(DialogInterface dialog) {
 				if ((mDialog != null) && (mDialog.isShowing())) {
 					mDialog.dismiss();
+				}
+				//关闭通道
+				Value.isTunnelOpened = false;
+				if (!Value.isTunnelOpened) {
+					TunnelCommunication.getInstance().closeTunnel(dealerName);
 				}
 				closePlayer();
 				finish();
@@ -706,8 +709,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		//注销广播
 		unregisterReceiver(playerReceiver);
 		//解除屏幕保持唤醒
-		wakeLock.release(); 
-		wakeLock = null;
+		if ((wakeLock != null) && (wakeLock.isHeld())) {
+			System.out.println("MyDebug: videoType: ------> wakeLock.release()");
+			wakeLock.release(); 
+			wakeLock = null;
+		}
 	}
 
 	@Override
@@ -853,9 +859,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						PlayerActivity.this.finish();
 						break;
 				}
-			}
-			else if (action.equals(DISPLAY_VIDEO_ACTION)) {
-				
 			}
 		}
 	}

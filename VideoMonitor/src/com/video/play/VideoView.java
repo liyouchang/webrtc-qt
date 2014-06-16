@@ -36,8 +36,8 @@ public class VideoView extends View {
     private int drawWidth = 0;
     private int drawHeight = 0;  
     private int videoType = 0;
-    private int bitWidth = 704;
-    private int bitHeight = 576;
+    private int bitWidth = 640;
+    private int bitHeight = 480;
     
     private Canvas mCanvas = null;
     
@@ -201,6 +201,7 @@ public class VideoView extends View {
 				bitWidth = 320;
 				bitHeight = 240;
 			}
+//			System.out.println("MyDebug: videoType: "+videoType);
 
 			srcRect.left = 0;
 			srcRect.top = 0;
@@ -244,9 +245,6 @@ public class VideoView extends View {
 				} else {
 					if (!isDisplayView) {
 						isDisplayView = true;
-//						Intent intent = new Intent();
-//						intent.setAction(PlayerActivity.DISPLAY_VIDEO_ACTION);
-//						mContext.sendBroadcast(intent);
 						Thread.sleep(3000);
 						Paint paint = new Paint();
 						paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));

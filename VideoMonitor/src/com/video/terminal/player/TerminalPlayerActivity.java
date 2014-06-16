@@ -1122,6 +1122,11 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 				if ((mDialog != null) && (mDialog.isShowing())) {
 					mDialog.dismiss();
 				}
+				//关闭通道
+				Value.isTunnelOpened = false;
+				if (!Value.isTunnelOpened) {
+					TunnelCommunication.getInstance().closeTunnel(dealerName);
+				}
 				closePlayer();
 				finish();
 			}
