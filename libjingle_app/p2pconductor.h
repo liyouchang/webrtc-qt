@@ -27,9 +27,12 @@ class P2PConductor:
 public:
     enum {
         MSG_CONNECT_TIMEOUT,
-        MSG_PEER_MESSAGE
+        MSG_PEER_MESSAGE,
+        MSG_DISCONNECT,
+        MSG_DISCONNECT_TIMEOUT
     };
     enum TunnelState {
+        kNew,
         kConnecting,
         kEstablished,
         kDisconnecting,
@@ -72,6 +75,7 @@ protected:
     void OnTunnelTerminate(StreamProcess * stream);
     void OnMessageFromPeer_s(const std::string &peerId,
                              const std::string &message);
+    void setTunnelState(TunnelState state);
 private:
     talk_base::scoped_refptr<PeerTunnelInterface> peer_connection_;
     talk_base::Thread * stream_thread_;

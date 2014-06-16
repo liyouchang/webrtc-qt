@@ -6,6 +6,7 @@
 namespace  kaerp2p {
 
 const int kConnectTimeout = 30000; // close DeletePeerConnection after 30s without connect
+const int kDisConnectTimeout = 5000;
 
 // Names used for a IceCandidate JSON object.
 const char kCandidateSdpMidName[] = "sdpMid";
@@ -38,7 +39,7 @@ protected:
 };
 
 P2PConductor::P2PConductor():
-    stream_thread_(NULL),signal_thread_(NULL),tunnelState(kClosed)
+    stream_thread_(NULL),signal_thread_(NULL),tunnelState(kNew)
 {
     stream_thread_ = new talk_base::Thread();
     bool result = stream_thread_->Start();
@@ -77,9 +78,7 @@ bool P2PConductor::ConnectToPeer(const std::string &peer_id)
 void P2PConductor::DisconnectFromCurrentPeer()
 {
     if (peer_connection_.get()) {
-        //DeletePeerConnection();
-        signal_thread_->Invoke<void>(
-                    talk_base::Bind(&P2PConductor::DeletePeerConnection,this));
+        signal_thread_->Post(this,MSG_DISCONNECT);
         SignalNeedSendToPeer(peer_id_,kByeMessage);
     }
 }
@@ -97,7 +96,7 @@ void P2PConductor::OnTunnelEstablished()
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     SignalStreamOpened(this->GetStreamProcess());
 
-    tunnelState = kEstablished;
+    this->setTunnelState(kEstablished);
 }
 
 void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
@@ -105,8 +104,7 @@ void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
     LOG(INFO) << "P2PConductor::OnTunnelTerminate";
     ASSERT(this->GetStreamProcess() == stream);
     SignalStreamClosed(stream);
-
-    peer_id_.clear();
+    this->signal_thread_->PostDelayed(kDisConnectTimeout,this,MSG_DISCONNECT_TIMEOUT);
 }
 
 void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
@@ -116,7 +114,9 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
         if(message.length() == (sizeof(kEndMsg) - 1) &&
                 message.compare(kEndMsg) == 0) {
             LOG(INFO)<<"receive end message from "<<peerId <<",tunnel is end";
-            tunnelState = kClosed;
+            setTunnelState(kClosed);
+            peer_id_.clear();
+            signal_thread_->Clear(this);
         } else {
             LOG(WARNING)<<"P2PConductor::OnMessageFromPeer---"<<
                       "should not receive message when tunnel is closing";
@@ -130,7 +130,7 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
         if (peerId == peer_id_ && peer_connection_.get()) {
             DeletePeerConnection();
             SignalNeedSendToPeer(peer_id_,kEndMsg);
-            tunnelState = kClosed;
+            setTunnelState(kClosed);
         }
         return;
     }
@@ -210,6 +210,11 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
     }
 }
 
+void P2PConductor::setTunnelState(P2PConductor::TunnelState state)
+{
+    tunnelState = state;
+}
+
 void P2PConductor::AddIceServer(const std::string &uri,
                                 const std::string &username,
                                 const std::string &password)
@@ -270,8 +275,7 @@ bool P2PConductor::InitializePeerConnection()
     if(!pt->Initialize(g_servers,this)){
         return false;
     }
-
-    tunnelState = kConnecting;
+    setTunnelState(kConnecting);
 
     peer_connection_ = PeerTunnelProxy::Create(pt->signaling_thread(), pt);
 
@@ -283,9 +287,8 @@ bool P2PConductor::InitializePeerConnection()
 void P2PConductor::DeletePeerConnection()
 {
     LOG(INFO) << "P2PConductor::DeletePeerConnection---" << this->peer_id_;
-    tunnelState = kDisconnecting;
+    setTunnelState(kDisconnecting);
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
-    //signal_thread_->Clear(this,MSG_PEER_MESSAGE);
     //when close peer_connection the session will terminate and destroy the channels
     //the channel destroy will make the StreamProcess clean up
     peer_connection_->Close();
@@ -374,6 +377,11 @@ void P2PConductor::OnMessage(talk_base::Message *msg)
         PeerMessageParams * param = static_cast<PeerMessageParams*>(msg->pdata);
         this->OnMessageFromPeer_s(param->peerId,param->message);
         delete param;
+    }else if(msg->message_id == MSG_DISCONNECT){
+        this->DeletePeerConnection();
+    }else if(msg->message_id == MSG_DISCONNECT_TIMEOUT){
+        this->peer_id_.clear();
+        this->setTunnelState(kClosed);
     }
 }
 
@@ -388,11 +396,11 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id,
         return;
     }
     //为了防止tunnelState的冲突，我们将tunnelstate的操作放在signal_thread中.
-//    PeerMessageParams * param = new PeerMessageParams(peer_id,message);
-//    signal_thread_->Post(this,MSG_PEER_MESSAGE,param);
-    signal_thread_->Invoke<void>(
-                talk_base::Bind(&P2PConductor::OnMessageFromPeer_s,
-                                this,peer_id,message));
+    PeerMessageParams * param = new PeerMessageParams(peer_id,message);
+    signal_thread_->Post(this,MSG_PEER_MESSAGE,param);
+//    signal_thread_->Invoke<void>(
+//                talk_base::Bind(&P2PConductor::OnMessageFromPeer_s,
+//                                this,peer_id,message));
     return;
 }
 

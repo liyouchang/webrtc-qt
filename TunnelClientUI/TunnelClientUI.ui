@@ -76,7 +76,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0090B0D41803-8F8F</string>
+          <string>97654321</string>
          </property>
         </widget>
        </item>
@@ -157,6 +157,23 @@
             <property name="text">
              <string>down</string>
             </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>56</width>
+               <height>16</height>
+              </rect>
+             </property>
+            </widget>
            </widget>
           </item>
          </layout>
