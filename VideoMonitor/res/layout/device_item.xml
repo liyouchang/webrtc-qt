@@ -12,7 +12,7 @@
         android:id="@+id/rl_device_bg"
         android:layout_width="100dp"
         android:layout_height="90dp"
-        android:background="@drawable/device_item_view_bg" >
+        android:background="@drawable/device_item_bg" >
 
         <ImageView
             android:id="@+id/iv_device_icon"

@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">视界通</string>
-    <string name="app_version">版本: V1.1.2</string>
+    <string name="app_version">版本: V1.1.4</string>
     <string name="company_website">公司网址: www.kaer.cn</string>
     <string name="company_phone">公司电话: 4006080787</string>
     <string name="company">山东卡尔电气股份有限公司</string>
@@ -27,7 +27,7 @@
     <string name="old_pwd">请输入旧密码</string>
     <string name="new_pwd">请输入新密码</string>
     <string name="new_repwd">请再次输入新密码</string>
-    <string name="hint_wifi_ssid">WiFi名称</string>
+    <string name="hint_wifi_ssid">点击搜索WiFi</string>
     <string name="hint_wifi_pwd">请输入WiFi密码</string>
     
     <string name="btn_ok">确定</string>
@@ -60,7 +60,7 @@
     <string name="play_alarm_music_explain">开启后，手机收到报警消息语音通知</string>
     <string name="remember_pwd_explain">关闭后，注销登录将删除密码</string>
     <string name="select_term_online_explain">请选择要配置的在线终端设备</string>
-    <string name="set_wifi_explain">确定后，会将当前的网络设置到设备中</string>
+    <string name="set_wifi_explain">确定后，会将当前的网络配置到设备中</string>
     <string name="wifi_term_list">在线终端列表</string>
     <string name="protect_traffic">流量保护</string>
     <string name="protect_traffic_explain">开启后，只允许在WiFi情况下观看视频</string>

@@ -254,36 +254,36 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 		
 		if (userName.equals("")) {
 			resultFlag = false;
-			et_name.setError("请输入用户名！");
+			Toast.makeText(mContext, "请输入用户名！", Toast.LENGTH_SHORT).show();
 		}
 		else if (Utils.isChineseString(userName)) {
 			resultFlag = false;
-			et_name.setError("不支持中文！");
+			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("用户名长度范围3~20！");
+			Toast.makeText(mContext, "用户名长度范围3~20！", Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			if (userEmail.equals("")) {
 				resultFlag = false;
-				et_email.setError("请输入电子邮箱！");
+				Toast.makeText(mContext, "请输入电子邮箱！", Toast.LENGTH_SHORT).show();
 			}
 			else if (Utils.isChineseString(userEmail)) {
 				resultFlag = false;
-				et_email.setError("不支持中文！");
+				Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 			}
 			else if ((userEmail.length()<6) || (userEmail.length()>20)) {
 				resultFlag = false;
-				et_email.setError("电子邮箱长度范围6~20！");
+				Toast.makeText(mContext, "电子邮箱长度范围6~20！", Toast.LENGTH_SHORT).show();
 			}
 			else if (userEmail.indexOf("@")<=0) {
 				resultFlag = false;
-				et_email.setError("邮箱格式不正确！");
+				Toast.makeText(mContext, "邮箱格式不正确！", Toast.LENGTH_SHORT).show();
 			}
 			else if (userEmail.indexOf(".")<=0) {
 				resultFlag = false;
-				et_email.setError("邮箱格式不正确！");
+				Toast.makeText(mContext, "邮箱格式不正确！", Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 			}

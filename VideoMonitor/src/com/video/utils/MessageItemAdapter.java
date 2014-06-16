@@ -10,7 +10,10 @@ import java.util.HashMap;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +25,8 @@ import android.widget.TextView;
 
 import com.video.R;
 import com.video.main.AlarmImageViewActivity;
+import com.video.main.MsgFragment;
+import com.video.socket.HandlerApplication;
 
 public class MessageItemAdapter extends BaseAdapter {
 
@@ -83,7 +88,6 @@ public class MessageItemAdapter extends BaseAdapter {
 		
 		String msg_image_url = list.get(position).get("imageURL");
 		if (!msg_image_url.equals("null")) {
-//			System.out.println("MyDebug: Image Url: "+msg_image_url);
 			AsyncImageTask task = new AsyncImageTask(holder.iv_image, msg_image_url);
 			task.execute();
 		}
@@ -92,9 +96,16 @@ public class MessageItemAdapter extends BaseAdapter {
 			@Override
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
+				Intent intent = new Intent();
+				if (list.get(position).get("isReaded").equals("false")) {
+					intent.putExtra("listMsgID", list.get(position).get("msgID"));
+					intent.setAction(MsgFragment.READ_MESSAGE_ACTION);
+					HandlerApplication.getInstance().sendBroadcast(intent);
+				}
+				
 				String UrlPath = list.get(position).get("imageURL");
 				String filePath = imageCache+File.separator+UrlPath.substring(UrlPath.lastIndexOf("/")+1);
-				Intent intent = new Intent(context, AlarmImageViewActivity.class);
+				intent = new Intent(context, AlarmImageViewActivity.class);
 				intent.putExtra("imagePath", filePath);
 				context.startActivity(intent);
 			}
@@ -113,7 +124,7 @@ public class MessageItemAdapter extends BaseAdapter {
 	/**
 	 * 异步加载图片类
 	 */
-	private final class AsyncImageTask extends AsyncTask<String, Integer, Uri> {
+	private final class AsyncImageTask extends AsyncTask<String, Integer, String> {
 		private ImageView imageView;
 		private String imagePath;
 		
@@ -124,38 +135,49 @@ public class MessageItemAdapter extends BaseAdapter {
 
 		//后台运行的子线程
 		@Override
-		protected Uri doInBackground(String... params) {
+		protected String doInBackground(String... params) {
 			try {
-				return getCacheImageUri(imagePath, imageCache);
+				return getCacheImageLocalPath(imagePath, imageCache);
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.out.println("MyDebug: getCacheImageUri()异常！");
+				System.out.println("MyDebug: getCacheImageLocalPath()异常！");
 			}
 			return null;
 		}
 
 		//更新界面显示
 		@Override
-		protected void onPostExecute(Uri result) {
-			super.onPostExecute(result);
-			if (imageView != null && result != null) {
-				imageView.setImageURI(result);
+		protected void onPostExecute(String localPath) {
+			super.onPostExecute(localPath);
+			if (imageView != null && localPath != null) {
+				BitmapFactory.Options opts = new BitmapFactory.Options();
+				opts.inJustDecodeBounds = true;
+				BitmapFactory.decodeFile(localPath, opts);
+				opts.inJustDecodeBounds = false;
+				opts.inSampleSize = Utils.computeSampleSize(opts, -1, 256*256);
+				try {
+					Bitmap bm = BitmapFactory.decodeFile(localPath, opts);
+					Drawable drawable =new BitmapDrawable(bm);
+					imageView.setBackgroundDrawable(drawable);
+				} catch (OutOfMemoryError e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 	
 	/**
-	 * 获得图片缓存的Uri路径
+	 * 获得图片缓存的本地路径
 	 * @param path 网络上图片的路径
 	 * @param cache 本地缓存文件夹
-	 * @return 返回缓存的Uri路径
+	 * @return 返回缓存的本地路径
 	 * @throws Exception 
 	 */
-	public Uri getCacheImageUri(String path, File cache) throws Exception {
+	public String getCacheImageLocalPath(String path, File cache) throws Exception {
 		String name = path.substring(path.lastIndexOf("/")+1);
 		File file = new File(cache, name);
 		if (file.exists()) {
-			return Uri.fromFile(file);
+			return file.getPath();
 		} else {
 			URL url = new URL(path);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -172,7 +194,7 @@ public class MessageItemAdapter extends BaseAdapter {
 				}
 				is.close();
 				fos.close();
-				return Uri.fromFile(file);
+				return file.getPath();
 			}
 		}
 		return null;

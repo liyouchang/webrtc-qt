@@ -10,8 +10,10 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.res.Configuration;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -63,7 +65,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 	
 	public static int requestPlayerTimes = 0;
 	private PlayerReceiver playerReceiver; 
-	public static final String TUNNEL_REQUEST_ACTION = "com.video.play.PlayerActivity.TunnelRequest";
 	public static final String REQUEST_TERMINAL_VIDEO_ACTION = "com.video.terminal.player.TerminalPlayerActivity.request";
 
 	public File videoSavePath = null; // 文件夹的缓存路径
@@ -212,7 +213,7 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 		playerReceiver = new PlayerReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(REQUEST_TERMINAL_VIDEO_ACTION);
-		filter.addAction(TUNNEL_REQUEST_ACTION);
+		filter.addAction(Value.TUNNEL_REQUEST_ACTION);
 		registerReceiver(playerReceiver, filter);
 		
 		//获得终端录像的信息		
@@ -1113,7 +1114,18 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 		spaceshipImage.startAnimation(hyperspaceJumpAnimation);
 		tipTextView.setText(msg);
 		Dialog loadingDialog = new Dialog(mContext, R.style.dialog_player_style);
-		loadingDialog.setCancelable(false);
+		loadingDialog.setCancelable(true);
+		loadingDialog.setCanceledOnTouchOutside(false);
+		loadingDialog.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				if ((mDialog != null) && (mDialog.isShowing())) {
+					mDialog.dismiss();
+				}
+				closePlayer();
+				finish();
+			}
+		});
 		loadingDialog.setContentView(layout, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.FILL_PARENT,
 				LinearLayout.LayoutParams.FILL_PARENT));
@@ -1262,7 +1274,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 						}
 						jniCallbackParam = 3;
 						isLocalFile = true;
-						toastNotify(mContext, "录像下载完成", Toast.LENGTH_SHORT);
 						break;
 					case 4: // 达到播放阀值
 						if (mDialog.isShowing()) {
@@ -1289,7 +1300,7 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 						break;
 				}
 			}
-			else if (action.equals(TUNNEL_REQUEST_ACTION)) {
+			else if (action.equals(Value.TUNNEL_REQUEST_ACTION)) {
 				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
 				switch (TunnelEvent) {
 					// 通道打开

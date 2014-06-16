@@ -273,10 +273,10 @@ public class UpdateAPK {
 			if (Utils.checkSDCard()) {
 				apkSavePath = Environment.getExternalStorageDirectory() + File.separator + "KaerVideo" + File.separator + "cache";
 				try {
-					//Http请求连接网络
+					// Http请求连接网络
 					InputStream inputStream = httpRequestNetWork(xmlHashMap.get("apkDownLoadUrl"));
 					if (inputStream != null) {
-						//确定文件目录的存在，没有创建目录
+						// 确定文件目录的存在，没有创建目录
 						File file = new File(apkSavePath);
 						System.out.println("MyDebug: "+"APK下载目录 : "+file.toString());
 						if (!file.exists()) {
@@ -287,10 +287,9 @@ public class UpdateAPK {
 						byte[] buf = new byte[2*1024];
 						int count = 0;
 						do {
-							//下载apk数据
+							// 下载apk数据
 							int readCount = inputStream.read(buf);
-							sleep(2);
-							//处理下载界面的显示
+							// 处理下载界面的显示
 							count += readCount;
 							int percent = (int)(((float)count/apkLeagth)*100);
 							sendHandlerMsg(DOWNLOAD_PERCENT, percent);
@@ -298,10 +297,10 @@ public class UpdateAPK {
 								downLoadDialog.dismiss();
 								sendHandlerMsg(APK_DOWNLOAD_FINISH);
 							}
-							//将下载的数据保存在SD卡上
+							// 将下载的数据保存在SD卡上
 							fileOutputStream.write(buf, 0, readCount);
 						} while(!isCancelUpgrade);
-						//关闭输入、输出流
+						// 关闭输入、输出流
 						inputStream.close();
 						fileOutputStream.close();
 					}

@@ -60,12 +60,12 @@ public class WiFiAlertDialog {
 		wifiList.setAdapter(adapter);
 	}
 	
-	public void setOnItemClickListenerEditText(final View et_ssid, final ArrayList<HashMap<String, Object>> list) {
-		final EditText editText = (EditText) et_ssid;
+	public void setOnItemClickListenerWiFiButton(final View btn_ssid, final ArrayList<HashMap<String, Object>> list) {
+		final Button buttonView = (Button) btn_ssid;
 		wifiList.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				editText.setText((CharSequence) list.get(position).get("WiFiSSID"));
+				buttonView.setText((CharSequence) list.get(position).get("WiFiSSID"));
 				WiFiActivity.selectedWiFi = list.get(position);
 				dismiss();
 			}

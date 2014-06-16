@@ -305,66 +305,66 @@ public class RegisterActivity extends Activity implements OnClickListener {
 		
 		if (userName.equals("")) {
 			resultFlag = false;
-			et_name.setError("请输入用户名！");
+			Toast.makeText(mContext, "请输入用户名！", Toast.LENGTH_SHORT).show();
 		}
 		else if (Utils.isChineseString(userName)) {
 			resultFlag = false;
-			et_name.setError("不支持中文！");
+			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
-			et_name.setError("用户名长度范围3~20！");
+			Toast.makeText(mContext, "用户名长度范围3~20！", Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			if (userEmail.equals("")) {
 				resultFlag = false;
-				et_email.setError("请输入电子邮箱！");
+				Toast.makeText(mContext, "请输入电子邮箱！", Toast.LENGTH_SHORT).show();
 			}
 			else if (Utils.isChineseString(userEmail)) {
 				resultFlag = false;
-				et_email.setError("不支持中文！");
+				Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 			}
 			else if ((userEmail.length()<6) || (userEmail.length()>20)) {
 				resultFlag = false;
-				et_email.setError("电子邮箱长度范围6~20！");
+				Toast.makeText(mContext, "电子邮箱长度范围6~20！", Toast.LENGTH_SHORT).show();
 			}
 			else if (userEmail.indexOf("@")<=0) {
 				resultFlag = false;
-				et_email.setError("邮箱格式不正确！");
+				Toast.makeText(mContext, "邮箱格式不正确！", Toast.LENGTH_SHORT).show();
 			}
 			else if (userEmail.indexOf(".")<=0) {
 				resultFlag = false;
-				et_email.setError("邮箱格式不正确！");
+				Toast.makeText(mContext, "邮箱格式不正确！", Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 				if (userPwd.equals("")) {
 					resultFlag = false;
-					et_pwd.setError("请输入密码！");
+					Toast.makeText(mContext, "请输入密码！", Toast.LENGTH_SHORT).show();
 				}
 				else if (Utils.isChineseString(userPwd)) {
 					resultFlag = false;
-					et_pwd.setError("不支持中文！");
+					Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 				}
 				else if ((userPwd.length()<6) || (userPwd.length()>20)) {
 					resultFlag = false;
-					et_pwd.setError("密码长度范围6~20！");
+					Toast.makeText(mContext, "密码长度范围6~20！", Toast.LENGTH_SHORT).show();
 				} else {
 					resultFlag = true;
 					if (userRepwd.equals("")) {
 						resultFlag = false;
-						et_repwd.setError("请输入确认密码！");
+						Toast.makeText(mContext, "请输入确认密码！", Toast.LENGTH_SHORT).show();
 					}
 					else if (Utils.isChineseString(userRepwd)) {
 						resultFlag = false;
-						et_repwd.setError("不支持中文！");
+						Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 					}
 					else if ((userRepwd.length()<6) || (userPwd.length()>20)) {
 						resultFlag = false;
-						et_repwd.setError("确认密码长度范围6~20！");
+						Toast.makeText(mContext, "确认密码长度范围6~20！", Toast.LENGTH_SHORT).show();
 					}
 					else if (!userPwd.equals(userRepwd)) {
 						resultFlag = false;
-						et_repwd.setError("两次输入的密码不一致！");
+						Toast.makeText(mContext, "两次输入的密码不一致！", Toast.LENGTH_SHORT).show();
 					} else {
 						resultFlag = true;
 					}

@@ -1,6 +1,7 @@
 package com.video.main;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import org.json.JSONException;
@@ -334,7 +335,9 @@ public class TerminalVideoListActivity extends Activity implements
 			} else {
 				holder = (ViewHolder) convertView.getTag();
 			}
-			holder.file_name.setText("文件名：" + list.get(position).get("fileDate"));
+			String dateString = list.get(position).get("fileDate");
+			Date date = Utils.StringToDate(dateString, "yyyyMMddHHmmss");
+			holder.file_name.setText("开始时间：" + Utils.DateToString(date, "yyyy-MM-dd HH:mm:ss"));
 			holder.file_size.setText("文件大小：" + list.get(position).get("fileSize"));
 
 			return convertView;
