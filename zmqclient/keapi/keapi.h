@@ -2,7 +2,7 @@
 #define __MY_KEAPI_H__
 
 #ifdef __cplusplus
-extern "C" {               
+extern "C" {
 #endif
 
 #include <stdio.h>
@@ -21,14 +21,14 @@ extern "C" {
 
 
 typedef struct
-{ 
+{
 	char path[NVR_PATH_LEN];
 	char date[NVR_DATE_LEN];
 	int  size;
 }t_VidRec_FileInfo, *pt_VidRec_FileInfo;
 
 typedef struct
-{ 
+{
 	int file_num;
 	t_VidRec_FileInfo   rec_file[MAX_NVR_QUERYNUM];
 }t_VidRecFile_QueryInfo, *pt_VidRecFile_QueryInfo;
@@ -66,7 +66,7 @@ int Raycomm_GetMediaData(int handle,char* buf,int max_size,unsigned int* timesta
 int Raycomm_DisConnectMedia(int handle);
 int Raycomm_ForceIframe(int handle );
 //int IPC_TalkPlay(const char* keyword,char* buf,int len,unsigned int timestamp,unsigned int audiotype);
-int Raycomm_TalkPlay (int handle, char* buf, int len, unsigned int timestamp, unsigned int audiotype);
+int Raycomm_TalkPlay(int handle, char* buf, int len, unsigned int timestamp, unsigned int audiotype);
 int Raycomm_SetPtz(const char* keyword,int preset,int cam_id);
 //通道号   chn = 1.2.3.4
 //移动侦测 rea = 1
@@ -90,10 +90,9 @@ int Raycomm_Reboot(void);
 int Raycomm_SetTitle(const char* pChnName);
 
 int Raycomm_SetAlarmEnable(char bEnable);
-//return 1 enable 0 disable
 int Raycomm_GetAlarmEnable();
-
-
+//设备NTP校时服务器设置，当设置ip、port、时区zone改变时，设置完后设备进行校时，而后每天校时一次
+int Raycomm_SetNtp(const char* ip,short port,const char* zone); // ip 格式0.0.0.0  zone格式+8:00
 #ifdef __cplusplus
 }
 #endif

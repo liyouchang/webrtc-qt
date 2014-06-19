@@ -5,10 +5,11 @@
 #include <vector>
 
 #include "libjingle_app/defaults.h"
-
+#include "talk/base/logging.h"
+#include "libjingle_app/p2pconductor.h"
 #include "VideoWall.h"
 #include "ke_recorder.h"
-
+#include "libjingle_app/p2pconductor.h"
 
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
@@ -24,11 +25,19 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
                      this,&KePlayerPlugin::StopVideo);
     QObject::connect(this,&KePlayerPlugin::TunnelClosed,
                      video_wall_,&VideoWall::StopPeerPlay);
-    QDir configDir = QDir::home();
-    configDir.mkdir("ShijietongConfig");
-    configDir.cd("ShijietongConfig");
-    myconfig = new QSettings(configDir.absoluteFilePath("playerconfig.ini"),
+    QString currentPath = QCoreApplication::applicationDirPath();
+    QDir configDir(currentPath);
+    myconfig = new QSettings(configDir.absoluteFilePath("pluginconfig.ini"),
                              QSettings::IniFormat,this);
+  //set log info
+    QString logFileName = myconfig->value("log/filename").toString();
+    QString logConfig = myconfig->value("log/config").toString();
+    QString logFilePath = configDir.absoluteFilePath(logFileName);
+    qDebug()<<"log info "<<logConfig<<" logFilePath "<<logFilePath;
+    talk_base::LogMessage::ConfigureLogging(logConfig.toLatin1().constData(),
+                                            logFilePath.toLocal8Bit().constData());
+
+    //set save path
     m_savePath = myconfig->value("plugin/save_path").toString();
     if(savePath().isEmpty()){
         QDir saveDir = QDir::home();
@@ -81,9 +90,23 @@ void KePlayerPlugin::FullScreen()
     this->video_wall_->showfullScreenWall();
 }
 
-int KePlayerPlugin::Initialize(QString routerUrl)
+int KePlayerPlugin::GetVersion()
 {
-
+    const int kVersion = 31;
+    return kVersion;
+}
+/**
+ * @brief KePlayerPlugin::Initialize
+ * @param routerUrl : a url to connect to message server(eg. tcp://222.174.213.185:5555)
+ * @param iceServers : the servers used by ice protocal to accomplish NAT traversal,
+ *  this param is a json string contains a array of json object of server connection info
+ *  (eg. "[{"uri":"stun:222.174.213.185:5389"},{"uri":"turn:222.174.213.185:5766"}]").
+ * @return : 0 for success.
+ */
+int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
+{
+    qDebug()<<"KePlayerPlugin::Initialize---routerUrl:"<<routerUrl<<
+              " iceServers"<<jstrIceServers;
     if(is_inited){
         return KE_SUCCESS;
     }
@@ -91,6 +114,8 @@ int KePlayerPlugin::Initialize(QString routerUrl)
         qWarning()<<"KePlayerPlugin::Initialize---connect error";
         return KE_FAILED;
     }
+
+
     tunnel_->Init(connection_.get());
     QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvVideoData,
                      this->video_wall_,&VideoWall::OnRecvMediaData);
@@ -120,6 +145,10 @@ int KePlayerPlugin::Initialize(QString routerUrl)
                      this,&KePlayerPlugin::TunnelClosed);
     QObject::connect(localClient_,&KeQtLocalClient::SigSearchedDeviceInfo,
                      this,&KePlayerPlugin::LocalDeviceInfo);
+
+    //init ice servers
+    std::string servers = jstrIceServers.toStdString();
+    kaerp2p::P2PConductor::AddIceServers(servers);
 
     return 0;
 }
@@ -184,11 +213,11 @@ QString KePlayerPlugin::StartCut(QString peerId)
 
 int KePlayerPlugin::StopCut(QString peerId)
 {
-    if(peerId.isEmpty()){
+    if (peerId.isEmpty()) {
         return KE_PARAM_ERROR;
     }
     std::string strId = peerId.toStdString();
-    if(!tunnel_->StopPeerVideoCut(strId)){
+    if (!tunnel_->StopPeerVideoCut(strId)) {
         return KE_VIDEO_CUT_FAILED;
     }
     return KE_SUCCESS;

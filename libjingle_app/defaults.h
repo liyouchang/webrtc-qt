@@ -61,6 +61,7 @@ enum FrameResolutionType{
 struct VideoInfo{
     int frameRate;
     int frameResolution;//a enumirate of FrameResolutionType
+    int frameInterval;//millisecond between two frame,this equals to 1000/frameRate
 };
 
 std::string GetRandomString();
@@ -77,5 +78,8 @@ std::string GetPeerName();
 std::string GetConfigFileString(std::string filename);
 
 std::string GetAppFilePath(std::string filename);
+
+std::string ToStringVersion(int intVer);
+
 }
 #endif  // PEERCONNECTION_SAMPLES_CLIENT_DEFAULTS_H_
