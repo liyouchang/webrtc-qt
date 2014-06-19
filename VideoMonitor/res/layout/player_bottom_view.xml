@@ -26,6 +26,17 @@
         android:layout_toRightOf="@+id/btn_player_capture"
         android:background="@drawable/player_record_disable"
         android:contentDescription="@null" />
+    
+    <Button
+        android:id="@+id/btn_player_screen"
+        android:layout_width="@dimen/player_icon_size"
+        android:layout_height="@dimen/player_icon_size"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/btn_player_record"
+        android:background="@drawable/player_screen_full"
+        android:contentDescription="@null" />
 
     <Button
         android:id="@+id/btn_player_talkback"
@@ -34,7 +45,7 @@
         android:layout_centerVertical="true"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@+id/btn_player_record"
+        android:layout_toRightOf="@+id/btn_player_screen"
         android:background="@drawable/player_talkback_disable"
         android:contentDescription="@null" />
 

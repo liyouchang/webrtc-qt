@@ -6,19 +6,15 @@ import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.PorterDuff.Mode;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Environment;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 
-import com.video.data.Value;
 import com.video.utils.Utils;
 
 public class VideoView extends View {
@@ -44,7 +40,7 @@ public class VideoView extends View {
     private PlayVideoThread playVideoThread = null; //播放视频线程
     private boolean runFlag = false; // 运行标志
     public boolean isPlayVideo = false; // 是否播放
-//    public boolean isFullScreen = true; // 是否全屏
+    public boolean isFullScreen = true; // 是否全屏
     public boolean isDisplayView = false;
     
     //视频解码库JNI接口
@@ -68,6 +64,18 @@ public class VideoView extends View {
 		TunnelCommunication.videoDataCache.clearBuffer();
 		uninitDecoder();
 	}
+	
+	/**
+     * 设置视频宽、高
+     * @param width
+     * @param height
+     */
+    public void setVideoScale(int width , int height){
+    	LayoutParams lp = getLayoutParams();
+    	lp.height = height;
+		lp.width = width;
+		setLayoutParams(lp);
+    }
 	
 	/**
 	 * 播放视频
@@ -123,40 +131,9 @@ public class VideoView extends View {
 						if (decodeLen >= 0) {
 							postInvalidate();
 						}
+						sleep(5);
+					} else {
 						sleep(10);
-					} else {
-						sleep(20);
-					}
-					if (Value.playTerminalVideoFileFlag) {
-						//终端录像
-						
-					} else {
-						//实时录像
-						if (!Value.isTunnelOpened) {
-							PlayerActivity.requestPlayerTimes = 0;
-							Intent intent = new Intent();
-							intent.setAction(PlayerActivity.REQUEST_TIMES_ACTION);
-							mContext.sendBroadcast(intent);
-//							if (PlayerActivity.requestPlayerTimes < 3) {
-//								if (!Value.isTunnelOpened) {
-//									PlayerActivity.requestPlayerTimes ++;
-//									Intent intent = new Intent();
-//									intent.setAction(PlayerActivity.PLAYER_BROADCAST_ACTION);
-//									mContext.sendBroadcast(intent);
-//									sleep(10000);
-//									System.out.println("MyDebug: 开始广播视频");
-//								}
-//							} else {
-//								if (!Value.isTunnelOpened) {
-//									PlayerActivity.requestPlayerTimes = 0;
-//									Intent intent = new Intent();
-//									intent.setAction(PlayerActivity.REQUEST_TIMES_ACTION);
-//									mContext.sendBroadcast(intent);
-//									System.out.println("MyDebug: 停止广播视频");
-//								}
-//							}
-							sleep(2000);
-						}
 					}
 				}catch(Exception ex){
 					ex.printStackTrace();
@@ -201,7 +178,6 @@ public class VideoView extends View {
 				bitWidth = 320;
 				bitHeight = 240;
 			}
-//			System.out.println("MyDebug: videoType: "+videoType);
 
 			srcRect.left = 0;
 			srcRect.top = 0;
@@ -209,11 +185,24 @@ public class VideoView extends View {
 			srcRect.bottom = bitHeight;
 			
 			if (mContext.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-				dstRect.left = 0;
-				dstRect.top = 0;
-				dstRect.right = drawWidth;
-				dstRect.bottom = drawHeight;
+				// 横屏
+				if (isFullScreen) {
+					dstRect.left = 0;
+					dstRect.top = 0;
+					dstRect.right = drawWidth;
+					dstRect.bottom = drawHeight;
+				} else {
+					int widthOffset = (drawWidth - drawHeight*bitWidth/bitHeight)/2;
+					if (widthOffset < 0) {
+						widthOffset = -widthOffset;
+					}
+					dstRect.left = widthOffset;
+					dstRect.top = 0;
+					dstRect.right = drawWidth - widthOffset;
+					dstRect.bottom = drawHeight;
+				}
 			} else {
+				// 竖屏
 				if (drawWidth <= drawHeight) {
 					dstRect.left = 0;
 					dstRect.top = (int) ((drawHeight - drawWidth / 1.2) / 4);
@@ -231,27 +220,6 @@ public class VideoView extends View {
 			canvas.drawBitmap(videoBmp, srcRect, dstRect, null);
 			if (mCanvas == null) {
 				mCanvas = canvas;
-			}
-			if (Value.playTerminalVideoFileFlag) {
-				//终端录像
-				
-			} else {
-				// 清空画布
-				if ((!runFlag) || (!Value.isTunnelOpened)) {
-					Paint paint = new Paint();
-					paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
-					canvas.drawBitmap(videoBmp, srcRect, dstRect, paint);
-					paint.setXfermode(new PorterDuffXfermode(Mode.SRC));
-				} else {
-					if (!isDisplayView) {
-						isDisplayView = true;
-						Thread.sleep(3000);
-						Paint paint = new Paint();
-						paint.setXfermode(new PorterDuffXfermode(Mode.CLEAR));
-						canvas.drawBitmap(videoBmp, srcRect, dstRect, paint);
-						paint.setXfermode(new PorterDuffXfermode(Mode.SRC));
-					}
-				}
 			}
 		} catch (Exception e) {
 			System.out.println("MyDebug: 绘制图像异常！");

@@ -220,11 +220,13 @@ public class SetDeviceBgActivity extends Activity implements OnClickListener {
 				overridePendingTransition(R.anim.fragment_nochange, R.anim.down_out);
 				break;
 			case R.id.btn_title_ok:
-				Bundle bundle = new Bundle();
-				bundle.putString("ImageBgPath", imageViews.get(listPosition));
-				Intent intent = new Intent();
-				intent.putExtras(bundle);
-				setResult(2, intent);
+				if ((imageViews != null) && (imageViews.size() > 0)) {
+					Bundle bundle = new Bundle();
+					bundle.putString("ImageBgPath", imageViews.get(listPosition));
+					Intent intent = new Intent();
+					intent.putExtras(bundle);
+					setResult(2, intent);
+				}
 				SetDeviceBgActivity.this.finish();
 				overridePendingTransition(0, R.anim.down_out);
 				break;

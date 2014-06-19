@@ -1,26 +1,35 @@
 package com.video.user;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.video.R;
@@ -28,13 +37,14 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlMessage;
 import com.video.main.MainActivity;
+import com.video.play.TunnelCommunication;
 import com.video.service.BackstageService;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
-import com.video.utils.OkOnlyDialog;
 import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
+import com.video.utils.WiFiAlertDialog;
 
 public class LoginActivity extends Activity implements OnClickListener {
 
@@ -57,6 +67,12 @@ public class LoginActivity extends Activity implements OnClickListener {
 	private final int IS_LOGINNING = 1;
 	private final int LOGIN_TIMEOUT = 2;
 	private final int LOGIN_AGAIN = 3;
+	private final int SEARCH_TIMEOUT = 4;
+	
+	private LocalDeviceReceiver localDeviceReceiver = null;
+	private ArrayList<HashMap<String, String>> localDeviceList = null;
+	private WiFiAlertDialog localDeviceDialog = null;
+	private LocalDeviceAdapter localDeviceAdapter = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +95,12 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 	
 	private void initView() {
+		
+		//注册广播
+		localDeviceReceiver = new LocalDeviceReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Value.SEARCH_LOCAL_DEVICE_ACTION);
+		registerReceiver(localDeviceReceiver, filter);
 		
 		cb_auto_login = (CheckBox) super.findViewById(R.id.cb_auto_login);
 		cb_auto_login.setOnCheckedChangeListener(new onCheckedChangeListenerImpl());
@@ -208,7 +230,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					break;
 				case LOGIN_AGAIN:
 					ZmqCtrl.getInstance().init();
-					if (loginTimes >= 4) {
+					if (loginTimes >= 3) {
 						loginTimes = 0;
 						if (mDialog != null) {
 							mDialog.dismiss();
@@ -220,6 +242,15 @@ public class LoginActivity extends Activity implements OnClickListener {
 						String data = generateLoginJson(userName, userPwd);
 						sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+					}
+					break;
+				case SEARCH_TIMEOUT:
+					if ((mDialog != null) && (mDialog.isShowing())) {
+						Toast.makeText(mContext, "搜索完毕，暂无本地设备", Toast.LENGTH_SHORT).show();
+						mDialog.dismiss();
+					}
+					if (handler.hasMessages(SEARCH_TIMEOUT)) {
+						handler.removeMessages(SEARCH_TIMEOUT);
 					}
 					break;
 				case R.id.login_id:
@@ -335,15 +366,19 @@ public class LoginActivity extends Activity implements OnClickListener {
 				et_pwd.setText("");
 				break;
 			case R.id.iv_login_demo:
-				final OkOnlyDialog myDialog=new OkOnlyDialog(mContext);
-				myDialog.setTitle("温馨提示");
-				myDialog.setMessage("业务体验正在完善，敬请期待...");
-				myDialog.setPositiveButton("确认", new OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						myDialog.dismiss();
-					}
-				});
+				TunnelCommunication.getInstance().searchLocalDevice();
+				mDialog = Utils.createLoadingDialog(mContext, "正在搜索设备...");
+				mDialog.show();
+				sendHandlerMsg(SEARCH_TIMEOUT, Value.REQ_TIME_10S);
+//				final OkOnlyDialog myDialog=new OkOnlyDialog(mContext);
+//				myDialog.setTitle("温馨提示");
+//				myDialog.setMessage("业务体验正在完善，敬请期待...");
+//				myDialog.setPositiveButton("确认", new OnClickListener() {
+//					@Override
+//					public void onClick(View v) {
+//						myDialog.dismiss();
+//					}
+//				});
 				break;
 		}
 	}
@@ -408,5 +443,125 @@ public class LoginActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onDestroy();
 		Value.isManulLogout = false;
+	}
+	
+	/**
+	 * 显示本地设备对话框
+	 */
+	private void showLocalDeviceList() {
+		localDeviceDialog = new WiFiAlertDialog(mContext);
+		localDeviceDialog.setTitle("本地设备列表");
+		localDeviceAdapter = new LocalDeviceAdapter(mContext, localDeviceList);
+		localDeviceDialog.setAdapter(localDeviceAdapter);
+		localDeviceDialog.setOnItemClickListenerLocalDevice(localDeviceList);
+	}
+	
+	/**
+	 * 搜索本地设备的适配器
+	 */
+	private class LocalDeviceAdapter extends BaseAdapter {
+		
+		private Context context;
+		private ArrayList<HashMap<String, String>> list = null;
+
+		public LocalDeviceAdapter(Context context, ArrayList<HashMap<String, String>> list) {
+			this.context = context;
+			this.list = list;
+		}
+
+		@Override
+		public int getCount() {
+			return list.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return list.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup viewGroup) {
+			ViewHolder holder;
+
+			if (convertView == null) {
+				convertView = LayoutInflater.from(context).inflate(R.layout.local_device_item, null);
+				holder = new ViewHolder();
+				convertView.setTag(holder);
+				holder.tv_local_device_name = (TextView) convertView.findViewById(R.id.tv_local_device_name);
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+			if (holder.tv_local_device_name != null) {
+				holder.tv_local_device_name.setText((CharSequence) list.get(position).get("MAC"));
+			}
+			return convertView;
+		}
+
+		class ViewHolder {
+			TextView tv_local_device_name;
+		}
+	}
+
+
+	/**
+	 * @author sunfusheng
+	 * 本地设备的广播接收
+	 */
+	public class LocalDeviceReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			boolean isRepeat = false;
+			if ((mDialog != null) && (mDialog.isShowing())) {
+				mDialog.dismiss();
+			}
+			if (handler.hasMessages(SEARCH_TIMEOUT)) {
+				handler.removeMessages(SEARCH_TIMEOUT);
+			}
+			if (localDeviceList == null) {
+				localDeviceList = new ArrayList<HashMap<String, String>>();
+			}
+			String action = intent.getAction();
+			if ((action.equals(Value.SEARCH_LOCAL_DEVICE_ACTION)) && (intent != null)) {
+				
+				String mac = (String) intent.getCharSequenceExtra("MAC");
+				String ip = (String) intent.getCharSequenceExtra("IP");
+				int port = intent.getIntExtra("Port", 22616);
+				String gateway = (String) intent.getCharSequenceExtra("Gateway");
+				String mask = (String) intent.getCharSequenceExtra("Mask");
+				
+				for (int i=0; i<localDeviceList.size(); i++) {
+					if (mac.equals(localDeviceList.get(i).get("MAC"))) {
+						isRepeat = true;
+					}
+				}
+				if (!isRepeat) {
+					HashMap<String, String> item = new HashMap<String, String>();
+					item.put("MAC", mac);
+					item.put("IP", ip);
+					item.put("Port", ""+port);
+					item.put("Gateway", gateway);
+					item.put("Mask", mask);
+					localDeviceList.add(item);
+				} else {
+					isRepeat = false;
+				}
+				if (localDeviceDialog == null) {
+					showLocalDeviceList();
+				} else {
+					if (localDeviceDialog.isShowing()) {
+						localDeviceAdapter.notifyDataSetChanged();
+					} else {
+						showLocalDeviceList();
+					}
+				}
+			}
+		}
 	}
 }

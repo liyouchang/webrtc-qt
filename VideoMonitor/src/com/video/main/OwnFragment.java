@@ -706,26 +706,30 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						mActivity.overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 						break;
 					case 3:
-						final OkCancelDialog myDialog1=new OkCancelDialog(mActivity);
-						myDialog1.setTitle("温馨提示");
-						myDialog1.setMessage("确认删除背景图片？");
-						myDialog1.setPositiveButton("确认", new OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								myDialog1.dismiss();
-								Handler sendHandler = ZmqThread.zmqThreadHandler;
-								String data = generateDeleteImageJson(mDeviceId);
-								sendHandlerMsg(IS_REQUESTING, "正在删除图片...");
-								sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
-								sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
-							}
-						});
-						myDialog1.setNegativeButton("取消", new OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								myDialog1.dismiss();
-							}
-						});
+						if (item.get("deviceBg").equals("null")) {
+							Toast.makeText(mActivity, "无背景图片，不需要删除！", Toast.LENGTH_SHORT).show();
+						} else {
+							final OkCancelDialog myDialog1=new OkCancelDialog(mActivity);
+							myDialog1.setTitle("温馨提示");
+							myDialog1.setMessage("确认删除背景图片？");
+							myDialog1.setPositiveButton("确认", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog1.dismiss();
+									Handler sendHandler = ZmqThread.zmqThreadHandler;
+									String data = generateDeleteImageJson(mDeviceId);
+									sendHandlerMsg(IS_REQUESTING, "正在删除图片...");
+									sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
+									sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+								}
+							});
+							myDialog1.setNegativeButton("取消", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog1.dismiss();
+								}
+							});
+						}
 						break;
 					case 4:
 						final OkCancelDialog myDialog2=new OkCancelDialog(mActivity);

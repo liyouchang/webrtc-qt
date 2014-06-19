@@ -103,11 +103,6 @@ public class Value {
 	public static boolean ownFragmentRequestAlarmFlag = false;
 	
 	/**
-	 * 播放终端视频文件
-	 */
-	public static boolean playTerminalVideoFileFlag = false;
-	
-	/**
 	 * 初始化应用程序的全局变量
 	 */
 	public static void resetValues() {
@@ -121,6 +116,5 @@ public class Value {
 		isTunnelOpened = false;
 		isSharedUser = false;
 		ownFragmentRequestAlarmFlag = false;
-		playTerminalVideoFileFlag = false;
 	}
 }

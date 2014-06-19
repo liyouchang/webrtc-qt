@@ -64,8 +64,6 @@ public class ZmqSocket {
 		}
 		if (zmq_socket != null) {
 			new ExitSocketThread().start();
-			
-//			new ZmqSocket();
 		}
 	}
 	

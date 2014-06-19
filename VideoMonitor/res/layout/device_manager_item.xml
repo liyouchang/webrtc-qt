@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/device_item_parent_view_bg"
+    android:paddingBottom="5dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp" >
+
+    <ImageView
+        android:id="@+id/iv_device_bg"
+        android:layout_width="100dp"
+        android:layout_height="90dp"
+        android:background="@drawable/device_item_bg"
+        android:contentDescription="@null" />
+
+    <RelativeLayout
+        android:id="@+id/rl_device_info"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_toRightOf="@+id/iv_device_bg"
+        android:background="@drawable/device_item_parent_view_bg"
+        android:paddingBottom="5dp"
+        android:paddingLeft="10dp"
+        android:paddingTop="5dp" >
+
+        <TextView
+            android:id="@+id/tv_device_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/device_item_name"
+            android:textColor="@color/light_black"
+            android:textSize="16dp" />
+
+        <TextView
+            android:id="@+id/tv_device_mac"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_device_name"
+            android:text="@string/device_item_mac"
+            android:textColor="@color/light_black"
+            android:textSize="16dp" />
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/rl_device_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@drawable/icon_button_right"
+        android:contentDescription="@null" />
+
+</RelativeLayout>
