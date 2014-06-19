@@ -53,15 +53,18 @@ signals:
     void LocalDeviceInfo(const QString & devInfo);
 
 public slots:
+    //change the version when you need to auto update
+    int GetVersion();
     void about();
     void SetDivision(int num);
     int PlayLocalFile();
     QString GetLocalPath(void);
     void FullScreen();
+
     //int GetLocalPlayPos();
     //void SetLocalPlayPos();
 
-    int Initialize(QString routerUrl);
+    int Initialize(QString routerUrl, QString jstrIceServers);
     int OpenTunnel(QString peer_id);
     int CloseTunnel(QString peer_id);
     int StartVideo(QString peer_id,int video);

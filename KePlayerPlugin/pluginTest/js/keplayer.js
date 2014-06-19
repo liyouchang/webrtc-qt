@@ -18,8 +18,10 @@ function load(){
     kePlayerObj.RecordStatus = function(peer,status){
         infoDiv.textContent = "RecordStatus "+ peer + " status-"+ status;
     }
+    var iceServers = [{"uri":"stun:222.174.213.185:5389"},{"uri":"turn:222.174.213.185:5766"}];
+    var strIceServers = JSON.stringify(iceServers);
 
-    kePlayerObj.Initialize(routerUrl.value);
+    kePlayerObj.Initialize(routerUrl.value,strIceServers);
     eventFunction();
 }
 function InitializePlugin(url){
@@ -45,9 +47,9 @@ var eventFunction = function(){
 };
 
 function QueryCameraRemoteFile(){
-   g_peer_id =  PeerID.value;
+    g_peer_id =  PeerID.value;
     var query_command = {type:"tunnel",command:"query_record",
-                condition:{startTime:"20130417175100",
+        condition:{startTime:"20130417175100",
             endTime:"20140618175500",offset:0,toQuery:3}};
     var query_str = JSON.stringify(query_command);
     kePlayerObj.SendCommand(g_peer_id,query_str);
@@ -60,7 +62,7 @@ function PlayCameraRemoteFile(){
             [{ "fileDate" : "20140428104953",
                  "fileName" : "/mnt/sd/20140428/video/01/104953_1.avi",
                  "fileSize" : 12136382 },
-           { "fileDate" : "20140428104750",
+             { "fileDate" : "20140428104750",
                  "fileName" : "/mnt/sd/20140428/video/01/104750_1.avi",
                  "fileSize" : 12323578 }];
     var record_str = JSON.stringify(record_list);
@@ -71,8 +73,8 @@ function GetWifiList(){
     g_peer_id =  PeerID.value;
     var wifiInfo =
             {"type":"tunnel",
-             "command":"wifi_info"
-            };
+        "command":"wifi_info"
+    };
     var wifiInfoStr = JSON.stringify(wifiInfo);
     kePlayerObj.SendCommand(g_peer_id,wifiInfoStr);
 }
