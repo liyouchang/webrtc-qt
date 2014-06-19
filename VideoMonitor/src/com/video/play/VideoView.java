@@ -90,11 +90,11 @@ public class VideoView extends View {
 		runFlag = false;
 		isPlayVideo = false;
 		TunnelCommunication.videoDataCache.clearBuffer();
-		if (playVideoThread != null) {
+		if ((playVideoThread != null) && (playVideoThread.isInterrupted())) {
 			playVideoThread.interrupt();
-			playVideoThread = null;
 			System.out.println("MyDebug: 【停止播放】");
 		}
+		playVideoThread = null;
 	}
 	
 	/**

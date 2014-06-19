@@ -207,7 +207,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		if (isLocalDevice) {
 			localDeviceIPandPort = (String) intent.getCharSequenceExtra("localDeviceIPandPort");
 		}
-		Value.TerminalDealerName = dealerName;
 		
 		if (!isLocalDevice) {
 			//【打开通道】
@@ -408,6 +407,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				//关闭通道
 				Value.isTunnelOpened = false;
 				if (!Value.isTunnelOpened) {
+					System.out.println("MyDebug: ------> 2.closeTunnel()");
 					TunnelCommunication.getInstance().closeTunnel(dealerName);
 				}
 				closePlayer();
@@ -465,8 +465,19 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		switch (v.getId()) {
 			// 关闭播放器
 			case R.id.ib_player_back:
-				closePlayer();
-				finish();
+				if (Value.isTunnelOpened) {
+					if (!isLocalDevice) {
+						// 关闭通道
+						System.out.println("MyDebug: ------> 1.closeTunnel()");
+						TunnelCommunication.getInstance().closeTunnel(dealerName);
+					} else {
+						// 本地设备
+						TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
+						TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
+					}
+				}
+//				closePlayer();
+//				finish();
 				break;
 			// 截屏
 			case R.id.btn_player_capture:
@@ -708,7 +719,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		unregisterReceiver(playerReceiver);
 		//解除屏幕保持唤醒
 		if ((wakeLock != null) && (wakeLock.isHeld())) {
-			System.out.println("MyDebug: videoType: ------> wakeLock.release()");
 			wakeLock.release(); 
 			wakeLock = null;
 		}
@@ -721,8 +731,19 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			if ((mDialog != null) && (mDialog.isShowing())) {
 				mDialog.dismiss();
 			}
-			closePlayer();
-			finish();
+			if (Value.isTunnelOpened) {
+				if (!isLocalDevice) {
+					// 关闭通道
+					System.out.println("MyDebug: ------> 1.closeTunnel()");
+					TunnelCommunication.getInstance().closeTunnel(dealerName);
+				} else {
+					// 本地设备
+					TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
+					TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
+				}
+			}
+//			closePlayer();
+//			finish();
 			return false;
 		}
 		return super.onKeyDown(keyCode, event);
@@ -751,11 +772,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		try {
 			destroyDialogView();
 			
-			//停止录视频
-			if (isRecordVideo) {
-				isRecordVideo = false;
-				TunnelCommunication.getInstance().stopRecordVideo(dealerName);
-			}
+//			//停止录视频
+//			if (isRecordVideo) {
+//				isRecordVideo = false;
+//				TunnelCommunication.getInstance().stopRecordVideo(dealerName);
+//			}
 			//关闭实时音视频
 			try {
 				videoView.stopVideo();
@@ -767,17 +788,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				System.out.println("MyDebug: 关闭音视频对讲异常！");
 				e.printStackTrace();
 			}
-			if (Value.isTunnelOpened) {
-				if (!isLocalDevice) {
-					// 关闭通道
-					TunnelCommunication.getInstance().closeTunnel(dealerName);
-				} else {
-					// 本地设备
-					TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
-					TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
-				}
-			}
-//			Value.TerminalDealerName = null;
 		} catch (Exception e) {
 			System.out.println("MyDebug: 关闭实时播放器异常！");
 			e.printStackTrace();
