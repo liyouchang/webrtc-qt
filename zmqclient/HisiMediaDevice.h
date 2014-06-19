@@ -6,12 +6,12 @@
  *
  */
 
-
-
 #ifndef HISIMEDIADEVICE_H
 #define HISIMEDIADEVICE_H
+
 #include "libjingle_app/ketunnelcamera.h"
 #include "talk/base/messagehandler.h"
+
 namespace talk_base {
     class Thread;
     class Buffer;
@@ -26,7 +26,7 @@ public:
 };
 
 
-class HisiMediaDevice:talk_base::MessageHandler,public kaerp2p::KeTunnelCamera
+class HisiMediaDevice:public talk_base::MessageHandler,public kaerp2p::KeTunnelCamera
 {
 public:
     enum{
@@ -47,7 +47,6 @@ public:
     virtual void GetCameraVideoInfo(int level,kaerp2p::VideoInfo * info);
     sigslot::signal0<> SignalNetStatusChange;
 
-
 protected:
     int GetVideoFrameType(int level);
     int GetVideoFrameRate(int level);
@@ -64,16 +63,15 @@ private:
     talk_base::Thread *media_thread_;
     int video1_handle_;
     int video2_handle_;
+    int video3_handle_;
     int audio_handle_;
     kaerp2p::VideoInfo video1_info_;
     kaerp2p::VideoInfo video2_info_;
-    int video1_clarity_;
-    int video2_clarity_;
 
     char media_buffer_[MEDIA_BUFFER_LENGTH];
     int oldNetType;
     int oldIp;
-    // KeTunnelCamera interface
+
 protected:
     virtual int GetVideoClarity();
     virtual void SetPtz(std::string ptz_key, int param);
@@ -82,6 +80,8 @@ protected:
     virtual void RecvGetWifiInfo(std::string peer_id);
     virtual void SetWifiInfo(std::string peerId, std::string param);
     virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
+    virtual void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
+
 };
 
 enum AlarmType{

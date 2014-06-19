@@ -30,7 +30,7 @@ linux {
     DESTDIR = $$output_dir/libs
 }
 
-arm {
+hisi {
     DEFINES += ARM
     output_dir = $$PWD/../out/arm
 }

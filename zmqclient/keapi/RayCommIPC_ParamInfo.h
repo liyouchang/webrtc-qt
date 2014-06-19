@@ -34,13 +34,13 @@ extern "C" {
 #define VIDEO2_RESOLUTION		"video2_resolution"		//	176x144, 352x288, 320x240 640x480
 
 #define VIDEO3_ENABLE 			"video3_enable"			// 	0:disable 1:enable
-#define VIDEO3_DATA				"video3_data"
+#define VIDEO3_DATA			"video3_data"
 #define VIDEO3_CODEC 			"video3_codec"      	// 	0:H264, 1:MJPG   
 #define VIDEO3_BITRATECTRL 		"video3_control"		// 	0:CBR,  1:VBR
 #define VIDEO3_BITRATE 			"video3_bitrate"		// 
 #define VIDEO3_QUALITY 			"video3_quality"		// 	5:普通,7:较好,9:最好
 #define VIDEO3_FRAMERATE 		"video3_framerate"		//	1,5,10,15,20,25,30
-#define VIDEO3_IFRAMEINTERVAL 	"video3_int"			// 	1,4,20,100,200
+#define VIDEO3_IFRAMEINTERVAL		"video3_int"			// 	1,4,20,100,200
 #define VIDEO3_RESOLUTION 		"video3_resolution"		// 	176x144, 352x288, 320x240 640x480 1280x720
 
 #define VIDEO4_ENABLE 			"video4_enable"			// 	0:disable 1:enable
@@ -63,9 +63,9 @@ extern "C" {
 #define VIDEO_CONTRAST          "video_contrast"
 #define VIDEO_SATURATION        "video_saturation"
 
-#define AUDIO_NUM 				"audio_num"				// 支持音频的个数
+#define AUDIO_NUM 		"audio_num"				// 支持音频的个数
 
-#define AUDIO1_DATA				"audio_data"
+#define AUDIO1_DATA		"audio_data"
 #define RAWAUDIO1_DATA			"rawaudio_data"
 #define AUDIO1_ENABLE 			"audio_enable"  		// 0:close , 1:open
 #define AUDIO1_CODEC 			"audio_codec"			// 0:ADPCM, 1:G.711

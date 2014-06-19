@@ -2,6 +2,7 @@
 #define KETUNNELCAMERA_H
 
 #include "KeMsgProcess.h"
+#include "talk/base/json.h"
 
 namespace kaerp2p{
 
@@ -32,6 +33,7 @@ protected:
                               const std::string &filename);
     virtual void OnRecvTalkData(const std::string & peer_id,
                                 const char * data,int len);
+    virtual void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
 };
 
 

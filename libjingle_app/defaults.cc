@@ -211,4 +211,12 @@ std::string GetCurrentDatetime(std::string format)
     return result;
 }
 
+std::string ToStringVersion(int intVer)
+{
+    std::stringstream ss;
+    ss << "V" << intVer/100 << std::setw(2) << std::setfill('0') << intVer%100;
+    return ss.str();
+
+}
+
 }
