@@ -42,7 +42,7 @@ HEADERS += \
     peerconnectionclientdealer.h \
     CameraClient.h
 
-arm{
+hisi {
     SOURCES += HisiMediaDevice.cpp
     HEADERS += HisiMediaDevice.h \
             keapi/RayCommIPC_ParamInfo.h \
@@ -56,7 +56,7 @@ arm{
 OTHER_FILES += \
     config.json
 
-arm {
+hisi {
     target_config.files  = $$OTHER_FILES $$DESTDIR/$$TARGET
     target_config.path   = /var/lib/tftpboot
     INSTALLS  += target_config

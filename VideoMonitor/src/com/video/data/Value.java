@@ -23,11 +23,6 @@ public class Value {
 	public final static String AlarmBackstageName = "Alarmstage";
 	
 	/**
-	 * 终端的Dealer名称
-	 */
-	public static String TerminalDealerName1 = null;
-	
-	/**
 	 * 服务器上比较版本的xml文件地址
 	 */
 	public final static String ApkXmlPath = "http://222.174.213.185:8088/plugin/VideoMonitorXml.xml";
@@ -116,7 +111,6 @@ public class Value {
 	 * 初始化应用程序的全局变量
 	 */
 	public static void resetValues() {
-		TerminalDealerName = null;
 		isLoginSuccess = false;
 		isNeedReqTermListFlag = true;
 		isNeedReqAlarmListFlag = true;

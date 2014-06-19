@@ -77,5 +77,8 @@ std::string GetPeerName();
 std::string GetConfigFileString(std::string filename);
 
 std::string GetAppFilePath(std::string filename);
+
+std::string ToStringVersion(int intVer);
+
 }
 #endif  // PEERCONNECTION_SAMPLES_CLIENT_DEFAULTS_H_

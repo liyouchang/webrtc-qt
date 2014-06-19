@@ -19,7 +19,9 @@
 
 
 std::string ReadConfigFile();
-const char * kVersion = "V0.31";
+
+//const char * kVersion = "V0.31";
+int kVersion = 31;
 
 int main()
 {
@@ -38,8 +40,9 @@ int main()
     talk_base::LogMessage::ConfigureLogging(logParamsValue.asString().c_str(),
                                             jlogsaveFile.asString().c_str());
 
+    Json::Value jntp = JsonConfig::Instance()->Get("ntpconfig","");
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
-    LOG(INFO)<<"zmqclient current version is "<<kVersion;
+    LOG(INFO)<<"zmqclient current version is "<<kaerp2p::ToStringVersion(kVersion);
 
     std::string serversStr  = JsonValueToString(jservers);
     kaerp2p::P2PConductor::AddIceServers(serversStr);
@@ -65,7 +68,7 @@ int main()
     }
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
-    if(strMac.empty()) {
+    if (strMac.empty()) {
         strMac = device->GetHardwareId();
     }
 

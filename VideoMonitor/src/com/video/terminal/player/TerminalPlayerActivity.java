@@ -225,7 +225,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 			fileInfo.currentFileIndex = intent.getIntExtra("fileIndex", 0);
 			currentFile = fileList.get(fileInfo.currentFileIndex);
 			
-			Value.TerminalDealerName = dealerName;
 			fileInfo.currentFileDate = currentFile.get("fileDate");
 			fileInfo.currentFileName = currentFile.get("fileName");
 			fileInfo.currentFileSize = Integer.parseInt(currentFile.get("fileSizeInt"));
@@ -1214,7 +1213,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 			if (Value.isTunnelOpened) {
 				TunnelCommunication.getInstance().closeTunnel(dealerName);
 			}
-			Value.TerminalDealerName = null;
 			
 			//删除缓存文件
 			Utils.deleteFile(videoSavePath);
