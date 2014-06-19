@@ -17,27 +17,27 @@
 
 class JniUtil {
 public:
-	JniUtil();
+  JniUtil();
 
-	static JniUtil * GetInstance();
-	virtual ~JniUtil();
-	static jboolean getObjectField(JNIEnv *env, jobject obj, const char *fieldName, const char *fieldDescriptor, jobject *out);
-	static jboolean getIntField(JNIEnv *env, jobject obj, const char *fieldName, jint *out);
-	bool JniSendToPeer(const char * peer_id,const char * message);
-	bool JniRecvVideoData(const char * peer_id,const char* data, int len);
-	bool JniRecvAudioData(const char * peer_id,const char* data, int len);
-	bool JniTunnelOpened(const char * peer_id);
-    bool JniRecordStatus(const char * peer_id, int recordstatus);
+  static JniUtil * GetInstance();
+  virtual ~JniUtil();
+  static jboolean getObjectField(JNIEnv *env, jobject obj, const char *fieldName, const char *fieldDescriptor, jobject *out);
+  static jboolean getIntField(JNIEnv *env, jobject obj, const char *fieldName, jint *out);
+  bool JniSendToPeer(const char * peer_id,const char * message);
+  bool JniRecvVideoData(const char * peer_id,const char* data, int len);
+  bool JniRecvAudioData(const char * peer_id,const char* data, int len);
+  bool JniTunnelOpened(const char * peer_id);
+  bool JniRecordStatus(const char * peer_id, int recordstatus);
 
-	//method call back
-    bool JniTunnelMethodCallback(const char * methodName, const char * strParam);
-	bool JniTunnelMethodCallback(const char * methodName,const char * peer_id,const char* data, int len);
-	bool getSendToPeerMethod(JNIEnv *env, jobject obj);
-	JavaVM * g_vm_;
-	jobject g_obj_;
-	jclass callBackCls;
-	jmethodID SendToPeer_mid;
-	std::string call_class_name_;
+  //method call back
+  bool JniTunnelMethodCallback(const char * methodName, const char * strParam);
+  bool JniTunnelMethodCallback(const char * methodName,const char * peer_id,const char* data, int len);
+  bool getSendToPeerMethod(JNIEnv *env, jobject obj);
+  JavaVM * g_vm_;
+  jobject g_obj_;
+  jclass callBackCls;
+  jmethodID SendToPeer_mid;
+  std::string call_class_name_;
 protected:
 };
 

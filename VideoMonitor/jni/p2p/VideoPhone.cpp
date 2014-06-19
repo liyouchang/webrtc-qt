@@ -9,11 +9,18 @@
 
 #include "talk/base/logging.h"
 
+#include "libjingle_app/p2pconductor.h"
+
 KeJniTunnelClient * client = NULL;
 JniPeerConnection * jniPeer = NULL;
 KeJniLocalClient * localClient = NULL;
 
-jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
+/*
+ * @param jstrIceServers : the servers used by ice protocal to accomplish NAT traversal,
+*  this param is a json string contains a array of json object of server connection info
+*  (eg. "[{"uri":"stun:222.174.213.185:5389"},{"uri":"turn:222.174.213.185:5766"}]").
+*/
+jint naInitialize(JNIEnv *env, jobject thiz, jstring jstrIceServers) {
     LOGI("1. naInitialize()");
 
     env->GetJavaVM(&JniUtil::GetInstance()->g_vm_);
@@ -27,6 +34,11 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
     lt->Initialize();
     localClient = new KeJniLocalClient();
     localClient->Init(lt);
+
+    //set ice servers
+    const char * iceservers = env->GetStringUTFChars(jstrIceServers, NULL);
+    kaerp2p::P2PConductor::AddIceServers(iceservers);
+    env->ReleaseStringUTFChars(jstrIceServers,iceservers);
 
     return 0;
 }
@@ -88,6 +100,8 @@ jint naCloseTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
     env->ReleaseStringUTFChars(peer_id,pid);
     return ret;
 }
+
+
 
 jint naAskMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
     LOGI("5. naAskMediaData()");
@@ -228,6 +242,16 @@ jint naStopLocalVideo(JNIEnv *env, jobject thiz, jstring peerAddr){
     env->ReleaseStringUTFChars(peerAddr,pid);
     return ret;
 }
+//check whether the tunnel of peerId is opened
+jboolean naIsTunnelOpened(JNIEnv *env, jobject thiz, jstring peer_id) {
+    if (client == NULL) {
+        return false;
+    }
+    const char * pid = env->GetStringUTFChars(peer_id, NULL);
+    bool ret = client->IsTunnelOpened(pid);
+    env->ReleaseStringUTFChars(peer_id,pid);
+    return ret;
+}
 
 #ifndef NELEM
 #define NELEM(x) ((int)(sizeof(x)/sizeof((x)[0])))
@@ -260,6 +284,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naDisconnectLocalDevice", "(Ljava/lang/String;)I", (void*) naDisconnectLocalDevice },
         { "naStartLocalVideo", "(Ljava/lang/String;)I", (void*) naStartLocalVideo },
         { "naStopLocalVideo", "(Ljava/lang/String;)I", (void*) naStopLocalVideo },
+        { "naIsTunnelOpened", "(Ljava/lang/String;)Z", (void*) naIsTunnelOpened }
 
     };
 
