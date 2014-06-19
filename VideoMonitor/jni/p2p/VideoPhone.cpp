@@ -9,11 +9,18 @@
 
 #include "talk/base/logging.h"
 
+#include "libjingle_app/p2pconductor.h"
+
 KeJniTunnelClient * client = NULL;
 JniPeerConnection * jniPeer = NULL;
 KeJniLocalClient * localClient = NULL;
 
-jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
+/*
+ * @param jstrIceServers : the servers used by ice protocal to accomplish NAT traversal,
+*  this param is a json string contains a array of json object of server connection info
+*  (eg. "[{"uri":"stun:222.174.213.185:5389"},{"uri":"turn:222.174.213.185:5766"}]").
+*/
+jint naInitialize(JNIEnv *env, jobject thiz, jstring jstrIceServers) {
     LOGI("1. naInitialize()");
 
     env->GetJavaVM(&JniUtil::GetInstance()->g_vm_);
@@ -28,6 +35,11 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring cbClass) {
     localClient = new KeJniLocalClient();
     localClient->Init(lt);
 
+    //set ice servers
+    const char * iceservers = env->GetStringUTFChars(jstrIceServers, NULL);
+    kaerp2p::P2PConductor::AddIceServers(iceservers);
+    env->ReleaseStringUTFChars(jstrIceServers,iceservers);
+
     return 0;
 }
 jint naTerminate(JNIEnv *env, jobject thiz) {
@@ -40,7 +52,7 @@ jint naTerminate(JNIEnv *env, jobject thiz) {
         delete client;
         client = NULL;
     }
-    if(localClient){
+    if(localClient) {
         delete localClient;
         localClient = NULL;
     }
@@ -89,20 +101,27 @@ jint naCloseTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
     return ret;
 }
 
-jint naAskMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
+
+
+jint naStartMediaData(JNIEnv *env, jobject thiz, jstring peer_id,jint level) {
     LOGI("5. naAskMediaData()");
     if (client == NULL) {
         return -1;
     }
     const char * pid = env->GetStringUTFChars(peer_id, NULL);
-
-    client->StartPeerMedia(pid,2);
-
+    client->StartPeerMedia(pid,level);
     env->ReleaseStringUTFChars(peer_id,pid);
     return 0;
-
 }
-
+jint naStopMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
+    if (client == NULL) {
+        return -1;
+    }
+    const char * pid = env->GetStringUTFChars(peer_id, NULL);
+    client->StopPeerMedia(pid);
+    env->ReleaseStringUTFChars(peer_id,pid);
+    return 0;
+}
 
 jint naSendTalkData(JNIEnv *env, jobject thiz,
                     jbyteArray talkBytes,jint dataLen) {
@@ -228,6 +247,16 @@ jint naStopLocalVideo(JNIEnv *env, jobject thiz, jstring peerAddr){
     env->ReleaseStringUTFChars(peerAddr,pid);
     return ret;
 }
+//check whether the tunnel of peerId is opened
+jboolean naIsTunnelOpened(JNIEnv *env, jobject thiz, jstring peer_id) {
+    if (client == NULL) {
+        return false;
+    }
+    const char * pid = env->GetStringUTFChars(peer_id, NULL);
+    bool ret = client->IsTunnelOpened(pid);
+    env->ReleaseStringUTFChars(peer_id,pid);
+    return ret;
+}
 
 #ifndef NELEM
 #define NELEM(x) ((int)(sizeof(x)/sizeof((x)[0])))
@@ -246,7 +275,8 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naTerminate", "()I", (void*) naTerminate },
         { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
         { "naCloseTunnel", "(Ljava/lang/String;)I", (void*) naCloseTunnel },
-        { "naAskMediaData", "(Ljava/lang/String;)I", (void*) naAskMediaData },
+        { "naStartMediaData", "(Ljava/lang/String;I)I", (void*) naStartMediaData },
+        { "naStopMediaData", "(Ljava/lang/String;)I", (void*) naStopMediaData },
         { "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naMessageFromPeer },
         { "naSendTalkData", "([BI)I", (void*) naSendTalkData },
@@ -260,6 +290,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naDisconnectLocalDevice", "(Ljava/lang/String;)I", (void*) naDisconnectLocalDevice },
         { "naStartLocalVideo", "(Ljava/lang/String;)I", (void*) naStartLocalVideo },
         { "naStopLocalVideo", "(Ljava/lang/String;)I", (void*) naStopLocalVideo },
+        { "naIsTunnelOpened", "(Ljava/lang/String;)Z", (void*) naIsTunnelOpened }
 
     };
 

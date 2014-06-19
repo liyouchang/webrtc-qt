@@ -67,13 +67,13 @@ struct MediaControlData : public talk_base::MessageData {
   int video2;//1 to request start video2, 0 to request stop
   int video3;
   int audio;//1 to request start audio, 0 to request stop
-  MediaControlData(int v1,int v2 ,int a) : video1(v1),video2(v2),video3(1), audio(a) { }
+  MediaControlData(int v1,int v2,int v3 ,int a) : video1(v1),video2(v2),video3(v3), audio(a) { }
 };
 
 
 HisiMediaDevice::HisiMediaDevice():
   media_thread_(0),video1_handle_(0),video2_handle_(0),audio_handle_(0),
-  oldNetType(-1),oldIp(-1)
+  oldNetType(-1),oldIp(-1),video3_handle_(0)
 {
   int ret = Raycomm_InitParam();
   LOG(INFO)<<"Raycomm_InitParam : "<<ret;
@@ -96,7 +96,7 @@ HisiMediaDevice::~HisiMediaDevice()
 bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
 {
   //start get media
-  media_thread_->Post(this, MSG_MEDIA_CONTROL, new MediaControlData(1,1,1));
+  media_thread_->Post(this, MSG_MEDIA_CONTROL, new MediaControlData(1,1,1,1));
   media_thread_->PostDelayed(10000,this,MSG_NET_CHECK);
   AlarmNotify::Instance()->StartNotify();
   return KeTunnelCamera::Init(client);
@@ -106,8 +106,17 @@ bool HisiMediaDevice::InitDeviceVideoInfo()
 {
   video1_info_.frameRate = this->GetVideoFrameRate(1);
   video1_info_.frameResolution = this->GetVideoFrameType(1);
+  video1_info_.frameInterval = 1000/video1_info_.frameRate;
   video2_info_.frameRate = this->GetVideoFrameRate(2);
   video2_info_.frameResolution = this->GetVideoFrameType(2);
+  video2_info_.frameInterval = 1000/video2_info_.frameRate;
+  video3_info_.frameRate = this->GetVideoFrameRate(3);
+  video3_info_.frameResolution = this->GetVideoFrameType(3);
+  video2_info_.frameInterval = 1000/video2_info_.frameRate;
+
+  LOG(INFO)<<"video1_info_.frameInterval="<<video1_info_.frameInterval<<
+             "; video2_info_.frameInterval="<<video2_info_.frameInterval<<
+             "; video2_info_.frameInterval="<<video2_info_.frameInterval;
   return true;
 }
 
@@ -119,6 +128,8 @@ void HisiMediaDevice::SendVideoFrame(const char *data, int len, int level)
       SignalVideoData1(data,len);
     }else if(level == 2){
       SignalVideoData2(data,len);
+    }else if( level == 3){
+      SignalVideoData3(data,len);
     }
 }
 
@@ -297,7 +308,7 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         if(mcd->video1 == 1 && video1_handle_ == 0){
             video1_handle_ =  Raycomm_ConnectMedia(VIDEO1_DATA,0);
             LOG(INFO)<<"HisiMediaDevice start video1 " <<video1_handle_;
-            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO);
+            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO1);
           }else if(mcd->video1 == 0 && video1_handle_ != 0){
             Raycomm_DisConnectMedia(video1_handle_);
             LOG(INFO)<<"HisiMediaDevice stop video";
@@ -307,11 +318,21 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         if(mcd->video2 == 1 && video2_handle_ == 0){
             video2_handle_ =  Raycomm_ConnectMedia(VIDEO2_DATA,0);
             LOG(INFO)<<"HisiMediaDevice start video2 " <<video2_handle_;
-            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO_SUB);
+            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO2);
           }else if(mcd->video2 == 0 && video2_handle_ != 0){
             Raycomm_DisConnectMedia(video2_handle_);
             LOG(INFO)<<"HisiMediaDevice stop video";
             video2_handle_ = 0;
+          }
+
+        if(mcd->video3 == 1 && video3_handle_ == 0){
+            video3_handle_ =  Raycomm_ConnectMedia(VIDEO3_DATA,0);
+            LOG(INFO)<<"HisiMediaDevice start video3 " <<video3_handle_;
+            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO3);
+          }else if(mcd->video3 == 0 && video3_handle_ != 0){
+            Raycomm_DisConnectMedia(video3_handle_);
+            LOG(INFO)<<"HisiMediaDevice stop video";
+            video3_handle_ = 0;
           }
 
         if(mcd->audio == 1 && audio_handle_ == 0 ){
@@ -327,7 +348,7 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         delete msg->pdata;
         break;
       }
-    case HisiMediaDevice::MSG_SEND_VIDEO:{
+    case MSG_SEND_VIDEO1:{
         if(video1_handle_ == 0) break;
         unsigned int timespan;
         int media_len = Raycomm_GetMediaData(video1_handle_,media_buffer_,
@@ -339,15 +360,15 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
               }
             this->SendVideoFrame(media_buffer_,media_len,1);
             //get next frame
-            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO);
+            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO1);
           }else{
             //wait and get
-            media_thread_->PostDelayed(kVideoSampleRate,this,
-                                       HisiMediaDevice::MSG_SEND_VIDEO);
+            media_thread_->PostDelayed(video1_info_.frameInterval,this,
+                                       HisiMediaDevice::MSG_SEND_VIDEO1);
           }
         break;
       }
-    case HisiMediaDevice::MSG_SEND_VIDEO_SUB:{
+    case MSG_SEND_VIDEO2:{
         if(video2_handle_ == 0) break;
         unsigned int timespan;
         int media_len = Raycomm_GetMediaData(video2_handle_,media_buffer_,
@@ -359,15 +380,33 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
               }
             this->SendVideoFrame(media_buffer_,media_len,2);
             //get next frame
-            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO_SUB);
+            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO2);
           }else{
-            //wait and get
-            media_thread_->PostDelayed(kVideoSampleRate,this,
-                                       HisiMediaDevice::MSG_SEND_VIDEO_SUB);
+            media_thread_->PostDelayed(video1_info_.frameInterval,this,
+                                       HisiMediaDevice::MSG_SEND_VIDEO2);
           }
         break;
       }
-    case HisiMediaDevice::MSG_SEND_AUDIO:{
+    case MSG_SEND_VIDEO3:{
+        if(video3_handle_ == 0) break;
+        unsigned int timespan;
+        int media_len = Raycomm_GetMediaData(video3_handle_,media_buffer_,
+                                             MEDIA_BUFFER_LENGTH,&timespan);
+        if(media_len > 0){
+            if(media_len == MEDIA_BUFFER_LENGTH){
+                LOG(LS_ERROR)<<"Raycomm_GetMediaData--- video3 "<<
+                               "no enough buffer for this large frame";
+              }
+            this->SendVideoFrame(media_buffer_,media_len,3);
+            //get next frame
+            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO2);
+          }else{
+            media_thread_->PostDelayed(video1_info_.frameInterval,this,
+                                       HisiMediaDevice::MSG_SEND_VIDEO2);
+          }
+        break;
+      }
+    case MSG_SEND_AUDIO:{
         if(audio_handle_ == 0) break;
         unsigned int timespan;
         int media_len = Raycomm_GetMediaData(audio_handle_,media_buffer_,
@@ -408,6 +447,8 @@ int HisiMediaDevice::GetVideoFrameType(int level)
       key = VIDEO1_RESOLUTION;
     }else if(level == 2){
       key = VIDEO2_RESOLUTION;
+    }else if(level == 3){
+      key = VIDEO3_RESOLUTION;
     }
   Raycomm_GetParam(key,buf,0);
   int frameType;
@@ -431,7 +472,6 @@ int HisiMediaDevice::GetVideoFrameType(int level)
                     resolution;
       frameType = 2;
     }
-  //LOG(INFO)<<"HisiMediaDevice::GetVideoFrameType---"<<frameType;
   return frameType;
 }
 
@@ -443,6 +483,8 @@ int HisiMediaDevice::GetVideoFrameRate(int level)
   if(level == 1){
       key = VIDEO1_FRAMERATE;
     }else if(level == 2){
+      key = VIDEO2_FRAMERATE;
+    }else if(level == 3){
       key = VIDEO2_FRAMERATE;
     }
   Raycomm_GetParam(key,buf,0);

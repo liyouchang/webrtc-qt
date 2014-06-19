@@ -61,6 +61,7 @@ enum FrameResolutionType{
 struct VideoInfo{
     int frameRate;
     int frameResolution;//a enumirate of FrameResolutionType
+    int frameInterval;//millisecond between two frame,this equals to 1000/frameRate
 };
 
 std::string GetRandomString();
