@@ -52,7 +52,7 @@ jint naTerminate(JNIEnv *env, jobject thiz) {
         delete client;
         client = NULL;
     }
-    if(localClient){
+    if(localClient) {
         delete localClient;
         localClient = NULL;
     }
@@ -103,20 +103,25 @@ jint naCloseTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
 
 
 
-jint naAskMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
+jint naStartMediaData(JNIEnv *env, jobject thiz, jstring peer_id,jint level) {
     LOGI("5. naAskMediaData()");
     if (client == NULL) {
         return -1;
     }
     const char * pid = env->GetStringUTFChars(peer_id, NULL);
-
-    client->StartPeerMedia(pid,2);
-
+    client->StartPeerMedia(pid,level);
     env->ReleaseStringUTFChars(peer_id,pid);
     return 0;
-
 }
-
+jint naStopMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
+    if (client == NULL) {
+        return -1;
+    }
+    const char * pid = env->GetStringUTFChars(peer_id, NULL);
+    client->StopPeerMedia(pid);
+    env->ReleaseStringUTFChars(peer_id,pid);
+    return 0;
+}
 
 jint naSendTalkData(JNIEnv *env, jobject thiz,
                     jbyteArray talkBytes,jint dataLen) {
@@ -270,7 +275,8 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naTerminate", "()I", (void*) naTerminate },
         { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
         { "naCloseTunnel", "(Ljava/lang/String;)I", (void*) naCloseTunnel },
-        { "naAskMediaData", "(Ljava/lang/String;)I", (void*) naAskMediaData },
+        { "naStartMediaData", "(Ljava/lang/String;I)I", (void*) naStartMediaData },
+        { "naStopMediaData", "(Ljava/lang/String;)I", (void*) naStopMediaData },
         { "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naMessageFromPeer },
         { "naSendTalkData", "([BI)I", (void*) naSendTalkData },

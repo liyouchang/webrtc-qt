@@ -60,7 +60,8 @@ protected:
   virtual void SetWifiInfo(std::string peerId, std::string param);
   virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
   virtual void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
-
+  virtual bool SetAlarmStatus(int status);
+  virtual void ReportAlarmStatus(const std::string &peerId);
 private:
   /**
      * @brief SendVideoFrame

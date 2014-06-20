@@ -42,7 +42,8 @@ int main()
 
     Json::Value jntp = JsonConfig::Instance()->Get("ntpconfig","");
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
-    LOG(INFO)<<"zmqclient current version is "<<kaerp2p::ToStringVersion(kVersion);
+    std::string clientVer = kaerp2p::ToStringVersion(kVersion);
+    LOG(INFO)<<"zmqclient current version is "<<clientVer;
 
     std::string serversStr  = JsonValueToString(jservers);
     kaerp2p::P2PConductor::AddIceServers(serversStr);
@@ -72,9 +73,9 @@ int main()
         strMac = device->GetHardwareId();
     }
 
-    CameraClient client(strMac);
+    CameraClient client(strMac,clientVer);
     client.Connect(router_value.asString(),strDealerId);
-    //client.Login();
+    client.Login();
     device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
 
     AlarmNotify::Instance()->SignalTerminalAlarm.connect(
