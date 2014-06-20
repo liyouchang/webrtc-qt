@@ -79,8 +79,8 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	private final int DEVICE_LINK = 3;
 	
 	private DeviceLinkThread deviceLinkThread = null; // 联机线程
-	private boolean isLinking = false;
-	private boolean isLinked = false;
+//	private boolean isLinking = false;
+//	private boolean isLinked = false;
 	
 	private OwnReceiver ownReceiver;
 	public static final String MSG_REFRESH_ACTION = "com.video.main.OwnFragment.msg_refresh_action";
@@ -451,7 +451,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					break;
 				// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
 				case DEVICE_LINK:
-					
+					if (deviceAdapter != null) {
+						deviceAdapter.notifyDataSetChanged();
+					}
 					break;
 			}
 			if (listSize == 0) {
@@ -487,12 +489,31 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					Thread.sleep(500);
 					if (deviceList != null) {
 						if (i < listSize) {
-							if ((deviceList.get(i).get("LinkState").equals("notlink")) || (deviceList.get(i).get("LinkState").equals("timeout"))) {
-								String peerId = deviceList.get(i).get("dealerName");
+							
+							String peerId = deviceList.get(i).get("dealerName");
+							String linkState = deviceList.get(i).get("LinkState");
+							
+							if (linkState.equals("notlink")) {
 								if (TunnelCommunication.getInstance().openTunnel(peerId) == 0) {
 									// 正在联机...
 									deviceList.get(i).put("LinkState", "linking");
+									System.out.println("MyDebug: ------> 正在联机: "+peerId);
+								} else {
+									sleep(1000);
+									System.out.println("MyDebug: ------> 无法联机: "+peerId);
 								}
+							}
+							else if (linkState.equals("timeout")) {
+								sleep(2000);
+								if (TunnelCommunication.getInstance().openTunnel(peerId) == 0) {
+									// 正在联机...
+									deviceList.get(i).put("LinkState", "linking");
+									System.out.println("MyDebug: ------> 超时正在联机: "+peerId);
+								} else {
+									sleep(1000);
+									System.out.println("MyDebug: ------> 超时无法联机: "+peerId);
+								}
+								sendHandlerMsg(DEVICE_LINK, null);
 							}
 							i++;
 						} else {

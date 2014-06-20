@@ -38,7 +38,8 @@ public class TunnelCommunication {
 	private native int naOpenTunnel(String peerId);
 	private native int naCloseTunnel(String peerId);
 	private native int naMessageFromPeer(String peerId, String msg);
-	private native int naAskMediaData(String peerId);
+	private native int naStartMediaData(String peerId, int level);
+	private native int naStopMediaData(String peerId);
 	private native int naSendTalkData(byte[] ulawData, int ulawDataLen);
 	private native int naStartPeerVideoCut(String peerId, String filepath);
 	private native int naStopPeerVideoCut(String peerId);
@@ -135,8 +136,15 @@ public class TunnelCommunication {
 	/**
 	 * 请求视频数据
 	 */
-	public int askMediaData(String peerId) {
-		return naAskMediaData(peerId);
+	public int startMediaData(String peerId, int level) {
+		return naStartMediaData(peerId, level);
+	}
+	
+	/**
+	 * 关闭视频数据
+	 */
+	public int stopMediaData(String peerId) {
+		return naStopMediaData(peerId);
 	}
 	
 	/**

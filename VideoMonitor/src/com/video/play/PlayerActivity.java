@@ -132,8 +132,18 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		}
 		
 		if (!isLocalDevice) {
-			//【打开通道】
-			TunnelCommunication.getInstance().openTunnel(dealerName);
+			if (TunnelCommunication.getInstance().IsTunnelOpened(dealerName)) {
+				System.out.println("MyDebug: 【通道已打开】");
+				Value.isTunnelOpened = true;
+				//【播放视频】
+				TunnelCommunication.getInstance().startMediaData(dealerName, 0);
+				videoView.playVideo();
+				sendHandlerMsg(DISPLAY_VIDEO_VIEW, 3000);
+			} else {
+				System.out.println("MyDebug: 【再次打开通道】");
+				//【打开通道】
+				TunnelCommunication.getInstance().openTunnel(dealerName);
+			}
 		} else {
 			//【本地设备】
 			TunnelCommunication.getInstance().connectLocalDevice(localDeviceIPandPort);
@@ -865,7 +875,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						Value.isTunnelOpened = true;
 						if (!isLocalDevice) {
 							//【播放视频】
-							TunnelCommunication.getInstance().askMediaData(dealerName);
+							TunnelCommunication.getInstance().startMediaData(dealerName, 0);
 						} else {
 							//【本地设备】
 							TunnelCommunication.getInstance().startLocalVideo(localDeviceIPandPort);
