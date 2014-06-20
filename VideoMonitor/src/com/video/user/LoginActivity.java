@@ -442,6 +442,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		unregisterReceiver(localDeviceReceiver);
 		Value.isManulLogout = false;
 	}
 	

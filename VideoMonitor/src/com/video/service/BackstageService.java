@@ -43,7 +43,7 @@ public class BackstageService extends Service {
 		// TODO Auto-generated method stub
 		super.onCreate();
 		// 初始化通道
-		TunnelCommunication.getInstance().tunnelInitialize("com/video/play/TunnelCommunication");
+		TunnelCommunication.getInstance().tunnelInitialize(Value.IceServersValue);
 	}
 	
 	@Override

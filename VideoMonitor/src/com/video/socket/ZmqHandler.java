@@ -59,6 +59,7 @@ public class ZmqHandler extends Handler {
 				} else {
 					item.put("deviceBg", obj.getString("PictureURL"));
 				}
+				item.put("LinkState", "notlink"); // 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
 				list.add(item);
 	    	}
 	    	return list;

@@ -23,6 +23,11 @@ public class Value {
 	public final static String AlarmBackstageName = "Alarmstage";
 	
 	/**
+	 * 终端服务初始化值
+	 */
+	public final static String IceServersValue = "[{uri:stun:222.174.213.185:5389},{uri:turn:222.174.213.185:5766}]";
+	
+	/**
 	 * 服务器上比较版本的xml文件地址
 	 */
 	public final static String ApkXmlPath = "http://222.174.213.185:8088/plugin/VideoMonitorXml.xml";

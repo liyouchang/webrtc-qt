@@ -33,7 +33,7 @@ public class TunnelCommunication {
 	public static AudioCache audioDataCache = null;
 	
 	//P2P动态库接口
-	private native int naInitialize(String classPath);
+	private native int naInitialize(String iceServersValue);
 	private native int naTerminate();
 	private native int naOpenTunnel(String peerId);
 	private native int naCloseTunnel(String peerId);
@@ -48,6 +48,7 @@ public class TunnelCommunication {
 	private native int naDisconnectLocalDevice(String peerAddr);
 	private native int naStartLocalVideo(String peerAddr);
 	private native int naStopLocalVideo(String peerAddr);
+	private native boolean naIsTunnelOpened(String peerId);
 
 	synchronized public static TunnelCommunication getInstance() {
 		if (tunnel == null) {
@@ -59,14 +60,14 @@ public class TunnelCommunication {
 	/**
 	 * 初始化通道
 	 */
-	public int tunnelInitialize(String classPath) {
+	public int tunnelInitialize(String iceServersValue) {
 		if (videoDataCache == null) {
 			videoDataCache = new VideoCache(1024*1024*3);
 		}
 		if (audioDataCache == null) {
 			audioDataCache = new AudioCache(1024*1024);
 		}
-		return naInitialize(classPath);
+		return naInitialize(iceServersValue);
 	}
 
 	/**
@@ -80,6 +81,13 @@ public class TunnelCommunication {
 			audioDataCache.clearBuffer();
 		}
 		return naTerminate();
+	}
+	
+	/**
+	 * 判断通道是否打开
+	 */
+	public boolean IsTunnelOpened(String peerId) {
+		return naIsTunnelOpened(peerId);
 	}
 	
 	/**

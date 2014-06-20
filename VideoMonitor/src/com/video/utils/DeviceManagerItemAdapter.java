@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -59,6 +60,7 @@ public class DeviceManagerItemAdapter extends BaseAdapter {
 			holder = new ViewHolder();
 			convertView.setTag(holder);
 			holder.device_bg = (RelativeLayout) convertView.findViewById(R.id.rl_device_bg);
+			holder.device_net_state = (ImageView) convertView.findViewById(R.id.iv_device_net_state);
 			holder.device_name = (TextView) convertView.findViewById(R.id.tv_device_name);
 			holder.device_id = (TextView) convertView.findViewById(R.id.tv_device_mac);
 		} else {
@@ -71,6 +73,11 @@ public class DeviceManagerItemAdapter extends BaseAdapter {
 		} else {
 			holder.device_bg.setBackgroundResource(R.drawable.device_item_bg);
 		}
+		if (Utils.getOnlineState(list.get(position).get("isOnline"))) {
+			holder.device_net_state.setBackgroundResource(R.drawable.icon_online);
+		} else {
+			holder.device_net_state.setBackgroundResource(R.drawable.icon_offline);
+		}
 		holder.device_name.setText(list.get(position).get("deviceName"));
 		holder.device_id.setText(list.get(position).get("deviceID"));
 		
@@ -79,6 +86,7 @@ public class DeviceManagerItemAdapter extends BaseAdapter {
 
 	static class ViewHolder {
 		RelativeLayout device_bg;
+		ImageView device_net_state;
 		TextView device_name;
 		TextView device_id;
 	}

@@ -130,6 +130,7 @@ public class XmlDevice {
 			Element stateElement = (Element) document.createElement("state");
 			Element dealerNameElement = (Element) document.createElement("dealer");
 			Element bgElement = (Element) document.createElement("bg");
+			Element linkElement = (Element) document.createElement("link");
 			
 			Text nameText = document.createTextNode(map.get("deviceName"));
 			nameElement.appendChild(nameText);
@@ -141,14 +142,17 @@ public class XmlDevice {
 			dealerNameElement.appendChild(dealerNameText);
 			Text bgText = document.createTextNode(map.get("deviceBg"));
 			bgElement.appendChild(bgText);
+			Text linkText = document.createTextNode(map.get("LinkState"));
+			linkElement.appendChild(linkText);
 			
 			itemElement.appendChild(nameElement);
 			itemElement.appendChild(idElement);
 			itemElement.appendChild(stateElement);
 			itemElement.appendChild(dealerNameElement);
 			itemElement.appendChild(bgElement);
+			itemElement.appendChild(linkElement);
 			Element rootElement = (Element) document.getDocumentElement();
-			rootElement.appendChild(itemElement);
+			rootElement.appendChild(linkElement);
 			writeXML(document, filePath);
 			return true;
 		} catch (Exception e) {
@@ -372,6 +376,7 @@ public class XmlDevice {
 					document.getElementsByTagName("state").item(i).getFirstChild().setNodeValue(map.get("isOnline"));
 					document.getElementsByTagName("dealer").item(i).getFirstChild().setNodeValue(map.get("dealerName"));
 					document.getElementsByTagName("bg").item(i).getFirstChild().setNodeValue(map.get("deviceBg"));
+					document.getElementsByTagName("link").item(i).getFirstChild().setNodeValue(map.get("LinkState"));
 					break;
 				}
 			}
@@ -402,11 +407,13 @@ public class XmlDevice {
 					String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
 					String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
 					String bg = document.getElementsByTagName("bg").item(i).getFirstChild().getNodeValue();
+					String link = document.getElementsByTagName("link").item(i).getFirstChild().getNodeValue();
 					item.put("deviceName", name);
 					item.put("deviceID", id);
 					item.put("isOnline", state);
 					item.put("dealerName", dealer);
 					item.put("deviceBg", bg);
+					item.put("LinkState", link);
 					return item;
 				}
 				
@@ -436,11 +443,13 @@ public class XmlDevice {
 					String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
 					String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
 					String bg = document.getElementsByTagName("bg").item(i).getFirstChild().getNodeValue();
+					String link = document.getElementsByTagName("link").item(i).getFirstChild().getNodeValue();
 					item.put("deviceName", name);
 					item.put("deviceID", id);
 					item.put("isOnline", state);
 					item.put("dealerName", dealer);
 					item.put("deviceBg", bg);
+					item.put("LinkState", link);
 					list.add(item);
 				}
 			}
@@ -492,11 +501,13 @@ public class XmlDevice {
 				String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
 				String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
 				String bg = document.getElementsByTagName("bg").item(i).getFirstChild().getNodeValue();
+				String link = document.getElementsByTagName("link").item(i).getFirstChild().getNodeValue();
 				item.put("deviceName", name);
 				item.put("deviceID", id);
 				item.put("isOnline", state);
 				item.put("dealerName", dealer);
 				item.put("deviceBg", bg);
+				item.put("LinkState", link);
 				list.add(item);
 			}
 			return list;

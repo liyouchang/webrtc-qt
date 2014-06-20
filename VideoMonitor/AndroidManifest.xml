@@ -107,12 +107,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
-        <!-- 终端WiFi配置 -->
-        <activity
-            android:name=".main.WiFiActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppThemeNoTitle" >
-        </activity>
         <!-- 帮助 -->
         <activity
             android:name=".main.HelpActivity"
@@ -122,6 +116,18 @@
         <!-- 关于 -->
         <activity
             android:name=".main.AboutActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 操作设备 -->
+        <activity
+            android:name=".main.DeviceOperationActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+        </activity>
+        <!-- 终端WiFi配置 -->
+        <activity
+            android:name=".main.WiFiActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>

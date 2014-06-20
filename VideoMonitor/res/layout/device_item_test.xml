@@ -13,6 +13,17 @@
         android:layout_width="100dp"
         android:layout_height="90dp"
         android:background="@drawable/device_item_bg" >
+        
+        <ImageView
+            android:id="@+id/iv_device_icon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/icon_device_play_xml"
+            android:contentDescription="@null"
+            android:padding="5dp"
+            android:scaleType="fitXY" />
 
         <ImageView
             android:id="@+id/iv_device_net_state"
@@ -39,7 +50,6 @@
             android:id="@+id/tv_device_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="2dp"
             android:text="@string/device_item_name"
             android:textColor="@color/light_black"
             android:textSize="16dp" />
@@ -48,15 +58,24 @@
             android:id="@+id/tv_device_mac"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingTop="2dp"
+            android:paddingTop="3dp"
             android:layout_below="@+id/tv_device_name"
             android:text="@string/device_item_mac"
             android:textColor="@color/light_black"
             android:textSize="16dp" />
+       <TextView
+            android:id="@+id/tv_device_link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="3dp"
+            android:layout_below="@+id/tv_device_mac"
+            android:text="@string/device_link"
+            android:textColor="#9c9c9c"
+            android:textSize="16dp" />
     </RelativeLayout>
 
     <ImageView
-        android:id="@+id/rl_device_next"
+        android:id="@+id/iv_device_link_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"

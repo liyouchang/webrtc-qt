@@ -50,7 +50,6 @@
     <string name="modify_pwd">修改密码</string>
     <string name="remember_pwd">记住密码</string>
     <string name="setting">功能设置</string>
-    <string name="device_manager">设备管理</string>
     <string name="local_device">本地设备</string>
     <string name="set_wifi">终端WiFi配置</string>
     <string name="help">帮助</string>
@@ -65,6 +64,13 @@
     <string name="wifi_term_list">在线终端列表</string>
     <string name="protect_traffic">流量保护</string>
     <string name="protect_traffic_explain">开启后，只允许在WiFi情况下观看视频</string>
+    
+    <string name="device_link"><![CDATA[正在联机...]]></string>
+    <string name="device_manager">设备管理</string>
+    <string name="delete_device">删除设备</string>
+    <string name="set_device_bg">设置背景图片</string>
+    <string name="delete_device_bg">删除背景图片</string>
+    <string name="device_operation">设备操作</string>
     
     <string name="add_new_device">添加设备</string>
     <string name="add_device_share">添加终端分享</string>
