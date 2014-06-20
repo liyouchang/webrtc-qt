@@ -288,15 +288,44 @@ void HisiMediaDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &j
       int status;
       if(GetIntFromJsonObject(jmessage,"value",&status) &&
          status != kCommandGetValue){//set value
-          //SetAlarmStatus(status);
+          SetAlarmStatus(status);
         }else{//get value
-          //ReportAlarmStatus(peerId);
+          ReportAlarmStatus(peerId);
         }
-      //OnRecvVideoClarity(peer_id,clarity);
+    }
+  if(command.compare("restart") == 0){
+      LOG(INFO)<<"receive restart message ,the device will reboot";
+      Raycomm_Reboot();
+    }
+  if(command.compare("rename")==0){
+      std::string name;
+      if(GetStringFromJsonObject(jmessage,"name", &name)){
+          int r  = Raycomm_SetTitle(name.c_str());
+          LOG(INFO)<<"receive rename message ,set device titile with "<<name<<
+                     " ;result "<<r;
+        }
     }
   else{
       kaerp2p::KeTunnelCamera::OnCommandJsonMsg(peerId,jmessage);
     }
+}
+
+bool HisiMediaDevice::SetAlarmStatus(int status)
+{
+  Raycomm_SetAlarmEnable(status);
+  return true;
+}
+
+void HisiMediaDevice::ReportAlarmStatus(const std::string &peerId)
+{
+  int ret = Raycomm_GetAlarmEnable();
+  Json::Value jmessage;
+  jmessage["type"] = "tunnel";
+  jmessage["command"] = "alarm_status";
+  jmessage["value"] = ret;
+  Json::StyledWriter writer;
+  std::string msg = writer.write(jmessage);
+  this->terminal_->SendByRouter(peerId,msg);
 }
 
 
