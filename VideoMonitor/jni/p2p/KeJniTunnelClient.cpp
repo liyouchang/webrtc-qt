@@ -9,7 +9,6 @@
 #include "talk/base/bind.h"
 #include "JniUtil.h"
 KeJniTunnelClient::KeJniTunnelClient() {
-	//jni_thread = talk_base::Thread::Current();
 }
 
 KeJniTunnelClient::~KeJniTunnelClient() {
@@ -18,7 +17,6 @@ KeJniTunnelClient::~KeJniTunnelClient() {
 void KeJniTunnelClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface * t,
                                        const std::string & peer_id){
 	KeTunnelClient::OnTunnelOpened(t,peer_id);
-//	LOG(INFO)<<"KeJniTunnelClient::OnTunnelOpened---"<<peer_id;
 	JniUtil::GetInstance()->JniTunnelOpened(peer_id.c_str());
 }
 void KeJniTunnelClient::OnRecvAudioData(const std::string& peer_id,
@@ -37,6 +35,7 @@ void KeJniTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
 {
     JniUtil::GetInstance()->JniRecordStatus(peer_id.c_str(),status);
 }
+
 //on tunnel closed
 void KeJniTunnelClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface* t,
                                         const std::string& peer_id) {
