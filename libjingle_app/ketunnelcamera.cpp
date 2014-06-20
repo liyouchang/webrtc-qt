@@ -285,6 +285,7 @@ namespace kaerp2p{
     if(video == 0){//stop
         camera->SignalVideoData1.disconnect(this);
         camera->SignalVideoData2.disconnect(this);
+        camera->SignalVideoData3.disconnect(this);
         this->video_started_ = false;
       }
     else if(!video_started_){
@@ -296,6 +297,10 @@ namespace kaerp2p{
           }
         else if(video == 2){
             camera->SignalVideoData2.connect(
+                  this , &KeMessageProcessCamera::OnVideoData);
+          }
+        else if(video == 3){
+            camera->SignalVideoData3.connect(
                   this , &KeMessageProcessCamera::OnVideoData);
           }
       }

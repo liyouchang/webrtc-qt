@@ -13,7 +13,7 @@ class CameraClient: public PeerConnectionClientDealer,
 {
 public:
 
-    explicit CameraClient(std::string mac);
+    CameraClient(std::string mac,std::string ver);
     virtual void Login();
     virtual void SendAlarm(int alarmType, const std::string &alarmInfo,
                            const std::string &picture);
@@ -33,6 +33,7 @@ private:
     std::string mac_;
     std::string messageServer;
     std::string alarmServer;
+    std::string clientVersion;
     int heartCount;
 
 };

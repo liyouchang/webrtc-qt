@@ -7,8 +7,9 @@
 #include "libjingle_app/defaults.h"
 
 const int kHeartInterval = 60000;//ms
-CameraClient::CameraClient(std::string mac):
-    mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),heartCount(0)
+CameraClient::CameraClient(std::string mac,std::string ver):
+    mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),
+    heartCount(0),clientVersion(ver)
 {
     comm_thread_ = talk_base::Thread::Current();
 }
@@ -19,6 +20,7 @@ void CameraClient::Login()
     Json::Value jmessage;
     jmessage["type"] = "Terminal_Login";
     jmessage["MAC"] = mac_;
+    jmessage["Version"] = clientVersion;
     std::string msg = writer.write(jmessage);
     this->SendToPeer(messageServer,msg);
 }
@@ -70,7 +72,7 @@ void CameraClient::OnMessage(talk_base::Message *msg)
     switch (msg->message_id) {
     case MSG_LOGIN_HEART:{
         if(++heartCount > 2){
-            LOG(INFO)<<"heart count is "<<heartCount;
+            LOG(INFO)<<"heart count is "<<heartCount << " reconnect";
             this->Reconnect();
             heartCount = 0;
         }
