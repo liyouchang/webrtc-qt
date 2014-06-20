@@ -91,16 +91,25 @@ public class DeviceItemAdapter extends BaseAdapter {
 			holder.device_net_state.setBackgroundResource(R.drawable.icon_online);
 		} else {
 			holder.device_net_state.setBackgroundResource(R.drawable.icon_offline);
+			holder.device_link.setText("无法联机");
+			holder.device_link_icon.setBackgroundResource(R.drawable.device_not_linked_icon);
 		}
-		// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
+		// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
 		String linkState = list.get(position).get("LinkState");
 		if (linkState.equals("linked")) {
 			holder.device_link.setText("已联机");
+			holder.device_link_icon.setBackgroundResource(R.drawable.device_linked_icon);
 		}
 		else if (linkState.equals("timeout")) {
 			holder.device_link.setText("联机超时");
-		} else {
+			holder.device_link_icon.setBackgroundResource(R.drawable.device_not_linked_icon);
+		} 
+		else if (linkState.equals("linking")) {
 			holder.device_link.setText("正在联机...");
+			holder.device_link_icon.setBackgroundResource(R.drawable.device_not_linked_icon);
+		} else {
+			holder.device_link.setText("无法联机");
+			holder.device_link_icon.setBackgroundResource(R.drawable.device_not_linked_icon);
 		}
 		holder.device_name.setText(list.get(position).get("deviceName"));
 		holder.device_id.setText(list.get(position).get("deviceID"));
