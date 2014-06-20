@@ -74,7 +74,6 @@ namespace kaerp2p {
   bool PeerTerminal::SendByTunnel(const std::string &peer_id,
                                   const char *data, size_t len)
   {
-    LOG(INFO)<<"PeerTerminal::SendByTunnel start";
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel == NULL){
         return false;
