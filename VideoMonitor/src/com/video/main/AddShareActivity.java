@@ -260,6 +260,8 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
 							Toast.makeText(mContext, "添加终端分享成功！", Toast.LENGTH_SHORT).show();
+							// 重新请求分享设备的用户名列表
+							reqMACShareListEvent();
 						} else {
 							Toast.makeText(mContext, "添加终端分享失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}

@@ -59,8 +59,9 @@
                 android:text="@string/setting"
                 android:textColor="@color/title_bg_black"
                 android:textSize="18dp" />
+
             <Button
-                android:id="@+id/btn_local_device"
+                android:id="@+id/btn_device_manager"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
@@ -72,10 +73,10 @@
                 android:gravity="center_vertical"
                 android:paddingLeft="15dp"
                 android:paddingRight="10dp"
-                android:text="@string/local_device"
+                android:text="@string/device_manager"
                 android:textColor="@color/title_bg_black"
                 android:textSize="18dp" />
-
+            
             <Button
                 android:id="@+id/btn_wifi"
                 android:layout_width="fill_parent"

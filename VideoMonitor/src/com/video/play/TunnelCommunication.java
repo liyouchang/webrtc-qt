@@ -33,12 +33,13 @@ public class TunnelCommunication {
 	public static AudioCache audioDataCache = null;
 	
 	//P2P动态库接口
-	private native int naInitialize(String classPath);
+	private native int naInitialize(String iceServersValue);
 	private native int naTerminate();
 	private native int naOpenTunnel(String peerId);
 	private native int naCloseTunnel(String peerId);
 	private native int naMessageFromPeer(String peerId, String msg);
-	private native int naAskMediaData(String peerId);
+	private native int naStartMediaData(String peerId, int level);
+	private native int naStopMediaData(String peerId);
 	private native int naSendTalkData(byte[] ulawData, int ulawDataLen);
 	private native int naStartPeerVideoCut(String peerId, String filepath);
 	private native int naStopPeerVideoCut(String peerId);
@@ -48,6 +49,7 @@ public class TunnelCommunication {
 	private native int naDisconnectLocalDevice(String peerAddr);
 	private native int naStartLocalVideo(String peerAddr);
 	private native int naStopLocalVideo(String peerAddr);
+	private native boolean naIsTunnelOpened(String peerId);
 
 	synchronized public static TunnelCommunication getInstance() {
 		if (tunnel == null) {
@@ -59,14 +61,14 @@ public class TunnelCommunication {
 	/**
 	 * 初始化通道
 	 */
-	public int tunnelInitialize(String classPath) {
+	public int tunnelInitialize(String iceServersValue) {
 		if (videoDataCache == null) {
 			videoDataCache = new VideoCache(1024*1024*3);
 		}
 		if (audioDataCache == null) {
 			audioDataCache = new AudioCache(1024*1024);
 		}
-		return naInitialize(classPath);
+		return naInitialize(iceServersValue);
 	}
 
 	/**
@@ -80,6 +82,13 @@ public class TunnelCommunication {
 			audioDataCache.clearBuffer();
 		}
 		return naTerminate();
+	}
+	
+	/**
+	 * 判断通道是否打开
+	 */
+	public boolean IsTunnelOpened(String peerId) {
+		return naIsTunnelOpened(peerId);
 	}
 	
 	/**
@@ -127,8 +136,15 @@ public class TunnelCommunication {
 	/**
 	 * 请求视频数据
 	 */
-	public int askMediaData(String peerId) {
-		return naAskMediaData(peerId);
+	public int startMediaData(String peerId, int level) {
+		return naStartMediaData(peerId, level);
+	}
+	
+	/**
+	 * 关闭视频数据
+	 */
+	public int stopMediaData(String peerId) {
+		return naStopMediaData(peerId);
 	}
 	
 	/**

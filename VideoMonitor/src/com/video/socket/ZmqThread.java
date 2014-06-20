@@ -65,7 +65,7 @@ public class ZmqThread extends Thread {
 				JSONObject obj = new JSONObject(message_str2);
 				if (obj.has("type")) {
 					String type = obj.getString("type");
-					if ((type.equals("p2p")) || (type.equals("tunnel"))) {
+					if (type.equals("p2p")) {
 						TunnelCommunication.getInstance().messageFromPeer(message_str1, message_str2);
 					} else {
 						result = message_str2;

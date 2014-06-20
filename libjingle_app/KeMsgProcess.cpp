@@ -40,8 +40,10 @@ void KeMsgProcess::StartHeartBeat()
 {
     LOG(INFO)<<"KeMsgProcess::StartHeartBeat";
     heart_thread_ =  talk_base::Thread::Current();
+    LOG(INFO)<<"KeMsgProcess::StartHeartBeat1";
     this->heart_count_ = 0;
     SendHeart();
+    LOG(INFO)<<"KeMsgProcess::StartHeartBeat end";
 }
 
 void KeMsgProcess::ExtractMessage(talk_base::Buffer &allBytes)

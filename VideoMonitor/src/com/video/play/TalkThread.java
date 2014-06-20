@@ -61,9 +61,9 @@ public class TalkThread extends Thread {
 				ulawDataLen = G711EnCoder(ulawData, buffer, bufferReadResult);
 				if (ulawDataLen > 0) {
 					TunnelCommunication.getInstance().sendTalkData(ulawData, ulawDataLen);
-					sleep(10);
+					sleep(5);
 				} else {
-					sleep(20);
+					sleep(10);
 				}
 			} catch (Exception e) {
 				System.out.println("MyDebug: 对讲线程异常！");

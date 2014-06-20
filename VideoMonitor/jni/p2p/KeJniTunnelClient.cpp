@@ -18,6 +18,7 @@ KeJniTunnelClient::~KeJniTunnelClient() {
 void KeJniTunnelClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface * t,
                                        const std::string & peer_id){
 	KeTunnelClient::OnTunnelOpened(t,peer_id);
+//	LOG(INFO)<<"KeJniTunnelClient::OnTunnelOpened---"<<peer_id;
 	JniUtil::GetInstance()->JniTunnelOpened(peer_id.c_str());
 }
 void KeJniTunnelClient::OnRecvAudioData(const std::string& peer_id,

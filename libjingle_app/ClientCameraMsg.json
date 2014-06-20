@@ -40,7 +40,7 @@ client-->camera
 }
 //no use
 //3. video clarity
-//client-->camera
+//client<-->camera
 //{
 //    "type":"tunnel",
 //    "command":"video_clarity",
@@ -48,13 +48,6 @@ client-->camera
 //    "value":1,    //1:low,2:normal,3:high. 1~3 设置通道清晰度；101或者无此字段:获取通道清晰度
 //}
 
-//camera-->client
-//{
-//    "type":"tunnel",
-//    "command":"video_clarity",
-//    "channel":1,//1:主通道，2：子通道
-//    "value":1,    //1:low,2:normal,3:high.
-//}
 
 4.get camera wifi info
 client-->camera
@@ -96,7 +89,6 @@ camera-->clent
 }
 
 6. check online
-
 camera<-->clent
 {
     "type":"tunnel",
@@ -120,4 +112,11 @@ client<-->camera
 }
 
 
+9. set camera name
+client-->camera
+{
+    "type":"tunnel",
+    "command":"rename",
+    "name":"camear name",
+}
 

@@ -112,11 +112,11 @@ bool HisiMediaDevice::InitDeviceVideoInfo()
   video2_info_.frameInterval = 1000/video2_info_.frameRate;
   video3_info_.frameRate = this->GetVideoFrameRate(3);
   video3_info_.frameResolution = this->GetVideoFrameType(3);
-  video2_info_.frameInterval = 1000/video2_info_.frameRate;
+  video3_info_.frameInterval = 1000/video3_info_.frameRate;
 
   LOG(INFO)<<"video1_info_.frameInterval="<<video1_info_.frameInterval<<
              "; video2_info_.frameInterval="<<video2_info_.frameInterval<<
-             "; video2_info_.frameInterval="<<video2_info_.frameInterval;
+             "; video3_info_.frameInterval="<<video3_info_.frameInterval;
   return true;
 }
 
@@ -288,15 +288,44 @@ void HisiMediaDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &j
       int status;
       if(GetIntFromJsonObject(jmessage,"value",&status) &&
          status != kCommandGetValue){//set value
-          //SetAlarmStatus(status);
+          SetAlarmStatus(status);
         }else{//get value
-          //ReportAlarmStatus(peerId);
+          ReportAlarmStatus(peerId);
         }
-      //OnRecvVideoClarity(peer_id,clarity);
+    }
+  if(command.compare("restart") == 0){
+      LOG(INFO)<<"receive restart message ,the device will reboot";
+      Raycomm_Reboot();
+    }
+  if(command.compare("rename")==0){
+      std::string name;
+      if(GetStringFromJsonObject(jmessage,"name", &name)){
+          int r  = Raycomm_SetTitle(name.c_str());
+          LOG(INFO)<<"receive rename message ,set device titile with "<<name<<
+                     " ;result "<<r;
+        }
     }
   else{
       kaerp2p::KeTunnelCamera::OnCommandJsonMsg(peerId,jmessage);
     }
+}
+
+bool HisiMediaDevice::SetAlarmStatus(int status)
+{
+  Raycomm_SetAlarmEnable(status);
+  return true;
+}
+
+void HisiMediaDevice::ReportAlarmStatus(const std::string &peerId)
+{
+  int ret = Raycomm_GetAlarmEnable();
+  Json::Value jmessage;
+  jmessage["type"] = "tunnel";
+  jmessage["command"] = "alarm_status";
+  jmessage["value"] = ret;
+  Json::StyledWriter writer;
+  std::string msg = writer.write(jmessage);
+  this->terminal_->SendByRouter(peerId,msg);
 }
 
 
@@ -328,8 +357,10 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
         if(mcd->video3 == 1 && video3_handle_ == 0){
             video3_handle_ =  Raycomm_ConnectMedia(VIDEO3_DATA,0);
             LOG(INFO)<<"HisiMediaDevice start video3 " <<video3_handle_;
-            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO3);
-          }else if(mcd->video3 == 0 && video3_handle_ != 0){
+            if(video3_handle_ > 0){
+                media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO3);
+              }
+          }else if(mcd->video3 == 0 && video3_handle_ > 0){
             Raycomm_DisConnectMedia(video3_handle_);
             LOG(INFO)<<"HisiMediaDevice stop video";
             video3_handle_ = 0;
@@ -380,10 +411,9 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
               }
             this->SendVideoFrame(media_buffer_,media_len,2);
             //get next frame
-            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO2);
+            media_thread_->Post(this,MSG_SEND_VIDEO2);
           }else{
-            media_thread_->PostDelayed(video1_info_.frameInterval,this,
-                                       HisiMediaDevice::MSG_SEND_VIDEO2);
+            media_thread_->PostDelayed(video2_info_.frameInterval,this,MSG_SEND_VIDEO2);
           }
         break;
       }
@@ -399,10 +429,9 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
               }
             this->SendVideoFrame(media_buffer_,media_len,3);
             //get next frame
-            media_thread_->Post(this,HisiMediaDevice::MSG_SEND_VIDEO2);
+            media_thread_->Post(this,MSG_SEND_VIDEO3);
           }else{
-            media_thread_->PostDelayed(video1_info_.frameInterval,this,
-                                       HisiMediaDevice::MSG_SEND_VIDEO2);
+            media_thread_->PostDelayed(video3_info_.frameInterval,this,MSG_SEND_VIDEO3);
           }
         break;
       }
@@ -420,7 +449,7 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
           }
         break;
       }
-    case HisiMediaDevice::MSG_NET_CHECK:{
+    case MSG_NET_CHECK:{
         this->CheckNetStatus();
         media_thread_->PostDelayed(10000,this,MSG_NET_CHECK);
         break;
@@ -485,7 +514,7 @@ int HisiMediaDevice::GetVideoFrameRate(int level)
     }else if(level == 2){
       key = VIDEO2_FRAMERATE;
     }else if(level == 3){
-      key = VIDEO2_FRAMERATE;
+      key = VIDEO3_FRAMERATE;
     }
   Raycomm_GetParam(key,buf,0);
   int frameRate = atoi(buf);
@@ -525,8 +554,12 @@ void HisiMediaDevice::GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info)
 {
   if(level == 1){
       *info = this->video1_info_;
-    }else if(level == 2){
+    }
+  else if(level == 2){
       *info = this->video2_info_;
+    }
+  else if(level == 3){
+      *info = this->video3_info_;
     }
 }
 

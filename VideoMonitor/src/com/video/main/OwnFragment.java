@@ -40,6 +40,7 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlDevice;
 import com.video.play.PlayerActivity;
+import com.video.play.TunnelCommunication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.user.LoginActivity;
@@ -75,6 +76,11 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	
 	private final int IS_REQUESTING = 1;
 	private final int REQUEST_TIMEOUT = 2;
+	private final int DEVICE_LINK = 3;
+	
+	private DeviceLinkThread deviceLinkThread = null; // 联机线程
+//	private boolean isLinking = false;
+//	private boolean isLinked = false;
 	
 	private OwnReceiver ownReceiver;
 	public static final String MSG_REFRESH_ACTION = "com.video.main.OwnFragment.msg_refresh_action";
@@ -119,7 +125,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	}
 	
 	private void initData() {
-		//初始化Activity要使用的参数
+		// 初始化Activity要使用的参数
 		ZmqHandler.mHandler = deviceHandler;
 		xmlData = new XmlDevice(mActivity);
 		preferData = new PreferData(mActivity);
@@ -127,12 +133,20 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			userName = preferData.readString("UserName");
 		}
 		
-		//注册广播
+		// 注册广播
 		ownReceiver = new OwnReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(MSG_REFRESH_ACTION);
+		filter.addAction(Value.TUNNEL_REQUEST_ACTION);
 		mActivity.registerReceiver(ownReceiver, filter);
 		
+		// 启动联机线程
+		if (deviceLinkThread == null) {
+			deviceLinkThread = new DeviceLinkThread(true);
+			deviceLinkThread.start();
+		}
+		
+		// 缩略图保存路径
 		String SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
 		thumbnailsPath = SD_path + File.separator + "KaerVideo" + File.separator + "thumbnails";
 		thumbnailsFile = new File(thumbnailsPath);
@@ -143,10 +157,10 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		deviceList = new ArrayList<HashMap<String, String>>();
 		
 		if (Value.isNeedReqTermListFlag) {
-			//从服务器请求设备列表
+			// 从服务器请求设备列表
 			reqTermListEvent();
 		} else {
-			//加载本地的设备列表数据
+			// 加载本地的设备列表数据
 			deviceList = xmlData.readXml();
 			listSize = deviceList.size();
 			
@@ -435,6 +449,12 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						deviceHandler.removeMessages(R.id.delete_back_image_id);
 					}
 					break;
+				// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
+				case DEVICE_LINK:
+					if (deviceAdapter != null) {
+						deviceAdapter.notifyDataSetChanged();
+					}
+					break;
 			}
 			if (listSize == 0) {
 				noDeviceLayout.setVisibility(View.VISIBLE);
@@ -443,6 +463,69 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			}
 		}
 	};
+	
+	public class DeviceLinkThread extends Thread {
+		
+		private boolean runFlag = false;
+		
+		public DeviceLinkThread(boolean isRun) {
+			runFlag = isRun;
+		}
+		
+		public void stopLink() {
+			runFlag = false;
+			if (deviceLinkThread != null) {
+				deviceLinkThread = null;
+			}
+		}
+		
+		public void run() {
+			
+			int i = 0;
+			// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
+			
+			while (runFlag) {
+				try {
+					Thread.sleep(500);
+					if (deviceList != null) {
+						if (i < listSize) {
+							
+							String peerId = deviceList.get(i).get("dealerName");
+							String linkState = deviceList.get(i).get("LinkState");
+							
+							if (linkState.equals("notlink")) {
+								if (TunnelCommunication.getInstance().openTunnel(peerId) == 0) {
+									// 正在联机...
+									deviceList.get(i).put("LinkState", "linking");
+									System.out.println("MyDebug: ------> 正在联机: "+peerId);
+								} else {
+									sleep(1000);
+									System.out.println("MyDebug: ------> 无法联机: "+peerId);
+								}
+							}
+							else if (linkState.equals("timeout")) {
+								sleep(2000);
+								if (TunnelCommunication.getInstance().openTunnel(peerId) == 0) {
+									// 正在联机...
+									deviceList.get(i).put("LinkState", "linking");
+									System.out.println("MyDebug: ------> 超时正在联机: "+peerId);
+								} else {
+									sleep(1000);
+									System.out.println("MyDebug: ------> 超时无法联机: "+peerId);
+								}
+								sendHandlerMsg(DEVICE_LINK, null);
+							}
+							i++;
+						} else {
+							i = 0;
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 	
 	public static Handler ownHandler = new Handler() {
 		@SuppressWarnings("unchecked")
@@ -472,6 +555,22 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			}
 		}
 	};
+	
+	/**
+	 * 从设备列表获得指定设备的position
+	 */
+	private int getListPosition(String dealerName) {
+		if (deviceList != null) {
+			int size = deviceList.size();
+			for (int i=0; i<size; i++) {
+				if (deviceList.get(i).get("dealerName").equals(dealerName)) {
+					return i;
+				}
+			}
+			return -1;
+		}
+		return -1;
+	}
 	
 	/**
 	 * 删除指定的图片文件
@@ -706,26 +805,30 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						mActivity.overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 						break;
 					case 3:
-						final OkCancelDialog myDialog1=new OkCancelDialog(mActivity);
-						myDialog1.setTitle("温馨提示");
-						myDialog1.setMessage("确认删除背景图片？");
-						myDialog1.setPositiveButton("确认", new OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								myDialog1.dismiss();
-								Handler sendHandler = ZmqThread.zmqThreadHandler;
-								String data = generateDeleteImageJson(mDeviceId);
-								sendHandlerMsg(IS_REQUESTING, "正在删除图片...");
-								sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
-								sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
-							}
-						});
-						myDialog1.setNegativeButton("取消", new OnClickListener() {
-							@Override
-							public void onClick(View v) {
-								myDialog1.dismiss();
-							}
-						});
+						if (item.get("deviceBg").equals("null")) {
+							Toast.makeText(mActivity, "无背景图片，不需要删除！", Toast.LENGTH_SHORT).show();
+						} else {
+							final OkCancelDialog myDialog1=new OkCancelDialog(mActivity);
+							myDialog1.setTitle("温馨提示");
+							myDialog1.setMessage("确认删除背景图片？");
+							myDialog1.setPositiveButton("确认", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog1.dismiss();
+									Handler sendHandler = ZmqThread.zmqThreadHandler;
+									String data = generateDeleteImageJson(mDeviceId);
+									sendHandlerMsg(IS_REQUESTING, "正在删除图片...");
+									sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
+									sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+								}
+							});
+							myDialog1.setNegativeButton("取消", new OnClickListener() {
+								@Override
+								public void onClick(View v) {
+									myDialog1.dismiss();
+								}
+							});
+						}
 						break;
 					case 4:
 						final OkCancelDialog myDialog2=new OkCancelDialog(mActivity);
@@ -806,8 +909,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		//注销广播
+		// 注销广播
 		mActivity.unregisterReceiver(ownReceiver);
+		System.out.println("MyDebug: 【退出OwnFragment】");
+		// 注销联机线程
+		if (deviceLinkThread != null) {
+			deviceLinkThread.stopLink();
+		}
 	}
 
 	public class OwnReceiver extends BroadcastReceiver {
@@ -819,6 +927,31 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			//更新未读报警消息的显示
 			if (action.equals(MSG_REFRESH_ACTION)) {
 				MainActivity.setAlarmIconAndText(intent.getIntExtra("AlarmCount", 0));
+			}
+			else if (action.equals(Value.TUNNEL_REQUEST_ACTION)) {
+				
+				// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
+				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
+				String peerId = intent.getStringExtra("PeerId");
+				int position = getListPosition(peerId);
+				if ((deviceList == null) || (position < 0)) {
+					return ;
+				}
+				switch (TunnelEvent) {
+					// 通道被打开
+					case 0:
+						// 已联机
+						deviceList.get(position).put("LinkState", "linked");
+						break;
+					// 通道被关闭
+					case 1:
+						// 联机超时
+						deviceList.get(position).put("LinkState", "timeout");
+						break;
+				}
+				if (deviceAdapter != null) {
+					deviceAdapter.notifyDataSetChanged();
+				}
 			}
 		}
 	}

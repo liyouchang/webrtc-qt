@@ -66,7 +66,7 @@ public class DeviceItemAdapter extends BaseAdapter {
 		ViewHolder holder;
 
 		if (convertView == null) {
-			convertView = LayoutInflater.from(context).inflate(R.layout.device_item, null);
+			convertView = LayoutInflater.from(context).inflate(R.layout.device_item_test, null);
 			holder = new ViewHolder();
 			convertView.setTag(holder);
 			holder.device_bg = (RelativeLayout) convertView.findViewById(R.id.rl_device_bg);
@@ -74,6 +74,8 @@ public class DeviceItemAdapter extends BaseAdapter {
 			holder.device_net_state = (ImageView) convertView.findViewById(R.id.iv_device_net_state);
 			holder.device_name = (TextView) convertView.findViewById(R.id.tv_device_name);
 			holder.device_id = (TextView) convertView.findViewById(R.id.tv_device_mac);
+			holder.device_link = (TextView) convertView.findViewById(R.id.tv_device_link);
+			holder.device_link_icon = (ImageView) convertView.findViewById(R.id.iv_device_link_icon);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
 		}
@@ -89,6 +91,16 @@ public class DeviceItemAdapter extends BaseAdapter {
 			holder.device_net_state.setBackgroundResource(R.drawable.icon_online);
 		} else {
 			holder.device_net_state.setBackgroundResource(R.drawable.icon_offline);
+		}
+		// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
+		String linkState = list.get(position).get("LinkState");
+		if (linkState.equals("linked")) {
+			holder.device_link.setText("已联机");
+		}
+		else if (linkState.equals("timeout")) {
+			holder.device_link.setText("联机超时");
+		} else {
+			holder.device_link.setText("正在联机...");
 		}
 		holder.device_name.setText(list.get(position).get("deviceName"));
 		holder.device_id.setText(list.get(position).get("deviceID"));
@@ -184,8 +196,10 @@ public class DeviceItemAdapter extends BaseAdapter {
 		RelativeLayout device_bg;
 		ImageView device_net_state;
 		ImageView device_icon;
+		ImageView device_link_icon;
 		TextView device_name;
 		TextView device_id;
+		TextView device_link;
 	}
 	
 	/**

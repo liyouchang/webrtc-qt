@@ -669,8 +669,7 @@ public class LocalPlayerActivity extends Activity implements OnClickListener {
 			if (isSilent) {// 是否静音
 				mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
 			} else {
-				mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, index,
-						0);
+				mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, index, 0);
 			}
 			currentVolume = index;
 			button_voice.setAlpha(findAlphaFromSound());

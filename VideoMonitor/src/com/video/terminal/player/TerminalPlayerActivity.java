@@ -11,9 +11,9 @@ import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.DialogInterface.OnCancelListener;
 import android.content.res.Configuration;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -126,9 +126,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 		
 		// 音频
 //		audioThread = new AudioThread();
-//		if (audioThread != null) {
-//			audioThread.start();
-//		}
 		
 		initData(); // 初始化数据
 		initView(); // 初始化视图
@@ -206,7 +203,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 	@SuppressWarnings("unchecked")
 	private void initData() {
 		mContext = TerminalPlayerActivity.this;
-		Value.playTerminalVideoFileFlag = true;
 		getScreenSize();
 		
 		//注册广播
@@ -390,6 +386,10 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 						randomFile = new RandomAccessFile(fileInfo.fileCachePath, "r");
 						randomFile.seek(0);
 					} 
+					
+					if (fileInfo.readFileSize >= fileInfo.downloadSize) {
+						sleep(100);
+					}
 					
 					if (randomFile != null) {
 						
@@ -913,8 +913,14 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 			if (handler.hasMessages(REQUEST_TIME_OUT)) {
 				handler.removeMessages(REQUEST_TIME_OUT);
 			}
-			closePlayer();
-			finish();
+			//关闭通道
+			if (Value.isTunnelOpened) {
+				TunnelCommunication.getInstance().closeTunnel(dealerName);
+			}
+			if (isLocalFile) {
+				closePlayer();
+				TerminalPlayerActivity.this.finish();
+			}
 		}
 		return super.onKeyDown(keyCode, event);
 	}
@@ -1126,8 +1132,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 				if (!Value.isTunnelOpened) {
 					TunnelCommunication.getInstance().closeTunnel(dealerName);
 				}
-				closePlayer();
-				finish();
 			}
 		});
 		loadingDialog.setContentView(layout, new LinearLayout.LayoutParams(
@@ -1170,8 +1174,10 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 		//注销广播
 		unregisterReceiver(playerReceiver);
 		//解除屏幕保持唤醒
-		wakeLock.release(); 
-		wakeLock = null;
+		if ((wakeLock != null) && (wakeLock.isHeld())) {
+			wakeLock.release(); 
+			wakeLock = null;
+		}
 	}
 
 	/**
@@ -1187,7 +1193,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 		if (infoPopupWindow.isShowing()) {
 			infoPopupWindow.dismiss();
 		}
-		Value.playTerminalVideoFileFlag = false;
 	}
 
 	/**
@@ -1207,11 +1212,6 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 			} catch (Exception e) {
 				System.out.println("MyDebug: 关闭终端录像音视频对讲异常！");
 				e.printStackTrace();
-			}
-			
-			//关闭通道
-			if (Value.isTunnelOpened) {
-				TunnelCommunication.getInstance().closeTunnel(dealerName);
 			}
 			
 			//删除缓存文件
@@ -1294,6 +1294,9 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 							playTerminalVideoFile();
 						}
 						videoView.playVideo();
+//						if (audioThread != null) {
+//							audioThread.start();
+//						}
 						break;
 					case 5: // 请求消息错误
 						if (mDialog.isShowing()) {
@@ -1327,16 +1330,14 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 						break;
 					// 通道关闭
 					case 1:
-						if (mDialog.isShowing()) {
+						if ((mDialog != null) && (mDialog.isShowing())) {
+							toastNotify(mContext, "请求视频超时，请重试！", Toast.LENGTH_SHORT);
 							mDialog.dismiss();
 						}
 						if (handler.hasMessages(REQUEST_TIME_OUT)) {
 							handler.removeMessages(REQUEST_TIME_OUT);
 						}
 						if (!isLocalFile) {
-							if (!Value.isTunnelOpened) {
-								toastNotify(mContext, "请求终端录像超时，请重试！", Toast.LENGTH_SHORT);
-							}
 							closePlayer();
 							TerminalPlayerActivity.this.finish();
 						}
