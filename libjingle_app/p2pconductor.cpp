@@ -51,10 +51,12 @@ P2PConductor::P2PConductor():
 
 P2PConductor::~P2PConductor()
 {
-    if(stream_thread_)
-        delete stream_thread_;
+    signal_thread_->Invoke<void>(talk_base::Bind(
+        &P2PConductor::DeletePeerConnection,this));
     if(signal_thread_)
         delete signal_thread_;
+    if(stream_thread_)
+        delete stream_thread_;
 }
 
 
@@ -103,14 +105,13 @@ void P2PConductor::OnTunnelEstablished()
     ASSERT(stream_process_);
     LOG(INFO)<<"P2PConductor::OnTunnelEstablished---"<<talk_base::Thread::Current()->name();
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
-    SignalStreamOpened(this->GetPeerID());
-
     this->setTunnelState(kTunnelEstablished);
+    SignalStreamOpened(this->GetPeerID());
 }
 
 void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
 {
-    ASSERT(this->GetStreamProcess() == stream);
+    //ASSERT(this->GetStreamProcess() == stream);
     LOG(INFO) << "P2PConductor::OnTunnelTerminate---end";
 }
 
@@ -301,8 +302,10 @@ void P2PConductor::DeletePeerConnection()
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     //when close peer_connection the session will terminate and destroy the channels
     //the channel destroy will make the StreamProcess clean up
-    peer_connection_->Close();
-    peer_connection_.release();
+    if(peer_connection_.get()){
+        peer_connection_->Close();
+        peer_connection_.release();
+    }
 }
 
 void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
