@@ -80,7 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:background="@drawable/icon_button_right"
+        android:background="@drawable/device_not_linked_icon"
         android:contentDescription="@null" />
 
 </RelativeLayout>

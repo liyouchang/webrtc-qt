@@ -449,7 +449,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						deviceHandler.removeMessages(R.id.delete_back_image_id);
 					}
 					break;
-				// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
+				// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
 				case DEVICE_LINK:
 					if (deviceAdapter != null) {
 						deviceAdapter.notifyDataSetChanged();
@@ -465,7 +465,6 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	};
 	
 	public class DeviceLinkThread extends Thread {
-		
 		private boolean runFlag = false;
 		
 		public DeviceLinkThread(boolean isRun) {
@@ -482,39 +481,36 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		public void run() {
 			
 			int i = 0;
-			// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
+			// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
 			
 			while (runFlag) {
 				try {
 					Thread.sleep(500);
 					if (deviceList != null) {
-						if (i < listSize) {
-							
+						if ((deviceList.get(i).get("isOnline").equals("true")) && (i < listSize)) {
 							String peerId = deviceList.get(i).get("dealerName");
 							String linkState = deviceList.get(i).get("LinkState");
 							
 							if (linkState.equals("notlink")) {
 								if (TunnelCommunication.getInstance().openTunnel(peerId) == 0) {
-									// 正在联机...
 									deviceList.get(i).put("LinkState", "linking");
 									System.out.println("MyDebug: ------> 正在联机: "+peerId);
 								} else {
+									deviceList.get(i).put("LinkState", "notlink");
 									sleep(1000);
-									System.out.println("MyDebug: ------> 无法联机: "+peerId);
 								}
 							}
 							else if (linkState.equals("timeout")) {
-								sleep(2000);
+								sleep(1000);
 								if (TunnelCommunication.getInstance().openTunnel(peerId) == 0) {
-									// 正在联机...
 									deviceList.get(i).put("LinkState", "linking");
 									System.out.println("MyDebug: ------> 超时正在联机: "+peerId);
 								} else {
+									deviceList.get(i).put("LinkState", "notlink");
 									sleep(1000);
-									System.out.println("MyDebug: ------> 超时无法联机: "+peerId);
 								}
-								sendHandlerMsg(DEVICE_LINK, null);
 							}
+							sendHandlerMsg(DEVICE_LINK, null);
 							i++;
 						} else {
 							i = 0;
@@ -541,6 +537,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						item.put("deviceName", deviceList.get(i).get("deviceName"));
 						deviceList.get(i).put("isOnline", item.get("isOnline"));
 						deviceList.get(i).put("dealerName", item.get("dealerName"));
+						if (!item.get("isOnline").equals("true")) {
+							deviceList.get(i).put("LinkState", "notlink");
+						}
 						break;
 					}
 				}
@@ -930,7 +929,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			}
 			else if (action.equals(Value.TUNNEL_REQUEST_ACTION)) {
 				
-				// 联机的4种状态：linked:已联机 notlink:未开始 linking:正在联机... timeout:联机超时
+				// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
 				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
 				String peerId = intent.getStringExtra("PeerId");
 				int position = getListPosition(peerId);
@@ -942,11 +941,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					case 0:
 						// 已联机
 						deviceList.get(position).put("LinkState", "linked");
+						System.out.println("MyDebug: ------> 联机成功: "+peerId);
 						break;
 					// 通道被关闭
 					case 1:
 						// 联机超时
 						deviceList.get(position).put("LinkState", "timeout");
+						System.out.println("MyDebug: ------> 联机失败: "+peerId);
 						break;
 				}
 				if (deviceAdapter != null) {
