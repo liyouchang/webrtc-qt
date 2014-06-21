@@ -82,31 +82,21 @@ bool PeerTerminal::SendByTunnel(const std::string &peer_id,
 }
 
 
-void PeerTerminal::OnTunnelOpened(kaerp2p::StreamProcess *stream)
+void PeerTerminal::OnTunnelOpened(const std::string &peerId)
 {
-    //ASSERT(tunnel == conductor_->GetStreamProcess());
-    LOG(INFO)<< __FUNCTION__;
-    ScopedTunnel aTunnel = this->GetTunnel(stream);
+    ScopedTunnel aTunnel = this->GetTunnel(peerId);
     if(aTunnel == NULL){
-        LOG(WARNING)<<"cannot get tunnel by stream";
+        LOG(WARNING)<<"PeerTerminal::OnTunnelOpened---cannot get tunnel by id";
         return ;
     }
-    //this->tunnel_stream_ = tunnel;
-    stream->SignalReadData.connect(this,&PeerTerminal::OnTunnelReadData);
-    //stream->SignalClosed.connect(this,&PeerTerminal::OnTunnelClosed);
-    this->SignalTunnelOpened(this,aTunnel->GetPeerID());
+    aTunnel->GetStreamProcess()->SignalReadData.connect(
+          this,&PeerTerminal::OnTunnelReadData);
+    this->SignalTunnelOpened(this,peerId);
 }
 
-void PeerTerminal::OnTunnelClosed(kaerp2p::StreamProcess *stream)
+void PeerTerminal::OnTunnelClosed(const std::string &peerId)
 {
-    LOG(INFO)<< __FUNCTION__;
-    ScopedTunnel aTunnel = this->GetTunnel(stream);
-    if(aTunnel == NULL){
-        LOG(WARNING)<<"PeerTerminal::OnTunnelClosed---cannot get tunnel by stream";
-        return ;
-    }
-
-    this->SignalTunnelClosed(this,aTunnel->GetPeerID());
+    this->SignalTunnelClosed(this,peerId);
 }
 
 void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
