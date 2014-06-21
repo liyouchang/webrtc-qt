@@ -125,5 +125,6 @@ client-->camera
     "type":"tunnel",
     "command":"ntp",
     "ip":"192.168.40.187",
-    "port":13,
+    "port":123,
+    "zone":"+8:00"
 }
