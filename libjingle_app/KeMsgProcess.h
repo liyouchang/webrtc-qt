@@ -38,7 +38,7 @@ public:
     virtual ~KeMsgProcess();
 
     enum {
-        MSG_HEART_SENDED,
+        MSG_SEND_HEART,
         MSG_HEART_RECEIVED
     };
 

@@ -45,11 +45,10 @@ jboolean JniUtil::getIntField(JNIEnv* env, jobject obj, const char* fieldName,
     return JNI_FALSE;
   *out = env->GetIntField(obj, fieldID);
   return JNI_TRUE;
-
 }
 
-bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
-
+bool JniUtil::JniSendToPeer(const char* peer_id, const char* message)
+{
   if(g_vm_ == 0){
       LOGE("g_vm is null");
       return false;
@@ -95,8 +94,6 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message) {
   if(attached){
       g_vm_->DetachCurrentThread();
     }
-  LOGI("JniUtil::JniSendToPeer----end");
-
   return true;
 }
 

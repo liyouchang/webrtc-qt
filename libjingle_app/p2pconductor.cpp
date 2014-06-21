@@ -44,7 +44,6 @@ P2PConductor::P2PConductor():
     stream_thread_ = new talk_base::Thread();
     bool result = stream_thread_->Start();
     ASSERT(result);
-
     signal_thread_ = new talk_base::Thread();
     result = signal_thread_->Start();
     ASSERT(result);
@@ -102,7 +101,7 @@ StreamProcess *P2PConductor::GetStreamProcess()
 void P2PConductor::OnTunnelEstablished()
 {
     ASSERT(stream_process_);
-
+    LOG(INFO)<<"P2PConductor::OnTunnelEstablished---"<<talk_base::Thread::Current()->name();
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     SignalStreamOpened(this->GetPeerID());
 
@@ -125,7 +124,7 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
             ConductorClose();
         } else {
             LOG(WARNING)<<"P2PConductor::OnMessageFromPeer---"<<
-                      "should not receive message when tunnel is closing";
+                          "should not receive message when tunnel is closing";
         }
         return;
     }
@@ -269,9 +268,7 @@ bool P2PConductor::InitializePeerConnection()
     if(g_servers.empty()){
         //lht TODO: turn server should get by the server
         P2PConductor::AddIceServer("stun:222.174.213.185:5389","","");
-
         P2PConductor::AddIceServer(GetPeerConnectionString(),"","");
-
         P2PConductor::AddIceServer("turn:222.174.213.185:5766",
                                    "lht","123456");
     }
@@ -375,10 +372,10 @@ void P2PConductor::OnIceGatheringChange(IceObserver::IceGatheringState new_state
 }
 
 struct PeerMessageParams : public talk_base::MessageData {
-  PeerMessageParams(std::string id,std::string msg):peerId(id),message(msg) {}
-  ~PeerMessageParams() {}
-  std::string peerId;
-  std::string message;
+    PeerMessageParams(std::string id,std::string msg):peerId(id),message(msg) {}
+    ~PeerMessageParams() {}
+    std::string peerId;
+    std::string message;
 };
 
 void P2PConductor::OnMessage(talk_base::Message *msg)
@@ -412,9 +409,9 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id,
     //为了防止tunnelState的冲突，我们将tunnelstate的操作放在signal_thread中.
     PeerMessageParams * param = new PeerMessageParams(peer_id,message);
     signal_thread_->Post(this,MSG_PEER_MESSAGE,param);
-//    signal_thread_->Invoke<void>(
-//                talk_base::Bind(&P2PConductor::OnMessageFromPeer_s,
-//                                this,peer_id,message));
+    //    signal_thread_->Invoke<void>(
+    //                talk_base::Bind(&P2PConductor::OnMessageFromPeer_s,
+    //                                this,peer_id,message));
     return;
 }
 

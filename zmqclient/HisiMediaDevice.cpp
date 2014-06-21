@@ -293,11 +293,11 @@ void HisiMediaDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &j
           ReportAlarmStatus(peerId);
         }
     }
-  if(command.compare("restart") == 0){
+  else if(command.compare("restart") == 0){
       LOG(INFO)<<"receive restart message ,the device will reboot";
       Raycomm_Reboot();
     }
-  if(command.compare("rename")==0){
+  else if(command.compare("rename")==0){
       std::string name;
       if(GetStringFromJsonObject(jmessage,"name", &name)){
           int r  = Raycomm_SetTitle(name.c_str());

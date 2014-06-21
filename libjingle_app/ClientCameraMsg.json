@@ -119,4 +119,12 @@ client-->camera
     "command":"rename",
     "name":"camear name",
 }
-
+10. set ntp param
+client-->camera
+{
+    "type":"tunnel",
+    "command":"ntp",
+    "ip":"192.168.40.187",
+    "port":123,
+    "zone":"+8:00"
+}

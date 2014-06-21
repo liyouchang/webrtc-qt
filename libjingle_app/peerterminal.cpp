@@ -90,7 +90,7 @@ void PeerTerminal::OnTunnelOpened(const std::string &peerId)
         return ;
     }
     aTunnel->GetStreamProcess()->SignalReadData.connect(
-          this,&PeerTerminal::OnTunnelReadData);
+                this,&PeerTerminal::OnTunnelReadData);
     this->SignalTunnelOpened(this,peerId);
 }
 
