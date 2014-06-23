@@ -313,6 +313,7 @@ StreamResult PseudoTcpChannel::Write(const void* data, size_t data_len,
 void PseudoTcpChannel::Close() {
     ASSERT(stream_ != NULL && stream_thread_->IsCurrent());
     CritScope lock(&cs_);
+    LOG(INFO)<<"PseudoTcpChannel::Close";
     stream_ = NULL;
     // Clear out any pending event notifications
     stream_thread_->Clear(this, MSG_ST_EVENT);
@@ -602,6 +603,7 @@ PseudoTcpChannel::InternalStream::InternalStream(PseudoTcpChannel* parent)
 }
 
 PseudoTcpChannel::InternalStream::~InternalStream() {
+    LOG(INFO)<<"PseudoTcpChannel::InternalStream::~InternalStream";
     Close();
 }
 

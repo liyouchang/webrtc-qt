@@ -305,9 +305,6 @@ void HisiMediaDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &j
                      " ;result "<<r;
         }
     }
-  else if(command.compare("ntp")){
-
-    }
   else{
       kaerp2p::KeTunnelCamera::OnCommandJsonMsg(peerId,jmessage);
     }

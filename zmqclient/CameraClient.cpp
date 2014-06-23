@@ -5,6 +5,7 @@
 #include "talk/base/timeutils.h"
 
 #include "libjingle_app/defaults.h"
+#include "keapi/keapi.h"
 
 const int kHeartInterval = 60000;//ms
 CameraClient::CameraClient(std::string mac,std::string ver):
@@ -96,7 +97,8 @@ void CameraClient::OnMessage(talk_base::Message *msg)
 void CameraClient::OnMessageFromPeer(const std::string &peer_id,
                                      const std::string &message)
 {
-    if(peer_id.compare("Backstage") == 0){
+    if(peer_id.compare("Backstage") == 0)
+    {
         Json::Reader reader;
         Json::Value jmessage;
         if (!reader.parse(message, jmessage)) {
@@ -111,6 +113,17 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
             if(result == 0){
             }
             comm_thread_->Post(this,MSG_RECEIVE_HEART);
+        }
+        else if(type.compare("Terminal_NTP"))
+        {
+            std::string ntpIp;
+            if(GetStringFromJsonObject(jmessage,"IP",&ntpIp)){
+                std::stringstream ss;
+                ss << "ntp="<<ntpIp<<"|123|+8:00";
+                std::string command = ss.str();
+                LOG(INFO)<<"set terminal ntp ---"<<command;
+                Raycomm_SetParam(command.c_str(),0);
+            }
         }
     }else{
         SignalMessageFromPeer(peer_id,message);

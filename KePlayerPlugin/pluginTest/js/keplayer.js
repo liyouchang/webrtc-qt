@@ -20,11 +20,16 @@ function load(){
     }
     var iceServers = [{"uri":"stun:222.174.213.185:5389"},{"uri":"turn:222.174.213.185:5766"}];
     var strIceServers = JSON.stringify(iceServers);
-
-    kePlayerObj.Initialize(routerUrl.value,strIceServers);
+    var strRouterUrl = "tcp://222.174.213.185:5555"
+    kePlayerObj.Initialize(strRouterUrl,strIceServers);
     eventFunction();
+
+
 }
-function InitializePlugin(url){
+function CheckOpen(peerId){
+    var opend = kePlayerObj.IsTunnelOpened(peerId);
+    g_infoDiv.textContent = opend;
+
 }
 
 function SetDivision(num){

@@ -29,14 +29,15 @@ public:
         MSG_CONNECT_TIMEOUT,
         MSG_PEER_MESSAGE,
         MSG_DISCONNECT,
-        MSG_DISCONNECT_TIMEOUT
+        MSG_DISCONNECT_TIMEOUT,
+        MSG_CONNECT
     };
     enum TunnelState {
-        kNew,
-        kConnecting,
-        kEstablished,
-        kDisconnecting,
-        kClosed
+        kTunnelNew,
+        kTunnelConnecting,
+        kTunnelEstablished,
+        kTunnelDisconnecting,
+        kTunnelClosed
     };
 
     P2PConductor();
@@ -55,8 +56,8 @@ public:
     //peer_id and message
     sigslot::signal2<const std::string &, const std::string& > SignalNeedSendToPeer;
     //when connect success ,this signal will be emit
-    sigslot::signal1<StreamProcess *> SignalStreamOpened;
-    sigslot::signal1<StreamProcess *> SignalStreamClosed;
+    sigslot::signal1<const std::string &> SignalStreamOpened;
+    sigslot::signal1<const std::string &> SignalStreamClosed;
     // CreateSessionDescriptionObserver interface
     void OnSuccess(SessionDescriptionInterface *desc);
     void OnFailure(const std::string &error);
@@ -70,11 +71,14 @@ public:
     void OnMessage(talk_base::Message *msg);
 protected:
     bool InitializePeerConnection();
+    //close peerconnection
     void DeletePeerConnection();
     void OnTunnelEstablished();
     void OnTunnelTerminate(StreamProcess * stream);
     void OnMessageFromPeer_s(const std::string &peerId,
                              const std::string &message);
+    //close when another peer is closed
+    void ConductorClose();
     void setTunnelState(TunnelState state);
 private:
     talk_base::scoped_refptr<PeerTunnelInterface> peer_connection_;
@@ -89,9 +93,7 @@ public :
                              const std::string & username,
                              const std::string & password);
     static void AddIceServers(std::string jstrServers);
-
     static PeerTunnelInterface::IceServers g_servers;
-
 };
 
 }

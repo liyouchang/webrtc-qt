@@ -54,6 +54,8 @@ typedef struct
 int Raycomm_InitParam(void);
 int Raycomm_UnInitParam(void);
 int Raycomm_GetParam(char *keyword,char *buf,int cam_id);
+//设备NTP校时服务器设置，当设置ip、port、时区zone改变时，设置完后设备进行校时，而后每天校时一次
+// ip 格式0.0.0.0  zone格式+8:00   command格式ntp=0.0.0.0|123|+8:00
 int Raycomm_SetParam(char *command,int cam_id);
 //int IPC_QueryVideoRecod(char* start_day,char* end_day,pt_VidRecFile_QueryInfo pt_vidrecfile_queryinfo,int offset,int usCount);
 int Raycomm_QueryNVR(char* start_day,char* end_day,pt_VidRecFile_QueryInfo pt_vidrecfile_queryinfo,int offset,int usCount);
@@ -66,7 +68,7 @@ int Raycomm_GetMediaData(int handle,char* buf,int max_size,unsigned int* timesta
 int Raycomm_DisConnectMedia(int handle);
 int Raycomm_ForceIframe(int handle );
 //int IPC_TalkPlay(const char* keyword,char* buf,int len,unsigned int timestamp,unsigned int audiotype);
-int Raycomm_TalkPlay(int handle, char* buf, int len, unsigned int timestamp, unsigned int audiotype);
+int Raycomm_TalkPlay (int handle, char* buf, int len, unsigned int timestamp, unsigned int audiotype);
 int Raycomm_SetPtz(const char* keyword,int preset,int cam_id);
 //通道号   chn = 1.2.3.4
 //移动侦测 rea = 1
@@ -91,8 +93,6 @@ int Raycomm_SetTitle(const char* pChnName);
 
 int Raycomm_SetAlarmEnable(char bEnable);
 int Raycomm_GetAlarmEnable();
-//设备NTP校时服务器设置，当设置ip、port、时区zone改变时，设置完后设备进行校时，而后每天校时一次
-int Raycomm_SetNtp(const char* ip,short port,const char* zone); // ip 格式0.0.0.0  zone格式+8:00
 #ifdef __cplusplus
 }
 #endif
