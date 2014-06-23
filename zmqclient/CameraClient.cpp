@@ -9,116 +9,123 @@
 
 const int kHeartInterval = 60000;//ms
 CameraClient::CameraClient(std::string mac,std::string ver):
-  mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),
-  heartCount(0),clientVersion(ver)
+    mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),
+    heartCount(0),clientVersion(ver)
 {
-  comm_thread_ = talk_base::Thread::Current();
+    comm_thread_ = talk_base::Thread::Current();
 }
 
 void CameraClient::Login()
 {
-  Json::StyledWriter writer;
-  Json::Value jmessage;
-  jmessage["type"] = "Terminal_Login";
-  jmessage["MAC"] = mac_;
-  jmessage["Version"] = clientVersion;
-  std::string msg = writer.write(jmessage);
-  this->SendToPeer(messageServer,msg);
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] = "Terminal_Login";
+    jmessage["MAC"] = mac_;
+    jmessage["Version"] = clientVersion;
+    std::string msg = writer.write(jmessage);
+    this->SendToPeer(messageServer,msg);
 }
 
 void CameraClient::SendAlarm(int alarmType, const std::string &alarmInfo,
                              const std::string &picture)
 {
-  Json::StyledWriter writer;
-  Json::Value jmessage;
+    Json::StyledWriter writer;
+    Json::Value jmessage;
 
-  jmessage["type"] = "Terminal_Alarm";
-  jmessage["MAC"] = mac_;
-  jmessage["AlarmType"] = alarmType;
-  jmessage["AlarmInfo"] = alarmInfo;
-  jmessage["Picture"] = picture;
-  jmessage["DateTime"] = kaerp2p::GetCurrentDatetime("%F %T");
+    jmessage["type"] = "Terminal_Alarm";
+    jmessage["MAC"] = mac_;
+    jmessage["AlarmType"] = alarmType;
+    jmessage["AlarmInfo"] = alarmInfo;
+    jmessage["Picture"] = picture;
+    jmessage["DateTime"] = kaerp2p::GetCurrentDatetime("%F %T");
 
-  std::string msg = writer.write(jmessage);
-  this->SendToPeer(alarmServer,msg);
+    std::string msg = writer.write(jmessage);
+    this->SendToPeer(alarmServer,msg);
 }
 
 bool CameraClient::Connect(const std::string &router, const std::string &id)
 {
-  std::string strDealerId = id;
-  if(strDealerId.empty()) {
-      strDealerId = mac_ + "-" + kaerp2p::GetRandomString();
+    std::string strDealerId = id;
+    if(strDealerId.empty()) {
+        strDealerId = mac_ + "-" + kaerp2p::GetRandomString();
     }
-  if(PeerConnectionClientDealer::Connect(router,strDealerId)){
-      comm_thread_->Post(this,MSG_LOGIN_HEART);
-      return true;
+    if(PeerConnectionClientDealer::Connect(router,strDealerId)){
+        comm_thread_->Post(this,MSG_LOGIN_HEART);
+        return true;
     }
-  return false;
+    return false;
 
 }
 
 void CameraClient::Reconnect()
 {
-  std::string strDealerId = mac_ + "-" + kaerp2p::GetRandomString();
-  std::string oldAddr = dealer_->addr();
-  LOG(INFO)<<"CameraClient::Reconnect---with id "<<strDealerId;
-  dealer_->terminate();
-  dealer_->initialize(strDealerId,oldAddr);
-  this->Login();
+    std::string strDealerId = mac_ + "-" + kaerp2p::GetRandomString();
+    std::string oldAddr = dealer_->addr();
+    LOG(INFO)<<"CameraClient::Reconnect---with id "<<strDealerId;
+    dealer_->terminate();
+    dealer_->initialize(strDealerId,oldAddr);
+    this->Login();
 }
 
 
 void CameraClient::OnMessage(talk_base::Message *msg)
 {
-  switch (msg->message_id) {
+    switch (msg->message_id) {
     case MSG_LOGIN_HEART:{
         if(++heartCount > 2){
             LOG(INFO)<<"heart count is "<<heartCount << " reconnect";
             this->Reconnect();
             heartCount = 0;
-          }
+        }
         this->Login();
         comm_thread_->PostDelayed(kHeartInterval,this,MSG_LOGIN_HEART);
         break;
-      }
+    }
     case MSG_RECEIVE_HEART:{
         //LOG(INFO)<<"receive heart at count "<<heartCount;
         heartCount = 0;
         break;
-      }
+    }
     case MSG_RECONNECT:{
         break;
-      }
+    }
     default:
-      break;
+        break;
     }
 }
 
 void CameraClient::OnMessageFromPeer(const std::string &peer_id,
                                      const std::string &message)
 {
-  if(peer_id.compare("Backstage") == 0){
-      Json::Reader reader;
-      Json::Value jmessage;
-      if (!reader.parse(message, jmessage)) {
-          LOG(WARNING) << "Received unknown message. " << message;
-          return;
+    if(peer_id.compare("Backstage") == 0)
+    {
+        Json::Reader reader;
+        Json::Value jmessage;
+        if (!reader.parse(message, jmessage)) {
+            LOG(WARNING) << "Received unknown message. " << message;
+            return;
         }
-      std::string type;
-      GetStringFromJsonObject(jmessage, "type", &type);
-      if(type.compare("Terminal_Login") == 0){
-          int result;
-          GetIntFromJsonObject(jmessage, "Result", &result);
-          if(result == 0){
+        std::string type;
+        GetStringFromJsonObject(jmessage, "type", &type);
+        if(type.compare("Terminal_Login") == 0){
+            int result;
+            GetIntFromJsonObject(jmessage, "Result", &result);
+            if(result == 0){
             }
-          comm_thread_->Post(this,MSG_RECEIVE_HEART);
+            comm_thread_->Post(this,MSG_RECEIVE_HEART);
         }
-      else if(type.compare("Terminal_NTP"))
+        else if(type.compare("Terminal_NTP"))
         {
-
+            std::string ntpIp;
+            if(GetStringFromJsonObject(jmessage,"IP",&ntpIp)){
+                std::stringstream ss;
+                ss << "ntp="<<ntpIp<<"|123|+8:00";
+                std::string command = ss.str();
+                LOG(INFO)<<"set terminal ntp ---"<<command;
+                Raycomm_SetParam(command.c_str(),0);
+            }
         }
-
     }else{
-      SignalMessageFromPeer(peer_id,message);
+        SignalMessageFromPeer(peer_id,message);
     }
 }
