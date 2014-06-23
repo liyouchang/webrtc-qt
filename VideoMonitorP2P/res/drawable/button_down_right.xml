@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<selector xmlns:android="http://schemas.android.com/apk/res/android">        
+	<item android:state_pressed="true">
+	    <!-- 按键按下风格 -->
+		<shape>
+		    <size android:height="60dip" />
+		    <stroke android:width="0.1dip" android:color="@color/blue" />
+			<solid android:color="@color/blue" />
+			<corners android:bottomRightRadius="10dip" /> 
+	  	</shape>
+  	</item>
+	<item>
+	    <!-- 按键显示风格 -->
+		<shape>
+		    <size android:height="60dip" />
+		    <stroke android:width="0.1dip" android:color="#363636" />
+	    	<solid android:color="#FFFFFF" />
+	    	<corners android:bottomRightRadius="10dip"/> 
+	    </shape>
+	</item>
+</selector>

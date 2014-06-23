@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/login_bg" >
+
+    <LinearLayout
+        android:id="@+id/layout_login_input"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="15.0dip"
+        android:layout_marginRight="15.0dip"
+        android:layout_marginTop="50dp"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:background="@drawable/input_background" >
+
+            <ImageView
+                android:id="@+id/iv_login_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10.0dip"
+                android:layout_marginRight="10.0dip"
+                android:background="@null"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/icon_username" />
+
+            <EditText
+                android:id="@+id/et_login_username"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/btn_login_username_del"
+                android:layout_toRightOf="@+id/iv_login_username"
+                android:background="@null"
+                android:hint="@string/login_username"
+                android:padding="0.0dip"
+                android:textColor="@color/black"
+                android:textSize="18.0sp" />
+
+            <Button
+                android:id="@+id/btn_login_username_del"
+                android:layout_width="20.0dip"
+                android:layout_height="20.0dip"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10.0dip"
+                android:background="@drawable/input_delete"
+                android:visibility="invisible" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10.0dip"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:background="@drawable/input_background" >
+
+            <ImageView
+                android:id="@+id/iv_login_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10.0dip"
+                android:layout_marginRight="10.0dip"
+                android:background="@null"
+                android:contentDescription="@null"
+                android:scaleType="fitCenter"
+                android:src="@drawable/icon_password" />
+
+            <EditText
+                android:id="@+id/et_login_password"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/btn_login_password_del"
+                android:layout_toRightOf="@+id/iv_login_password"
+                android:background="@null"
+                android:hint="@string/login_password"
+                android:inputType="textPassword"
+                android:padding="0.0dip"
+                android:textColor="@color/black"
+                android:textSize="18.0sp" />
+
+            <Button
+                android:id="@+id/btn_login_password_del"
+                android:layout_width="20.0dip"
+                android:layout_height="20.0dip"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="10.0dip"
+                android:background="@drawable/input_delete"
+                android:visibility="invisible" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btn_login"
+            android:layout_width="fill_parent"
+            android:layout_height="47.0dip"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="20.0dip"
+            android:background="@drawable/button_style"
+            android:text="@string/login"
+            android:textColor="@color/white"
+            android:textSize="18.0sp" />
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="35.0dip"
+            android:layout_marginTop="15.0dip" >
+
+            <CheckBox
+                android:id="@+id/cb_auto_login"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:button="@drawable/login_checkbox_selector"
+                android:checked="true"
+                android:drawablePadding="5dp"
+                android:paddingTop="3.0dip"
+                android:text="@string/auto_login"
+                android:textColor="@color/light_black"
+                android:textSize="16.0sp" />
+
+            <Button
+                android:id="@+id/btn_login_find"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_alignParentRight="true"
+                android:background="@null"
+                android:gravity="center"
+                android:padding="0.0dip"
+                android:text="@string/forget_pwd"
+                android:textColor="@color/light_black"
+                android:textSize="16.0sp" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_login_regist"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="@null"
+        android:gravity="center"
+        android:text="@string/register"
+        android:textColor="@color/blue"
+        android:textSize="16.0sp" />
+
+    <ImageView
+        android:id="@+id/iv_login_demo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@null"
+        android:contentDescription="@null"
+        android:scaleType="fitCenter"
+        android:src="@drawable/icon_login_demo" />
+
+</RelativeLayout>

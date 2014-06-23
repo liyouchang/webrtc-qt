@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/page_bg_grey"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/title_height_size" >
+
+        <TextView
+            android:id="@+id/tv_vp_image"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/title_height_size"
+            android:layout_weight="1"
+            android:background="@drawable/viewpage_selected"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/local_picture"
+            android:textColor="@color/orange"
+            android:textSize="16dp" />
+
+        <TextView
+            android:id="@+id/tv_vp_video"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/title_height_size"
+            android:layout_weight="1"
+            android:background="@drawable/viewpage_unselected"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/local_video"
+            android:textColor="@color/white"
+            android:textSize="16dp" />
+        
+        <TextView
+            android:id="@+id/tv_vp_terminal"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/title_height_size"
+            android:layout_weight="1"
+            android:background="@drawable/viewpage_unselected"
+            android:gravity="center_horizontal|center_vertical"
+            android:text="@string/terminal_video"
+            android:textColor="@color/white"
+            android:textSize="16dp" />
+    </LinearLayout>
+    
+    <com.video.utils.TextProgressBar
+        android:id="@+id/progressBar_sd"
+        style="@style/downloadProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="20dp"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp" />
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/local_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="65dp" />
+    
+</LinearLayout>

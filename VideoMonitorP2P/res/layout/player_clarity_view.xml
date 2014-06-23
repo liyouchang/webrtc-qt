@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="270dp"
+    android:layout_height="50dp"
+    android:background="@drawable/player_bg"
+    android:layout_gravity="center" >
+
+    <Button
+        android:id="@+id/btn_video_clarity_high"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:paddingLeft="10dp"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/video_clarity_high_xml"
+        android:contentDescription="@null"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical" />
+
+    <Button
+        android:id="@+id/btn_video_clarity_normal"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@+id/btn_video_clarity_high"
+        android:background="@drawable/video_clarity_normal_xml"
+        android:contentDescription="@null"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical" />
+
+    <Button
+        android:id="@+id/btn_video_clarity_low"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:layout_marginLeft="5dp"
+        android:paddingRight="10dp"
+        android:layout_toRightOf="@+id/btn_video_clarity_normal"
+        android:background="@drawable/video_clarity_low_xml"
+        android:contentDescription="@null"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical" />
+
+</RelativeLayout>

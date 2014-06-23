@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootView"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/page_bg_grey" >
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/image_view_title"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/title_height_size"
+        android:layout_alignParentTop="true"
+        android:background="@color/title_bg_black"
+        android:visibility="visible"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/ib_image_back"
+            android:layout_width="60dp"
+            android:layout_height="@dimen/title_height_size"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/title_more_xml"
+            android:contentDescription="@null"
+            android:gravity="center_vertical|center_horizontal"
+            android:src="@drawable/btn_title_back_selected" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/image_view"
+            android:textColor="@color/orange"
+            android:textSize="@dimen/title_text_size" />
+
+        <ImageButton
+            android:id="@+id/ib_image_delete"
+            android:layout_width="60dp"
+            android:layout_height="@dimen/title_height_size"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/title_more_xml"
+            android:contentDescription="@null"
+            android:gravity="center_vertical|center_horizontal"
+            android:src="@drawable/delete" />
+    </RelativeLayout>
+
+    <com.video.local.DefineGallery
+        android:id="@+id/mygallery"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/image_view_title"
+        android:spacing="5dp" />
+
+</RelativeLayout>
