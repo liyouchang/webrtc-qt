@@ -56,4 +56,6 @@ HEADERS  += \
     $$PWD/KeQtTunnelClient.h \
     $$PWD/KePlayerPlugin.h \
     $$PWD/ke_recorder.h \
-    ../KePlayerPlugin/kevideocutter.h
+    ../KePlayerPlugin/kevideocutter.h \
+    $$PWD/ObjectSafetyImpl.h
+

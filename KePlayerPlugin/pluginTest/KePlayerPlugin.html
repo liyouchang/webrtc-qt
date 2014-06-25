@@ -28,14 +28,18 @@
     -->
     <p></p>
 
-    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="0090B0D41803-EB0A"/>
+    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="0090B0D41803-75BE"/>
     <input type="button" value="Open Tunnel" OnClick="KePlayerPlugin.OpenTunnel(PeerID.value);"/>
     <input type="button" value="Close Tunnel" OnClick="KePlayerPlugin.CloseTunnel(PeerID.value);"/>
     <input type="button" value="check open" OnClick="CheckOpen(PeerID.value);"/>
 
     <p></p>
+    <input type="button" value="high" OnClick="KePlayerPlugin.StartVideo(PeerID.value,1)"/>
+    <input type="button" value="mid" OnClick="KePlayerPlugin.StartVideo(PeerID.value,2)"/>
+    <input type="button" value="low" OnClick="KePlayerPlugin.StartVideo(PeerID.value,3)"/>
+    <input type="button" value="stop" OnClick="KePlayerPlugin.StopVideo(PeerID.value)"/>
 
-    <input type="button" value="Start Video" OnClick="KePlayerPlugin.StartVideo(PeerID.value,3)"/>
+    <p></p>
     <input type="button" value="Start Cut" OnClick="StartCut()"/>
     <input type="button" value="Stop Cut" OnClick="KePlayerPlugin.StopCut(PeerID.value)"/>
 

@@ -17,7 +17,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Kaer inc."
             VALUE "FileDescription", "kaer player plugin"
-            VALUE "FileVersion", "0.3.1.0"
+            VALUE "FileVersion", "0.3.2.0"
             VALUE "LegalCopyright", "Copyright (C) 2013 kaer inc."
             VALUE "InternalName", "KePlayerPlugin.dll"
             VALUE "OriginalFilename", "KePlayerPlugin.dll"

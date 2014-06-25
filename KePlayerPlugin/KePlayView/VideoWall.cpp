@@ -11,7 +11,6 @@ const QString kLocalIndexPrefix = "local_file_";
 VideoWall::VideoWall(QWidget *parent) :
     QWidget(parent),layout_changed_(false)
 {
-
     AVService::Initialize();
     this->setBackgroundRole(QPalette::Dark);
     //this->setStyleSheet("background-color:rgb(255, 0, 0);");
@@ -42,6 +41,9 @@ VideoWall::VideoWall(QWidget *parent) :
 
 VideoWall::~VideoWall()
 {
+    for(int i=0;i<MAX_AVPLAYER;i++){
+        delete this->players[i];
+    }
     AVService::Cleanup();
 }
 
