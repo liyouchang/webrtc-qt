@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Application;
-import android.content.Intent;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -110,30 +109,58 @@ public class MainApplication extends Application {
 	}
 	
 	/**
-	 * 从设备列表获得指定设备的position
+	 * 获得设备列表的大小
 	 */
-	public int getDeviceListPosition(String dealerName) {
-		if (MainApplication.getInstance().deviceList != null) {
-			int size = MainApplication.getInstance().deviceList.size();
-			for (int i=0; i<size; i++) {
-				if (MainApplication.getInstance().deviceList.get(i).get("dealerName").equals(dealerName)) {
-					return i;
-				}
+	public int getDeviceListSize() {
+		if (deviceList != null) {
+			return deviceList.size();
+		}
+		return 0;
+	}
+	
+	/**
+	 * 通过deviceID从设备列表获得指定设备的position
+	 */
+	public int getDeviceListPositionByDeviceID(String deviceID) {
+		int size = getDeviceListSize();
+		for (int i=0; i<size; i++) {
+			if (deviceList.get(i).get("deviceID").equals(deviceID)) {
+				return i;
 			}
-			return -1;
 		}
 		return -1;
 	}
 	
 	/**
-	 * 发送更新设备列表状态的广播
+	 * 通过dealerName从设备列表获得指定设备的position
 	 */
-	public void sendChangeDeviceListBroadcast() {
-		Intent actionIntent = new Intent();
-		actionIntent.setAction(BackstageService.CHANGE_DEVICE_LIST_ACTION);
-		sendBroadcast(actionIntent);
+	public int getDeviceListPositionByDealerName(String dealerName) {
+		String[] sArray = dealerName.split("-");
+		int size = getDeviceListSize();
+		for (int i=0; i<size; i++) {
+			if (deviceList.get(i).get("deviceID").equalsIgnoreCase(sArray[0].trim())) {
+				return i;
+			}
+		}
+		return -1;
 	}
-
+	
+	/**
+	 * 获得在线设备列表
+	 */
+	public ArrayList<HashMap<String, String>> getOnlineDeviceList() {
+		int len = getDeviceListSize();
+		ArrayList<HashMap<String, String>> listObj = new ArrayList<HashMap<String, String>>();
+		
+		for (int i=0; i<len; i++) {
+			HashMap<String, String> item = deviceList.get(i);
+			if (item.get("isOnline").equals("true")) {
+				listObj.add(item);
+			}
+		}
+		return listObj;
+	}
+	
 	/**
 	 * 发送Handler消息
 	 */
@@ -156,6 +183,14 @@ public class MainApplication extends Application {
 		handler.sendMessage(msg);
 	}
 	public void sendHandlerMsg(Handler handler, int what, int arg1, int arg2, String obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.arg1 = arg1;
+		msg.arg2 = arg2;
+		msg.obj = obj;
+		handler.sendMessage(msg);
+	}
+	public void sendHandlerMsg(Handler handler, int what, int arg1, int arg2, Object obj) {
 		Message msg = new Message();
 		msg.what = what;
 		msg.arg1 = arg1;

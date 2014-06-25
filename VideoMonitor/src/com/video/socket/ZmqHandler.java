@@ -297,11 +297,12 @@ public class ZmqHandler extends Handler {
 			}
 			// 终端上下线消息推送
 			else if (type.equals("Backstage_TermActive")) {
-				HashMap<String, String> item = new HashMap<String, String>();
-			    item.put("deviceID", obj.getString("MAC"));
-			    item.put("isOnline", getState(obj.getInt("Active")));
-				item.put("dealerName", obj.getString("DealerName"));
-				OwnFragment.ownHandler.obtainMessage(0, item).sendToTarget();
+				Intent actionIntent = new Intent();
+				actionIntent.putExtra("deviceID", obj.getString("MAC"));
+				actionIntent.putExtra("dealerName", obj.getString("DealerName"));
+				actionIntent.putExtra("isOnline", getState(obj.getInt("Active")));
+				actionIntent.setAction(BackstageService.TERM_ONLINE_STATE_ACTION);
+				MainApplication.getInstance().sendBroadcast(actionIntent);
 			}
 			// 客户端和服务器的心跳
 			else if (type.equals("Client_BeatHeart")) {

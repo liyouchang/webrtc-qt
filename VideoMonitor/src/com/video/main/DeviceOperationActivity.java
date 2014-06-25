@@ -29,7 +29,7 @@ public class DeviceOperationActivity extends Activity implements OnClickListener
 
 	private String deviceName = null;
 	private String deviceId = null;
-	private String dealerName = null;
+//	private String dealerName = null;
 	private String deviceBg = "null";
 	private String userName = null;
 	
@@ -80,9 +80,9 @@ public class DeviceOperationActivity extends Activity implements OnClickListener
 		Intent intent = this.getIntent();
 		deviceName = (String) intent.getCharSequenceExtra("deviceName");
 		deviceId = (String) intent.getCharSequenceExtra("deviceID");
-		if (intent.hasExtra("dealerName")) {
-			dealerName = (String) intent.getCharSequenceExtra("dealerName");
-		}
+//		if (intent.hasExtra("dealerName")) {
+//			dealerName = (String) intent.getCharSequenceExtra("dealerName");
+//		}
 		
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");

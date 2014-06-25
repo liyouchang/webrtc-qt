@@ -32,18 +32,19 @@ import com.video.data.Value;
 import com.video.main.MainActivity;
 import com.video.main.SetDateActivity;
 import com.video.play.PlayerActivity;
+import com.video.service.MainApplication;
 import com.video.user.LoginActivity;
 
 public class DeviceItemAdapter extends BaseAdapter {
 
 	private Context context;
 	private ArrayList<HashMap<String, String>> list;
-	private File thumbnailsFile = null;
+	private File thumbnailsFile = MainApplication.getInstance().thumbnailsFile;
 
-	public DeviceItemAdapter(Context context, File thumbnailsFile, ArrayList<HashMap<String, String>> list) {
+	public DeviceItemAdapter(Context context, ArrayList<HashMap<String, String>> list) {
 		this.context = context;
 		this.list = list;
-		this.thumbnailsFile = thumbnailsFile;
+		this.thumbnailsFile = MainApplication.getInstance().thumbnailsFile;
 	}
 
 	@Override

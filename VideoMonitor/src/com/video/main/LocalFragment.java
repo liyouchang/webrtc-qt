@@ -30,10 +30,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.video.R;
-import com.video.data.XmlDevice;
 import com.video.local.ImageListViewAdapter;
 import com.video.local.LocalFileItem;
 import com.video.local.VideoListViewAdapter;
+import com.video.service.MainApplication;
 import com.video.utils.DeviceItemAdapter;
 import com.video.utils.TextProgressBar;
 import com.video.utils.Utils;
@@ -85,9 +85,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	private RelativeLayout noVideoLayout = null;
 	
 	//终端录像初始化
-	private XmlDevice xmlData;
-	private String thumbnailsPath = null;
-	private File thumbnailsFile = null;
 	private ArrayList<HashMap<String, String>> deviceList = null;
 	private DeviceItemAdapter deviceAdapter = null;
 	private ListView terminalListView = null;
@@ -167,8 +164,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		filter.addAction(REFRESH_VIDEO_FILE);
 		mActivity.registerReceiver(localReceiver, filter);
 		
-		xmlData = new XmlDevice(mActivity);
-		
 		if (Utils.checkSDCard()) {
 			//获得SD的信息
 			progressBarSD = (TextProgressBar) mView.findViewById(R.id.progressBar_sd);
@@ -192,14 +187,8 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			new LocalVideoThread().start();
 			
 			//终端录像初始化
-			thumbnailsPath = SD_path + File.separator + "KaerVideo" + File.separator + "thumbnails";
-			thumbnailsFile = new File(thumbnailsPath);
-			if(!thumbnailsFile.exists()){
-				thumbnailsFile.mkdirs();
-			}
-			
 			deviceList = new ArrayList<HashMap<String, String>>();
-			ArrayList<HashMap<String, String>> readList = xmlData.getOnlineList();
+			ArrayList<HashMap<String, String>> readList = MainApplication.getInstance().getOnlineDeviceList();
 			if (readList != null) {
 				deviceList = readList;
 			}
@@ -210,7 +199,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			} else {
 				noDeviceLayout.setVisibility(View.INVISIBLE);
 			}
-			deviceAdapter = new DeviceItemAdapter(mActivity, thumbnailsFile, deviceList);
+			deviceAdapter = new DeviceItemAdapter(mActivity, deviceList);
 			terminalListView.setAdapter(deviceAdapter);
 		}
 	}

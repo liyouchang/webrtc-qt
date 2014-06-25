@@ -64,7 +64,7 @@ public class TunnelCommunication {
 	 */
 	public int tunnelInitialize(String iceServersValue) {
 		if (videoDataCache == null) {
-			videoDataCache = new VideoCache(1024*1024*3);
+			videoDataCache = new VideoCache(1024*1024);
 		}
 		if (audioDataCache == null) {
 			audioDataCache = new AudioCache(1024*1024);

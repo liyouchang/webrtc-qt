@@ -131,12 +131,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		
 		if (listSize > 1) {
 			MainApplication.getInstance().deviceList = orderDeviceList(MainApplication.getInstance().deviceList);
-			deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
-			lv_list.setAdapter(deviceAdapter);
-		} else {
-			deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
-			lv_list.setAdapter(deviceAdapter);
 		}
+		deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
+		lv_list.setAdapter(deviceAdapter);
 		
 		if (listSize == 0) {
 			noDeviceLayout.setVisibility(View.VISIBLE);
@@ -288,13 +285,12 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					Value.isNeedReqTermListFlag = true;
 					Toast.makeText(mActivity, ""+msg.obj, Toast.LENGTH_SHORT).show();
 					
-					listSize = MainApplication.getInstance().deviceList.size();
 					if (listSize > 1) {
 						MainApplication.getInstance().deviceList = orderDeviceList(MainApplication.getInstance().deviceList);
-						deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
+						deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
 						lv_list.setAdapter(deviceAdapter);
 					} else {
-						deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
+						deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
 						lv_list.setAdapter(deviceAdapter);
 					}
 					break;
@@ -318,23 +314,19 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							if (listObj != null) {
 								MainApplication.getInstance().xmlDevice.updateList(listObj);
 								MainApplication.getInstance().deviceList = listObj;
-								listSize = MainApplication.getInstance().deviceList.size();
-								System.out.println("MyDebug: ------> listSize: " + listSize);
+								listSize = MainApplication.getInstance().getDeviceListSize();
 								
 								if (listSize > 1) {
 									MainApplication.getInstance().deviceList = orderDeviceList(MainApplication.getInstance().deviceList);
-									deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
-									lv_list.setAdapter(deviceAdapter);
-								} else {
-									deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
-									lv_list.setAdapter(deviceAdapter);
 								}
+								deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
+								lv_list.setAdapter(deviceAdapter);
 							} else {
 								listSize = 0;
 								MainApplication.getInstance().xmlDevice.deleteAllItem();
 								if (MainApplication.getInstance().deviceList != null) {
 									MainApplication.getInstance().deviceList.clear();
-									deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
+									deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
 									lv_list.setAdapter(deviceAdapter);
 								}
 							}
@@ -358,7 +350,6 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							MainApplication.getInstance().xmlDevice.deleteItem(mDeviceId);
 							MainApplication.getInstance().deviceList.remove(listPosition);
 							deviceAdapter.notifyDataSetChanged();
-							listSize = MainApplication.getInstance().xmlDevice.getListSize();
 							Toast.makeText(mActivity, "删除终端绑定成功！", Toast.LENGTH_SHORT).show();
 						} else {
 							Toast.makeText(mActivity, "删除终端绑定失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
@@ -419,46 +410,26 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					break;
 				case REFRESH_DEVICE_LIST:
 					if (deviceAdapter != null) {
-						deviceAdapter.notifyDataSetChanged();
+						if ((Boolean) msg.obj) {
+							listSize = MainApplication.getInstance().getDeviceListSize();
+							if (listSize > 1) {
+								MainApplication.getInstance().deviceList = orderDeviceList(MainApplication.getInstance().deviceList);
+								deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
+								lv_list.setAdapter(deviceAdapter);
+							} else {
+								deviceAdapter.notifyDataSetChanged();
+							}
+						} else {
+							deviceAdapter.notifyDataSetChanged();
+						}
 					}
 					break;
 			}
+			listSize = MainApplication.getInstance().getDeviceListSize();
 			if (listSize == 0) {
 				noDeviceLayout.setVisibility(View.VISIBLE);
 			} else {
 				noDeviceLayout.setVisibility(View.INVISIBLE);
-			}
-		}
-	};
-	
-	public static Handler ownHandler = new Handler() {
-		@SuppressWarnings("unchecked")
-		@Override
-		public void handleMessage(Message msg) {
-			// TODO Auto-generated method stub
-			super.handleMessage(msg);
-			if (msg.what == 0) {
-				HashMap<String, String> item = (HashMap<String, String>)msg.obj;
-				String mac = item.get("deviceID");
-				for (int i=0; i<listSize; i++) {
-					if (MainApplication.getInstance().deviceList.get(i).get("deviceID").equals(mac)) {
-						item.put("deviceName", MainApplication.getInstance().deviceList.get(i).get("deviceName"));
-						MainApplication.getInstance().deviceList.get(i).put("isOnline", item.get("isOnline"));
-						MainApplication.getInstance().deviceList.get(i).put("dealerName", item.get("dealerName"));
-						if (!item.get("isOnline").equals("true")) {
-							MainApplication.getInstance().deviceList.get(i).put("LinkState", "notlink");
-						}
-						break;
-					}
-				}
-				MainApplication.getInstance().xmlDevice.updateItemState(mac, item.get("isOnline"), item.get("dealerName"));
-				if (listSize > 1) {
-					MainApplication.getInstance().deviceList = orderDeviceList(MainApplication.getInstance().deviceList);
-					deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
-					lv_list.setAdapter(deviceAdapter);
-				} else {
-					deviceAdapter.notifyDataSetChanged();
-				}
 			}
 		}
 	};
@@ -730,12 +701,11 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			Bundle bundle = data.getExtras();
 			String id = bundle.getString("deviceId");
 			String name = bundle.getString("deviceName");
-			for (int i=0; i<listSize; i++) {
-				if (MainApplication.getInstance().deviceList.get(i).get("deviceID").equals(id)) {
-					MainApplication.getInstance().deviceList.get(i).put("deviceName", name);
-					deviceAdapter.notifyDataSetChanged();
-					break;
-				}
+			int position = MainApplication.getInstance().getDeviceListPositionByDeviceID(id);
+			if (position == -1) {
+				return ;
+			} else {
+				MainApplication.getInstance().deviceList.get(position).put("deviceName", name);
 			}
 		}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 		else if (resultCode == 2) {
@@ -754,10 +724,10 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			
 			if (listSize > 1) {
 				MainApplication.getInstance().deviceList = orderDeviceList(MainApplication.getInstance().deviceList);
-				deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
+				deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
 				lv_list.setAdapter(deviceAdapter);
 			} else {
-				deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().thumbnailsFile, MainApplication.getInstance().deviceList);
+				deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
 				lv_list.setAdapter(deviceAdapter);
 			}
 			
@@ -767,6 +737,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				noDeviceLayout.setVisibility(View.INVISIBLE);
 			}
 		}
+		MainApplication.getInstance().sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST);
 	}
 
 	@Override
@@ -788,7 +759,8 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				MainActivity.setAlarmIconAndText(intent.getIntExtra("AlarmCount", 0));
 			}
 			else if (action.equals(BackstageService.CHANGE_DEVICE_LIST_ACTION)) {
-				MainApplication.getInstance().sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST);
+				boolean isTermActive = intent.getBooleanExtra("isTermActive", false);
+				MainApplication.getInstance().sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST, 0, 0, isTermActive);
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="270dp"
     android:layout_height="50dp"
-    android:background="@drawable/player_bg"
+    android:background="@drawable/player_clarity_bg"
     android:layout_gravity="center" >
 
     <Button

@@ -34,6 +34,7 @@ public class BackstageService extends Service {
 	public static final String BACKSTAGE_MESSAGE_ACTION = "BackstageService.backstage_message"; // 接收报警消息
 	public static final String SEARCH_LOCAL_DEVICE_ACTION = "BackstageService.search_local_device"; // 搜索本地设备
 	public static final String CHANGE_DEVICE_LIST_ACTION = "BackstageService.change_device_list"; // 更新设备列表状态
+	public static final String TERM_ONLINE_STATE_ACTION = "BackstageService.term_online_state"; // 终端上下线状态
 	
 	static 
 	{
@@ -59,6 +60,7 @@ public class BackstageService extends Service {
 		//注册广播
 		IntentFilter mFilter = new IntentFilter();
 		mFilter.addAction(TUNNEL_REQUEST_ACTION);
+		mFilter.addAction(TERM_ONLINE_STATE_ACTION);
         mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(serviceReceiver, mFilter);
         
@@ -229,12 +231,22 @@ public class BackstageService extends Service {
 						}
 					}
 					// 发送更新设备列表状态的广播
-					MainApplication.getInstance().sendChangeDeviceListBroadcast();
+					sendChangeDeviceListBroadcast(false);
 				} else {
 					continue;
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 发送更新设备列表状态的广播
+	 */
+	public void sendChangeDeviceListBroadcast(boolean isTermActive) {
+		Intent actionIntent = new Intent();
+		actionIntent.putExtra("isTermActive", isTermActive);
+		actionIntent.setAction(BackstageService.CHANGE_DEVICE_LIST_ACTION);
+		sendBroadcast(actionIntent);
 	}
 	
 	/**
@@ -310,6 +322,7 @@ public class BackstageService extends Service {
 					if (handler.hasMessages(LINK_TIMEOUT)) {
 						handler.removeMessages(LINK_TIMEOUT);
 					}
+					sendChangeDeviceListBroadcast(false);
 					break;
 			}
 		}
@@ -325,6 +338,7 @@ public class BackstageService extends Service {
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+				// 网络变化后，处理登录操作
 				connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 				info = connectivityManager.getActiveNetworkInfo();
 				
@@ -348,11 +362,14 @@ public class BackstageService extends Service {
 					System.out.println("MyDebug: 【没有可用网络】");
 				}
 			}
-			else if (action.equals(BackstageService.TUNNEL_REQUEST_ACTION)) {
+			else if (action.equals(TUNNEL_REQUEST_ACTION)) {
 				// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
 				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
 				String peerId = intent.getStringExtra("PeerId");
-				int position = MainApplication.getInstance().getDeviceListPosition(peerId);
+				int position = MainApplication.getInstance().getDeviceListPositionByDealerName(peerId);
+				if (position == -1) {
+					return ;
+				}
 				
 				switch (TunnelEvent) {
 					// 通道被打开
@@ -366,8 +383,25 @@ public class BackstageService extends Service {
 						MainApplication.getInstance().deviceList.get(position).put("LinkState", "timeout");
 						break;
 				}
-				// 发送更新设备列表状态的广播
-				MainApplication.getInstance().sendChangeDeviceListBroadcast();
+				sendChangeDeviceListBroadcast(false);
+			}
+			else if (action.equals(TERM_ONLINE_STATE_ACTION)) {
+				// 终端上下线
+				String mac = intent.getStringExtra("deviceID");
+				int position = MainApplication.getInstance().getDeviceListPositionByDeviceID(mac);
+				if (position == -1) {
+					return ;
+				}
+				String dealerName = intent.getStringExtra("dealerName");
+				String isOnline = intent.getStringExtra("isOnline");
+				
+				MainApplication.getInstance().deviceList.get(position).put("dealerName", dealerName);
+				MainApplication.getInstance().deviceList.get(position).put("isOnline", isOnline);
+				if (!isOnline.equals("true")) {
+					MainApplication.getInstance().deviceList.get(position).put("LinkState", "notlink");
+				}
+				MainApplication.getInstance().xmlDevice.updateItemState(mac, isOnline, dealerName);
+				sendChangeDeviceListBroadcast(true);
 			}
 		}
 	};

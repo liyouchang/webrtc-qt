@@ -40,7 +40,6 @@ import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.Value;
-import com.video.service.BackstageService;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
@@ -76,12 +75,12 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private boolean isTalkEnable = false;
 	private boolean isPlayMusic = false;
 	private boolean isPopupWindowShow = false;
+	private boolean isClarityPopupWindowShow = false;
 	
 	private final int SHOW_TIME_MS = 6000;
 	private final int HIDE_POPUPWINDOW = 1;
-	private final static int REQUEST_TIMEOUT = 2;
-	private final static int DISPLAY_VIDEO_VIEW = 3;
-	private final static int CHANGE_LOADED_VIEW = 4;
+	private final static int DISPLAY_VIDEO_VIEW = 2;
+	private final static int CHANGE_LOADED_VIEW = 3;
 	
 	private GestureDetector mGestureDetector = null; // 手势识别
 	
@@ -91,13 +90,19 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private static PopupWindow bottomPopupWindow = null; // 底部弹出框
 	private View recordView = null; // 录像视图
 	private static PopupWindow recordPopupWindow = null; // 录像弹出框
-
+	private View clarityView = null;//清晰度视图
+	private PopupWindow clarityPopupWindow = null;//清晰度弹出框
+	
 	private Button player_capture = null;
 	private Button player_record = null;
 	private Button player_screen = null;
 	private Button player_talkback = null;
 	private Button player_sound = null;
+	
 	private Button video_clarity = null;
+	private Button clarity_high = null;
+	private Button clarity_normal = null;
+	private Button clarity_low = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +118,16 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private void initPlayer() {
 		mContext = PlayerActivity.this;
 		getScreenSize();
+		
+		Intent intent = this.getIntent();
+		deviceName = (String) intent.getCharSequenceExtra("deviceName");
+		dealerName = (String) intent.getCharSequenceExtra("dealerName");
+		if (intent.hasExtra("isLocalDevice")) {
+			isLocalDevice = intent.getBooleanExtra("isLocalDevice", false);
+		}
+		if (isLocalDevice) {
+			localDeviceIPandPort = (String) intent.getCharSequenceExtra("localDeviceIPandPort");
+		}
 		
 		//注册广播
 //		playerReceiver = new PlayerReceiver();
@@ -155,19 +170,19 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		video_clarity = (Button) bottomView.findViewById(R.id.btn_player_clarity);
 		video_clarity.setOnClickListener(this);
 		
+		//视频质量弹出框
+		clarityView = getLayoutInflater().inflate(R.layout.player_clarity_view, null);
+		clarityPopupWindow = new PopupWindow(clarityView, screenWidth, bottomHeight, false);
+		clarity_high = (Button) clarityView.findViewById(R.id.btn_video_clarity_high);
+		clarity_high.setOnClickListener(this);
+		clarity_normal = (Button) clarityView.findViewById(R.id.btn_video_clarity_normal);
+		clarity_normal.setOnClickListener(this);
+		clarity_low = (Button) clarityView.findViewById(R.id.btn_video_clarity_low);
+		clarity_low.setOnClickListener(this);
+		
 		// 录像弹出框
 		recordView = getLayoutInflater().inflate(R.layout.player_video_record_view, null);
 		recordPopupWindow = new PopupWindow(recordView, screenWidth, bottomHeight, false);
-		
-		Intent intent = this.getIntent();
-		deviceName = (String) intent.getCharSequenceExtra("deviceName");
-		dealerName = (String) intent.getCharSequenceExtra("dealerName");
-		if (intent.hasExtra("isLocalDevice")) {
-			isLocalDevice = intent.getBooleanExtra("isLocalDevice", false);
-		}
-		if (isLocalDevice) {
-			localDeviceIPandPort = (String) intent.getCharSequenceExtra("localDeviceIPandPort");
-		}
 		
 		if (!isLocalDevice) {
 			if (TunnelCommunication.getInstance().IsTunnelOpened(dealerName)) {
@@ -190,7 +205,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			timeCountThread = new TimeCountThread(true);
 			timeCountThread.start();
 		}
-		sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_30S);
 		
 		mGestureDetector = new GestureDetector(new SimpleOnGestureListener(){
 			// 单击屏幕
@@ -301,11 +315,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				// 隐藏弹出框
 				case HIDE_POPUPWINDOW:
 					hidePopupWindow();
-					break;
-				// 请求超时
-				case REQUEST_TIMEOUT:
-					closePlayer();
-					finish();
 					break;
 				// 显示实时视频
 				case DISPLAY_VIDEO_VIEW:
@@ -423,6 +432,10 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		}
 		if (bottomPopupWindow.isShowing()) {
 			bottomPopupWindow.dismiss();
+		}
+		if (isClarityPopupWindowShow) {
+			isClarityPopupWindowShow = false;
+			clarityPopupWindow.update(0, 0, 0, 0);
 		}
 	}
 	
@@ -639,6 +652,64 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					audioThread.openAudioTrackVolume();
 				}
 				break;
+			//【视频清晰度选择】 1:主通道高清  2:子通道标清  3:子通道流畅
+			case R.id.btn_player_clarity:
+				if (isClarityPopupWindowShow) {
+					isClarityPopupWindowShow = false;
+					clarityPopupWindow.update(0, 0, 0, 0);
+				} else {
+					isClarityPopupWindowShow = true;
+					if (clarityPopupWindow != null && videoView != null) {
+						clarityPopupWindow.showAtLocation(videoView, Gravity.BOTTOM|Gravity.RIGHT, 0, 0);
+						clarityPopupWindow.update(10, (bottomHeight+10), LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+					}
+				}
+				break;
+			// 高清
+			case R.id.btn_video_clarity_high:
+				TunnelCommunication.getInstance().startMediaData(dealerName, 1);
+				toastNotify(mContext, "已选高清", Toast.LENGTH_SHORT);
+				if (TunnelCommunication.videoDataCache != null) {
+					TunnelCommunication.videoDataCache.clearBuffer();
+				}
+				if (TunnelCommunication.audioDataCache != null) {
+					TunnelCommunication.audioDataCache.clearBuffer();
+				}
+				if (isClarityPopupWindowShow) {
+					isClarityPopupWindowShow = false;
+					clarityPopupWindow.update(0, 0, 0, 0);
+				}
+				break;
+			// 标清
+			case R.id.btn_video_clarity_normal:
+				TunnelCommunication.getInstance().startMediaData(dealerName, 2);
+				toastNotify(mContext, "已选标清", Toast.LENGTH_SHORT);
+				if (TunnelCommunication.videoDataCache != null) {
+					TunnelCommunication.videoDataCache.clearBuffer();
+				}
+				if (TunnelCommunication.audioDataCache != null) {
+					TunnelCommunication.audioDataCache.clearBuffer();
+				}
+				if (isClarityPopupWindowShow) {
+					isClarityPopupWindowShow = false;
+					clarityPopupWindow.update(0, 0, 0, 0);
+				}
+				break;
+			// 流畅
+			case R.id.btn_video_clarity_low:
+				TunnelCommunication.getInstance().startMediaData(dealerName, 3);
+				toastNotify(mContext, "已选流畅", Toast.LENGTH_SHORT);
+				if (TunnelCommunication.videoDataCache != null) {
+					TunnelCommunication.videoDataCache.clearBuffer();
+				}
+				if (TunnelCommunication.audioDataCache != null) {
+					TunnelCommunication.audioDataCache.clearBuffer();
+				}
+				if (isClarityPopupWindowShow) {
+					isClarityPopupWindowShow = false;
+					clarityPopupWindow.update(0, 0, 0, 0);
+				}
+				break;
 		}
 		if (v.getId() != R.id.ib_player_back) {
 			cancelDelayHide();
@@ -819,6 +890,9 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		if (recordPopupWindow.isShowing()) {
 			recordPopupWindow.dismiss();
 		}
+		if (clarityPopupWindow.isShowing()) {
+			clarityPopupWindow.dismiss();
+		}
 	}
 
 	/**
@@ -856,103 +930,36 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
-			String action = intent.getAction();
-			if (action.equals(BackstageService.TUNNEL_REQUEST_ACTION)) {
-				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
-				switch (TunnelEvent) {
-					case 0:
-						if (handler.hasMessages(REQUEST_TIMEOUT)) {
-							handler.removeMessages(REQUEST_TIMEOUT);
-						}
-						Value.isTunnelOpened = true;
-						if (!isLocalDevice) {
-							//【播放视频】
-							TunnelCommunication.getInstance().startMediaData(dealerName, 0);
-						} else {
-							//【本地设备】
-							TunnelCommunication.getInstance().startLocalVideo(localDeviceIPandPort);
-							if (videoView != null) {
-								videoView.isDisplayView = true;
-							}
-						}
-						videoView.playVideo();
-						sendHandlerMsg(DISPLAY_VIDEO_VIEW, 3000);
-						break;
-					case 1:
-						Value.isTunnelOpened = false;
-						closePlayer();
-						PlayerActivity.this.finish();
-						break;
-				}
-			}
+//			String action = intent.getAction();
+//			if (action.equals(BackstageService.TUNNEL_REQUEST_ACTION)) {
+//				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
+//				switch (TunnelEvent) {
+//					case 0:
+//						if (handler.hasMessages(REQUEST_TIMEOUT)) {
+//							handler.removeMessages(REQUEST_TIMEOUT);
+//						}
+//						Value.isTunnelOpened = true;
+//						if (!isLocalDevice) {
+//							//【播放视频】
+//							TunnelCommunication.getInstance().startMediaData(dealerName, 0);
+//						} else {
+//							//【本地设备】
+//							TunnelCommunication.getInstance().startLocalVideo(localDeviceIPandPort);
+//							if (videoView != null) {
+//								videoView.isDisplayView = true;
+//							}
+//						}
+//						videoView.playVideo();
+//						sendHandlerMsg(DISPLAY_VIDEO_VIEW, 3000);
+//						break;
+//					case 1:
+//						Value.isTunnelOpened = false;
+//						closePlayer();
+//						PlayerActivity.this.finish();
+//						break;
+//				}
+//			}
 		}
 	}
-	
 }
-	
-//	{
-//		private boolean isClarityPopupWindowShow = false;
-//		private Button clarity_high = null;
-//		private Button clarity_normal = null;
-//		private Button clarity_low = null;
-//		private View clarityView = null;//底部视图
-//		private PopupWindow clarityPopupWindow = null;//底部弹出框
-		
-		//视频质量弹出框
-//		clarityView = getLayoutInflater().inflate(R.layout.player_clarity_view, null);
-//		clarityPopupWindow = new PopupWindow(clarityView);
-//		clarity_high = (Button) clarityView.findViewById(R.id.btn_video_clarity_high);
-//		clarity_high.setOnClickListener(this);
-//		clarity_normal = (Button) clarityView.findViewById(R.id.btn_video_clarity_normal);
-//		clarity_normal.setOnClickListener(this);
-//		clarity_low = (Button) clarityView.findViewById(R.id.btn_video_clarity_low);
-//		clarity_low.setOnClickListener(this);
-		
-//		if (clarityPopupWindow != null) {
-//			clarityPopupWindow.dismiss();
-//			isClarityPopupWindowShow = false;
-//		}
-		
-//		//视频清晰度选择
-//	case R.id.btn_player_clarity:
-//		if (isClarityPopupWindowShow) {
-//			isClarityPopupWindowShow = false;
-//			clarityPopupWindow.update(0, 0, 0, 0);
-//		} else {
-//			isClarityPopupWindowShow = true;
-//			if (clarityPopupWindow != null && videoView != null) {
-//				clarityPopupWindow.showAtLocation(videoView, Gravity.BOTTOM|Gravity.RIGHT, 0, 0);
-//				clarityPopupWindow.update(10, (bottomHeight+10), LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-//			}
-//		}
-//		break;
-//	//高清
-//	case R.id.btn_video_clarity_high:
-//		System.out.println("MyDebug: ---> btn_video_clarity_high");
-//		if (isClarityPopupWindowShow) {
-//			isClarityPopupWindowShow = false;
-//			clarityPopupWindow.update(0, 0, 0, 0);
-//		}
-//		break;
-//	//标准
-//	case R.id.btn_video_clarity_normal:
-//		System.out.println("MyDebug: ---> btn_video_clarity_normal");
-//		if (isClarityPopupWindowShow) {
-//			isClarityPopupWindowShow = false;
-//			clarityPopupWindow.update(0, 0, 0, 0);
-//		}
-//		break;
-//	//流畅
-//	case R.id.btn_video_clarity_low:
-//		System.out.println("MyDebug: ---> btn_video_clarity_low");
-//		if (isClarityPopupWindowShow) {
-//			isClarityPopupWindowShow = false;
-//			clarityPopupWindow.update(0, 0, 0, 0);
-//		}
-//		break;
-		
-//		if (clarityPopupWindow != null) {
-//			clarityPopupWindow.dismiss();
-//		}
-//	}
 

@@ -1,6 +1,5 @@
 package com.video.main;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +13,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.view.ViewPager.LayoutParams;
@@ -62,8 +60,6 @@ public class SharedActivity extends Activity implements OnClickListener {
 	private PopupWindow mPopupWindow;
 	private Dialog mDialog = null;
 	
-	private String thumbnailsPath = null;
-	private File thumbnailsFile = null;
 	private static ArrayList<HashMap<String, String>> sharedList = null;
 	private static DeviceItemAdapter deviceAdapter = null;
 	private ListView lv_list;
@@ -105,19 +101,12 @@ public class SharedActivity extends Activity implements OnClickListener {
 			userName = preferData.readString("UserName");
 		}
 		
-		String SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
-		thumbnailsPath = SD_path + File.separator + "KaerVideo" + File.separator + "thumbnails";
-		thumbnailsFile = new File(thumbnailsPath);
-		if(!thumbnailsFile.exists()){
-			thumbnailsFile.mkdirs();
-		}
-		
 		//初始化终端列表的显示
 		reqTermListEvent();
 		sharedList = xmlShare.readXml();
 		if (sharedList != null) {
 			listSize = sharedList.size();
-			deviceAdapter = new DeviceItemAdapter(mContext, thumbnailsFile, sharedList);
+			deviceAdapter = new DeviceItemAdapter(mContext, sharedList);
 			lv_list.setAdapter(deviceAdapter);
 			if (listSize == 0) {
 				noDeviceLayout.setVisibility(View.VISIBLE);
@@ -203,7 +192,7 @@ public class SharedActivity extends Activity implements OnClickListener {
 							if (listObj != null) {
 								xmlShare.updateList(listObj);
 								sharedList = listObj;
-								deviceAdapter = new DeviceItemAdapter(mContext, thumbnailsFile, sharedList);
+								deviceAdapter = new DeviceItemAdapter(mContext, sharedList);
 								lv_list.setAdapter(deviceAdapter);
 								listSize = sharedList.size();
 							} else {

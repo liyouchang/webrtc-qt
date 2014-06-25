@@ -29,7 +29,7 @@ import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.Value;
-import com.video.data.XmlDevice;
+import com.video.service.MainApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.OkCancelDialog;
@@ -39,7 +39,6 @@ import com.video.utils.WiFiAlertDialog;
 public class WiFiActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
-	private static XmlDevice xmlData;
 	private ArrayList<HashMap<String, String>> onlineTermList = null;
 	private Button button_wifi_term_select;
 	public static String onlineDealerName = "";
@@ -107,8 +106,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	private void initData() {
 		mContext = WiFiActivity.this;
 		ZmqHandler.mHandler = handler;
-		xmlData = new XmlDevice(mContext);
-		onlineTermList = xmlData.getOnlineList();
+		onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
 		if (onlineTermList == null) {
 			button_wifi_term_select.setText("没有在线设备");
 		} else {
@@ -338,7 +336,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 				overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 				break;
 			case R.id.btn_wifi_term_list:
-				onlineTermList = xmlData.getOnlineList();
+				onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
 				if (onlineTermList == null) {
 					Toast.makeText(mContext, "没有在线设备 ", Toast.LENGTH_SHORT).show();
 				} else {
@@ -350,7 +348,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 				et_wifi_pwd.setText("");	
 				break;
 			case R.id.btn_wifi_name:
-				onlineTermList = xmlData.getOnlineList();
+				onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
 				if (onlineTermList == null) {
 					Toast.makeText(mContext, "没有在线设备，无法请求WiFi列表！ ", Toast.LENGTH_SHORT).show();
 				} else {

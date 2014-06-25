@@ -72,7 +72,6 @@
         android:contentDescription="@null"
         android:text="@string/clarity_normal"
         android:textColor="@color/white"
-        android:textSize="20dp"
-        android:visibility="invisible" />
+        android:textSize="20dp" />
 
 </RelativeLayout>

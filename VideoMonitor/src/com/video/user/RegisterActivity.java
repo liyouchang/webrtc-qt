@@ -177,6 +177,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 			jsonObj.put("UserName", username);
 			jsonObj.put("Pwd", Utils.CreateMD5Pwd(pwd));
 			jsonObj.put("Email", email);
+//			jsonObj.put("realm", realm);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
