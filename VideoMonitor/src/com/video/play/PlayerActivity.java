@@ -22,6 +22,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.Vibrator;
 import android.support.v4.view.ViewPager.LayoutParams;
+import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -186,14 +187,14 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		
 		if (!isLocalDevice) {
 			if (TunnelCommunication.getInstance().IsTunnelOpened(dealerName)) {
-				System.out.println("MyDebug: 【通道已打开】");
+				Log.i("play","【通道已打开】");
 				Value.isTunnelOpened = true;
 				//【播放视频】 1:主通道高清  2:子通道标清  3:子通道流畅
 				TunnelCommunication.getInstance().startMediaData(dealerName, 2);
 				videoView.playVideo();
 				sendHandlerMsg(DISPLAY_VIDEO_VIEW, 3000);
 			} else {
-				System.out.println("MyDebug: 【再次打开通道】");
+				Log.i("play","【再次打开通道】");
 				//【打开通道】
 				TunnelCommunication.getInstance().openTunnel(dealerName);
 			}
@@ -667,14 +668,12 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				break;
 			// 高清
 			case R.id.btn_video_clarity_high:
+				//切换分辨率，这里现停止现有的视频播放，然后再打开，否则解码库会崩溃，原因未知
+				videoView.stopVideo();
 				TunnelCommunication.getInstance().startMediaData(dealerName, 1);
 				toastNotify(mContext, "已选高清", Toast.LENGTH_SHORT);
-				if (TunnelCommunication.videoDataCache != null) {
-					TunnelCommunication.videoDataCache.clearBuffer();
-				}
-				if (TunnelCommunication.audioDataCache != null) {
-					TunnelCommunication.audioDataCache.clearBuffer();
-				}
+				videoView.playVideo();
+				
 				if (isClarityPopupWindowShow) {
 					isClarityPopupWindowShow = false;
 					clarityPopupWindow.update(0, 0, 0, 0);
@@ -682,14 +681,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				break;
 			// 标清
 			case R.id.btn_video_clarity_normal:
+				videoView.stopVideo();
 				TunnelCommunication.getInstance().startMediaData(dealerName, 2);
 				toastNotify(mContext, "已选标清", Toast.LENGTH_SHORT);
-				if (TunnelCommunication.videoDataCache != null) {
-					TunnelCommunication.videoDataCache.clearBuffer();
-				}
-				if (TunnelCommunication.audioDataCache != null) {
-					TunnelCommunication.audioDataCache.clearBuffer();
-				}
+				videoView.playVideo();
+
 				if (isClarityPopupWindowShow) {
 					isClarityPopupWindowShow = false;
 					clarityPopupWindow.update(0, 0, 0, 0);
@@ -697,14 +693,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				break;
 			// 流畅
 			case R.id.btn_video_clarity_low:
+				videoView.stopVideo();
 				TunnelCommunication.getInstance().startMediaData(dealerName, 3);
 				toastNotify(mContext, "已选流畅", Toast.LENGTH_SHORT);
-				if (TunnelCommunication.videoDataCache != null) {
-					TunnelCommunication.videoDataCache.clearBuffer();
-				}
-				if (TunnelCommunication.audioDataCache != null) {
-					TunnelCommunication.audioDataCache.clearBuffer();
-				}
+				videoView.playVideo();
+
 				if (isClarityPopupWindowShow) {
 					isClarityPopupWindowShow = false;
 					clarityPopupWindow.update(0, 0, 0, 0);
@@ -912,11 +905,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					talkThread.stopTalkThread();
 				}
 			} catch (Exception e) {
-				System.out.println("MyDebug: 关闭音视频对讲异常！");
+				Log.w("play","MyDebug: 关闭音视频对讲异常！");
 				e.printStackTrace();
 			}
 		} catch (Exception e) {
-			System.out.println("MyDebug: 关闭实时播放器异常！");
+			Log.w("play","MyDebug: 关闭实时播放器异常！");
 			e.printStackTrace();
 		}
 	}

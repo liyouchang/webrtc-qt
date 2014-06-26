@@ -9,6 +9,7 @@ import org.zeromq.ZMQ;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.video.R;
 import com.video.data.Value;
@@ -111,7 +112,7 @@ public class ZmqThread extends Thread {
 					String result = recvZmqData();
 					if (result != null) {
 						sendHandlerMsg(result);
-						System.out.println("MyDebug: ZMQ接收数据：" + result);
+						Log.d("zmq","MyDebug: ZMQ接收数据：" + result);
 					}
 					if (zmqThreadHandler.hasMessages(R.id.zmq_recv_data_id)) {
 						zmqThreadHandler.removeMessages(R.id.zmq_recv_data_id);
@@ -141,8 +142,7 @@ public class ZmqThread extends Thread {
 					String peerId = mapData.get("peerId");
 					String peerData = mapData.get("peerData");
 					sendZmqData(peerId, peerData);
-					System.out.println("MyDebug: \n");
-					System.out.println("MyDebug: ZMQ向终端服务器发送数据：" + peerData);
+					Log.d("zmq","MyDebug: ZMQ向终端服务器发送数据：" + peerData);
 					if (zmqThreadHandler.hasMessages(R.id.send_to_peer_id)) {
 						zmqThreadHandler.removeMessages(R.id.send_to_peer_id);
 					}

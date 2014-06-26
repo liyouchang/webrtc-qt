@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.video.R;
 import com.video.service.BackstageService;
@@ -25,6 +26,8 @@ public class TunnelCommunication {
 	
 	//视频
 	public static byte videoFrameType; 
+	public static byte oldVideoFrameType; 
+
 	public static VideoCache videoDataCache = null;
 	public static byte[] naluData = new byte[width*height*3];
 	public static int naluDataLen = 4;
@@ -96,7 +99,7 @@ public class TunnelCommunication {
 	 * 通道被打开(回调)
 	 */
 	public void TunnelOpened(String peerId) {
-		System.out.println("MyDebug: 【"+peerId+"】通道被打开");
+		Log.i("tunnel","MyDebug: 【"+peerId+"】通道被打开");
 		
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 0);
@@ -109,7 +112,7 @@ public class TunnelCommunication {
 	 * 通道被关闭(回调)
 	 */
 	public void TunnelClosed(String peerId) {
-		System.out.println("MyDebug: 【"+peerId+"】通道被关闭");
+		Log.i("tunnel","MyDebug: 【"+peerId+"】通道被关闭");
 		
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 1);
@@ -185,7 +188,7 @@ public class TunnelCommunication {
 	 * 5:请求消息错误
 	 */
 	public void RecordStatus(String peerId, int status) {
-		System.out.println("MyDebug: 【"+peerId+"】下载终端录像文件回调值："+status);
+		Log.i("tunnel","MyDebug: 【"+peerId+"】下载终端录像文件回调值："+status);
 		
 		Intent intent = new Intent();
 		intent.putExtra("PeerId", peerId);
@@ -215,7 +218,7 @@ public class TunnelCommunication {
 			intent.setAction(BackstageService.SEARCH_LOCAL_DEVICE_ACTION);
 			MainApplication.getInstance().sendBroadcast(intent);
 			
-			System.out.println("MyDebug: 【本地设备信息】 mac:"+mac+" ip:"+ip+" port:"+port+" gateway: "+gateway+" mask:"+mask);
+			Log.i("tunnel","MyDebug: 【本地设备信息】 mac:"+mac+" ip:"+ip+" port:"+port+" gateway: "+gateway+" mask:"+mask);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -301,14 +304,19 @@ public class TunnelCommunication {
 		int frameLen = Tools.getWordValue(data, pushPosition);
 		pushPosition += 2;
 		if (frameLen == (dataLen - pushPosition)) {
-			if ((byte)(videoFrameType & 0x80) != 0) {
+			if(oldVideoFrameType != videoFrameType){
+				Log.i("tunnel","frame type change old is "+oldVideoFrameType+" now is "+videoFrameType);
+				oldVideoFrameType = videoFrameType;
+			}
+			if ((byte)(videoFrameType & 0x80) != 0) {//子frame
 				pushPosition += 4;
-			} else {
-				if(naluDataLen > 4 ){
-					Tools.setIntValue(naluData, 0, naluDataLen-4);
+			} else {//
+				if(naluDataLen > 4 ){//收到新一帧数据，将上一帧数据放入播放缓冲区
+					Tools.setIntValue(naluData, 0, naluDataLen-4);//前四个字节为帧长度
 					if (videoDataCache.push(naluData, naluDataLen) != 0) {
 						videoDataCache.clearBuffer();
 					}
+					//保留前四个字节为帧长度
 					naluDataLen = 4;
 				}
 			}

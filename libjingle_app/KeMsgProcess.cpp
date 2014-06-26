@@ -256,8 +256,9 @@ namespace kaerp2p{
         return ;
       }
 
-    LOG(INFO)<< "delete and erase peer "<< peer_id;
+    LOG(INFO)<< "delete peer "<< (*it)->peer_id() ;
     delete (*it);
+    LOG(INFO)<<"remove form vector";
     processes_.erase(it);
     LOG(INFO)<< "KeMsgProcessContainer::OnTunnelClosed end";
 

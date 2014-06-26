@@ -1,5 +1,7 @@
 package com.video.socket;
 
+import android.util.Log;
+
 
 public class ZmqCtrl {
 	
@@ -22,7 +24,7 @@ public class ZmqCtrl {
 	public void init() {
 		if (zmqSocketInstance == null) {
 			zmqSocketInstance = new ZmqSocket();
-			System.out.println("MyDebug: 初始化ZMQ, 启动相关线程");
+			Log.i("zmq","初始化ZMQ, 启动相关线程");
 		}
 	}
 	
