@@ -20,6 +20,7 @@ HEADERS      += $$PWD/qtbrowserplugin.h \
 
 win32 {
   #lht:need to build with msvc,there will be some error in mingw
+    DEFINES += NPAPI
   SOURCES     += $$PWD/qtbrowserplugin_win.cpp
   !isEmpty(TARGET) {
     TARGET = np$$TARGET

@@ -94,7 +94,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 32;
+    const int kVersion = 33;
     return kVersion;
 }
 /**
@@ -154,7 +154,7 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
     std::string servers = jstrIceServers.toStdString();
     kaerp2p::P2PConductor::AddIceServers(servers);
 
-    return 0;
+    return KE_SUCCESS;
 }
 
 //video:1 main stream 2 sub stream

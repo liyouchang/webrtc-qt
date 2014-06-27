@@ -14,6 +14,9 @@
 #include "ObjectSafetyImpl.h"
 #endif
 
+#ifdef NPAPI
+#include "qtbrowserplugin.h"
+#endif
 
 QT_BEGIN_NAMESPACE
 class QSettings;
@@ -40,6 +43,10 @@ class KePlayerPlugin : public QWidget
         #ifdef QAXSERVER
         , public QAxBindable
         #endif
+        #ifdef NPAPI
+        , public QtNPBindable
+        #endif
+
 {
     Q_OBJECT
     Q_PROPERTY( QString m_savePath READ savePath WRITE setSavePath )
