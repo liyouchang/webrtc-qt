@@ -24,6 +24,7 @@ import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
+import android.util.Log;
 import android.util.Xml;
 
 import com.video.utils.Utils;
@@ -51,7 +52,7 @@ public class XmlDevice {
 					initXmlFile(file);
 				} catch (IOException e) {
 					e.printStackTrace();
-					System.out.println("MyDebug: init()异常！");
+					Log.w("MyDebug",": init()异常！");
 				}
 			}
 		}
@@ -76,7 +77,7 @@ public class XmlDevice {
 			os.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: initXmlFile()异常！");
+			Log.w("MyDebug",": initXmlFile()异常！");
 		}
 	}
 
@@ -93,7 +94,7 @@ public class XmlDevice {
 			return document;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: loadInit()异常！");
+			Log.w("MyDebug"," loadInit()异常！");
 		}
 		return null;
 	}
@@ -111,7 +112,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: addList()异常！");
+			Log.w("MyDebug"," addList()异常！");
 		}
 		return false;
 	}
@@ -157,7 +158,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: addItem()异常！");
+			Log.w("MyDebug"," addItem()异常！");
 		}
 		return false;
 	}
@@ -180,7 +181,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: isItemExit()异常！");
+			Log.w("MyDebug"," isItemExit()异常！");
 		}
 		return false;
 	}
@@ -207,7 +208,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: deleteItem()异常！");
+			Log.i("MyDebug"," deleteItem()异常！");
 		}
 		return false;
 	}
@@ -232,7 +233,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: deleteItemBg()异常！");
+			Log.i("MyDebug",": deleteItemBg()异常！");
 		}
 		return false;
 	}
@@ -309,6 +310,7 @@ public class XmlDevice {
 		}
 		return false;
 	}
+	
 	
 	/**
 	 * 更新一个Item节点的名称
@@ -420,7 +422,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getItem()异常！");
+			Log.w("MyDebug",": getItem()异常！");
 		}
 		return null;
 	}
@@ -460,7 +462,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getItem()异常！");
+			Log.w("MyDebug",": getItem()异常！");
 		}
 		return null;
 	}
@@ -479,7 +481,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: writeXML()异常！");
+			Log.w("MyDebug",": writeXML()异常！");
 		}
 		return false;
 	}
@@ -513,7 +515,7 @@ public class XmlDevice {
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: readXml()异常！");
+			Log.w("MyDebug",": readXml()异常！");
 		}
 		return null;
 	}

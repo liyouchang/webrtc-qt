@@ -99,6 +99,7 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
 {
     if(peer_id.compare("Backstage") == 0)
     {
+
         Json::Reader reader;
         Json::Value jmessage;
         if (!reader.parse(message, jmessage)) {
@@ -114,7 +115,7 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
             }
             comm_thread_->Post(this,MSG_RECEIVE_HEART);
         }
-        else if(type.compare("Terminal_NTP"))
+        else if(type.compare("Terminal_NTP") == 0)
         {
             std::string ntpIp;
             if(GetStringFromJsonObject(jmessage,"IP",&ntpIp)){
@@ -122,8 +123,12 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
                 ss << "ntp="<<ntpIp<<"|123|+8:00";
                 std::string command = ss.str();
                 LOG(INFO)<<"set terminal ntp ---"<<command;
-                Raycomm_SetParam(command.c_str(),0);
+                Raycomm_SetParam((char *)command.c_str(),0);
+            }else{
+                LOG(INFO)<<"get ntp ip error";
             }
+        }else{
+            LOG(WARNING)<<"no support backstage message";
         }
     }else{
         SignalMessageFromPeer(peer_id,message);

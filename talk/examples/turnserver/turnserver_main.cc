@@ -55,6 +55,7 @@ public:
             char buf[32];
             size_t len = talk_base::hex_decode(buf, sizeof(buf), hex);
             *key = std::string(buf, len);
+            LOG(INFO)<<"GetKey---Key="<<*key<<" len="<<len;
         }else{
             std::cerr<<"Get name value error"<<std::endl;
         }
@@ -92,7 +93,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    talk_base::LogMessage::ConfigureLogging("tstamp thread info file","turnserver.log");
+    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug file","turnserver.log");
 
     cricket::TurnServer server(main);
     TurnFileAuth auth(argv[4]);

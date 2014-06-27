@@ -672,6 +672,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				videoView.stopVideo();
 				TunnelCommunication.getInstance().startMediaData(dealerName, 1);
 				toastNotify(mContext, "已选高清", Toast.LENGTH_SHORT);
+				SetClarityText(1);
 				videoView.playVideo();
 				
 				if (isClarityPopupWindowShow) {
@@ -684,6 +685,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				videoView.stopVideo();
 				TunnelCommunication.getInstance().startMediaData(dealerName, 2);
 				toastNotify(mContext, "已选标清", Toast.LENGTH_SHORT);
+				SetClarityText(2);
 				videoView.playVideo();
 
 				if (isClarityPopupWindowShow) {
@@ -696,6 +698,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				videoView.stopVideo();
 				TunnelCommunication.getInstance().startMediaData(dealerName, 3);
 				toastNotify(mContext, "已选流畅", Toast.LENGTH_SHORT);
+				SetClarityText(3);
 				videoView.playVideo();
 
 				if (isClarityPopupWindowShow) {
@@ -709,7 +712,15 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			hidePopupWindowDelay();
 		}
 	}
-	
+	private void SetClarityText(int clarity){
+		if(clarity == 1){
+			video_clarity.setText("高清");
+		}else if(clarity == 2){
+			video_clarity.setText("均衡");
+		}else if(clarity == 3){
+			video_clarity.setText("流畅");
+		}
+	}
 	/**
 	 * @param order: "move_left", "move_right", "move_up", "move_down", "stop" 
 	 * @return 返回生成JSON云台控制的字符串
