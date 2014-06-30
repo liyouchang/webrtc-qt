@@ -10,6 +10,7 @@
 #include "VideoWall.h"
 #include "ke_recorder.h"
 #include "libjingle_app/p2pconductor.h"
+#include "zmqclient/peerconnectionclientdealer.h"
 
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
@@ -94,7 +95,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 33;
+    const int kVersion = 34;
     return kVersion;
 }
 /**

@@ -18,9 +18,9 @@ function load(){
     kePlayerObj.RecordStatus = function(peer,status){
         infoDiv.textContent = "RecordStatus "+ peer + " status-"+ status;
     }
-    var iceServers = [{"uri":"stun:222.174.213.185:5389"},{"uri":"turn:222.174.213.185:5766"}];
+    var iceServers = [{"uri":"stun:192.168.40.192:5389"},{"uri":"turn:192.168.40.192:5766"}];
     var strIceServers = JSON.stringify(iceServers);
-    var strRouterUrl = "tcp://222.174.213.185:5555"
+    var strRouterUrl = "tcp://192.168.0.185:5555"
     kePlayerObj.Initialize(strRouterUrl,strIceServers);
     eventFunction();
 
@@ -38,18 +38,18 @@ function SetDivision(num){
 
 var eventFunction = function(){
 //IE should use these functions
-//    function kePlayerObj::TunnelOpened(peer) {
-//        kePlayerObj.TunnelOpened(peer);
-//    }
-//    function kePlayerObj::TunnelClosed(peer) {
-//        kePlayerObj.TunnelClosed(peer);
-//    }
-//    function kePlayerObj::RecvPeerMsg(peer,msg) {
-//        kePlayerObj.RecvPeerMsg(peer,msg);
-//    }
-//    function kePlayerObj::RecordStatus(peer,status){
-//        kePlayerObj.RecordStatus(peer,status);
-//    }
+    function kePlayerObj::TunnelOpened(peer) {
+        kePlayerObj.TunnelOpened(peer);
+    }
+    function kePlayerObj::TunnelClosed(peer) {
+        kePlayerObj.TunnelClosed(peer);
+    }
+    function kePlayerObj::RecvPeerMsg(peer,msg) {
+        kePlayerObj.RecvPeerMsg(peer,msg);
+    }
+    function kePlayerObj::RecordStatus(peer,status){
+        kePlayerObj.RecordStatus(peer,status);
+    }
 };
 
 function QueryCameraRemoteFile(){

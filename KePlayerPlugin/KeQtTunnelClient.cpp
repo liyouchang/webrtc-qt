@@ -50,9 +50,11 @@ void KeQtTunnelClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface *t, const s
     emit SigTunnelClosed(peer_id.c_str());
 }
 
-void KeQtTunnelClient::OnRouterMessage(const std::string &peer_id, const std::string &msg)
+void KeQtTunnelClient::OnRouterMessage(const std::string &peer_id, talk_base::Buffer &msg)
 {
-    emit SigRecvPeerMsg(peer_id.c_str(),msg.c_str());
+
+    std::string strMsg(msg.data(),msg.length());
+    emit SigRecvPeerMsg(peer_id.c_str(),strMsg.c_str());
 }
 
 

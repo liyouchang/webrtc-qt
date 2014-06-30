@@ -151,6 +151,7 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
     }
     else if(type.compare("tunnel") == 0){
         //dispath tunnel message
+        //LOG(INFO)<<"PeerTerminal::OnRouterReadData---receive tunnel msg : "<<msg;
         talk_base::Buffer buffer(msg.c_str(),msg.length());
         SignalRouterMessage(peer_id,buffer);
     }else{

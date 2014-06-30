@@ -12,7 +12,7 @@ public:
     explicit KeQtTunnelClient(QObject *parent = 0);
     virtual void OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id);
     virtual void OnTunnelClosed(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id);
-    virtual void OnRouterMessage(const std::string &peer_id, const std::string &msg);
+    virtual void OnRouterMessage(const std::string &peer_id, talk_base::Buffer &msg);
 
 signals:
     void SigRecvVideoData(QString peer_id,QByteArray data);

@@ -156,13 +156,13 @@ void KeTunnelClient::SendTalkData(const char *data, int len)
 void KeTunnelClient::OnRecvAudioData(const std::string &peer_id,
                                      const char *data, int len)
 {
-    LOG(INFO)<<__FUNCTION__;
+    LOG(LS_VERBOSE)<<"KeTunnelClient::OnRecvAudioData";
 }
 
 void KeTunnelClient::OnRecvVideoData(const std::string &peer_id,
                                      const char *data, int len)
 {
-    LOG(INFO)<<__FUNCTION__;
+    LOG(LS_VERBOSE)<<"KeTunnelClient::OnRecvVideoData";
 }
 
 void KeTunnelClient::OnRecordFileData(const std::string &peer_id,

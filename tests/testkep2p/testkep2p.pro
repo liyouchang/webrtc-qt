@@ -33,4 +33,10 @@ win32 {
     #PRE_TARGETDEPS += $$DESTDIR/libjsoncpp.a $$DESTDIR/libjingle_p2p.a $$DESTDIR/libjingle.a $$DESTDIR/libjingle_app.a
 }
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    ../../zmqclient/asyndealer.cpp \
+    ../../zmqclient/peerconnectionclientdealer.cpp \
+
+HEADERS  += \
+    ../../zmqclient/asyndealer.h \
+    ../../zmqclient/peerconnectionclientdealer.h \
