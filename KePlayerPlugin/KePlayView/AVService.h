@@ -7,7 +7,7 @@ class AVService
 {
 public:
     explicit AVService(int streamID);
-
+    ~AVService();
     void SetPlayWnd(HWND hWnd);
     int OpenStream(HWND playWnd);
     int OpenSound();

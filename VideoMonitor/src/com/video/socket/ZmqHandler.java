@@ -11,6 +11,7 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import com.video.R;
 import com.video.data.PreferData;
@@ -67,7 +68,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getReqTermList()异常！");
+			Log.w("zmq","getReqTermList()异常！");
 			if ((list != null) && (list.size() > 0)) {
 				return list;
 			}
@@ -124,7 +125,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getReqAlarmList()异常！");
+			Log.w("zmq","MyDebug: getReqAlarmList()异常！");
 			if ((list != null) && (list.size() > 0)) {
 				return list;
 			}
@@ -157,7 +158,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getReqMACShareUserList()异常！");
+			Log.w("zmq","MyDebug: getReqMACShareUserList()异常！");
 		}
 		return null;
 	}
@@ -197,7 +198,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getTermWiFiList()异常！");
+			Log.w("zmq","MyDebug: getTermWiFiList()异常！");
 		}
 		return null;
 	}
@@ -232,7 +233,7 @@ public class ZmqHandler extends Handler {
 			jsonObj.put("Pwd", Utils.CreateMD5Pwd(userPwd));
 			return jsonObj.toString();
 		} catch (JSONException e) {
-			System.out.println("MyDebug: generateLoginJson()异常！");
+			Log.w("zmq","MyDebug: generateLoginJson()异常！");
 			e.printStackTrace();
 		}
 		return null;
@@ -264,7 +265,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getTerminalFileList()异常！");
+			Log.w("zmq","MyDebug: getTerminalFileList()异常！");
 		}
 		return null;
 	}
@@ -313,7 +314,7 @@ public class ZmqHandler extends Handler {
 					Handler sendHandler = ZmqThread.zmqThreadHandler;
 					String data = generateLoginJson();
 					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
-					System.out.println("MyDebug: 【正在重新登录...】");
+					Log.i("zmq","MyDebug: 【正在重新登录...】");
 				}
 			}
 			// 重新登录
@@ -322,9 +323,9 @@ public class ZmqHandler extends Handler {
 				if (resultCode == 0) {
 					Value.isLoginSuccess = true;
 					Value.beatHeartFailFlag = false;
-					System.out.println("MyDebug: 【重新登录成功】");
+					Log.i("zmq","【重新登录成功】");
 				} else {
-					System.out.println("MyDebug: 【重新登录失败】");
+					Log.i("zmq","MyDebug: 【重新登录失败】");
 					Handler sendHandler = ZmqThread.zmqThreadHandler;
 					String data = generateLoginJson();
 					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
@@ -358,9 +359,9 @@ public class ZmqHandler extends Handler {
 					intent.setAction(OwnFragment.MSG_REFRESH_ACTION);
 					intent.putExtra("AlarmCount", unreadAlarmCount);
 					MainApplication.getInstance().sendBroadcast(intent);
-					System.out.println("MyDebug: 【请求报警数据成功】");
+					Log.i("zmq","【请求报警数据成功】");
 				} else {
-					System.out.println("MyDebug: 【请求报警数据失败】");
+					Log.i("zmq","【请求报警数据失败】");
 				}
 			} else {
 				//各个界面下的handler操作

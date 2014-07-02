@@ -8,6 +8,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
+import android.util.Log;
 
 import com.video.data.Value;
 import com.video.service.BackstageService;
@@ -38,7 +39,7 @@ public class ZmqSocket {
         }
 		
 		if (!isServiceWorked()) {
-			System.out.println("MyDebug: 【启动服务】");
+			Log.i("zmq","MyDebug: 【启动服务】");
 			Intent intent = new Intent(MainApplication.getInstance(), BackstageService.class);
         	MainApplication.getInstance().startService(intent);
 		}

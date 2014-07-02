@@ -22,7 +22,7 @@ void PlayWidget::setSelected(bool select)
 void PlayWidget::PlayMediaData(QByteArray &data)
 {
     if(!playSource->IsPlaying()){
-        HWND playWId = (HWND)this->winId();
+        HWND playWId = (HWND)this->effectiveWinId();
         if(playSource->OpenStream(playWId)!=0)
             return;
         playSource->OpenSound();
@@ -34,7 +34,7 @@ void PlayWidget::PlayMediaData(QByteArray &data)
 void PlayWidget::PlayFile(QString file_name,int file_size)
 {
     QByteArray data = file_name.toLocal8Bit();
-    HWND playWId = (HWND)this->winId();
+    HWND playWId = (HWND)this->effectiveWinId();
     playSource->PlayFile(data.constData(),file_size,playWId);
 }
 

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>视界通平台p2p穿透原理.html</title>
+  <meta name="generator" content="Haroopad 0.12.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>div.oembedall-githubrepos{border:1px solid #DDD;border-radius:4px;list-style-type:none;margin:0 0 10px;padding:8px 10px 0;font:13.34px/1.4 helvetica,arial,freesans,clean,sans-serif;width:452px;background-color:#fff}div.oembedall-githubrepos .oembedall-body{background:-moz-linear-gradient(center top,#FAFAFA,#EFEFEF) repeat scroll 0 0 transparent;background:-webkit-gradient(linear,left top,left bottom,from(#FAFAFA),to(#EFEFEF));border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-top:1px solid #EEE;margin-left:-10px;margin-top:8px;padding:5px 10px;width:100%}div.oembedall-githubrepos h3{font-size:14px;margin:0;padding-left:18px;white-space:nowrap}div.oembedall-githubrepos p.oembedall-description{color:#444;font-size:12px;margin:0 0 3px}div.oembedall-githubrepos p.oembedall-updated-at{color:#888;font-size:11px;margin:0}div.oembedall-githubrepos ul.oembedall-repo-stats{border:medium none;float:right;font-size:11px;font-weight:700;padding-left:15px;position:relative;z-index:5;margin:0}div.oembedall-githubrepos ul.oembedall-repo-stats li{border:medium none;color:#666;display:inline-block;list-style-type:none;margin:0!important}div.oembedall-githubrepos ul.oembedall-repo-stats li a{background-color:transparent;border:medium none;color:#666!important;background-position:5px -2px;background-repeat:no-repeat;border-left:1px solid #DDD;display:inline-block;height:21px;line-height:21px;padding:0 5px 0 23px}div.oembedall-githubrepos ul.oembedall-repo-stats li:first-child a{border-left:medium none;margin-right:-3px}div.oembedall-githubrepos ul.oembedall-repo-stats li a:hover{background:none no-repeat scroll 5px -27px #4183C4;color:#FFF!important;text-decoration:none}div.oembedall-githubrepos ul.oembedall-repo-stats li:first-child a:hover{border-bottom-left-radius:3px;border-top-left-radius:3px}ul.oembedall-repo-stats li:last-child a:hover{border-bottom-right-radius:3px;border-top-right-radius:3px}span.oembedall-closehide{background-color:#aaa;border-radius:2px;cursor:pointer;margin-right:3px}div.oembedall-container{margin-top:5px;text-align:left}.oembedall-ljuser{font-weight:700}.oembedall-ljuser img{vertical-align:bottom;border:0;padding-right:1px}.oembedall-stoqembed{border-bottom:1px dotted #999;float:left;overflow:hidden;width:730px;line-height:1;background:none repeat scroll 0 0 #FFF;color:#000;font-family:Arial,Liberation Sans,DejaVu Sans,sans-serif;font-size:80%;text-align:left;margin:0;padding:0}.oembedall-stoqembed a{color:#07C;text-decoration:none;margin:0;padding:0}.oembedall-stoqembed a:hover{text-decoration:underline}.oembedall-stoqembed a:visited{color:#4A6B82}.oembedall-stoqembed h3{font-family:Trebuchet MS,Liberation Sans,DejaVu Sans,sans-serif;font-size:130%;font-weight:700;margin:0;padding:0}.oembedall-stoqembed .oembedall-reputation-score{color:#444;font-size:120%;font-weight:700;margin-right:2px}.oembedall-stoqembed .oembedall-user-info{height:35px;width:185px}.oembedall-stoqembed .oembedall-user-info .oembedall-user-gravatar32{float:left;height:32px;width:32px}.oembedall-stoqembed .oembedall-user-info .oembedall-user-details{float:left;margin-left:5px;overflow:hidden;white-space:nowrap;width:145px}.oembedall-stoqembed .oembedall-question-hyperlink{font-weight:700}.oembedall-stoqembed .oembedall-stats{background:none repeat scroll 0 0 #EEE;margin:0 0 0 7px;padding:4px 7px 6px;width:58px}.oembedall-stoqembed .oembedall-statscontainer{float:left;margin-right:8px;width:86px}.oembedall-stoqembed .oembedall-votes{color:#555;padding:0 0 7px;text-align:center}.oembedall-stoqembed .oembedall-vote-count-post{font-size:240%;color:#808185;display:block;font-weight:700}.oembedall-stoqembed .oembedall-views{color:#999;padding-top:4px;text-align:center}.oembedall-stoqembed .oembedall-status{margin-top:-3px;padding:4px 0;text-align:center;background:none repeat scroll 0 0 #75845C;color:#FFF}.oembedall-stoqembed .oembedall-status strong{color:#FFF;display:block;font-size:140%}.oembedall-stoqembed .oembedall-summary{float:left;width:635px}.oembedall-stoqembed .oembedall-excerpt{line-height:1.2;margin:0;padding:0 0 5px}.oembedall-stoqembed .oembedall-tags{float:left;line-height:18px}.oembedall-stoqembed .oembedall-tags a:hover{text-decoration:none}.oembedall-stoqembed .oembedall-post-tag{background-color:#E0EAF1;border-bottom:1px solid #3E6D8E;border-right:1px solid #7F9FB6;color:#3E6D8E;font-size:90%;line-height:2.4;margin:2px 2px 2px 0;padding:3px 4px;text-decoration:none;white-space:nowrap}.oembedall-stoqembed .oembedall-post-tag:hover{background-color:#3E6D8E;border-bottom:1px solid #37607D;border-right:1px solid #37607D;color:#E0EAF1}.oembedall-stoqembed .oembedall-fr{float:right}.oembedall-stoqembed .oembedall-statsarrow{background-image:url(http://cdn.sstatic.net/stackoverflow/img/sprites.png?v=3);background-repeat:no-repeat;overflow:hidden;background-position:0 -435px;float:right;height:13px;margin-top:12px;width:7px}.oembedall-facebook1{border:#1A3C6C solid 1px;padding:0;font:13.34px/1.4 verdana;width:500px}.oembedall-facebook2{background-color:#627add}.oembedall-facebook2 a{color:#e8e8e8;text-decoration:none}.oembedall-facebookBody{background-color:#fff;vertical-align:top;padding:5px}.oembedall-facebookBody .contents{display:inline-block;width:100%}.oembedall-facebookBody div img{float:left;margin-right:5px}div.oembedall-lanyard{-webkit-box-shadow:none;-webkit-transition-delay:0s;-webkit-transition-duration:.4000000059604645s;-webkit-transition-property:width;-webkit-transition-timing-function:cubic-bezier(0.42,0,.58,1);background-attachment:scroll;background-clip:border-box;background-color:transparent;background-image:none;background-origin:padding-box;border-bottom-width:0;border-left-width:0;border-right-width:0;border-top-width:0;box-shadow:none;color:#112644;display:block;float:left;font-family:'Trebuchet MS',Trebuchet,sans-serif;font-size:16px;height:253px;line-height:19px;margin-bottom:0;margin-left:0;margin-right:0;margin-top:0;max-width:none;min-height:0;outline-color:#112644;outline-style:none;outline-width:0;overflow-x:visible;overflow-y:visible;padding-bottom:0;padding-left:0;padding-right:0;padding-top:0;position:relative;text-align:left;vertical-align:baseline;width:804px}div.oembedall-lanyard .tagline{font-size:1.5em}div.oembedall-lanyard .wrapper{overflow:hidden;clear:both}div.oembedall-lanyard .split{float:left;display:inline}div.oembedall-lanyard .prominent-place .flag:active,div.oembedall-lanyard .prominent-place .flag:focus,div.oembedall-lanyard .prominent-place .flag:hover,div.oembedall-lanyard .prominent-place .flag:link,div.oembedall-lanyard .prominent-place .flag:visited{float:left;display:block;width:48px;height:48px;position:relative;top:-5px;margin-right:10px}div.oembedall-lanyard .place-context{font-size:.889em}div.oembedall-lanyard .prominent-place .sub-place{display:block}div.oembedall-lanyard .prominent-place{font-size:1.125em;line-height:1.1em;font-weight:400}div.oembedall-lanyard .main-date{color:#8CB4E0;font-weight:700;line-height:1.1}div.oembedall-lanyard .first{width:48.57%;margin:0 0 0 2.857%}html{height:100%}body{margin:0!important;padding:5px 20px 26px!important;background-color:#fff;font-family:"Lucida Grande","Segoe UI","Apple SD Gothic Neo","Malgun Gothic","Lucida Sans Unicode",Helvetica,Arial,sans-serif;font-size:.9em;overflow-x:hidden;overflow-y:auto}br,h1,h2,h3,h4,h5,h6{clear:both}hr.page{background:transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;border:0 none;color:#ccc;height:3px;padding:0}hr.underscore{border:0 none!important;height:30px;padding:0;-webkit-margin-before:0;-webkit-margin-after:0}body >:first-child{margin-top:0!important}img.plugin{box-shadow:0 1px 3px rgba(0,0,0,.1);border-radius:3px}iframe{border:0}figure{-webkit-margin-before:0;-webkit-margin-after:0;-webkit-margin-start:0;-webkit-margin-end:0}kbd{border:1px solid #aaa;-moz-border-radius:2px;-webkit-border-radius:2px;border-radius:2px;-moz-box-shadow:1px 2px 2px #ddd;-webkit-box-shadow:1px 2px 2px #ddd;box-shadow:1px 2px 2px #ddd;background-color:#f9f9f9;background-image:-moz-linear-gradient(top,#eee,#f9f9f9,#eee);background-image:-o-linear-gradient(top,#eee,#f9f9f9,#eee);background-image:-webkit-linear-gradient(top,#eee,#f9f9f9,#eee);background-image:linear-gradient(top,#eee,#f9f9f9,#eee);padding:1px 3px;font-family:inherit;font-size:.85em}.oembeded .oembed_photo{display:inline-block}img[data-echo]{margin:25px 0;width:100px;height:100px;background:#fff url(../img/ajax.gif) no-repeat center center}.spinner{display:inline-block;width:10px;height:10px;margin-bottom:-.1em;border:2px solid rgba(0,0,0,.5);border-top-color:transparent;border-radius:100%;-webkit-animation:spin 1s infinite linear;animation:spin 1s infinite linear}.spinner:after{content:'';display:block;width:0;height:0;position:absolute;top:-6px;left:0;border:4px solid transparent;border-bottom-color:rgba(0,0,0,.5);-webkit-transform:rotate(45deg);transform:rotate(45deg)}@-webkit-keyframes spin{to{-webkit-transform:rotate(360deg)}}@keyframes spin{to{transform:rotate(360deg)}}p.toc{margin:0!important}p.toc ul{padding-left:10px}p.toc>ul{padding:10px;margin:0 10px;display:inline-block;border:1px solid #ededed;border-radius:5px}p.toc li,p.toc ul{list-style-type:none}p.toc li{width:100%;padding:0;overflow:hidden}p.toc li a::after{content:"."}p.toc li a:before{content:"• "}p.toc h5{text-transform:uppercase}p.toc .title{float:left;padding-right:3px}p.toc .number{margin:0;float:right;padding-left:3px;background:#fff;display:none}.markdown{padding:20px}.markdown a{text-decoration:none;vertical-align:baseline}.markdown a:hover{text-decoration:underline}.markdown h1{font-size:2.2em;font-weight:700;margin:1.5em 0 1em}.markdown h2{font-size:1.8em;font-weight:700;margin:1.275em 0 .85em}.markdown h3{font-size:1.6em;font-weight:700;margin:1.125em 0 .75em}.markdown h4{font-size:1.4em;font-weight:700;margin:.99em 0 .66em}.markdown h5{font-size:1.2em;font-weight:700;margin:.855em 0 .57em}.markdown h6{font-size:1em;font-weight:700;margin:.75em 0 .5em}.markdown h1+p,.markdown h1:first-child,.markdown h2+p,.markdown h2:first-child,.markdown h3+p,.markdown h3:first-child,.markdown h4+p,.markdown h4:first-child,.markdown h5+p,.markdown h5:first-child,.markdown h6+p,.markdown h6:first-child{margin-top:0}.markdown hr{border:1px solid #ccc}.markdown p{margin:1em 0;word-wrap:break-word}.markdown ol{list-style-type:decimal}.markdown li{display:list-item;line-height:1.4em}.markdown blockquote{margin:1em 20px}.markdown blockquote>:first-child{margin-top:0}.markdown blockquote>:last-child{margin-bottom:0}.markdown blockquote cite:before{content:'\2014 \00A0'}.markdown .code{border-radius:3px;word-break:break-all;word-wrap:break-word}.markdown pre{border-radius:3px;word-break:break-all;word-wrap:break-word;overflow:auto}.markdown pre code{display:block}.markdown pre>code{border:1px solid #ccc;white-space:pre;padding:.5em;margin:0}.markdown code{border-radius:3px;word-break:break-all;word-wrap:break-word;border:1px solid #ccc;padding:0 5px;margin:0 2px}.markdown img{max-width:100%}.markdown table{padding:0;border-collapse:collapse;border-spacing:0}.markdown table tr td,.markdown table tr th{border:1px solid #ccc;margin:0;padding:6px 13px}.markdown table tr th{font-weight:700}.markdown table tr th>:first-child{margin-top:0}.markdown table tr th>:last-child{margin-bottom:0}.markdown table tr td>:first-child{margin-top:0}.markdown table tr td>:last-child{margin-bottom:0}.markdown em.underline{font-style:normal;text-decoration:underline}.markdown strong.highlight{color:#000;padding:0 5px;background-color:#fdffb6;-webkit-box-shadow:#fdffb6 0 0 5px;-moz-box-shadow:#fdffb6 0 0 5px;box-shadow:#fdffb6 0 0 5px}footer{position:fixed;font-size:.8em;text-align:right;bottom:0;margin-left:-25px;height:20px;width:100%}</style>
+</head>
+<body class="markdown haroopad">
+
+  <h1 id="kaer-p2p-"><a name="kaer-p2p-" href="#kaer-p2p-"></a>Kaer视界通平台P2P穿透原理</h1><p>视界通平台采用交互式连接建立（Interactive Connectivity Establishment）实现P2P连接的建立.</p><p>交互式连接建立(以下简称ICE)是由IETF的MMUSIC工作组开发出来的一种framework，可整合各种NAT穿透技术，如STUN、TURN（Traversal Using Relay NAT，中继NAT实现的穿透）、RSIP（Realm Specific IP，特定域IP）等。该framework可以让客户端利用各种NAT穿透方式打穿远程的防火墙。</p><p>ICE是一种探索和更新式的解决方案。通过收集自己的和通信对端的尽可能多的网络信息（各种网络地址），尝试在这些地址之间建立数据通道，并在此过程中不断更新先前收集到的信息，从而找到和选择一条能够进行NAT穿越的数据通道。</p><p>视界通服务器P2P结构如下所示:</p><pre><code data-origin="&lt;pre&gt;&lt;code&gt;                          +--------+
+                          |视界通 |
+       +-------+          | 平台  |          +-------+
+       | STUN  |          |       |          | TURN  |
+       | Srvr  |          +-------+          | Srvr  |
+       |       |         /         \         |       |
+       +-------+        /           \        +-------+
+                       /             \
+                      /               \
+                     /                 \
+                    /                   \
+                   /  &amp;lt;-     消息    -&amp;gt;  \
+                  /                       \
+                 /                         \
+           +--------+                   +--------+
+           |  NAT   |                   |  NAT   |
+           +--------+                   +--------+
+             /                                \
+            /                                  \
+           /                                    \
+       +-------+                             +-------+
+       | Agent |                             | Agent |
+       |   L   |                             |   R   |
+       |       |                             |       |
+       +-------+                             +-------+
+
+                      kaer平台P2P结构
+&lt;/code&gt;&lt;/pre&gt;">                          +--------+
+                          |视界通 |
+       +-------+          | 平台  |          +-------+
+       | STUN  |          |       |          | TURN  |
+       | Srvr  |          +-------+          | Srvr  |
+       |       |         /         \         |       |
+       +-------+        /           \        +-------+
+                       /             \
+                      /               \
+                     /                 \
+                    /                   \
+                   /  &lt;-     消息    -&gt;  \
+                  /                       \
+                 /                         \
+           +--------+                   +--------+
+           |  NAT   |                   |  NAT   |
+           +--------+                   +--------+
+             /                                \
+            /                                  \
+           /                                    \
+       +-------+                             +-------+
+       | Agent |                             | Agent |
+       |   L   |                             |   R   |
+       |       |                             |       |
+       +-------+                             +-------+
+
+                      kaer平台P2P结构
+</code></pre><p>视界通平台是一个消息转发平台,可以将两个Agent之间的消息进行交换.STUN和TURN服务器是实现ICE协议所需要的服务器.</p><p>两个在NAT之后的agent,通过如下流程实现P2P连接:</p><ol>
+<li><p>收集地址</p>
+<p> Agent必须确定所有的候选的地址。这些地址包括本地网络接口的地址和由它派生的其他所有地址。本地网络地址包括本地网卡地址、VPN网络地址、MIP网络地址等。派生地址指的是通过本地地址向STUN服务器发送STUN请求获得的网络地址，这些地址分为两类，一类是通过STUN的绑定发现用法得到的地址，称为服务器反向候选地址（Server Reflexive Candidates）或服务器反向地址。另一类是通过中继用法得到的，称为中继地址（RELAYED CANDIDATES）。上面提到的两种用法在相应的规范中提出。</p>
+<p> 服务器反向地址实际上就是终端的网络包经过一重或多重NAT穿透之后，由STUN服务器观察到的经过NAT转换之后的地址。中继地址是STUN服务器收到STUN请求后，为请求发起方在本机上分配的代理地址，所有被路由到该地址的网络包将会被转发到服务器反向地址，继而穿透NAT发送到终端，因此如名字所示，它是STUN服务器完成中继功能的地址。</p>
+<p> 为了找到服务器反向地址，Agent通过每一个主机候选地址（通过绑定主机某个接口和端口而获取的候选地址），使用绑定发现用法（Binding Discovery Usage [11]）发送一个STUN绑定请求给STUN服务器（STUN服务器的地址已经配置或者可以通过某种途径学习到）。当Agent发送绑定请求，NAT将分配一个绑定，它映射该服务器反向地址到主机候选地址。这样，通过主机候选地址发送的外发包，将通过NAT转换为通过服务器反向地址发送的包。发往服务器反向候选地址的包，将被NAT转换为发往该主机候选地址的包，并转发给Agent。</p>
+<p> 当Agent与STUN服务器之间存在多重NAT，那么STUN请求将会针对每一个NAT创建一个绑定，但是，只有最外部的服务器反向地址会被Agent发现。如果Agent不在任何NAT之后，那么，基候选传输地址将与服务器反向地址相同，服务器反向地址可以忽略。</p>
+<p> 关于中继地址，STUN中继用法允许STUN服务器作为一个媒体中继器进行工作，在L与R之间进行转发。为了发送消息到L，R必须发送消息给媒体中继器，通过媒体中继器转发给L。反之亦然。</p>
+<p> 从L到R的消息其地址信息将两次被重写：第一次被NAT，第二次被STUN中继服务器。这样，R所了解的想与之通信的地址就是STUN中继服务器的地址。这个地址就是中继地址。</p>
+</li>
+<li><p>连通性检查</p>
+<p> Agent L收集到所有的候选地址后，就将它们按优先级高低进行排序，再通过信令信道发送给Agent R。这些候选地址作为SDP请求的属性被传输。当R收到请求，它执行相同的地址收集过程，并且把它自己的候选地址作为响应消息发给请求者。这样，每个Agent都将有一个完整的包含了双方候选地址的列表，然后准备执行连通性检查。</p>
+<p> 连通性检查的基本原理是：</p>
+<pre><code data-origin="&lt;pre&gt;&lt;code&gt; - 按照优先顺序对候选地址进行排序。
+ - 利用每个候选地址发送一个检查包。
+ - 收到另一个Agent的确认检查包。
+&lt;/code&gt;&lt;/pre&gt;"> - 按照优先顺序对候选地址进行排序。
+ - 利用每个候选地址发送一个检查包。
+ - 收到另一个Agent的确认检查包。
+</code></pre><p> 首先，Agent将本地地址集和远程地址集进行配对，如本地有n个地址，远程有m个地址，那么配成n*m对。对这些地址对进行连通性检查是通过发送和接收STUN请求和响应完成的，此时，Agent在每个地址对的本地地址上，必须同时充当STUN服务器和STUN客户端的角色。若通信双方以某一地址对通过一个完整的四次握手，那么该地址对就是有效地址对。</p>
+<p> 四次握手是指：当通过地址对中的本地地址向地址对中远程地址发送一个STUN请求，并成功收到STUN响应，称该地址对是可接收的；当地址对中的本地地址收到地址对中远程地址的一个STUN请求，并成功地响应，则称该地址对为可发送的。若一个地址对是可接收的，同时又是可发送的，则称该地址对是有效的，即通过连通性检查。则此地址对可用于媒体传输。</p>
+<p> 通常在对称NAT的情况下，在地址对验证过程中，会出现发现以前收集地址时没有收集到的地址对，这时就要对这些新的地址对进行连通性检查。</p>
+</li>
+<li><p>对候选地址进行排序</p>
+<p> 由于收集候选地址时，收集的是所有的候选地址，为了能够更快更好的找到能够正常工作的候选地址对，对所有组合进行排序是势在必行的。在此说明进行排序的两个基本原则，详细地排序算法将在后续文档中描述。</p>
+<p> Agent为它的每个候选地址设置一个数值的优先级，这个优先级连同候选地址对一起发送给通信的对端。</p>
+<p> 综合本地的和远程的候选地址的优先级，计算出候选地址对的优先级，这样，双方的同一个候选地址对的优先级相同。以此排序，则通信双方的排序结果相同。</p>
+</li>
+<li><p>进行SDP编码</p>
+<p> 为了实现基于ICE的NAT穿越，对SDP进行了扩展，主要增加了四个属性。分别是candidate属性、ice-ufrag属性、ice-pwd属性和remote-candidates属性。</p>
+<p> candidate属性为通信提供多种可能的候选地址中的一个。这些地址是使用STUN的端到端的连通性检查为有效的。<br> remote-candidates属性提供请求者想要应答者在应答中使用的远程候选传输地址标识。<br> ice-pwd属性提供用于保护STUN连通性检查的密码。<br> ice-ufrag属性提供在STUN连通性检查中组成用户名的片断。    </p>
+</li>
+</ol>
+
+<footer style="position:fixed; font-size:.8em; text-align:right; bottom:0px; margin-left:-25px; height:20px; width:100%;">generated by <a href="http://pad.haroopress.com" target="_blank">haroopad</a></footer>
+</body>
+</html>

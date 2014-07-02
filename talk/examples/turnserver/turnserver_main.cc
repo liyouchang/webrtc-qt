@@ -34,73 +34,78 @@
 #include "talk/p2p/base/basicpacketsocketfactory.h"
 #include "talk/p2p/base/turnserver.h"
 
+#include "talk/base/logging.h"
+
 static const char kSoftware[] = "libjingle TurnServer";
 
 class TurnFileAuth : public cricket::TurnAuthInterface {
- public:
-  explicit TurnFileAuth(const std::string& path) : file_(path) {
-    if(!file_.Load()){
-        std::cerr<<"file load error "<<path<<std::endl;
+public:
+    explicit TurnFileAuth(const std::string& path) : file_(path) {
+        if(!file_.Load()){
+            std::cerr<<"file load error "<<path<<std::endl;
+        }
     }
-  }
-  virtual bool GetKey(const std::string& username, const std::string& realm,
-                      std::string* key) {
-    // File is stored as lines of <username>=<HA1>.
-    // Generate HA1 via "echo -n "<username>:<realm>:<password>" | md5sum"
-    std::string hex;
-    bool ret = file_.GetStringValue(username, &hex);
-    if (ret) {
-      char buf[32];
-      size_t len = talk_base::hex_decode(buf, sizeof(buf), hex);
-      *key = std::string(buf, len);
-    }else{
-         std::cerr<<"Get name value error"<<std::endl;
+    virtual bool GetKey(const std::string& username, const std::string& realm,
+                        std::string* key) {
+        // File is stored as lines of <username>=<HA1>.
+        // Generate HA1 via "echo -n "<username>:<realm>:<password>" | md5sum"
+        std::string hex;
+        bool ret = file_.GetStringValue(username, &hex);
+        if (ret) {
+            char buf[32];
+            size_t len = talk_base::hex_decode(buf, sizeof(buf), hex);
+            *key = std::string(buf, len);
+            LOG(INFO)<<"GetKey---Key="<<*key<<" len="<<len;
+        }else{
+            std::cerr<<"Get name value error"<<std::endl;
+        }
+        return ret;
     }
-    return ret;
-  }
- private:
-  talk_base::OptionsFile file_;
+private:
+    talk_base::OptionsFile file_;
 };
 
 int main(int argc, char **argv) {
-  if (argc != 5) {
-    std::cerr << "usage: turnserver int-addr ext-ip realm auth-file"
-              << std::endl;
-    return 1;
-  }
+    if (argc != 5) {
+        std::cerr << "usage: turnserver int-addr ext-ip realm auth-file"
+                  << std::endl;
+        return 1;
+    }
 
-  talk_base::SocketAddress int_addr;
-  if (!int_addr.FromString(argv[1])) {
-    std::cerr << "Unable to parse IP address: " << argv[1] << std::endl;
-    return 1;
-  }
+    talk_base::SocketAddress int_addr;
+    if (!int_addr.FromString(argv[1])) {
+        std::cerr << "Unable to parse IP address: " << argv[1] << std::endl;
+        return 1;
+    }
 
-  talk_base::IPAddress ext_addr;
-  if (!IPFromString(argv[2], &ext_addr)) {
-    std::cerr << "Unable to parse IP address: " << argv[2] << std::endl;
-    return 1;
-  }
+    talk_base::IPAddress ext_addr;
+    if (!IPFromString(argv[2], &ext_addr)) {
+        std::cerr << "Unable to parse IP address: " << argv[2] << std::endl;
+        return 1;
+    }
 
-  talk_base::Thread* main = talk_base::Thread::Current();
-  talk_base::AsyncUDPSocket* int_socket =
-      talk_base::AsyncUDPSocket::Create(main->socketserver(), int_addr);
-  if (!int_socket) {
-    std::cerr << "Failed to create a UDP socket bound at"
-              << int_addr.ToString() << std::endl;
-    return 1;
-  }
+    talk_base::Thread* main = talk_base::Thread::Current();
+    talk_base::AsyncUDPSocket* int_socket =
+            talk_base::AsyncUDPSocket::Create(main->socketserver(), int_addr);
+    if (!int_socket) {
+        std::cerr << "Failed to create a UDP socket bound at"
+                  << int_addr.ToString() << std::endl;
+        return 1;
+    }
 
-  cricket::TurnServer server(main);
-  TurnFileAuth auth(argv[4]);
-  server.set_realm(argv[3]);
-  server.set_software(kSoftware);
-  server.set_auth_hook(&auth);
-  server.AddInternalSocket(int_socket, cricket::PROTO_UDP);
-  server.SetExternalSocketFactory(new talk_base::BasicPacketSocketFactory(),
-                                  talk_base::SocketAddress(ext_addr, 0));
+    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug file","turnserver.log");
 
-  std::cout << "Listening internally at " << int_addr.ToString() << std::endl;
+    cricket::TurnServer server(main);
+    TurnFileAuth auth(argv[4]);
+    server.set_realm(argv[3]);
+    server.set_software(kSoftware);
+    server.set_auth_hook(&auth);
+    server.AddInternalSocket(int_socket, cricket::PROTO_UDP);
+    server.SetExternalSocketFactory(new talk_base::BasicPacketSocketFactory(),
+                                    talk_base::SocketAddress(ext_addr, 0));
 
-  main->Run();
-  return 0;
+    std::cout << "Listening internally at " << int_addr.ToString() << std::endl;
+
+    main->Run();
+    return 0;
 }

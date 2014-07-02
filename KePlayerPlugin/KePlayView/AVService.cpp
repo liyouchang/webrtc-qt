@@ -10,6 +10,12 @@ AVService::AVService(int streamID)
     playStatus = PLAYSTATUS_Free;
     m_iPlaySpeed = 0;
     m_fileHandle = 65+streamID;
+    //this->CloseStream();
+}
+
+AVService::~AVService()
+{
+   // CloseStream();
 }
 
 void AVService::SetPlayWnd(HWND hWnd)
@@ -186,6 +192,7 @@ int AVService::Cleanup()
         return 0;
     }
     isInitailed = 0;
+    qDebug()<<"AV_FREE";
     return AV_Free();
 }
 
