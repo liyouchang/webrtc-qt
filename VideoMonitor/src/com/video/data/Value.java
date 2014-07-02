@@ -33,6 +33,11 @@ public class Value {
 	public final static String ApkXmlPath = "http://222.174.213.185:8088/plugin/VideoMonitorXml.xml";
 	
 	/**
+	 * realm
+	 */
+	public static String realm = "kaer";
+	
+	/**
 	 * 服务的包名类名
 	 */
 	public final static String BackstageServicePackage = "com.video.service.BackstageService";

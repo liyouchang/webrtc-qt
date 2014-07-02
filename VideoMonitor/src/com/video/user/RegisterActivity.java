@@ -167,22 +167,35 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	}
 	
 	/**
+	 * 生成JSON的realm字符串
+	 */
+	private String generateRealmJson() {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_Getrealm");
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
 	 * 生成JSON的注册字符串
 	 */
 	private String generateRegisterJson(String username, String pwd, String email) {
-		String result = "";
+		String newPwd = username+":"+Value.realm+":"+pwd;
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_Registration");
 			jsonObj.put("UserName", username);
-			jsonObj.put("Pwd", Utils.CreateMD5Pwd(pwd));
+			jsonObj.put("Pwd", Utils.CreateMD5Pwd(newPwd));
 			jsonObj.put("Email", email);
-//			jsonObj.put("realm", realm);
+			return jsonObj.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		result = jsonObj.toString();
-		return result;
+		return null;
 	}
 	
 	private Handler handler = new Handler() {
@@ -203,6 +216,16 @@ public class RegisterActivity extends Activity implements OnClickListener {
 						handler.removeMessages(REGISTER_TIMEOUT);
 					}
 					Toast.makeText(mContext, "注册失败，网络超时！", Toast.LENGTH_SHORT).show();
+					break;
+				case R.id.get_realm_id:
+					if (msg.arg1 == 0) {
+						sendRegisterJsonData();
+						System.out.println("MyDebug: 注册操作：获得realm成功，发送注册信息！");
+					} else {
+						System.out.println("MyDebug: 注册操作：获得realm失败，重新发送获得realm信息！");
+						String data = generateRealmJson();
+						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+					}
 					break;
 				case R.id.register_id:
 					if (handler.hasMessages(REGISTER_TIMEOUT)) {
@@ -253,10 +276,19 @@ public class RegisterActivity extends Activity implements OnClickListener {
 		handler.sendMessage(msg);
 	}
 	
+	private void sendRegisterJsonData() {
+		String data = generateRegisterJson(userName, userPwd, userEmail);
+		if (data != null) {
+			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+		} else {
+			Toast.makeText(mContext, "加密数据错误，请重试！", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
 	private void clickRegisterEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkRegisterData()) {
-				String data = generateRegisterJson(userName, userPwd, userEmail);
+				String data = generateRealmJson();
 				sendHandlerMsg(IS_REGISTERING);
 				sendHandlerMsg(REGISTER_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);

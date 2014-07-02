@@ -436,7 +436,7 @@ public class MainActivity extends FragmentActivity {
 				//重新登录
 				case LOGIN_AGAIN:
 					ZmqCtrl.getInstance().init();
-					if (loginTimes >= 3) {
+					if (loginTimes >= 2) {
 						loginTimes = 0;
 						if (mDialog != null) {
 							mDialog.dismiss();

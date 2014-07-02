@@ -365,8 +365,18 @@ public class ZmqHandler extends Handler {
 			} else {
 				//各个界面下的handler操作
 				if (mHandler != null) {
+					//realm
+					if (type.equals("Client_Getrealm")) {
+						int resultCode = obj.getInt("Result");
+						if (resultCode == 0) {
+							if (!obj.isNull("realm")) {
+								Value.realm = obj.getString("realm");
+							}
+						}
+						mHandler.obtainMessage(R.id.get_realm_id, resultCode, 0).sendToTarget();
+					}
 					//注册
-					if (type.equals("Client_Registration")) {
+					else if (type.equals("Client_Registration")) {
 						int resultCode = obj.getInt("Result");
 						mHandler.obtainMessage(R.id.register_id, resultCode, 0).sendToTarget();
 					}
