@@ -26,6 +26,13 @@ function load(){
 
 
 }
+
+window.onbeforeunload = function (e){
+    console.log("unload");
+    kePlayerObj.DestroyAll();
+    //return false;
+}
+
 function CheckOpen(peerId){
     var opend = kePlayerObj.IsTunnelOpened(peerId);
     g_infoDiv.textContent = opend;
@@ -38,18 +45,18 @@ function SetDivision(num){
 
 var eventFunction = function(){
 //IE should use these functions
-    function kePlayerObj::TunnelOpened(peer) {
-        kePlayerObj.TunnelOpened(peer);
-    }
-    function kePlayerObj::TunnelClosed(peer) {
-        kePlayerObj.TunnelClosed(peer);
-    }
-    function kePlayerObj::RecvPeerMsg(peer,msg) {
-        kePlayerObj.RecvPeerMsg(peer,msg);
-    }
-    function kePlayerObj::RecordStatus(peer,status){
-        kePlayerObj.RecordStatus(peer,status);
-    }
+//    function kePlayerObj::TunnelOpened(peer) {
+//        kePlayerObj.TunnelOpened(peer);
+//    }
+//    function kePlayerObj::TunnelClosed(peer) {
+//        kePlayerObj.TunnelClosed(peer);
+//    }
+//    function kePlayerObj::RecvPeerMsg(peer,msg) {
+//        kePlayerObj.RecvPeerMsg(peer,msg);
+//    }
+//    function kePlayerObj::RecordStatus(peer,status){
+//        kePlayerObj.RecordStatus(peer,status);
+//    }
 };
 
 function QueryCameraRemoteFile(){

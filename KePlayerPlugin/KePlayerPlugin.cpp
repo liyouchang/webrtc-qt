@@ -15,7 +15,6 @@
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
       connection_(new PeerConnectionClientDealer()),
-      tunnel_(new KeQtTunnelClient()),
       is_inited(false)
 {
     QVBoxLayout *vbox = new QVBoxLayout( this );
@@ -46,17 +45,45 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
         QDir saveDir = QDir::home();
         saveDir.mkdir("ShijietongData");
         saveDir.cd("ShijietongData");
-        m_savePath = saveDir.absolutePath();
-        myconfig->setValue("plugin/save_path",savePath());
+        this->setSavePath( saveDir.absolutePath() );
     }
 
     localClient_ = new KeQtLocalClient(this);
+    tunnel_ = new KeQtTunnelClient(this);
 }
 
 KePlayerPlugin::~KePlayerPlugin()
 {
     qDebug()<<"KePlayerPlugin::~KePlayerPlugin";
-    myconfig->setValue("plugin/save_path",savePath());
+    DestroyAll();
+}
+
+void KePlayerPlugin::DestroyAll()
+{
+    qDebug()<<"KePlayerPlugin::DestroyAll";
+    if(tunnel_){
+        delete tunnel_;
+        tunnel_ = NULL;
+    }
+    if(connection_){
+        delete connection_;
+        connection_ = NULL;
+    }
+
+    if(localClient_){
+        delete localClient_;
+        localClient_ = NULL;
+    }
+
+    if(video_wall_){
+        delete video_wall_;
+        video_wall_ = NULL;
+    }
+    if(myconfig){
+        delete myconfig;
+        myconfig = NULL;
+    }
+
 }
 
 void KePlayerPlugin::about()
@@ -95,7 +122,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 34;
+    const int kVersion = 35;
     return kVersion;
 }
 /**
@@ -121,18 +148,18 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
     }
 
 
-    tunnel_->Init(connection_.get());
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvVideoData,
+    tunnel_->Init(connection_);
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvVideoData,
                      this->video_wall_,&VideoWall::OnRecvMediaData);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvAudioData,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvAudioData,
                      this->video_wall_,&VideoWall::OnRecvMediaData);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigTunnelOpened,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigTunnelOpened,
                      this,&KePlayerPlugin::TunnelOpened);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigTunnelClosed,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigTunnelClosed,
                      this,&KePlayerPlugin::TunnelClosed);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecordStatus,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecordStatus,
                      this,&KePlayerPlugin::RecordStatus);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvPeerMsg,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvPeerMsg,
                      this,&KePlayerPlugin::RecvPeerMsg);
     this->is_inited = true;
 
@@ -157,6 +184,7 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
 
     return KE_SUCCESS;
 }
+
 
 //video:1 main stream 2 sub stream
 int KePlayerPlugin::StartVideo(QString peer_id, int video)
@@ -354,6 +382,7 @@ void KePlayerPlugin::setSavePath(const QString &path)
         return;
     }
     this->m_savePath = path;
+    myconfig->setValue("plugin/save_path",savePath());
 }
 
 void KePlayerPlugin::OnRecordStatus(QString peer_id, int status)
