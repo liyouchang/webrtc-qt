@@ -289,6 +289,7 @@ void HisiMediaDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &j
       if(GetIntFromJsonObject(jmessage,"value",&status) &&
          status != kCommandGetValue){//set value
           SetAlarmStatus(status);
+          ReportAlarmStatus(peerId);
         }else{//get value
           ReportAlarmStatus(peerId);
         }

@@ -32,7 +32,7 @@
 #include "talk/base/thread.h"
 #include "talk/base/stringencode.h"
 #include "talk/p2p/base/basicpacketsocketfactory.h"
-#include "talk/p2p/base/turnserver.h"
+#include "turnserver.h"
 
 #include "asyndealer.h"
 #include "talk/base/json.h"
@@ -84,20 +84,44 @@ public:
         jmessage["UserName"] = username;
         std::string msg = writer.write(jmessage);
 
-        std::string hex;
+        std::string recvMsg;
 
-        bool ret = dealer->SendRecv("Backstage",msg,&hex,3000);
-        if(ret){
-            LOG(INFO)<<"get user"<<username<<" pwd is "<<hex;
-            char buf[32];
-            size_t len = talk_base::hex_decode(buf, sizeof(buf), hex);
-            *key = std::string(buf, len);
-        }else{
-            std::cerr<<"Get back pwd error"<<std::endl;
-
+        if(!dealer->SendRecv("Backstage",msg,&recvMsg,3000)){
+            LOG(INFO)<<"receive msg from backstage error";
+            return false;
         }
-        return ret;
+        //{"Pwd": "067AE6D247D5BE64D341EABF0E7787A5","Result": 0,"type": "Turn_GetPwd"}
+        Json::Reader reader;
+        if (!reader.parse(recvMsg, jmessage)) {
+            LOG(WARNING) << "Received unknown message. ";
+            return false;
+        }
+        std::string pwdhex;
+        if(!GetStringFromJsonObject(jmessage,"Pwd",&pwdhex)){
+            LOG(INFO)<<"get pwd form receive msg error "<<recvMsg;
+            return false;
+        }
+        LOG(INFO)<<"get user"<<username<<" pwd is "<<pwdhex;
+        char buf[32];
+        size_t len = talk_base::hex_decode(buf, sizeof(buf), pwdhex);
+        *key = std::string(buf, len);
+        return true;
     }
+    virtual void ReportInfo(const std::string &username,int totalData,
+                            const std::string &startTime,const std::string &endTime){
+        LOG(INFO)<<"ReportInfo---uname:"<<username<<"; total KB:"<<totalData<<
+                   " ; start time :"<<startTime<<"; end time:"<<endTime;
+        Json::StyledWriter writer;
+        Json::Value jmessage;
+        jmessage["type"] = "Turn_flowRecord";
+        jmessage["UserName"] = username;
+        jmessage["BeginTime"] = startTime;
+        jmessage["EndTime"] = endTime;
+        jmessage["flowTotal"] = totalData;//KB
+        std::string msg = writer.write(jmessage);
+        dealer->send(alarmStage,msg);
+    }
+
     std::string realm;
 
 private:
