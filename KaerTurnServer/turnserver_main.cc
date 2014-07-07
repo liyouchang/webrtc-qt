@@ -37,7 +37,7 @@
 #include "asyndealer.h"
 #include "talk/base/json.h"
 
-static const char kSoftware[] = "libjingle TurnServer";
+static const char kSoftware[] = "kaer TurnServer";
 
 class TurnFileAuth : public cricket::TurnAuthInterface {
 public:
@@ -64,6 +64,7 @@ public:
 private:
     talk_base::OptionsFile file_;
 };
+
 
 class TurnDealerAuth : public cricket::TurnAuthInterface {
 public:
@@ -107,9 +108,10 @@ public:
         *key = std::string(buf, len);
         return true;
     }
+
     virtual void ReportInfo(const std::string &username,int totalData,
                             const std::string &startTime,const std::string &endTime){
-        LOG(INFO)<<"ReportInfo---uname:"<<username<<"; total KB:"<<totalData<<
+        LOG(LERROR)<<"ReportInfo---uname:"<<username<<"; total KB:"<<totalData<<
                    " ; start time :"<<startTime<<"; end time:"<<endTime;
         Json::StyledWriter writer;
         Json::Value jmessage;
@@ -138,7 +140,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug","");
+    talk_base::LogMessage::ConfigureLogging("tstamp thread error debug","");
 
 
     talk_base::SocketAddress int_addr;
@@ -162,10 +164,12 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    TurnDealerAuth auth(argv[4]);
-    std::string key;
-    auth.GetKey("lht","kaer",&key);
 
+
+    TurnDealerAuth auth(argv[4]);
+//    std::string key;
+//    auth.GetKey("lht","kaer",&key);
+//    auth.ReportInfo("lht",2222,GetCurrentDatetime("%F %T"),GetCurrentDatetime("%F %T"));
     cricket::TurnServer server(main);
     server.set_realm(argv[3]);
     server.set_software(kSoftware);

@@ -7,6 +7,9 @@ CONFIG -= qt
 include (../talk/talk_common.pri)
 
 DESTDIR = $$output_dir
+
+TARGET = kaerturnserver
+
 INCLUDEPATH  +=  \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
     ../third_party/cppzmq/include
@@ -35,4 +38,8 @@ SOURCES += \
 HEADERS += \
     turnserver.h \
     asyndealer.h
+
+OTHER_FILES += \
+    turnserver_stop.sh \
+    turnserver_start.sh
 

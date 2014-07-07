@@ -72,12 +72,11 @@ enum {
 std::string GetCurrentDatetime(std::string format)
 {
     std::string result;
-    struct tm time;
-    int microsecond;
-    talk_base::CurrentTmTime(&time,&microsecond);
+    time_t tim = time(NULL);
+    struct tm * now = localtime(&tim);
     char mbstr[100];
 
-    if (strftime(mbstr, sizeof(mbstr), format.c_str(), &time)) {
+    if (strftime(mbstr, sizeof(mbstr), format.c_str(),now)) {
         result = mbstr;
     }
     return result;
@@ -655,7 +654,9 @@ TurnServer::Allocation::Allocation(TurnServer* server,
     external_socket_->SignalReadPacket.connect(
                 this, &TurnServer::Allocation::OnExternalPacket);
 
-    this->startTime = GetCurrentDatetime("yyyy-MM-dd hh:mm:ss");
+    this->startTime = GetCurrentDatetime("%F %T");
+
+    LOG(LERROR)<<"TurnServer::Allocation::Allocation---created at "<<this->startTime;
 
 }
 
@@ -670,12 +671,13 @@ TurnServer::Allocation::~Allocation() {
     }
     thread_->Clear(this, MSG_TIMEOUT);
 
-    int totalKB = this->totalRelaySize/1000;
-    if(totalKB > 10){
-        this->endTime = GetCurrentDatetime("yyyy-MM-dd hh:mm:ss");
+    int totalKB = this->totalRelaySize/1000;//change to KB
+    this->endTime = GetCurrentDatetime("%F %T");
+    if(totalKB > 10){//the size is more than 10KB
         this->server_->auth_hook_->ReportInfo(this->username(),totalKB,
                                               this->startTime,this->endTime);
     }
+    LOG(LERROR)<<"TurnServer::Allocation::Allocation---delete at "<<this->endTime;
 
     LOG_J(LS_INFO, this) << "Allocation destroyed";
 }
