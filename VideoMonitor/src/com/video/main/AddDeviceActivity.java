@@ -44,6 +44,7 @@ import com.video.data.Value;
 import com.video.data.XmlDevice;
 import com.video.play.TunnelCommunication;
 import com.video.service.BackstageService;
+import com.video.service.MainApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
@@ -189,20 +190,26 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_ADDING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在添加设备...");
-					mDialog.show();
+					if (mDialog == null) {
+						mDialog = Utils.createLoadingDialog(mContext, "正在添加设备...");
+						mDialog.show();
+					}
 					break;
 				case ADD_TIMEOUT:
-					if (mDialog.isShowing())
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
 					}
 					Toast.makeText(mContext, "添加终端失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case SEARCH_TIMEOUT:
-					if (mDialog.isShowing())
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(SEARCH_TIMEOUT)) {
 						handler.removeMessages(SEARCH_TIMEOUT);
 					}
@@ -211,23 +218,21 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				case R.id.add_device_id:
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
-						if (mDialog != null)
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
+							mDialog = null;
+						}
+						if (msg.arg1 == 0) {
 							String dealerName = (String)msg.obj;
-							xmlData.addItem(getDeviceItem(mDeviceName, mDeviceId, dealerName));
+							HashMap<String, String> item = getDeviceItem(mDeviceName, mDeviceId, dealerName);
+							xmlData.addItem(item);
+							MainApplication.getInstance().deviceList.add(item);
 							Toast.makeText(mContext, "添加终端成功！", Toast.LENGTH_SHORT).show();
-							
-							Bundle bundle = new Bundle();
-							bundle.putString("deviceId", mDeviceId);
-							Intent intent = new Intent();
-							intent.putExtras(bundle);
-							setResult(3, intent);
+							setResult(3, null);
 							AddDeviceActivity.this.finish();
 							overridePendingTransition(R.anim.fragment_nochange, R.anim.up_out);
 						} else {
-							Toast.makeText(mContext, "添加终端失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "添加终端失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.add_device_id);
@@ -362,6 +367,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		item.put("deviceID", deviceId);
 		item.put("dealerName", dealerName);
 		item.put("deviceBg", "null");
+		item.put("LinkState", "notlink");
 		return item;
 	}
 	

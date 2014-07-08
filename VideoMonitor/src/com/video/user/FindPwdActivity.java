@@ -22,22 +22,24 @@ import com.video.R;
 import com.video.data.Value;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
-import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 
 public class FindPwdActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
+	private Dialog mDialog = null;
 	
 	private EditText et_name;
 	private EditText et_email;
+	private EditText et_password;
 	private Button btn_submit;
 	private Button button_delete_username;
 	private Button button_delete_email;
-	private Dialog mDialog = null;
+	private Button button_delete_password;
 	
 	private String userName = "";
 	private String userEmail = "";
+	private String userPassword = "";
 	
 	private final int IS_SUBMITTING = 1;
 	private final int SUBMIT_TIMEOUT = 2;
@@ -63,6 +65,9 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 		button_delete_email = (Button) this.findViewById(R.id.btn_find_email_del);
 		button_delete_email.setOnClickListener(this);
 		
+		button_delete_password = (Button) this.findViewById(R.id.btn_find_password_del);
+		button_delete_password.setOnClickListener(this);
+		
 		et_name = (EditText)super.findViewById(R.id.et_find_username);
 		et_name.addTextChangedListener(new TextWatcher() {
 			@Override
@@ -73,14 +78,10 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 					button_delete_username.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		et_email = (EditText)super.findViewById(R.id.et_find_email);
@@ -93,14 +94,26 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 					button_delete_email.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
+			public void afterTextChanged(Editable s) {}
+		});
+		
+		et_password = (EditText)super.findViewById(R.id.et_find_password);
+		et_password.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0) {
+					button_delete_password.setVisibility(View.INVISIBLE);
+				} else {
+					button_delete_password.setVisibility(View.VISIBLE);
+				}
 			}
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+			@Override
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		btn_submit = (Button)super.findViewById(R.id.btn_find_pwd_submit);
@@ -115,40 +128,20 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	/**
 	 * 生成JSON的注册字符串
 	 */
-	private String generateFindPwdJson(String username, String email) {
-		String result = "";
+	private String generateFindPwdJson(String username, String email, String password) {
+		String newPwd = username+":"+Value.realm+":"+password;
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_ResetPwd");
 			jsonObj.put("UserName", username);
 			jsonObj.put("Email", email);
+			jsonObj.put("NewPwd", Utils.CreateMD5Pwd(newPwd));
+			return jsonObj.toString();
 		} catch (JSONException e) {
+			System.out.println("MyDebug: generateFindPwdJson()异常！");
 			e.printStackTrace();
 		}
-		result = jsonObj.toString();
-		return result;
-	}
-	
-	/**
-	 * 显示操作的提示
-	 */
-	private void showHandleDialog(String info) {
-		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-		myDialog.setTitle("温馨提示");
-		myDialog.setMessage(info);
-		myDialog.setPositiveButton("确认", new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				myDialog.dismiss();
-				finish();
-			}
-		});
-		myDialog.setNegativeButton("返回", new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				myDialog.dismiss();
-			}
-		});
+		return null;
 	}
 	
 	private Handler handler = new Handler() {
@@ -159,27 +152,32 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_SUBMITTING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在找回...");
-					mDialog.show();
+					if (mDialog == null) {
+						mDialog = Utils.createLoadingDialog(mContext, "正在找回...");
+						mDialog.show();
+					}
 					break;
 				case SUBMIT_TIMEOUT:
-					if (mDialog != null)
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(SUBMIT_TIMEOUT)) {
 						handler.removeMessages(SUBMIT_TIMEOUT);
 					}
-					Toast.makeText(mContext, "找回密码失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "重置密码失败，网络超时！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.find_pwd_id:
 					if (handler.hasMessages(SUBMIT_TIMEOUT)) {
 						handler.removeMessages(SUBMIT_TIMEOUT);
-						if (mDialog != null)
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
-							showHandleDialog("恭喜您！找回密码成功，服务器已将您的密码重置为【123456】！");
+							mDialog = null;
+						}
+						if (msg.arg1 == 0) {
+							Toast.makeText(mContext, "恭喜您，重置密码成功！", Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "找回密码失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "重置密码失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.find_pwd_id);
@@ -212,10 +210,10 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 	private void clickFindPwdEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkFindPwdData()) {
-				String data = generateFindPwdJson(userName, userEmail);
+				String data = generateFindPwdJson(userName, userEmail, userPassword);
+				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 				sendHandlerMsg(IS_SUBMITTING);
 				sendHandlerMsg(SUBMIT_TIMEOUT, Value.REQ_TIME_10S);
-				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
 			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
@@ -235,6 +233,9 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 			case R.id.btn_find_email_del:
 				et_email.setText("");
 				break;
+			case R.id.btn_find_password_del:
+				et_password.setText("");
+				break;
 			case R.id.btn_find_pwd_submit:
 				clickFindPwdEvent();
 				break;
@@ -250,6 +251,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 		//获取EditText输入框的字符串
 		userName = et_name.getText().toString().trim();
 		userEmail = et_email.getText().toString().trim();
+		userPassword = et_password.getText().toString().trim();
 		
 		if (userName.equals("")) {
 			resultFlag = false;
@@ -285,6 +287,20 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 				Toast.makeText(mContext, "邮箱格式不正确！", Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
+				if (userPassword.equals("")) {
+					resultFlag = false;
+					Toast.makeText(mContext, "请输入新密码！", Toast.LENGTH_SHORT).show();
+				}
+				else if (Utils.isChineseString(userPassword)) {
+					resultFlag = false;
+					Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+				}
+				else if ((userPassword.length()<6) || (userPassword.length()>20)) {
+					resultFlag = false;
+					Toast.makeText(mContext, "密码长度范围6~20！", Toast.LENGTH_SHORT).show();
+				} else {
+					resultFlag = true;
+				}
 			}
 		}
 		return resultFlag;

@@ -59,6 +59,17 @@
         android:layout_toRightOf="@+id/btn_player_talkback"
         android:background="@drawable/player_sound_enable"
         android:contentDescription="@null" />
+    
+    <Button
+        android:id="@+id/btn_player_defence"
+        android:layout_width="@dimen/player_icon_size"
+        android:layout_height="@dimen/player_icon_size"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/btn_player_sound"
+        android:background="@drawable/player_defence_enable"
+        android:contentDescription="@null" />
 
     <Button
         android:id="@+id/btn_player_clarity"

@@ -11,15 +11,14 @@ import org.json.JSONObject;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
-import com.video.data.XmlDevice;
 import com.video.data.XmlMessage;
 import com.video.main.MainActivity;
 import com.video.main.OwnFragment;
+import com.video.play.PlayerActivity;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
 import com.video.utils.Utils;
@@ -68,7 +67,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			Log.w("zmq","getReqTermList()异常！");
+			Utils.log("getReqTermList()异常！");
 			if ((list != null) && (list.size() > 0)) {
 				return list;
 			}
@@ -86,11 +85,9 @@ public class ZmqHandler extends Handler {
 		if (len <= 0) {
 			return null;
 		}
-		XmlDevice xmlData = new XmlDevice(MainApplication.getInstance());
-		ArrayList<HashMap<String, String>> deviceList = xmlData.readXml();
 		int deviceCount = 0;
-		if (deviceList != null) {
-			deviceCount = deviceList.size();
+		if (MainApplication.getInstance().deviceList != null) {
+			deviceCount = MainApplication.getInstance().deviceList.size();
 		} else {
 			deviceCount = 0;
 		}
@@ -102,8 +99,8 @@ public class ZmqHandler extends Handler {
 		    	String alarmDevice = obj.getString("MAC");
 		    	
 		    	for (int j=0; j<deviceCount; j++) {
-		    		if (deviceList.get(j).get("deviceID").equals(alarmDevice)) {
-		    			alarmDevice = deviceList.get(j).get("deviceName");
+		    		if (MainApplication.getInstance().deviceList.get(j).get("deviceID").equals(alarmDevice)) {
+		    			alarmDevice = MainApplication.getInstance().deviceList.get(j).get("deviceName");
 		    			break;
 		    		}
 		    	}
@@ -125,7 +122,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			Log.w("zmq","MyDebug: getReqAlarmList()异常！");
+			Utils.log("getReqAlarmList()异常！");
 			if ((list != null) && (list.size() > 0)) {
 				return list;
 			}
@@ -158,7 +155,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			Log.w("zmq","MyDebug: getReqMACShareUserList()异常！");
+			Utils.log("getReqMACShareUserList()异常！");
 		}
 		return null;
 	}
@@ -198,7 +195,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			Log.w("zmq","MyDebug: getTermWiFiList()异常！");
+			Utils.log("getTermWiFiList()异常！");
 		}
 		return null;
 	}
@@ -211,32 +208,6 @@ public class ZmqHandler extends Handler {
 		msg.what = what;
 		msg.obj = obj;
 		handler.sendMessage(msg);
-	}
-	
-	/**
-	 * 生成JSON的登录字符串
-	 */
-	private String generateLoginJson() {
-		PreferData preferData = new PreferData(MainApplication.getInstance());
-		String userName = "";
-		String userPwd = "";
-		if (preferData.isExist("UserName")) {
-			userName = preferData.readString("UserName");
-		}
-		if (preferData.isExist("UserPwd")) {
-			userPwd = preferData.readString("UserPwd");
-		}
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "Client_Login");
-			jsonObj.put("UserName", userName);
-			jsonObj.put("Pwd", Utils.CreateMD5Pwd(userPwd));
-			return jsonObj.toString();
-		} catch (JSONException e) {
-			Log.w("zmq","MyDebug: generateLoginJson()异常！");
-			e.printStackTrace();
-		}
-		return null;
 	}
 	
 	/**
@@ -265,7 +236,7 @@ public class ZmqHandler extends Handler {
 	    	return list;
 		} catch (JSONException e) {
 			e.printStackTrace();
-			Log.w("zmq","MyDebug: getTerminalFileList()异常！");
+			Utils.log("getTerminalFileList()异常！");
 		}
 		return null;
 	}
@@ -280,7 +251,7 @@ public class ZmqHandler extends Handler {
 			// 报警消息推送
 			if (type.equals("Backstage_message")) {
 				Value.isNeedReqAlarmListFlag = true;
-				Value.requstAlarmCount++;
+				Value.newAlarmMessageCount++;
 				PreferData preferData = new PreferData(MainActivity.mContext);
 				int alarmCount = 0;
 				if (preferData.isExist("AlarmCount")) {
@@ -311,24 +282,26 @@ public class ZmqHandler extends Handler {
 				if (resultCode != 0) {
 					Value.isLoginSuccess = false;
 					Value.beatHeartFailFlag = true;
-					Handler sendHandler = ZmqThread.zmqThreadHandler;
-					String data = generateLoginJson();
-					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
-					Log.i("zmq","MyDebug: 【正在重新登录...】");
+					String data = MainApplication.getInstance().generateLoginJson(MainApplication.getInstance().userName, MainApplication.getInstance().userPwd);
+					sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+					Utils.log("【正在重新登录...】");
 				}
 			}
 			// 重新登录
 			else if ((Value.beatHeartFailFlag) && (type.equals("Client_Login"))) {
-				int resultCode = obj.getInt("Result");
-				if (resultCode == 0) {
-					Value.isLoginSuccess = true;
-					Value.beatHeartFailFlag = false;
-					Log.i("zmq","【重新登录成功】");
-				} else {
-					Log.i("zmq","MyDebug: 【重新登录失败】");
-					Handler sendHandler = ZmqThread.zmqThreadHandler;
-					String data = generateLoginJson();
-					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+				Value.reloginTimes ++;
+				if (Value.reloginTimes <= 3) {
+					int resultCode = obj.getInt("Result");
+					if (resultCode == 0) {
+						Value.reloginTimes = 0;
+						Value.isLoginSuccess = true;
+						Value.beatHeartFailFlag = false;
+						Utils.log("【重新登录成功】");
+					} else {
+						Utils.log("【重新登录失败】");
+						String data = MainApplication.getInstance().generateLoginJson(MainApplication.getInstance().userName, MainApplication.getInstance().userPwd);
+						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+					}
 				}
 			}
 			// 请求报警数据
@@ -359,9 +332,9 @@ public class ZmqHandler extends Handler {
 					intent.setAction(OwnFragment.MSG_REFRESH_ACTION);
 					intent.putExtra("AlarmCount", unreadAlarmCount);
 					MainApplication.getInstance().sendBroadcast(intent);
-					Log.i("zmq","【请求报警数据成功】");
+					Utils.log("【请求报警数据成功】");
 				} else {
-					Log.i("zmq","【请求报警数据失败】");
+					Utils.log("【请求报警数据失败】");
 				}
 			} else {
 				//各个界面下的handler操作
@@ -495,7 +468,7 @@ public class ZmqHandler extends Handler {
 						int resultCode = obj.getInt("Result");
 						mHandler.obtainMessage(R.id.add_device_share_id, resultCode, 0).sendToTarget();
 					}
-					//请求终端列表
+					//请求分享终端列表
 					else if (type.equals("Client_ReqShareList")) {
 						int resultCode = obj.getInt("Result");
 						if (resultCode == 0) {
@@ -543,6 +516,14 @@ public class ZmqHandler extends Handler {
 								JSONArray jsonArray = obj.getJSONArray("recordList");
 								mHandler.obtainMessage(R.id.request_terminal_video_list_id, totalNum, 0, getTerminalFileList(jsonArray)).sendToTarget();
 							}
+						}
+						else if (resultCode.equals("alarm_status")) {
+							Intent intent = new Intent();
+							if (!obj.isNull("value")) {
+								intent.putExtra("alarmDefence", obj.getInt("value"));
+							}
+							intent.setAction(PlayerActivity.ALARM_DEFENCE_ACTION);
+							MainApplication.getInstance().sendBroadcast(intent);
 						}
 					}
 				}

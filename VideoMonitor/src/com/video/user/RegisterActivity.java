@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.service.MainApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
@@ -85,14 +86,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 					button_delete_username.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		et_email = (EditText)super.findViewById(R.id.et_register_email);
@@ -105,14 +102,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 					button_delete_email.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		et_pwd = (EditText)super.findViewById(R.id.et_register_password);
@@ -125,14 +118,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 					button_delete_password.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		et_repwd = (EditText)super.findViewById(R.id.et_register_repassword);
@@ -145,14 +134,10 @@ public class RegisterActivity extends Activity implements OnClickListener {
 					button_delete_repassword.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		btn_register = (Button)super.findViewById(R.id.btn_register);
@@ -162,22 +147,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	private void initData() {
 		mContext = RegisterActivity.this;
 		ZmqHandler.mHandler = handler;
-		
 		preferData = new PreferData(mContext);
-	}
-	
-	/**
-	 * 生成JSON的realm字符串
-	 */
-	private String generateRealmJson() {
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "Client_Getrealm");
-			return jsonObj.toString();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		return null;
 	}
 	
 	/**
@@ -206,12 +176,16 @@ public class RegisterActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REGISTERING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在注册...");
-					mDialog.show();
+					if (mDialog == null) {
+						mDialog = Utils.createLoadingDialog(mContext, "正在注册...");
+						mDialog.show();
+					}
 					break;
 				case REGISTER_TIMEOUT:
-					if (mDialog != null)
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(REGISTER_TIMEOUT)) {
 						handler.removeMessages(REGISTER_TIMEOUT);
 					}
@@ -223,17 +197,18 @@ public class RegisterActivity extends Activity implements OnClickListener {
 						System.out.println("MyDebug: 注册操作：获得realm成功，发送注册信息！");
 					} else {
 						System.out.println("MyDebug: 注册操作：获得realm失败，重新发送获得realm信息！");
-						String data = generateRealmJson();
+						String data = MainApplication.getInstance().generateRealmJson();
 						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 					}
 					break;
 				case R.id.register_id:
 					if (handler.hasMessages(REGISTER_TIMEOUT)) {
 						handler.removeMessages(REGISTER_TIMEOUT);
-						if (mDialog != null)
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
+							mDialog = null;
+						}
+						if (msg.arg1 == 0) {
 							Toast.makeText(mContext, "恭喜您，注册成功！", Toast.LENGTH_SHORT).show();
 							if (preferData.isExist("UserName")) {
 								preferData.deleteItem("UserName");
@@ -246,7 +221,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 								preferData.deleteItem("AutoLogin");
 							}
 						} else {
-							Toast.makeText(mContext, "注册失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "注册失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.register_id);
@@ -288,7 +263,7 @@ public class RegisterActivity extends Activity implements OnClickListener {
 	private void clickRegisterEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkRegisterData()) {
-				String data = generateRealmJson();
+				String data = MainApplication.getInstance().generateRealmJson();
 				sendHandlerMsg(IS_REGISTERING);
 				sendHandlerMsg(REGISTER_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);

@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -22,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.video.R;
 import com.video.main.AlarmImageViewActivity;
@@ -34,9 +36,9 @@ public class MessageItemAdapter extends BaseAdapter {
 	private ArrayList<HashMap<String, String>> list;
 	private File imageCache = null;
 
-	public MessageItemAdapter(Context context, File imageCache, ArrayList<HashMap<String, String>> list) {
+	public MessageItemAdapter(Context context, ArrayList<HashMap<String, String>> list) {
 		this.context = context;
-		this.imageCache = imageCache;
+		this.imageCache = MainApplication.getInstance().cacheFile;
 		this.list = list;
 	}
 
@@ -56,13 +58,10 @@ public class MessageItemAdapter extends BaseAdapter {
 	}
 	
 	private int getReadedState(String state) {
-		int result = -1;
 		if (state.equals("true")) {
-			result = View.INVISIBLE;
-		} else {
-			result = View.VISIBLE;
+			return View.INVISIBLE;
 		}
-		return result;
+		return View.VISIBLE;
 	}
 
 	@Override
@@ -104,10 +103,15 @@ public class MessageItemAdapter extends BaseAdapter {
 				}
 				
 				String UrlPath = list.get(position).get("imageURL");
-				String filePath = imageCache+File.separator+UrlPath.substring(UrlPath.lastIndexOf("/")+1);
-				intent = new Intent(context, AlarmImageViewActivity.class);
-				intent.putExtra("imagePath", filePath);
-				context.startActivity(intent);
+				if (!UrlPath.equals("null")) {
+					String filePath = imageCache+File.separator+UrlPath.substring(UrlPath.lastIndexOf("/")+1);
+					intent = new Intent(context, AlarmImageViewActivity.class);
+					intent.putExtra("imagePath", filePath);
+					context.startActivity(intent);
+					((Activity) context).overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
+				} else {
+					Toast.makeText(context, "该条报警消息暂无图片", Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 		return convertView;
