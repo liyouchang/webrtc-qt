@@ -127,7 +127,12 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		filter.addAction(BackstageService.CHANGE_DEVICE_LIST_ACTION);
 		mActivity.registerReceiver(ownReceiver, filter);
 		
-		listSize = MainApplication.getInstance().deviceList.size();
+		if (MainApplication.getInstance().deviceList == null) {
+			MainApplication.getInstance().deviceList = new ArrayList<HashMap<String, String>>();
+			listSize = 0;
+		} else {
+			listSize = MainApplication.getInstance().deviceList.size();
+		}
 		
 		if (listSize > 1) {
 			MainApplication.getInstance().deviceList = orderDeviceList(MainApplication.getInstance().deviceList);

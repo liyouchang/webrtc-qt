@@ -402,7 +402,9 @@ public class SharedActivity extends Activity implements OnClickListener {
 		super.onDestroy();
 		unregisterReceiver(serviceReceiver);
 		Value.isSharedUser = false;
-		linkDeviceThread.stopThread();
+		if (linkDeviceThread != null) {
+			linkDeviceThread.stopThread();
+		}
 	}
 
 	@Override
