@@ -3,9 +3,6 @@ package com.video.user;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -35,10 +32,10 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
-import com.video.data.XmlMessage;
 import com.video.main.MainActivity;
 import com.video.play.TunnelCommunication;
 import com.video.service.BackstageService;
+import com.video.service.MainApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
@@ -189,23 +186,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 		}
 	}
 	
-	/**
-	 * 生成JSON的登录字符串
-	 */
-	private String generateLoginJson(String username, String pwd) {
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "Client_Login");
-			jsonObj.put("UserName", username);
-			jsonObj.put("Pwd", Utils.CreateMD5Pwd(pwd));
-			return jsonObj.toString();
-		} catch (JSONException e) {
-			System.out.println("MyDebug: generateLoginJson()异常！");
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	private Handler handler = new Handler() {
 
 		@Override
@@ -222,26 +202,23 @@ public class LoginActivity extends Activity implements OnClickListener {
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
 					}
-					//超时之后关闭服务，断开连接，再重启服务
-					ZmqCtrl.getInstance().exit();
-			    	stopService(new Intent(mContext, BackstageService.class));
-					Value.resetValues();
+					// 终止主程序和服务广播
+					MainApplication.getInstance().stopActivityandService();
 					sendHandlerMsg(LOGIN_AGAIN, 3000);
 					break;
 				case LOGIN_AGAIN:
-					ZmqCtrl.getInstance().init();
-					if (loginTimes >= 2) {
+					if (loginTimes > 1) {
 						loginTimes = 0;
-						if (mDialog != null) {
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
 						Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
 					} else {
-						Handler sendHandler = ZmqThread.zmqThreadHandler;
-						String data = generateLoginJson(userName, userPwd);
+						ZmqCtrl.getInstance().init();
+						String data = MainApplication.getInstance().generateLoginJson(userName, userPwd);
+						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 						sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
-						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 					}
 					break;
 				case SEARCH_TIMEOUT:
@@ -253,22 +230,33 @@ public class LoginActivity extends Activity implements OnClickListener {
 						handler.removeMessages(SEARCH_TIMEOUT);
 					}
 					break;
+				case R.id.get_realm_id:
+					if (msg.arg1 == 0) {
+						sendLoginJsonData();
+						System.out.println("MyDebug: 登录操作：获得realm成功！");
+					} else {
+						System.out.println("MyDebug: 登录操作：获得realm失败！");
+						String data = MainApplication.getInstance().generateRealmJson();
+						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+					}
+					break;
 				case R.id.login_id:
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
-						if (mDialog != null) {
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
 						loginTimes = 0;
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
+						if (msg.arg1 == 0) {
 							//登录成功
 							Value.isLoginSuccess = true;
+							MainApplication.getInstance().userName = userName;
+							MainApplication.getInstance().userPwd = userPwd;
 							startActivity(new Intent(mContext, MainActivity.class));
 							LoginActivity.this.finish();
 						} else {
-							Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.login_id);
@@ -310,36 +298,23 @@ public class LoginActivity extends Activity implements OnClickListener {
 		}
 	}
 	
-	public void clickLoginEvent() {
+	public void sendLoginJsonData() {
+		if (checkRegisterData()) {
+			preferData.writeData("UserName", userName);
+			preferData.writeData("UserPwd", userPwd);
+			String data = MainApplication.getInstance().generateLoginJson(userName, userPwd);
+			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+		}
+	}
+	
+	private void clickLoginEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkRegisterData()) {
-				if (preferData.isExist("UserName")) {
-					//切换账号
-					if (!userName.equals(preferData.readString("UserName"))) {
-						if (preferData.isExist("AlarmCount")) {
-							preferData.deleteItem("AlarmCount");
-				        }
-						MainActivity.setAlarmIconAndText(0);
-					}
-					XmlMessage xmlData = new XmlMessage(mContext);
-					xmlData.deleteAllItem();
-					preferData.deleteItem("UserName");
-					preferData.writeData("UserName", userName);
-				} else {
-					preferData.writeData("UserName", userName);
-				}
-				
-				if (preferData.isExist("UserPwd")) {
-					preferData.deleteItem("UserPwd");
-					preferData.writeData("UserPwd", userPwd);
-				} else {
-					preferData.writeData("UserPwd", userPwd);
-				}
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
-				String data = generateLoginJson(userName, userPwd);
+				ZmqCtrl.getInstance().init();
+				String data = MainApplication.getInstance().generateRealmJson();
 				sendHandlerMsg(IS_LOGINNING);
 				sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
-				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
 			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
@@ -370,15 +345,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 				mDialog = Utils.createLoadingDialog(mContext, "正在搜索设备...");
 				mDialog.show();
 				sendHandlerMsg(SEARCH_TIMEOUT, Value.REQ_TIME_10S);
-//				final OkOnlyDialog myDialog=new OkOnlyDialog(mContext);
-//				myDialog.setTitle("温馨提示");
-//				myDialog.setMessage("业务体验正在完善，敬请期待...");
-//				myDialog.setPositiveButton("确认", new OnClickListener() {
-//					@Override
-//					public void onClick(View v) {
-//						myDialog.dismiss();
-//					}
-//				});
 				break;
 		}
 	}
@@ -386,8 +352,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
-		if (mDialog != null)
+		if ((mDialog != null) && (mDialog.isShowing())) {
 			mDialog.dismiss();
+			mDialog = null;
+		}
 		if (handler.hasMessages(LOGIN_TIMEOUT)) {
 			handler.removeMessages(LOGIN_TIMEOUT);
 		}

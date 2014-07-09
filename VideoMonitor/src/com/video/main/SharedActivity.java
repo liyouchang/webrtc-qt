@@ -9,9 +9,12 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -33,8 +36,10 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
-import com.video.data.XmlShare;
 import com.video.play.PlayerActivity;
+import com.video.play.TunnelCommunication;
+import com.video.service.BackstageService;
+import com.video.service.MainApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.user.LoginActivity;
@@ -47,9 +52,6 @@ import com.video.utils.Utils;
 public class SharedActivity extends Activity implements OnClickListener {
 	
 	private Context mContext;
-	private static XmlShare xmlShare;
-	private PreferData preferData = null;
-	private String userName = null;
 	//终端列表项
 	private static String mDeviceName = null;
 	private static String mDeviceId = null;
@@ -66,6 +68,10 @@ public class SharedActivity extends Activity implements OnClickListener {
 	
 	private final int IS_REQUESTING = 1;
 	private final int REQUEST_TIMEOUT = 2;
+	private final int LINK_TIMEOUT = 3;
+	private final int REFRESH_DEVICE_LIST = 4;
+	
+	private LinkDeviceThread linkDeviceThread = null;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +81,6 @@ public class SharedActivity extends Activity implements OnClickListener {
 		initView();
 		initData();
 	}
-	
-	
 	
 	private void initView () {
 		ImageButton back = (ImageButton) this.findViewById(R.id.btn_shared_back);
@@ -93,67 +97,49 @@ public class SharedActivity extends Activity implements OnClickListener {
 		//初始化Activity要使用的参数
 		mContext = SharedActivity.this;
 		ZmqHandler.mHandler = handler;
-		xmlShare = new XmlShare(mContext);
-		preferData = new PreferData(mContext);
 		
 		Value.isSharedUser = true;
-		if (preferData.isExist("UserName")) {
-			userName = preferData.readString("UserName");
-		}
+		
+		//注册广播
+		IntentFilter mFilter = new IntentFilter();
+		mFilter.addAction(BackstageService.TUNNEL_REQUEST_ACTION);
+		mFilter.addAction(BackstageService.TERM_ONLINE_STATE_ACTION);
+        mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(serviceReceiver, mFilter);
 		
 		//初始化终端列表的显示
 		reqTermListEvent();
-		sharedList = xmlShare.readXml();
-		if (sharedList != null) {
-			listSize = sharedList.size();
-			deviceAdapter = new DeviceItemAdapter(mContext, sharedList);
-			lv_list.setAdapter(deviceAdapter);
-			if (listSize == 0) {
-				noDeviceLayout.setVisibility(View.VISIBLE);
-			} else {
-				noDeviceLayout.setVisibility(View.INVISIBLE);
-			}
-		} else {
-			listSize = xmlShare.getListSize();
-			if (listSize == 0) {
-				noDeviceLayout.setVisibility(View.VISIBLE);
-			} else {
-				noDeviceLayout.setVisibility(View.INVISIBLE);
-			}
-		}
 	}
 	
 	/**
 	 * 生成JSON的请求分享列表字符串
 	 */
 	private String generateReqTermListJson() {
-		String result = "";
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_ReqShareList");
-			jsonObj.put("UserName", userName);
+			jsonObj.put("UserName", MainApplication.getInstance().userName);
+			return jsonObj.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		result = jsonObj.toString();
-		return result;
+		return null;
 	}
 	
 	/**
 	 * 生成JSON的删除终端分享字符串
 	 */
 	private String generateDelShareTermItemJson(String mac) {
-		String result = "";
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_DelShareTerm");
-			jsonObj.put("UserName", userName);
+			jsonObj.put("UserName", MainApplication.getInstance().userName);
 			jsonObj.put("MAC", mac);
+			return jsonObj.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		result = jsonObj.toString();
-		return result;
+		return null;
 	}
 	
 	private Handler handler = new Handler() {
@@ -165,11 +151,13 @@ public class SharedActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					mDialog = Utils.createLoadingDialog(mContext, (String) msg.obj);
-					mDialog.show();
+					if (mDialog == null) {
+						mDialog = Utils.createLoadingDialog(mContext, (String) msg.obj);
+						mDialog.show();
+					}
 					break;
 				case REQUEST_TIMEOUT:
-					if (mDialog != null) {
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
 						mDialog = null;
 					}
@@ -177,59 +165,78 @@ public class SharedActivity extends Activity implements OnClickListener {
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
 					Toast.makeText(mContext, ""+msg.obj, Toast.LENGTH_SHORT).show();
+					listSize = 0;
 					break;
 				//请求终端列表
 				case R.id.request_device_share_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
-						if (mDialog != null) {
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
+						if (msg.arg1 == 0) {
 							ArrayList<HashMap<String, String>> listObj = (ArrayList<HashMap<String, String>>) msg.obj;
 							if (listObj != null) {
-								xmlShare.updateList(listObj);
 								sharedList = listObj;
 								deviceAdapter = new DeviceItemAdapter(mContext, sharedList);
 								lv_list.setAdapter(deviceAdapter);
 								listSize = sharedList.size();
+								linkDeviceThread = new LinkDeviceThread(true);
+								linkDeviceThread.start();
 							} else {
 								listSize = 0;
-								xmlShare.deleteAllItem();
 								if (sharedList != null) {
 									sharedList.clear();
 									deviceAdapter.notifyDataSetChanged();
 								}
 							}
 						} else {
-							Toast.makeText(mContext, msg.obj+"，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, msg.obj+"，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.request_device_share_id);
 					}
 					break;
-				//删除终端绑定
+				//删除终端分享
 				case R.id.delete_device_share_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
-						if (mDialog != null) {
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
-							xmlShare.deleteItem(mDeviceId);
+						if (msg.arg1 == 0) {
 							sharedList.remove(listPosition);
 							deviceAdapter.notifyDataSetChanged();
-							listSize = xmlShare.getListSize();
+							listSize = sharedList.size();
 							Toast.makeText(mContext, "删除终端分享成功！", Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "删除终端分享失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "删除终端分享失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_device_share_id);
+					}
+					break;
+				// 联机超时3秒后，重新联机
+				case LINK_TIMEOUT:
+					if (TunnelCommunication.getInstance().openTunnel((String) msg.obj) == 0) {
+						sharedList.get(msg.arg1).put("LinkState", "linking");
+					} else {
+						sharedList.get(msg.arg1).put("LinkState", "notlink");
+					}
+					if (handler.hasMessages(LINK_TIMEOUT)) {
+						handler.removeMessages(LINK_TIMEOUT);
+					}
+					break;
+				// 刷新终端列表图片
+				case REFRESH_DEVICE_LIST:
+					if (deviceAdapter != null) {
+						if (msg.obj != null) {
+							deviceAdapter.notifyDataSetChanged();
+						} else {
+							deviceAdapter.notifyDataSetChanged();
+						}
 					}
 					break;
 			}
@@ -241,28 +248,90 @@ public class SharedActivity extends Activity implements OnClickListener {
 		}
 	};
 	
-	public static Handler sharedHandler = new Handler() {
-		@SuppressWarnings("unchecked")
-		@Override
-		public void handleMessage(Message msg) {
-			// TODO Auto-generated method stub
-			super.handleMessage(msg);
-			if (msg.what == 0) {
-				HashMap<String, String> item = (HashMap<String, String>)msg.obj;
-				String mac = item.get("deviceID");
-				for (int i=0; i<listSize; i++) {
-					if (sharedList.get(i).get("deviceID").equals(mac)) {
-						item.put("deviceName", sharedList.get(i).get("deviceName"));
-						sharedList.get(i).put("isOnline", item.get("isOnline"));
-						sharedList.get(i).put("dealerName", item.get("dealerName"));
-						break;
-					}
+	/**
+	 * 联机操作后台线程
+	 */
+	public class LinkDeviceThread extends Thread {
+		private boolean isRun = false;
+		
+		public LinkDeviceThread(boolean isRun) {
+			this.isRun = isRun;
+		}
+		
+		public void stopThread() {
+			isRun = false;
+			if (linkDeviceThread != null) {
+				try {
+					linkDeviceThread.join();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				deviceAdapter.notifyDataSetChanged();
-				xmlShare.updateItemState(mac, item.get("isOnline"), item.get("dealerName"));
+				linkDeviceThread = null;
 			}
 		}
-	};
+		
+		@Override
+		public void run() {
+			while (isRun) {
+				try {
+					sleep(1000);
+					if (listSize > 0) {
+						linkDevice();
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 联机操作
+	 */
+	private void linkDevice() {
+		if ((sharedList == null) || (sharedList.size() <= 0)) {
+			return ;
+		}
+		
+		int size = sharedList.size();
+		if (size > 0) {
+			for (int i=0; i<size; i++) {
+				if (sharedList.get(i).get("isOnline").equals("true")) {
+					String peerId = sharedList.get(i).get("dealerName");
+					String linkState = sharedList.get(i).get("LinkState");
+					
+					if (linkState.equals("notlink")) {
+						if (TunnelCommunication.getInstance().IsTunnelOpened(peerId)) {
+							// 已联机
+							sharedList.get(i).put("LinkState", "linked");
+						} else {
+							if (TunnelCommunication.getInstance().openTunnel(peerId) == 0) {
+								// 正在联机...
+								sharedList.get(i).put("LinkState", "linking");
+							} else {
+								sharedList.get(i).put("LinkState", "notlink");
+							}
+						}
+					}
+					else if (linkState.equals("timeout")) {
+						if (TunnelCommunication.getInstance().IsTunnelOpened(peerId)) {
+							// 已联机
+							sharedList.get(i).put("LinkState", "linked");
+						} else {
+							// 发送超时正在联机延时消息
+							if (!handler.hasMessages(LINK_TIMEOUT)) {
+								MainApplication.getInstance().sendHandlerMsg(handler, LINK_TIMEOUT, i, 0, peerId, 3000);
+							}
+						}
+					}
+					// 发送更新设备列表状态的广播
+					sendHandlerMsg(REFRESH_DEVICE_LIST, null);
+				} else {
+					continue;
+				}
+			}
+		}
+	}
 	
 	/**
 	 * 发送Handler消息
@@ -331,7 +400,11 @@ public class SharedActivity extends Activity implements OnClickListener {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		unregisterReceiver(serviceReceiver);
 		Value.isSharedUser = false;
+		if (linkDeviceThread != null) {
+			linkDeviceThread.stopThread();
+		}
 	}
 
 	@Override
@@ -363,45 +436,50 @@ public class SharedActivity extends Activity implements OnClickListener {
 					if (Value.isLoginSuccess) {
 						//读取流量保护开关设置
 						boolean isProtectTraffic = true;
+						PreferData preferData = new PreferData(mContext);
 						if (preferData.isExist("ProtectTraffic")) {
 							isProtectTraffic = preferData.readBoolean("ProtectTraffic");
 						}
 						
-						if (!isProtectTraffic) {
-							//实时视频
-							Intent intent = new Intent(mContext, PlayerActivity.class);
-							intent.putExtra("deviceName", mDeviceName);
-							intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
-							mContext.startActivity(intent);
-						} else {
-							if (Utils.isWiFiNetwork(mContext)) {
+						if (item.get("LinkState").equals("linked")) {
+							if (!isProtectTraffic) {
 								//实时视频
 								Intent intent = new Intent(mContext, PlayerActivity.class);
 								intent.putExtra("deviceName", mDeviceName);
 								intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
 								mContext.startActivity(intent);
 							} else {
-								final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-								myDialog.setTitle("温馨提示");
-								myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
-								myDialog.setPositiveButton("确认", new OnClickListener() {
-									@Override
-									public void onClick(View v) {
-										myDialog.dismiss();
-										//实时视频
-										Intent intent = new Intent(mContext, PlayerActivity.class);
-										intent.putExtra("deviceName", mDeviceName);
-										intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
-										mContext.startActivity(intent);
-									}
-								});
-								myDialog.setNegativeButton("取消", new OnClickListener() {
-									@Override
-									public void onClick(View v) {
-										myDialog.dismiss();
-									}
-								});
+								if (Utils.isWiFiNetwork(mContext)) {
+									//实时视频
+									Intent intent = new Intent(mContext, PlayerActivity.class);
+									intent.putExtra("deviceName", mDeviceName);
+									intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
+									mContext.startActivity(intent);
+								} else {
+									final OkCancelDialog myDialog=new OkCancelDialog(mContext);
+									myDialog.setTitle("温馨提示");
+									myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
+									myDialog.setPositiveButton("确认", new OnClickListener() {
+										@Override
+										public void onClick(View v) {
+											myDialog.dismiss();
+											//实时视频
+											Intent intent = new Intent(mContext, PlayerActivity.class);
+											intent.putExtra("deviceName", mDeviceName);
+											intent.putExtra("dealerName", sharedList.get(position).get("dealerName"));
+											mContext.startActivity(intent);
+										}
+									});
+									myDialog.setNegativeButton("取消", new OnClickListener() {
+										@Override
+										public void onClick(View v) {
+											myDialog.dismiss();
+										}
+									});
+								}
 							}
+						} else {
+							Toast.makeText(mContext, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						final OkOnlyDialog myDialog=new OkOnlyDialog(mContext);
@@ -440,6 +518,80 @@ public class SharedActivity extends Activity implements OnClickListener {
 			return false;
 		}
 	}
+	
+	/**
+	 * 通过dealerName从设备列表获得指定设备的position
+	 */
+	public int getDeviceListPositionByDealerName(String dealerName) {
+		String[] sArray = dealerName.split("-");
+		int size = sharedList.size();
+		for (int i=0; i<size; i++) {
+			if (sharedList.get(i).get("deviceID").equalsIgnoreCase(sArray[0].trim())) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	/**
+	 * 通过deviceID从设备列表获得指定设备的position
+	 */
+	public int getDeviceListPositionByDeviceID(String deviceID) {
+		int size = sharedList.size();
+		for (int i=0; i<size; i++) {
+			if (sharedList.get(i).get("deviceID").equals(deviceID)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
+		
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String action = intent.getAction();
+			if (action.equals(BackstageService.TUNNEL_REQUEST_ACTION)) {
+				// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
+				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
+				String peerId = intent.getStringExtra("PeerId");
+				int position = getDeviceListPositionByDealerName(peerId);
+				if (position == -1) {
+					return ;
+				}
+				switch (TunnelEvent) {
+					// 通道被打开
+					case 0:
+						// 已联机
+						sharedList.get(position).put("LinkState", "linked");
+						break;
+					// 通道被关闭
+					case 1:
+						// 联机超时
+						sharedList.get(position).put("LinkState", "timeout");
+						break;
+				}
+				sendHandlerMsg(REFRESH_DEVICE_LIST, null);
+			}
+			else if (action.equals(BackstageService.TERM_ONLINE_STATE_ACTION)) {
+				// 终端上下线
+				String mac = intent.getStringExtra("deviceID");
+				int position = getDeviceListPositionByDeviceID(mac);
+				if (position == -1) {
+					return ;
+				}
+				String dealerName = intent.getStringExtra("dealerName");
+				String isOnline = intent.getStringExtra("isOnline");
+				
+				sharedList.get(position).put("dealerName", dealerName);
+				sharedList.get(position).put("isOnline", isOnline);
+				if (!isOnline.equals("true")) {
+					sharedList.get(position).put("LinkState", "notlink");
+				}
+				sendHandlerMsg(REFRESH_DEVICE_LIST, null);
+			}
+		}
+	};
 
 	/**
 	 * 设备项ListView的长按键的PopupWindow选项

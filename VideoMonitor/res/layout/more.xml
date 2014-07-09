@@ -60,7 +60,7 @@
                 android:textColor="@color/title_bg_black"
                 android:textSize="18dp" />
 
-            <Button
+            <!-- <Button
                 android:id="@+id/btn_device_manager"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
                 android:paddingRight="10dp"
                 android:text="@string/device_manager"
                 android:textColor="@color/title_bg_black"
-                android:textSize="18dp" />
+                android:textSize="18dp" /> -->
             
             <Button
                 android:id="@+id/btn_wifi"

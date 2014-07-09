@@ -4,13 +4,22 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.app.Application;
+import android.content.Intent;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 
+import com.video.R;
 import com.video.data.PreferData;
+import com.video.data.Value;
 import com.video.data.XmlDevice;
+import com.video.data.XmlMessage;
+import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
 public class MainApplication extends Application {
@@ -19,6 +28,10 @@ public class MainApplication extends Application {
 	public static MainApplication getInstance() {  
         return AppInstance;  
     }
+	
+	// 用户信息
+	public String userName = "";
+	public String userPwd = "";
 	
 	// 保存为缓存文件句柄
 	public PreferData preferData = null;
@@ -217,5 +230,116 @@ public class MainApplication extends Application {
 		msg.arg2 = arg2;
 		msg.obj = obj;
 		handler.sendMessageDelayed(msg, timeout);
+	}
+	
+	/**
+	 * 生成JSON的turn和stun字符串
+	 */
+	public String generateStunandTurnJson(String turn, String stun) {
+		JSONArray jsonArr = new JSONArray();
+		JSONObject jsonObj = null;
+		try {
+			jsonObj = new JSONObject();
+			jsonObj.put("uri", turn);
+			jsonArr.put(jsonObj);
+			jsonObj = new JSONObject();
+			jsonObj.put("uri", stun);
+			jsonArr.put(jsonObj);
+			return jsonArr.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 生成JSON的realm字符串
+	 */
+	public String generateRealmJson() {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_Getrealm");
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 生成JSON的登录字符串
+	 */
+	public String generateLoginJson(String username, String pwd) {
+		String newPwd = username+":"+Value.realm+":"+pwd;
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_Login");
+			jsonObj.put("UserName", username);
+			jsonObj.put("Pwd", Utils.CreateMD5Pwd(newPwd));
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			Utils.log("generateLoginJson()异常！");
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 生成JSON的注销登录字符串
+	 */
+	private String generateLogoutJson() {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_Logout");
+			jsonObj.put("UserName", userName);
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 生成JSON的请求报警数据字符串
+	 */
+	public String generateRequestAlarmJson(int msgId, int count) {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_ReqAlarm");
+			jsonObj.put("UserName", userName);
+			jsonObj.put("ID", msgId);
+			jsonObj.put("Count", count);
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 终止主程序和服务
+	 */
+	public void stopActivityandService() {
+		// 清除报警消息缓存和未读消息数量
+		XmlMessage xmlData = new XmlMessage(AppInstance);
+		xmlData.deleteAllItem();
+		if (preferData.isExist("AlarmCount")) {
+			preferData.deleteItem("AlarmCount");
+        }
+		
+		// 删除缓存和缩略图文件夹
+		Utils.deleteDirectoryFiles(cacheFile);
+		Utils.deleteDirectoryFiles(thumbnailsFile);
+		
+		// 发送注销消息
+		String data = generateLogoutJson();
+		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+		
+		// 复位全局变量
+		Value.resetValues();
+		
+		// 停止后台服务
+		Intent intent = new Intent(MainApplication.getInstance(), BackstageService.class);
+    	MainApplication.getInstance().stopService(intent);
 	}
 }

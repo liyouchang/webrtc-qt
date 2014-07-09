@@ -107,11 +107,11 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		mContext = WiFiActivity.this;
 		ZmqHandler.mHandler = handler;
 		onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
-		if (onlineTermList == null) {
-			button_wifi_term_select.setText("没有在线设备");
-		} else {
+		if ((onlineTermList != null) && (onlineTermList.size() > 0)) {
 			button_wifi_term_select.setText((CharSequence) onlineTermList.get(0).get("deviceName"));
 			onlineDealerName = ""+onlineTermList.get(0).get("dealerName");
+		} else {
+			button_wifi_term_select.setText("没有在线设备");
 		}
 	}
 	
@@ -337,11 +337,11 @@ public class WiFiActivity extends Activity implements OnClickListener {
 				break;
 			case R.id.btn_wifi_term_list:
 				onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
-				if (onlineTermList == null) {
-					Toast.makeText(mContext, "没有在线设备 ", Toast.LENGTH_SHORT).show();
-				} else {
+				if ((onlineTermList != null) && (onlineTermList.size() > 0)) {
 					showOnlineTermList();
 					System.out.println("MyDebug: dealerName："+onlineDealerName);
+				} else {
+					Toast.makeText(mContext, "没有在线设备 ", Toast.LENGTH_SHORT).show();
 				}
 				break;
 			case R.id.btn_wifi_password_del:
@@ -349,16 +349,14 @@ public class WiFiActivity extends Activity implements OnClickListener {
 				break;
 			case R.id.btn_wifi_name:
 				onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
-				if (onlineTermList == null) {
-					Toast.makeText(mContext, "没有在线设备，无法请求WiFi列表！ ", Toast.LENGTH_SHORT).show();
-				} else {
+				if ((onlineTermList != null) && (onlineTermList.size() > 0)) {
 					getWiFiListInfoEvent();
+				} else {
+					Toast.makeText(mContext, "没有在线设备，无法请求WiFi列表！ ", Toast.LENGTH_SHORT).show();
 				}
 				break;
 			case R.id.btn_wifi_submit:
-				if (onlineTermList == null) {
-					Toast.makeText(mContext, "设备不在线，无法配置网络 ", Toast.LENGTH_SHORT).show();
-				} else {
+				if ((onlineTermList != null) && (onlineTermList.size() > 0)) {
 					String pwd = et_wifi_pwd.getText().toString().trim();
 					if (selectedWiFi == null) {
 						Toast.makeText(mContext, "请先搜索WiFi，再配置", Toast.LENGTH_SHORT).show();
@@ -368,6 +366,8 @@ public class WiFiActivity extends Activity implements OnClickListener {
 					} else {
 						setTermWiFiInfoEvent(pwd);
 					}
+				} else {
+					Toast.makeText(mContext, "设备不在线，无法配置网络 ", Toast.LENGTH_SHORT).show();
 				}
 				break;
 		}
