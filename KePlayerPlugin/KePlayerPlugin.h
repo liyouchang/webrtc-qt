@@ -99,7 +99,11 @@ public slots:
     int StopVideo(QString peerId);
     QString StartCut(QString peerId);
     int StopCut(QString peerId);
+
     QString Capture(QString peerId);
+    bool OpenSound(QString peerId);
+    bool CloseSound(QString peerId);
+
     int SendCommand(QString peer_id,QString msg);
 
     int PlayRecordFiles(QString peer_id,QString jstrRecordArray);

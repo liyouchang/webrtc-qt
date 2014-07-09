@@ -49,6 +49,20 @@ void PlayWidget::StopPlayFile()
     this->update();
 }
 
+bool PlayWidget::OpenSound()
+{
+    int ret = playSource->OpenSound();
+    qDebug()<<"PlayWidget::OpenSound---"<<ret;
+    return true;
+}
+
+bool PlayWidget::CloseSound()
+{
+    int ret = playSource->CloseSound();
+    qDebug()<<"PlayWidget::CloseSound---"<<ret;
+    return true;
+}
+
 bool PlayWidget::IsPlaying()
 {
     return playSource->IsPlaying();

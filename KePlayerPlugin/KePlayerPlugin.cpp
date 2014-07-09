@@ -281,6 +281,23 @@ QString KePlayerPlugin::Capture(QString peerId)
     return jsondoc.toJson();
 }
 
+bool KePlayerPlugin::OpenSound(QString peerId)
+{
+    if(peerId.isEmpty()){
+        return false;
+    }
+    return video_wall_->OpenSound(peerId);
+}
+
+bool KePlayerPlugin::CloseSound(QString peerId)
+{
+    if(peerId.isEmpty()){
+        return false;
+    }
+    return video_wall_->CloseSound(peerId);
+
+}
+
 int KePlayerPlugin::SendCommand(QString peer_id, QString msg)
 {
     std::string str_id = peer_id.toStdString();

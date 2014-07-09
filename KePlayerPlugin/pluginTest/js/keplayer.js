@@ -20,7 +20,7 @@ function load(){
     }
     var iceServers = [{"uri":"stun:192.168.40.192:5389"},{"uri":"turn:192.168.40.192:5766"}];
     var strIceServers = JSON.stringify(iceServers);
-    var strRouterUrl = "tcp://192.168.0.185:5555"
+    var strRouterUrl = "tcp://192.168.40.192:5555"
     kePlayerObj.Initialize(strRouterUrl,strIceServers);
     eventFunction();
 

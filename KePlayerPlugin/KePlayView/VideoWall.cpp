@@ -247,6 +247,26 @@ bool VideoWall::Capture(QString peer_id, QString fileName)
     return false;
 }
 
+bool VideoWall::OpenSound(QString peerId)
+{
+    int play_index = peer_play_map_.value(peerId,-1);
+    if(play_index != -1){
+        return players[play_index]->OpenSound();
+    }
+    qWarning()<<"VideoWall::OpenSound---id "<<peerId<<" not found";
+    return false;
+}
+
+bool VideoWall::CloseSound(QString peerId)
+{
+    int play_index = peer_play_map_.value(peerId,-1);
+    if(play_index != -1){
+        return players[play_index]->OpenSound();
+    }
+    qWarning()<<"VideoWall::CloseSound---id "<<peerId<<" not found";
+    return false;
+}
+
 
 
 void VideoWall::setSelectedPlayer(int newSelected)
