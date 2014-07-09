@@ -111,7 +111,7 @@
     <string name="set_background">设置背景图片</string>
     <string name="video_record_view_rec">REC</string>
     <string name="clarity_high">高清</string>
-    <string name="clarity_normal">标准</string>
+    <string name="clarity_normal">均衡</string>
     <string name="clarity_low">流畅</string>
     
     <string name="video_loaded_text"><![CDATA[已加载(0%)，请稍后...]]></string>

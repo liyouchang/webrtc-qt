@@ -2,9 +2,6 @@ package com.video.main;
 
 import java.util.ArrayList;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -34,7 +31,6 @@ import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.main.FragmentTabAdapter.OnMyTabChangedListener;
-import com.video.service.BackstageService;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
@@ -101,35 +97,33 @@ public class MainActivity extends FragmentActivity {
 			    	isStartupThreadRun = true;
 			    	quitFullScreen();
 			    	if (isAppFirstTime) {
-			    		//第一次使用该软件的帮助图片
+			    		// 第一次使用该软件的帮助图片
 			    		isAppFirstTime = true;
 			    		preferData.writeData("AppFirstTime", isAppFirstTime);
 			    		startActivity(new Intent(mContext, HelpActivity.class));
 			    		MainActivity.this.finish();
 			    	} else {
 						if (isAutoLogin) {
-							//自动登录，不进入登录界面
+							// 自动登录，不进入登录界面
 							if (Utils.isNetworkAvailable(mContext)) {
 								if (preferData.isExist("UserName")) {
 									userName = preferData.readString("UserName");
 								}
-								
 								if (preferData.isExist("UserPwd")) {
 									userPwd = preferData.readString("UserPwd");
 								}
-								Handler sendHandler = ZmqThread.zmqThreadHandler;
-								String data = generateLoginJson(userName, userPwd);
+								String data = MainApplication.getInstance().generateRealmJson();
+								sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 								sendHandlerMsg(IS_LOGINNING);
-								handler.sendEmptyMessageDelayed(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
-								sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+								sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 							} else {
-								//无可用网络
+								// 无可用网络
 								Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 								startActivity(new Intent(mContext, LoginActivity.class));
 								MainActivity.this.finish();
 							}
 						} else {
-							//非自动登录
+							// 非自动登录
 							startActivity(new Intent(mContext, LoginActivity.class));
 							MainActivity.this.finish();
 						}
@@ -167,24 +161,6 @@ public class MainActivity extends FragmentActivity {
 		attrs.flags &= (~WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		getWindow().setAttributes(attrs);
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-	}
-
-	
-	/**
-	 * 生成JSON的登录字符串
-	 */
-	private String generateLoginJson(String username, String pwd) {
-		String result = "";
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "Client_Login");
-			jsonObj.put("UserName", username);
-			jsonObj.put("Pwd", Utils.CreateMD5Pwd(pwd));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		result = jsonObj.toString();
-		return result;
 	}
 	
 	private void initData() {
@@ -427,18 +403,15 @@ public class MainActivity extends FragmentActivity {
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
 					}
-					//超时之后关闭服务，断开连接，再重启服务
-					ZmqCtrl.getInstance().exit();
-			    	stopService(new Intent(mContext, BackstageService.class));
-					Value.resetValues();
+					// 终止主程序和服务广播
+					MainApplication.getInstance().stopActivityandService();
 					sendHandlerMsg(LOGIN_AGAIN, 3000);
 					break;
 				//重新登录
 				case LOGIN_AGAIN:
-					ZmqCtrl.getInstance().init();
-					if (loginTimes >= 3) {
+					if (loginTimes > 1) {
 						loginTimes = 0;
-						if (mDialog != null) {
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
 							mDialog = null;
 						}
@@ -446,28 +419,43 @@ public class MainActivity extends FragmentActivity {
 						startActivity(new Intent(mContext, LoginActivity.class));
 		    			MainActivity.this.finish();
 					} else {
-						Handler sendHandler = ZmqThread.zmqThreadHandler;
-						String data = generateLoginJson(userName, userPwd);
+						ZmqCtrl.getInstance().init();
+						String data = MainApplication.getInstance().generateLoginJson(userName, userPwd);
+						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 						sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
-						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
+					}
+					break;
+				// 获得realm
+				case R.id.get_realm_id:
+					if (msg.arg1 == 0) {
+						String data = MainApplication.getInstance().generateLoginJson(userName, userPwd);
+						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+						System.out.println("MyDebug: 自动登录操作：获得realm成功！");
+					} else {
+						System.out.println("MyDebug: 自动登录操作：获得realm失败！");
+						String data = MainApplication.getInstance().generateRealmJson();
+						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 					}
 					break;
 				//接收登录响应
 				case R.id.login_id:
 					if (handler.hasMessages(LOGIN_TIMEOUT)) {
 						handler.removeMessages(LOGIN_TIMEOUT);
-						if (mDialog != null)
-							mDialog.dismiss();
 						if (isStartupThreadRun) {
-							int resultCode = msg.arg1;
-							if (resultCode == 0) {
+							if ((mDialog != null) && (mDialog.isShowing())) {
+								mDialog.dismiss();
+								mDialog = null;
+							}
+							if (msg.arg1 == 0) {
 								Value.isLoginSuccess = true;
+								MainApplication.getInstance().userName = userName;
+								MainApplication.getInstance().userPwd = userPwd;
 								setContentView(R.layout.main);
 						        initData();
 						        initView();
 						        new UpdateAPK(mContext).startCheckUpgadeThread();
 							} else {
-								Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+								Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 								startActivity(new Intent(mContext, LoginActivity.class));
 				    			MainActivity.this.finish();
 							}
@@ -511,10 +499,8 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
-				Value.resetValues();
-				Intent intent = new Intent(MainApplication.getInstance(), BackstageService.class);
-		    	MainApplication.getInstance().stopService(intent);
-		    	finish();
+				MainApplication.getInstance().stopActivityandService();
+				finish();
 			}
 		});
 		myDialog.setNegativeButton("取消", new OnClickListener() {
@@ -543,8 +529,10 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
-		if (mDialog != null)
+		if ((mDialog != null) && (mDialog.isShowing())) {
 			mDialog.dismiss();
+			mDialog = null;
+		}
 		if (handler.hasMessages(LOGIN_TIMEOUT)) {
 			handler.removeMessages(LOGIN_TIMEOUT);
 		}
@@ -575,6 +563,7 @@ public class MainActivity extends FragmentActivity {
 		super.onStop();
 		if ((mDialog != null) && (mDialog.isShowing())) {
 			mDialog.dismiss();
+			mDialog = null;
 		}
 		isActivityShow = false;
 		isStartupThreadRun = false;
@@ -586,6 +575,5 @@ public class MainActivity extends FragmentActivity {
 		super.onDestroy();
 		Value.isManulLogout = false;
 	}
-	
 }
 

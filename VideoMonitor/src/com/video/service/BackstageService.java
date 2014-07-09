@@ -48,7 +48,7 @@ public class BackstageService extends Service {
 		// TODO Auto-generated method stub
 		super.onCreate();
 		// 初始化通道
-		TunnelCommunication.getInstance().tunnelInitialize(Value.IceServersValue);
+		TunnelCommunication.getInstance().tunnelInitialize(MainApplication.getInstance().generateStunandTurnJson(Value.turn, Value.stun));
 	}
 	
 	@Override
@@ -85,7 +85,7 @@ public class BackstageService extends Service {
 			isRun = false;
 			thread = null;
 		}
-		System.out.println("MyDebug: 【停止服务】");
+		Utils.log("【停止服务】");
 	}
 
 	@Override
@@ -249,31 +249,6 @@ public class BackstageService extends Service {
 		sendBroadcast(actionIntent);
 	}
 	
-	/**
-	 * 生成JSON的登录字符串
-	 */
-	private String generateLoginJson() {
-		String userName = "";
-		String userPwd = "";
-		if (preferData.isExist("UserName")) {
-			userName = preferData.readString("UserName");
-		}
-		if (preferData.isExist("UserPwd")) {
-			userPwd = preferData.readString("UserPwd");
-		}
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "Client_Login");
-			jsonObj.put("UserName", userName);
-			jsonObj.put("Pwd", Utils.CreateMD5Pwd(userPwd));
-			return jsonObj.toString();
-		} catch (JSONException e) {
-			System.out.println("MyDebug: generateLoginJson()异常！");
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
 	private int loginTimes = 0;
 	private final static int LOGIN_TIMEOUT = 1;
 	private final int LOGIN_AGAIN = 2;
@@ -307,7 +282,7 @@ public class BackstageService extends Service {
 					} else {
 						Value.beatHeartFailFlag = true;
 						Handler sendHandler = ZmqThread.zmqThreadHandler;
-						String data = generateLoginJson();
+						String data = MainApplication.getInstance().generateLoginJson(MainApplication.getInstance().userName, MainApplication.getInstance().userPwd);
 						sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 						sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 					}
@@ -345,12 +320,12 @@ public class BackstageService extends Service {
 				if ((info != null) && (info.isAvailable()) && networkChangeFlag) {
 					ZmqCtrl.getInstance().init();
 					networkChangeFlag = false;
-					System.out.println("MyDebug: 【网络已连接】");
+					Utils.log("【网络已连接】");
 					
 					// 重新登录
 					Value.beatHeartFailFlag = true;
 					Handler sendHandler = ZmqThread.zmqThreadHandler;
-					String data = generateLoginJson();
+					String data = MainApplication.getInstance().generateLoginJson(MainApplication.getInstance().userName, MainApplication.getInstance().userPwd);
 					sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 				} 
@@ -359,7 +334,7 @@ public class BackstageService extends Service {
 					Value.resetValues();
 					closeAPPAndService();
 					ZmqCtrl.getInstance().exit();
-					System.out.println("MyDebug: 【没有可用网络】");
+					Utils.log("【没有可用网络】");
 				}
 			}
 			else if (action.equals(TUNNEL_REQUEST_ACTION)) {

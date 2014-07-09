@@ -142,41 +142,45 @@ public class DeviceItemAdapter extends BaseAdapter {
 									isProtectTraffic = preferData.readBoolean("ProtectTraffic");
 								}
 								
-								if (!isProtectTraffic) {
-									//实时视频
-									Intent intent = new Intent(context, PlayerActivity.class);
-									intent.putExtra("deviceName", name);
-									intent.putExtra("dealerName", list.get(position).get("dealerName"));
-									context.startActivity(intent);
-								} else {
-									if (Utils.isWiFiNetwork(context)) {
+								if (list.get(position).get("LinkState").equals("linked")) {
+									if (!isProtectTraffic) {
 										//实时视频
 										Intent intent = new Intent(context, PlayerActivity.class);
 										intent.putExtra("deviceName", name);
 										intent.putExtra("dealerName", list.get(position).get("dealerName"));
 										context.startActivity(intent);
 									} else {
-										final OkCancelDialog myDialog=new OkCancelDialog(context);
-										myDialog.setTitle("温馨提示");
-										myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
-										myDialog.setPositiveButton("确认", new OnClickListener() {
-											@Override
-											public void onClick(View v) {
-												myDialog.dismiss();
-												//实时视频
-												Intent intent = new Intent(context, PlayerActivity.class);
-												intent.putExtra("deviceName", name);
-												intent.putExtra("dealerName", list.get(position).get("dealerName"));
-												context.startActivity(intent);
-											}
-										});
-										myDialog.setNegativeButton("取消", new OnClickListener() {
-											@Override
-											public void onClick(View v) {
-												myDialog.dismiss();
-											}
-										});
+										if (Utils.isWiFiNetwork(context)) {
+											//实时视频
+											Intent intent = new Intent(context, PlayerActivity.class);
+											intent.putExtra("deviceName", name);
+											intent.putExtra("dealerName", list.get(position).get("dealerName"));
+											context.startActivity(intent);
+										} else {
+											final OkCancelDialog myDialog=new OkCancelDialog(context);
+											myDialog.setTitle("温馨提示");
+											myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
+											myDialog.setPositiveButton("确认", new OnClickListener() {
+												@Override
+												public void onClick(View v) {
+													myDialog.dismiss();
+													//实时视频
+													Intent intent = new Intent(context, PlayerActivity.class);
+													intent.putExtra("deviceName", name);
+													intent.putExtra("dealerName", list.get(position).get("dealerName"));
+													context.startActivity(intent);
+												}
+											});
+											myDialog.setNegativeButton("取消", new OnClickListener() {
+												@Override
+												public void onClick(View v) {
+													myDialog.dismiss();
+												}
+											});
+										}
 									}
+								} else {
+									Toast.makeText(context, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
 								}
 							}
 						} else {
@@ -196,7 +200,7 @@ public class DeviceItemAdapter extends BaseAdapter {
 							});
 						}
 					} else {
-						Toast.makeText(context, "【"+name+"】终端设备不在线！", Toast.LENGTH_SHORT).show();
+						Toast.makeText(context, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
 					}
 				} else {
 					Toast.makeText(context, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();

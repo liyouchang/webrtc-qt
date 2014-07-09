@@ -48,6 +48,7 @@ public class AlarmImageViewActivity extends Activity implements OnClickListener 
 		switch (v.getId()) {
 			case R.id.ib_alarm_back:
 				finish();
+				overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 				break;
 		}
 	}
@@ -57,6 +58,7 @@ public class AlarmImageViewActivity extends Activity implements OnClickListener 
 		// TODO Auto-generated method stub
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
 			finish();
+			overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 		}
 		return false;
 	}

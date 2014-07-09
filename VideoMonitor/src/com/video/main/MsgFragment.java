@@ -1,6 +1,5 @@
 package com.video.main;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +16,6 @@ import android.content.IntentFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
@@ -42,6 +40,7 @@ import com.video.data.XmlMessage;
 import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
 import com.video.service.BackstageService;
+import com.video.service.MainApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.user.LoginActivity;
@@ -63,7 +62,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	public final static String READ_MESSAGE_ACTION = "MsgFragment.read_message_action";
 	
 	/**
-	 * 0:正常请求和下拉请求  1:上拖请求  2:删除该条报警  3:删除当前全部报警  4:标记该条报警  5:标记当前全部报警
+	 * 0:正常请求和下拉请求  1:上拖请求  2:请求新的报警数据  3:删除该条报警  4:删除当前全部报警  5:标记该条报警  6:标记当前全部报警
 	 */
 	private int reqAlarmType = 0;
 	private String userName = "";
@@ -82,7 +81,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private String msg_refresh_time = null;
 	private String msg_refresh_terminal = null;
 	
-	private File imageCache = null;
 	private final int IS_REQUESTING = 1;
 	private final int REQUEST_TIMEOUT = 2;
 	
@@ -109,22 +107,21 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	public void onResume() {
 		// TODO Auto-generated method stub
 		super.onResume();
-		
 		if (Value.isLoginSuccess) {
 			if (MainActivity.isCurrentTab(3)) {
 				ZmqHandler.mHandler = handler;
-				
 				//需要请求报警消息
 				if (Value.isNeedReqAlarmListFlag) {
 					Value.ownFragmentRequestAlarmFlag = false;
-					reqAlarmEvent();
+					reqAlarmType = 2;
+					requestAlarmEvent(0, Value.newAlarmMessageCount);
 				} else {
 					if (Value.ownFragmentRequestAlarmFlag) {
 						Value.ownFragmentRequestAlarmFlag = false;
 						msgList = xmlData.readXml();
 						if (msgList != null) {
 							listSize = msgList.size();
-							msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
+							msgAdapter = new MessageItemAdapter(mActivity, msgList);
 							lv_list.setAdapter(msgAdapter);
 						}
 					}
@@ -176,13 +173,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			userName = preferData.readString("UserName");
 		}
 		
-		String SD_path = Environment.getExternalStorageDirectory().getAbsolutePath();
-		String filePath = SD_path + File.separator + "KaerVideo" + File.separator + "cache";
-		imageCache = new File(filePath);
-		if(!imageCache.exists()){
-			imageCache.mkdirs();
-		}
-		
 		//初始化下拉刷新的显示
 		if (preferData.isExist("msgRefreshTime")) {
 			msg_refresh_time = preferData.readString("msgRefreshTime");
@@ -198,39 +188,15 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		msgList = xmlData.readXml();
 		if (msgList != null) {
 			listSize = msgList.size();
-			msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
+			msgAdapter = new MessageItemAdapter(mActivity, msgList);
 			lv_list.setAdapter(msgAdapter);
 		}
-	}
-	
-	/**
-	 * 生成JSON的请求报警数据字符串
-	 */
-	private String generateReqAlarmJson(int id, int count) {
-		String result = "";
-		if (id == 0) {
-			reqAlarmType = 0;
-		} else {
-			reqAlarmType = 1;
-		}
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "Client_ReqAlarm");
-			jsonObj.put("UserName", userName);
-			jsonObj.put("ID", id);
-			jsonObj.put("Count", count);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		result = jsonObj.toString();
-		return result;
 	}
 	
 	/**
 	 * 生成JSON的删除该条报警字符串
 	 */
 	private String generateDeleteThisItemJson(int id) {
-		reqAlarmType = 2;
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_DelAlarm");
@@ -247,7 +213,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 * 生成JSON的删除当前全部报警字符串
 	 */
 	private String generateDeleteThisListJson() {
-		reqAlarmType = 3;
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_DelSelectAlarm");
@@ -269,7 +234,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 * 生成JSON的标记该条报警字符串
 	 */
 	private String generateMarkThisItemJson(int id) {
-		reqAlarmType = 4;
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_MarkAlarm");
@@ -289,7 +253,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 */
 	private String generateMarkThisListJson() {
 		boolean result = false;
-		reqAlarmType = 5;
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_MarkSelectAlarm");
@@ -330,12 +293,16 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					mDialog = Utils.createLoadingDialog(mActivity, "正在请求报警数据...");
-					mDialog.show();
+					if (mDialog == null) {
+						mDialog = Utils.createLoadingDialog(mActivity, "正在请求报警数据...");
+						mDialog.show();
+					}
 					break;
 				case REQUEST_TIMEOUT:
-					if (mDialog != null)
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
@@ -345,15 +312,16 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 					if (mPullToRefreshView.getFooterState() == PullToRefreshView.REFRESHING) {
 						mPullToRefreshView.onFooterRefreshComplete();
 					}
-					Toast.makeText(mActivity, "请求报警数据失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mActivity, "请求报警数据超时，请重试！", Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.request_alarm_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
-						if (mDialog != null)
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
+							mDialog = null;
+						}
+						if (msg.arg1 == 0) {
 							Value.isNeedReqAlarmListFlag = false;
 							switch (reqAlarmType) {
 								//正常请求和下拉请求
@@ -369,7 +337,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 									if (listObj != null) {
 										xmlData.updateList(listObj);
 										msgList = listObj;
-										msgAdapter = new MessageItemAdapter(mActivity, imageCache, msgList);
+										msgAdapter = new MessageItemAdapter(mActivity, msgList);
 										lv_list.setAdapter(msgAdapter);
 									} else {
 										xmlData.deleteAllItem();
@@ -378,46 +346,60 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 											msgAdapter.notifyDataSetChanged();
 										}
 									}
-									Value.requstAlarmCount = 5;
+									Value.newAlarmMessageCount = 0;
 									break;
-								//上拖请求
+								//上拖请求，请求以前的报警消息
 								case 1:
 									if (mPullToRefreshView.getFooterState() == PullToRefreshView.REFRESHING) {
 										mPullToRefreshView.onFooterRefreshComplete();
 									}
-									ArrayList<HashMap<String, String>> list = (ArrayList<HashMap<String, String>>) msg.obj;
-									if (list != null) {
-										int len = list.size();
+									ArrayList<HashMap<String, String>> list1 = (ArrayList<HashMap<String, String>>) msg.obj;
+									if (list1 != null) {
+										int len = list1.size();
 										for (int i=0; i<len; i++) {
-											msgList.add(list.get(i));
-											xmlData.addItem(list.get(i));
+											msgList.add(list1.get(i));
+											xmlData.addItem(list1.get(i));
 										}
 										msgAdapter.notifyDataSetChanged();
 									}
 									break;
-								//删除该条报警
+								//请求新的报警数据
 								case 2:
+									ArrayList<HashMap<String, String>> list2 = (ArrayList<HashMap<String, String>>) msg.obj;
+									if (list2 != null) {
+										int len = list2.size();
+										for (int i=0; i<len; i++) {
+											msgList.add(0, list2.get(i));
+										}
+										xmlData.updateList(msgList);
+										msgAdapter.notifyDataSetChanged();
+									}
+									Value.newAlarmMessageCount = 0;
+									break;
+								//删除该条报警
+								case 3:
 									msgList.remove(listPosition);
 									xmlData.deleteItem(mMsgID);
 									msgAdapter.notifyDataSetChanged();
-									Value.requstAlarmCount = listSize;
-									reqAlarmEvent();
+									reqAlarmType = 1;
+									requestAlarmEvent(xmlData.getMinUpdateID(), 1);
 									break;
 								//删除当前全部报警
-								case 3:
+								case 4:
 									msgList.removeAll(msgList);
 									xmlData.deleteAllItem();
 									msgAdapter.notifyDataSetChanged();
-									reqAlarmEvent();
+									reqAlarmType = 0;
+									requestAlarmEvent(0, 5);
 									break;
 								//标记该条报警
-								case 4:
+								case 5:
 									msgList.get(listPosition).put("isReaded", "true");
 									xmlData.updateItemState(mMsgID, "true");
 									msgAdapter.notifyDataSetChanged();
 									break;
 								//标记当前全部报警
-								case 5:
+								case 6:
 									for (int i=0; i<listSize; i++) {
 										msgList.get(i).put("isReaded", "true");
 										xmlData.updateItemState(msgList.get(i).get("isReaded"), "true");
@@ -426,14 +408,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 									break;
 								default: break;
 							}
-							reqAlarmType = 0;
 							//实时更新列表的大小和未读报警消息的数量
 							listSize = xmlData.getListSize();
 							unreadAlarmCount = getAlarmCount();
 							MainActivity.setAlarmIconAndText(unreadAlarmCount);
 							preferData.writeData("AlarmCount", unreadAlarmCount);
 						} else {
-							Toast.makeText(mActivity, msg.obj+","+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, msg.obj+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.login_id);
@@ -470,16 +451,15 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		}
 	}
 	
-	public void reqAlarmEvent() {
+	/**
+	 * 请求报警消息
+	 */
+	public void requestAlarmEvent(int msgId, int count) {
 		if (Utils.isNetworkAvailable(mActivity)) {
-			if (Value.requstAlarmCount > 99) {
-				Value.requstAlarmCount = 99;
-			}
-			Handler sendHandler = ZmqThread.zmqThreadHandler;
-			String data = generateReqAlarmJson(0, Value.requstAlarmCount);
+			String data = MainApplication.getInstance().generateRequestAlarmJson(msgId, count);
+			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, data);
 			sendHandlerMsg(IS_REQUESTING);
 			sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
-			sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
 		} else {
 			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
@@ -490,15 +470,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 */
 	@Override
 	public void onFooterRefresh(PullToRefreshView view) {
-		
-		ZmqHandler.mHandler = handler;
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
-				String data = generateReqAlarmJson(xmlData.getMinUpdateID(), 5);
+				reqAlarmType = 1;
+				String data = MainApplication.getInstance().generateRequestAlarmJson(xmlData.getMinUpdateID(), 5);
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
-				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
+				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, data);
 			}
 		}, 1000);
 	}
@@ -509,15 +487,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	 */
 	@Override
 	public void onHeaderRefresh(PullToRefreshView view) {
-		
-		ZmqHandler.mHandler = handler;
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
-				String data = generateReqAlarmJson(0, Value.requstAlarmCount);
+				reqAlarmType = 0;
+				String data = MainApplication.getInstance().generateRequestAlarmJson(0, 5);
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
-				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, data);
+				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, data);
 			}
 		}, 1000);
 	}
@@ -542,9 +518,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			mMsgID = item.get("msgID");
 			String sendData = generateMarkThisItemJson(Integer.parseInt(mMsgID));
 			if (sendData != null) {
-				Handler sendHandler = ZmqThread.zmqThreadHandler;
+				reqAlarmType = 5;
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
-				sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
+				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, sendData);
 			}
 		}
 	}
@@ -597,16 +573,19 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 				
 				switch (position) {
 					case 0: //删除该条报警
+						reqAlarmType = 3;
 						sendData = generateDeleteThisItemJson(Integer.parseInt(mMsgID));
 						sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, sendData);
 						break;
 					case 1: //删除当前全部报警
+						reqAlarmType = 4;
 						sendData = generateDeleteThisListJson();
 						sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 						sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, sendData);
 						break;
 					case 2: //标记该条报警
+						reqAlarmType = 5;
 						sendData = generateMarkThisItemJson(Integer.parseInt(mMsgID));
 						if (sendData == null) {
 							Toast.makeText(mActivity, "该条报警已标记！", Toast.LENGTH_SHORT).show();
@@ -616,6 +595,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 						}
 						break;
 					case 3: //标记当前全部报警
+						reqAlarmType = 6;
 						sendData = generateMarkThisListJson();
 						if (sendData == null) {
 							Toast.makeText(mActivity, "当前全部报警已标记！", Toast.LENGTH_SHORT).show();
@@ -636,12 +616,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		//清空缓存
-//      File[] files = imageCache.listFiles();
-//      for(File file :files){
-//          file.delete();
-//      }
-//      imageCache.delete();
 		mActivity.unregisterReceiver(backstageMessageReceiver);
 	}
 
@@ -662,9 +636,10 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			// TODO Auto-generated method stub
 			String action = intent.getAction();
 			if ((Value.isNeedReqAlarmListFlag) && (action.equals(BackstageService.BACKSTAGE_MESSAGE_ACTION))) {
-				// 需要请求报警消息
+				// 请求新的报警消息
+				reqAlarmType = 2;
 				Value.ownFragmentRequestAlarmFlag = false;
-				reqAlarmEvent();
+				requestAlarmEvent(0, Value.newAlarmMessageCount);
 			}
 			else if (action.equals(READ_MESSAGE_ACTION)) {
 				// 标记为已读
@@ -680,9 +655,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 				}
 				String sendData = generateMarkThisItemJson(Integer.parseInt(mMsgID));
 				if (sendData != null) {
-					Handler sendHandler = ZmqThread.zmqThreadHandler;
+					reqAlarmType = 5;
 					sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
-					sendHandlerMsg(sendHandler, R.id.zmq_send_alarm_id, sendData);
+					sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, sendData);
 				}
 			}
 		}

@@ -32,6 +32,7 @@ linux {
 
 hisi {
     DEFINES += ARM
+    message($$DEFINES)
     output_dir = $$PWD/../out/arm
 }
 

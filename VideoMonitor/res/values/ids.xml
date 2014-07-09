@@ -30,6 +30,9 @@
     <!-- 关闭ZMQ Socket -->
     <item name="close_zmq_socket_id" type="id"/>
     
+    <!-- 获得realm -->
+    <item name="get_realm_id" type="id"/>
+    
     <!-- 注册 -->
     <item name="register_id" type="id"/>
     

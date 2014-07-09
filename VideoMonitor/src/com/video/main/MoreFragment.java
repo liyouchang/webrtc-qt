@@ -1,12 +1,7 @@
 package com.video.main;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
@@ -17,8 +12,7 @@ import android.widget.Button;
 
 import com.video.R;
 import com.video.data.PreferData;
-import com.video.data.Value;
-import com.video.socket.ZmqThread;
+import com.video.service.MainApplication;
 import com.video.user.LoginActivity;
 import com.video.user.ModifyPwdActivity;
 import com.video.utils.OkCancelDialog;
@@ -30,7 +24,6 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	
 	private Button button_logout;
 	private PreferData preferData = null;
-	private String userName = null;
 	
 	private boolean isRememberPwd = true;
 	
@@ -59,8 +52,8 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		Button button_setting = (Button)mView.findViewById(R.id.btn_setting);
 		button_setting.setOnClickListener(this);
 		
-		Button button_device_manager = (Button)mView.findViewById(R.id.btn_device_manager);
-		button_device_manager.setOnClickListener(this);
+//		Button button_device_manager = (Button)mView.findViewById(R.id.btn_device_manager);
+//		button_device_manager.setOnClickListener(this);
 		
 		Button button_wifi = (Button)mView.findViewById(R.id.btn_wifi);
 		button_wifi.setOnClickListener(this);
@@ -76,27 +69,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
  	}
 	
 	private void initData() {
-		
-		preferData = new PreferData(mActivity);
-		if (preferData.isExist("UserName")) {
-			userName = preferData.readString("UserName");
+		if (preferData == null) {
+			preferData = new PreferData(mActivity);
 		}
-	}
-	
-	/**
-	 * 生成JSON的注销登录字符串
-	 */
-	private String generateLogoutJson() {
-		String result = "";
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "Client_Logout");
-			jsonObj.put("UserName", userName);
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		result = jsonObj.toString();
-		return result;
 	}
 	
 	/**
@@ -110,11 +85,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
-				Value.resetValues();
-				ExitLogoutAPP();
+				exitActivityandService();
 			}
 		});
-
 		myDialog.setNegativeButton("取消", new OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -124,19 +97,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	}
 	
 	/**
-	 * 发送Handler消息
-	 */
-	private void sendHandlerMsg(Handler handler, int what, String obj) {
-		Message msg = new Message();
-		msg.what = what;
-		msg.obj = obj;
-		handler.sendMessage(msg);
-	}
-	
-	/**
 	 * 退出当前账号登录的处理
 	 */
-	private void ExitLogoutAPP() {
+	private void exitActivityandService() {
 		if (preferData.isExist("RememberPwd")) {
 			isRememberPwd = preferData.readBoolean("RememberPwd");
 		}
@@ -148,8 +111,9 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				preferData.deleteItem("AutoLogin");
 			}
 		}
-		String data = generateLogoutJson();
-		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+		// 终止主程序和服务广播
+		MainApplication.getInstance().stopActivityandService();
+		// 启动登录界面
 		startActivity(new Intent(mActivity, LoginActivity.class));
 		mActivity.finish();
 	}
@@ -159,17 +123,17 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
 			case R.id.btn_modify_pwd:
-				startActivity(new Intent(mActivity, ModifyPwdActivity.class));
+				startActivityForResult(new Intent(mActivity, ModifyPwdActivity.class), 1);
 				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_setting:
 				startActivity(new Intent(mActivity, SettingsActivity.class));
 				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 				break;
-			case R.id.btn_device_manager:
-				startActivity(new Intent(mActivity, DeviceManagerActivity.class));
-				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
-				break;
+//			case R.id.btn_device_manager:
+//				startActivity(new Intent(mActivity, DeviceManagerActivity.class));
+//				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
+//				break;
 			case R.id.btn_wifi:
 				startActivity(new Intent(mActivity, WiFiActivity.class));
 				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
@@ -185,6 +149,29 @@ public class MoreFragment extends Fragment implements OnClickListener {
 			case R.id.btn_logout:
 				showHandleDialog();
 				break;
+		}
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == 1) {
+			// 修改密码返回处理
+			if (preferData == null) {
+				preferData = new PreferData(mActivity);
+			}
+			if (preferData.isExist("UserPwd")) {
+				preferData.deleteItem("UserPwd");
+			}
+			if (preferData.isExist("AutoLogin")) {
+				preferData.deleteItem("AutoLogin");
+			}
+			// 终止主程序和服务广播
+			MainApplication.getInstance().stopActivityandService();
+			// 启动登录界面
+			startActivity(new Intent(mActivity, LoginActivity.class));
+			mActivity.finish();
 		}
 	}
 

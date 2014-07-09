@@ -25,7 +25,6 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
-import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 
 public class ModifyPwdActivity extends Activity implements OnClickListener {
@@ -83,14 +82,10 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 					button_delete_old_password.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		et_new_pwd = (EditText)super.findViewById(R.id.et_modify_new_password);
@@ -103,14 +98,10 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 					button_delete_new_password.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		et_new_repwd = (EditText)super.findViewById(R.id.et_modify_new_repassword);
@@ -123,14 +114,10 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 					button_delete_new_repassword.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
 		Button button_submit = (Button) super.findViewById(R.id.btn_modify_pwd_submit);
@@ -154,18 +141,19 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 	 * 生成JSON的注册字符串
 	 */
 	private String generateModifyPwdJson(String username, String oldpwd, String newpwd) {
-		String result = "";
+		String oldPwd = username+":"+Value.realm+":"+oldpwd;
+		String newPwd = username+":"+Value.realm+":"+newpwd;
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_ChangePwd");
 			jsonObj.put("UserName", username);
-			jsonObj.put("OldPwd", Utils.CreateMD5Pwd(oldpwd));
-			jsonObj.put("NewPwd", Utils.CreateMD5Pwd(newpwd));
+			jsonObj.put("OldPwd", Utils.CreateMD5Pwd(oldPwd));
+			jsonObj.put("NewPwd", Utils.CreateMD5Pwd(newPwd));
+			return jsonObj.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		result = jsonObj.toString();
-		return result;
+		return null;
 	}
 	
 	private Handler handler = new Handler() {
@@ -176,12 +164,16 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_MODIFYING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在提交...");
-					mDialog.show();
+					if (mDialog == null) {
+						mDialog = Utils.createLoadingDialog(mContext, "正在提交...");
+						mDialog.show();
+					}
 					break;
 				case MODIFY_TIMEOUT:
-					if (mDialog != null)
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(MODIFY_TIMEOUT)) {
 						handler.removeMessages(MODIFY_TIMEOUT);
 					}
@@ -190,33 +182,18 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 				case R.id.modify_pwd_id:
 					if (handler.hasMessages(MODIFY_TIMEOUT)) {
 						handler.removeMessages(MODIFY_TIMEOUT);
-						if (mDialog != null)
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
-							final OkCancelDialog myDialog2=new OkCancelDialog(mContext);
-							myDialog2.setTitle("温馨提示");
-							myDialog2.setMessage("修改密码成功，是否重新登录？");
-							myDialog2.setPositiveButton("确认", new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									myDialog2.dismiss();
-									if (preferData.isExist("UserPwd")) {
-										preferData.deleteItem("UserPwd");
-									}
-									startActivity(new Intent(mContext, LoginActivity.class));
-									ModifyPwdActivity.this.finish();
-								}
-							});
-							myDialog2.setNegativeButton("取消", new OnClickListener() {
-								@Override
-								public void onClick(View v) {
-									myDialog2.dismiss();
-									ModifyPwdActivity.this.finish();
-								}
-							});
+							mDialog = null;
+						}
+						if (msg.arg1 == 0) {
+							Toast.makeText(mContext, "恭喜您，修改密码成功！", Toast.LENGTH_SHORT).show();
+							Intent intent = new Intent();
+							setResult(1, intent);
+							finish();
+							overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 						} else {
-							Toast.makeText(mContext, "修改密码失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, "修改密码失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.modify_pwd_id);
@@ -250,9 +227,9 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 		if (Utils.isNetworkAvailable(mContext)) {
 			if (checkModifyPwdData()) {
 				String data = generateModifyPwdJson(userName, userOldPwd, userNewPwd);
+				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 				sendHandlerMsg(IS_MODIFYING);
 				sendHandlerMsg(MODIFY_TIMEOUT, Value.REQ_TIME_10S);
-				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
 			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();

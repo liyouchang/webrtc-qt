@@ -61,6 +61,7 @@ class TurnAuthInterface {
   // Return true if the given username and realm are valid, or false if not.
   virtual bool GetKey(const std::string& username, const std::string& realm,
                       std::string* key) = 0;
+
 };
 
 // The core TURN server class. Give it a socket to listen on via

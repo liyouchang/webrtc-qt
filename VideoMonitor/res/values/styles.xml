@@ -12,7 +12,7 @@
 	</style>
 	
 	<style name="VideoPlayTheme" parent="android:Theme.NoTitleBar.Fullscreen">  
-     	<item name="android:background">#4F4F4F</item>    
+     	<item name="android:background">@color/black</item>    
 	</style>
 	
 	<style name="TitleTheme" parent="android:Theme">  
@@ -34,14 +34,6 @@
         <item name="android:windowFrame">@null</item>  
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowBackground">@drawable/progressbar_bg</item>  
-        <item name="android:windowIsFloating">true</item>  
-        <item name="android:windowContentOverlay">@null</item>  
-    </style>
-    
-	<style name="dialog_player_style" parent="android:style/Theme.Dialog">  
-        <item name="android:windowFrame">@null</item>  
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:windowBackground">@color/white</item>  
         <item name="android:windowIsFloating">true</item>  
         <item name="android:windowContentOverlay">@null</item>  
     </style>

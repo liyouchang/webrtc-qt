@@ -1112,14 +1112,14 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 	 */
 	private Dialog createLoadingDialog(String msg) {
 		LayoutInflater inflater = LayoutInflater.from(mContext);
-		View v = inflater.inflate(R.layout.dialog_player_layout, null);
+		View v = inflater.inflate(R.layout.dialog_player, null);
 		LinearLayout layout = (LinearLayout) v.findViewById(R.id.dialog_view);
 		ImageView spaceshipImage = (ImageView) v.findViewById(R.id.dialog_img);
 		TextView tipTextView = (TextView) v.findViewById(R.id.dialog_textView);
 		Animation hyperspaceJumpAnimation = AnimationUtils.loadAnimation(mContext, R.anim.dialog_anim);
 		spaceshipImage.startAnimation(hyperspaceJumpAnimation);
 		tipTextView.setText(msg);
-		Dialog loadingDialog = new Dialog(mContext, R.style.dialog_player_style);
+		Dialog loadingDialog = new Dialog(mContext, R.style.AppThemeFullscreen);
 		loadingDialog.setCancelable(true);
 		loadingDialog.setCanceledOnTouchOutside(false);
 		loadingDialog.setOnCancelListener(new OnCancelListener() {

@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
@@ -88,7 +87,7 @@ public class VideoView extends View {
 		if (playVideoThread == null) {
 			playVideoThread = new PlayVideoThread();
 			playVideoThread.start();
-			Log.i("play"," 【播放视频】");
+			Utils.log(" 【播放视频】");
 		}
 	}
 
@@ -98,17 +97,13 @@ public class VideoView extends View {
 	public void stopVideo() {
 		runFlag = false;
 		isPlayVideo = false;
+		TunnelCommunication.videoDataCache.clearBuffer();
 		try {
 			playVideoThread.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			Log.w("play","join play thread error");
+			Utils.log(" 【停止视频】");
 		}
-		//TunnelCommunication.videoDataCache.clearBuffer();
-//		if ((playVideoThread != null) && (playVideoThread.isInterrupted())) {
-//			playVideoThread.interrupt();
-//			Log.i("play","MyDebug: 【停止播放】");
-//		}
 		playVideoThread = null;
 	}
 
@@ -142,11 +137,9 @@ public class VideoView extends View {
 
 				}
 			}catch(Exception ex){
-				Log.w("play","play thread exception!");
 				ex.printStackTrace();
 			}
 			uninitView();
-			Log.i("play","exit PlayVideoThread !");
 		}
 	}
 
@@ -227,7 +220,7 @@ public class VideoView extends View {
 				mCanvas = canvas;
 			}
 		} catch (Exception e) {
-			Log.w("play","MyDebug: 绘制图像异常！");
+			Utils.log(" 绘制图像异常！");
 			e.printStackTrace();
 		}
 	}

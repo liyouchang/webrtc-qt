@@ -34,10 +34,18 @@ import com.video.R;
 
 public class Utils {
 	
+	public static String Tag = "MyDebug:";
 	public static int screenWidth;
 	public static int screenHeight;
 	private static final char HEX_DIGITS[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}; 
 	
+	
+	/**
+	 * 打印日志
+	 */
+	public static void log(String info) {
+		System.out.println(Tag + info);
+	}
 	
 	/**
 	 * 连接网络异常时获得异常原因
@@ -273,7 +281,6 @@ public class Utils {
 			file.delete();
 			return ;
 		}
-
 		if (file.isDirectory()) {
 			File[] childFiles = file.listFiles();
 			if (childFiles == null || childFiles.length == 0) {
@@ -284,6 +291,22 @@ public class Utils {
 				deleteFile(childFiles[i]);
 			}
 			file.delete();
+		}
+	}
+	
+	/**
+	 * 删除指定文件夹下的所有文件
+	 */
+	public static void deleteDirectoryFiles(File file) {
+		if (!file.isDirectory()) {
+			return ;
+		} else {
+			File[] childFiles = file.listFiles();
+			if ((childFiles != null) && (childFiles.length > 0)) {
+				for (int i=0; i<childFiles.length; i++) {
+					deleteFile(childFiles[i]);
+				}
+			}
 		}
 	}
 	

@@ -32,11 +32,12 @@
 #include "talk/base/thread.h"
 #include "talk/base/stringencode.h"
 #include "talk/p2p/base/basicpacketsocketfactory.h"
-#include "talk/p2p/base/turnserver.h"
+#include "turnserver.h"
 
-#include "talk/base/logging.h"
+#include "asyndealer.h"
+#include "talk/base/json.h"
 
-static const char kSoftware[] = "libjingle TurnServer";
+static const char kSoftware[] = "kaer TurnServer";
 
 class TurnFileAuth : public cricket::TurnAuthInterface {
 public:
@@ -55,7 +56,6 @@ public:
             char buf[32];
             size_t len = talk_base::hex_decode(buf, sizeof(buf), hex);
             *key = std::string(buf, len);
-            LOG(INFO)<<"GetKey---Key="<<*key<<" len="<<len;
         }else{
             std::cerr<<"Get name value error"<<std::endl;
         }
@@ -65,12 +65,83 @@ private:
     talk_base::OptionsFile file_;
 };
 
-int main(int argc, char **argv) {
+
+class TurnDealerAuth : public cricket::TurnAuthInterface {
+public:
+
+    explicit TurnDealerAuth(const std::string router):
+        backStage("Backstage"),alarmStage("Alarmstage")
+    {
+        dealer = new AsynDealer();
+        dealer->initialize("",router);
+
+    }
+    virtual bool GetKey(const std::string& username, const std::string& realm,
+                        std::string* key) {
+
+        Json::StyledWriter writer;
+        Json::Value jmessage;
+        jmessage["type"] = "Turn_GetPwd";
+        jmessage["UserName"] = username;
+        std::string msg = writer.write(jmessage);
+
+        std::string recvMsg;
+
+        if(!dealer->SendRecv("Backstage",msg,&recvMsg,3000)){
+            LOG(INFO)<<"receive msg from backstage error";
+            return false;
+        }
+        //{"Pwd": "067AE6D247D5BE64D341EABF0E7787A5","Result": 0,"type": "Turn_GetPwd"}
+        Json::Reader reader;
+        if (!reader.parse(recvMsg, jmessage)) {
+            LOG(WARNING) << "Received unknown message. ";
+            return false;
+        }
+        std::string pwdhex;
+        if(!GetStringFromJsonObject(jmessage,"Pwd",&pwdhex)){
+            LOG(INFO)<<"get pwd form receive msg error "<<recvMsg;
+            return false;
+        }
+        LOG(INFO)<<"get user"<<username<<" pwd is "<<pwdhex;
+        char buf[32];
+        size_t len = talk_base::hex_decode(buf, sizeof(buf), pwdhex);
+        *key = std::string(buf, len);
+        return true;
+    }
+
+    virtual void ReportInfo(const std::string &username,int totalData,
+                            const std::string &startTime,const std::string &endTime){
+        LOG(LERROR)<<"ReportInfo---uname:"<<username<<"; total KB:"<<totalData<<
+                   " ; start time :"<<startTime<<"; end time:"<<endTime;
+        Json::StyledWriter writer;
+        Json::Value jmessage;
+        jmessage["type"] = "Turn_flowRecord";
+        jmessage["UserName"] = username;
+        jmessage["BeginTime"] = startTime;
+        jmessage["EndTime"] = endTime;
+        jmessage["flowTotal"] = totalData;//KB
+        std::string msg = writer.write(jmessage);
+        dealer->send(alarmStage,msg);
+    }
+
+    std::string realm;
+
+private:
+    std::string backStage;
+    std::string alarmStage;
+    AsynDealer * dealer;
+};
+
+int main(int argc, char **argv)
+{
     if (argc != 5) {
-        std::cerr << "usage: turnserver int-addr ext-ip realm auth-file"
+        std::cerr << "usage: turnserver int-addr ext-ip realm router"
                   << std::endl;
         return 1;
     }
+
+    talk_base::LogMessage::ConfigureLogging("tstamp thread error debug","");
+
 
     talk_base::SocketAddress int_addr;
     if (!int_addr.FromString(argv[1])) {
@@ -93,10 +164,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    talk_base::LogMessage::ConfigureLogging("tstamp thread info debug file","turnserver.log");
 
+
+    TurnDealerAuth auth(argv[4]);
+//    std::string key;
+//    auth.GetKey("lht","kaer",&key);
+//    auth.ReportInfo("lht",2222,GetCurrentDatetime("%F %T"),GetCurrentDatetime("%F %T"));
     cricket::TurnServer server(main);
-    TurnFileAuth auth(argv[4]);
     server.set_realm(argv[3]);
     server.set_software(kSoftware);
     server.set_auth_hook(&auth);

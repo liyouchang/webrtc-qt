@@ -8,6 +8,7 @@ public class AudioThread extends Thread {
 
 	private AudioTrack audioTrack = null;
 	private boolean runFlag = false;
+	private boolean isPlayAudio = false;
 	
 	private byte[] readBuf = null;
 	private byte[] writeBuf = null;
@@ -62,19 +63,32 @@ public class AudioThread extends Thread {
 	}
 	
 	/**
+	 * 播放声音
+	 */
+	public void startAudioThread() {
+		runFlag = true;
+		isPlayAudio = true;
+		initAudioThread();
+	}
+	
+	/**
 	 * 停止声音
 	 */
 	public void stopAudioThread() {
+		isPlayAudio = false;
 		runFlag = false;
 		uninitAudioThread();
 	}
 	
 	public void run() {
-		initAudioThread();
-		runFlag = true;
-		
 		while (runFlag) {
 			try {
+				// 播放、暂停
+				if (!isPlayAudio) {
+					sleep(100);
+					continue;
+				}
+				
 				int readBufLen = TunnelCommunication.audioDataCache.pop(readBuf, 0);
 				if (readBufLen > 0) {
 					readBufLen = G711Decoder(writeBuf, readBuf, readBufLen);
