@@ -4,9 +4,7 @@
     android:background="@color/page_bg_grey"
     android:layout_width="fill_parent"
     android:layout_height="100dp"
-    android:gravity="center"
-    android:paddingBottom="2dip"
-    android:paddingTop="2dip" >
+    android:gravity="center" >
 
     <ProgressBar
         android:id="@+id/pull_to_refresh_progress"

@@ -3,8 +3,10 @@ package com.video.main;
 import java.util.ArrayList;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -68,6 +70,9 @@ public class MainActivity extends FragmentActivity {
 	private final static int LOGIN_TIMEOUT = 2;
 	private final int LOGIN_AGAIN = 3;
 	
+	private MainReceiver mainReceiver = null;
+	public static final String UNREAD_ALARM_COUNT_ACTION = "MainActivity.unread_alarm_count_action";
+	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,6 +80,12 @@ public class MainActivity extends FragmentActivity {
         mContext = MainActivity.this;
         preferData = new PreferData(mContext);
         ZmqCtrl.getInstance().init();
+        
+        // 注册广播
+        mainReceiver = new MainReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(UNREAD_ALARM_COUNT_ACTION);
+		registerReceiver(mainReceiver, filter);
         
         if (!Value.isLoginSuccess) {
         	setFullScreen();
@@ -239,9 +250,11 @@ public class MainActivity extends FragmentActivity {
         }
         updateTab(mTabHost);
         if (preferData.isExist("AlarmCount")) {
-        	setAlarmIconAndText(preferData.readInt("AlarmCount"));
+        	MainApplication.getInstance().unreadAlarmCount = preferData.readInt("AlarmCount");
+        	setAlarmIconAndText(MainApplication.getInstance().unreadAlarmCount);
         } else {
-        	setAlarmIconAndText(0);
+        	MainApplication.getInstance().unreadAlarmCount = 0;
+        	setAlarmIconAndText(MainApplication.getInstance().unreadAlarmCount);
         }
         
         fragments.add(new OwnFragment());
@@ -269,18 +282,17 @@ public class MainActivity extends FragmentActivity {
 		
 		currentTab = mTabHost.getCurrentTabTag();
 		
-		int msgCount = 0;
 		if (preferData.isExist("AlarmCount")) {
-			msgCount = preferData.readInt("AlarmCount");
+			MainApplication.getInstance().unreadAlarmCount = preferData.readInt("AlarmCount");
 		} else {
-			msgCount = 0;
+			MainApplication.getInstance().unreadAlarmCount = 0;
 		}
         
 		for (int i = 0; i < _TabHost.getTabWidget().getChildCount(); i++) {
 			TextView tv = (TextView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
     		if (_TabHost.getCurrentTab() == i) {
     			if (i == 2) {
-    				if (msgCount > 0) {
+    				if (MainApplication.getInstance().unreadAlarmCount > 0) {
     	        		tv.setTextColor(mContext.getResources().getColorStateList(R.color.red));
     	        	} else {
         				tv.setTextColor(this.getResources().getColorStateList(R.color.tab_text_color));
@@ -290,7 +302,7 @@ public class MainActivity extends FragmentActivity {
     			}
 			} else {
 				if (i == 2) {
-    				if (msgCount > 0) {
+    				if (MainApplication.getInstance().unreadAlarmCount > 0) {
     	        		tv.setTextColor(mContext.getResources().getColorStateList(R.color.red));
     	        	} else {
     	        		tv.setTextColor(this.getResources().getColorStateList(R.color.white));
@@ -573,7 +585,27 @@ public class MainActivity extends FragmentActivity {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		if (mainReceiver != null) {
+			unregisterReceiver(mainReceiver);
+		}
 		Value.isManulLogout = false;
+	}
+	
+	public class MainReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			String action = intent.getAction();
+			// 更新未读报警消息的显示
+			if (action.equals(UNREAD_ALARM_COUNT_ACTION)) {
+				setAlarmIconAndText(MainApplication.getInstance().unreadAlarmCount);
+				if (preferData == null) {
+					preferData = new PreferData(mContext);
+				}
+				preferData.writeData("AlarmCount", MainApplication.getInstance().unreadAlarmCount);
+			}
+		}
 	}
 }
 

@@ -53,6 +53,7 @@ public class MainApplication extends Application {
 	
 	// 终端设备列表
 	public ArrayList<HashMap<String, String>> deviceList = null;
+	public int unreadAlarmCount = 0;
 	
 	@Override  
     public void onCreate() {  
@@ -314,6 +315,29 @@ public class MainApplication extends Application {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	/**
+	 * 生成JSON的查看未读报警消息数字符串
+	 */
+	public String generateUnreadAlarmCountJson() {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "Client_NotReadAlarm");
+			jsonObj.put("UserName", userName);
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 请求未读报警消息数事件
+	 */
+	public void requestUnreadAlarmCountEvent() {
+		String data = generateUnreadAlarmCountJson();
+		MainApplication.getInstance().sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, data);
 	}
 	
 	/**

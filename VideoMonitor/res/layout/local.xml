@@ -30,8 +30,9 @@
             android:text="@string/local_video"
             android:textColor="@color/white"
             android:textSize="16dp" />
-        
-        <!-- <TextView
+
+        <!--
+             <TextView
             android:id="@+id/tv_vp_terminal"
             android:layout_width="match_parent"
             android:layout_height="@dimen/title_height_size"
@@ -40,21 +41,21 @@
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/terminal_video"
             android:textColor="@color/white"
-            android:textSize="16dp" /> -->
+            android:textSize="16dp" />
+        -->
     </LinearLayout>
-    
+
     <com.video.utils.TextProgressBar
         android:id="@+id/progressBar_sd"
         style="@style/downloadProgressBar"
         android:layout_width="match_parent"
         android:layout_height="20dp"
-        android:paddingTop="1dp"
-        android:paddingBottom="1dp" />
+        android:paddingBottom="1dp"
+        android:paddingTop="1dp" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/local_viewpager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingBottom="65dp" />
-    
+        android:layout_height="match_parent" />
+
 </LinearLayout>

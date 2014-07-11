@@ -74,13 +74,12 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private int screenHeight = 0;
 	private int titleHeight = 80;
 	private int bottomHeight = 100;
+	private int paddingBottom = 0;
 	
 	private boolean isRecordVideo = false;
 	private boolean isVoiceEnable = true;
 	private boolean isTalkEnable = false;
 	private boolean isPlayMusic = false;
-	private boolean isDefence = false;
-	private boolean isNeedNotify = false;
 	private boolean isPopupWindowShow = false;
 	private boolean isClarityPopupWindowShow = false;
 	
@@ -88,6 +87,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private final int HIDE_POPUPWINDOW = 1;
 	private final int DISPLAY_VIDEO_VIEW = 2;
 	private final int CHANGE_VIDEO_TYPE = 3;
+	private final int REQUEST_TIMEOUT = 4;
 	
 	private GestureDetector mGestureDetector = null; // 手势识别
 	
@@ -105,7 +105,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private Button player_screen = null;
 	private Button player_talkback = null;
 	private Button player_sound = null;
-	private Button player_defence = null;
 	
 	private Button video_clarity = null;
 	private Button clarity_high = null;
@@ -156,7 +155,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		registerReceiver(playerReceiver, filter);
 		
 		// 视频
-		videoView = new VideoView(this);
+		videoView = new VideoView(mContext);
 		setContentView(videoView);
 		videoView.setDrawingCacheEnabled(false);
 		videoView.setWillNotCacheDrawing(true);
@@ -188,8 +187,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		player_sound.setOnClickListener(this);
 		video_clarity = (Button) bottomView.findViewById(R.id.btn_player_clarity);
 		video_clarity.setOnClickListener(this);
-		player_defence = (Button) bottomView.findViewById(R.id.btn_player_defence);
-		player_defence.setOnClickListener(this);
+		paddingBottom = bottomPopupWindow.getHeight();
 		
 		//视频质量弹出框
 		clarityView = getLayoutInflater().inflate(R.layout.player_clarity_view, null);
@@ -210,17 +208,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		
 		if (!isLocalDevice) {
 			if (TunnelCommunication.getInstance().IsTunnelOpened(dealerName)) {
-				Utils.log("【通道已打开】");
-				Value.isTunnelOpened = true;
 				//【播放视频】 1:主通道高清  2:子通道标清  3:子通道流畅
 				player_clarity = 2;
 				TunnelCommunication.getInstance().startMediaData(dealerName, player_clarity);
 				videoView.playVideo();
 				sendHandlerMsg(DISPLAY_VIDEO_VIEW, 3000);
-				if (mDialog == null) {
-					mDialog = createLoadingDialog("正在请求视频，请稍后...");
-					mDialog.show();
-				}
 			} else {
 				closePlayer();
 				PlayerActivity.this.finish();
@@ -228,6 +220,13 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		} else {
 			//【本地设备】
 			TunnelCommunication.getInstance().connectLocalDevice(localDeviceIPandPort);
+			sendHandlerMsg(REQUEST_TIMEOUT, 10000);
+			Utils.log("正在打开本地设备通道...");
+			video_clarity.setVisibility(View.INVISIBLE);
+		}
+		if (mDialog == null) {
+			mDialog = createLoadingDialog("正在请求视频，请稍后...");
+			mDialog.show();
 		}
 		
 		mGestureDetector = new GestureDetector(new SimpleOnGestureListener(){
@@ -267,8 +266,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				// TODO Auto-generated method stub
-				TunnelCommunication.getInstance().stopMediaData(dealerName);
-				closePlayer();
 				PlayerActivity.this.finish();
 			}
 		});
@@ -294,15 +291,16 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						mDialog.dismiss();
 						mDialog = null;
 					}
-					if ((audioThread != null) && (!audioThread.isAlive())) {
+					if (audioThread == null) {
+						audioThread = new AudioThread();
+					}
+					if (!audioThread.isAlive()) {
+						audioThread.start();
 						audioThread.startAudioThread();
 					}
-					
 					isPopupWindowShow = true;
 					showPopupWindow();
 					hidePopupWindowDelay();
-					sendAlarmDefenceData(2);
-					isNeedNotify = false;
 					break;
 				// 改变视频播放类型：高清，均衡，流畅
 				case CHANGE_VIDEO_TYPE:
@@ -310,14 +308,32 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						mDialog.dismiss();
 						mDialog = null;
 					}
+					if (videoView == null) {
+						videoView = new VideoView(mContext);
+					}
 					videoView.playVideo();
-					if ((audioThread != null) && (!audioThread.isAlive())) {
+					if (audioThread == null) {
+						audioThread = new AudioThread();
+					}
+					if (!audioThread.isAlive()) {
+						audioThread.start();
 						audioThread.startAudioThread();
 					}
-					
 					isPopupWindowShow = true;
 					showPopupWindow();
 					hidePopupWindowDelay();
+					break;
+				// 请求超时处理
+				case REQUEST_TIMEOUT:
+					if ((mDialog != null) && (mDialog.isShowing())) {
+						mDialog.dismiss();
+						mDialog = null;
+					}
+					if (isLocalDevice) {
+						toastNotify(mContext, "请求本地设备视频超时！", Toast.LENGTH_SHORT);
+						TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
+						TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
+					}
 					break;
 			}
 		}
@@ -624,19 +640,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					audioThread.openAudioTrackVolume();
 				}
 				break;
-			// 布撤防
-			case R.id.btn_player_defence:
-				if (!Value.isSharedUser) {
-					if (isDefence) {
-						sendAlarmDefenceData(0);
-					} else {
-						sendAlarmDefenceData(1);
-					}
-					isNeedNotify = true;
-				} else {
-					toastNotify(mContext, "对不起，您暂无该权限！", Toast.LENGTH_SHORT);
-				}
-				break;
 			//【视频清晰度选择】 1:主通道高清  2:子通道均衡  3:子通道流畅
 			case R.id.btn_player_clarity:
 				if (isClarityPopupWindowShow) {
@@ -646,7 +649,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					isClarityPopupWindowShow = true;
 					if (clarityPopupWindow != null && videoView != null) {
 						clarityPopupWindow.showAtLocation(videoView, Gravity.BOTTOM|Gravity.RIGHT, 0, 0);
-						clarityPopupWindow.update(15, (bottomHeight+15), LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+						clarityPopupWindow.update(15, (paddingBottom+15), LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 						clarity_high.setBackgroundResource(R.drawable.video_high_clarity_unselected);
 						clarity_normal.setBackgroundResource(R.drawable.video_normal_clarity_unselected);
 						clarity_low.setBackgroundResource(R.drawable.video_low_clarity_unselected);
@@ -665,48 +668,15 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			// 高清
 			case R.id.btn_video_clarity_high:
 				//切换分辨率，这里现停止现有的视频播放，然后再打开，否则解码库会崩溃，原因未知
-				videoView.stopVideo();
-				audioThread.stopAudioThread();
-				player_clarity = 1;
-				TunnelCommunication.getInstance().startMediaData(dealerName, player_clarity);
-				video_clarity.setText("高清");
-				
-				if (mDialog == null) {
-					mDialog = createLoadingDialog("正在请求视频，请稍后...");
-					mDialog.show();
-				}
-				hidePopupWindow();
-				sendHandlerMsg(CHANGE_VIDEO_TYPE, 3000);
+				selectVideoClarity(1);
 				break;
 			// 均衡
 			case R.id.btn_video_clarity_normal:
-				videoView.stopVideo();
-				audioThread.stopAudioThread();
-				player_clarity = 2;
-				TunnelCommunication.getInstance().startMediaData(dealerName, player_clarity);
-				video_clarity.setText("均衡");
-				
-				if (mDialog == null) {
-					mDialog = createLoadingDialog("正在请求视频，请稍后...");
-					mDialog.show();
-				}
-				hidePopupWindow();
-				sendHandlerMsg(CHANGE_VIDEO_TYPE, 3000);
+				selectVideoClarity(2);
 				break;
 			// 流畅
 			case R.id.btn_video_clarity_low:
-				videoView.stopVideo();
-				audioThread.stopAudioThread();
-				player_clarity = 3;
-				TunnelCommunication.getInstance().startMediaData(dealerName, player_clarity);
-				video_clarity.setText("流畅");
-
-				if (mDialog == null) {
-					mDialog = createLoadingDialog("正在请求视频，请稍后...");
-					mDialog.show();
-				}
-				hidePopupWindow();
-				sendHandlerMsg(CHANGE_VIDEO_TYPE, 3000);
+				selectVideoClarity(3);
 				break;
 		}
 		if (v.getId() != R.id.ib_player_back) {
@@ -714,34 +684,38 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		}
 	}
 	
-	
 	/**
-	 * 0撤防  1布放  2获得布撤防状态
+	 * 【视频清晰度选择】 1:主通道高清  2:子通道均衡  3:子通道流畅
 	 */
-	private String generateDefenceJson(int order) {
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj.put("type", "tunnel");
-			jsonObj.put("command", "alarm_status");
-			if (order != 2) {
-				jsonObj.put("value", order);
-			}
-			return jsonObj.toString();
-		} catch (JSONException e) {
-			e.printStackTrace();
+	private void selectVideoClarity(int clarity) {
+		if (videoView != null) {
+			videoView.stopVideo();
 		}
-		return null;
-	}
-	
-	/**
-	 * 发送布撤防的信息: 0撤防  1布放  2获得布撤防状态
-	 */
-	private void sendAlarmDefenceData(int order) {
-		String data = generateDefenceJson(order);
-		HashMap<String, String> map = new HashMap<String, String>();
-		map.put("peerId", dealerName);
-		map.put("peerData", data);
-		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.send_to_peer_id, map); 
+		if (audioThread != null) {
+			audioThread.stopAudioThread();
+			audioThread = null;
+		}
+		if (mDialog == null) {
+			mDialog = createLoadingDialog("正在请求视频，请稍后...");
+			mDialog.show();
+		}
+		switch (clarity) {
+			case 1:
+				player_clarity = 1;
+				video_clarity.setText("高清");
+				break;
+			case 2:
+				player_clarity = 2;
+				video_clarity.setText("均衡");
+				break;
+			case 3:
+				player_clarity = 3;
+				video_clarity.setText("流畅");
+				break;
+		}
+		hidePopupWindow();
+		sendHandlerMsg(CHANGE_VIDEO_TYPE, 3000);
+		TunnelCommunication.getInstance().startMediaData(dealerName, player_clarity);
 	}
 	
 	/**
@@ -816,7 +790,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						case MotionEvent.ACTION_MOVE:
 							endTime = System.currentTimeMillis();
 							spaceTime = endTime - startTime;
-							if (!isPtzControling && (spaceTime > 200)) {
+							if (!isPtzControling && (spaceTime > 150)) {
 								isPtzControling = true;
 								
 								endPointX = event.getX();
@@ -860,7 +834,14 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		// TODO Auto-generated method stub
 		super.onPause();
 		closePlayer();
-		PlayerActivity.this.finish();
+		if (!isLocalDevice) {
+			TunnelCommunication.getInstance().stopMediaData(dealerName);
+			PlayerActivity.this.finish();
+		} else {
+			// 本地设备
+			TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
+			TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
+		}
 	}
 
 	@Override
@@ -868,8 +849,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		// TODO Auto-generated method stub
 		super.onStop();
 		isActivityShow = false;
-		closePlayer();
-		PlayerActivity.this.finish();
 	}
 
 	@Override
@@ -889,10 +868,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
-			Value.isTunnelOpened = false;
 			if (!isLocalDevice) {
-				TunnelCommunication.getInstance().stopMediaData(dealerName);
-				closePlayer();
 				PlayerActivity.this.finish();
 			} else {
 				// 本地设备
@@ -944,10 +920,17 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			destroyDialogView();
 			//关闭实时音视频
 			try {
-				videoView.stopVideo();
-				audioThread.stopAudioThread();
+				if (videoView != null) {
+					videoView.stopVideo();
+					videoView = null;
+				}
+				if (audioThread != null) {
+					audioThread.stopAudioThread();
+					audioThread = null;
+				}
 				if (talkThread != null) {
 					talkThread.stopTalkThread();
+					talkThread = null;
 				}
 			} catch (Exception e) {
 				Utils.log("关闭音视频对讲异常！");
@@ -970,33 +953,40 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			// TODO Auto-generated method stub
 			String action = intent.getAction();
 			if (action.equals(BackstageService.TUNNEL_REQUEST_ACTION)) {
-				if (intent.getIntExtra("TunnelEvent", 1) == 1) {
-					// 通道被关闭
-					Value.isTunnelOpened = false;
-					toastNotify(mContext, "对不起，视频连接已断开", Toast.LENGTH_SHORT);
-					TunnelCommunication.getInstance().stopMediaData(dealerName);
-					closePlayer();
-					PlayerActivity.this.finish();
-				}
-			}
-			else if (action.equals(ALARM_DEFENCE_ACTION)) {
-				if (intent.hasExtra("alarmDefence")) {
-					int alarmStatus = intent.getIntExtra("alarmDefence", 0);
-					if (alarmStatus == 0) {
-						isDefence = false;
-						player_defence.setBackgroundResource(R.drawable.player_defence_disable);
-						if (isNeedNotify) {
-							toastNotify(mContext, "已撤防", Toast.LENGTH_SHORT);
-							playMyMusic(R.raw.withdraw_defence);
-						}
-					} else {
-						isDefence = true;
-						player_defence.setBackgroundResource(R.drawable.player_defence_enable);
-						if (isNeedNotify) {
-							toastNotify(mContext, "布放成功", Toast.LENGTH_SHORT);
-							playMyMusic(R.raw.set_defence);
-						}
+				if (intent.getIntExtra("TunnelEvent", 1) == 0) {
+					if (handler.hasMessages(REQUEST_TIMEOUT)) {
+						handler.removeMessages(REQUEST_TIMEOUT);
 					}
+					// 通道被打开
+					if (isLocalDevice) {
+						TunnelCommunication.getInstance().startLocalVideo(localDeviceIPandPort);
+						Utils.log("正在请求本地设备视频...");
+						if ((mDialog != null) && (mDialog.isShowing())) {
+							mDialog.dismiss();
+							mDialog = null;
+						}
+						if (videoView == null) {
+							videoView = new VideoView(mContext);
+						}
+						videoView.playVideo();
+						if (audioThread == null) {
+							audioThread = new AudioThread();
+						}
+						if (!audioThread.isAlive()) {
+							audioThread.start();
+							audioThread.startAudioThread();
+						}
+						isPopupWindowShow = true;
+						showPopupWindow();
+						hidePopupWindowDelay();
+					}
+				}
+				else if (intent.getIntExtra("TunnelEvent", 1) == 1) {
+					// 通道被关闭
+					if (!isLocalDevice) {
+						toastNotify(mContext, "对不起，视频连接已断开！", Toast.LENGTH_SHORT);
+					}
+					PlayerActivity.this.finish();
 				}
 			}
 		}
