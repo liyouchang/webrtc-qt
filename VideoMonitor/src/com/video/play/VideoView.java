@@ -87,7 +87,7 @@ public class VideoView extends View {
 		if (playVideoThread == null) {
 			playVideoThread = new PlayVideoThread();
 			playVideoThread.start();
-			Utils.log(" 【播放视频】");
+			Utils.log("【播放视频】");
 		}
 	}
 
@@ -100,9 +100,9 @@ public class VideoView extends View {
 		TunnelCommunication.videoDataCache.clearBuffer();
 		try {
 			playVideoThread.join();
+			Utils.log("【停止视频】");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-			Utils.log(" 【停止视频】");
 		}
 		playVideoThread = null;
 	}

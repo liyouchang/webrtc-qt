@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/page_bg_grey"
     android:orientation="vertical" >
-    
+
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/add_device_title"
@@ -20,8 +20,8 @@
             android:textColor="@color/orange"
             android:textSize="@dimen/title_text_size" />
     </RelativeLayout>
-    
-    <!-- 
+
+    <!--
     <RelativeLayout
         android:id="@+id/rl_no_alert_msg_image"
         android:layout_width="match_parent"
@@ -50,9 +50,9 @@
             android:text="@string/no_alert_msg"
             android:textColor="@color/light_black"
             android:textSize="16.0sp" />
-    </RelativeLayout>
-	 -->
-	 
+    </RelativeLayout>
+    -->
+
     <com.video.main.PullToRefreshView
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/main_pull_refresh_view"
@@ -60,16 +60,14 @@
         android:layout_height="match_parent"
         android:background="@color/page_bg_grey"
         android:orientation="vertical" >
-        
+
         <ListView
             android:id="@+id/msg_list"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_marginBottom="70dp"
             android:cacheColorHint="#00000000"
             android:divider="#00000000"
-			android:dividerHeight="10dp" />
-        
+            android:dividerHeight="10dp" />
     </com.video.main.PullToRefreshView>
 
 </LinearLayout>

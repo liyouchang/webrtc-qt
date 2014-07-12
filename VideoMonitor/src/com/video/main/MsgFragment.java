@@ -55,7 +55,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private View mView;
 	private XmlMessage xmlData = null;
 	private PreferData preferData = null;
-	private int unreadAlarmCount = 0;
 	private Dialog mDialog = null;
 	
 	private BackstageMessageReceiver backstageMessageReceiver = null;
@@ -275,16 +274,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		return null;
 	}
 	
-	private int getAlarmCount() {
-		int result = 0;
-		for (int i=0; i<listSize; i++) {
-			if (msgList.get(i).get("isReaded").equals("false")) {
-				result++;
-			}
-		}
-		return result;
-	}
-	
 	private Handler handler = new Handler() {
 		@SuppressWarnings("unchecked")
 		@Override
@@ -408,11 +397,10 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 									break;
 								default: break;
 							}
+							//请求未读报警消息数
+							MainApplication.getInstance().requestUnreadAlarmCountEvent();
 							//实时更新列表的大小和未读报警消息的数量
 							listSize = xmlData.getListSize();
-							unreadAlarmCount = getAlarmCount();
-							MainActivity.setAlarmIconAndText(unreadAlarmCount);
-							preferData.writeData("AlarmCount", unreadAlarmCount);
 						} else {
 							Toast.makeText(mActivity, msg.obj+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}

@@ -16,6 +16,7 @@ import com.video.service.MainApplication;
 import com.video.socket.ZmqThread;
 import com.video.terminal.player.TerminalPlayerActivity;
 import com.video.utils.Tools;
+import com.video.utils.Utils;
 
 public class TunnelCommunication {
 
@@ -99,7 +100,7 @@ public class TunnelCommunication {
 	 * 通道被打开(回调)
 	 */
 	public void TunnelOpened(String peerId) {
-		Log.i("tunnel","MyDebug: 【"+peerId+"】通道被打开");
+		Utils.log("【"+peerId+"】通道被打开");
 		
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 0);
@@ -112,7 +113,7 @@ public class TunnelCommunication {
 	 * 通道被关闭(回调)
 	 */
 	public void TunnelClosed(String peerId) {
-		Log.i("tunnel","MyDebug: 【"+peerId+"】通道被关闭");
+		Utils.log("【"+peerId+"】通道被关闭");
 		
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 1);

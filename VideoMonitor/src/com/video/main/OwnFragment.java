@@ -71,8 +71,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	private final int REQUEST_TIMEOUT = 2;
 	private final int REFRESH_DEVICE_LIST = 3;
 	
-	private OwnReceiver ownReceiver;
-	public static final String MSG_REFRESH_ACTION = "com.video.main.OwnFragment.msg_refresh_action";
+	private OwnReceiver ownReceiver = null;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -123,7 +122,6 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		// 注册广播
 		ownReceiver = new OwnReceiver();
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(MSG_REFRESH_ACTION);
 		filter.addAction(BackstageService.CHANGE_DEVICE_LIST_ACTION);
 		mActivity.registerReceiver(ownReceiver, filter);
 		
@@ -745,11 +743,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
 			String action = intent.getAction();
-			//更新未读报警消息的显示
-			if (action.equals(MSG_REFRESH_ACTION)) {
-				MainActivity.setAlarmIconAndText(intent.getIntExtra("AlarmCount", 0));
-			}
-			else if (action.equals(BackstageService.CHANGE_DEVICE_LIST_ACTION)) {
+			if (action.equals(BackstageService.CHANGE_DEVICE_LIST_ACTION)) {
 				if (!intent.hasExtra("isTermActive")) {
 					boolean isTermActive = intent.getBooleanExtra("isTermActive", false);
 					MainApplication.getInstance().sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST, 0, 0, isTermActive);

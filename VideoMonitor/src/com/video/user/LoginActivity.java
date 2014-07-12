@@ -162,7 +162,9 @@ public class LoginActivity extends Activity implements OnClickListener {
 	
 	private void initData() {
 		mContext = LoginActivity.this;
+		ZmqCtrl.getInstance().init();
 		ZmqHandler.mHandler = handler;
+		
 		if (preferData == null) {
 			preferData = new PreferData(mContext);
 		}
@@ -251,8 +253,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 						if (msg.arg1 == 0) {
 							//登录成功
 							Value.isLoginSuccess = true;
-							MainApplication.getInstance().userName = userName;
-							MainApplication.getInstance().userPwd = userPwd;
 							startActivity(new Intent(mContext, MainActivity.class));
 							LoginActivity.this.finish();
 						} else {
@@ -300,8 +300,16 @@ public class LoginActivity extends Activity implements OnClickListener {
 	
 	public void sendLoginJsonData() {
 		if (checkRegisterData()) {
+			if (preferData.isExist("UserName")) {
+				preferData.deleteItem("UserName");
+			}
+			if (preferData.isExist("UserPwd")) {
+				preferData.deleteItem("UserPwd");
+			}
 			preferData.writeData("UserName", userName);
 			preferData.writeData("UserPwd", userPwd);
+			MainApplication.getInstance().userName = userName;
+			MainApplication.getInstance().userPwd = userPwd;
 			String data = MainApplication.getInstance().generateLoginJson(userName, userPwd);
 			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		}
@@ -329,9 +337,11 @@ public class LoginActivity extends Activity implements OnClickListener {
 				clickLoginEvent();
 				break;
 			case R.id.btn_login_regist:
+				ZmqCtrl.getInstance().init();
 				startActivity(new Intent(this, RegisterActivity.class));
 				break;
 			case R.id.btn_login_find:
+				ZmqCtrl.getInstance().init();
 				startActivity(new Intent(this, FindPwdActivity.class));
 				break;
 			case R.id.btn_login_username_del:
@@ -341,6 +351,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 				et_pwd.setText("");
 				break;
 			case R.id.iv_login_demo:
+				ZmqCtrl.getInstance().init();
 				TunnelCommunication.getInstance().searchLocalDevice();
 				mDialog = Utils.createLoadingDialog(mContext, "正在搜索设备...");
 				mDialog.show();
@@ -372,35 +383,37 @@ public class LoginActivity extends Activity implements OnClickListener {
 		boolean resultFlag = false;
 		
 		//获取EditText输入框的字符串
-		userName = et_name.getText().toString().trim();
-		userPwd = et_pwd.getText().toString().trim();
+		String name = et_name.getText().toString().trim();
+		String pwd = et_pwd.getText().toString().trim();
 		
-		if (userName.equals("")) {
+		if (name.equals("")) {
 			resultFlag = false;
 			Toast.makeText(mContext, "请输入用户名！", Toast.LENGTH_SHORT).show();
 		}
-		else if (Utils.isChineseString(userName)) {
+		else if (Utils.isChineseString(name)) {
 			resultFlag = false;
 			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 		}
-		else if ((userName.length()<3) || (userName.length()>20)) {
+		else if ((name.length()<3) || (name.length()>20)) {
 			resultFlag = false;
 			Toast.makeText(mContext, "用户名长度范围3~20！", Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
-			if (userPwd.equals("")) {
+			userName = name;
+			if (pwd.equals("")) {
 				resultFlag = false;
 				Toast.makeText(mContext, "请输入密码！", Toast.LENGTH_SHORT).show();
 			}
-			else if (Utils.isChineseString(userPwd)) {
+			else if (Utils.isChineseString(pwd)) {
 				resultFlag = false;
 				Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
 			}
-			else if ((userPwd.length()<6) || (userPwd.length()>20)) {
+			else if ((pwd.length()<6) || (pwd.length()>20)) {
 				resultFlag = false;
 				Toast.makeText(mContext, "密码长度范围6~20！", Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
+				userPwd = pwd;
 			}
 		}
 		return resultFlag;

@@ -1,5 +1,7 @@
 package com.video.play;
 
+import com.video.utils.Utils;
+
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -7,7 +9,7 @@ import android.media.AudioTrack;
 public class AudioThread extends Thread {
 
 	private AudioTrack audioTrack = null;
-	private boolean runFlag = false;
+	public boolean runFlag = false;
 	private boolean isPlayAudio = false;
 	
 	private byte[] readBuf = null;
@@ -47,16 +49,16 @@ public class AudioThread extends Thread {
 		TunnelCommunication.audioDataCache.clearBuffer();
 		if (audioTrack != null) {
 			try {
-				if ((audioTrack != null) && (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_STOPPED )) {
+				if (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_STOPPED) {
 					audioTrack.stop();
-					audioTrack.release();
 				}
+				audioTrack.release();
 				audioTrack = null;
 				readBuf = null;
 				writeBuf = null;
 			} catch (Exception e) {
 				audioTrack = null;
-				System.out.println("MyDebug: uninitAudioThread()异常！");
+				Utils.log("uninitAudioThread()异常！");
 				e.printStackTrace();
 			}
 		}
@@ -88,7 +90,6 @@ public class AudioThread extends Thread {
 					sleep(100);
 					continue;
 				}
-				
 				int readBufLen = TunnelCommunication.audioDataCache.pop(readBuf, 0);
 				if (readBufLen > 0) {
 					readBufLen = G711Decoder(writeBuf, readBuf, readBufLen);

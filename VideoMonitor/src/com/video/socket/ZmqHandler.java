@@ -17,7 +17,6 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.data.XmlMessage;
 import com.video.main.MainActivity;
-import com.video.main.OwnFragment;
 import com.video.play.PlayerActivity;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
@@ -128,16 +127,6 @@ public class ZmqHandler extends Handler {
 			}
 		}
 		return null;
-	}
-	
-	private int getAlarmCount(ArrayList<HashMap<String, String>> list, int listSize) {
-		int result = 0;
-		for (int i=0; i<listSize; i++) {
-			if (list.get(i).get("isReaded").equals("false")) {
-				result++;
-			}
-		}
-		return result;
 	}
 	
 	/**
@@ -313,31 +302,31 @@ public class ZmqHandler extends Handler {
 					JSONArray jsonArray = obj.getJSONArray("AlarmData");
 					ArrayList<HashMap<String, String>> msgList = new ArrayList<HashMap<String, String>>();
 					msgList = getReqAlarmList(jsonArray);
-					
-					int listSize = 0;
-					int unreadAlarmCount = 0;
 					if (msgList != null) {
 						xmlData.updateList(msgList);
-						listSize = xmlData.getListSize();
-						unreadAlarmCount = getAlarmCount(msgList, listSize);
 					} else {
 						xmlData.deleteAllItem();
 					}
-					
-					// 更新未读报警消息的显示
-					PreferData preferData = new PreferData(MainApplication.getInstance());
-					preferData.writeData("AlarmCount", unreadAlarmCount);
-					
-					Intent intent = new Intent();
-					intent.setAction(OwnFragment.MSG_REFRESH_ACTION);
-					intent.putExtra("AlarmCount", unreadAlarmCount);
-					MainApplication.getInstance().sendBroadcast(intent);
 					Utils.log("【请求报警数据成功】");
 				} else {
 					Utils.log("【请求报警数据失败】");
 				}
+				//请求未读报警消息数
+				MainApplication.getInstance().requestUnreadAlarmCountEvent();
+			}
+			// 未读报警消息数
+			else if (type.equals("Client_NotReadAlarm")) {
+				if (obj.isNull("NotReadCount")) {
+					MainApplication.getInstance().unreadAlarmCount = 0;
+				} else {
+					MainApplication.getInstance().unreadAlarmCount = obj.getInt("NotReadCount");
+				}
+				Utils.log("未读报警消息数: "+MainApplication.getInstance().unreadAlarmCount);
+				Intent intent = new Intent();
+				intent.setAction(MainActivity.UNREAD_ALARM_COUNT_ACTION);
+				MainApplication.getInstance().sendBroadcast(intent);
 			} else {
-				//各个界面下的handler操作
+				// 各个界面下的handler操作
 				if (mHandler != null) {
 					//realm
 					if (type.equals("Client_Getrealm")) {
@@ -358,7 +347,6 @@ public class ZmqHandler extends Handler {
 					else if (type.equals("Client_Login")) {
 						int resultCode = obj.getInt("Result");
 						if (resultCode == 0) {
-							Value.isLoginSuccess = true;
 							Value.beatHeartFailFlag = false;
 						}
 						mHandler.obtainMessage(R.id.login_id, resultCode, 0).sendToTarget();
