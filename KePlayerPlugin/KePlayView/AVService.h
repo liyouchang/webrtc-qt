@@ -12,13 +12,13 @@ public:
     int OpenStream(HWND playWnd);
     int OpenSound();
     int CloseSound();
-    int InputStream(const char * data, int dataLen);
+    int InputStream(const char *data, int dataLen);
     int CloseStream();
     bool IsPlaying();
-    int CapPic(const char * fileName);
+    int CapPic(const char *fileName);
 
     //play file methods
-    int PlayFile(const char * fileName,int fileSize,HWND playWnd);
+    int PlayFile(const char *fileName,int fileSize,HWND playWnd);
     int SetFileSize(long fileSize);
     int SetPlayPos(int pos);
     int GetPlayPos(int &pos);

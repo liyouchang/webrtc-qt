@@ -37,7 +37,7 @@ private:
     bool selected;
     // QWidget interface
 protected:
-    void paintEvent(QPaintEvent *);
+ //   void paintEvent(QPaintEvent *);
 //    void showEvent(QShowEvent *);
 
 };

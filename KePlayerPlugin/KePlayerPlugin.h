@@ -104,6 +104,9 @@ public slots:
     bool OpenSound(QString peerId);
     bool CloseSound(QString peerId);
 
+    bool StartTalk();
+    bool StopTalk();
+
     int SendCommand(QString peer_id,QString msg);
 
     int PlayRecordFiles(QString peer_id,QString jstrRecordArray);

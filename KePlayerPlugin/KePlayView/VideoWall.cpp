@@ -36,7 +36,7 @@ VideoWall::VideoWall(QWidget *parent) :
     setSelectedPlayer(0);
     SetDivision(ScreenDivision_One);
 
-   // setAcceptDrops(true);
+    // setAcceptDrops(true);
 }
 
 VideoWall::~VideoWall()
@@ -158,6 +158,7 @@ void VideoWall::PlayLocalFile(QString peer_id,QString file_name,int file_size)
 }
 
 
+
 void VideoWall::ExchangePlayWidget(int from, int to)
 {
     qDebug()<<"VideoWall::ExchangePlayWidget-- from" << from<<" to "<<to;
@@ -261,10 +262,49 @@ bool VideoWall::CloseSound(QString peerId)
 {
     int play_index = peer_play_map_.value(peerId,-1);
     if(play_index != -1){
-        return players[play_index]->OpenSound();
+        return players[play_index]->CloseSound();
     }
     qWarning()<<"VideoWall::CloseSound---id "<<peerId<<" not found";
     return false;
+}
+
+bool VideoWall::StartTalk()
+{
+    if(!talkTimer){
+        talkTimer = new QTimer(this);
+        AVService::StartTalk();
+        QObject::connect(talkTimer, SIGNAL(timeout()), this, SLOT(OnGetTalkData()));
+        talkTimer->start(15);
+        return true;
+    }else{
+        qDebug("talk already start");
+        return false;
+    }
+}
+
+bool VideoWall::StopTalk()
+{
+    if(talkTimer){
+        talkTimer->stop();
+        delete talkTimer;
+        talkTimer = NULL;
+        AVService::StopTalk();
+        return true;
+    }else{
+        qDebug("talk not start");
+        return false;
+    }
+
+}
+
+void VideoWall::OnGetTalkData()
+{
+    char buf[500];
+    int buflen = AVService::GetAudioData(buf);
+    if(buflen > 6){
+        QByteArray data(&buf[6],buflen-6);
+        emit SigTalkData(data);
+    }
 }
 
 
@@ -353,43 +393,43 @@ void VideoWall::performDrag(PlayWidget *pw)
 
 void VideoWall::contextMenuEvent(QContextMenuEvent *event)
 {
-//    qDebug()<<"VideoWall::contextMenuEvent";
-//    PlayWidget *child = static_cast<PlayWidget*>(this->childAt(event->pos()));
-//    if (!child){
-//        qWarning()<<"VideoWall::contextMenuEvent--- no find PlayWidget";
-//        return;
-//    }
-//    int playIndex = child->playIndex();
-//    //this->setSelectedPlayer(playIndex);
+    //    qDebug()<<"VideoWall::contextMenuEvent";
+    //    PlayWidget *child = static_cast<PlayWidget*>(this->childAt(event->pos()));
+    //    if (!child){
+    //        qWarning()<<"VideoWall::contextMenuEvent--- no find PlayWidget";
+    //        return;
+    //    }
+    //    int playIndex = child->playIndex();
+    //    //this->setSelectedPlayer(playIndex);
 
-//    itemMenu->exec(event->globalPos());
-
-}
-
-void VideoWall::paintEvent(QPaintEvent *)
-{
-//    if(layout_changed_){
-//        for(int i=0;i<MAX_AVPLAYER;i++){
-//            //                    if(!this->players[i]->isVisible()){
-//            //                        this->players[i]->setVisible(true);
-
-
-//            //}
-//           // this->players[i]->winId();
-//            // this->players[i]->update();
-//        }
-//        //        for(int i=m_layoutList.size();i<MAX_AVPLAYER;i++){
-//        //            //this->players[i]->winId();
-//        //            //this->players[i]->setGeometry(-100,-100,0,0);
-//        //            //this->players[i]->winId();
-//        //            this->players[i]->setVisible(false);
-
-//        //        }
-//        layout_changed_ = false;
-//    }
-
+    //    itemMenu->exec(event->globalPos());
 
 }
+
+//void VideoWall::paintEvent(QPaintEvent *)
+//{
+//    //    if(layout_changed_){
+//    //        for(int i=0;i<MAX_AVPLAYER;i++){
+//    //            //                    if(!this->players[i]->isVisible()){
+//    //            //                        this->players[i]->setVisible(true);
+
+
+//    //            //}
+//    //           // this->players[i]->winId();
+//    //            // this->players[i]->update();
+//    //        }
+//    //        //        for(int i=m_layoutList.size();i<MAX_AVPLAYER;i++){
+//    //        //            //this->players[i]->winId();
+//    //        //            //this->players[i]->setGeometry(-100,-100,0,0);
+//    //        //            //this->players[i]->winId();
+//    //        //            this->players[i]->setVisible(false);
+
+//    //        //        }
+//    //        layout_changed_ = false;
+//    //    }
+
+
+//}
 
 void VideoWall::mouseMoveEvent(QMouseEvent *event)
 {

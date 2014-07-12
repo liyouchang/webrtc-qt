@@ -5,7 +5,7 @@
 #include <QVector>
 #include <QMap>
 
-#define MAX_AVPLAYER 32
+#define MAX_AVPLAYER 1
 class AVService;
 class PlayWidget;
 
@@ -66,9 +66,15 @@ public:
     bool OpenSound(QString peerId);
     bool CloseSound(QString peerId);
 
+    QTimer *talkTimer;
+    bool StartTalk();
+    bool StopTalk();
 signals:
     void SigNeedStopPeerPlay(QString peer_id);
+    void SigTalkData(QByteArray data);
 public slots:
+    void OnGetTalkData();
+
     void setSelectedPlayer(int newSelected);
     void deleteItem();
     void showfullScreenWall();
@@ -76,6 +82,7 @@ public slots:
     void OnRecvMediaData(QString peer_id, QByteArray data);
 
     void PlayLocalFile(QString peer_id, QString file_name, int file_size);
+
 private:
     //AVService * playSource;
     QGridLayout *mainLayout;
@@ -108,7 +115,7 @@ protected:
     void dropEvent(QDropEvent *);
     void keyPressEvent(QKeyEvent *e);
     void contextMenuEvent(QContextMenuEvent *event);
-    void paintEvent(QPaintEvent *);
+    //void paintEvent(QPaintEvent *);
 
 };
 

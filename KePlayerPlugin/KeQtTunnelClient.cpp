@@ -57,6 +57,11 @@ void KeQtTunnelClient::OnRouterMessage(const std::string &peer_id, talk_base::Bu
     emit SigRecvPeerMsg(peer_id.c_str(),strMsg.c_str());
 }
 
+void KeQtTunnelClient::OnTalkData(QByteArray data)
+{
+    this->SendTalkData(data.constData(),data.length());
+}
+
 
 
 

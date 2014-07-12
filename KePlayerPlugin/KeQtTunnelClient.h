@@ -13,6 +13,8 @@ public:
     virtual void OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id);
     virtual void OnTunnelClosed(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id);
     virtual void OnRouterMessage(const std::string &peer_id, talk_base::Buffer &msg);
+public slots:
+    void OnTalkData(QByteArray data);
 
 signals:
     void SigRecvVideoData(QString peer_id,QByteArray data);

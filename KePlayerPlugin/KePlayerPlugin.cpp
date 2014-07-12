@@ -110,9 +110,11 @@ int KePlayerPlugin::PlayLocalFile()
 
 QString KePlayerPlugin::GetLocalPath()
 {
-    return QFileDialog::getExistingDirectory(
+    QString ret =  QFileDialog::getExistingDirectory(
                 this,"选择路径",savePath(),
-                QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+                QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks|QFileDialog::ReadOnly);
+    LOG(INFO)<<"get local path " << ret.toLatin1().constData();
+    return ret;
 }
 
 void KePlayerPlugin::FullScreen()
@@ -122,7 +124,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 35;
+    const int kVersion = 51;
     return kVersion;
 }
 /**
@@ -161,6 +163,9 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
                      this,&KePlayerPlugin::RecordStatus);
     QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvPeerMsg,
                      this,&KePlayerPlugin::RecvPeerMsg);
+    QObject::connect(this->video_wall_,&VideoWall::SigTalkData,
+                     this->tunnel_,&KeQtTunnelClient::OnTalkData);
+
     this->is_inited = true;
 
 
@@ -296,6 +301,16 @@ bool KePlayerPlugin::CloseSound(QString peerId)
     }
     return video_wall_->CloseSound(peerId);
 
+}
+
+bool KePlayerPlugin::StartTalk()
+{
+    return video_wall_->StartTalk();
+}
+
+bool KePlayerPlugin::StopTalk()
+{
+    return video_wall_->StopTalk();
 }
 
 int KePlayerPlugin::SendCommand(QString peer_id, QString msg)

@@ -239,9 +239,10 @@ void P2PConductor::AddIceServer(const std::string &uri,
     g_servers.push_back(server);
 
 }
-
+//将g_servers置为jstrServers中的server
 void P2PConductor::AddIceServers(std::string jstrServers)
 {
+
     Json::Reader reader;
     Json::Value jservers;
     if (!reader.parse(jstrServers, jservers)) {
@@ -249,8 +250,9 @@ void P2PConductor::AddIceServers(std::string jstrServers)
                         "unknown json string " << jstrServers;
         return;
     }
+    //每次都重新添加
+    g_servers.clear();
     std::vector<Json::Value> jServersArray;
-
     if(JsonArrayToValueVector(jservers,&jServersArray)){
         for(int i=0;i<jServersArray.size();i++){
             Json::Value jserver = jServersArray[i];
@@ -268,10 +270,10 @@ bool P2PConductor::InitializePeerConnection()
 {
     if(g_servers.empty()){
         //lht TODO: turn server should get by the server
-        P2PConductor::AddIceServer("stun:222.174.213.185:5389","","");
+//        P2PConductor::AddIceServer("stun:222.174.213.181:5389","","");
         P2PConductor::AddIceServer(GetPeerConnectionString(),"","");
-        P2PConductor::AddIceServer("turn:222.174.213.185:5766",
-                                   "lht","123456");
+//        P2PConductor::AddIceServer("turn:222.174.213.185:5766",
+//                                   "lht","123456");
     }
 
     stream_process_.reset(new StreamProcess(stream_thread_));

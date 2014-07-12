@@ -28,7 +28,7 @@
     -->
     <p></p>
 
-    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="0090B0D41803-75BE"/>
+    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="0090B01C0C32-E771"/>
     <input type="button" value="Open Tunnel" OnClick="KePlayerPlugin.OpenTunnel(PeerID.value);"/>
     <input type="button" value="Close Tunnel" OnClick="KePlayerPlugin.CloseTunnel(PeerID.value);"/>
     <input type="button" value="check open" OnClick="CheckOpen(PeerID.value);"/>
@@ -38,6 +38,11 @@
     <input type="button" value="mid" OnClick="KePlayerPlugin.StartVideo(PeerID.value,2)"/>
     <input type="button" value="low" OnClick="KePlayerPlugin.StartVideo(PeerID.value,3)"/>
     <input type="button" value="stop" OnClick="KePlayerPlugin.StopVideo(PeerID.value)"/>
+    <p></p>
+    <input type="button" value="open sound" OnClick="KePlayerPlugin.OpenSound(PeerID.value);"/>
+    <input type="button" value="close sound" OnClick="KePlayerPlugin.CloseSound(PeerID.value);"/>
+    <input type="button" value="start talk" OnClick="KePlayerPlugin.StartTalk();"/>
+    <input type="button" value="stop talk" OnClick="KePlayerPlugin.StopTalk();"/>
 
     <p></p>
     <input type="button" value="Start Cut" OnClick="StartCut()"/>

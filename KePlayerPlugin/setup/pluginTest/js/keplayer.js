@@ -18,14 +18,21 @@ function load(){
     kePlayerObj.RecordStatus = function(peer,status){
         infoDiv.textContent = "RecordStatus "+ peer + " status-"+ status;
     }
-    var iceServers = [{"uri":"stun:222.174.213.185:5389"},{"uri":"turn:222.174.213.185:5766"}];
+    var iceServers = [{"uri":"stun:222.174.213.181:5389"},{"uri":"turn:222.174.213.181:5766"}];
     var strIceServers = JSON.stringify(iceServers);
-    var strRouterUrl = "tcp://222.174.213.185:5555"
+    var strRouterUrl = "tcp://222.174.213.181:5555"
     kePlayerObj.Initialize(strRouterUrl,strIceServers);
     eventFunction();
 
 
 }
+
+window.onbeforeunload = function (e){
+    console.log("unload");
+    kePlayerObj.DestroyAll();
+    //return false;
+}
+
 function CheckOpen(peerId){
     var opend = kePlayerObj.IsTunnelOpened(peerId);
     g_infoDiv.textContent = opend;
