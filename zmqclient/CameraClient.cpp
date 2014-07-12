@@ -1,16 +1,16 @@
 #include "CameraClient.h"
+
 #include "talk/base/json.h"
 #include "talk/base/logging.h"
 #include "talk/base/thread.h"
 #include "talk/base/timeutils.h"
 
 #include "libjingle_app/defaults.h"
-#include "keapi/keapi.h"
 
 const int kHeartInterval = 60000;//ms
 CameraClient::CameraClient(std::string mac,std::string ver):
     mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),
-    heartCount(0),clientVersion(ver)
+    heartCount(0),clientVersion(ver),oldNetType(-1),oldIp(-1)
 {
     comm_thread_ = talk_base::Thread::Current();
 }
@@ -61,11 +61,15 @@ void CameraClient::Reconnect()
 {
     std::string strDealerId = mac_ + "-" + kaerp2p::GetRandomString();
     std::string oldAddr = dealer_->addr();
-    LOG(INFO)<<"CameraClient::Reconnect---with id "<<strDealerId;
-    dealer_->terminate();
-    dealer_->initialize(strDealerId,oldAddr);
+    LOG(INFO)<<"CameraClient::Reconnect---with id "<<strDealerId<<" to addr "<<
+               oldAddr;
+
+    this->Connect(oldAddr,"");
+    //dealer_->terminate();
+    //dealer_->initialize(strDealerId,oldAddr);
     this->Login();
 }
+
 
 
 void CameraClient::OnMessage(talk_base::Message *msg)
@@ -112,6 +116,7 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
             int result;
             GetIntFromJsonObject(jmessage, "Result", &result);
             if(result == 0){
+
             }
             comm_thread_->Post(this,MSG_RECEIVE_HEART);
         }
@@ -122,8 +127,7 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
                 std::stringstream ss;
                 ss << "ntp="<<ntpIp<<"|123|+8:00";
                 std::string command = ss.str();
-                LOG(INFO)<<"set terminal ntp ---"<<command;
-                Raycomm_SetParam((char *)command.c_str(),0);
+                SignalNtpSet(command);
             }else{
                 LOG(INFO)<<"get ntp ip error";
             }

@@ -33,14 +33,12 @@ AsynDealer::~AsynDealer()
 
 bool AsynDealer::initialize(const std::string &id, const std::string &router)
 {
-
     return zmq_thread_->Invoke<bool>(
                 talk_base::Bind(&AsynDealer::initialize_z,this,id,router));
 }
 
 void AsynDealer::terminate()
 {
-    LOG(INFO)<<"AsynDealer::terminate---";
     zmq_thread_->Invoke<void>(
                 talk_base::Bind(&AsynDealer::terminate_z, this));
 }

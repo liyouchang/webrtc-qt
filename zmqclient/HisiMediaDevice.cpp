@@ -61,6 +61,7 @@ const int kVideoSampleRate = 40;//40 ms per frame
 const int kAudioSampleRate = 20;//20 ms
 
 const int kCommandGetValue  = 101;
+const int kCheckNet = 10000;//ms
 
 struct MediaControlData : public talk_base::MessageData {
     int video1;//1 to request start video1 , 0 to request stop
@@ -97,7 +98,7 @@ bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
 {
     //start get media
     media_thread_->Post(this, MSG_MEDIA_CONTROL, new MediaControlData(1,1,1,1));
-    media_thread_->PostDelayed(10000,this,MSG_NET_CHECK);
+    media_thread_->PostDelayed(kCheckNet,this,MSG_NET_CHECK);
     AlarmNotify::Instance()->StartNotify();
     return KeTunnelCamera::Init(client);
 }
@@ -452,12 +453,18 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
     }
     case MSG_NET_CHECK:{
         this->CheckNetStatus();
-        media_thread_->PostDelayed(10000,this,MSG_NET_CHECK);
+        media_thread_->PostDelayed(kCheckNet,this,MSG_NET_CHECK);
         break;
     }
     default:
         break;
     }
+}
+
+void HisiMediaDevice::SetNtp(const std::string &ntpParam)
+{
+    LOG(INFO)<<"HisiMediaDevice::SetNtp---"<<ntpParam;
+    Raycomm_SetParam((char *)ntpParam.c_str(),0);
 }
 
 void HisiMediaDevice::SetVideoResolution(std::string r)
@@ -525,13 +532,12 @@ int HisiMediaDevice::GetVideoFrameRate(int level)
 
 void HisiMediaDevice::CheckNetStatus()
 {
-    //    LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---oldip"<<oldIp<<
-    //               " oldNet"<<oldNetType;
     int ip = Raycomm_GetIP();
     int net = Raycomm_GetNetType();
     if (ip != oldIp && oldIp != -1) {
-        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---"<<
-                   "Ip changed new ip is "<<ip <<", old ip is "<<oldIp;
+        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---"<<"Ip changed new ip is "<<
+                   kaerp2p::GetLittleEndianIp(ip) <<", old ip is "<<
+                   kaerp2p::GetLittleEndianIp(oldIp) ;
         this->SignalNetStatusChange();
     } else if( net != oldNetType && oldNetType != -1 ) {
         LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---"<<

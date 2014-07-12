@@ -47,7 +47,7 @@ public:
     virtual void GetCameraVideoInfo(int level,kaerp2p::VideoInfo * info);
     sigslot::signal0<> SignalNetStatusChange;
     virtual void OnMessage(talk_base::Message *msg);
-
+    void SetNtp(const std::string & ntpParam);
 protected:
     int GetVideoFrameType(int level);
     int GetVideoFrameRate(int level);

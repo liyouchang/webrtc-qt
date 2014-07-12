@@ -21,7 +21,7 @@
 std::string ReadConfigFile();
 
 //const char * kVersion = "V0.31";
-int kVersion = 50;
+int kVersion = 51;
 
 int main()
 {
@@ -54,7 +54,7 @@ int main()
     GetStringFromJson(dealer_value,&strDealerId);
 
 #ifndef ARM
-    CameraClient client(strMac);
+    CameraClient client(strMac,clientVer);
     client.Connect(router_value.asString(),strDealerId);
     //client.Login();
     Json::Value jsampleFile =
@@ -76,6 +76,8 @@ int main()
     CameraClient client(strMac,clientVer);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
+
+    client.SignalNtpSet.connect(device,&HisiMediaDevice::SetNtp);
     device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
 
     AlarmNotify::Instance()->SignalTerminalAlarm.connect(
@@ -85,6 +87,7 @@ int main()
 
 #endif //arm
     talk_base::Thread::Current()->Run();
+
     return 0;
 }
 
