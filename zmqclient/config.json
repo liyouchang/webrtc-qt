@@ -4,13 +4,12 @@
         "mac" : ""
     },
     "dealerId" : "",
-    "routerUrl":"tcp://222.174.213.185:5555",
+    "routerUrl":"tcp://222.174.213.181:5555",
     "logParams":"tstamp thread info debug file",
     "logSaveFile":"/tmp/zmqclient.log",
-    "servers":[{"uri":"stun:222.174.213.185:5389"},
-        {"uri":"turn:222.174.213.185:5766"}],
+    "servers":[{"uri":"stun:222.174.213.181:5389"}],
     "clarity":2,
     "sampleFileName":"Sample.avi",
-    "ntpconfig":{"ip":"192.168.60.198","port":"123","zone":"+8:00"}
+    "ntpconfig":{"ip":"222.174.213.181","port":"123","zone":"+8:00"}
 
 }

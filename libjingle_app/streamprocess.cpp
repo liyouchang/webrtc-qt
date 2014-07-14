@@ -54,7 +54,7 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
         return;
     }
     if (events & talk_base::SE_OPEN) {
-        LOG(INFO)<<__FUNCTION__<<"Tunnel Connected";
+        LOG(INFO)<<"StreamProcess::OnStreamEvent"<<"Tunnel Connected";
         SignalOpened();
 
     }
@@ -102,7 +102,7 @@ void StreamProcess::WriteStreamInternel()
             //still have something to write
             size_t leftWrite =0 ;
             write_buf_.GetBuffered(&leftWrite);
-            if(leftWrite > 0 ){
+            if( leftWrite > 0 ){
                 stream_->PostEvent(talk_base::SE_WRITE, 0);
             }
         }

@@ -498,11 +498,11 @@ bool KaerSession::CreateChannels(const cricket::SessionDescription *desc)
 bool KaerSession::CreatePseudoTcpChannel_s()
 {
     channel_->Connect(CN_TUNNEL,"tcp", 1);
-    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,1024*1024);
-    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,1024*1024);
+    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,512*1024);
+    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
     //    channel_->SignalChannelClosed.connect(this, &TunnelSession::OnChannelClosed);
 
-    LOG(INFO)<<"channel option set";
+    LOG(INFO)<<"KaerSession::CreatePseudoTcpChannel_s---channel option set";
     return true;
 }
 

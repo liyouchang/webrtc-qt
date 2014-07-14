@@ -252,15 +252,15 @@ namespace kaerp2p{
           }
       }
     if (it == processes_.end()){
-        LOG(WARNING)<< "peer id "<< peer_id<<" not found";
+        LOG(WARNING)<<"peer id "<< peer_id<<" not found";
         return ;
       }
 
-    LOG(INFO)<< "delete peer "<< (*it)->peer_id() ;
+    LOG(INFO)<<"delete peer "<< (*it)->peer_id() ;
     delete (*it);
     LOG(INFO)<<"remove form vector";
     processes_.erase(it);
-    LOG(INFO)<< "KeMsgProcessContainer::OnTunnelClosed end";
+    LOG(INFO)<<"KeMsgProcessContainer::OnTunnelClosed end";
 
   }
 

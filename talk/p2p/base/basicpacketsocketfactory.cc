@@ -74,6 +74,13 @@ AsyncPacketSocket* BasicPacketSocketFactory::CreateUdpSocket(
     delete socket;
     return NULL;
   }
+  //LHT
+  socket->SetOption(Socket::OPT_SNDBUF,1024*1024);
+  int value;
+  socket->GetOption(Socket::OPT_SNDBUF,&value);
+  LOG(INFO)<<"BasicPacketSocketFactory::CreateUdpSocket---socket sendbuf "<<value;
+   socket->GetOption(Socket::OPT_RCVBUF,&value);
+   LOG(INFO)<<"BasicPacketSocketFactory::CreateUdpSocket---socket recvbuf "<<value;
   return new talk_base::AsyncUDPSocket(socket);
 }
 
