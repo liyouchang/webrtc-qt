@@ -9,9 +9,11 @@
 #include "talk/base/buffer.h"
 #include "talk/base/sigslot.h"
 #include "talk/base/messagehandler.h"
+#include "talk/base/criticalsection.h"
 
 #include "PeerTerminalInterface.h"
 #include "PeerConnectionClinetInterface.h"
+
 #include "defaults.h"
 
 namespace talk_base {
@@ -108,6 +110,9 @@ protected:
     virtual void OnHeartStop(const std::string & peer_id);
 
     std::vector<KeMsgProcess *> processes_;
+    // Protects changes to processes
+    talk_base::CriticalSection crit_;
+
     PeerTerminalInterface * terminal_;
     bool has_terminal;
 };

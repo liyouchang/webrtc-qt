@@ -51,6 +51,7 @@ void KeVideoSimulator::OnFileVideoData(const char *data, int len)
 {
     this->SignalVideoData1(data,len);
     this->SignalVideoData2(data,len);
+    this->SignalVideoData3(data,len);
 }
 
 void KeVideoSimulator::OnFileAudioData(const char *data, int len)

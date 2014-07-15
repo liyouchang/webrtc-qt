@@ -173,6 +173,7 @@ void PeerTerminal::OnTunnelNeedSend(const std::string &peer_id,
 
 ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
 {
+    talk_base::CritScope cs(&crit_);
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
         if ((*it)->GetPeerID().compare(peer_id) == 0) {
@@ -186,6 +187,7 @@ ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
 
 ScopedTunnel PeerTerminal::GetTunnel(kaerp2p::StreamProcess *stream)
 {
+    talk_base::CritScope cs(&crit_);
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
         if ((*it)->GetStreamProcess() == stream) {
@@ -199,6 +201,7 @@ ScopedTunnel PeerTerminal::GetTunnel(kaerp2p::StreamProcess *stream)
 
 int PeerTerminal::CountAvailableTunnels()
 {
+    talk_base::CritScope cs(&crit_);
     int notUsedNum = max_tunnel_num_ - tunnels_.size();
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
@@ -218,8 +221,7 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
     }
     aTunnel = this->GetTunnel("");
     if(aTunnel){
-        LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<
-                   "reuse a empty tunnel, total is "<<tunnels_.size();
+        LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<"reuse a empty tunnel";
         return aTunnel;
     }
     if(tunnels_.size() <= max_tunnel_num_ ||
@@ -228,11 +230,12 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
         aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
         aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
         aTunnel->SignalStreamClosed.connect(this,&PeerTerminal::OnTunnelClosed);
+        talk_base::CritScope cs(&crit_);
         tunnels_.push_back(aTunnel);
         LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<
                    "create a new tunnel, total tunnel num is "<< tunnels_.size();
     } else {
-        LOG(WARNING) <<"PeerTerminal::GetOrCreateTunnel---"<<
+        LOG(WARNING)<<"PeerTerminal::GetOrCreateTunnel---"<<
                        "tunnel number is more than the max number "<<
                        tunnels_.size();
     }

@@ -20,7 +20,7 @@ namespace kaerp2p{
                                  talk_base::Buffer &msg);
     virtual void SetVideoClarity(int);
     virtual int GetVideoClarity();
-    virtual void SetPtz(std::string  ptz_key,int param);
+    virtual void SetPtz(std::string ptz_key,int param);
     virtual void GetCameraVideoInfo(int level,VideoInfo * info) = 0;
 
   protected:
