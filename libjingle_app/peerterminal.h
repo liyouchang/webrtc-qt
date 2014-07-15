@@ -49,6 +49,8 @@ private:
     kaerp2p::PeerConnectionClientInterface * client_;
     //talk_base::scoped_refptr<kaerp2p::P2PConductor> conductor_;
     std::vector<ScopedTunnel> tunnels_;
+    talk_base::CriticalSection crit_;
+
     int max_tunnel_num_;
 
 };
