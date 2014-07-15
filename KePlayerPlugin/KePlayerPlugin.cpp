@@ -17,10 +17,10 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
       connection_(new PeerConnectionClientDealer()),
       is_inited(false)
 {
-    QVBoxLayout *vbox = new QVBoxLayout( this );
+    QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setMargin(0);
     video_wall_ = new VideoWall(this);
-    vbox->addWidget( video_wall_ );
+    vbox->addWidget(video_wall_);
 
     QObject::connect(video_wall_,&VideoWall::SigNeedStopPeerPlay,
                      this,&KePlayerPlugin::StopVideo);

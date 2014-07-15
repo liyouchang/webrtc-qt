@@ -16,11 +16,12 @@ INCLUDEPATH  +=  \
 
 
 win32 {
+    DEFINES += __WINDOWS__ ZMQ_STATIC
+
     LIBS +=-lwinmm -liphlpapi -lcomsupp -lsecur32 -lws2_32  -lcrypt32 -lAdvapi32 -luser32
     LIBS += -lStrmiids -lshell32 -lrpcrt4
-
     LIBS += -L$$output_dir/libs
-    LIBS += -ljsoncpp
+    LIBS += -ljsoncpp -lcppzmq
     LIBS += -ljingle_p2p  -ljingle
 } else {
     #QMAKE_CXXFLAGS += -std=c++11
