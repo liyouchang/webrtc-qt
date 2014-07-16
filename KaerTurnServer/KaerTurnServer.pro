@@ -6,7 +6,7 @@ CONFIG -= qt
 
 include (../talk/talk_common.pri)
 
-DESTDIR = $$output_dir
+#DESTDIR = $$output_dir
 
 TARGET = kaerturnserver
 
@@ -43,4 +43,10 @@ HEADERS += \
 OTHER_FILES += \
     turnserver_stop.sh \
     turnserver_start.sh
+
+
+
+target_config.files  = $$OTHER_FILES $$DESTDIR/$$TARGET
+target_config.path   = $$output_dir
+INSTALLS  += target_config
 
