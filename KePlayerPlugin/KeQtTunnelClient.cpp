@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QFile>
 
+#include "talk/base/logging.h"
+
 #include "kevideocutter.h"
 
 KeQtTunnelClient::KeQtTunnelClient(QObject *parent) :
@@ -54,6 +56,7 @@ void KeQtTunnelClient::OnRouterMessage(const std::string &peer_id, talk_base::Bu
 {
 
     std::string strMsg(msg.data(),msg.length());
+    LOG(INFO)<<"KeQtTunnelClient::OnRouterMessage---"<<peer_id<<",msg:"<<strMsg;
     emit SigRecvPeerMsg(peer_id.c_str(),strMsg.c_str());
 }
 

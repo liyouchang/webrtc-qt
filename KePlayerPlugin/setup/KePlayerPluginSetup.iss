@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "KaerPlayerPlugin"
-#define MyAppVersion "0.34"
+#define MyAppVersion "0.51"
 #define MyAppPublisher "Kaer, Inc."
 #define MyAppURL "http://www.kaer.cn/"
 
@@ -24,7 +24,7 @@ DisableProgramGroupPage=yes
 OutputBaseFilename=KaerPlayerPluginSetup
 Compression=lzma
 SolidCompression=yes
-VersionInfoVersion=0.3.4.0
+VersionInfoVersion=0.5.1.0
 
 
 [Languages]

@@ -315,11 +315,11 @@ void KeLocalMessage::OnMessageRespond(talk_base::Buffer &msgData)
 
 }
 
-std::string GetLittleEndianIp(int srcIp){
-    int netIp = talk_base::HostToNetwork32(srcIp);
-    talk_base::IPAddress addr(netIp);
-    return addr.ToString();
-}
+//std::string GetLittleEndianIp(int srcIp){
+//    int netIp = talk_base::HostToNetwork32(srcIp);
+//    talk_base::IPAddress addr(netIp);
+//    return addr.ToString();
+//}
 
 void KeLocalMessage::OnRecvSearchOnlineDeviceResp(talk_base::Buffer &msgData)
 {
