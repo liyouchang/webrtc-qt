@@ -21,7 +21,7 @@
 std::string ReadConfigFile();
 
 //const char * kVersion = "V0.31";
-int kVersion = 51;
+int kVersion = 52;
 
 int main()
 {

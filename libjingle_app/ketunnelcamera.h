@@ -29,6 +29,7 @@ namespace kaerp2p{
     sigslot::signal2<const char *, int> SignalVideoData2;
     sigslot::signal2<const char *, int> SignalVideoData3;
     sigslot::signal2<const char *, int> SignalAudioData;
+
     virtual void OnRecvVideoClarity(std::string peer_id,int clarity);
     virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
     virtual void RecvGetWifiInfo(std::string peer_id);
@@ -52,6 +53,11 @@ namespace kaerp2p{
     void OnRecordData(const char * data,int len);
     void OnRecordReadEnd(RecordReaderInterface *reader);
     sigslot::signal3<const std::string &,const char *,int > SignalRecvTalkData;
+
+    int video_status;
+    int audio_status;
+    int talk_status;
+
   protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     virtual void RecvAskMediaReq(talk_base::Buffer &msgData);
@@ -62,9 +68,6 @@ namespace kaerp2p{
     virtual void RespPlayFileReq(int resp, const char *fileName);
     virtual void ConnectMedia(int video,int audio,int talk);
   private:
-    bool video_started_;
-    bool audio_started_;
-    bool talk_started_;
     RecordReaderInterface *recordReader;
 
   };
