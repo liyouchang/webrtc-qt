@@ -61,7 +61,12 @@ hisi {
     target_config.path   = /var/lib/tftpboot
     INSTALLS  += target_config
 }eles{
-    target_config.files  = $$OTHER_FILES
-    target_config.path   = $$DESTDIR
-    INSTALLS  += target_config
+#    target.files = $$DESTDIR/$$TARGET
+#    target.path =   /home/lht/workspace/P2PSystem/out/zmqclient
+#    INSTALLS += target
+
+##    target_config.files  = $$OTHER_FILES
+##    target_config.path   = $$output_dir/$$TARGET
+##    INSTALLS  += target_config
+
 }

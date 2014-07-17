@@ -194,7 +194,6 @@ void KeMessageProcessCamera::RecvAskMediaReq(talk_base::Buffer &msgData)
     //send stream
     KEVideoServerReq * msg = (KEVideoServerReq *)msgData.data();
     ConnectMedia(msg->video,msg->listen,msg->talk);
-    LOG(INFO)<<"KeMessageProcessCamera::RecvAskMediaReq--end";
 }
 
 void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
@@ -320,7 +319,6 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
         this->SignalRecvTalkData.connect(camera,&KeTunnelCamera::OnRecvTalkData);
         talk_status = talk;
     }
-    LOG(INFO)<<"KeMessageProcessCamera::ConnectMedia---end";
 }
 
 void KeMessageProcessCamera::OnVideoData(const char *data, int len)

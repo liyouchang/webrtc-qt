@@ -62,7 +62,8 @@ protected:
     virtual void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
     virtual bool SetAlarmStatus(int status);
     virtual void ReportAlarmStatus(const std::string &peerId);
-
+    virtual void ReportResult(const std::string &peerId,
+                              const std::string & command, int result);
 private:
     /**
      * @brief SendVideoFrame

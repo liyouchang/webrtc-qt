@@ -10,6 +10,4 @@
     "servers":[{"uri":"stun:222.174.213.181:5389"}],
     "clarity":2,
     "sampleFileName":"Sample.avi",
-    "ntpconfig":{"ip":"222.174.213.181","port":"123","zone":"+8:00"}
-
 }

@@ -313,14 +313,16 @@ void HisiMediaDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &j
     }
     else if(command.compare("restart") == 0){
         LOG(INFO)<<"receive restart message ,the device will reboot";
-        Raycomm_Reboot();
+        int r = Raycomm_Reboot();
+        this->ReportResult(peerId,command,r);
     }
     else if(command.compare("rename")==0){
         std::string name;
         if(GetStringFromJsonObject(jmessage,"name", &name)){
             int r  = Raycomm_SetTitle(name.c_str());
-            LOG(INFO)<<"receive rename message ,set device titile with "<<name<<
+            LOG(INFO)<<"receive rename message ,set device title - "<<name<<
                        " ;result "<<r;
+            this->ReportResult(peerId,command,r);
         }
     }
     else{
@@ -344,6 +346,18 @@ void HisiMediaDevice::ReportAlarmStatus(const std::string &peerId)
     Json::StyledWriter writer;
     std::string msg = writer.write(jmessage);
     this->terminal_->SendByRouter(peerId,msg);
+}
+
+void HisiMediaDevice::ReportResult(const std::string &peerId, const std::string &command, int result)
+{
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = command;
+    jmessage["result"] = result;
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+    this->terminal_->SendByRouter(peerId,msg);
+
 }
 
 

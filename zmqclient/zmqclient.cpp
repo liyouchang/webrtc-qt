@@ -20,7 +20,6 @@
 
 std::string ReadConfigFile();
 
-//const char * kVersion = "V0.31";
 int kVersion = 52;
 
 int main()
@@ -40,7 +39,7 @@ int main()
     talk_base::LogMessage::ConfigureLogging(logParamsValue.asString().c_str(),
                                             jlogsaveFile.asString().c_str());
 
-    Json::Value jntp = JsonConfig::Instance()->Get("ntpconfig","");
+    //Json::Value jntp = JsonConfig::Instance()->Get("ntpconfig","");
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
     std::string clientVer = kaerp2p::ToStringVersion(kVersion);
     LOG(INFO)<<"zmqclient current version is "<<clientVer;
