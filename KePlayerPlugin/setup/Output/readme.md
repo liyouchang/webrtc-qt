@@ -1,5 +1,6 @@
 ###版本说明:
-V0.51 
+V0.52
+1. 修改一些已知问题
 
 V0.35 
 1. 增加DestroyAll()函数,在js中的window.onbeforeunload,解决IE浏览器刷新无法销毁对象的问题
@@ -82,6 +83,7 @@ V0.32
 	UDP广播查找本地终端设备
 	
 ###回调说明:
+
 1. TunnelOpened(peerId);
 
 2. TunnelClosed(peerId);

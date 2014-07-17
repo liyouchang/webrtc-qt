@@ -5,7 +5,7 @@
 #include "defaults.h"
 namespace  kaerp2p {
 
-const int kConnectTimeout = 13000; // close DeletePeerConnection after 13s without connect
+const int kConnectTimeout = 30000; // close DeletePeerConnection after 13s without connect
 const int kDisConnectTimeout = 2000;
 
 // Names used for a IceCandidate JSON object.
@@ -291,7 +291,7 @@ bool P2PConductor::InitializePeerConnection()
     setTunnelState(kTunnelConnecting);
 
     peer_connection_ = PeerTunnelProxy::Create(pt->signaling_thread(), pt);
-
+    LOG(INFO)<<"P2PConductor::InitializePeerConnection---connect timeout is "<<kConnectTimeout;
     signal_thread_->PostDelayed(kConnectTimeout,this,MSG_CONNECT_TIMEOUT);
 
     return true;

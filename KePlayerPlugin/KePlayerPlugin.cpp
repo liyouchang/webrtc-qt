@@ -110,7 +110,7 @@ int KePlayerPlugin::PlayLocalFile()
 
 QString KePlayerPlugin::GetLocalPath()
 {
-    QString ret =  QFileDialog::getExistingDirectory(
+    QString ret = QFileDialog::getExistingDirectory(
                 this,"选择路径",savePath(),
                 QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks|QFileDialog::ReadOnly);
     LOG(INFO)<<"get local path " << ret.toLatin1().constData();
@@ -124,7 +124,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 51;
+    const int kVersion = 52;
     return kVersion;
 }
 /**
