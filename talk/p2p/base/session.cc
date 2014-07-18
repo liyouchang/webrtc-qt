@@ -66,7 +66,7 @@ TransportProxy::~TransportProxy() {
   }
 }
 
-std::string TransportProxy::type() const {
+const std::string& TransportProxy::type() const {
   return transport_->get()->type();
 }
 
@@ -286,9 +286,12 @@ bool TransportProxy::SetLocalTransportDescription(
   if (action == CA_ANSWER) {
     CompleteNegotiation();
   }
-  return transport_->get()->SetLocalTransportDescription(description,
-                                                         action,
-                                                         error_desc);
+  bool result = transport_->get()->SetLocalTransportDescription(description,
+                                                                action,
+                                                                error_desc);
+  if (result)
+    local_description_set_ = true;
+  return result;
 }
 
 bool TransportProxy::SetRemoteTransportDescription(
@@ -299,9 +302,12 @@ bool TransportProxy::SetRemoteTransportDescription(
   if (action == CA_ANSWER) {
     CompleteNegotiation();
   }
-  return transport_->get()->SetRemoteTransportDescription(description,
-                                                          action,
-                                                          error_desc);
+  bool result = transport_->get()->SetRemoteTransportDescription(description,
+                                                                 action,
+                                                                 error_desc);
+  if (result)
+    remote_description_set_ = true;
+  return result;
 }
 
 void TransportProxy::OnSignalingReady() {
@@ -392,8 +398,6 @@ BaseSession::BaseSession(talk_base::Thread* signaling_thread,
       transport_type_(NS_GINGLE_P2P),
       initiator_(initiator),
       identity_(NULL),
-      local_description_(NULL),
-      remote_description_(NULL),
       ice_tiebreaker_(talk_base::CreateRandomId64()),
       role_switch_(false) {
   ASSERT(signaling_thread->IsCurrent());
@@ -411,9 +415,38 @@ BaseSession::~BaseSession() {
        iter != transports_.end(); ++iter) {
     delete iter->second;
   }
+}
 
-  delete remote_description_;
-  delete local_description_;
+const SessionDescription* BaseSession::local_description() const {
+  // TODO(tommi): Assert on thread correctness.
+  return local_description_.get();
+}
+
+const SessionDescription* BaseSession::remote_description() const {
+  // TODO(tommi): Assert on thread correctness.
+  return remote_description_.get();
+}
+
+SessionDescription* BaseSession::remote_description() {
+  // TODO(tommi): Assert on thread correctness.
+  return remote_description_.get();
+}
+
+void BaseSession::set_local_description(const SessionDescription* sdesc) {
+  // TODO(tommi): Assert on thread correctness.
+  if (sdesc != local_description_.get())
+    local_description_.reset(sdesc);
+}
+
+void BaseSession::set_remote_description(SessionDescription* sdesc) {
+  // TODO(tommi): Assert on thread correctness.
+  if (sdesc != remote_description_)
+    remote_description_.reset(sdesc);
+}
+
+const SessionDescription* BaseSession::initiator_description() const {
+  // TODO(tommi): Assert on thread correctness.
+  return initiator_ ? local_description_.get() : remote_description_.get();
 }
 
 bool BaseSession::SetIdentity(talk_base::SSLIdentity* identity) {
@@ -431,11 +464,11 @@ bool BaseSession::PushdownTransportDescription(ContentSource source,
                                                ContentAction action,
                                                std::string* error_desc) {
   if (source == CS_LOCAL) {
-    return PushdownLocalTransportDescription(local_description_,
+    return PushdownLocalTransportDescription(local_description(),
                                              action,
                                              error_desc);
   }
-  return PushdownRemoteTransportDescription(remote_description_,
+  return PushdownRemoteTransportDescription(remote_description(),
                                             action,
                                             error_desc);
 }
@@ -505,8 +538,8 @@ TransportChannel* BaseSession::GetChannel(const std::string& content_name,
   TransportProxy* transproxy = GetTransportProxy(content_name);
   if (transproxy == NULL)
     return NULL;
-  else
-    return transproxy->GetChannel(component);
+
+  return transproxy->GetChannel(component);
 }
 
 void BaseSession::DestroyChannel(const std::string& content_name,
@@ -550,6 +583,8 @@ TransportProxy* BaseSession::GetOrCreateTransportProxy(
                                   new TransportWrapper(transport));
   transproxy->SignalCandidatesReady.connect(
       this, &BaseSession::OnTransportProxyCandidatesReady);
+  if (identity_)
+    transproxy->SetIdentity(identity_);
   transports_[content_name] = transproxy;
 
   return transproxy;
@@ -762,9 +797,9 @@ void BaseSession::OnTransportCandidatesAllocationDone(Transport* transport) {
   // Transport, since this removes the need to manually iterate over all
   // the transports, as is needed to make sure signals are handled properly
   // when BUNDLEing.
-#if 0
-  ASSERT(!IsCandidateAllocationDone());
-#endif
+  // TODO(juberti): Per b/7998978, devs and QA are hitting this assert in ways
+  // that make it prohibitively difficult to run dbg builds. Disabled for now.
+  //ASSERT(!IsCandidateAllocationDone());
   for (TransportMap::iterator iter = transports_.begin();
        iter != transports_.end(); ++iter) {
     if (iter->second->impl() == transport) {
@@ -813,6 +848,7 @@ void BaseSession::LogState(State old_state, State new_state) {
                << " Transport:" << transport_type();
 }
 
+// static
 bool BaseSession::GetTransportDescription(const SessionDescription* description,
                                           const std::string& content_name,
                                           TransportDescription* tdesc) {
@@ -875,6 +911,7 @@ bool BaseSession::GetContentAction(ContentAction* action,
     }
   return true;
 }
+
 
 void BaseSession::OnMessage(talk_base::Message *pmsg) {
     switch (pmsg->message_id) {

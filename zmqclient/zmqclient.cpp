@@ -20,7 +20,7 @@
 
 std::string ReadConfigFile();
 
-int kVersion = 52;
+int kVersion = 53;
 
 int main()
 {

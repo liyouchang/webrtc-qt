@@ -71,20 +71,20 @@ public:
     PseudoTcpChannel(talk_base::Thread* stream_thread,
                      BaseSession* session);
 
-    bool Connect(const std::string& content_name,
-                 const std::string& channel_name,
-                 int component);
-    talk_base::StreamInterface* GetStream();
+  bool Connect(const std::string& content_name,
+               const std::string& channel_name,
+               int component);
+  talk_base::StreamInterface* GetStream();
 
-    sigslot::signal1<PseudoTcpChannel*> SignalChannelClosed;
+  sigslot::signal1<PseudoTcpChannel*> SignalChannelClosed;
 
     // Call this when the Session used to create this channel is being torn
     // down, to ensure that things get cleaned up properly.
     void OnSessionTerminate(BaseSession* session);
 
-    // See the PseudoTcp class for available options.
-    void GetOption(PseudoTcp::Option opt, int* value);
-    void SetOption(PseudoTcp::Option opt, int value);
+  // See the PseudoTcp class for available options.
+  void GetOption(PseudoTcp::Option opt, int* value);
+  void SetOption(PseudoTcp::Option opt, int value);
 
     //lht
     const std::string& content_name() { return content_name_; }
@@ -96,38 +96,38 @@ private:
     class InternalStream;
     friend class InternalStream;
 
-    virtual ~PseudoTcpChannel();
+  virtual ~PseudoTcpChannel();
 
-    // Stream thread methods
-    talk_base::StreamState GetState() const;
-    talk_base::StreamResult Read(void* buffer, size_t buffer_len,
-                                 size_t* read, int* error);
-    talk_base::StreamResult Write(const void* data, size_t data_len,
-                                  size_t* written, int* error);
-    void Close();
+  // Stream thread methods
+  talk_base::StreamState GetState() const;
+  talk_base::StreamResult Read(void* buffer, size_t buffer_len,
+                               size_t* read, int* error);
+  talk_base::StreamResult Write(const void* data, size_t data_len,
+                                size_t* written, int* error);
+  void Close();
 
-    // Multi-thread methods
-    void OnMessage(talk_base::Message* pmsg);
-    void AdjustClock(bool clear = true);
-    void CheckDestroy();
+  // Multi-thread methods
+  void OnMessage(talk_base::Message* pmsg);
+  void AdjustClock(bool clear = true);
+  void CheckDestroy();
 
-    // Signal thread methods
-    void OnChannelDestroyed(TransportChannel* channel);
+  // Signal thread methods
+  void OnChannelDestroyed(TransportChannel* channel);
 
-    // Worker thread methods
-    void OnChannelWritableState(TransportChannel* channel);
-    void OnChannelRead(TransportChannel* channel, const char* data, size_t size,
-                       const talk_base::PacketTime& packet_time, int flags);
-    void OnChannelConnectionChanged(TransportChannel* channel,
-                                    const Candidate& candidate);
+  // Worker thread methods
+  void OnChannelWritableState(TransportChannel* channel);
+  void OnChannelRead(TransportChannel* channel, const char* data, size_t size,
+                     const talk_base::PacketTime& packet_time, int flags);
+  void OnChannelConnectionChanged(TransportChannel* channel,
+                                  const Candidate& candidate);
 
-    virtual void OnTcpOpen(PseudoTcp* ptcp);
-    virtual void OnTcpReadable(PseudoTcp* ptcp);
-    virtual void OnTcpWriteable(PseudoTcp* ptcp);
-    virtual void OnTcpClosed(PseudoTcp* ptcp, uint32 nError);
-    virtual IPseudoTcpNotify::WriteResult TcpWritePacket(PseudoTcp* tcp,
-                                                         const char* buffer,
-                                                         size_t len);
+  virtual void OnTcpOpen(PseudoTcp* ptcp);
+  virtual void OnTcpReadable(PseudoTcp* ptcp);
+  virtual void OnTcpWriteable(PseudoTcp* ptcp);
+  virtual void OnTcpClosed(PseudoTcp* ptcp, uint32 nError);
+  virtual IPseudoTcpNotify::WriteResult TcpWritePacket(PseudoTcp* tcp,
+                                                       const char* buffer,
+                                                       size_t len);
 
     virtual IPseudoTcpNotify::WriteResult TcpWritePacket_w(const char* buffer,
                                                          size_t len);

@@ -41,6 +41,7 @@
 #include <openssl/err.h>
 #include <openssl/opensslv.h>
 #include <openssl/rand.h>
+#include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
 #if HAVE_CONFIG_H
@@ -711,7 +712,10 @@ bool OpenSSLAdapter::VerifyServerName(SSL* ssl, const char* host,
       }
 
       STACK_OF(CONF_VALUE)* value = meth->i2v(meth, ext_str, NULL);
-      for (int j = 0; j < sk_CONF_VALUE_num(value); ++j) {
+
+      // Cast to size_t to be compilable for both OpenSSL and BoringSSL.
+      for (size_t j = 0; j < static_cast<size_t>(sk_CONF_VALUE_num(value));
+           ++j) {
         CONF_VALUE* nval = sk_CONF_VALUE_value(value, j);
         // The value for nval can contain wildcards
         if (!strcmp(nval->name, "DNS") && string_match(host, nval->value)) {
@@ -735,7 +739,7 @@ bool OpenSSLAdapter::VerifyServerName(SSL* ssl, const char* host,
   }
 
   char data[256];
-  X509_name_st* subject;
+  X509_NAME* subject;
   if (!ok
       && ((subject = X509_get_subject_name(certificate)) != NULL)
       && (X509_NAME_get_text_by_NID(subject, NID_commonName,

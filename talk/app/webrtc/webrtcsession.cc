@@ -371,14 +371,15 @@ static std::string MakeTdErrorString(const std::string& desc) {
 
 // Set |option| to the highest-priority value of |key| in the optional
 // constraints if the key is found and has a valid value.
+template<typename T>
 static void SetOptionFromOptionalConstraint(
     const MediaConstraintsInterface* constraints,
-    const std::string& key, cricket::Settable<int>* option) {
+    const std::string& key, cricket::Settable<T>* option) {
   if (!constraints) {
     return;
   }
   std::string string_value;
-  int value;
+  T value;
   if (constraints->GetOptional().FindFirst(key, &string_value)) {
     if (talk_base::FromString(string_value, &value)) {
       option->Set(value);
@@ -429,8 +430,10 @@ class IceRestartAnswerLatch {
         // No transport description exist. This is not an ice restart.
         continue;
       }
-      if (new_transport_desc->ice_pwd != old_transport_desc->ice_pwd &&
-          new_transport_desc->ice_ufrag != old_transport_desc->ice_ufrag) {
+      if (cricket::IceCredentialsChanged(old_transport_desc->ice_ufrag,
+                                         old_transport_desc->ice_pwd,
+                                         new_transport_desc->ice_ufrag,
+                                         new_transport_desc->ice_pwd)) {
         LOG(LS_INFO) << "Remote peer request ice restart.";
         ice_restart_ = true;
         break;
@@ -564,21 +567,23 @@ bool WebRtcSession::Initialize(
   SetOptionFromOptionalConstraint(constraints,
       MediaConstraintsInterface::kCpuOveruseThreshold,
       &video_options_.cpu_overuse_threshold);
-
-  if (FindConstraint(
-      constraints,
+  SetOptionFromOptionalConstraint(constraints,
       MediaConstraintsInterface::kCpuOveruseDetection,
-      &value,
-      NULL)) {
-    video_options_.cpu_overuse_detection.Set(value);
-  }
-  if (FindConstraint(
-      constraints,
+      &video_options_.cpu_overuse_detection);
+  SetOptionFromOptionalConstraint(constraints,
       MediaConstraintsInterface::kCpuOveruseEncodeUsage,
-      &value,
-      NULL)) {
-    video_options_.cpu_overuse_encode_usage.Set(value);
-  }
+      &video_options_.cpu_overuse_encode_usage);
+  SetOptionFromOptionalConstraint(constraints,
+      MediaConstraintsInterface::kCpuUnderuseEncodeRsdThreshold,
+      &video_options_.cpu_underuse_encode_rsd_threshold);
+  SetOptionFromOptionalConstraint(constraints,
+      MediaConstraintsInterface::kCpuOveruseEncodeRsdThreshold,
+      &video_options_.cpu_overuse_encode_rsd_threshold);
+
+  // Find payload padding constraint.
+  SetOptionFromOptionalConstraint(constraints,
+      MediaConstraintsInterface::kPayloadPadding,
+      &video_options_.use_payload_padding);
 
   // Find improved wifi bwe constraint.
   if (FindConstraint(
@@ -592,13 +597,9 @@ bool WebRtcSession::Initialize(
     video_options_.use_improved_wifi_bandwidth_estimator.Set(true);
   }
 
-  if (FindConstraint(
-        constraints,
-        MediaConstraintsInterface::kHighStartBitrate,
-        &value,
-        NULL)) {
-    video_options_.video_start_bitrate.Set(cricket::kHighStartBitrate);
-  }
+  SetOptionFromOptionalConstraint(constraints,
+      MediaConstraintsInterface::kHighStartBitrate,
+      &video_options_.video_start_bitrate);
 
   if (FindConstraint(
       constraints,
@@ -615,6 +616,10 @@ bool WebRtcSession::Initialize(
     video_options_.video_highest_bitrate.Set(
         cricket::VideoOptions::HIGH);
   }
+
+  SetOptionFromOptionalConstraint(constraints,
+      MediaConstraintsInterface::kOpusFec,
+      &audio_options_.opus_fec);
 
   const cricket::VideoCodec default_codec(
       JsepSessionDescription::kDefaultVideoCodecId,
@@ -932,31 +937,18 @@ bool WebRtcSession::UpdateIce(PeerConnectionInterface::IceTransportsType type) {
   return false;
 }
 
-bool WebRtcSession::GetTrackIdBySsrc(uint32 ssrc, std::string* id) {
-  if (GetLocalTrackId(ssrc, id)) {
-    if (GetRemoteTrackId(ssrc, id)) {
-      LOG(LS_WARNING) << "SSRC " << ssrc
-                      << " exists in both local and remote descriptions";
-      return true;  // We return the remote track id.
-    }
-    return true;
-  } else {
-    return GetRemoteTrackId(ssrc, id);
-  }
-}
-
-bool WebRtcSession::GetLocalTrackId(uint32 ssrc, std::string* track_id) {
+bool WebRtcSession::GetLocalTrackIdBySsrc(uint32 ssrc, std::string* track_id) {
   if (!BaseSession::local_description())
     return false;
   return webrtc::GetTrackIdBySsrc(
-    BaseSession::local_description(), ssrc, track_id);
+      BaseSession::local_description(), ssrc, track_id);
 }
 
-bool WebRtcSession::GetRemoteTrackId(uint32 ssrc, std::string* track_id) {
+bool WebRtcSession::GetRemoteTrackIdBySsrc(uint32 ssrc, std::string* track_id) {
   if (!BaseSession::remote_description())
-      return false;
+    return false;
   return webrtc::GetTrackIdBySsrc(
-    BaseSession::remote_description(), ssrc, track_id);
+      BaseSession::remote_description(), ssrc, track_id);
 }
 
 std::string WebRtcSession::BadStateErrMsg(State state) {
@@ -1158,6 +1150,8 @@ void WebRtcSession::AddSctpDataStream(uint32 sid) {
 }
 
 void WebRtcSession::RemoveSctpDataStream(uint32 sid) {
+  mediastream_signaling_->RemoveSctpDataChannel(static_cast<int>(sid));
+
   if (!data_channel_.get()) {
     LOG(LS_ERROR) << "RemoveDataChannelStreams called when data_channel_ is "
                   << "NULL.";

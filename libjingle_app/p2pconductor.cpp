@@ -41,12 +41,14 @@ protected:
 P2PConductor::P2PConductor():
     stream_thread_(NULL),signal_thread_(NULL),tunnelState(kTunnelNew)
 {
-    stream_thread_ = new talk_base::Thread();
-    bool result = stream_thread_->Start();
-    ASSERT(result);
-    signal_thread_ = new talk_base::Thread();
-    result = signal_thread_->Start();
-    ASSERT(result);
+    if(stream_thread_ == NULL){
+        stream_thread_ = new talk_base::Thread();
+        stream_thread_->Start();
+    }
+    if(signal_thread_ == NULL){
+        signal_thread_ = new talk_base::Thread();
+        signal_thread_->Start();
+    }
 }
 
 P2PConductor::~P2PConductor()
@@ -413,7 +415,7 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id,
     }
     //为了防止tunnelState的冲突，我们将tunnelstate的操作放在signal_thread中.
     PeerMessageParams * param = new PeerMessageParams(peer_id,message);
-    signal_thread_->Post(this,MSG_PEER_MESSAGE,param);
+    signal_thread_->Send(this,MSG_PEER_MESSAGE,param);
     //    signal_thread_->Invoke<void>(
     //                talk_base::Bind(&P2PConductor::OnMessageFromPeer_s,
     //                                this,peer_id,message));
