@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "KaerPlayerPlugin"
-#define MyAppVersion "0.52"
+#define MyAppVersion "0.53"
 #define MyAppPublisher "Kaer, Inc."
 #define MyAppURL "http://www.kaer.cn/"
 
@@ -24,7 +24,7 @@ DisableProgramGroupPage=yes
 OutputBaseFilename=KaerPlayerPluginSetup
 Compression=lzma
 SolidCompression=yes
-VersionInfoVersion=0.5.2.0
+VersionInfoVersion=0.5.3.0
 
 
 [Languages]
@@ -38,7 +38,7 @@ Source: "DllDeinterlace.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "hi_h264dec_w.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "lib_VoiceEngine_dll32.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "npKePlayerPlugin.dll"; DestDir: "{app}"; Flags: ignoreversion regserver 32bit
-Source: "npKePlayerPlugin.dll.embed.manifest"; DestDir: "{app}"; Flags: ignoreversion
+;Source: "npKePlayerPlugin.dll.embed.manifest"; DestDir: "{app}"; Flags: ignoreversion
 Source: "REG.BAT"; DestDir: "{app}"; Flags: ignoreversion
 Source: "UNREG.BAT"; DestDir: "{app}"; Flags: ignoreversion
 Source: "pluginTest/*"; DestDir: "{app}/pluginTest"; Flags: ignoreversion  recursesubdirs createallsubdirs

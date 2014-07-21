@@ -4,7 +4,7 @@
 1 ICON DISCARDABLE "KePlayerPlugin.ico"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,5,2,0
+ FILEVERSION 0,5,3,0
  PRODUCTVERSION 0,5,0,0
  FILEFLAGSMASK 0x3fL
  FILEOS 0x00040000L
@@ -17,7 +17,7 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Kaer inc."
             VALUE "FileDescription", "kaer player plugin"
-            VALUE "FileVersion", "0.5.2.0"
+            VALUE "FileVersion", "0.5.3.0"
             VALUE "LegalCopyright", "Copyright (C) 2013 kaer inc."
             VALUE "InternalName", "KePlayerPlugin.dll"
             VALUE "OriginalFilename", "KePlayerPlugin.dll"

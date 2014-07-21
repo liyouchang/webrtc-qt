@@ -1,6 +1,8 @@
 #include "KePlayerPlugin.h"
 #include <QApplication>
 #include "qtbrowserplugin.h"
+//#include <QtPlugin>
+//Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 
 #if _MSC_VER >= 1600
 #pragma execution_character_set("utf-8")

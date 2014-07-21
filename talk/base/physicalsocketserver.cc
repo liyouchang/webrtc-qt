@@ -106,7 +106,8 @@ const uint16 PACKET_MAXIMUMS[] = {
 static const int IP_HEADER_SIZE = 20u;
 static const int IPV6_HEADER_SIZE = 40u;
 static const int ICMP_HEADER_SIZE = 8u;
-static const int ICMP_PING_TIMEOUT_MILLIS = 10000u;
+//static const int ICMP_PING_TIMEOUT_MILLIS = 10000u;
+static const int ICMP_PING_TIMEOUT_MILLIS = 1000u; //lht change the timeout for wait less
 #endif
 
 class PhysicalSocket : public AsyncSocket, public sigslot::has_slots<> {
@@ -442,10 +443,10 @@ class PhysicalSocket : public AsyncSocket, public sigslot::has_slots<> {
         return -1;
       } else if (result != WinPing::PING_TOO_LARGE) {
         *mtu = PACKET_MAXIMUMS[level];
+          LOG_F(INFO)<<"---level="<<level<<" ping result="<<result;
         return 0;
       }
     }
-
     ASSERT(false);
     return -1;
 #elif defined(IOS) || defined(OSX)

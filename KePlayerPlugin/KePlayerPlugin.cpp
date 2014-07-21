@@ -17,6 +17,8 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
       connection_(new PeerConnectionClientDealer()),
       is_inited(false)
 {
+    qDebug()<<"KePlayerPlugin::KePlayerPlugin--start ";
+
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setMargin(0);
     video_wall_ = new VideoWall(this);
@@ -124,7 +126,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 52;
+    const int kVersion = 53;
     return kVersion;
 }
 /**

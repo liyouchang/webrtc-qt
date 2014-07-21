@@ -1,5 +1,5 @@
 TEMPLATE = lib
-CONFIG  += dll
+#CONFIG  += dll
 win32 {
   # Uncomment the following line to build a plugin that can be used also in 
   # Internet Explorer, through ActiveX.
