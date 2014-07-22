@@ -14,7 +14,7 @@
 
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
-      connection_(new PeerConnectionClientDealer()),
+      connection_(NULL),tunnel_(NULL),localClient_(NULL),
       is_inited(false)
 {
     qDebug()<<"KePlayerPlugin::KePlayerPlugin--start ";
@@ -50,8 +50,6 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
         this->setSavePath( saveDir.absolutePath() );
     }
 
-    localClient_ = new KeQtLocalClient(this);
-    tunnel_ = new KeQtTunnelClient(this);
 }
 
 KePlayerPlugin::~KePlayerPlugin()
@@ -76,7 +74,6 @@ void KePlayerPlugin::DestroyAll()
         delete localClient_;
         localClient_ = NULL;
     }
-
     if(video_wall_){
         delete video_wall_;
         video_wall_ = NULL;
@@ -87,6 +84,7 @@ void KePlayerPlugin::DestroyAll()
     }
 
 }
+
 
 void KePlayerPlugin::about()
 {
@@ -126,7 +124,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 53;
+    const int kVersion = 54;
     return kVersion;
 }
 /**
@@ -143,15 +141,22 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
               " iceServers"<<jstrIceServers;
     LOG(INFO)<<"KePlayerPlugin version is "<<kaerp2p::ToStringVersion(this->GetVersion());
 
+    //init ice servers
+    std::string servers = jstrIceServers.toStdString();
+    kaerp2p::P2PConductor::AddIceServers(servers);
+
     if(is_inited){
+        qDebug()<<"KePlayerPlugin::Initialize---alreay init";
         return KE_SUCCESS;
     }
+    connection_ = new PeerConnectionClientDealer();
+
     if(!connection_->Connect(routerUrl.toStdString(),"")){
         qWarning()<<"KePlayerPlugin::Initialize---connect error";
         return KE_FAILED;
     }
 
-
+    tunnel_ = new KeQtTunnelClient(this);
     tunnel_->Init(connection_);
     QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvVideoData,
                      this->video_wall_,&VideoWall::OnRecvMediaData);
@@ -170,7 +175,7 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
 
     this->is_inited = true;
 
-
+    localClient_ = new KeQtLocalClient(this);
     kaerp2p::LocalTerminal * local = new kaerp2p::LocalTerminal();
     local->Initialize();
     localClient_->Init(local);
@@ -184,10 +189,6 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
                      this,&KePlayerPlugin::TunnelClosed);
     QObject::connect(localClient_,&KeQtLocalClient::SigSearchedDeviceInfo,
                      this,&KePlayerPlugin::LocalDeviceInfo);
-
-    //init ice servers
-    std::string servers = jstrIceServers.toStdString();
-    kaerp2p::P2PConductor::AddIceServers(servers);
 
     return KE_SUCCESS;
 }

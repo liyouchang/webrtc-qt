@@ -79,7 +79,6 @@ signals:
 
 public slots:
     void DestroyAll();
-
     //change the version when you need to auto update
     int GetVersion();
     void about();

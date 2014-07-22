@@ -139,4 +139,28 @@ function GetLocalDirPath(){
 
 }
 
+function Echo(){
+    g_peer_id =  PeerID.value;
+    var echo =
+    {"type":"tunnel",
+     "command":"echo"
+    };
+    var str = JSON.stringify(echo);
+    kePlayerObj.SendCommand(g_peer_id,str);
+}
+
+
+function Ptz(side){
+    g_peer_id =  PeerID.value;
+    var ptz ={
+                "type":"tunnel",
+                "command":"ptz",
+                "control":side,
+                "param":10
+            };
+    var str = JSON.stringify(ptz);
+    console.log(str);
+    kePlayerObj.SendCommand(g_peer_id,str);
+}
+
 

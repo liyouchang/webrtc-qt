@@ -16,6 +16,8 @@ public:
         SignalMessageFromPeer(peer_id,message);
     }
     sigslot::signal2<const std::string &,const std::string &> SignalMessageFromPeer;
+    sigslot::signal0<> SignalDestroyed;
+
 protected:
     virtual ~PeerConnectionClientInterface() {}
 };

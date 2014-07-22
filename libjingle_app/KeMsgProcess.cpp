@@ -187,7 +187,6 @@ KeMsgProcessContainer::~KeMsgProcessContainer()
         delete this->terminal_;
         this->terminal_ = 0;
     }
-
     talk_base::CritScope cs(&crit_);
     for(int i =0 ;i< processes_.size();i++){
         delete processes_[i];
@@ -234,7 +233,7 @@ bool KeMsgProcessContainer::IsTunnelOpened(const std::string &peer_id)
 void KeMsgProcessContainer::OnTunnelOpened(PeerTerminalInterface *t,
                                            const std::string &peer_id)
 {
-    LOG(INFO)<<"KeMsgProcessContainer::OnTunnelOpened";
+    LOG_T_F(INFO)<<"tunnel opened "<<peer_id;
     ASSERT(terminal_ == t);
     KeMsgProcess *process = new KeMsgProcess(peer_id,this);
     this->AddMsgProcess(process);
@@ -244,7 +243,6 @@ void KeMsgProcessContainer::OnTunnelClosed(PeerTerminalInterface *t,
                                            const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
-    LOG(INFO)<<"KeMsgProcessContainer::OnTunnelClosed";
     talk_base::CritScope cs(&crit_);
 
     std::vector<KeMsgProcess *>::iterator it = processes_.begin();
@@ -254,15 +252,12 @@ void KeMsgProcessContainer::OnTunnelClosed(PeerTerminalInterface *t,
         }
     }
     if (it == processes_.end()){
-        LOG(WARNING)<<"peer id "<< peer_id<<" not found";
+        LOG_T_F(WARNING)<<"peer id "<< peer_id<<" not found";
         return ;
     }
-    LOG(INFO)<<"delete peer "<< (*it)->peer_id() ;
     delete (*it);
-    LOG(INFO)<<"remove form vector";
     processes_.erase(it);
-    LOG(INFO)<<"KeMsgProcessContainer::OnTunnelClosed end";
-
+    LOG_T_F(INFO)<<"delete "<<peer_id;
 }
 
 void KeMsgProcessContainer::OnTunnelMessage(const std::string &peer_id,
@@ -270,7 +265,7 @@ void KeMsgProcessContainer::OnTunnelMessage(const std::string &peer_id,
 {
     KeMsgProcess * process = this->GetProcess(peer_id);
     if(process == NULL){
-        LOG(WARNING)<< "peer id "<< peer_id<<" not found";
+        LOG_T_F(WARNING)<< "peer id "<< peer_id<<" not found";
         return;
     }
     process->OnProcessMessage(peer_id,msg);

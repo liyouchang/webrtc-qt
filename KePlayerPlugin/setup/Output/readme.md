@@ -1,4 +1,8 @@
 ###版本说明:
+V0.54
+1. 修改了链接速度慢的问题
+2. 解决了一个关闭浏览器崩溃的bug
+
 V0.52
 1. 修改一些已知问题
 
@@ -105,3 +109,8 @@ V0.32
     KE_VIDEO_START_FAILED = 10004,
     KE_CAPTURE_FAILED = 10005,
     KE_OTHER_ERROR
+
+	
+###编译环境
+
+Qt5.2.1 msvc2010 static

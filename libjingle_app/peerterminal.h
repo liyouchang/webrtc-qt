@@ -40,6 +40,7 @@ protected:
     void OnTunnelReadData(kaerp2p::StreamProcess * stream,size_t len);
     void OnRouterReadData(const std::string & peer_id, const std::string & msg);
     void OnTunnelNeedSend(const std::string& peer_id, const std::string& msg);
+
 private:
     ScopedTunnel GetTunnel(const std::string & peer_id);
     ScopedTunnel GetTunnel(kaerp2p::StreamProcess * stream);

@@ -25,9 +25,9 @@ AsynDealer::AsynDealer():context_(NULL),socket_(NULL)
 
 AsynDealer::~AsynDealer()
 {
-    zmq_thread_->Clear(this);
     zmq_thread_->Invoke<void>(
                 talk_base::Bind(&AsynDealer::terminate_z, this));
+    zmq_thread_->Clear(this);
     delete zmq_thread_;
 }
 
@@ -113,6 +113,10 @@ bool AsynDealer::send_z(const std::string & addr,const std::string & data)
 void AsynDealer::recv_z()
 {
     ASSERT(zmq_thread_->IsCurrent());
+    if(!socket_){
+        LOG_T_F(WARNING) << "socket null";
+        return;
+    }
     zmq_pollitem_t  items [] = {{*socket_,0,ZMQ_POLLIN,0}};
     zmq_poll(items,1,10);
     if(items[0].revents & ZMQ_POLLIN){

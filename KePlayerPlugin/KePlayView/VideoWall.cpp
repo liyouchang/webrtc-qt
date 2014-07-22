@@ -36,6 +36,10 @@ VideoWall::VideoWall(QWidget *parent) :
     setSelectedPlayer(0);
     SetDivision(ScreenDivision_One);
 
+
+    talkTimer = new QTimer(this);
+    QObject::connect(talkTimer, SIGNAL(timeout()), this, SLOT(OnGetTalkData()));
+
     // setAcceptDrops(true);
 }
 
@@ -270,10 +274,8 @@ bool VideoWall::CloseSound(QString peerId)
 
 bool VideoWall::StartTalk()
 {
-    if(!talkTimer){
-        talkTimer = new QTimer(this);
+    if(!talkTimer->isActive()){
         AVService::StartTalk();
-        QObject::connect(talkTimer, SIGNAL(timeout()), this, SLOT(OnGetTalkData()));
         talkTimer->start(15);
         return true;
     }else{
@@ -284,10 +286,8 @@ bool VideoWall::StartTalk()
 
 bool VideoWall::StopTalk()
 {
-    if(talkTimer){
+    if(talkTimer->isActive()){
         talkTimer->stop();
-        delete talkTimer;
-        talkTimer = NULL;
         AVService::StopTalk();
         return true;
     }else{

@@ -28,7 +28,7 @@
     -->
     <p></p>
 
-    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="12345678-F5C2"/>
+    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="12345678-71D8"/>
     <input type="button" value="Open Tunnel" OnClick="KePlayerPlugin.OpenTunnel(PeerID.value);"/>
     <input type="button" value="Close Tunnel" OnClick="KePlayerPlugin.CloseTunnel(PeerID.value);"/>
     <input type="button" value="check open" OnClick="CheckOpen(PeerID.value);"/>
@@ -43,6 +43,12 @@
     <input type="button" value="close sound" OnClick="KePlayerPlugin.CloseSound(PeerID.value);"/>
     <input type="button" value="start talk" OnClick="KePlayerPlugin.StartTalk();"/>
     <input type="button" value="stop talk" OnClick="KePlayerPlugin.StopTalk();"/>
+    <p></p>
+    <input type="button" value="up" OnClick="Ptz('move_up')"/>
+    <input type="button" value="down" OnClick="Ptz('move_down')"/>
+    <input type="button" value="left" OnClick="Ptz('move_left')"/>
+    <input type="button" value="right" OnClick="Ptz('move_right')"/>
+    <input type="button" value="echo" OnClick="Echo()"/>
 
     <p></p>
     <input type="button" value="Start Cut" OnClick="StartCut()"/>
