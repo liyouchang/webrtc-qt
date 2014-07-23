@@ -34,7 +34,8 @@ public:
 
     // Create a new offer.
     // The CreateSessionDescriptionObserver callback will be called when done.
-    virtual void CreateOffer(CreateSessionDescriptionObserver* observer) =0;
+    virtual void CreateOffer(CreateSessionDescriptionObserver* observer,
+                             const std::string &description) =0;
     // Create an answer to an offer.
     // The CreateSessionDescriptionObserver callback will be called when done.
     virtual void CreateAnswer(CreateSessionDescriptionObserver* observer) =0;
@@ -108,7 +109,8 @@ public:
 
     // Create a new offer.
     // The CreateSessionDescriptionObserver callback will be called when done.
-    virtual void CreateOffer(CreateSessionDescriptionObserver* observer) ;
+    virtual void CreateOffer(CreateSessionDescriptionObserver* observer,
+                             const std::string &description) ;
     // Create an answer to an offer.
     // The CreateSessionDescriptionObserver callback will be called when done.
     virtual void CreateAnswer(CreateSessionDescriptionObserver* observer) ;
@@ -172,7 +174,8 @@ private:
 BEGIN_PROXY_MAP(PeerTunnel)
     PROXY_CONSTMETHOD0(const SessionDescriptionInterface*, local_description)
     PROXY_CONSTMETHOD0(const SessionDescriptionInterface*, remote_description)
-    PROXY_METHOD1(void, CreateOffer, CreateSessionDescriptionObserver*)
+    PROXY_METHOD2(void, CreateOffer, CreateSessionDescriptionObserver*,
+                  const std::string &)
     PROXY_METHOD1(void, CreateAnswer, CreateSessionDescriptionObserver*)
     PROXY_METHOD2(void, SetLocalDescription, SetSessionDescriptionObserver*,
                   SessionDescriptionInterface*)

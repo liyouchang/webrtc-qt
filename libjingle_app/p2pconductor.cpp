@@ -74,7 +74,7 @@ bool P2PConductor::ConnectToPeer(const std::string &peer_id)
     }
     if (InitializePeerConnection()) {
         peer_id_ = peer_id;
-        peer_connection_->CreateOffer(this);
+        peer_connection_->CreateOffer(this,"tcp");
     } else {
         LOG(LS_INFO) <<"initialize connection error";
         return false;
@@ -413,6 +413,7 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id,
         LOG(WARNING)<<"P2PConductor::OnMessageFromPeer---peer id is wrong";
         return;
     }
+    //LOG(INFO)<<"P2PConductor::OnMessageFromPeer---from - "<<peer_id<<", msg -"<<message;
     //为了防止tunnelState的冲突，我们将tunnelstate的操作放在signal_thread中.
     PeerMessageParams * param = new PeerMessageParams(peer_id,message);
     signal_thread_->Send(this,MSG_PEER_MESSAGE,param);

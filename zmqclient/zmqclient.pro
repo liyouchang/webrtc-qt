@@ -10,6 +10,7 @@ DESTDIR = $$output_dir/$$TARGET
 
 message("DESTDIR is "$$DESTDIR)
 
+
 INCLUDEPATH  +=  \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
     ../third_party/cppzmq/include
@@ -27,7 +28,7 @@ win32 {
     LIBS += -L$$output_dir/libs
     LIBS += -ljingle_app -ljingle_p2p -ljingle
     LIBS += -lcppzmq -ljsoncpp
-    LIBS += -pthread -ldl
+    LIBS += -pthread -ldl -lprofiler
 
 }
 

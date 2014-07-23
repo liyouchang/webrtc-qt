@@ -214,26 +214,17 @@ void PseudoTcpChannel::SetOption(PseudoTcp::Option opt, int value) {
   tcp_->SetOption(opt, value);
 }
 
-
-
-
-
-void PseudoTcpChannel::CreateChannel_w(const std::string &content_name, const std::string &channel_name, int component)
+void PseudoTcpChannel::CreateChannel_w(const std::string &content_name,
+                                       const std::string &channel_name,
+                                       int component)
 {
-    channel_ = session_->CreateChannel(
-                content_name, channel_name, component);
+    channel_ = session_->CreateChannel(content_name, channel_name, component);
     channel_name_ = channel_name;
     channel_->SetOption(Socket::OPT_DONTFRAGMENT, 1);
-
-    channel_->SignalDestroyed.connect(this,
-                                      &PseudoTcpChannel::OnChannelDestroyed);
-    channel_->SignalWritableState.connect(this,
-                                          &PseudoTcpChannel::OnChannelWritableState);
-    channel_->SignalReadPacket.connect(this,
-                                       &PseudoTcpChannel::OnChannelRead);
-    channel_->SignalRouteChange.connect(this,
-                                        &PseudoTcpChannel::OnChannelConnectionChanged);
-
+    channel_->SignalDestroyed.connect(this,&PseudoTcpChannel::OnChannelDestroyed);
+    channel_->SignalWritableState.connect(this,&PseudoTcpChannel::OnChannelWritableState);
+    channel_->SignalReadPacket.connect(this,&PseudoTcpChannel::OnChannelRead);
+    channel_->SignalRouteChange.connect(this,&PseudoTcpChannel::OnChannelConnectionChanged);
 }
 
 //
@@ -533,7 +524,8 @@ IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket(
         //LOG_F(LS_VERBOSE) << "(" << sent << ") Sent";
         return IPseudoTcpNotify::WR_SUCCESS;
     } else if (IsBlockingError(channel_->GetError())) {
-        LOG_F(LS_VERBOSE) << "Blocking";
+        //LOG_F(LS_VERBOSE) << "Blocking";
+        LOG_F(LS_INFO) << "PseudoTcpChannel::TcpWritePacket---Blocking";
         return IPseudoTcpNotify::WR_SUCCESS;
     } else if (channel_->GetError() == EMSGSIZE) {
         LOG_F(LS_ERROR) << "EMSGSIZE";
@@ -545,25 +537,25 @@ IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket(
     }
 }
 
-IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket_w(const char *buffer, size_t len)
-{
-    talk_base::PacketOptions packet_options;
-    int sent = channel_->SendPacket(buffer, len, packet_options);
-    if (sent > 0) {
-        LOG_F(LS_VERBOSE) << "(" << sent << ") Sent";
-        return IPseudoTcpNotify::WR_SUCCESS;
-    } else if (IsBlockingError(channel_->GetError())) {
-        LOG_F(LS_VERBOSE) << "Blocking";
-        return IPseudoTcpNotify::WR_SUCCESS;
-    } else if (channel_->GetError() == EMSGSIZE) {
-        LOG_F(LS_ERROR) << "EMSGSIZE";
-        return IPseudoTcpNotify::WR_TOO_LARGE;
-    } else {
-        PLOG(LS_ERROR, channel_->GetError()) << "PseudoTcpChannel::TcpWritePacket";
-        ASSERT(false);
-        return IPseudoTcpNotify::WR_FAIL;
-    }
-}
+//IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket_w(const char *buffer, size_t len)
+//{
+//    talk_base::PacketOptions packet_options;
+//    int sent = channel_->SendPacket(buffer, len, packet_options);
+//    if (sent > 0) {
+//        LOG_F(LS_VERBOSE) << "(" << sent << ") Sent";
+//        return IPseudoTcpNotify::WR_SUCCESS;
+//    } else if (IsBlockingError(channel_->GetError())) {
+//        LOG_F(LS_VERBOSE) << "Blocking";
+//        return IPseudoTcpNotify::WR_SUCCESS;
+//    } else if (channel_->GetError() == EMSGSIZE) {
+//        LOG_F(LS_ERROR) << "EMSGSIZE";
+//        return IPseudoTcpNotify::WR_TOO_LARGE;
+//    } else {
+//        PLOG(LS_ERROR, channel_->GetError()) << "PseudoTcpChannel::TcpWritePacket";
+//        ASSERT(false);
+//        return IPseudoTcpNotify::WR_FAIL;
+//    }
+//}
 
 void PseudoTcpChannel::AdjustClock(bool clear) {
   ASSERT(cs_.CurrentThreadIsOwner());

@@ -129,8 +129,8 @@ private:
                                                        const char* buffer,
                                                        size_t len);
 
-    virtual IPseudoTcpNotify::WriteResult TcpWritePacket_w(const char* buffer,
-                                                         size_t len);
+//    virtual IPseudoTcpNotify::WriteResult TcpWritePacket_w(const char* buffer,
+//                                                         size_t len);
 
     talk_base::Thread* signal_thread_, * worker_thread_, * stream_thread_;
     BaseSession* session_;

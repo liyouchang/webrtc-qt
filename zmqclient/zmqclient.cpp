@@ -16,8 +16,7 @@
 #include "HisiMediaDevice.h"
 
 #endif//arm
-
-
+#include <google/profiler.h>
 std::string ReadConfigFile();
 
 int kVersion = 53;
@@ -53,6 +52,8 @@ int main()
     GetStringFromJson(dealer_value,&strDealerId);
 
 #ifndef ARM
+    ProfilerStart("zmq.prof");
+
     CameraClient client(strMac,clientVer);
     client.Connect(router_value.asString(),strDealerId);
     //client.Login();
@@ -66,6 +67,10 @@ int main()
     if(!simulator->Init(&client)){
         return 1;
     }
+    //talk_base::Thread::Current()->Run();
+    talk_base::Thread::Current()->ProcessMessages(60000);
+    delete simulator;
+    ProfilerStop();
 #else
     HisiMediaDevice * device = new HisiMediaDevice();
     if (strMac.empty()) {
@@ -83,10 +88,8 @@ int main()
                 &client,&CameraClient::SendAlarm);
 
     device->Init(&client);
-
-#endif //arm
     talk_base::Thread::Current()->Run();
-
+#endif //arm
     return 0;
 }
 

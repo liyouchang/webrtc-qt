@@ -104,7 +104,10 @@ void StreamProcess::WriteStreamInternel()
             write_buf_.GetBuffered(&leftWrite);
             if( leftWrite > 0 ){
                 stream_->PostEvent(talk_base::SE_WRITE, 0);
+            }else{
             }
+        }else{
+            //LOG_T_F(INFO)<<"write false "<<result;
         }
     }
 }
@@ -132,9 +135,11 @@ bool StreamProcess::WriteStream(const char *data, int len)
     write_buf_.GetWriteRemaining(&wlen);
     //if write buffer is full ,wait until the buffer has half space to write
     if(writeBufferFull){
-        if(len > kWriteBufferSize/2){
+        if(wlen > kWriteBufferSize/2){
+            LOG(INFO) << "StreamProcess::WriteStream---"<<
+                            "write buffer is now able to use";
             writeBufferFull = false;
-        }else{
+        } else {
             return false;
         }
     }

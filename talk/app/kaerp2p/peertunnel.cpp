@@ -338,13 +338,14 @@ const SessionDescriptionInterface *PeerTunnel::remote_description() const
     return session_->remote_desc_.get();
 }
 
-void PeerTunnel::CreateOffer(CreateSessionDescriptionObserver *observer)
+void PeerTunnel::CreateOffer(CreateSessionDescriptionObserver *observer,
+                             const std::string &description)
 {
     if (!VERIFY(observer != NULL)) {
         LOG(LS_ERROR) << "CreateOffer - observer is NULL.";
         return;
     }
-    session_->CreateOffer(observer);
+    session_->CreateOffer(observer,description);
 
 }
 
