@@ -115,7 +115,7 @@ void UdpStreamChannel::OnChannelDestroyed(cricket::TransportChannel *channel)
 
 void UdpStreamChannel::OnChannelWritableState(cricket::TransportChannel *channel)
 {
-    LOG_F(LS_VERBOSE) << "[" << channel_name_ << "]";
+    LOG_F(INFO) << "[" << channel_name_ << "]";
     ASSERT(worker_thread_->IsCurrent());
     if (!channel_) {
         LOG_F(LS_WARNING) << "NULL channel";
@@ -126,6 +126,8 @@ void UdpStreamChannel::OnChannelWritableState(cricket::TransportChannel *channel
         return;
 
     ready_to_connect_ = false;
+    stream_->PostEvent(stream_thread_, SE_OPEN | SE_READ | SE_WRITE,0);
+
 }
 
 void UdpStreamChannel::OnChannelRead(cricket::TransportChannel *channel,
