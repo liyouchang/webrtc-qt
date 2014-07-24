@@ -23,12 +23,12 @@ bool UdpStreamChannel::Connect(const std::string &content_name, const std::strin
     worker_thread_ = session_->worker_thread();
     content_name_ = content_name;
 
-    if (session_->initiator()) {
-        // Since we may try several protocols and network adapters that won't work,
-        // waiting until we get our first writable notification before initiating
-        // TCP negotiation.
-        ready_to_connect_ = true;
-    }
+//    if (session_->initiator()) {
+//        // Since we may try several protocols and network adapters that won't work,
+//        // waiting until we get our first writable notification before initiating
+//        // TCP negotiation.
+//    }
+    ready_to_connect_ = true;
 
     worker_thread_->Invoke<void>(
                 talk_base::Bind(&StreamChannelInterface::CreateChannel_w,
@@ -154,7 +154,7 @@ void UdpStreamChannel::OnChannelRead(cricket::TransportChannel *channel,
 
 void UdpStreamChannel::OnChannelConnectionChanged(cricket::TransportChannel *channel, const cricket::Candidate &candidate)
 {
-    LOG_F(LS_VERBOSE) << "[" << channel_name_ << "]";
+    LOG_F(INFO) << "[" << channel_name_ << "]";
     ASSERT(worker_thread_->IsCurrent());
     CritScope lock(&cs_);
     if (!channel_) {
