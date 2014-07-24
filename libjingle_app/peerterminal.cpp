@@ -99,26 +99,26 @@ void PeerTerminal::OnTunnelClosed(const std::string &peerId)
     this->SignalTunnelClosed(this,peerId);
 }
 
-void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
+void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream,
+                                    talk_base::Buffer& buffer)
 {
     //ASSERT(tunnel == conductor_->GetStreamProcess());
-    //LOG(INFO)<< __FUNCTION__ << " read " << len;
     ScopedTunnel aTunnel = this->GetTunnel(stream);
     if(aTunnel == NULL){
-        LOG(WARNING)<<"cannot get tunnel by stream";
+        LOG_T_F(WARNING)<<"cannot get tunnel by stream";
         return ;
     }
 
-    char  * buffer = new char[len];
-    size_t readLen;
-    bool result = stream->ReadStream(buffer,len,&readLen);
-    if(!result){
-        LOG(WARNING)<<__FUNCTION__<<"--read stream error";
-        return ;
-    }
-    talk_base::Buffer data(buffer,readLen);
-    delete buffer;
-    this->SignalTunnelMessage(aTunnel->GetPeerID(),data);
+//    char * buffer = new char[len];
+//    size_t readLen;
+//    bool result = stream->ReadStream(buffer,len,&readLen);
+//    if(!result){
+//        LOG_T_F(WARNING)<<"--read stream error";
+//        return ;
+//    }
+//    talk_base::Buffer data(buffer,readLen);
+//    delete buffer;
+    this->SignalTunnelMessage(aTunnel->GetPeerID(),buffer);
 }
 /**
  * @brief PeerTerminal::OnRouterReadData,we process message received by client_,

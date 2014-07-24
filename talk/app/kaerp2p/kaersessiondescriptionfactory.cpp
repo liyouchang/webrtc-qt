@@ -31,12 +31,10 @@ KaerSessionDescriptionFactory::KaerSessionDescriptionFactory(
     session_(session),
     session_id_(session_id)
 {
-
 }
 
 KaerSessionDescriptionFactory::~KaerSessionDescriptionFactory()
 {
-
 }
 
 void KaerSessionDescriptionFactory::CopyCandidatesFromSessionDescription(

@@ -299,7 +299,7 @@ TunnelSession::TunnelSession(TunnelSessionClientBase* client, BaseSession* sessi
   ASSERT(session_ != NULL);
   session_->SignalState.connect(this, &TunnelSession::OnSessionState);
   channel_ = new PseudoTcpChannel(stream_thread, session_);
-  channel_->SignalChannelClosed.connect(this, &TunnelSession::OnChannelClosed);
+  //channel_->SignalChannelClosed.connect(this, &TunnelSession::OnChannelClosed);
 }
 
 TunnelSession::~TunnelSession() {

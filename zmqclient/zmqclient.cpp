@@ -12,12 +12,13 @@
 
 #ifndef ARM
 #include "KeVideoSimulator.h"
+#include <google/profiler.h>
+
 #else
 #include "HisiMediaDevice.h"
 
 #endif//arm
-#include <google/profiler.h>
-std::string ReadConfigFile();
+
 
 int kVersion = 53;
 
@@ -69,6 +70,7 @@ int main()
     }
     //talk_base::Thread::Current()->Run();
     talk_base::Thread::Current()->ProcessMessages(60000);
+    std::cout << "===========delete simulator=========" <<std::endl;
     delete simulator;
     ProfilerStop();
 #else

@@ -62,24 +62,24 @@ struct EventData : public MessageData {
 // PseudoTcpChannel::InternalStream
 ///////////////////////////////////////////////////////////////////////////////
 
-class PseudoTcpChannel::InternalStream : public StreamInterface {
-public:
-  InternalStream(PseudoTcpChannel* parent);
-  virtual ~InternalStream();
+//class PseudoTcpChannel::InternalStream : public StreamInterface {
+//public:
+//  InternalStream(PseudoTcpChannel* parent);
+//  virtual ~InternalStream();
 
-  virtual StreamState GetState() const;
-  virtual StreamResult Read(void* buffer, size_t buffer_len,
-                                       size_t* read, int* error);
-  virtual StreamResult Write(const void* data, size_t data_len,
-                                        size_t* written, int* error);
-  virtual void Close();
+//  virtual StreamState GetState() const;
+//  virtual StreamResult Read(void* buffer, size_t buffer_len,
+//                                       size_t* read, int* error);
+//  virtual StreamResult Write(const void* data, size_t data_len,
+//                                        size_t* written, int* error);
+//  virtual void Close();
 
-private:
-  // parent_ is accessed and modified exclusively on the event thread, to
-  // avoid thread contention.  This means that the PseudoTcpChannel cannot go
-  // away until after it receives a Close() from TunnelStream.
-  PseudoTcpChannel* parent_;
-};
+//private:
+//  // parent_ is accessed and modified exclusively on the event thread, to
+//  // avoid thread contention.  This means that the PseudoTcpChannel cannot go
+//  // away until after it receives a Close() from TunnelStream.
+//  PseudoTcpChannel* parent_;
+//};
 
 ///////////////////////////////////////////////////////////////////////////////
 // PseudoTcpChannel
@@ -99,17 +99,23 @@ private:
 // Signal thread methods
 //
 
+//PseudoTcpChannel::PseudoTcpChannel(Thread* stream_thread, BaseSession* session)
+//    : signal_thread_(session->signaling_thread()),
+//      worker_thread_(NULL),
+//      stream_thread_(stream_thread),
+//      session_(session), channel_(NULL), tcp_(NULL), stream_(NULL),
+//      stream_readable_(false), pending_read_event_(false),
+//      ready_to_connect_(false) {
+//    ASSERT(signal_thread_->IsCurrent());
+//    ASSERT(NULL != session_);
+//}
 PseudoTcpChannel::PseudoTcpChannel(Thread* stream_thread, BaseSession* session)
-    : signal_thread_(session->signaling_thread()),
-      worker_thread_(NULL),
-      stream_thread_(stream_thread),
-      session_(session), channel_(NULL), tcp_(NULL), stream_(NULL),
+    :StreamChannelInterface(stream_thread,session),tcp_(NULL),
       stream_readable_(false), pending_read_event_(false),
       ready_to_connect_(false) {
     ASSERT(signal_thread_->IsCurrent());
     ASSERT(NULL != session_);
 }
-
 PseudoTcpChannel::~PseudoTcpChannel() {
   ASSERT(signal_thread_->IsCurrent());
   ASSERT(worker_thread_ == NULL);
@@ -133,7 +139,8 @@ bool PseudoTcpChannel::Connect(const std::string& content_name,
     content_name_ = content_name;
     //lht
     worker_thread_->Invoke<void>(
-                talk_base::Bind(&PseudoTcpChannel::CreateChannel_w,this,
+                talk_base::Bind(&StreamChannelInterface::CreateChannel_w,
+                                (StreamChannelInterface *)this,
                                 content_name, channel_name, component));
 
     ASSERT(tcp_ == NULL);
@@ -153,7 +160,7 @@ StreamInterface* PseudoTcpChannel::GetStream() {
   CritScope lock(&cs_);
   ASSERT(NULL != session_);
   if (!stream_)
-    stream_ = new PseudoTcpChannel::InternalStream(this);
+    stream_ = new StreamChannelInterface::InternalStream(this);
   //TODO("should we disallow creation of new stream at some point?");
   return stream_;
 }
@@ -214,18 +221,18 @@ void PseudoTcpChannel::SetOption(PseudoTcp::Option opt, int value) {
   tcp_->SetOption(opt, value);
 }
 
-void PseudoTcpChannel::CreateChannel_w(const std::string &content_name,
-                                       const std::string &channel_name,
-                                       int component)
-{
-    channel_ = session_->CreateChannel(content_name, channel_name, component);
-    channel_name_ = channel_name;
-    channel_->SetOption(Socket::OPT_DONTFRAGMENT, 1);
-    channel_->SignalDestroyed.connect(this,&PseudoTcpChannel::OnChannelDestroyed);
-    channel_->SignalWritableState.connect(this,&PseudoTcpChannel::OnChannelWritableState);
-    channel_->SignalReadPacket.connect(this,&PseudoTcpChannel::OnChannelRead);
-    channel_->SignalRouteChange.connect(this,&PseudoTcpChannel::OnChannelConnectionChanged);
-}
+//void PseudoTcpChannel::CreateChannel_w(const std::string &content_name,
+//                                       const std::string &channel_name,
+//                                       int component)
+//{
+//    channel_ = session_->CreateChannel(content_name, channel_name, component);
+//    channel_name_ = channel_name;
+//    channel_->SetOption(Socket::OPT_DONTFRAGMENT, 1);
+//    channel_->SignalDestroyed.connect(this,&PseudoTcpChannel::OnChannelDestroyed);
+//    channel_->SignalWritableState.connect(this,&PseudoTcpChannel::OnChannelWritableState);
+//    channel_->SignalReadPacket.connect(this,&PseudoTcpChannel::OnChannelRead);
+//    channel_->SignalRouteChange.connect(this,&PseudoTcpChannel::OnChannelConnectionChanged);
+//}
 
 //
 // Stream thread methods
@@ -509,15 +516,6 @@ IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket(
     ASSERT(tcp == tcp_);
     ASSERT(NULL != channel_);
 
-
-    //lht work on worker thread
-    //LOG(INFO) << "PseudoTcpChannel::TcpWritePacket";
-
-//    IPseudoTcpNotify::WriteResult result =
-//            worker_thread_->Invoke<IPseudoTcpNotify::WriteResult>(
-//                talk_base::Bind(&PseudoTcpChannel::TcpWritePacket_w,this,
-//                                buffer, len));
-//    return result;
     talk_base::PacketOptions packet_options;
     int sent = channel_->SendPacket(buffer, len, packet_options);
     if (sent > 0) {
@@ -536,26 +534,6 @@ IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket(
         return IPseudoTcpNotify::WR_FAIL;
     }
 }
-
-//IPseudoTcpNotify::WriteResult PseudoTcpChannel::TcpWritePacket_w(const char *buffer, size_t len)
-//{
-//    talk_base::PacketOptions packet_options;
-//    int sent = channel_->SendPacket(buffer, len, packet_options);
-//    if (sent > 0) {
-//        LOG_F(LS_VERBOSE) << "(" << sent << ") Sent";
-//        return IPseudoTcpNotify::WR_SUCCESS;
-//    } else if (IsBlockingError(channel_->GetError())) {
-//        LOG_F(LS_VERBOSE) << "Blocking";
-//        return IPseudoTcpNotify::WR_SUCCESS;
-//    } else if (channel_->GetError() == EMSGSIZE) {
-//        LOG_F(LS_ERROR) << "EMSGSIZE";
-//        return IPseudoTcpNotify::WR_TOO_LARGE;
-//    } else {
-//        PLOG(LS_ERROR, channel_->GetError()) << "PseudoTcpChannel::TcpWritePacket";
-//        ASSERT(false);
-//        return IPseudoTcpNotify::WR_FAIL;
-//    }
-//}
 
 void PseudoTcpChannel::AdjustClock(bool clear) {
   ASSERT(cs_.CurrentThreadIsOwner());
@@ -592,46 +570,46 @@ void PseudoTcpChannel::CheckDestroy() {
 // PseudoTcpChannel::InternalStream
 ///////////////////////////////////////////////////////////////////////////////
 
-PseudoTcpChannel::InternalStream::InternalStream(PseudoTcpChannel* parent)
-  : parent_(parent) {
-}
+//PseudoTcpChannel::InternalStream::InternalStream(PseudoTcpChannel* parent)
+//  : parent_(parent) {
+//}
 
-PseudoTcpChannel::InternalStream::~InternalStream() {
-  Close();
-}
+//PseudoTcpChannel::InternalStream::~InternalStream() {
+//  Close();
+//}
 
-StreamState PseudoTcpChannel::InternalStream::GetState() const {
-  if (!parent_)
-    return SS_CLOSED;
-  return parent_->GetState();
-}
+//StreamState PseudoTcpChannel::InternalStream::GetState() const {
+//  if (!parent_)
+//    return SS_CLOSED;
+//  return parent_->GetState();
+//}
 
-StreamResult PseudoTcpChannel::InternalStream::Read(
-    void* buffer, size_t buffer_len, size_t* read, int* error) {
-  if (!parent_) {
-    if (error)
-      *error = ENOTCONN;
-    return SR_ERROR;
-  }
-  return parent_->Read(buffer, buffer_len, read, error);
-}
+//StreamResult PseudoTcpChannel::InternalStream::Read(
+//    void* buffer, size_t buffer_len, size_t* read, int* error) {
+//  if (!parent_) {
+//    if (error)
+//      *error = ENOTCONN;
+//    return SR_ERROR;
+//  }
+//  return parent_->Read(buffer, buffer_len, read, error);
+//}
 
-StreamResult PseudoTcpChannel::InternalStream::Write(
-    const void* data, size_t data_len,  size_t* written, int* error) {
-  if (!parent_) {
-    if (error)
-      *error = ENOTCONN;
-    return SR_ERROR;
-  }
-  return parent_->Write(data, data_len, written, error);
-}
+//StreamResult PseudoTcpChannel::InternalStream::Write(
+//    const void* data, size_t data_len,  size_t* written, int* error) {
+//  if (!parent_) {
+//    if (error)
+//      *error = ENOTCONN;
+//    return SR_ERROR;
+//  }
+//  return parent_->Write(data, data_len, written, error);
+//}
 
-void PseudoTcpChannel::InternalStream::Close() {
-  if (!parent_)
-    return;
-  parent_->Close();
-  parent_ = NULL;
-}
+//void PseudoTcpChannel::InternalStream::Close() {
+//  if (!parent_)
+//    return;
+//  parent_->Close();
+//  parent_ = NULL;
+//}
 
 ///////////////////////////////////////////////////////////////////////////////
 

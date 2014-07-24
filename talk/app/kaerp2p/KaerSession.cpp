@@ -6,6 +6,10 @@
 #include "talk/base/stringencode.h"
 #include "talk/session/tunnel/tunnelsessionclient.h"
 #include "talk/base/bind.h"
+#include "talk/session/tunnel/pseudotcpchannel.h"
+
+#include "talk/app/kaerp2p/udpstreamchannel.h"
+
 using cricket::ContentInfo;
 using cricket::ContentInfos;
 using cricket::SessionDescription;
@@ -16,7 +20,6 @@ namespace kaerp2p {
 
 const char NS_TUNNEL[] = "http://www.google.com/talk/tunnel";
 const char CN_TUNNEL[] = "tunnel";
-
 
 // Error messages
 const char kSetLocalSdpFailed[] = "SetLocalDescription failed: ";
@@ -260,14 +263,12 @@ KaerSession::~KaerSession()
     for (size_t i = 0; i < saved_candidates_.size(); ++i) {
         delete saved_candidates_[i];
     }
-
 }
 
 bool KaerSession::Initialize()
 {
     kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
                                          signaling_thread(),this,id()));
-
     return true;
 }
 
@@ -445,7 +446,6 @@ bool KaerSession::ProcessIceMessage(const IceCandidateInterface *candidate)
                                          candidate->candidate()));
         return true;
     }
-
     // Add this candidate to the remote session description.
     if (!remote_desc_->AddCandidate(candidate)) {
         LOG(LS_ERROR) << "ProcessIceMessage: Candidate cannot be used";
@@ -490,23 +490,24 @@ bool KaerSession::CreateChannels(const cricket::SessionDescription *desc)
     LOG_T_F(INFO)<<"channel name is "<<tunnel_desc->description;
     //    return this->signaling_thread()->Invoke<bool>(
     //                talk_base::Bind(&KaerSession::CreatePseudoTcpChannel_s,this));
-    channel_ = new cricket::PseudoTcpChannel(this->worker_thread(), this);
-    channel_->Connect(CN_TUNNEL,"tcp", 1);
-    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,512*1024);
-    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
+//    channel_ = new cricket::PseudoTcpChannel(this->worker_thread(), this);
+//    channel_->Connect(CN_TUNNEL,"tcp", 1);
+    channel_ = new kaerp2p::UdpStreamChannel(this->worker_thread(), this);
+    channel_->Connect(CN_TUNNEL,"udp",1);
+//    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,2048*1024);
+//    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
     return true;
 }
 
-bool KaerSession::CreatePseudoTcpChannel_s()
-{
-    channel_->Connect(CN_TUNNEL,"tcp", 1);
-    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,512*1024);
-    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
-    //    channel_->SignalChannelClosed.connect(this, &TunnelSession::OnChannelClosed);
-
-    //LOG(INFO)<<"KaerSession::CreatePseudoTcpChannel_s---channel option set";
-    return true;
-}
+//bool KaerSession::CreatePseudoTcpChannel_s()
+//{
+////    channel_->Connect(CN_TUNNEL,"tcp", 1);
+////    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,512*1024);
+////    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
+////    channel_->SignalChannelClosed.connect(this, &KaerSession::OnStreamChannelClosed);
+//    //LOG(INFO)<<"KaerSession::CreatePseudoTcpChannel_s---channel option set";
+//    return true;
+//}
 
 void KaerSession::RemoveUnusedChannelsAndTransports(
         const cricket::SessionDescription *desc)
@@ -563,7 +564,6 @@ bool KaerSession::UpdateSessionState(KaerSession::Action action,
 
 void KaerSession::EnableChannels()
 {
-
 }
 
 bool KaerSession::StartCandidatesAllocation()
@@ -655,7 +655,6 @@ void KaerSession::SetIceConnectionState(IceObserver::IceConnectionState state)
     if (ice_connection_state_ == state) {
         return;
     }
-
     // ASSERT that the requested transition is allowed.  Note that
     // WebRtcSession does not implement "kIceConnectionClosed" (that is handled
     // within PeerConnection).  This switch statement should compile away when
@@ -728,12 +727,10 @@ bool KaerSession::ValidateSessionDescription(
     //        !VerifyCrypto(sdesc->description(), dtls_enabled_, &crypto_error)) {
     //      return BadSdp(source, crypto_error, error_desc);
     //    }
-
     // Verify ice-ufrag and ice-pwd.
     if (!VerifyIceUfragPwdPresent(sdesc->description())) {
         return BadSdp(source, kSdpWithoutIceUfragPwd, error_desc);
     }
-
     //        if (!ValidateBundleSettings(sdesc->description())) {
     //          return BadSdp(source, kBundleWithoutRtcpMux, error_desc);
     //        }
@@ -747,7 +744,6 @@ bool KaerSession::ValidateSessionDescription(
             return BadSdp(source, kMlineMismatch, error_desc);
         }
     }
-
     return true;
 }
 
@@ -860,13 +856,17 @@ bool KaerSession::GetLocalCandidateMediaIndex(const std::string &content_name,
     return content_found;
 }
 
+void KaerSession::OnStreamChannelClosed(cricket::StreamChannelInterface *channel)
+{
+    LOG_T_F(INFO)<<"channel closed "<<channel->content_name();
+}
+
 void KaerSession::OnTransportRequestSignaling(cricket::Transport *transport)
 {
     ASSERT(signaling_thread()->IsCurrent());
     transport->OnSignalingReady();
     if (ice_observer_) {
-        ice_observer_->OnIceGatheringChange(
-                    IceObserver::kIceGatheringGathering);
+        ice_observer_->OnIceGatheringChange(IceObserver::kIceGatheringGathering);
     }
 }
 
@@ -875,7 +875,6 @@ void KaerSession::OnTransportConnecting(cricket::Transport *transport)
     ASSERT(signaling_thread()->IsCurrent());
     // start monitoring for the write state of the transport.
     OnTransportWritable(transport);
-
 }
 
 void KaerSession::OnTransportWritable(cricket::Transport *transport)
@@ -884,24 +883,20 @@ void KaerSession::OnTransportWritable(cricket::Transport *transport)
     // TODO(bemasc): Expose more API from Transport to detect when
     // candidate selection starts or stops, due to success or failure.
     if (transport->all_channels_writable()) {
-        if (ice_connection_state_ ==
-                IceObserver::kIceConnectionChecking ||
-                ice_connection_state_ ==
-                IceObserver::kIceConnectionDisconnected) {
+        if (ice_connection_state_ == IceObserver::kIceConnectionChecking ||
+                ice_connection_state_ == IceObserver::kIceConnectionDisconnected)
+        {
             SetIceConnectionState(IceObserver::kIceConnectionConnected);
         }
     } else if (transport->HasChannels()) {
         // If the current state is Connected or Completed, then there were writable
         // channels but now there are not, so the next state must be Disconnected.
-        if (ice_connection_state_ ==
-                IceObserver::kIceConnectionConnected ||
-                ice_connection_state_ ==
-                IceObserver::kIceConnectionCompleted) {
-            SetIceConnectionState(
-                        IceObserver::kIceConnectionDisconnected);
+        if (ice_connection_state_ == IceObserver::kIceConnectionConnected ||
+                ice_connection_state_ == IceObserver::kIceConnectionCompleted)
+        {
+            SetIceConnectionState(IceObserver::kIceConnectionDisconnected);
         }
     }
-
 }
 
 void KaerSession::OnTransportProxyCandidatesReady(
@@ -909,7 +904,6 @@ void KaerSession::OnTransportProxyCandidatesReady(
 {
     ASSERT(signaling_thread()->IsCurrent());
     ProcessNewLocalCandidate(proxy->content_name(), candidates);
-
 }
 
 void KaerSession::OnCandidatesAllocationDone()
@@ -920,7 +914,6 @@ void KaerSession::OnCandidatesAllocationDone()
                     IceObserver::kIceGatheringComplete);
         ice_observer_->OnIceComplete();
     }
-
 }
 
 

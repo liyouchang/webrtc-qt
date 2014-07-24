@@ -33,7 +33,7 @@
 #include "talk/base/stream.h"
 #include "talk/p2p/base/pseudotcp.h"
 #include "talk/p2p/base/session.h"
-
+#include "streamchannelinterface.h"
 namespace talk_base {
 class Thread;
 }
@@ -62,10 +62,11 @@ class TransportChannel;
 // until long after PseudoTcpChannel has finished.  We must cope with both.
 ///////////////////////////////////////////////////////////////////////////////
 
-class PseudoTcpChannel
-        : public IPseudoTcpNotify,
-        public talk_base::MessageHandler,
-        public sigslot::has_slots<> {
+class PseudoTcpChannel:
+        public IPseudoTcpNotify,
+        public StreamChannelInterface,
+        public talk_base::MessageHandler
+{
 public:
     // Signal thread methods
     PseudoTcpChannel(talk_base::Thread* stream_thread,
@@ -76,7 +77,7 @@ public:
                int component);
   talk_base::StreamInterface* GetStream();
 
-  sigslot::signal1<PseudoTcpChannel*> SignalChannelClosed;
+//  sigslot::signal1<PseudoTcpChannel*> SignalChannelClosed;
 
     // Call this when the Session used to create this channel is being torn
     // down, to ensure that things get cleaned up properly.
@@ -86,15 +87,9 @@ public:
   void GetOption(PseudoTcp::Option opt, int* value);
   void SetOption(PseudoTcp::Option opt, int value);
 
-    //lht
-    const std::string& content_name() { return content_name_; }
-    void CreateChannel_w(const std::string& content_name,
-                         const std::string& channel_name,
-                         int component);
-    //lht add end
 private:
-    class InternalStream;
-    friend class InternalStream;
+//    class InternalStream;
+//    friend class InternalStream;
 
   virtual ~PseudoTcpChannel();
 
@@ -129,16 +124,13 @@ private:
                                                        const char* buffer,
                                                        size_t len);
 
-//    virtual IPseudoTcpNotify::WriteResult TcpWritePacket_w(const char* buffer,
-//                                                         size_t len);
-
-    talk_base::Thread* signal_thread_, * worker_thread_, * stream_thread_;
-    BaseSession* session_;
-    TransportChannel* channel_;
-    std::string content_name_;
-    std::string channel_name_;
+//    talk_base::Thread* signal_thread_, * worker_thread_, * stream_thread_;
+//    BaseSession* session_;
+//    TransportChannel* channel_;
+//    std::string content_name_;
+//    std::string channel_name_;
     PseudoTcp* tcp_;
-    InternalStream* stream_;
+//    InternalStream* stream_;
     bool stream_readable_, pending_read_event_;
     bool ready_to_connect_;
     mutable talk_base::CriticalSection cs_;

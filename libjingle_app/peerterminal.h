@@ -37,7 +37,7 @@ public:
 protected:
     void OnTunnelOpened(const std::string &peerId);
     void OnTunnelClosed(const std::string &peerId);
-    void OnTunnelReadData(kaerp2p::StreamProcess * stream,size_t len);
+    void OnTunnelReadData(kaerp2p::StreamProcess * stream, talk_base::Buffer &buffer);
     void OnRouterReadData(const std::string & peer_id, const std::string & msg);
     void OnTunnelNeedSend(const std::string& peer_id, const std::string& msg);
 

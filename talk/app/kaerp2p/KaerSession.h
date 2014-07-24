@@ -3,7 +3,7 @@
 
 #include "talk/p2p/base/session.h"
 #include "talk/app/webrtc/jsep.h"
-#include "talk/session/tunnel/pseudotcpchannel.h"
+#include "talk/session/tunnel/streamchannelinterface.h"
 
 using namespace webrtc;
 
@@ -86,10 +86,10 @@ public:
 
 protected:
     bool CreateChannels(const cricket::SessionDescription* desc);
-    bool CreatePseudoTcpChannel_s();
+    //bool CreatePseudoTcpChannel_s();
 
 private:
-    enum Action  {
+    enum Action {
         kOffer,
         kPrAnswer,
         kAnswer,
@@ -144,7 +144,9 @@ private:
     IceObserver::IceConnectionState ice_connection_state_;
     talk_base::scoped_ptr<IceRestartAnswerLatch> ice_restart_latch_;
 
-    cricket::PseudoTcpChannel* channel_;
+    cricket::StreamChannelInterface* channel_;
+    virtual void OnStreamChannelClosed(cricket::StreamChannelInterface *channel);
+
     // Candidates that arrived before the remote description was set.
     std::vector<webrtc::IceCandidateInterface*> saved_candidates_;
     talk_base::scoped_ptr<KaerSessionDescriptionFactory> kaer_session_desc_factory_;

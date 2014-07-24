@@ -134,7 +134,7 @@ SOURCES += \
     base/ratelimiter.cc \
     base/worker.cc \
     base/optionsfile.cc \
-    base/event.cc
+    base/event.cc \
 
 
 
@@ -195,7 +195,7 @@ HEADERS += \
     base/buffer.h \
     base/optionsfile.h \
     base/asyncpacketsocket.h \
-    base/event.h
+    base/event.h \
 
 OTHER_FILES += \
     libjingle.gyp
