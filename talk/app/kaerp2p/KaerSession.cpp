@@ -859,6 +859,7 @@ bool KaerSession::GetLocalCandidateMediaIndex(const std::string &content_name,
 void KaerSession::OnStreamChannelClosed(cricket::StreamChannelInterface *channel)
 {
     LOG_T_F(INFO)<<"channel closed "<<channel->content_name();
+    channel_ = NULL;
 }
 
 void KaerSession::OnTransportRequestSignaling(cricket::Transport *transport)

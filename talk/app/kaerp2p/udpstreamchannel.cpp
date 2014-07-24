@@ -81,6 +81,24 @@ StreamResult UdpStreamChannel::Write(const void *data, size_t data_len, size_t *
     }
 }
 
+void UdpStreamChannel::Close()
+{
+    ASSERT(stream_ != NULL && stream_thread_->IsCurrent());
+    CritScope lock(&cs_);
+    stream_ = NULL;
+    LOG_T_F(INFO)<<" close udp stream channel";
+    delete this;
+
+    // Clear out any pending event notifications
+    //stream_thread_->Clear(this, MSG_ST_EVENT);
+//    if (tcp_) {
+//      tcp_->Close(false);
+//      AdjustClock();
+//    } else {
+//      CheckDestroy();
+//    }
+}
+
 void UdpStreamChannel::OnChannelDestroyed(cricket::TransportChannel *channel)
 {
     LOG_F(LS_INFO) << "(" << channel->component() << ")";
@@ -93,7 +111,6 @@ void UdpStreamChannel::OnChannelDestroyed(cricket::TransportChannel *channel)
         stream_->PostEvent(stream_thread_,SE_CLOSE,0);
     }
     this->SignalChannelClosed(this);
-    delete this;
 }
 
 void UdpStreamChannel::OnChannelWritableState(cricket::TransportChannel *channel)
