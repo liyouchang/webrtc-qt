@@ -134,6 +134,8 @@ void UdpStreamChannel::OnChannelRead(cricket::TransportChannel *channel,
                                      const char *data, size_t size,
                                      const PacketTime &packet_time, int flags)
 {
+    LOG_F(INFO) << "readed "<<size;
+
     ASSERT(worker_thread_->IsCurrent());
     CritScope lock(&cs_);
     if (!channel_) {

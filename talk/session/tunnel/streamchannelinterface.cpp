@@ -82,6 +82,7 @@ void StreamChannelInterface::CreateChannel_w(const std::string &content_name,
     channel_ = session_->CreateChannel(content_name, channel_name, component);
     channel_name_ = channel_name;
     channel_->SetOption(Socket::OPT_DONTFRAGMENT, 1);
+    channel_->SetOption(Socket::OPT_SNDBUF,10*1024*1024);
     channel_->SignalDestroyed.connect(this,&StreamChannelInterface::OnChannelDestroyed);
     channel_->SignalWritableState.connect(this,&StreamChannelInterface::OnChannelWritableState);
     channel_->SignalReadPacket.connect(this,&StreamChannelInterface::OnChannelRead);

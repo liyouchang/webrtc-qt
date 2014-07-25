@@ -490,10 +490,10 @@ bool KaerSession::CreateChannels(const cricket::SessionDescription *desc)
     LOG_T_F(INFO)<<"channel name is "<<tunnel_desc->description;
     //    return this->signaling_thread()->Invoke<bool>(
     //                talk_base::Bind(&KaerSession::CreatePseudoTcpChannel_s,this));
-//    channel_ = new cricket::PseudoTcpChannel(this->worker_thread(), this);
-//    channel_->Connect(CN_TUNNEL,"tcp", 1);
-    channel_ = new kaerp2p::UdpStreamChannel(this->worker_thread(), this);
-    channel_->Connect(CN_TUNNEL,"udp",1);
+    channel_ = new cricket::PseudoTcpChannel(this->worker_thread(), this);
+    channel_->Connect(CN_TUNNEL,"tcp", 1);
+//    channel_ = new kaerp2p::UdpStreamChannel(this->worker_thread(), this);
+//    channel_->Connect(CN_TUNNEL,"udp",1);
 //    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,2048*1024);
 //    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
     return true;
@@ -501,10 +501,10 @@ bool KaerSession::CreateChannels(const cricket::SessionDescription *desc)
 
 //bool KaerSession::CreatePseudoTcpChannel_s()
 //{
-////    channel_->Connect(CN_TUNNEL,"tcp", 1);
-////    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,512*1024);
-////    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
-////    channel_->SignalChannelClosed.connect(this, &KaerSession::OnStreamChannelClosed);
+//    channel_->Connect(CN_TUNNEL,"tcp", 1);
+//    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,512*1024);
+//    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
+//    channel_->SignalChannelClosed.connect(this, &KaerSession::OnStreamChannelClosed);
 //    //LOG(INFO)<<"KaerSession::CreatePseudoTcpChannel_s---channel option set";
 //    return true;
 //}
