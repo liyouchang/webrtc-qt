@@ -26,9 +26,9 @@ KeVideoSimulator::~KeVideoSimulator()
     delete reader;
 }
 
-bool KeVideoSimulator::Init(kaerp2p::PeerConnectionClientInterface *client)
+bool KeVideoSimulator::Init(kaerp2p::PeerTerminalInterface *t)
 {
-    if(!KeTunnelCamera::Init(client)){
+    if(!KeTunnelCamera::Init(t)){
         return  false;
     }
     return reader->StartRead(fileName);

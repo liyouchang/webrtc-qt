@@ -206,8 +206,8 @@ bool KeMsgProcessContainer::Init(PeerTerminalInterface *t)
 
 bool KeMsgProcessContainer::Init(kaerp2p::PeerConnectionClientInterface *client)
 {
-    PeerTerminal * t = new PeerTerminal();
-    t->Initialize(client);
+    PeerTerminal * t = new PeerTerminal(client);
+    //t->Initialize(client);
     this->has_terminal = true;
     return this->Init(t);
 }
@@ -294,6 +294,7 @@ KeMsgProcess *KeMsgProcessContainer::GetProcess(const std::string &peer_id)
 
 void KeMsgProcessContainer::AddMsgProcess(KeMsgProcess *process)
 {
+    LOG_T_F(INFO)<<" new process "<<process->peer_id();
     process->SignalNeedSendData.connect(
                 this,&KeMsgProcessContainer::SendProcessData);
     process->SignalHeartStop.connect(this,&KeMsgProcessContainer::OnHeartStop);
