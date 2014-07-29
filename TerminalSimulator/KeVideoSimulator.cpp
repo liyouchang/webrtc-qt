@@ -15,8 +15,8 @@
 KeVideoSimulator::KeVideoSimulator(const std::string &fileName):
     fileName(fileName)
 {
-    //reader = new kaerp2p::RecordReaderAvi(0);
-    reader = new kaerp2p::FakeRecordReaderAvi(10);
+    reader = new kaerp2p::RecordReaderAvi(20);
+    //reader = new kaerp2p::FakeRecordReaderAvi(10);
     reader->SignalVideoData.connect(this,&KeVideoSimulator::OnFileVideoData);
     reader->SignalAudioData.connect(this,&KeVideoSimulator::OnFileAudioData);
     reader->SignalRecordEnd.connect(this,&KeVideoSimulator::OnFileReadEnd);

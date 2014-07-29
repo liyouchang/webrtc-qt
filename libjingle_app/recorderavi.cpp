@@ -583,4 +583,38 @@ bool RecordReaderAvi::StopRead()
     return true;
 }
 
+FakeRecordReaderAvi::FakeRecordReaderAvi(int interval):interval(interval)
+{
+    readThread = new talk_base::Thread();
+    readThread->Start();
+}
+
+FakeRecordReaderAvi::~FakeRecordReaderAvi()
+{
+    delete readThread;
+}
+
+void FakeRecordReaderAvi::OnMessage(talk_base::Message *msg)
+{
+    char moviBuf[13000];
+    int moviLen = 13000;
+    SignalVideoData(moviBuf,moviLen);
+//    SignalVideoData(moviBuf,moviLen);
+//    SignalVideoData(moviBuf,moviLen);
+    readThread->PostDelayed(interval,this);
+}
+
+bool FakeRecordReaderAvi::StartRead(const std::string &filename)
+{
+    readThread->Post(this);
+    return true;
+
+}
+
+bool FakeRecordReaderAvi::StopRead()
+{
+    readThread->Clear(this);
+    return true;
+}
+
 }

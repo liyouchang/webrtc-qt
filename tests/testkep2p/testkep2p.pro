@@ -10,10 +10,9 @@ include (../../talk/talk_common.pri)
 
 DESTDIR = $$output_dir/$$TARGET
 
-message("DESTDIR is "$$DESTDIR)
+#message("DESTDIR is "$$DESTDIR)
 
 INCLUDEPATH     +=  \
-    ../../third_party/jsoncpp/overrides/include ../../third_party/jsoncpp/source/include \
     ../../third_party/cppzmq/include
 
 win32 {
@@ -40,3 +39,10 @@ SOURCES += main.cpp \
 HEADERS  += \
     ../../zmqclient/asyndealer.h \
     ../../zmqclient/peerconnectionclientdealer.h \
+
+
+hisi {
+    target_config.files  = $$OTHER_FILES $$DESTDIR/$$TARGET
+    target_config.path   = /var/lib/tftpboot
+    INSTALLS  += target_config
+}

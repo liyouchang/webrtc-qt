@@ -93,13 +93,13 @@ HisiMediaDevice::~HisiMediaDevice()
     Raycomm_UnInitParam();
 }
 
-bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
+bool HisiMediaDevice::Init(kaerp2p::PeerTerminalInterface *t)
 {
     //start get media
     media_thread_->Post(this, MSG_MEDIA_CONTROL, new MediaControlData(1,1,1,1));
     media_thread_->PostDelayed(kCheckNet,this,MSG_NET_CHECK);
     AlarmNotify::Instance()->StartNotify();
-    return KeTunnelCamera::Init(client);
+    return KeTunnelCamera::Init(t);
 }
 
 bool HisiMediaDevice::InitDeviceVideoInfo()

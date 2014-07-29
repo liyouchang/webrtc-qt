@@ -309,8 +309,11 @@ bool LocalUdpTerminal::SendByTunnel(const std::string &peerAddr,
             return false;
         }
         leftDataLen -= sendLen;
+        //socketThread_->SleepMs(1);
+        //LOG_T_F(INFO)<<"send "<<sent;
     }
     return true;
+
 }
 const int kLocalSocketStartPort = 22555;
 const int kLocalSocketEndPort = 22600;
@@ -333,6 +336,29 @@ bool LocalUdpTerminal::Initialize_s(const std::string &localAddr)
     localSocket->SetOption(talk_base::Socket::OPT_NODELAY,1);
 
     return true;
+}
+
+bool LocalUdpTerminal::SendByTunnel_s(const std::string &peerAddr, const char *data, size_t len)
+{
+    talk_base::PacketOptions options;
+    talk_base::SocketAddress remote_addr;
+    remote_addr.FromString(peerAddr);
+    const int onceSend = 1400;
+    int leftDataLen = len;
+    while(leftDataLen > 0){
+        int sendLen = leftDataLen > onceSend ? onceSend:leftDataLen;
+        int sent = localSocket->SendTo(data,sendLen,remote_addr,options);
+        if(sent < 0){
+            LOG(INFO)<<"LocalTerminal::SendByTunnel --- send "<<sendLen<<
+                       " error "<<localSocket->GetError();
+            return false;
+        }
+        leftDataLen -= sendLen;
+        //socketThread_->SleepMs(1);
+        LOG_T_F(INFO)<<"send "<<sent;
+    }
+    return true;
+
 }
 
 void LocalUdpTerminal::OnPackage(talk_base::AsyncPacketSocket *socket,

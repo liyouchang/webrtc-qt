@@ -74,6 +74,7 @@ public:
 protected:
     bool Initialize_s(const std::string & localAddr);
     //bool OpenTunnel_s(const std::string &peerAddr);
+    bool SendByTunnel_s(const std::string &peerAddr, const char *data, size_t len);
     void OnPackage(talk_base::AsyncPacketSocket* socket,
                    const char* buf, size_t size,
                    const talk_base::SocketAddress& remote_addr,

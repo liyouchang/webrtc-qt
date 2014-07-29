@@ -100,16 +100,16 @@ void StreamProcess::ReadStreamInternel()
 
 void StreamProcess::WriteStreamInternel()
 {
-    const int oneWrite = 1400;
+    //const int oneWrite = 1400;
     size_t toWrite = 0;
     size_t written = 0;
     talk_base::StreamResult result;
     const void * buffer = this->write_buf_.GetReadData(&toWrite);
     if(buffer != NULL && toWrite > 0){
         int error;
-        if(toWrite > oneWrite){
-            toWrite = oneWrite;
-        }
+//        if(toWrite > oneWrite){
+//            toWrite = oneWrite;
+//        }
         result = stream_->WriteAll(buffer,toWrite,&written,&error);
         if(written > 0){
             this->write_buf_.ConsumeReadData(written);

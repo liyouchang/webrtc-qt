@@ -39,7 +39,7 @@ public:
     };
     HisiMediaDevice();
     ~HisiMediaDevice();
-    virtual bool Init(kaerp2p::PeerConnectionClientInterface *client);
+    virtual bool Init(kaerp2p::PeerTerminalInterface *t);
     bool InitDeviceVideoInfo();
     virtual void SetVideoClarity(int);
     void SetVideoResolution(std::string r);

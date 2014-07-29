@@ -4,7 +4,8 @@ SUBDIRS += \
     third_party \
     talk \
     libjingle_app \
-    zmqclient
+    zmqclient \
+    TerminalSimulator
 
 
 

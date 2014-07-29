@@ -67,5 +67,22 @@ private:
 public:
 };
 
+class FakeRecordReaderAvi: public RecordReaderInterface,public talk_base::MessageHandler
+{
+public:
+    FakeRecordReaderAvi(int interval);
+    ~FakeRecordReaderAvi();
+    void OnMessage(talk_base::Message *msg);
+    bool StartRead(const std::string &filename);
+    bool StopRead();
+
+protected:
+    talk_base::Thread * readThread;
+    int interval;
+
+
+};
+
+
 }
 #endif // RECORDERAVI_H
