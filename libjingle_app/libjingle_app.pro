@@ -16,10 +16,6 @@ CONFIG -= qt
 
 include (../talk/talk_common.pri)
 
-INCLUDEPATH     +=  \
-    ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
-
-
 
 DESTDIR = $$output_dir/libs
 

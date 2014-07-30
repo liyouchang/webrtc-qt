@@ -1,11 +1,15 @@
 
 
-INCLUDEPATH += $$PWD/..
+INCLUDEPATH += $$PWD/.. \
+    ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include
 
 
 DEFINES += JSONCPP_RELATIVE_PATH LOGGING=1  \
     LIBPEERCONNECTION_LIB=1  USE_WEBRTC_DEV_BRANCH \
     SRTP_RELATIVE_PATH HAVE_SRTP
+
+
+
 
 
 win32 {
@@ -31,7 +35,6 @@ linux {
 
 hisi {
     DEFINES += ARM
-    message($$DEFINES)
     output_dir = $$PWD/../out/arm
 }
 

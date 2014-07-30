@@ -10,13 +10,10 @@
 #include "libjingle_app/defaults.h"
 #include "libjingle_app/p2pconductor.h"
 #include "libjingle_app/peerterminal.h"
-#ifndef ARM
-#include "KeVideoSimulator.h"
-//#include <google/profiler.h>
 
+#ifndef ARM
 #else
 #include "HisiMediaDevice.h"
-
 #endif//arm
 
 
@@ -59,28 +56,28 @@ int main()
 //    client.Connect(router_value.asString(),strDealerId);
 
 //    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client);
-    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
-    terminal->Initialize("0.0.0.0:12345");
+////    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
+////    terminal->Initialize("0.0.0.0:12345");
 
-    Json::Value jsampleFile =
-            JsonConfig::Instance()->Get("sampleFileName","sample.avi");
-    std::string sampleFileName;
-    if(!GetStringFromJson(jsampleFile,&sampleFileName)){
-        return 2;
-    }
+//    Json::Value jsampleFile =
+//            JsonConfig::Instance()->Get("sampleFileName","sample.avi");
+//    std::string sampleFileName;
+//    if(!GetStringFromJson(jsampleFile,&sampleFileName)){
+//        return 2;
+//    }
 
 
-    KeVideoSimulator * simulator = new KeVideoSimulator(sampleFileName);
-    if(!simulator->Init(terminal)){
-        return 1;
-    }
+//    KeVideoSimulator * simulator = new KeVideoSimulator(sampleFileName);
+//    if(!simulator->Init(terminal)){
+//        return 1;
+//    }
 
-    //talk_base::Thread::Current()->Run();
-    talk_base::Thread::Current()->ProcessMessages(60000);
-    std::cout << "===========delete simulator=========" <<std::endl;
-    delete simulator;
-    delete terminal;
-//    ProfilerStop();
+//    //talk_base::Thread::Current()->Run();
+//    talk_base::Thread::Current()->ProcessMessages(60000);
+//    std::cout << "===========delete simulator=========" <<std::endl;
+//    delete simulator;
+//    delete terminal;
+////    ProfilerStop();
 
 
 
@@ -100,8 +97,16 @@ int main()
     AlarmNotify::Instance()->SignalTerminalAlarm.connect(
                 &client,&CameraClient::SendAlarm);
 
-    device->Init(&client);
+//    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client);
+    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
+    terminal->Initialize("0.0.0.0:12345");
+
+    device->Init(terminal);
     talk_base::Thread::Current()->Run();
+
+    delete device;
+    delete terminal;
+
 #endif //arm
     return 0;
 }

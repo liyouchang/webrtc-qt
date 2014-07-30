@@ -16,6 +16,7 @@ public:
     sigslot::signal1<RecordReaderInterface *> SignalRecordEnd;
     sigslot::signal2<const char *,int> SignalVideoData;
     sigslot::signal2<const char *,int> SignalAudioData;
+    sigslot::signal2<RecordReaderInterface * ,int> SignalReportProgress;
     VideoInfo recordInfo;
 protected:
     RecordReaderInterface(){}

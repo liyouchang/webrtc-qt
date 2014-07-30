@@ -5,15 +5,11 @@ CONFIG -= qt
 
 
 include (../talk/talk_common.pri)
+include (zmqdealer.pri)
 
 DESTDIR = $$output_dir/$$TARGET
 
-message("DESTDIR is "$$DESTDIR)
-
-
-INCLUDEPATH  +=  \
-    ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
-    ../third_party/cppzmq/include
+#message("DESTDIR is "$$DESTDIR)
 
 win32 {
     #for zmqhelper
@@ -28,20 +24,13 @@ win32 {
     LIBS += -L$$output_dir/libs
     LIBS += -ljingle_app -ljingle_p2p -ljingle
     LIBS += -lcppzmq -ljsoncpp
-    LIBS += -pthread -ldl -lprofiler
-
+    LIBS += -pthread -ldl
+    #LIBS += -lprofiler
 }
 
 SOURCES += \
-    asyndealer.cpp \
-    peerconnectionclientdealer.cpp \
-    CameraClient.cpp \
     zmqclient.cpp
 
-HEADERS += \
-    asyndealer.h \
-    peerconnectionclientdealer.h \
-    CameraClient.h
 
 hisi {
     SOURCES += HisiMediaDevice.cpp
@@ -50,12 +39,13 @@ hisi {
             keapi/keapi.h
     LIBS += -lkeapi -lstore -lexfat
 }else {
-    SOURCES +=  KeVideoSimulator.cpp
-    HEADERS +=  KeVideoSimulator.h
+#    SOURCES +=  KeVideoSimulator.cpp
+#    HEADERS +=  KeVideoSimulator.h
 }
 
 OTHER_FILES += \
     config.json
+
 
 hisi {
     target_config.files  = $$OTHER_FILES $$DESTDIR/$$TARGET
