@@ -264,14 +264,18 @@ bool LocalUdpTerminal::OpenTunnel(const std::string &peerAddr)
     if(localSocket){
         this->SignalTunnelOpened(this,peerAddr);
         this->isOpened = true;
+        return true;
     }
+    return false;
 }
 
 bool LocalUdpTerminal::CloseTunnel(const std::string &peerAddr)
 {
     if(localSocket){
         this->SignalTunnelClosed(this,peerAddr);
+        return true;
     }
+    return false;
 }
 
 bool LocalUdpTerminal::SendByRouter(const std::string &peerAddr,

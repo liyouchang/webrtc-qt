@@ -12,7 +12,7 @@
 #include "libjingle_app/peerterminal.h"
 #ifndef ARM
 #include "KeVideoSimulator.h"
-#include <google/profiler.h>
+//#include <google/profiler.h>
 
 #else
 #include "HisiMediaDevice.h"
@@ -53,7 +53,7 @@ int main()
     GetStringFromJson(dealer_value,&strDealerId);
 
 #ifndef ARM
-    ProfilerStart("zmq.prof");
+//    ProfilerStart("zmq.prof");
 
 //    CameraClient client(strMac,clientVer);
 //    client.Connect(router_value.asString(),strDealerId);
@@ -80,7 +80,7 @@ int main()
     std::cout << "===========delete simulator=========" <<std::endl;
     delete simulator;
     delete terminal;
-    ProfilerStop();
+//    ProfilerStop();
 
 
 
