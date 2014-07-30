@@ -8,6 +8,7 @@ CONFIG -= qt
 include (../talk/talk_common.pri)
 include (../zmqclient/zmqdealer.pri)
 
+DESTDIR = $$output_dir/$$TARGET
 
 win32 {
     #for zmqhelper
@@ -36,4 +37,13 @@ HEADERS += \
 
 OTHER_FILES += \
     config.json
+
+
+#target.files = $$DESTDIR/$$TARGET
+#target.path = $$output_dir/$$TARGET
+#INSTALLS += target
+
+target_config.files  = $$OTHER_FILES
+target_config.path   = $$output_dir/$$TARGET
+INSTALLS  += target_config
 
