@@ -652,7 +652,7 @@ void RecordReaderAvi::ReadRecord()
 
         bool  isIdr = ((moviBuf.get()[4]&0x1f)==0x07) ;//判断idr帧
         if(isIdr){
-            LOG_T_F(INFO)<<"current frame "<<this->currentFrame<<" is idr";
+            LOG_T_F(LS_VERBOSE)<<"current frame "<<this->currentFrame<<" is idr";
         }
         SignalVideoData(moviBuf.get(),moviLen);
         if(moviLen&0x01){//read one more byte if the lenght is odd

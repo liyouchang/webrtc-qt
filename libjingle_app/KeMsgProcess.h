@@ -87,7 +87,7 @@ public:
     virtual ~KeMsgProcessContainer();
 
     virtual bool Init(PeerTerminalInterface *t);
-    virtual bool Init(kaerp2p::PeerConnectionClientInterface * client);
+    //virtual bool Init(kaerp2p::PeerConnectionClientInterface * client);
     virtual bool OpenTunnel(const std::string &peer_id);
     virtual bool CloseTunnel(const std::string &peer_id);
     virtual bool IsTunnelOpened(const std::string &peer_id);
@@ -114,7 +114,7 @@ protected:
     talk_base::CriticalSection crit_;
 
     PeerTerminalInterface * terminal_;
-    bool has_terminal;
+    //bool has_terminal;
 };
 
 }

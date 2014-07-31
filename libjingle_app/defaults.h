@@ -46,7 +46,7 @@ extern const char kKaerPTZCommandValue[];
 
 extern const uint16 kDefaultServerPort;
 
-enum FrameResolutionType{
+enum FrameType{
     kFrameD1 = 0,
     kFrameQCIF = 1,
     kFrameCIF = 2,

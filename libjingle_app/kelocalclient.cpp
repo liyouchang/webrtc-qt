@@ -174,7 +174,7 @@ KeLocalClient::KeLocalClient()
 bool KeLocalClient::Init(PeerTerminalInterface *t)
 {
     KeMsgProcessContainer::Init(t);
-    this->has_terminal = true;
+    //this->has_terminal = true;
 
     broadcastMsg.reset(new KeLocalMessage("broadcast",this));
     broadcastMsg->SignalNeedSendData.connect(

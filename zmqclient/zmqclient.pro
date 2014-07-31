@@ -29,18 +29,30 @@ win32 {
 }
 
 SOURCES += \
-    zmqclient.cpp
+    zmqclient.cpp \
 
 
 hisi {
+    SOURCES += kesdkdevice.cpp
+    HEADERS += kesdkdevice.h \
+            keapi/media_define.h \
+            keapi/media_api.h \
+            keapi/common_define.h \
+            keapi/common_api.h
+
+    LIBS +=-L$$output_dir/libs/sdk -lmedia -lcommon
+    LIBS += $$output_dir/libs/mpp/openssl-0.9.8d/libcrypto.a
+    LIBS +=-L$$output_dir/libs/mpp/lib  -lmpi -lisp -lsns_ov9712_8 \
+         -laec -lVoiceEngine -lanr -lresampler
+
+}else {
+#    SOURCES +=  KeVideoSimulator.cpp
+#    HEADERS +=  KeVideoSimulator.h
     SOURCES += HisiMediaDevice.cpp
     HEADERS += HisiMediaDevice.h \
             keapi/RayCommIPC_ParamInfo.h \
             keapi/keapi.h
-    LIBS += -lkeapi -lstore -lexfat
-}else {
-#    SOURCES +=  KeVideoSimulator.cpp
-#    HEADERS +=  KeVideoSimulator.h
+
 }
 
 OTHER_FILES += \
@@ -61,3 +73,5 @@ hisi {
 ##    INSTALLS  += target_config
 
 }
+
+
