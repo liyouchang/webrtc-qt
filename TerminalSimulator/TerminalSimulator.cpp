@@ -15,7 +15,7 @@
 using namespace std;
 
 
-int kVersion = 53;
+int kVersion = 54;
 
 int main()
 {
@@ -68,8 +68,8 @@ int main()
         return 1;
     }
 
-    //talk_base::Thread::Current()->Run();
-    talk_base::Thread::Current()->ProcessMessages(60000);
+    talk_base::Thread::Current()->Run();
+    //talk_base::Thread::Current()->ProcessMessages(60000);
     std::cout << "===========delete simulator=========" <<std::endl;
     delete simulator;
     delete terminal;

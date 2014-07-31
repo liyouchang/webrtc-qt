@@ -82,22 +82,22 @@ bool PlayWidget::Capture(QString file_name)
     return true;
 }
 
-//void PlayWidget::paintEvent(QPaintEvent *event)
-//{
-////    QPainter p(this);
-//    //qDebug()<<"PlayWidget::paintEvent ---"<<this->winId();
+void PlayWidget::paintEvent(QPaintEvent *event)
+{
+//    QPainter p(this);
+    qDebug()<<"PlayWidget::paintEvent ---"<<this->effectiveWinId();
 
-////    if(this->selected){
-////        p.setPen(Qt::yellow);
+//    if(this->selected){
+//        p.setPen(Qt::yellow);
 
-////    }else{
-////        p.setPen(Qt::black);
-////    }
-////    QRect r(event->rect());
-////    r.adjust(0, 0, -1, -1);
-////    p.drawRect(r);
-////    p.drawText(10,10,QString::number(playIndex()));
-//    //qDebug()<<"PlayWidget::paintEvent "<<playIndex()<<" rect "<<r;
-//   // QWidget::paintEvent(event);
-//}
+//    }else{
+//        p.setPen(Qt::black);
+//    }
+//    QRect r(event->rect());
+//    r.adjust(0, 0, -1, -1);
+//    p.drawRect(r);
+//    p.drawText(10,10,QString::number(playIndex()));
+    //qDebug()<<"PlayWidget::paintEvent "<<playIndex()<<" rect "<<r;
+   // QWidget::paintEvent(event);
+}
 
