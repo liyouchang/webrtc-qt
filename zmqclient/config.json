@@ -1,9 +1,9 @@
 {
 
     "camera" : {
-        "mac" : "123456"
+        "mac" : "123458"
     },
-    "dealerId" : "123456",
+    "dealerId" : "123458",
     "routerUrl":"tcp://222.174.213.181:5555",
     "logParams":"tstamp thread info debug",
     "logSaveFile":"/tmp/zmqclient.log",

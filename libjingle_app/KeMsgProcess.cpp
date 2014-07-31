@@ -178,15 +178,15 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
 KeMsgProcessContainer::KeMsgProcessContainer()
 {
     this->terminal_ = 0;
-    has_terminal = false;
+    //has_terminal = false;
 }
 
 KeMsgProcessContainer::~KeMsgProcessContainer()
 {
-    if(has_terminal){
-        delete this->terminal_;
-        this->terminal_ = 0;
-    }
+//    if(has_terminal){
+//        delete this->terminal_;
+//        this->terminal_ = 0;
+//    }
     talk_base::CritScope cs(&crit_);
     for(int i =0 ;i< processes_.size();i++){
         delete processes_[i];
@@ -204,13 +204,13 @@ bool KeMsgProcessContainer::Init(PeerTerminalInterface *t)
     return true;
 }
 
-bool KeMsgProcessContainer::Init(kaerp2p::PeerConnectionClientInterface *client)
-{
-    PeerTerminal * t = new PeerTerminal(client);
-    //t->Initialize(client);
-    this->has_terminal = true;
-    return this->Init(t);
-}
+//bool KeMsgProcessContainer::Init(kaerp2p::PeerConnectionClientInterface *client)
+//{
+//    PeerTerminal * t = new PeerTerminal(client);
+//    //t->Initialize(client);
+//    this->has_terminal = true;
+//    return this->Init(t);
+//}
 
 bool KeMsgProcessContainer::OpenTunnel(const std::string & peer_id)
 {

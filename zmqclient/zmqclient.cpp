@@ -13,7 +13,7 @@
 
 #ifndef ARM
 #else
-#include "HisiMediaDevice.h"
+#include "kesdkdevice.h"
 #endif//arm
 
 
@@ -82,28 +82,27 @@ int main()
 
 
 #else
-    HisiMediaDevice * device = new HisiMediaDevice();
-    if (strMac.empty()) {
-        strMac = device->GetHardwareId();
-    }
+    KeSdkDevice * device = new KeSdkDevice();
+//    if (strMac.empty()) {
+//        strMac = device->GetHardwareId();
+//    }
 
     CameraClient client(strMac,clientVer);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
 
-    client.SignalNtpSet.connect(device,&HisiMediaDevice::SetNtp);
-    device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
+//    client.SignalNtpSet.connect(device,&HisiMediaDevice::SetNtp);
+//    device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
 
-    AlarmNotify::Instance()->SignalTerminalAlarm.connect(
-                &client,&CameraClient::SendAlarm);
+//    AlarmNotify::Instance()->SignalTerminalAlarm.connect(
+//                &client,&CameraClient::SendAlarm);
 
-//    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client);
-    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
-    terminal->Initialize("0.0.0.0:12345");
+    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client);
+//    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
+//    terminal->Initialize("0.0.0.0:12345");
 
     device->Init(terminal);
     talk_base::Thread::Current()->Run();
-
     delete device;
     delete terminal;
 
