@@ -11,6 +11,7 @@
 #include "ke_recorder.h"
 #include "libjingle_app/p2pconductor.h"
 #include "zmqclient/peerconnectionclientdealer.h"
+#include "libjingle_app/peerterminal.h"
 
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
@@ -124,7 +125,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 54;
+    const int kVersion = 55;
     return kVersion;
 }
 /**
@@ -156,8 +157,10 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
         return KE_FAILED;
     }
 
+    kaerp2p::PeerTerminal * peerTerminal = new kaerp2p::PeerTerminal(connection_);
+
     tunnel_ = new KeQtTunnelClient(this);
-    tunnel_->Init(connection_);
+    tunnel_->Init(peerTerminal);
     QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvVideoData,
                      this->video_wall_,&VideoWall::OnRecvMediaData);
     QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvAudioData,

@@ -122,7 +122,7 @@ void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream,
 void PeerTerminal::OnRouterReadData(const std::string & peer_id,
                                     const std::string & msg)
 {
-    LOG_F(INFO)<<"receive from :"<<peer_id<<" msg:"<<msg;
+    LOG_F(LS_VERBOSE)<<"receive from :"<<peer_id<<" msg:"<<msg;
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(msg, jmessage)) {

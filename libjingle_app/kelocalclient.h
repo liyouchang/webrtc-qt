@@ -73,8 +73,6 @@ protected:
     virtual void OnRecvVideoData(const std::string & peer_id,
                                  const char * data,int len);
     talk_base::scoped_ptr<KeLocalMessage> broadcastMsg;
-private:
-    bool Init(PeerConnectionClientInterface *client);
 };
 
 class KeLocalMessage : public KeMsgProcess

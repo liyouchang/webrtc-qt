@@ -4,9 +4,7 @@ include (../talk/talk_common.pri)
 
 DESTDIR = $$output_dir/$$TARGET
 
-INCLUDEPATH     +=  $$PWD\
-    ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
-    ../third_party/cppzmq/include
+INCLUDEPATH += $$PWD   ../third_party/cppzmq/include
 
 win32 {
 #for zmqhelper
@@ -22,7 +20,6 @@ win32 {
     LIBS +=   -ljingle_app  -ljingle_p2p  -ljingle
     LIBS += -ljsoncpp  -lcppzmq
     LIBS += -pthread -ldl
-    #PRE_TARGETDEPS += $$DESTDIR/libjsoncpp.a $$DESTDIR/libjingle_p2p.a $$DESTDIR/libjingle.a $$DESTDIR/libjingle_app.a
 }
 
 

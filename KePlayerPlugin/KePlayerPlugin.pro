@@ -13,7 +13,7 @@ CONFIG +=  dll
 
 win32{
     RC_FILE  = KePlayerPlugin.rc
-    QTPLUGIN+=qwindows
+    QTPLUGIN += qwindows
 }
 #DEF_FILE = KePlayerPlugin.def
 #Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)

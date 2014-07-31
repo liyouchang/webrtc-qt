@@ -210,10 +210,6 @@ bool KeLocalClient::StopPeerMedia(std::string peerAddr)
     return true;
 }
 
-bool KeLocalClient::Init(PeerConnectionClientInterface *client)
-{
-    return false;
-}
 
 void KeLocalClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peerAddr)
 {
