@@ -12,7 +12,33 @@
 #include "libjingle_app/p2pconductor.h"
 #include "zmqclient/peerconnectionclientdealer.h"
 #include "libjingle_app/peerterminal.h"
+#ifdef WIN32
+#include <windows.h>
+#include <Shlobj.h>
 
+#ifdef UNICODE
+
+#define QStringToTCHAR(x)     (wchar_t*) x.utf16()
+
+#define PQStringToTCHAR(x)    (wchar_t*) x->utf16()
+
+#define TCHARToQString(x)     QString::fromUtf16((const ushort * )(x))
+
+#define TCHARToQStringN(x,y)  QString::fromUtf16((const ushort * )(x),(y))
+
+#else
+
+#define QStringToTCHAR(x)     x.local8Bit().constData()
+
+#define PQStringToTCHAR(x)    x->local8Bit().constData()
+
+#define TCHARToQString(x)     QString::fromLocal8Bit((x))
+
+#define TCHARToQStringN(x,y)  QString::fromLocal8Bit((x),(y))
+
+#endif
+
+#endif
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
       connection_(NULL),tunnel_(NULL),localClient_(NULL),
@@ -94,7 +120,7 @@ void KePlayerPlugin::about()
 
 void KePlayerPlugin::SetDivision(int num)
 {
-    this->video_wall_->SetDivision(num);
+//    this->video_wall_->SetDivision(num);
 }
 
 int KePlayerPlugin::PlayLocalFile()
@@ -111,10 +137,27 @@ int KePlayerPlugin::PlayLocalFile()
 
 QString KePlayerPlugin::GetLocalPath()
 {
-    QString ret = QFileDialog::getExistingDirectory(
+    QString ret;
+#ifdef WIN32
+    BROWSEINFO bInfo;
+    ZeroMemory(&bInfo, sizeof(bInfo));
+    bInfo.hwndOwner = (HWND)this->effectiveWinId();
+    bInfo.lpszTitle = TEXT("choose dir:");
+    bInfo.ulFlags = BIF_RETURNONLYFSDIRS;
+    LPITEMIDLIST lpDlist; //用来保存返回信息的IDList
+    lpDlist = SHBrowseForFolder(&bInfo) ; //显示选择对话框
+    if(lpDlist != NULL)  //用户按了确定按钮
+    {
+        TCHAR chPath[255]; //用来存储路径的字符串
+        SHGetPathFromIDList(lpDlist, chPath);//把项目标识列表转化成字符串
+        ret = TCHARToQString(chPath);
+    }
+#else
+    ret = QFileDialog::getExistingDirectory(
                 this,"选择路径",savePath(),
                 QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks|QFileDialog::ReadOnly);
-    LOG(INFO)<<"get local path " << ret.toLatin1().constData();
+#endif
+    qDebug()<<"get local path " << ret;
     return ret;
 }
 

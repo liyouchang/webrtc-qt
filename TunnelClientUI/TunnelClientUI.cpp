@@ -23,8 +23,17 @@ TunnelClientUI::TunnelClientUI(QWidget *parent) :
 {
     ui->setupUi(this);
 
+   // "[{"uri":"stun:222.174.213.185:5389"},{"uri":"turn:222.174.213.185:5766"}]"
     QString configStr = "";
-    this->ui->playPlugin->Initialize("tcp://192.168.0.185:5555");
+    Json::StyledWriter writer;
+
+    Json::Value jmessage;
+    Json::Value stunMsg;
+    stunMsg["uri"] = "stun:192.168.40.179:5389";
+    jmessage.append(stunMsg);
+    std::string msg = writer.write(jmessage);
+
+    this->ui->playPlugin->Initialize("tcp://192.168.40.179:5555",msg.c_str());
 
     //connection_ = new   PeerConnectionClientDealer();
 }
