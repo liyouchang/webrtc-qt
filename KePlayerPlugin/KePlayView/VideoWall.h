@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QVector>
 #include <QMap>
-
+#include <QFrame>
 #define MAX_AVPLAYER 1
 class AVService;
 //class PlayWidget;
@@ -20,7 +20,7 @@ class QMenu;
 QT_END_NAMESPACE
 
 
-class VideoWall: public QWidget
+class VideoWall: public QFrame
 {
     Q_OBJECT
 
@@ -115,7 +115,7 @@ protected:
 //    void dropEvent(QDropEvent *);
     void keyPressEvent(QKeyEvent *e);
 //    void contextMenuEvent(QContextMenuEvent *event);
-    //void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent *e);
 
 };
 

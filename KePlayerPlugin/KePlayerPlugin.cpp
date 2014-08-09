@@ -50,6 +50,9 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     vbox->setMargin(0);
     video_wall_ = new VideoWall(this);
     vbox->addWidget(video_wall_);
+    video_wall_->setGeometry(0,0,400,300);
+    video_wall_->setContentsMargins(0,0,0,0);
+    this->setContentsMargins(0,0,0,0);
 
     QObject::connect(video_wall_,&VideoWall::SigNeedStopPeerPlay,
                      this,&KePlayerPlugin::StopVideo);
@@ -614,6 +617,12 @@ QString KePlayerPlugin::GetTimeFileName(QString peerId, QString extName, QString
     QString fileName = QString("%1_%2_%3.%4").
             arg(peerId.left(12)).arg(dateStr).arg(timeStr).arg(extName);
     return fileDir.filePath(fileName);
+}
+
+void KePlayerPlugin::paintEvent(QPaintEvent *e)
+{
+//    e->ignore();
+//    qDebug()<<"KePlayerPlugin::paintEvent";
 }
 
 QString KePlayerPlugin::savePath() const

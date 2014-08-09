@@ -135,6 +135,7 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
         ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
         if(aTunnel == NULL){
             LOG(WARNING)<<"read  p2p msg from unknown peer "<<peer_id;
+            //
             return;
         }
         std::string peerMsg;

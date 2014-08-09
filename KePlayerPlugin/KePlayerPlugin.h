@@ -141,6 +141,10 @@ private:
     bool is_inited;
     QSettings *myconfig;
 
+
+    // QWidget interface
+protected:
+    void paintEvent(QPaintEvent *);
 };
 
 #endif // KEPLAYERPLUGIN_H

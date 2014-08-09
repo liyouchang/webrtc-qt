@@ -67,7 +67,7 @@ struct KERTStreamHead
 struct KEFrameHead{
     short frameNo;
     short piecesNo;
-    int second;
+    int second;//时间戳
     char millisecond;//millisecond devide 10
     char frameType;// 0-D1 1-QCIF 3-HD1 7-VGA 10-720P 4-QVGA 50-audio_frame
     short frameLen;

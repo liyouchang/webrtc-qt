@@ -9,18 +9,21 @@
 const QString kLocalIndexPrefix = "local_file_";
 
 VideoWall::VideoWall(QWidget *parent) :
-    QWidget(parent),layout_changed_(false)
+    QFrame(parent),layout_changed_(false)
 {
     AVService::Initialize();
     playSource = new AVService(1);
 
     this->setBackgroundRole(QPalette::Dark);
-    //this->setStyleSheet("background-color:rgb(255, 0, 0);");
     this->setAutoFillBackground(true);
+
+//       this->setStyleSheet("border:5px solid red;\
+//                        background-color:black;");
+
     //QPalette palette;
     // palette.setColor(this->backgroundRole(), Qt::gray);
     //this->setPalette(palette);
-    qDebug()<<this->contentsMargins();
+  //  qDebug()<<this->contentsMargins();
 //    createActions();
 //    createMenus();
 
@@ -436,30 +439,33 @@ void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
 
 //}
 
-//void VideoWall::paintEvent(QPaintEvent *)
-//{
-//    //    if(layout_changed_){
-//    //        for(int i=0;i<MAX_AVPLAYER;i++){
-//    //            //                    if(!this->players[i]->isVisible()){
-//    //            //                        this->players[i]->setVisible(true);
+void VideoWall::paintEvent(QPaintEvent *e)
+{
+//    e->ignore();
+    //    if(layout_changed_){
+    //        for(int i=0;i<MAX_AVPLAYER;i++){
+    //            //                    if(!this->players[i]->isVisible()){
+    //            //                        this->players[i]->setVisible(true);
 
 
-//    //            //}
-//    //           // this->players[i]->winId();
-//    //            // this->players[i]->update();
-//    //        }
-//    //        //        for(int i=m_layoutList.size();i<MAX_AVPLAYER;i++){
-//    //        //            //this->players[i]->winId();
-//    //        //            //this->players[i]->setGeometry(-100,-100,0,0);
-//    //        //            //this->players[i]->winId();
-//    //        //            this->players[i]->setVisible(false);
+    //            //}
+    //           // this->players[i]->winId();
+    //            // this->players[i]->update();
+    //        }
+    //        //        for(int i=m_layoutList.size();i<MAX_AVPLAYER;i++){
+    //        //            //this->players[i]->winId();
+    //        //            //this->players[i]->setGeometry(-100,-100,0,0);
+    //        //            //this->players[i]->winId();
+    //        //            this->players[i]->setVisible(false);
 
-//    //        //        }
-//    //        layout_changed_ = false;
-//    //    }
+    //        //        }
+    //        layout_changed_ = false;
+    //    }
+
+//    qDebug()<<"VideoWall::paintEvent";
 
 
-//}
+}
 
 //void VideoWall::mouseMoveEvent(QMouseEvent *event)
 //{
