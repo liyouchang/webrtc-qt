@@ -202,25 +202,40 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
             reinterpret_cast<KEPlayRecordFileReq *>(msgData.data());
     LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile--"<<pMsg->fileData;
     std::string fileName = pMsg->fileData;
-    if(recordReader != NULL){
-        LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
-                   "already start record read";
-        RespPlayFileReq(RESP_NAK,fileName.c_str());
-        return;
+
+    if(pMsg->fileType == 1){
+        if(recordReader != NULL){
+            LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
+                       "already start record read";
+            RespPlayFileReq(RESP_NAK);
+            return;
+        }
+
+        recordReader = new RecordReaderAvi();
+        if(!recordReader->StartRead(fileName)){
+            LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
+                       "start read failed";
+            delete recordReader;
+            recordReader = NULL;
+            RespPlayFileReq(RESP_NAK);
+            return;
+        }
+        recordReader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnVideoData);
+        recordReader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnAudioData);
+        recordReader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
+        recordReader->SignalReportProgress.connect(this,&KeMessageProcessCamera::OnRecordProcess);
+        RespPlayFileReq(RESP_ACK);
+    }else if(pMsg->fileType == 2){
+        if(pMsg->playSpeed != 0 && pMsg->playSpeed != -1){
+            recordReader->SetSpeed(pMsg->playSpeed);
+            this->RespPlayFileReq(RESP_CTRL);
+        }
+        if(pMsg->playPos != -1){
+            recordReader->SetPosition(pMsg->playPos);
+            this->RespPlayFileReq(RESP_CTRL);
+        }
     }
-    recordReader = new RecordReaderAvi(1);
-    if(!recordReader->StartRead(fileName)){
-        LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
-                   "start read failed";
-        delete recordReader;
-        recordReader = NULL;
-        RespPlayFileReq(RESP_NAK,fileName.c_str());
-        return;
-    }
-    recordReader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnRecordData);
-    recordReader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnRecordData);
-    recordReader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
-    RespPlayFileReq(RESP_ACK,fileName.c_str());
+
 }
 
 void KeMessageProcessCamera::RecvTalkData(talk_base::Buffer &msgData)
@@ -254,7 +269,7 @@ void KeMessageProcessCamera::RespAskMediaReq(const VideoInfo &info)
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
-void KeMessageProcessCamera::RespPlayFileReq(int resp,const char * fileName)
+void KeMessageProcessCamera::RespPlayFileReq(int resp)
 {
     talk_base::Buffer sendBuf;
     int msgLen = sizeof(KEPlayRecordFileResp);
@@ -264,11 +279,12 @@ void KeMessageProcessCamera::RespPlayFileReq(int resp,const char * fileName)
     msg->msgType = KEMSG_REQUEST_PLAY_FILE;
     msg->msgLength = msgLen;
     msg->videoID = 0;
-    msg->channelNo = 1;
+    msg->playSpeed = recordReader->GetSpeed();
+    msg->playPos = recordReader->GetPosition();
     msg->resp = resp;
     msg->frameRate = recordReader->recordInfo.frameRate;
     msg->frameResolution = recordReader->recordInfo.frameResolution;
-    talk_base::strcpyn(msg->fileName,80,fileName);
+//    talk_base::strcpyn(msg->fileName,80,fileName);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
@@ -319,6 +335,22 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
         this->SignalRecvTalkData.connect(camera,&KeTunnelCamera::OnRecvTalkData);
         talk_status = talk;
     }
+}
+
+void KeMessageProcessCamera::OnRecordProcess(int percent)
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KEPlayRecordFileResp);
+    sendBuf.SetLength(msgLen);
+    KEPlayRecordFileResp * msg = (KEPlayRecordFileResp *)sendBuf.data();
+    msg->protocal = PROTOCOL_HEAD;
+    msg->msgType = KEMSG_REQUEST_PLAY_FILE;
+    msg->msgLength = msgLen;
+    msg->videoID = 0;
+    msg->playSpeed = -1;
+    msg->playPos = percent;
+    msg->resp = RESP_CTRL;
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
 void KeMessageProcessCamera::OnVideoData(const char *data, int len)
@@ -420,20 +452,21 @@ void KeMessageProcessCamera::OnRecordData(const char *data, int len)
 void KeMessageProcessCamera::OnRecordReadEnd(RecordReaderInterface *reader)
 {
     ASSERT(recordReader == reader);
-    recordReader->StopRead();
-    delete recordReader;
-    recordReader = NULL;
-    int msgLen = sizeof(KEPlayRecordDataHead);
-    talk_base::Buffer sendBuf;
-    KEPlayRecordDataHead streamHead;
-    streamHead.protocal = PROTOCOL_HEAD;
-    streamHead.msgType = KEMSG_RecordPlayData;
-    streamHead.msgLength = msgLen;
-    streamHead.channelNo = 1;
-    streamHead.videoID = 0;
-    streamHead.resp = RESP_END;
-    sendBuf.AppendData(&streamHead,sizeof(KEPlayRecordDataHead));
-    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+    this->RespPlayFileReq(RESP_END);
+//    recordReader->StopRead();
+//    delete recordReader;
+//    recordReader = NULL;
+//    int msgLen = sizeof(KEPlayRecordDataHead);
+//    talk_base::Buffer sendBuf;
+//    KEPlayRecordDataHead streamHead;
+//    streamHead.protocal = PROTOCOL_HEAD;
+//    streamHead.msgType = KEMSG_RecordPlayData;
+//    streamHead.msgLength = msgLen;
+//    streamHead.channelNo = 1;
+//    streamHead.videoID = 0;
+//    streamHead.resp = RESP_END;
+//    sendBuf.AppendData(&streamHead,sizeof(KEPlayRecordDataHead));
+//    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
 }

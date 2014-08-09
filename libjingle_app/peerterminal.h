@@ -49,6 +49,7 @@ private:
     int CountAvailableTunnels();
     ScopedTunnel GetOrCreateTunnel(const std::string & peer_id);
 
+    void SendTunnelError(const std::string &peer_id);
     kaerp2p::PeerConnectionClientInterface * client_;
     //talk_base::scoped_refptr<kaerp2p::P2PConductor> conductor_;
     std::vector<ScopedTunnel> tunnels_;

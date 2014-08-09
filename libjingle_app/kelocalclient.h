@@ -13,7 +13,7 @@
 
 namespace kaerp2p{
 
-class LocalTerminal: public  PeerTerminalInterface
+class LocalTerminal: public PeerTerminalInterface
 {
     // PeerTerminalInterface interface
 public:

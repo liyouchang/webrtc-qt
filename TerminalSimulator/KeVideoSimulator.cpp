@@ -44,6 +44,7 @@ void KeVideoSimulator::GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info)
 //restart again
 void KeVideoSimulator::OnFileReadEnd(kaerp2p::RecordReaderInterface *)
 {
+    LOG_F(INFO)<<"read end restart";
     reader->StopRead();
     reader->StartRead(fileName);
 }

@@ -134,7 +134,8 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
     if(type.compare("p2p") == 0){
         ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
         if(aTunnel == NULL){
-            LOG(WARNING)<<"read  p2p msg from unknown peer "<<peer_id;
+            LOG(WARNING)<<"read  p2p msg and create tunnel error "<<peer_id;
+            SendTunnelError(peer_id);
             return;
         }
         std::string peerMsg;
@@ -232,6 +233,16 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
                        tunnels_.size();
     }
     return aTunnel;
+}
+
+void PeerTerminal::SendTunnelError(const std::string &peer_id)
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "p2p_error";
+    std::string msg = writer.write(jmessage);
+    this->SendByRouter(peer_id,msg);
 }
 
 LocalUdpTerminal::LocalUdpTerminal():

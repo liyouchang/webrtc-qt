@@ -13,11 +13,13 @@
 
 #ifndef ARM
 #else
-#include "kesdkdevice.h"
+//#include "kesdkdevice.h"
+#include "HisiMediaDevice.h"
 #endif//arm
 
 
 int kVersion = 53;
+
 
 int main()
 {
@@ -41,7 +43,7 @@ int main()
     std::string clientVer = kaerp2p::ToStringVersion(kVersion);
     LOG(INFO)<<"zmqclient current version is "<<clientVer;
 
-    std::string serversStr  = JsonValueToString(jservers);
+    std::string serversStr = JsonValueToString(jservers);
     kaerp2p::P2PConductor::AddIceServers(serversStr);
 
     std::string strDealerId;
@@ -50,42 +52,13 @@ int main()
     GetStringFromJson(dealer_value,&strDealerId);
 
 #ifndef ARM
-//    ProfilerStart("zmq.prof");
-
-//    CameraClient client(strMac,clientVer);
-//    client.Connect(router_value.asString(),strDealerId);
-
-//    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client);
-////    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
-////    terminal->Initialize("0.0.0.0:12345");
-
-//    Json::Value jsampleFile =
-//            JsonConfig::Instance()->Get("sampleFileName","sample.avi");
-//    std::string sampleFileName;
-//    if(!GetStringFromJson(jsampleFile,&sampleFileName)){
-//        return 2;
-//    }
-
-
-//    KeVideoSimulator * simulator = new KeVideoSimulator(sampleFileName);
-//    if(!simulator->Init(terminal)){
-//        return 1;
-//    }
-
-//    //talk_base::Thread::Current()->Run();
-//    talk_base::Thread::Current()->ProcessMessages(60000);
-//    std::cout << "===========delete simulator=========" <<std::endl;
-//    delete simulator;
-//    delete terminal;
-////    ProfilerStop();
-
-
 
 #else
-    KeSdkDevice * device = new KeSdkDevice();
-//    if (strMac.empty()) {
-//        strMac = device->GetHardwareId();
-//    }
+    //KeSdkDevice * device = new KeSdkDevice();
+    HisiMediaDevice * device = new HisiMediaDevice();
+    if (strMac.empty()) {
+        strMac = device->GetHardwareId();
+    }
 
     CameraClient client(strMac,clientVer);
     client.Connect(router_value.asString(),strDealerId);

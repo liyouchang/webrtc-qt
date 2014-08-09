@@ -36,7 +36,7 @@ KeSdkDevice::KeSdkDevice()
     struct MEDIAPARAM media;
     CONFIG_Get(CONFIG_TYPE_MEDIA,(void *)&media);
     printf("resolution %d frame_rate %d rate_ctrl_mode %d bitrate %d piclevel %d\n",
-           media.main[0].resolution,media.main[0].frame_rate,
+            media.main[0].resolution,media.main[0].frame_rate,
             media.main[0].rate_ctrl_mode,media.main[0].bitrate,
             media.main[0].piclevel);
 
@@ -44,6 +44,10 @@ KeSdkDevice::KeSdkDevice()
     media.main[0].resolution = RESO_720P;
     media.main[0].bitrate = 512;
     media.main[0].piclevel = 0;
+    media.minor[0].frame_rate = 25;
+    media.minor[0].resolution = RESO_D1;
+    media.minor[0].bitrate = 256;
+    media.minor[0].piclevel = 0;
 
     CONFIG_Set(CONFIG_TYPE_MEDIA,(void *)&media);
     CONFIG_Get(CONFIG_TYPE_MEDIA,(void *)&media);
@@ -61,6 +65,7 @@ KeSdkDevice::KeSdkDevice()
     video3_info_.frameInterval = 1000/video3_info_.frameRate;
 
     MEDIA_Initialize();
+    LOG_F(INFO)<<"media init";
 }
 
 KeSdkDevice::~KeSdkDevice()
@@ -74,7 +79,15 @@ bool KeSdkDevice::Init(kaerp2p::PeerTerminalInterface *t)
 
     RegisterCallBack::Instance()->SignalVideoFrame.connect(
                 this,&KeSdkDevice::SendVideoFrame);
-    FIFO_Stream_Open(FIFO_STREAM_H264,0,0);
+    RegisterCallBack::Instance()->SignalAudioFrame.connect(
+                this,&KeSdkDevice::SendAudioFrame);
+ //   LOG_F(INFO)<<"stream open";
+    video1_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,0);
+    video2_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,1);
+    video3_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,2);
+    audio_handle_ = FIFO_Stream_Open(FIFO_STREAM_AUDIO,0,0);
+
+ //   LOG_F(INFO)<<"init end";
 
     return KeTunnelCamera::Init(t);
 }
@@ -140,7 +153,10 @@ void KeSdkDevice::SendAudioFrame(const char *data, int len)
 
 KeSdkDevice::RegisterCallBack::RegisterCallBack()
 {
-    FIFO_Register_Callback(FIFO_H264_MAIN,&RegisterCallBack::FirstStreamCallBack);
+    FIFO_Register_Callback(FIFO_H264_MAIN,&RegisterCallBack::MainStreamCallBack);
+    FIFO_Register_Callback(FIFO_H264_SUB,&RegisterCallBack::SubStreamCallBack);
+    FIFO_Register_Callback(FIFO_H264_EXT,&RegisterCallBack::ExtStreamCallBack);
+    FIFO_Register_Callback(FIFO_H264_AUDIO,&RegisterCallBack::AudioStreamCallBack);
 }
 
 KeSdkDevice::RegisterCallBack *KeSdkDevice::RegisterCallBack::Instance(){
@@ -148,11 +164,28 @@ KeSdkDevice::RegisterCallBack *KeSdkDevice::RegisterCallBack::Instance(){
     return &instance;
 }
 
-int KeSdkDevice::RegisterCallBack::FirstStreamCallBack(char *pFrameData, int iFrameLen)
+int KeSdkDevice::RegisterCallBack::MainStreamCallBack(char *pFrameData, int iFrameLen)
 {
    // LOG_F(INFO)<<" recevie frame "<<iFrameLen;
 
     RegisterCallBack::Instance()->SignalVideoFrame(pFrameData,iFrameLen,1);
+}
+
+int KeSdkDevice::RegisterCallBack::SubStreamCallBack(char *pFrameData, int iFrameLen)
+{
+    RegisterCallBack::Instance()->SignalVideoFrame(pFrameData,iFrameLen,2);
+
+}
+
+int KeSdkDevice::RegisterCallBack::ExtStreamCallBack(char *pFrameData, int iFrameLen)
+{
+    RegisterCallBack::Instance()->SignalVideoFrame(pFrameData,iFrameLen,3);
+}
+
+int KeSdkDevice::RegisterCallBack::AudioStreamCallBack(char *pFrameData, int iFrameLen)
+{
+    RegisterCallBack::Instance()->SignalAudioFrame(pFrameData,iFrameLen);
+
 }
 
 

@@ -17,6 +17,7 @@
 
 #include "talk/base/stream.h"
 #include "talk/base/stringencode.h"
+#include "talk/base/bind.h"
 
 #include "defaults.h"
 
@@ -470,7 +471,7 @@ const int kNormalSpeed = 0x10;
 
 RecordReaderAvi::RecordReaderAvi(int audioInterval,talk_base::Thread *thread):
     ownThread(false),audioFrameInterval(audioInterval),readThread(thread),
-    speed(kNormalSpeed),currentFrame(0)
+    speed(kNormalSpeed),currentFrame(0),oldPercent(0)
 {
     aviFile_ = new talk_base::FileStream();
     if(readThread == NULL){
@@ -548,7 +549,7 @@ bool RecordReaderAvi::StartRead(const std::string &filename)
     }
     LOG(INFO)<<"RecordReaderAvi::StartRead---The frame resolution is "<<
                this->recordInfo.frameResolution << " frame rate is "<<
-               this->recordInfo.frameRate<< " list len is"<< listLen;
+               this->recordInfo.frameRate<< " list len is "<< listLen;
 
     char listType[5] = {0};
     result = aviFile_->Read(listType,4,NULL,NULL);
@@ -563,6 +564,7 @@ bool RecordReaderAvi::StartRead(const std::string &filename)
     }
     //
     indexPos = filePos + listLen + 4;
+    this->MoveTo(0);
 
 
     readThread->Post(this,MSG_READ);
@@ -583,9 +585,14 @@ bool RecordReaderAvi::SetSpeed(int speed)
     }
     talk_base::TypedMessageData<int> * msgData =
             new talk_base::TypedMessageData<int>(speed);
-    readThread->Post(this,MSG_SETSPEED,msgData);
+    readThread->Send(this,MSG_SETSPEED,msgData);
     return true;
 }
+int RecordReaderAvi::GetSpeed()
+{
+    return this->speed;
+}
+
 
 bool RecordReaderAvi::SetPosition(int percent)
 {
@@ -594,9 +601,13 @@ bool RecordReaderAvi::SetPosition(int percent)
     }
     talk_base::TypedMessageData<int> * msgData =
             new talk_base::TypedMessageData<int>(percent);
-    readThread->Post(this,MSG_SETPOSITION,msgData);
+    readThread->Send(this,MSG_SETPOSITION,msgData);
     return true;
+}
 
+int RecordReaderAvi::GetPosition()
+{
+    return readThread->Invoke<int>(talk_base::Bind(&RecordReaderAvi::GetPlayedPercent,this));
 }
 
 void RecordReaderAvi::MoveTo(int percent)
@@ -612,9 +623,10 @@ void RecordReaderAvi::MoveTo(int percent)
         }
         int indexLen;
         result = aviFile_->Read(&indexLen,4,NULL,NULL);
-        int indexNum = indexLen/sizeof(AVIINDEXENTRY);
-        LOG_F(INFO)<<"the index len is "<<indexLen << " and the number is"<<indexNum;
-        for(int i=0;i<indexNum;i++){
+        this->totalFrame = indexLen/sizeof(AVIINDEXENTRY);
+
+        LOG_F(INFO)<<"the index len is "<<indexLen << " and the number is "<<totalFrame;
+        for(int i=0;i<totalFrame;i++){
             AVIINDEXENTRY  entry;
             result = aviFile_->Read(&entry,sizeof(AVIINDEXENTRY),NULL,NULL);
             if(result != talk_base::SR_SUCCESS){
@@ -631,7 +643,6 @@ void RecordReaderAvi::MoveTo(int percent)
     currentFrame = pos;
 
     readThread->Post(this,MSG_READ);
-
 }
 
 void RecordReaderAvi::ReadRecord()
@@ -649,7 +660,6 @@ void RecordReaderAvi::ReadRecord()
             LOG(WARNING)<<"RecordReaderAvi::OnMessage---"<<"read file error ";
             return ;
         }
-
         bool  isIdr = ((moviBuf.get()[4]&0x1f)==0x07) ;//判断idr帧
         if(isIdr){
             LOG_T_F(LS_VERBOSE)<<"current frame "<<this->currentFrame<<" is idr";
@@ -660,6 +670,7 @@ void RecordReaderAvi::ReadRecord()
             aviFile_->Read(&nullByte,1,NULL,NULL);
         }
         ++this->currentFrame;
+
         readThread->Post(this,MSG_READ);
 
     }else if(strcmp(moviType,"01wb") == 0){ // audio
@@ -674,7 +685,15 @@ void RecordReaderAvi::ReadRecord()
             SignalAudioData(moviBuf.get(),moviLen);
         }
         ++this->currentFrame;
+
+        if(GetPlayedPercent() != oldPercent){
+            oldPercent = GetPlayedPercent();
+            this->SignalReportProgress(oldPercent);
+        }
+
         int delayInterval = audioFrameInterval*speed/kNormalSpeed;
+
+
 
         readThread->PostDelayed(delayInterval,this,MSG_READ);
 
@@ -682,6 +701,15 @@ void RecordReaderAvi::ReadRecord()
         LOG(INFO)<<"Read record end with no data";
         SignalRecordEnd(this);
     }
+
+}
+
+int RecordReaderAvi::GetPlayedPercent()
+{
+    if(totalFrame ==0 ){
+        return 0;
+    }
+    return currentFrame*100/totalFrame;
 
 }
 

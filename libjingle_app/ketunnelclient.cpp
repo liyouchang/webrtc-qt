@@ -16,7 +16,6 @@ namespace kaerp2p {
 
 KeTunnelClient::KeTunnelClient()
 {
-
 }
 
 bool KeTunnelClient::SendCommand(const std::string &peer_id,
@@ -100,11 +99,38 @@ bool KeTunnelClient::DownloadRemoteFile(std::string peerId,
         return false;
     }
 
-    return  process->ReqestPlayFile(
-                remoteFileName.c_str(),saveFileName.c_str(),playSize);
+    return  process->ReqestPlayFile(remoteFileName.c_str());
 }
+/**
+ * @brief KeTunnelClient::SetPlayFileStatus
+ * @param peerId
+ * @param jstrStatus {position:,speed:}
+ * @return
+ */
+bool KeTunnelClient::SetPlayFileStatus(std::string peerId, std::string jstrStatus)
+{
+    KeMessageProcessClient * process =
+            dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peerId));
+    if(process == NULL){
+        LOG(WARNING) <<"KeTunnelClient::PeerVideoCut---"<<
+                       "process not found "<<peerId;
+        return false;
+    }
 
+    Json::Reader reader;
+    Json::Value jmessage;
+    if (!reader.parse(jstrStatus, jmessage)) {
+        LOG(WARNING) << "Received unknown message. " << jstrStatus;
+        return false;
+    }
+    int speed = -1;
+    GetIntFromJsonObject(jmessage, "speed", &speed);
+    int position = -1;
+    GetIntFromJsonObject(jmessage, "position", &position);
 
+    process->SetPlayFileStatus(position,speed);
+
+}
 
 void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t,
                                     const std::string &peer_id)
@@ -133,7 +159,6 @@ void KeTunnelClient::OnRouterMessage(const std::string &peer_id,
         LOG(WARNING)<<"get command error"<<peer_id<<" Msg "<<strMsg;
         return;
     }
-
 }
 
 void KeTunnelClient::SendTalkData(const char *data, int len)
@@ -171,18 +196,16 @@ void KeTunnelClient::OnRecordFileData(const std::string &peer_id,
     LOG(INFO)<<"KeTunnelClient::OnRecordFileData";
 }
 
-void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
+void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status, int position, int speed)
 {
     LOG(INFO)<<"KeTunnelClient::OnRecordStatus---"<<peer_id<<" status "<<status;
-
 }
 
 
 KeMessageProcessClient::KeMessageProcessClient(std::string peer_id,
                                                KeTunnelClient * container):
-    KeMsgProcess(peer_id,container),recordSaver(NULL),shouldPlaySize(INT_MAX)
+    KeMsgProcess(peer_id,container),recordSaver(NULL)
 {
-
 }
 
 KeMessageProcessClient::~KeMessageProcessClient()
@@ -208,29 +231,13 @@ void KeMessageProcessClient::AskVideo(int video, int listen, int talk)
     pReqMsg->talk = talk;
     pReqMsg->protocalType = 0;
     pReqMsg->transSvrIp = 0;
-
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
-
 }
 
-bool KeMessageProcessClient::ReqestPlayFile(const char *remoteFile,
-                                            const char *saveFile,int playSize)
+bool KeMessageProcessClient::ReqestPlayFile(const char *remoteFile)
 {
-    LOG(INFO)<<"KeMessageProcessClient::ReqestPlayFile---"<<
-               "shouldplaySize="<<playSize;
-    if(recordSaver){
-        LOG(WARNING)<<"KeMessageProcessClient::ReqestPlayFile---"<<
-                      "already start record";
-        return false;
-    }
-    recordSaver = new Ke08RecordSaver();
-    if(!recordSaver->StartSave(saveFile)){
-        LOG(WARNING)<<"KeMessageProcessClient::ReqestPlayFile---"<<
-                      "file start save error";
-        return false;
-    }
-    shouldPlaySize = playSize;
-
+    //    LOG(INFO)<<"KeMessageProcessClient::ReqestPlayFile---"<<
+    //               "shouldplaySize="<<playSize;
     talk_base::Buffer sendBuf;
     int msgLen = sizeof(KEPlayRecordFileReq);
     sendBuf.SetLength(msgLen);
@@ -240,9 +247,8 @@ bool KeMessageProcessClient::ReqestPlayFile(const char *remoteFile,
     pReqMsg->msgType = KEMSG_REQUEST_PLAY_FILE;
     pReqMsg->msgLength = msgLen;
     pReqMsg->clientID = 0;
-    pReqMsg->channelNo = 1;
-    pReqMsg->videoID = 0;
-    pReqMsg->protocalType = 0;
+    pReqMsg->playSpeed = -1;
+    pReqMsg->fileType = 1;
     talk_base::strcpyn(pReqMsg->fileData,80,remoteFile);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
     return true;
@@ -261,7 +267,6 @@ void KeMessageProcessClient::OnTalkData(const char *data, int len)
     head->videoID = 0;
     memcpy(sendBuf.data() + sizeof(KERTStreamHead),data,len);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
-
 }
 
 bool KeMessageProcessClient::StartVideoCut(const std::string &filename)
@@ -296,6 +301,39 @@ bool KeMessageProcessClient::StopVideoCut()
     delete recordSaver;
     recordSaver = NULL;
     return ret;
+}
+
+bool KeMessageProcessClient::SetPlayFileStatus(int position ,int speed)
+{
+    //    Json::Reader reader;
+    //    Json::Value jmessage;
+    //    if (!reader.parse(jstrStatus, jmessage)) {
+    //        LOG(WARNING) << "Received unknown message. " << strMsg;
+    //        return;
+    //    }
+    //    std::string command;
+    //    bool ret = GetIntFromJsonObject(jmessage, kKaerMsgCommandName, &command);
+    //    if(!ret){
+    //        LOG(WARNING)<<"get command error"<<peer_id<<" Msg "<<strMsg;
+    //        return;
+    //    }
+
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KEPlayRecordFileReq);
+    sendBuf.SetLength(msgLen);
+    KEPlayRecordFileReq * pReqMsg;
+    pReqMsg = (KEPlayRecordFileReq *)sendBuf.data();
+    pReqMsg->protocal = PROTOCOL_HEAD;
+    pReqMsg->msgType = KEMSG_REQUEST_PLAY_FILE;
+    pReqMsg->msgLength = msgLen;
+    pReqMsg->playSpeed = speed;
+    pReqMsg->playPos = position;
+    pReqMsg->videoID = 0;
+    pReqMsg->protocalType = 0;
+    //    talk_base::strcpyn(pReqMsg->fileData,80,remoteFile);
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+
+
 }
 
 void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
@@ -352,26 +390,21 @@ void KeMessageProcessClient::OnRecvRecordMsg(talk_base::Buffer &msgData)
 {
     KEPlayRecordDataHead * phead = (KEPlayRecordDataHead *)msgData.data();
 
-    KeTunnelClient *client  = static_cast< KeTunnelClient *>(container_);
+    KeTunnelClient *client  = static_cast<KeTunnelClient *>(container_);
 
     if(phead->resp == RESP_ACK){
         const int data_pos = sizeof(KEPlayRecordDataHead);
         int mediaDataLen = msgData.length() - data_pos;
-        recordSaver->OnVideoData(
-                    this->peer_id(),msgData.data()+data_pos,mediaDataLen);
 
-        if(recordSaver->savedSize > this->shouldPlaySize){
-            shouldPlaySize = INT_MAX;
-            client->OnRecordStatus(this->peer_id(),kShouldPlay);
-
-        }
+        //        SignalRecvVideoData(this->peer_id(),msgData.data() +
+        //                            sendStartPos,mediaDataLen);
     }
     else if(phead->resp == RESP_END){
-        LOG(INFO)<<"KeMessageProcessClient::OnRecvRecordMsg---end";
-        client->OnRecordStatus(this->peer_id(),kDownloadEnd);
-        recordSaver->StopSave();
-        delete recordSaver;
-        recordSaver = NULL;
+        //        LOG(INFO)<<"KeMessageProcessClient::OnRecvRecordMsg---end";
+        //        client->OnRecordStatus(this->peer_id(),kDownloadEnd);
+        //        recordSaver->StopSave();
+        //        delete recordSaver;
+        //        recordSaver = NULL;
     }
 }
 
@@ -395,25 +428,25 @@ void KeMessageProcessClient::RecvPlayFileResp(talk_base::Buffer &msgData)
     if(msg->resp == RESP_ACK){
         LOG(INFO)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
                    "start playback";
-        if(!recordSaver){
-            LOG(WARNING)<<"record saver not init";
-            client->OnRecordStatus(this->peer_id(),kRecordSaverError);
-            return;
-        }
-        client->OnRecordStatus(this->peer_id(),kRequestSuccess);
+        client->OnRecordStatus(this->peer_id(),kRecordStartPlay,msg->playPos,msg->playSpeed);
         return;
     }else if(msg->resp == RESP_NAK){
         LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
                       "file error";
-        client->OnRecordStatus(this->peer_id(),kRequestFileError);
-    }else{
+        client->OnRecordStatus(this->peer_id(),kRequestFileError,-1,-1);
+    }else if(msg->resp == RESP_CTRL){
+        client->OnRecordStatus(this->peer_id(),kRecordPlaying,msg->playPos,msg->playSpeed);
+    }else if(msg->resp == RESP_END){
+        client->OnRecordStatus(this->peer_id(),kRecordPlayEnd,msg->playPos,msg->playSpeed);
+    }
+    else{
         LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
                       "message error";
-        client->OnRecordStatus(this->peer_id(),kRequestMsgError);
+        client->OnRecordStatus(this->peer_id(),kRequestMsgError,-1,-1);
     }
-    recordSaver->StopSave();
-    delete recordSaver;
-    recordSaver = NULL;
+    //    recordSaver->StopSave();
+    //    delete recordSaver;
+    //    recordSaver = NULL;
 }
 
 }

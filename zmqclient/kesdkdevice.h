@@ -27,9 +27,17 @@ protected:
         static RegisterCallBack *Instance();
         sigslot::signal3<const char *, int ,int> SignalVideoFrame;
         sigslot::signal2<const char *, int > SignalAudioFrame;
-        static int FirstStreamCallBack(char * pFrameData,int iFrameLen);
+        static int MainStreamCallBack(char * pFrameData,int iFrameLen);
+        static int SubStreamCallBack(char * pFrameData,int iFrameLen);
+        static int ExtStreamCallBack(char * pFrameData,int iFrameLen);
+        static int AudioStreamCallBack(char * pFrameData,int iFrameLen);
+
 
     };
+    int video1_handle_;
+    int video2_handle_;
+    int video3_handle_;
+    int audio_handle_;
 
     kaerp2p::VideoInfo video1_info_;
     kaerp2p::VideoInfo video2_info_;
