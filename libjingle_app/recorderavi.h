@@ -74,24 +74,31 @@ public:
     bool StopRead();
     bool SetSpeed(int speed);//0x10 normal ,0x20 2x speed,0x40 4x speed,
                             //0x08 1/2 speed,0x04 1/4 speed
+    int GetSpeed();
+
     bool SetPosition(int percent);// 0-100 percent
+    int GetPosition();
+
+    sigslot::signal1<int> SignalReportProgress;
 
 private:
     void MoveTo(int percent);
     void ReadRecord();
+    int GetPlayedPercent();
     talk_base::FileStream * aviFile_;
     talk_base::Thread * readThread;
 
     int audioFrameInterval;//million second, audio frame interval time,
                             //20 is normal speed
+
     int speed; //0x10 normal,0x20 2x speed,0x40 4x speed,0x08 1/2 speed,0x04 1/4 speed
     int totalFrame;
     int currentFrame;
-    int indexPos;
 
+    int oldPercent;
+    int indexPos;
     bool ownThread;
     std::vector<AVIINDEXENTRY> recordIndex;
-public:
 };
 
 class FakeRecordReaderAvi: public RecordReaderInterface,public talk_base::MessageHandler

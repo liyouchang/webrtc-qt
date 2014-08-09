@@ -46,7 +46,8 @@ public:
 
     virtual void OnMessage(talk_base::Message *msg);
     virtual void StartHeartBeat();
-    virtual void OnProcessMessage(const std::string & peer_id,talk_base::Buffer & msg);
+    virtual void OnProcessMessage(const std::string & peer_id,
+                                  talk_base::Buffer & msg);
 
     std::string peer_id(){ return peer_id_;}
 
