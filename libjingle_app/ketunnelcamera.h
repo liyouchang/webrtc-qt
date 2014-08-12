@@ -70,7 +70,6 @@ protected:
     virtual void OnRecordProcess(int percent);
 private:
     RecordReaderAvi *recordReader;
-
 };
 
 }

@@ -32,7 +32,9 @@ bool KeVideoSimulator::Init(kaerp2p::PeerTerminalInterface *t)
     if(!KeTunnelCamera::Init(t)){
         return  false;
     }
-    return reader->StartRead(fileName);
+    bool ret = reader->StartRead(fileName);
+    return ret;
+//    return true;
 }
 
 void KeVideoSimulator::GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info)

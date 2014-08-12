@@ -200,32 +200,37 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
 {
     KEPlayRecordFileReq * pMsg =
             reinterpret_cast<KEPlayRecordFileReq *>(msgData.data());
-    LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile--"<<pMsg->fileData;
     std::string fileName = pMsg->fileData;
 
     if(pMsg->fileType == 1){
-        if(recordReader != NULL){
+        LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile---start play"<<
+                    pMsg->fileData;
+        if(recordReader != NULL && recordReader->IsReading()){
             LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
                        "already start record read";
             RespPlayFileReq(RESP_NAK);
             return;
         }
-
-        recordReader = new RecordReaderAvi();
+        if(recordReader == NULL){
+            recordReader = new RecordReaderAvi();
+            recordReader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnAudioData);
+            recordReader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnVideoData);
+            recordReader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
+            recordReader->SignalReportProgress.connect(this,&KeMessageProcessCamera::OnRecordProcess);
+        }
         if(!recordReader->StartRead(fileName)){
-            LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
-                       "start read failed";
+            LOG_T_F(WARNING)<<"KeMessageProcessCamera::RecvPlayFile---"<<"start read failed";
+            RespPlayFileReq(RESP_NAK);
             delete recordReader;
             recordReader = NULL;
-            RespPlayFileReq(RESP_NAK);
             return;
         }
-        recordReader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnVideoData);
-        recordReader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnAudioData);
-        recordReader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
-        recordReader->SignalReportProgress.connect(this,&KeMessageProcessCamera::OnRecordProcess);
+        this->videoInfo_ = recordReader->recordInfo;
         RespPlayFileReq(RESP_ACK);
     }else if(pMsg->fileType == 2){
+        LOG_T_F(INFO)<<"play file control--position:"<< pMsg->playPos <<
+                       " ,speed:"<<pMsg->playSpeed;
+
         if(pMsg->playSpeed != 0 && pMsg->playSpeed != -1){
             recordReader->SetSpeed(pMsg->playSpeed);
             this->RespPlayFileReq(RESP_CTRL);
@@ -234,6 +239,12 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
             recordReader->SetPosition(pMsg->playPos);
             this->RespPlayFileReq(RESP_CTRL);
         }
+    }else if(pMsg->fileType == 3){
+        LOG_T_F(INFO)<<"stop play file";
+        recordReader->StopRead();
+
+    }else{
+        LOG_T_F(WARNING)<<"unknown file type";
     }
 
 }
@@ -453,9 +464,11 @@ void KeMessageProcessCamera::OnRecordReadEnd(RecordReaderInterface *reader)
 {
     ASSERT(recordReader == reader);
     this->RespPlayFileReq(RESP_END);
-//    recordReader->StopRead();
+    recordReader->StopRead();
+
 //    delete recordReader;
 //    recordReader = NULL;
+
 //    int msgLen = sizeof(KEPlayRecordDataHead);
 //    talk_base::Buffer sendBuf;
 //    KEPlayRecordDataHead streamHead;
