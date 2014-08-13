@@ -67,7 +67,7 @@
             android:layout_height="fill_parent"
             android:cacheColorHint="#00000000"
             android:divider="#00000000"
-            android:dividerHeight="10dp" />
+            android:dividerHeight="5dp" />
     </com.video.main.PullToRefreshView>
 
 </LinearLayout>

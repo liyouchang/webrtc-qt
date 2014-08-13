@@ -298,9 +298,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						audioThread.start();
 						audioThread.startAudioThread();
 					}
-					isPopupWindowShow = true;
-					showPopupWindow();
-					hidePopupWindowDelay();
+					if (isActivityShow) {
+						isPopupWindowShow = true;
+						showPopupWindow();
+						hidePopupWindowDelay();
+					}
 					break;
 				// 改变视频播放类型：高清，均衡，流畅
 				case CHANGE_VIDEO_TYPE:
@@ -319,9 +321,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						audioThread.start();
 						audioThread.startAudioThread();
 					}
-					isPopupWindowShow = true;
-					showPopupWindow();
-					hidePopupWindowDelay();
+					if (isActivityShow) {
+						isPopupWindowShow = true;
+						showPopupWindow();
+						hidePopupWindowDelay();
+					}
 					break;
 				// 请求超时处理
 				case REQUEST_TIMEOUT:
@@ -518,15 +522,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		switch (v.getId()) {
 			// 关闭播放器
 			case R.id.ib_player_back:
-				if (!isLocalDevice) {
-					TunnelCommunication.getInstance().stopMediaData(dealerName);
-					closePlayer();
-					PlayerActivity.this.finish();
-				} else {
-					// 本地设备
-					TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
-					TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
-				}
+				PlayerActivity.this.finish();
 				break;
 			// 截屏
 			case R.id.btn_player_capture:
@@ -868,13 +864,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
-			if (!isLocalDevice) {
-				PlayerActivity.this.finish();
-			} else {
-				// 本地设备
-				TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
-				TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
-			}
+			PlayerActivity.this.finish();
 			return false;
 		}
 		return super.onKeyDown(keyCode, event);
@@ -976,9 +966,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 							audioThread.start();
 							audioThread.startAudioThread();
 						}
-						isPopupWindowShow = true;
-						showPopupWindow();
-						hidePopupWindowDelay();
+						if (isActivityShow) {
+							isPopupWindowShow = true;
+							showPopupWindow();
+							hidePopupWindowDelay();
+						}
 					}
 				}
 				else if (intent.getIntExtra("TunnelEvent", 1) == 1) {
