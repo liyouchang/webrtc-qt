@@ -107,6 +107,7 @@ struct KeDeviceGetKeyReq{
     int videoID;
     char deviceMac[16];
 };
+
 struct KeDeviceGetKeyResp{
     unsigned char protocal;
     unsigned char msgType;//0xD0

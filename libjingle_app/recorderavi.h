@@ -68,33 +68,28 @@ public:
         MSG_SETSPEED,
         MSG_SETPOSITION
     };
-
     void OnMessage(talk_base::Message *msg);
     bool StartRead(const std::string & filename);
     bool StopRead();
-    bool SetSpeed(int speed);//0x10 normal ,0x20 2x speed,0x40 4x speed,
-                            //0x08 1/2 speed,0x04 1/4 speed
-    int GetSpeed();
+    bool IsReading();
 
+    bool SetSpeed(int speed);//0x10 normal ,0x20 2x speed,0x40 4x speed,
+                            //0x08 1/2 speed,0x04 1/4 speed,0 pause,100 continue
+    int GetSpeed();
     bool SetPosition(int percent);// 0-100 percent
     int GetPosition();
-
     sigslot::signal1<int> SignalReportProgress;
-
 private:
     void MoveTo(int percent);
     void ReadRecord();
     int GetPlayedPercent();
     talk_base::FileStream * aviFile_;
     talk_base::Thread * readThread;
-
     int audioFrameInterval;//million second, audio frame interval time,
                             //20 is normal speed
-
     int speed; //0x10 normal,0x20 2x speed,0x40 4x speed,0x08 1/2 speed,0x04 1/4 speed
     int totalFrame;
     int currentFrame;
-
     int oldPercent;
     int indexPos;
     bool ownThread;
@@ -109,12 +104,9 @@ public:
     void OnMessage(talk_base::Message *msg);
     bool StartRead(const std::string &filename);
     bool StopRead();
-
 protected:
     talk_base::Thread * readThread;
     int interval;
-
-
 };
 
 
