@@ -744,7 +744,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			// TODO Auto-generated method stub
 			String action = intent.getAction();
 			if (action.equals(BackstageService.CHANGE_DEVICE_LIST_ACTION)) {
-				if (!intent.hasExtra("isTermActive")) {
+				if (intent.hasExtra("isTermActive")) {
 					boolean isTermActive = intent.getBooleanExtra("isTermActive", false);
 					MainApplication.getInstance().sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST, 0, 0, isTermActive);
 				} else {

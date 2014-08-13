@@ -10,4 +10,6 @@
     <!-- 播放器图标大小 -->
     <dimen name="player_icon_size">50dip</dimen>
     
+    <dimen name="more_frgment_widget_height">50.0dip</dimen>
+    
 </resources>

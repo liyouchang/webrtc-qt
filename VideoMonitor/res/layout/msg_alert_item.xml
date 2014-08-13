@@ -5,6 +5,7 @@
     android:layout_centerVertical="true"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
+    android:paddingBottom="5dp"
     android:background="@color/page_bg_grey"
     android:orientation="vertical" >
 

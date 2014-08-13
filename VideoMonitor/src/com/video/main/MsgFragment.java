@@ -350,6 +350,8 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 											xmlData.addItem(list1.get(i));
 										}
 										msgAdapter.notifyDataSetChanged();
+									} else {
+										Toast.makeText(mActivity, "后面没有了", Toast.LENGTH_SHORT).show();
 									}
 									break;
 								//请求新的报警数据
