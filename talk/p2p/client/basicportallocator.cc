@@ -55,8 +55,6 @@ const uint32 MSG_SHAKE = 5;
 const uint32 MSG_SEQUENCEOBJECTS_CREATED = 6;
 const uint32 MSG_CONFIG_STOP = 7;
 
-const uint32 ALLOCATE_DELAY = 250;
-
 const int PHASE_UDP = 0;
 const int PHASE_RELAY = 1;
 const int PHASE_TCP = 2;
@@ -398,8 +396,6 @@ void BasicPortAllocatorSession::OnAllocate() {
     DoAllocate();
 
   allocation_started_ = true;
-  if (running_)
-    network_thread_->PostDelayed(ALLOCATE_DELAY, this, MSG_ALLOCATE);
 }
 
 // For each network, see if we have a sequence that covers it already.  If not,
@@ -1027,7 +1023,9 @@ void AllocationSequence::CreateTurnPort(const RelayServerConfig& config) {
     TurnPort* port = NULL;
     // Shared socket mode must be enabled only for UDP based ports. Hence
     // don't pass shared socket for ports which will create TCP sockets.
-    if (IsFlagSet(PORTALLOCATOR_ENABLE_SHARED_SOCKET) &&
+    // TODO(mallinath) - Enable shared socket mode for TURN ports. Disabled
+    // due to webrtc bug https://code.google.com/p/webrtc/issues/detail?id=3537
+    if (IsFlagSet(PORTALLOCATOR_ENABLE_TURN_SHARED_SOCKET) &&
         relay_port->proto == PROTO_UDP) {
       port = TurnPort::Create(session_->network_thread(),
                               session_->socket_factory(),

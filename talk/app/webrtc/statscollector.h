@@ -40,19 +40,19 @@
 #include "talk/app/webrtc/statstypes.h"
 #include "talk/app/webrtc/webrtcsession.h"
 
-#include "talk/base/timing.h"
-
 namespace webrtc {
 
 class StatsCollector {
  public:
-  StatsCollector();
+  enum TrackDirection {
+    kSending = 0,
+    kReceiving,
+  };
 
-  // Register the session Stats should operate on.
-  // Set to NULL if the session has ended.
-  void set_session(WebRtcSession* session) {
-    session_ = session;
-  }
+  // The caller is responsible for ensuring that the session outlives the
+  // StatsCollector instance.
+  explicit StatsCollector(WebRtcSession* session);
+  virtual ~StatsCollector();
 
   // Adds a MediaStream with tracks that can be used as a |selector| in a call
   // to GetStats.
@@ -77,12 +77,16 @@ class StatsCollector {
 
   // Prepare an SSRC report for the given ssrc. Used internally
   // in the ExtractStatsFromList template.
-  StatsReport* PrepareLocalReport(uint32 ssrc, const std::string& transport);
+  StatsReport* PrepareLocalReport(uint32 ssrc, const std::string& transport,
+                                  TrackDirection direction);
   // Prepare an SSRC report for the given remote ssrc. Used internally.
-  StatsReport* PrepareRemoteReport(uint32 ssrc, const std::string& transport);
-  // Extracts the ID of a Transport belonging to an SSRC. Used internally.
-  bool GetTransportIdFromProxy(const std::string& proxy,
-                               std::string* transport_id);
+  StatsReport* PrepareRemoteReport(uint32 ssrc, const std::string& transport,
+                                   TrackDirection direction);
+
+  // Method used by the unittest to force a update of stats since UpdateStats()
+  // that occur less than kMinGatherStatsPeriod number of ms apart will be
+  // ignored.
+  void ClearUpdateStatsCache();
 
  private:
   bool CopySelectedReports(const std::string& selector, StatsReports* reports);
@@ -98,25 +102,29 @@ class StatsCollector {
   void ExtractSessionInfo();
   void ExtractVoiceInfo();
   void ExtractVideoInfo(PeerConnectionInterface::StatsOutputLevel level);
-  double GetTimeNow();
   void BuildSsrcToTransportId();
-  WebRtcSession* session() { return session_; }
   webrtc::StatsReport* GetOrCreateReport(const std::string& type,
-                                         const std::string& id);
+                                         const std::string& id,
+                                         TrackDirection direction);
   webrtc::StatsReport* GetReport(const std::string& type,
-                                 const std::string& id);
+                                 const std::string& id,
+                                 TrackDirection direction);
 
   // Helper method to get stats from the local audio tracks.
   void UpdateStatsFromExistingLocalAudioTracks();
   void UpdateReportFromAudioTrack(AudioTrackInterface* track,
                                   StatsReport* report);
 
+  // Helper method to get the id for the track identified by ssrc.
+  // |direction| tells if the track is for sending or receiving.
+  bool GetTrackIdBySsrc(uint32 ssrc, std::string* track_id,
+                        TrackDirection direction);
+
   // A map from the report id to the report.
   std::map<std::string, StatsReport> reports_;
   // Raw pointer to the session the statistics are gathered from.
-  WebRtcSession* session_;
+  WebRtcSession* const session_;
   double stats_gathering_started_;
-  talk_base::Timing timing_;
   cricket::ProxyTransportMap proxy_to_transport_;
 
   typedef std::vector<std::pair<AudioTrackInterface*, uint32> >

@@ -29,7 +29,8 @@ public:
             webrtc::SessionDescriptionInterface* dest_desc);
 
 
-    void CreateOffer(webrtc::CreateSessionDescriptionObserver* observer);
+    void CreateOffer(webrtc::CreateSessionDescriptionObserver* observer,
+                     const std::string &description);
     void CreateAnswer(webrtc::CreateSessionDescriptionObserver* observer);
 private:
 

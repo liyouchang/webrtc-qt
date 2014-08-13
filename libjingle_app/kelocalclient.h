@@ -13,7 +13,7 @@
 
 namespace kaerp2p{
 
-class LocalTerminal: public  PeerTerminalInterface
+class LocalTerminal: public PeerTerminalInterface
 {
     // PeerTerminalInterface interface
 public:
@@ -39,10 +39,17 @@ protected:
                    const talk_base::PacketTime& packet_time);
 private:
     talk_base::AsyncUDPSocket * broadcastSocket;
-    talk_base::AsyncRawTCPSocket * localSocket;
+    talk_base::AsyncPacketSocket * localSocket;
     talk_base::Thread* socketThread_;
     bool ownThread;
+    std::string bindAddr;
+    int socketType; //1:udp ,2 :tcp
+
+    talk_base::scoped_ptr<talk_base::BasicPacketSocketFactory> socket_factory_;
+
 };
+
+
 
 class KeLocalMessage;
 class KeLocalClient:public KeMsgProcessContainer
@@ -66,8 +73,6 @@ protected:
     virtual void OnRecvVideoData(const std::string & peer_id,
                                  const char * data,int len);
     talk_base::scoped_ptr<KeLocalMessage> broadcastMsg;
-private:
-    bool Init(PeerConnectionClientInterface *client);
 };
 
 class KeLocalMessage : public KeMsgProcess

@@ -9,11 +9,11 @@ class RecorderAvi;
 class RecordSaverInterface;
 
 enum RecordStatus{
-    kRequestSuccess = 0,//请求录像下载成功
-    kRecordSaverError = 1,//录像保存失败
+    kRecordStartPlay = 0,//请求录像下载成功
+    kRecordPlayError = 1,//录像保存失败
     kRequestFileError = 2,//请求录像文件错误
-    kDownloadEnd = 3,//下载结束
-    kShouldPlay = 4,//下载数据达到播放阈值
+    kRecordPlayEnd = 3,//下载结束
+    kRecordPlaying = 4,//下载数据达到播放阈值
     kRequestMsgError//请求消息错误
 };
 
@@ -45,6 +45,7 @@ public:
     virtual bool DownloadRemoteFile(std::string  peerId,
                                     std::string remoteFileName,
                                     std::string saveFileName, int playSize);
+    virtual bool SetPlayFileStatus(std::string peerId,std::string jstrStatus);
     virtual void OnTunnelOpened(PeerTerminalInterface * t,
                                 const std::string & peer_id);
     virtual void OnRouterMessage(const std::string &peer_id,
@@ -56,7 +57,8 @@ public:
 protected:
     virtual void OnRecordFileData(const std::string & peer_id,
                                   const char * data,int len);
-    virtual void OnRecordStatus(const std::string & peer_id,int status);
+    virtual void OnRecordStatus(const std::string & peer_id,int status,
+                                int position,int speed);
 };
 
 
@@ -66,14 +68,15 @@ public:
     KeMessageProcessClient(std::string peer_id,KeTunnelClient * container);
     virtual ~KeMessageProcessClient();
     virtual void AskVideo(int video, int listen, int talk);
-    bool ReqestPlayFile(const char *remoteFile,const char *saveFile,int playSize);
+    bool ReqestPlayFile(const char *remoteFile);
     void OnTalkData(const char * data,int len);
     bool StartVideoCut(const std::string &filename);
     bool StopVideoCut();
+    bool SetPlayFileStatus(int position ,int speed);
     sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
-    sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;
-    sigslot::signal2<const std::string &,int> SignalRecordPlayStatus;
+//    sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;
+//    sigslot::signal2<const std::string &,int,int> SignalRecordPlayStatus;
 protected:
     virtual void OnMessageRespond(talk_base::Buffer & msgData);
     virtual void RecvVideoData(talk_base::Buffer & msgData);
@@ -83,7 +86,6 @@ protected:
     virtual void RecvPlayFileResp(talk_base::Buffer & msgData);
 private:
     //RecorderAvi *cutter_;
-    int shouldPlaySize;
     RecordSaverInterface *recordSaver;
     std::string requestReocrdFileName;
 };

@@ -16,34 +16,34 @@
 #include "libjingle_app/KeMsgProcess.h"
 #include "libjingle_app/jsonconfig.h"
 
-#define VIDEO1_DATA			"video1_data"
+#define VIDEO1_DATA             "video1_data"
 #define VIDEO1_CODEC 			"video1_codec"          //0:H264, 1:MJPG
 #define VIDEO1_BITRATECTRL 		"video1_control"        //0:CBR,  1:VBR
 #define VIDEO1_BITRATE 			"video1_bitrate"	//
 #define VIDEO1_QUALITY 			"video1_quality"	//5:普通,7:较好,9:最好
 #define VIDEO1_FRAMERATE 		"video1_framerate"	//,5,10,15,20,25,30
-#define VIDEO1_IFRAMEINTERVAL           "video1_int"		//1,4,20,100,200
+#define VIDEO1_IFRAMEINTERVAL   "video1_int"		//1,4,20,100,200
 #define VIDEO1_DEINTERLACE 		"video1_deint"		//0:close,1:open反交错
 #define VIDEO1_RESOLUTION 		"video1_resolution"	//176x144, 352x288, 320x240 640x480 1280x720
 
 #define VIDEO2_ENABLE 			"video2_enable"		//0:disable 1:enable
-#define VIDEO2_DATA                     "video2_data"
+#define VIDEO2_DATA             "video2_data"
 #define VIDEO2_CODEC			"video2_codec"		//0:H264, 1:MJPG 0:
 #define VIDEO2_BITRATECTRL		"video2_control"	//0:CBR,  1:VBR
 #define VIDEO2_BITRATE 		 	"video2_bitrate"	//
 #define VIDEO2_QUALITY 		 	"video2_quality"        //5:普通,7:较好,9:最好
 #define VIDEO2_FRAMERATE		"video2_framerate"	//1,5,10,15,20,25,30,
-#define VIDEO2_IFRAMEINTERVAL           "video2_int"		//1,4,20,100,200
+#define VIDEO2_IFRAMEINTERVAL   "video2_int"		//1,4,20,100,200
 #define VIDEO2_RESOLUTION		"video2_resolution"	//176x144, 352x288, 320x240 640x480
 
 #define VIDEO3_ENABLE 			"video3_enable"		//0:disable 1:enable
-#define VIDEO3_DATA			"video3_data"
+#define VIDEO3_DATA             "video3_data"
 #define VIDEO3_CODEC 			"video3_codec"          //0:H264, 1:MJPG
 #define VIDEO3_BITRATECTRL 		"video3_control"	//0:CBR,  1:VBR
 #define VIDEO3_BITRATE 			"video3_bitrate"	//
 #define VIDEO3_QUALITY 			"video3_quality"	//5:普通,7:较好,9:最好
 #define VIDEO3_FRAMERATE 		"video3_framerate"	//1,5,10,15,20,25,30
-#define VIDEO3_IFRAMEINTERVAL		"video3_int"		//1,4,20,100,200
+#define VIDEO3_IFRAMEINTERVAL	"video3_int"		//1,4,20,100,200
 #define VIDEO3_RESOLUTION 		"video3_resolution"	//176x144, 352x288, 320x240 640x480 1280x720
 
 
@@ -61,6 +61,7 @@ const int kVideoSampleRate = 40;//40 ms per frame
 const int kAudioSampleRate = 20;//20 ms
 
 const int kCommandGetValue  = 101;
+const int kCheckNet = 10000;//ms
 
 struct MediaControlData : public talk_base::MessageData {
     int video1;//1 to request start video1 , 0 to request stop
@@ -69,7 +70,6 @@ struct MediaControlData : public talk_base::MessageData {
     int audio;//1 to request start audio, 0 to request stop
     MediaControlData(int v1,int v2,int v3 ,int a) : video1(v1),video2(v2),video3(v3), audio(a) { }
 };
-
 
 HisiMediaDevice::HisiMediaDevice():
     media_thread_(0),video1_handle_(0),video2_handle_(0),audio_handle_(0),
@@ -93,13 +93,13 @@ HisiMediaDevice::~HisiMediaDevice()
     Raycomm_UnInitParam();
 }
 
-bool HisiMediaDevice::Init(kaerp2p::PeerConnectionClientInterface *client)
+bool HisiMediaDevice::Init(kaerp2p::PeerTerminalInterface *t)
 {
     //start get media
     media_thread_->Post(this, MSG_MEDIA_CONTROL, new MediaControlData(1,1,1,1));
-    media_thread_->PostDelayed(10000,this,MSG_NET_CHECK);
+    media_thread_->PostDelayed(kCheckNet,this,MSG_NET_CHECK);
     AlarmNotify::Instance()->StartNotify();
-    return KeTunnelCamera::Init(client);
+    return KeTunnelCamera::Init(t);
 }
 
 bool HisiMediaDevice::InitDeviceVideoInfo()
@@ -124,18 +124,35 @@ bool HisiMediaDevice::InitDeviceVideoInfo()
 
 void HisiMediaDevice::SendVideoFrame(const char *data, int len, int level)
 {
-    if(level == 1){
-        SignalVideoData1(data,len);
-    }else if(level == 2){
-        SignalVideoData2(data,len);
-    }else if( level == 3){
-        SignalVideoData3(data,len);
+//    if(level == 1){
+//        SignalVideoData1(data,len);
+//    }else if(level == 2){
+//        SignalVideoData2(data,len);
+//    }else if( level == 3){
+//        SignalVideoData3(data,len);
+//    }
+    //
+    talk_base::CritScope cs(&crit_);
+    for(int i =0 ;i< processes_.size();i++){
+        kaerp2p::KeMessageProcessCamera * camProcess =
+                static_cast<kaerp2p::KeMessageProcessCamera *>(processes_[i]);
+        if(camProcess->video_status == level){
+            camProcess->OnVideoData(data,len);
+        }
     }
 }
 
 void HisiMediaDevice::SendAudioFrame(const char *data, int len)
 {
-    SignalAudioData(data,len);
+    //SignalAudioData(data,len);
+    talk_base::CritScope cs(&crit_);
+    for(int i =0 ;i< processes_.size();i++){
+        kaerp2p::KeMessageProcessCamera * camProcess =
+                static_cast<kaerp2p::KeMessageProcessCamera *>(processes_[i]);
+        if(camProcess->audio_status == 1){
+            camProcess->OnAudioData(data,len);
+        }
+    }
 }
 
 void HisiMediaDevice::SetVideoClarity(int clarity)
@@ -296,14 +313,16 @@ void HisiMediaDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &j
     }
     else if(command.compare("restart") == 0){
         LOG(INFO)<<"receive restart message ,the device will reboot";
-        Raycomm_Reboot();
+        int r = Raycomm_Reboot();
+        this->ReportResult(peerId,command,r);
     }
     else if(command.compare("rename")==0){
         std::string name;
         if(GetStringFromJsonObject(jmessage,"name", &name)){
             int r  = Raycomm_SetTitle(name.c_str());
-            LOG(INFO)<<"receive rename message ,set device titile with "<<name<<
+            LOG(INFO)<<"receive rename message ,set device title - "<<name<<
                        " ;result "<<r;
+            this->ReportResult(peerId,command,r);
         }
     }
     else{
@@ -327,6 +346,18 @@ void HisiMediaDevice::ReportAlarmStatus(const std::string &peerId)
     Json::StyledWriter writer;
     std::string msg = writer.write(jmessage);
     this->terminal_->SendByRouter(peerId,msg);
+}
+
+void HisiMediaDevice::ReportResult(const std::string &peerId, const std::string &command, int result)
+{
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = command;
+    jmessage["result"] = result;
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+    this->terminal_->SendByRouter(peerId,msg);
+
 }
 
 
@@ -452,12 +483,18 @@ void HisiMediaDevice::OnMessage(talk_base::Message *msg)
     }
     case MSG_NET_CHECK:{
         this->CheckNetStatus();
-        media_thread_->PostDelayed(10000,this,MSG_NET_CHECK);
+        media_thread_->PostDelayed(kCheckNet,this,MSG_NET_CHECK);
         break;
     }
     default:
         break;
     }
+}
+
+void HisiMediaDevice::SetNtp(const std::string &ntpParam)
+{
+    LOG(INFO)<<"HisiMediaDevice::SetNtp---"<<ntpParam;
+    Raycomm_SetParam((char *)ntpParam.c_str(),0);
 }
 
 void HisiMediaDevice::SetVideoResolution(std::string r)
@@ -525,13 +562,12 @@ int HisiMediaDevice::GetVideoFrameRate(int level)
 
 void HisiMediaDevice::CheckNetStatus()
 {
-    //    LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---oldip"<<oldIp<<
-    //               " oldNet"<<oldNetType;
     int ip = Raycomm_GetIP();
     int net = Raycomm_GetNetType();
     if (ip != oldIp && oldIp != -1) {
-        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---"<<
-                   "Ip changed new ip is "<<ip <<", old ip is "<<oldIp;
+        LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---"<<"Ip changed new ip is "<<
+                   kaerp2p::GetLittleEndianIp(ip) <<", old ip is "<<
+                   kaerp2p::GetLittleEndianIp(oldIp) ;
         this->SignalNetStatusChange();
     } else if( net != oldNetType && oldNetType != -1 ) {
         LOG(INFO)<<"HisiMediaDevice::CheckNetStatus---"<<

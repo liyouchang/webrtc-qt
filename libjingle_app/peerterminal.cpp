@@ -1,27 +1,18 @@
 #include "peerterminal.h"
 #include "KeMessage.h"
 #include "talk/base/json.h"
+#include "talk/base/bind.h"
 
 namespace kaerp2p {
 
 
 
-PeerTerminal::PeerTerminal():
-    client_(0)
+PeerTerminal::PeerTerminal(kaerp2p::PeerConnectionClientInterface * client,
+                           int max_tunnel):
+    client_(client),max_tunnel_num_(max_tunnel)
 {
-
-}
-
-int PeerTerminal::Initialize(kaerp2p::PeerConnectionClientInterface * client,
-                             int max_tunnel)
-{
-    max_tunnel_num_ = max_tunnel;
-    this->client_ = client;
-    //int ret = client_->Connect(router,id);
     client_->SignalMessageFromPeer.connect(this,&PeerTerminal::OnRouterReadData);
-    return 0;
 }
-
 
 bool PeerTerminal::OpenTunnel(const std::string & peer_id)
 {
@@ -99,26 +90,26 @@ void PeerTerminal::OnTunnelClosed(const std::string &peerId)
     this->SignalTunnelClosed(this,peerId);
 }
 
-void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
+void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream,
+                                    talk_base::Buffer& buffer)
 {
     //ASSERT(tunnel == conductor_->GetStreamProcess());
-    //LOG(INFO)<< __FUNCTION__ << " read " << len;
     ScopedTunnel aTunnel = this->GetTunnel(stream);
     if(aTunnel == NULL){
-        LOG(WARNING)<<"cannot get tunnel by stream";
+        LOG_T_F(WARNING)<<"cannot get tunnel by stream";
         return ;
     }
 
-    char  * buffer = new char[len];
-    size_t readLen;
-    bool result = stream->ReadStream(buffer,len,&readLen);
-    if(!result){
-        LOG(WARNING)<<__FUNCTION__<<"--read stream error";
-        return ;
-    }
-    talk_base::Buffer data(buffer,readLen);
-    delete buffer;
-    this->SignalTunnelMessage(aTunnel->GetPeerID(),data);
+//    char * buffer = new char[len];
+//    size_t readLen;
+//    bool result = stream->ReadStream(buffer,len,&readLen);
+//    if(!result){
+//        LOG_T_F(WARNING)<<"--read stream error";
+//        return ;
+//    }
+//    talk_base::Buffer data(buffer,readLen);
+//    delete buffer;
+    this->SignalTunnelMessage(aTunnel->GetPeerID(),buffer);
 }
 /**
  * @brief PeerTerminal::OnRouterReadData,we process message received by client_,
@@ -131,6 +122,7 @@ void PeerTerminal::OnTunnelReadData(kaerp2p::StreamProcess *stream, size_t len)
 void PeerTerminal::OnRouterReadData(const std::string & peer_id,
                                     const std::string & msg)
 {
+    LOG_F(LS_VERBOSE)<<"receive from :"<<peer_id<<" msg:"<<msg;
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(msg, jmessage)) {
@@ -142,7 +134,8 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
     if(type.compare("p2p") == 0){
         ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
         if(aTunnel == NULL){
-            LOG(WARNING)<<"read  p2p msg from unknown peer "<<peer_id;
+            LOG(WARNING)<<"read  p2p msg and create tunnel error "<<peer_id;
+            SendTunnelError(peer_id);
             return;
         }
         std::string peerMsg;
@@ -151,6 +144,7 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
     }
     else if(type.compare("tunnel") == 0){
         //dispath tunnel message
+        //LOG(INFO)<<"PeerTerminal::OnRouterReadData---receive tunnel msg : "<<msg;
         talk_base::Buffer buffer(msg.c_str(),msg.length());
         SignalRouterMessage(peer_id,buffer);
     }else{
@@ -172,6 +166,7 @@ void PeerTerminal::OnTunnelNeedSend(const std::string &peer_id,
 
 ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
 {
+    talk_base::CritScope cs(&crit_);
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
         if ((*it)->GetPeerID().compare(peer_id) == 0) {
@@ -185,6 +180,7 @@ ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
 
 ScopedTunnel PeerTerminal::GetTunnel(kaerp2p::StreamProcess *stream)
 {
+    talk_base::CritScope cs(&crit_);
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
         if ((*it)->GetStreamProcess() == stream) {
@@ -198,6 +194,7 @@ ScopedTunnel PeerTerminal::GetTunnel(kaerp2p::StreamProcess *stream)
 
 int PeerTerminal::CountAvailableTunnels()
 {
+    talk_base::CritScope cs(&crit_);
     int notUsedNum = max_tunnel_num_ - tunnels_.size();
     std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
@@ -217,8 +214,7 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
     }
     aTunnel = this->GetTunnel("");
     if(aTunnel){
-        LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<
-                   "reuse a empty tunnel, total is "<<tunnels_.size();
+        LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<"reuse a empty tunnel";
         return aTunnel;
     }
     if(tunnels_.size() <= max_tunnel_num_ ||
@@ -227,15 +223,175 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
         aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
         aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
         aTunnel->SignalStreamClosed.connect(this,&PeerTerminal::OnTunnelClosed);
+        talk_base::CritScope cs(&crit_);
         tunnels_.push_back(aTunnel);
         LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<
                    "create a new tunnel, total tunnel num is "<< tunnels_.size();
     } else {
-        LOG(WARNING) <<"PeerTerminal::GetOrCreateTunnel---"<<
+        LOG(WARNING)<<"PeerTerminal::GetOrCreateTunnel---"<<
                        "tunnel number is more than the max number "<<
                        tunnels_.size();
     }
     return aTunnel;
+}
+
+void PeerTerminal::SendTunnelError(const std::string &peer_id)
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = "p2p_error";
+    std::string msg = writer.write(jmessage);
+    this->SendByRouter(peer_id,msg);
+}
+
+LocalUdpTerminal::LocalUdpTerminal():
+    localSocket(NULL),ownThread(false),isOpened(false)
+{
+    this->socketThread_ = new talk_base::Thread();
+    this->socketThread_->Start();
+    socket_factory_.reset(new talk_base::BasicPacketSocketFactory(socketThread_));
+}
+
+LocalUdpTerminal::~LocalUdpTerminal()
+{
+    if(localSocket){
+        localSocket->Close();
+        delete localSocket;
+    }
+    delete this->socketThread_;
+}
+
+bool LocalUdpTerminal::Initialize(const std::string &localAddr)
+{
+    return socketThread_->Invoke<bool>(
+                talk_base::Bind(&LocalUdpTerminal::Initialize_s,this,localAddr));
+
+}
+
+bool LocalUdpTerminal::OpenTunnel(const std::string &peerAddr)
+{
+//    return socketThread_->Invoke<bool>(
+//                talk_base::Bind(&LocalTerminal::OpenTunnel_s,this,peerAddr));
+    if(localSocket){
+        this->SignalTunnelOpened(this,peerAddr);
+        this->isOpened = true;
+        return true;
+    }
+    return false;
+}
+
+bool LocalUdpTerminal::CloseTunnel(const std::string &peerAddr)
+{
+    if(localSocket){
+        this->SignalTunnelClosed(this,peerAddr);
+        return true;
+    }
+    return false;
+}
+
+bool LocalUdpTerminal::SendByRouter(const std::string &peerAddr,
+                                    const std::string &data)
+{
+    return SendByRouter(peerAddr,data.c_str(),data.size());
+}
+
+bool LocalUdpTerminal::SendByRouter(const std::string &peerAddr,
+                                    const char *data, size_t len)
+{
+    return false;
+}
+
+bool LocalUdpTerminal::SendByTunnel(const std::string &peerAddr,
+                                    const std::string &data)
+{
+    return SendByTunnel(peerAddr,data.c_str(),data.size());
+}
+
+bool LocalUdpTerminal::SendByTunnel(const std::string &peerAddr,
+                                    const char *data, size_t len)
+{
+    talk_base::PacketOptions options;
+    talk_base::SocketAddress remote_addr;
+    remote_addr.FromString(peerAddr);
+    const int onceSend = 1400;
+    int leftDataLen = len;
+    while(leftDataLen > 0){
+        int sendLen = leftDataLen > onceSend ? onceSend:leftDataLen;
+        int sent = localSocket->SendTo(data,sendLen,remote_addr,options);
+        if(sent < 0){
+            LOG(INFO)<<"LocalTerminal::SendByTunnel --- send "<<sendLen<<
+                       " error "<<localSocket->GetError();
+            return false;
+        }
+        leftDataLen -= sendLen;
+        //socketThread_->SleepMs(1);
+        //LOG_T_F(INFO)<<"send "<<sent;
+    }
+    return true;
+
+}
+const int kLocalSocketStartPort = 22555;
+const int kLocalSocketEndPort = 22600;
+
+bool LocalUdpTerminal::Initialize_s(const std::string &localAddr)
+{
+    talk_base::SocketAddress local_address(INADDR_ANY,kLocalSocketStartPort);
+    if(!localAddr.empty() && !local_address.FromString(localAddr)){
+        return false;
+    }
+
+    localSocket = socket_factory_->CreateUdpSocket(local_address,
+                                     kLocalSocketStartPort,kLocalSocketEndPort);
+    if(!localSocket){
+        LOG_T_F(WARNING) << "Failed to create UDP socket bound at port";
+        return false;
+    }
+    LOG_T_F(INFO)<<"create socket success "<<localSocket->GetLocalAddress().ToString();
+    localSocket->SignalReadPacket.connect(this,&LocalUdpTerminal::OnPackage);
+    localSocket->SetOption(talk_base::Socket::OPT_NODELAY,1);
+
+    return true;
+}
+
+bool LocalUdpTerminal::SendByTunnel_s(const std::string &peerAddr, const char *data, size_t len)
+{
+    talk_base::PacketOptions options;
+    talk_base::SocketAddress remote_addr;
+    remote_addr.FromString(peerAddr);
+    const int onceSend = 1400;
+    int leftDataLen = len;
+    while(leftDataLen > 0){
+        int sendLen = leftDataLen > onceSend ? onceSend:leftDataLen;
+        int sent = localSocket->SendTo(data,sendLen,remote_addr,options);
+        if(sent < 0){
+            LOG(INFO)<<"LocalTerminal::SendByTunnel --- send "<<sendLen<<
+                       " error "<<localSocket->GetError();
+            return false;
+        }
+        leftDataLen -= sendLen;
+        //socketThread_->SleepMs(1);
+        LOG_T_F(INFO)<<"send "<<sent;
+    }
+    return true;
+
+}
+
+void LocalUdpTerminal::OnPackage(talk_base::AsyncPacketSocket *socket,
+                                 const char *buf, size_t size,
+                                 const talk_base::SocketAddress &remote_addr,
+                                 const talk_base::PacketTime &packet_time)
+{
+
+    std::string peerAddr = remote_addr.ToString();
+    if(!isOpened){
+        this->SignalTunnelOpened(this,peerAddr);
+        isOpened = true;
+    }
+    talk_base::Buffer buffer(buf,size);
+    if(socket == localSocket){
+        this->SignalTunnelMessage(peerAddr,buffer);
+    }
 }
 
 }

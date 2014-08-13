@@ -6,6 +6,10 @@
 #include "talk/base/stringencode.h"
 #include "talk/session/tunnel/tunnelsessionclient.h"
 #include "talk/base/bind.h"
+#include "talk/session/tunnel/pseudotcpchannel.h"
+
+#include "talk/app/kaerp2p/udpstreamchannel.h"
+
 using cricket::ContentInfo;
 using cricket::ContentInfos;
 using cricket::SessionDescription;
@@ -16,7 +20,6 @@ namespace kaerp2p {
 
 const char NS_TUNNEL[] = "http://www.google.com/talk/tunnel";
 const char CN_TUNNEL[] = "tunnel";
-
 
 // Error messages
 const char kSetLocalSdpFailed[] = "SetLocalDescription failed: ";
@@ -241,20 +244,17 @@ private:
 KaerSession::KaerSession(talk_base::Thread* signaling_thread,
                          talk_base::Thread* worker_thread,
                          cricket::PortAllocator* port_allocator):
-    cricket::BaseSession(signaling_thread,
-                         worker_thread,
-                         port_allocator,
+    cricket::BaseSession(signaling_thread , worker_thread , port_allocator,
                          talk_base::ToString(talk_base::CreateRandomId64() &
                                              LLONG_MAX),
-                         cricket::NS_TUNNEL,
-                         false),
+                         cricket::NS_TUNNEL,false),
     ice_connection_state_(IceObserver::kIceConnectionNew),
     ice_observer_(NULL),
     ice_restart_latch_(new IceRestartAnswerLatch),
     channel_(NULL)
 {
-//    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
-//                                         this->signaling_thread(),this,id()));
+    //    kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
+    //                                         this->signaling_thread(),this,id()));
 }
 
 KaerSession::~KaerSession()
@@ -263,15 +263,12 @@ KaerSession::~KaerSession()
     for (size_t i = 0; i < saved_candidates_.size(); ++i) {
         delete saved_candidates_[i];
     }
-
 }
 
 bool KaerSession::Initialize()
 {
     kaer_session_desc_factory_.reset(new KaerSessionDescriptionFactory(
                                          signaling_thread(),this,id()));
-
-    channel_ = new cricket::PseudoTcpChannel(this->worker_thread(), this);
     return true;
 }
 
@@ -297,9 +294,10 @@ void KaerSession::RegisterIceObserver(IceObserver *observer) {
     ice_observer_ = observer;
 }
 
-void KaerSession::CreateOffer(webrtc::CreateSessionDescriptionObserver *observer)
+void KaerSession::CreateOffer(webrtc::CreateSessionDescriptionObserver *observer,
+                              const std::string &description)
 {
-    kaer_session_desc_factory_->CreateOffer(observer);
+    kaer_session_desc_factory_->CreateOffer(observer,description);
 }
 
 void KaerSession::CreateAnswer(webrtc::CreateSessionDescriptionObserver *observer)
@@ -307,7 +305,8 @@ void KaerSession::CreateAnswer(webrtc::CreateSessionDescriptionObserver *observe
     kaer_session_desc_factory_->CreateAnswer(observer);
 }
 
-bool KaerSession::SetLocalDescription(webrtc::SessionDescriptionInterface *desc, std::string *err_desc)
+bool KaerSession::SetLocalDescription(webrtc::SessionDescriptionInterface *desc,
+                                      std::string *err_desc)
 {
     // Takes the ownership of |desc| regardless of the result.
     talk_base::scoped_ptr<webrtc::SessionDescriptionInterface> desc_temp(desc);
@@ -442,11 +441,11 @@ bool KaerSession::ProcessIceMessage(const IceCandidateInterface *candidate)
         LOG(LS_INFO) << "ProcessIceMessage: Remote description not set, "
                      << "save the candidate for later use.";
         saved_candidates_.push_back(
-                    new JsepIceCandidate(candidate->sdp_mid(), candidate->sdp_mline_index(),
+                    new JsepIceCandidate(candidate->sdp_mid(),
+                                         candidate->sdp_mline_index(),
                                          candidate->candidate()));
         return true;
     }
-
     // Add this candidate to the remote session description.
     if (!remote_desc_->AddCandidate(candidate)) {
         LOG(LS_ERROR) << "ProcessIceMessage: Candidate cannot be used";
@@ -482,31 +481,38 @@ KaerSession::Action KaerSession::GetAction(const std::string &type)
 bool KaerSession::CreateChannels(const cricket::SessionDescription *desc)
 {
     const ContentInfo* cinfo = desc->FirstContentByType(NS_TUNNEL);
-
-    //if(cinfo)
-    return this->signaling_thread()->Invoke<bool>(
-                talk_base::Bind(&KaerSession::CreatePseudoTcpChannel_s,this));
-
-    //    channel_->Connect(CN_TUNNEL,"tcp", 1);
-    //    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,1024*1024);
-    //    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,1024*1024);
-
-    //    LOG(INFO)<<"channel option set";
-    //    return true;
-}
-
-bool KaerSession::CreatePseudoTcpChannel_s()
-{
-    channel_->Connect(CN_TUNNEL,"tcp", 1);
-    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,1024*1024);
-    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,1024*1024);
-    //    channel_->SignalChannelClosed.connect(this, &TunnelSession::OnChannelClosed);
-
-    LOG(INFO)<<"channel option set";
+    if(!cinfo){
+        LOG_T_F(WARNING)<<"get tunnel info failed";
+        return false;
+    }
+    const cricket::TunnelContentDescription* tunnel_desc =
+            static_cast<const cricket::TunnelContentDescription*>(cinfo->description);
+    LOG_T_F(INFO)<<"channel name is "<<tunnel_desc->description;
+    //    return this->signaling_thread()->Invoke<bool>(
+    //                talk_base::Bind(&KaerSession::CreatePseudoTcpChannel_s,this));
+    cricket::PseudoTcpChannel * newChannel =
+            new cricket::PseudoTcpChannel(this->worker_thread(), this);
+    newChannel->Connect(CN_TUNNEL,"tcp", 1);
+    newChannel->SetOption(cricket::PseudoTcp::OPT_SNDBUF,512*1024);
+    newChannel->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
+    channel_ = newChannel;
+//    channel_ = new kaerp2p::UdpStreamChannel(this->worker_thread(), this);
+//    channel_->Connect(CN_TUNNEL,"udp",1);
     return true;
 }
 
-void KaerSession::RemoveUnusedChannelsAndTransports(const cricket::SessionDescription *desc)
+//bool KaerSession::CreatePseudoTcpChannel_s()
+//{
+//    channel_->Connect(CN_TUNNEL,"tcp", 1);
+//    channel_->SetOption(cricket::PseudoTcp::OPT_SNDBUF,512*1024);
+//    channel_->SetOption(cricket::PseudoTcp::OPT_RCVBUF,128*1024);
+//    channel_->SignalChannelClosed.connect(this, &KaerSession::OnStreamChannelClosed);
+//    //LOG(INFO)<<"KaerSession::CreatePseudoTcpChannel_s---channel option set";
+//    return true;
+//}
+
+void KaerSession::RemoveUnusedChannelsAndTransports(
+        const cricket::SessionDescription *desc)
 {
     const ContentInfo* cinfo = desc->FirstContentByType(NS_TUNNEL);
     if( (!cinfo || cinfo->rejected) && channel_){
@@ -515,7 +521,10 @@ void KaerSession::RemoveUnusedChannelsAndTransports(const cricket::SessionDescri
     }
 }
 
-bool KaerSession::UpdateSessionState(KaerSession::Action action, cricket::ContentSource source, const cricket::SessionDescription *desc, std::string *err_desc)
+bool KaerSession::UpdateSessionState(KaerSession::Action action,
+                                     cricket::ContentSource source,
+                                     const cricket::SessionDescription *desc,
+                                     std::string *err_desc)
 {
     // If there's already a pending error then no state transition should happen.
     // But all call-sites should be verifying this before calling us!
@@ -557,7 +566,6 @@ bool KaerSession::UpdateSessionState(KaerSession::Action action, cricket::Conten
 
 void KaerSession::EnableChannels()
 {
-
 }
 
 bool KaerSession::StartCandidatesAllocation()
@@ -588,7 +596,8 @@ void KaerSession::CopySavedCandidates(SessionDescriptionInterface *dest_desc)
     saved_candidates_.clear();
 }
 
-bool KaerSession::UseCandidatesInSessionDescription(const SessionDescriptionInterface *remote_desc)
+bool KaerSession::UseCandidatesInSessionDescription(
+        const SessionDescriptionInterface *remote_desc)
 {
     if (!remote_desc)
         return true;
@@ -648,7 +657,6 @@ void KaerSession::SetIceConnectionState(IceObserver::IceConnectionState state)
     if (ice_connection_state_ == state) {
         return;
     }
-
     // ASSERT that the requested transition is allowed.  Note that
     // WebRtcSession does not implement "kIceConnectionClosed" (that is handled
     // within PeerConnection).  This switch statement should compile away when
@@ -721,12 +729,10 @@ bool KaerSession::ValidateSessionDescription(
     //        !VerifyCrypto(sdesc->description(), dtls_enabled_, &crypto_error)) {
     //      return BadSdp(source, crypto_error, error_desc);
     //    }
-
     // Verify ice-ufrag and ice-pwd.
     if (!VerifyIceUfragPwdPresent(sdesc->description())) {
         return BadSdp(source, kSdpWithoutIceUfragPwd, error_desc);
     }
-
     //        if (!ValidateBundleSettings(sdesc->description())) {
     //          return BadSdp(source, kBundleWithoutRtcpMux, error_desc);
     //        }
@@ -740,7 +746,6 @@ bool KaerSession::ValidateSessionDescription(
             return BadSdp(source, kMlineMismatch, error_desc);
         }
     }
-
     return true;
 }
 
@@ -776,7 +781,8 @@ bool KaerSession::ExpectSetRemoteDescription(KaerSession::Action action)
             (action == kPrAnswer && state() == STATE_RECEIVEDPRACCEPT));
 }
 
-std::string KaerSession::BadStateErrMsg(const std::string &type, cricket::BaseSession::State state)
+std::string KaerSession::BadStateErrMsg(const std::string &type,
+                                        cricket::BaseSession::State state)
 {
     std::ostringstream desc;
     desc << "Called with type in wrong state, "
@@ -796,15 +802,17 @@ bool KaerSession::CreateTransportProxies(const cricket::TransportInfos &tinfos)
     return true;
 }
 
-cricket::TransportInfos KaerSession::GetEmptyTransportInfos(const cricket::ContentInfos &contents) const
+cricket::TransportInfos KaerSession::GetEmptyTransportInfos(
+        const cricket::ContentInfos &contents) const
 {
     cricket::TransportInfos tinfos;
     for (cricket::ContentInfos::const_iterator content = contents.begin();
          content != contents.end(); ++content) {
-        tinfos.push_back(cricket::TransportInfo(content->name,
-                                                cricket::TransportDescription(transport_type(),
-                                                                              std::string(),
-                                                                              std::string())));
+        tinfos.push_back(cricket::TransportInfo(
+                             content->name,
+                             cricket::TransportDescription(transport_type(),
+                                                           std::string(),
+                                                           std::string())));
     }
     return tinfos;
 }
@@ -832,7 +840,8 @@ void KaerSession::ProcessNewLocalCandidate(const std::string &content_name,
     }
 }
 
-bool KaerSession::GetLocalCandidateMediaIndex(const std::string &content_name, int *sdp_mline_index)
+bool KaerSession::GetLocalCandidateMediaIndex(const std::string &content_name,
+                                              int *sdp_mline_index)
 {
     if (!BaseSession::local_description() || !sdp_mline_index)
         return false;
@@ -849,13 +858,18 @@ bool KaerSession::GetLocalCandidateMediaIndex(const std::string &content_name, i
     return content_found;
 }
 
+void KaerSession::OnStreamChannelClosed(cricket::StreamChannelInterface *channel)
+{
+    LOG_T_F(INFO)<<"channel closed "<<channel->content_name();
+    channel_ = NULL;
+}
+
 void KaerSession::OnTransportRequestSignaling(cricket::Transport *transport)
 {
     ASSERT(signaling_thread()->IsCurrent());
     transport->OnSignalingReady();
     if (ice_observer_) {
-        ice_observer_->OnIceGatheringChange(
-                    IceObserver::kIceGatheringGathering);
+        ice_observer_->OnIceGatheringChange(IceObserver::kIceGatheringGathering);
     }
 }
 
@@ -864,7 +878,6 @@ void KaerSession::OnTransportConnecting(cricket::Transport *transport)
     ASSERT(signaling_thread()->IsCurrent());
     // start monitoring for the write state of the transport.
     OnTransportWritable(transport);
-
 }
 
 void KaerSession::OnTransportWritable(cricket::Transport *transport)
@@ -873,31 +886,27 @@ void KaerSession::OnTransportWritable(cricket::Transport *transport)
     // TODO(bemasc): Expose more API from Transport to detect when
     // candidate selection starts or stops, due to success or failure.
     if (transport->all_channels_writable()) {
-        if (ice_connection_state_ ==
-                IceObserver::kIceConnectionChecking ||
-                ice_connection_state_ ==
-                IceObserver::kIceConnectionDisconnected) {
+        if (ice_connection_state_ == IceObserver::kIceConnectionChecking ||
+                ice_connection_state_ == IceObserver::kIceConnectionDisconnected)
+        {
             SetIceConnectionState(IceObserver::kIceConnectionConnected);
         }
     } else if (transport->HasChannels()) {
         // If the current state is Connected or Completed, then there were writable
         // channels but now there are not, so the next state must be Disconnected.
-        if (ice_connection_state_ ==
-                IceObserver::kIceConnectionConnected ||
-                ice_connection_state_ ==
-                IceObserver::kIceConnectionCompleted) {
-            SetIceConnectionState(
-                        IceObserver::kIceConnectionDisconnected);
+        if (ice_connection_state_ == IceObserver::kIceConnectionConnected ||
+                ice_connection_state_ == IceObserver::kIceConnectionCompleted)
+        {
+            SetIceConnectionState(IceObserver::kIceConnectionDisconnected);
         }
     }
-
 }
 
-void KaerSession::OnTransportProxyCandidatesReady(cricket::TransportProxy *proxy, const cricket::Candidates &candidates)
+void KaerSession::OnTransportProxyCandidatesReady(
+        cricket::TransportProxy *proxy, const cricket::Candidates &candidates)
 {
     ASSERT(signaling_thread()->IsCurrent());
     ProcessNewLocalCandidate(proxy->content_name(), candidates);
-
 }
 
 void KaerSession::OnCandidatesAllocationDone()
@@ -908,7 +917,6 @@ void KaerSession::OnCandidatesAllocationDone()
                     IceObserver::kIceGatheringComplete);
         ice_observer_->OnIceComplete();
     }
-
 }
 
 

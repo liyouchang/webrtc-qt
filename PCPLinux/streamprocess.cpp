@@ -43,7 +43,7 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
     }
     if (events & talk_base::SE_OPEN) {
         //std::cout << "Tunnel connected" << std::endl;
-        LOG(INFO)<<__FUNCTION__<<"Tunnel Connected";
+        LOG(INFO)<<"StreamProcess::OnStreamEvent"<<"Tunnel Connected";
     }
     size_t count;
     if (events & talk_base::SE_WRITE) {

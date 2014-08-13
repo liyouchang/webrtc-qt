@@ -5,7 +5,7 @@
 #include "defaults.h"
 namespace  kaerp2p {
 
-const int kConnectTimeout = 13000; // close DeletePeerConnection after 13s without connect
+const int kConnectTimeout = 30000; // close DeletePeerConnection after 13s without connect
 const int kDisConnectTimeout = 2000;
 
 // Names used for a IceCandidate JSON object.
@@ -41,12 +41,14 @@ protected:
 P2PConductor::P2PConductor():
     stream_thread_(NULL),signal_thread_(NULL),tunnelState(kTunnelNew)
 {
-    stream_thread_ = new talk_base::Thread();
-    bool result = stream_thread_->Start();
-    ASSERT(result);
-    signal_thread_ = new talk_base::Thread();
-    result = signal_thread_->Start();
-    ASSERT(result);
+    if(stream_thread_ == NULL){
+        stream_thread_ = new talk_base::Thread();
+        stream_thread_->Start();
+    }
+    if(signal_thread_ == NULL){
+        signal_thread_ = new talk_base::Thread();
+        signal_thread_->Start();
+    }
 }
 
 P2PConductor::~P2PConductor()
@@ -72,7 +74,7 @@ bool P2PConductor::ConnectToPeer(const std::string &peer_id)
     }
     if (InitializePeerConnection()) {
         peer_id_ = peer_id;
-        peer_connection_->CreateOffer(this);
+        peer_connection_->CreateOffer(this,"tcp");
     } else {
         LOG(LS_INFO) <<"initialize connection error";
         return false;
@@ -239,9 +241,10 @@ void P2PConductor::AddIceServer(const std::string &uri,
     g_servers.push_back(server);
 
 }
-
+//将g_servers置为jstrServers中的server
 void P2PConductor::AddIceServers(std::string jstrServers)
 {
+
     Json::Reader reader;
     Json::Value jservers;
     if (!reader.parse(jstrServers, jservers)) {
@@ -249,8 +252,9 @@ void P2PConductor::AddIceServers(std::string jstrServers)
                         "unknown json string " << jstrServers;
         return;
     }
+    //每次都重新添加
+    g_servers.clear();
     std::vector<Json::Value> jServersArray;
-
     if(JsonArrayToValueVector(jservers,&jServersArray)){
         for(int i=0;i<jServersArray.size();i++){
             Json::Value jserver = jServersArray[i];
@@ -268,10 +272,10 @@ bool P2PConductor::InitializePeerConnection()
 {
     if(g_servers.empty()){
         //lht TODO: turn server should get by the server
-        P2PConductor::AddIceServer("stun:222.174.213.185:5389","","");
+//        P2PConductor::AddIceServer("stun:222.174.213.181:5389","","");
         P2PConductor::AddIceServer(GetPeerConnectionString(),"","");
-        P2PConductor::AddIceServer("turn:222.174.213.185:5766",
-                                   "lht","123456");
+//        P2PConductor::AddIceServer("turn:222.174.213.185:5766",
+//                                   "lht","123456");
     }
 
     stream_process_.reset(new StreamProcess(stream_thread_));
@@ -289,7 +293,7 @@ bool P2PConductor::InitializePeerConnection()
     setTunnelState(kTunnelConnecting);
 
     peer_connection_ = PeerTunnelProxy::Create(pt->signaling_thread(), pt);
-
+    LOG(INFO)<<"P2PConductor::InitializePeerConnection---connect timeout is "<<kConnectTimeout;
     signal_thread_->PostDelayed(kConnectTimeout,this,MSG_CONNECT_TIMEOUT);
 
     return true;
@@ -409,9 +413,10 @@ void P2PConductor::OnMessageFromPeer(const std::string &peer_id,
         LOG(WARNING)<<"P2PConductor::OnMessageFromPeer---peer id is wrong";
         return;
     }
+    //LOG(INFO)<<"P2PConductor::OnMessageFromPeer---from - "<<peer_id<<", msg -"<<message;
     //为了防止tunnelState的冲突，我们将tunnelstate的操作放在signal_thread中.
     PeerMessageParams * param = new PeerMessageParams(peer_id,message);
-    signal_thread_->Post(this,MSG_PEER_MESSAGE,param);
+    signal_thread_->Send(this,MSG_PEER_MESSAGE,param);
     //    signal_thread_->Invoke<void>(
     //                talk_base::Bind(&P2PConductor::OnMessageFromPeer_s,
     //                                this,peer_id,message));

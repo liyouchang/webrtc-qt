@@ -16,7 +16,7 @@ PlayWidget::~PlayWidget()
 void PlayWidget::setSelected(bool select)
 {
     this->selected = select;
-    this->update();
+    //this->update();
 }
 
 void PlayWidget::PlayMediaData(QByteArray &data)
@@ -49,6 +49,20 @@ void PlayWidget::StopPlayFile()
     this->update();
 }
 
+bool PlayWidget::OpenSound()
+{
+    int ret = playSource->OpenSound();
+    qDebug()<<"PlayWidget::OpenSound---"<<ret;
+    return true;
+}
+
+bool PlayWidget::CloseSound()
+{
+    int ret = playSource->CloseSound();
+    qDebug()<<"PlayWidget::CloseSound---"<<ret;
+    return true;
+}
+
 bool PlayWidget::IsPlaying()
 {
     return playSource->IsPlaying();
@@ -71,7 +85,7 @@ bool PlayWidget::Capture(QString file_name)
 void PlayWidget::paintEvent(QPaintEvent *event)
 {
 //    QPainter p(this);
-    //qDebug()<<"PlayWidget::paintEvent ---"<<this->winId();
+    qDebug()<<"PlayWidget::paintEvent ---"<<this->effectiveWinId();
 
 //    if(this->selected){
 //        p.setPen(Qt::yellow);

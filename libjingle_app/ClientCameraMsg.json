@@ -101,6 +101,12 @@ client-->camera
     "type":"tunnel",
     "command":"restart"
 }
+client<--camera
+{
+    "type":"tunnel",
+    "command":"restart",
+    "result":0
+}
 
 8. get or set cmaera alarm status
 client<-->camera
@@ -119,6 +125,13 @@ client-->camera
     "command":"rename",
     "name":"camear name",
 }
+client<--camera
+{
+    "type":"tunnel",
+    "command":"rename",
+    "result":0,
+}
+
 10. set ntp param
 client-->camera
 {

@@ -1,0 +1,15 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins\@kaer.com/KePlayer,version=3.0]
+"Path"="E:\\workspace\\qt\\P2PSystem\\out\\release\\npKePlayerPlugin\\npKePlayerPlugin.dll"
+"GeckoVersion"="1.00"
+"Version"="3.0"
+"Vendor"="kaer"
+"Description"="Kaer camera play plugin"
+"ProductName"="KePlayerPlugin"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins\@kaer.com/KePlayer,version=3.0\MimeTypes]
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\MozillaPlugins\@kaer.com/KePlayer,version=3.0\MimeTypes\application/keplayer-plugin]

@@ -1,5 +1,5 @@
 TEMPLATE = lib
-CONFIG  += dll
+#CONFIG  += dll
 win32 {
   # Uncomment the following line to build a plugin that can be used also in 
   # Internet Explorer, through ActiveX.
@@ -32,7 +32,7 @@ win32 {
   } else {
     DEF_FILE       += $$PWD/qtbrowserplugin.def
   }
-    message("DEF_FILE is $$DEF_FILE")
+    #message("DEF_FILE is $$DEF_FILE")
   firefox {
     exists("c:/program files/mozilla firefox/plugins") {
       DLLDESTDIR += "c:/program files/mozilla firefox/plugins"

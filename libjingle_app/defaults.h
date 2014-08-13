@@ -46,7 +46,7 @@ extern const char kKaerPTZCommandValue[];
 
 extern const uint16 kDefaultServerPort;
 
-enum FrameResolutionType{
+enum FrameType{
     kFrameD1 = 0,
     kFrameQCIF = 1,
     kFrameCIF = 2,
@@ -65,7 +65,7 @@ struct VideoInfo{
 };
 
 std::string GetRandomString();
-//yyyy-MM-dd hh:mm:ss---- %F %T
+//yyyy-MM-dd hh:mm:ss ---- %F %T
 std::string GetCurrentDatetime(std::string format);
 
 
@@ -81,5 +81,6 @@ std::string GetAppFilePath(std::string filename);
 
 std::string ToStringVersion(int intVer);
 
+std::string GetLittleEndianIp(int srcIp);
 }
 #endif  // PEERCONNECTION_SAMPLES_CLIENT_DEFAULTS_H_

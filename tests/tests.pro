@@ -1,5 +1,6 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    testkep2p
+    testkep2p \
+    TestUdpServer
 

@@ -39,7 +39,7 @@ public:
     };
     HisiMediaDevice();
     ~HisiMediaDevice();
-    virtual bool Init(kaerp2p::PeerConnectionClientInterface *client);
+    virtual bool Init(kaerp2p::PeerTerminalInterface *t);
     bool InitDeviceVideoInfo();
     virtual void SetVideoClarity(int);
     void SetVideoResolution(std::string r);
@@ -47,7 +47,7 @@ public:
     virtual void GetCameraVideoInfo(int level,kaerp2p::VideoInfo * info);
     sigslot::signal0<> SignalNetStatusChange;
     virtual void OnMessage(talk_base::Message *msg);
-
+    void SetNtp(const std::string & ntpParam);
 protected:
     int GetVideoFrameType(int level);
     int GetVideoFrameRate(int level);
@@ -62,6 +62,8 @@ protected:
     virtual void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
     virtual bool SetAlarmStatus(int status);
     virtual void ReportAlarmStatus(const std::string &peerId);
+    virtual void ReportResult(const std::string &peerId,
+                              const std::string & command, int result);
 private:
     /**
      * @brief SendVideoFrame

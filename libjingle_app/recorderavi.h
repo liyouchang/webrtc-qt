@@ -15,6 +15,8 @@
 
 #include "recordinterface.h"
 
+#include <vector>
+
 namespace talk_base{
 class Buffer;
 class FileStream;
@@ -22,6 +24,12 @@ class FileStream;
 
 namespace kaerp2p {
 
+typedef struct {
+    uint32_t ckid; //记录数据块中子块的标记
+    uint32_t dwFlags; //表示chid所指子块的属性
+    uint32_t dwChunkOffset; //子块的相对位置
+    uint32_t dwChunkLength; //子块长度
+}AVIINDEXENTRY;
 
 
 class RecorderAvi:public RecordSaverInterface
@@ -55,17 +63,50 @@ class RecordReaderAvi :
 public:
     RecordReaderAvi(int audioInterval = 20,talk_base::Thread * thread = NULL);
     virtual ~RecordReaderAvi();
+    enum {
+        MSG_READ,
+        MSG_SETSPEED,
+        MSG_SETPOSITION
+    };
     void OnMessage(talk_base::Message *msg);
     bool StartRead(const std::string & filename);
     bool StopRead();
+    bool SetSpeed(int speed);//0x10 normal ,0x20 2x speed,0x40 4x speed,
+                            //0x08 1/2 speed,0x04 1/4 speed
+    int GetSpeed();
+    bool SetPosition(int percent);// 0-100 percent
+    int GetPosition();
+    sigslot::signal1<int> SignalReportProgress;
 private:
+    void MoveTo(int percent);
+    void ReadRecord();
+    int GetPlayedPercent();
     talk_base::FileStream * aviFile_;
     talk_base::Thread * readThread;
     int audioFrameInterval;//million second, audio frame interval time,
                             //20 is normal speed
+    int speed; //0x10 normal,0x20 2x speed,0x40 4x speed,0x08 1/2 speed,0x04 1/4 speed
+    int totalFrame;
+    int currentFrame;
+    int oldPercent;
+    int indexPos;
     bool ownThread;
-public:
+    std::vector<AVIINDEXENTRY> recordIndex;
 };
+
+class FakeRecordReaderAvi: public RecordReaderInterface,public talk_base::MessageHandler
+{
+public:
+    FakeRecordReaderAvi(int interval);
+    ~FakeRecordReaderAvi();
+    void OnMessage(talk_base::Message *msg);
+    bool StartRead(const std::string &filename);
+    bool StopRead();
+protected:
+    talk_base::Thread * readThread;
+    int interval;
+};
+
 
 }
 #endif // RECORDERAVI_H

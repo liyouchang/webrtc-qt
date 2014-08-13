@@ -31,6 +31,7 @@ enum KEMsgType
 #define RESP_ACK 0x0d
 #define RESP_NAK 0x05
 #define RESP_END 0x06
+#define RESP_CTRL 0x07
 
 #define KE_Terminal_Port 22616
 
@@ -167,6 +168,7 @@ struct KEChannelCommonResp{
     char chanelNo;
     char resp;
 };
+
 struct KEDeviceCommonResp
 {
     unsigned char protocal;
@@ -229,8 +231,8 @@ struct KEVideoServerReq
     int clientID;
     char channelNo;//1 for main frame 2 for sub frame
     char video;//视频=1 request main,2 request sub   =0 停止
-    char listen;//监听=1请求   =0 停止
-    char talk;// 对讲=1请求   =0 停止
+    char listen;//监听=1请求 =0 停止
+    char talk;// 对讲=1请求 =0 停止
     char protocalType;//0/tcp ,1/udp
     int transSvrIp;//服务器IP
 };
@@ -320,6 +322,7 @@ struct KEDevGetSerialDataHead
     int clientID;
     short dataLen;
 };
+
 struct KEPlayRecordFileReq
 {
     unsigned char protocal;
@@ -327,26 +330,28 @@ struct KEPlayRecordFileReq
     int msgLength;//31
     int videoID;
     int clientID;
-    char channelNo;
-    char fileType;
-    int fileNo;//1 无用
+    char playSpeed;//speed /0x10 normal ,0x20 2x speed,0x40 4x speed,
+    //0x08 1/2 speed,0x04 1/4 speed
+    char fileType;//1,new file play 2, file play control
+    int playPos;//-1, pos not change,0~100 pos set percent. only used at filetype==2
     char startTime[6];//无用
     int clientIp;//0或本机ip
-    char protocalType; //
+    char protocalType;
     char fileData[80];
 };
+
 struct KEPlayRecordFileResp
 {
     unsigned char protocal;
     unsigned char msgType;//0x54
     int msgLength;//
     int videoID;
-    int clientID;
-    char channelNo;
+    int playPos;
+    char playSpeed;
     char resp;//13 request download success,5 no file or file error
     int frameResolution;
     int frameRate;
-    char fileName[80];
+//    char fileName[80];
 };
 
 struct KEPlayRecordDataHead
@@ -359,6 +364,7 @@ struct KEPlayRecordDataHead
     char channelNo;
     char resp;//13 后面有数据 ，6 数据结束,
 };
+
 
 //device ----> client
 struct KEAlarmSenserReq
@@ -373,6 +379,7 @@ struct KEAlarmSenserReq
     char msecond;//时间戳millisecond devide 10
     char number;//序号
 };
+
 //client ----> device
 struct KEAlarmSenserResp
 {

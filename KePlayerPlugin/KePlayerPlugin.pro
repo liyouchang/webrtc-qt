@@ -5,26 +5,24 @@
 #-------------------------------------------------
 TEMPLATE = lib
 
-QT       += core gui
-
+QT += core
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
 TARGET = KePlayerPlugin
 CONFIG +=  dll
 
 
 win32{
     RC_FILE  = KePlayerPlugin.rc
+    QTPLUGIN += qwindows
 }
 #DEF_FILE = KePlayerPlugin.def
+#Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 
 include(npapi/qtbrowserplugin.pri)
 include(QtUICommon.pri)
 
-
 SOURCES +=\
     PluginMain.cpp
-
 
 OTHER_FILES += \
     KePlayerPlugin.rc \
@@ -33,3 +31,12 @@ OTHER_FILES += \
     pluginTest/js/keplayer.js \
     pluginTest/css/main.css \
     pluginTest/js/json2.js
+
+#message( $$DESTDIR/$$TARGET".exe")
+#target_config.files = $$DESTDIR/$$TARGET
+target.path = $$PWD/setup
+INSTALLS += target
+
+htmltarget.files = pluginTest/*
+htmltarget.path = $$PWD/setup/pluginTest
+INSTALLS += htmltarget

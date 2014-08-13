@@ -31,12 +31,10 @@ KaerSessionDescriptionFactory::KaerSessionDescriptionFactory(
     session_(session),
     session_id_(session_id)
 {
-
 }
 
 KaerSessionDescriptionFactory::~KaerSessionDescriptionFactory()
 {
-
 }
 
 void KaerSessionDescriptionFactory::CopyCandidatesFromSessionDescription(
@@ -60,10 +58,11 @@ void KaerSessionDescriptionFactory::CopyCandidatesFromSessionDescription(
 
 
 void KaerSessionDescriptionFactory::CreateOffer(
-        webrtc::CreateSessionDescriptionObserver *observer)
+        webrtc::CreateSessionDescriptionObserver *observer,
+        const std::string &description)
 {
     cricket::SessionDescription* desc(
-                client_.CreateOffer("test"));
+                client_.CreateOffer(description));
     // RFC 3264
     // When issuing an offer that modifies the session,
     // the "o=" line of the new SDP MUST be identical to that in the

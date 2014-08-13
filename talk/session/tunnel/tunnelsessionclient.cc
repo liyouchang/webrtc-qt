@@ -2,26 +2,26 @@
  * libjingle
  * Copyright 2004--2008, Google Inc.
  *
- * Redistribution and use in source and binary forms, with or without
+ * Redistribution and use in source and binary forms, with or without 
  * modification, are permitted provided that the following conditions are met:
  *
- *  1. Redistributions of source code must retain the above copyright notice,
+ *  1. Redistributions of source code must retain the above copyright notice, 
  *     this list of conditions and the following disclaimer.
  *  2. Redistributions in binary form must reproduce the above copyright notice,
  *     this list of conditions and the following disclaimer in the documentation
  *     and/or other materials provided with the distribution.
- *  3. The name of the author may not be used to endorse or promote products
+ *  3. The name of the author may not be used to endorse or promote products 
  *     derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
  * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
- * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
  * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
  * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR 
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
@@ -42,16 +42,16 @@ const char NS_TUNNEL[] = "http://www.google.com/talk/tunnel";
 const char CN_TUNNEL[] = "tunnel";
 
 enum {
-    MSG_CLOCK = 1,
-    MSG_DESTROY,
-    MSG_TERMINATE,
-    MSG_EVENT,
-    MSG_CREATE_TUNNEL,
+  MSG_CLOCK = 1,
+  MSG_DESTROY,
+  MSG_TERMINATE,
+  MSG_EVENT,
+  MSG_CREATE_TUNNEL,
 };
 
 struct EventData : public talk_base::MessageData {
-    int event, error;
-    EventData(int ev, int err = 0) : event(ev), error(err) { }
+  int event, error;
+  EventData(int ev, int err = 0) : event(ev), error(err) { }
 };
 
 struct CreateTunnelData : public talk_base::MessageData {
@@ -295,22 +295,22 @@ SessionDescription* TunnelSessionClient::CreateAnswer(
 TunnelSession::TunnelSession(TunnelSessionClientBase* client, BaseSession* session,
                              talk_base::Thread* stream_thread)
     : client_(client), session_(session), channel_(NULL) {
-    ASSERT(client_ != NULL);
-    ASSERT(session_ != NULL);
-    session_->SignalState.connect(this, &TunnelSession::OnSessionState);
-    channel_ = new PseudoTcpChannel(stream_thread, session_);
-    channel_->SignalChannelClosed.connect(this, &TunnelSession::OnChannelClosed);
+  ASSERT(client_ != NULL);
+  ASSERT(session_ != NULL);
+  session_->SignalState.connect(this, &TunnelSession::OnSessionState);
+  channel_ = new PseudoTcpChannel(stream_thread, session_);
+  //channel_->SignalChannelClosed.connect(this, &TunnelSession::OnChannelClosed);
 }
 
 TunnelSession::~TunnelSession() {
-    ASSERT(client_ != NULL);
-    ASSERT(session_ == NULL);
-    ASSERT(channel_ == NULL);
+  ASSERT(client_ != NULL);
+  ASSERT(session_ == NULL);
+  ASSERT(channel_ == NULL);
 }
 
 talk_base::StreamInterface* TunnelSession::GetStream() {
-    ASSERT(channel_ != NULL);
-    return channel_->GetStream();
+  ASSERT(channel_ != NULL);
+  return channel_->GetStream();
 }
 
 bool TunnelSession::HasSession(BaseSession* session) {
@@ -333,11 +333,11 @@ BaseSession* TunnelSession::ReleaseSession(bool channel_exists) {
 
 void TunnelSession::OnSessionState(BaseSession* session,
                                    BaseSession::State state) {
-    LOG(LS_INFO) << "TunnelSession::OnSessionState("
-                 << talk_base::nonnull(
-                        talk_base::FindLabel(state, SESSION_STATES), "Unknown")
-                 << ")";
-    ASSERT(session == session_);
+  LOG(LS_INFO) << "TunnelSession::OnSessionState("
+               << talk_base::nonnull(
+                    talk_base::FindLabel(state, SESSION_STATES), "Unknown")
+               << ")";
+  ASSERT(session == session_);
 
     switch (state) {
     case BaseSession::STATE_RECEIVEDINITIATE:
@@ -367,18 +367,17 @@ void TunnelSession::OnInitiate() {
 }
 
 void TunnelSession::OnAccept() {
-    ASSERT(channel_ != NULL);
-    const ContentInfo* content =
-            session_->remote_description()->FirstContentByType(NS_TUNNEL);
-    ASSERT(content != NULL);
-    VERIFY(channel_->Connect(
-               content->name, "tcp", ICE_CANDIDATE_COMPONENT_DEFAULT
-               ));
+  ASSERT(channel_ != NULL);
+  const ContentInfo* content =
+      session_->remote_description()->FirstContentByType(NS_TUNNEL);
+  ASSERT(content != NULL);
+  VERIFY(channel_->Connect(
+      content->name, "tcp", ICE_CANDIDATE_COMPONENT_DEFAULT));
 }
 
 void TunnelSession::OnTerminate() {
-    ASSERT(channel_ != NULL);
-    channel_->OnSessionTerminate(session_);
+  ASSERT(channel_ != NULL);
+  channel_->OnSessionTerminate(session_);
 }
 
 void TunnelSession::OnChannelClosed(PseudoTcpChannel* channel) {

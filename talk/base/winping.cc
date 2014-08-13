@@ -164,7 +164,7 @@ inline uint32 ReplySize(uint32 data_size, int family) {
 WinPing::WinPing()
     : dll_(0), hping_(INVALID_HANDLE_VALUE), create_(0), close_(0), send_(0),
       create6_(0), send6_(0), data_(0), dlen_(0), reply_(0),
-      rlen_(0), valid_(false) {
+      rlen_(0), valid_(false),hping6_(INVALID_HANDLE_VALUE) {
 
   dll_ = LoadLibraryA(ICMP_DLL_NAME);
   if (!dll_) {

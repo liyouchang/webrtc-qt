@@ -9,12 +9,13 @@ namespace kaerp2p{
 LocalTerminal::LocalTerminal():
     broadcastSocket(NULL),localSocket(NULL),ownThread(false)
 {
-    //socket的执行必须和socket创建在一个线程,否则socket消息接收不到,
-    //若需使用不同线程,可以考虑使用proxy
+   //socket的执行必须和socket创建在一个线程,否则socket消息接收不到,
+  //若需使用不同线程,可以考虑使用proxy
  //   this->socketThread_ = talk_base::Thread::Current();
 //    if(thread == NULL)
     this->socketThread_ = new talk_base::Thread();
     this->socketThread_->Start();
+    //socket_factory_.reset(new talk_base::BasicPacketSocketFactory(socketThread_));
 }
 
 LocalTerminal::~LocalTerminal()
@@ -26,11 +27,9 @@ LocalTerminal::~LocalTerminal()
         localSocket->Close();
         delete localSocket;
     }
-    //delete this->socketThread_;
+    delete this->socketThread_;
 }
 
-const int kBroadSocketStartPort = 22555;
-const int kBroadSocketEndPort = 22600;
 bool LocalTerminal::Initialize()
 {
     return socketThread_->Invoke<bool>(
@@ -58,7 +57,6 @@ bool LocalTerminal::CloseTunnel(const std::string &peerAddr)
 bool LocalTerminal::SendByRouter(const std::string &peerAddr, const std::string &data)
 {
     return SendByRouter(peerAddr,data.c_str(),data.size());
-
 }
 
 bool LocalTerminal::SendByRouter(const std::string &peerAddr, const char *data, size_t len)
@@ -91,27 +89,31 @@ bool LocalTerminal::SendByTunnel(const std::string &peerAddr, const char *data, 
     }
     return true;
 }
+const int kLocalSocketStartPort = 22555;
+const int kLocalSocketEndPort = 22600;
 
 bool LocalTerminal::Initialize_s()
 {
     int port = 0;
     talk_base::SocketAddress int_addr(INADDR_ANY,port);
-    broadcastSocket = talk_base::AsyncUDPSocket::Create(this->socketThread_->socketserver(),int_addr);
-    if(!broadcastSocket){
+    broadcastSocket = talk_base::AsyncUDPSocket::Create(
+                this->socketThread_->socketserver(),int_addr);
+    if(!broadcastSocket) {
         LOG(WARNING) << "Failed to create a UDP socket bound at port"<< port;
         int_addr.SetPort(++port);
-        broadcastSocket = talk_base::AsyncUDPSocket::Create(this->socketThread_->socketserver(),int_addr);
-        if(!broadcastSocket){
-            LOG(WARNING) << "Failed to create again UDP socket bound at port"<< port;
-            return false;
-        }
+        broadcastSocket = talk_base::AsyncUDPSocket::Create(
+                    this->socketThread_->socketserver(),int_addr);
     }
-    broadcastSocket->SignalReadPacket.connect(this,&LocalTerminal::OnPackage);
-    int ret = broadcastSocket->SetOption(talk_base::Socket::OPT_BROADCAST,1);
-    LOG(INFO)<<"LocalTerminal::Initialize--- set opt "<<ret;
+    if(broadcastSocket){
+        broadcastSocket->SignalReadPacket.connect(this,&LocalTerminal::OnPackage);
+        int ret = broadcastSocket->SetOption(talk_base::Socket::OPT_BROADCAST,1);
+        LOG(INFO)<<"LocalTerminal::Initialize--- set opt "<<ret;
+    }else{
+        LOG(WARNING) << "Failed to create again UDP socket bound at port"<< port;
+        return false;
 
+    }
     return true;
-
 }
 
 bool LocalTerminal::OpenTunnel_s(const std::string &peerAddr)
@@ -172,7 +174,7 @@ KeLocalClient::KeLocalClient()
 bool KeLocalClient::Init(PeerTerminalInterface *t)
 {
     KeMsgProcessContainer::Init(t);
-    this->has_terminal = true;
+    //this->has_terminal = true;
 
     broadcastMsg.reset(new KeLocalMessage("broadcast",this));
     broadcastMsg->SignalNeedSendData.connect(
@@ -208,10 +210,6 @@ bool KeLocalClient::StopPeerMedia(std::string peerAddr)
     return true;
 }
 
-bool KeLocalClient::Init(PeerConnectionClientInterface *client)
-{
-    return false;
-}
 
 void KeLocalClient::OnTunnelOpened(PeerTerminalInterface *t, const std::string &peerAddr)
 {
@@ -315,11 +313,11 @@ void KeLocalMessage::OnMessageRespond(talk_base::Buffer &msgData)
 
 }
 
-std::string GetLittleEndianIp(int srcIp){
-    int netIp = talk_base::HostToNetwork32(srcIp);
-    talk_base::IPAddress addr(netIp);
-    return addr.ToString();
-}
+//std::string GetLittleEndianIp(int srcIp){
+//    int netIp = talk_base::HostToNetwork32(srcIp);
+//    talk_base::IPAddress addr(netIp);
+//    return addr.ToString();
+//}
 
 void KeLocalMessage::OnRecvSearchOnlineDeviceResp(talk_base::Buffer &msgData)
 {

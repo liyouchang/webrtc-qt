@@ -78,6 +78,7 @@ signals:
     void LocalDeviceInfo(const QString & devInfo);
 
 public slots:
+    void DestroyAll();
     //change the version when you need to auto update
     int GetVersion();
     void about();
@@ -97,7 +98,14 @@ public slots:
     int StopVideo(QString peerId);
     QString StartCut(QString peerId);
     int StopCut(QString peerId);
+
     QString Capture(QString peerId);
+    bool OpenSound(QString peerId);
+    bool CloseSound(QString peerId);
+
+    bool StartTalk();
+    bool StopTalk();
+
     int SendCommand(QString peer_id,QString msg);
 
     int PlayRecordFiles(QString peer_id,QString jstrRecordArray);
@@ -126,11 +134,9 @@ private:
     static QString GetTimeFileName(QString peerId,QString extName,QString path);
     QQueue<RecordFileInfo> need_play_records_;
     VideoWall * video_wall_;
-    talk_base::scoped_ptr<KeQtTunnelClient> tunnel_;
-    talk_base::scoped_ptr<PeerConnectionClientDealer> connection_;
-
+    KeQtTunnelClient * tunnel_;
+    PeerConnectionClientDealer * connection_;
     KeQtLocalClient * localClient_;
-
     QString m_savePath;
     bool is_inited;
     QSettings *myconfig;

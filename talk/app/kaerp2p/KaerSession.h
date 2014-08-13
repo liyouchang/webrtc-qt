@@ -3,7 +3,7 @@
 
 #include "talk/p2p/base/session.h"
 #include "talk/app/webrtc/jsep.h"
-#include "talk/session/tunnel/pseudotcpchannel.h"
+#include "talk/session/tunnel/streamchannelinterface.h"
 
 using namespace webrtc;
 
@@ -63,11 +63,12 @@ public:
     void Terminate();
 
     virtual talk_base::StreamInterface* GetStream();
-    cricket::PseudoTcpChannel * GetChannel();
+    //cricket::PseudoTcpChannel * GetChannel();
 
     void RegisterIceObserver(IceObserver* observer);
 
-    void CreateOffer(webrtc::CreateSessionDescriptionObserver* observer);
+    void CreateOffer(webrtc::CreateSessionDescriptionObserver* observer,
+                     const std::string &description);
     void CreateAnswer(webrtc::CreateSessionDescriptionObserver* observer);
 
     // The ownership of |desc| will be transferred after this call.
@@ -85,13 +86,13 @@ public:
 
 protected:
     bool CreateChannels(const cricket::SessionDescription* desc);
-    bool CreatePseudoTcpChannel_s();
+    //bool CreatePseudoTcpChannel_s();
 
 private:
-    enum Action  {
-      kOffer,
-      kPrAnswer,
-      kAnswer,
+    enum Action {
+        kOffer,
+        kPrAnswer,
+        kAnswer,
     };
     static Action GetAction(const std::string& type);
 
@@ -106,16 +107,16 @@ private:
     void CopySavedCandidates(SessionDescriptionInterface* dest_desc);
     // Uses all remote candidates in |remote_desc| in this session.
     bool UseCandidatesInSessionDescription(
-        const SessionDescriptionInterface* remote_desc);
+            const SessionDescriptionInterface* remote_desc);
     // Uses |candidate| in this session.
     bool UseCandidate(const IceCandidateInterface* candidate);
 
     void SetIceConnectionState(IceObserver::IceConnectionState state);
 
     // Below methods are helper methods which verifies SDP.
-    bool ValidateSessionDescription(const webrtc::SessionDescriptionInterface* sdesc,
-                                    cricket::ContentSource source,
-                                    std::string* error_desc);
+    bool ValidateSessionDescription(
+            const webrtc::SessionDescriptionInterface* sdesc,
+            cricket::ContentSource source, std::string* error_desc);
     // Check if a call to SetLocalDescription is acceptable with |action|.
     bool ExpectSetLocalDescription(Action action);
     // Check if a call to SetRemoteDescription is acceptable with |action|.
@@ -126,7 +127,8 @@ private:
 
 
     bool CreateTransportProxies(const cricket::TransportInfos& tinfos);
-    cricket::TransportInfos GetEmptyTransportInfos(const cricket::ContentInfos& contents) const;
+    cricket::TransportInfos GetEmptyTransportInfos(
+            const cricket::ContentInfos& contents) const;
 
     // Creates a JsepIceCandidate and adds it to the local session description
     // and notify observers. Called when a new local candidate have been found.
@@ -142,11 +144,12 @@ private:
     IceObserver::IceConnectionState ice_connection_state_;
     talk_base::scoped_ptr<IceRestartAnswerLatch> ice_restart_latch_;
 
-    cricket::PseudoTcpChannel* channel_;
+    cricket::StreamChannelInterface* channel_;
+    virtual void OnStreamChannelClosed(cricket::StreamChannelInterface *channel);
+
     // Candidates that arrived before the remote description was set.
     std::vector<webrtc::IceCandidateInterface*> saved_candidates_;
-    talk_base::scoped_ptr<KaerSessionDescriptionFactory>
-        kaer_session_desc_factory_;
+    talk_base::scoped_ptr<KaerSessionDescriptionFactory> kaer_session_desc_factory_;
 
 public:
     talk_base::scoped_ptr<webrtc::SessionDescriptionInterface> local_desc_;

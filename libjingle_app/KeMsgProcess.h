@@ -9,9 +9,11 @@
 #include "talk/base/buffer.h"
 #include "talk/base/sigslot.h"
 #include "talk/base/messagehandler.h"
+#include "talk/base/criticalsection.h"
 
 #include "PeerTerminalInterface.h"
 #include "PeerConnectionClinetInterface.h"
+
 #include "defaults.h"
 
 namespace talk_base {
@@ -44,7 +46,8 @@ public:
 
     virtual void OnMessage(talk_base::Message *msg);
     virtual void StartHeartBeat();
-    virtual void OnProcessMessage(const std::string & peer_id,talk_base::Buffer & msg);
+    virtual void OnProcessMessage(const std::string & peer_id,
+                                  talk_base::Buffer & msg);
 
     std::string peer_id(){ return peer_id_;}
 
@@ -85,7 +88,7 @@ public:
     virtual ~KeMsgProcessContainer();
 
     virtual bool Init(PeerTerminalInterface *t);
-    virtual bool Init(kaerp2p::PeerConnectionClientInterface * client);
+    //virtual bool Init(kaerp2p::PeerConnectionClientInterface * client);
     virtual bool OpenTunnel(const std::string &peer_id);
     virtual bool CloseTunnel(const std::string &peer_id);
     virtual bool IsTunnelOpened(const std::string &peer_id);
@@ -108,8 +111,11 @@ protected:
     virtual void OnHeartStop(const std::string & peer_id);
 
     std::vector<KeMsgProcess *> processes_;
+    // Protects changes to processes
+    talk_base::CriticalSection crit_;
+
     PeerTerminalInterface * terminal_;
-    bool has_terminal;
+    //bool has_terminal;
 };
 
 }

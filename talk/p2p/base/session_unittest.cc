@@ -25,14 +25,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
+#include <string.h>
+
 #include <sstream>
 #include <deque>
 #include <map>
 
 #include "talk/base/base64.h"
 #include "talk/base/common.h"
-#include "talk/base/dscp.h"
 #include "talk/base/gunit.h"
 #include "talk/base/helpers.h"
 #include "talk/base/logging.h"
@@ -76,19 +76,6 @@ static const int kEventTimeout = 5000;
 static const int kNumPorts = 2;
 static const int kPort0 = 28653;
 static const int kPortStep = 5;
-
-static const std::string kNotifyNick1 = "derekcheng_google.com^59422C27";
-static const std::string kNotifyNick2 = "someoneelses_google.com^7abd6a7a20";
-static const uint32 kNotifyAudioSsrc1 = 2625839801U;
-static const uint32 kNotifyAudioSsrc2 = 2529430427U;
-static const uint32 kNotifyVideoSsrc1 = 3;
-static const uint32 kNotifyVideoSsrc2 = 2;
-
-static const std::string kViewRequestNick = "param_google.com^16A3CDBE";
-static const uint32 kViewRequestSsrc = 4;
-static const int kViewRequestWidth = 320;
-static const int kViewRequestHeight = 200;
-static const int kViewRequestFrameRate = 15;
 
 int GetPort(int port_index) {
   return kPort0 + (port_index * kPortStep);
@@ -824,14 +811,15 @@ struct ChannelHandler : sigslot::has_slots<> {
     EXPECT_LE(size, sizeof(last_data));
     data_count += 1;
     last_size = size;
-    std::memcpy(last_data, buf, size);
+    memcpy(last_data, buf, size);
   }
 
   void Send(const char* data, size_t size) {
+    talk_base::PacketOptions options;
     std::string data_with_id(name);
     data_with_id += data;
     int result = channel->SendPacket(data_with_id.c_str(), data_with_id.size(),
-                                     talk_base::DSCP_NO_CHANGE, 0);
+                                     options, 0);
     EXPECT_EQ(static_cast<int>(data_with_id.size()), result);
   }
 
@@ -1170,14 +1158,10 @@ class SessionTest : public testing::Test {
       EXPECT_EQ(strlen(dat1a), chan2a->last_size);
       EXPECT_EQ(strlen(dat1b), chan2b->last_size);
 
-      EXPECT_EQ(0, std::memcmp(chan1a->last_data, dat2a,
-                               strlen(dat2a)));
-      EXPECT_EQ(0, std::memcmp(chan1b->last_data, dat2b,
-                               strlen(dat2b)));
-      EXPECT_EQ(0, std::memcmp(chan2a->last_data, dat1a,
-                               strlen(dat1a)));
-      EXPECT_EQ(0, std::memcmp(chan2b->last_data, dat1b,
-                               strlen(dat1b)));
+      EXPECT_EQ(0, memcmp(chan1a->last_data, dat2a, strlen(dat2a)));
+      EXPECT_EQ(0, memcmp(chan1b->last_data, dat2b, strlen(dat2b)));
+      EXPECT_EQ(0, memcmp(chan2a->last_data, dat1a, strlen(dat1a)));
+      EXPECT_EQ(0, memcmp(chan2b->last_data, dat1b, strlen(dat1b)));
     }
   }
 

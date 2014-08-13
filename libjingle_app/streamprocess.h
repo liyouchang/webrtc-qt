@@ -19,10 +19,10 @@ public:
 
     void Close();
     bool WriteStream(const char * data,int len);
-    bool ReadStream(void *buffer, size_t bytes, size_t *bytes_read = 0);
-    sigslot::signal2<StreamProcess*, size_t> SignalReadData;
+    //bool ReadStream(void *buffer, size_t bytes, size_t *bytes_read = 0);
+    sigslot::signal2<StreamProcess*, talk_base::Buffer &> SignalReadData;
     sigslot::signal0<> SignalOpened;
-    sigslot::signal1<StreamProcess *> SignalClosed;
+    sigslot::signal1<StreamProcess*> SignalClosed;
 protected:
     void Cleanup(talk_base::StreamInterface* stream, bool delay=false);
     void OnStreamEvent(talk_base::StreamInterface* stream, int events,
@@ -33,7 +33,7 @@ protected:
     talk_base::Thread * stream_thread_;
     // MessageHandler interface
     size_t totalread;
-    talk_base::FifoBuffer read_buf_;
+    //talk_base::FifoBuffer read_buf_;
     talk_base::FifoBuffer write_buf_;
     bool writeBufferFull;
 };

@@ -20,6 +20,8 @@ public:
     virtual bool Connect(const std::string &router, const std::string &id);
     virtual void Reconnect();
 
+    sigslot::signal1<const std::string &> SignalNtpSet;
+
     enum
     {
         MSG_LOGIN_HEART,
@@ -36,6 +38,8 @@ private:
     std::string clientVersion;
     int heartCount;
 
+    int oldNetType;
+    int oldIp;
 };
 
 #endif // CAMERACLIENT_H

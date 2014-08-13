@@ -15,7 +15,8 @@
 KeVideoSimulator::KeVideoSimulator(const std::string &fileName):
     fileName(fileName)
 {
-    reader = new kaerp2p::RecordReaderAvi();
+    //reader = new kaerp2p::RecordReaderAvi(0);
+    reader = new kaerp2p::FakeRecordReaderAvi(10);
     reader->SignalVideoData.connect(this,&KeVideoSimulator::OnFileVideoData);
     reader->SignalAudioData.connect(this,&KeVideoSimulator::OnFileAudioData);
     reader->SignalRecordEnd.connect(this,&KeVideoSimulator::OnFileReadEnd);
@@ -26,9 +27,9 @@ KeVideoSimulator::~KeVideoSimulator()
     delete reader;
 }
 
-bool KeVideoSimulator::Init(kaerp2p::PeerConnectionClientInterface *client)
+bool KeVideoSimulator::Init(kaerp2p::PeerTerminalInterface *t)
 {
-    if(!KeTunnelCamera::Init(client)){
+    if(!KeTunnelCamera::Init(t)){
         return  false;
     }
     return reader->StartRead(fileName);
@@ -51,6 +52,7 @@ void KeVideoSimulator::OnFileVideoData(const char *data, int len)
 {
     this->SignalVideoData1(data,len);
     this->SignalVideoData2(data,len);
+    this->SignalVideoData3(data,len);
 }
 
 void KeVideoSimulator::OnFileAudioData(const char *data, int len)

@@ -16,10 +16,6 @@ CONFIG -= qt
 
 include (../talk/talk_common.pri)
 
-INCLUDEPATH     +=  \
-    ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
-
-
 
 DESTDIR = $$output_dir/libs
 
@@ -46,7 +42,9 @@ SOURCES += \
     ketunnelcamera.cpp \
     recorderavi.cpp \
     ke08recorder.cpp \
-    kelocalclient.cpp
+    kelocalclient.cpp \
+    ../talk/app/kaerp2p/udpstreamchannel.cpp \
+    ../talk/session/tunnel/streamchannelinterface.cpp
 
 
 HEADERS += \
@@ -75,7 +73,9 @@ HEADERS += \
     recorderavi.h \
     recordinterface.h \
     ke08recorder.h \
-    kelocalclient.h
+    kelocalclient.h \
+    ../talk/app/kaerp2p/udpstreamchannel.h \
+    ../talk/session/tunnel/streamchannelinterface.h
 
 OTHER_FILES += \
     ClientCameraMsg.json

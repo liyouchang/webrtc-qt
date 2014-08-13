@@ -10,17 +10,46 @@
 #include "VideoWall.h"
 #include "ke_recorder.h"
 #include "libjingle_app/p2pconductor.h"
+#include "zmqclient/peerconnectionclientdealer.h"
+#include "libjingle_app/peerterminal.h"
+#ifdef WIN32
+#include <windows.h>
+#include <Shlobj.h>
 
+#ifdef UNICODE
+
+#define QStringToTCHAR(x)     (wchar_t*) x.utf16()
+
+#define PQStringToTCHAR(x)    (wchar_t*) x->utf16()
+
+#define TCHARToQString(x)     QString::fromUtf16((const ushort * )(x))
+
+#define TCHARToQStringN(x,y)  QString::fromUtf16((const ushort * )(x),(y))
+
+#else
+
+#define QStringToTCHAR(x)     x.local8Bit().constData()
+
+#define PQStringToTCHAR(x)    x->local8Bit().constData()
+
+#define TCHARToQString(x)     QString::fromLocal8Bit((x))
+
+#define TCHARToQStringN(x,y)  QString::fromLocal8Bit((x),(y))
+
+#endif
+
+#endif
 KePlayerPlugin::KePlayerPlugin(QWidget *parent)
     : QWidget(parent),
-      connection_(new PeerConnectionClientDealer()),
-      tunnel_(new KeQtTunnelClient()),
+      connection_(NULL),tunnel_(NULL),localClient_(NULL),
       is_inited(false)
 {
-    QVBoxLayout *vbox = new QVBoxLayout( this );
+    qDebug()<<"KePlayerPlugin::KePlayerPlugin--start ";
+
+    QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setMargin(0);
     video_wall_ = new VideoWall(this);
-    vbox->addWidget( video_wall_ );
+    vbox->addWidget(video_wall_);
 
     QObject::connect(video_wall_,&VideoWall::SigNeedStopPeerPlay,
                      this,&KePlayerPlugin::StopVideo);
@@ -45,18 +74,44 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
         QDir saveDir = QDir::home();
         saveDir.mkdir("ShijietongData");
         saveDir.cd("ShijietongData");
-        m_savePath = saveDir.absolutePath();
-        myconfig->setValue("plugin/save_path",savePath());
+        this->setSavePath( saveDir.absolutePath() );
     }
 
-    localClient_ = new KeQtLocalClient(this);
 }
 
 KePlayerPlugin::~KePlayerPlugin()
 {
     qDebug()<<"KePlayerPlugin::~KePlayerPlugin";
-    myconfig->setValue("plugin/save_path",savePath());
+    DestroyAll();
 }
+
+void KePlayerPlugin::DestroyAll()
+{
+    qDebug()<<"KePlayerPlugin::DestroyAll";
+    if(tunnel_){
+        delete tunnel_;
+        tunnel_ = NULL;
+    }
+    if(connection_){
+        delete connection_;
+        connection_ = NULL;
+    }
+
+    if(localClient_){
+        delete localClient_;
+        localClient_ = NULL;
+    }
+    if(video_wall_){
+        delete video_wall_;
+        video_wall_ = NULL;
+    }
+    if(myconfig){
+        delete myconfig;
+        myconfig = NULL;
+    }
+
+}
+
 
 void KePlayerPlugin::about()
 {
@@ -65,7 +120,7 @@ void KePlayerPlugin::about()
 
 void KePlayerPlugin::SetDivision(int num)
 {
-    this->video_wall_->SetDivision(num);
+//    this->video_wall_->SetDivision(num);
 }
 
 int KePlayerPlugin::PlayLocalFile()
@@ -82,9 +137,28 @@ int KePlayerPlugin::PlayLocalFile()
 
 QString KePlayerPlugin::GetLocalPath()
 {
-    return QFileDialog::getExistingDirectory(
+    QString ret;
+#ifdef WIN32
+    BROWSEINFO bInfo;
+    ZeroMemory(&bInfo, sizeof(bInfo));
+    bInfo.hwndOwner = (HWND)this->effectiveWinId();
+    bInfo.lpszTitle = TEXT("choose dir:");
+    bInfo.ulFlags = BIF_RETURNONLYFSDIRS;
+    LPITEMIDLIST lpDlist; //用来保存返回信息的IDList
+    lpDlist = SHBrowseForFolder(&bInfo) ; //显示选择对话框
+    if(lpDlist != NULL)  //用户按了确定按钮
+    {
+        TCHAR chPath[255]; //用来存储路径的字符串
+        SHGetPathFromIDList(lpDlist, chPath);//把项目标识列表转化成字符串
+        ret = TCHARToQString(chPath);
+    }
+#else
+    ret = QFileDialog::getExistingDirectory(
                 this,"选择路径",savePath(),
-                QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks);
+                QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks|QFileDialog::ReadOnly);
+#endif
+    qDebug()<<"get local path " << ret;
+    return ret;
 }
 
 void KePlayerPlugin::FullScreen()
@@ -94,7 +168,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 33;
+    const int kVersion = 55;
     return kVersion;
 }
 /**
@@ -111,31 +185,43 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
               " iceServers"<<jstrIceServers;
     LOG(INFO)<<"KePlayerPlugin version is "<<kaerp2p::ToStringVersion(this->GetVersion());
 
+    //init ice servers
+    std::string servers = jstrIceServers.toStdString();
+    kaerp2p::P2PConductor::AddIceServers(servers);
+
     if(is_inited){
+        qDebug()<<"KePlayerPlugin::Initialize---alreay init";
         return KE_SUCCESS;
     }
+    connection_ = new PeerConnectionClientDealer();
+
     if(!connection_->Connect(routerUrl.toStdString(),"")){
         qWarning()<<"KePlayerPlugin::Initialize---connect error";
         return KE_FAILED;
     }
 
+    kaerp2p::PeerTerminal * peerTerminal = new kaerp2p::PeerTerminal(connection_);
 
-    tunnel_->Init(connection_.get());
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvVideoData,
+    tunnel_ = new KeQtTunnelClient(this);
+    tunnel_->Init(peerTerminal);
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvVideoData,
                      this->video_wall_,&VideoWall::OnRecvMediaData);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvAudioData,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvAudioData,
                      this->video_wall_,&VideoWall::OnRecvMediaData);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigTunnelOpened,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigTunnelOpened,
                      this,&KePlayerPlugin::TunnelOpened);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigTunnelClosed,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigTunnelClosed,
                      this,&KePlayerPlugin::TunnelClosed);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecordStatus,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecordStatus,
                      this,&KePlayerPlugin::RecordStatus);
-    QObject::connect(tunnel_.get(),&KeQtTunnelClient::SigRecvPeerMsg,
+    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvPeerMsg,
                      this,&KePlayerPlugin::RecvPeerMsg);
+    QObject::connect(this->video_wall_,&VideoWall::SigTalkData,
+                     this->tunnel_,&KeQtTunnelClient::OnTalkData);
+
     this->is_inited = true;
 
-
+    localClient_ = new KeQtLocalClient(this);
     kaerp2p::LocalTerminal * local = new kaerp2p::LocalTerminal();
     local->Initialize();
     localClient_->Init(local);
@@ -150,12 +236,9 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
     QObject::connect(localClient_,&KeQtLocalClient::SigSearchedDeviceInfo,
                      this,&KePlayerPlugin::LocalDeviceInfo);
 
-    //init ice servers
-    std::string servers = jstrIceServers.toStdString();
-    kaerp2p::P2PConductor::AddIceServers(servers);
-
     return KE_SUCCESS;
 }
+
 
 //video:1 main stream 2 sub stream
 int KePlayerPlugin::StartVideo(QString peer_id, int video)
@@ -250,6 +333,33 @@ QString KePlayerPlugin::Capture(QString peerId)
     jreturn.insert("info",info);
     QJsonDocument jsondoc(jreturn);
     return jsondoc.toJson();
+}
+
+bool KePlayerPlugin::OpenSound(QString peerId)
+{
+    if(peerId.isEmpty()){
+        return false;
+    }
+    return video_wall_->OpenSound(peerId);
+}
+
+bool KePlayerPlugin::CloseSound(QString peerId)
+{
+    if(peerId.isEmpty()){
+        return false;
+    }
+    return video_wall_->CloseSound(peerId);
+
+}
+
+bool KePlayerPlugin::StartTalk()
+{
+    return video_wall_->StartTalk();
+}
+
+bool KePlayerPlugin::StopTalk()
+{
+    return video_wall_->StopTalk();
 }
 
 int KePlayerPlugin::SendCommand(QString peer_id, QString msg)
@@ -353,6 +463,7 @@ void KePlayerPlugin::setSavePath(const QString &path)
         return;
     }
     this->m_savePath = path;
+    myconfig->setValue("plugin/save_path",savePath());
 }
 
 void KePlayerPlugin::OnRecordStatus(QString peer_id, int status)
