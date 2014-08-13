@@ -99,7 +99,6 @@ void KePlayerPlugin::DestroyAll()
         delete connection_;
         connection_ = NULL;
     }
-
     if(localClient_){
         delete localClient_;
         localClient_ = NULL;
@@ -112,9 +111,7 @@ void KePlayerPlugin::DestroyAll()
         delete myconfig;
         myconfig = NULL;
     }
-
 }
-
 
 void KePlayerPlugin::about()
 {
@@ -123,7 +120,7 @@ void KePlayerPlugin::about()
 
 void KePlayerPlugin::SetDivision(int num)
 {
-//    this->video_wall_->SetDivision(num);
+    this->video_wall_->SetDivision(num);
 }
 
 int KePlayerPlugin::PlayLocalFile()
@@ -148,7 +145,7 @@ QString KePlayerPlugin::GetLocalPath()
     bInfo.lpszTitle = TEXT("choose dir:");
     bInfo.ulFlags = BIF_RETURNONLYFSDIRS;
     LPITEMIDLIST lpDlist; //用来保存返回信息的IDList
-    lpDlist = SHBrowseForFolder(&bInfo) ; //显示选择对话框
+    lpDlist = SHBrowseForFolder(&bInfo); //显示选择对话框
     if(lpDlist != NULL)  //用户按了确定按钮
     {
         TCHAR chPath[255]; //用来存储路径的字符串
@@ -160,7 +157,7 @@ QString KePlayerPlugin::GetLocalPath()
                 this,"选择路径",savePath(),
                 QFileDialog::ShowDirsOnly|QFileDialog::DontResolveSymlinks|QFileDialog::ReadOnly);
 #endif
-    qDebug()<<"get local path " << ret;
+    qDebug() << " get local path " << ret;
     return ret;
 }
 
@@ -221,9 +218,7 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
                      this,&KePlayerPlugin::RecvPeerMsg);
     QObject::connect(this->video_wall_,&VideoWall::SigTalkData,
                      this->tunnel_,&KeQtTunnelClient::OnTalkData);
-
     this->is_inited = true;
-
     localClient_ = new KeQtLocalClient(this);
     kaerp2p::LocalTerminal * local = new kaerp2p::LocalTerminal();
     local->Initialize();
@@ -238,7 +233,6 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
                      this,&KePlayerPlugin::TunnelClosed);
     QObject::connect(localClient_,&KeQtLocalClient::SigSearchedDeviceInfo,
                      this,&KePlayerPlugin::LocalDeviceInfo);
-
     return KE_SUCCESS;
 }
 
@@ -252,7 +246,7 @@ int KePlayerPlugin::StartVideo(QString peer_id, int video)
         return KE_VIDEO_START_FAILED;
     }
     int index = video_wall_->SetPeerPlay(peer_id);
-    qDebug()<<"KePlayerPlugin::StartVideo play index is " << index;
+    qDebug()<<"KePlayerPlugin::StartVideo play index is "<<index;
     return KE_SUCCESS;
 }
 
@@ -372,91 +366,44 @@ int KePlayerPlugin::SendCommand(QString peer_id, QString msg)
     return tunnel_->SendCommand(str_id,str_msg);
 }
 
-int KePlayerPlugin::PlayRecordFiles(QString peerId, QString jstrRecordArray)
+bool KePlayerPlugin::PlayRecordFile(QString peerId, QString remoteFile)
 {
     std::string strId = peerId.toStdString();
-
-    QJsonParseError jparseerror;
-    QJsonDocument jsondoc(
-                QJsonDocument::fromJson(jstrRecordArray.toUtf8(),&jparseerror));
-    if(jparseerror.error != QJsonParseError::NoError){
-        return 10001;
-    }
-    QJsonArray jrecordArray = jsondoc.array();
-    QJsonObject jrecordObj = jrecordArray.first().toObject();
-    QString fileName = jrecordObj.value("fileName").toString();
-    QString fileDate = jrecordObj.value("fileDate").toString();
-    int fileSize = jrecordObj.value("fileSize").toInt();
-
-    std::string remoteFileName = fileName.toStdString();
+    std::string remoteFileName = remoteFile.toStdString();
     qDebug()<<"fileName-"<<remoteFileName.c_str();
-    QDir fileDir(savePath());
-    fileDir.mkdir("RemoteFiles");
-    fileDir.cd("RemoteFiles");
-    QString saveFilePath = fileDir.filePath(QString("%1_%2.%3").
-                                            arg(peerId.left(12)).arg(fileDate).arg("h264"));
-
-    bool result = tunnel_->DownloadRemoteFile(
-                strId,remoteFileName,saveFilePath.toLocal8Bit().constData(),
-                fileSize/10);
+    bool result = tunnel_->PlayRemoteFile(strId,remoteFileName);
     if(!result){
         qWarning() << "tunnel DownloadRemoteFile error ";
-        return 10005;
+        return false;
     }
-    /*
-    need_play_records_.clear();
-    std::vector<Json::Value>::iterator it = record_vector.begin();
-    for(;it != record_vector.end();++it){
-        RecordFileInfo file_info;
-        file_info.peer_id = str_id;
-        if(!GetIntFromJsonObject(*it,"file_size",&file_info.size)){
-            qWarning() << "get file size error. " << record_info_list;
-            return 10003;
-        }
-        if(!GetStringFromJsonObject(*it,"file_name",&file_info.remote_name)){
-            qWarning() << "get file name error. " <<record_info_list;
-            return 10003;
-        }
-        if(!GetStringFromJsonObject(*it,"file_date",&file_info.file_date)){
-            qWarning() << "get file date error. " << record_info_list;
-            return 10003;
-        }
-        need_play_records_.enqueue(file_info);
+    int index = video_wall_->SetPeerPlay(peerId);
+    qDebug()<<"KePlayerPlugin::PlayRecordFile play index is " << index <<" peer id is "<<peerId;
+    return true;
+}
+
+bool KePlayerPlugin::StopPlayFile(QString peer_id)
+{
+
+    if(peer_id.isEmpty()){
+        return false;
     }
-    if(need_play_records_.empty()){
+    video_wall_->StopPeerPlay(peer_id);
 
-        return 10002;
+    std::string strId = peer_id.toStdString();
+
+    if(!tunnel_->SetPlayFileStatus(strId,3,-1,-1)){
+        qWarning() << "tunnel StopPlayFile error ";
+        return false;
     }
-    RecordFileInfo first_record = need_play_records_.dequeue();
-    bool result = tunnel_->DownloadRemoteFile(str_id,first_record.remote_name);
-    if(!result){
-        qWarning() << "tunnel DownloadRemoteFile error ";
-        return 10005;
-    }
-
-    KeRecorder * recorder = new KeRecorder(this);
-    recorder->setObjectName(peer_id);
-
-    QObject::connect(recorder,&KeRecorder::SigAbleToPlay,
-                     this->video_wall_,&VideoWall::PlayLocalFile);
-
-    QObject::connect(this,&KePlayerPlugin::RemoteFileDownloadEnd,
-                     recorder,&KeRecorder::OnRecordDownloadEnd);
-
-
-    recorder->OpenFile(first_record,m_savePath);
-*/
+    this->video_wall_->StopPeerPlay(peer_id);
     return 0;
 }
 
-int KePlayerPlugin::StopPlayFile(QString peer_id)
+bool KePlayerPlugin::SetPlayPosition(QString peer_id,int pos)
 {
-    KeRecorder * recorder = this->findChild<KeRecorder*>(peer_id);
-    if(recorder){
-        delete recorder;
-    }
-    this->video_wall_->StopFilePlay(peer_id);
-    return 0;
+    std::string strId = peer_id.toStdString();
+    qDebug()<<"KePlayerPlugin::SetPlayPosition  "<< pos;
+    return tunnel_->SetPlayFileStatus(strId,2,pos,-1);
 }
 
 void KePlayerPlugin::setSavePath(const QString &path)

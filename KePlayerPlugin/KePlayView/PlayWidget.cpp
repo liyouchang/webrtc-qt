@@ -22,7 +22,8 @@ void PlayWidget::setSelected(bool select)
 void PlayWidget::PlayMediaData(QByteArray &data)
 {
     if(!playSource->IsPlaying()){
-        HWND playWId = (HWND)this->effectiveWinId();
+        qDebug()<<"PlayWidget::PlayMediaData";
+        HWND playWId = (HWND)this->winId();
         if(playSource->OpenStream(playWId)!=0)
             return;
         playSource->OpenSound();
@@ -52,14 +53,14 @@ void PlayWidget::StopPlayFile()
 bool PlayWidget::OpenSound()
 {
     int ret = playSource->OpenSound();
-    qDebug()<<"PlayWidget::OpenSound---"<<ret;
+    //qDebug()<<"PlayWidget::OpenSound---"<<ret;
     return true;
 }
 
 bool PlayWidget::CloseSound()
 {
     int ret = playSource->CloseSound();
-    qDebug()<<"PlayWidget::CloseSound---"<<ret;
+    //qDebug()<<"PlayWidget::CloseSound---"<<ret;
     return true;
 }
 
@@ -78,26 +79,21 @@ bool PlayWidget::Capture(QString file_name)
 {
     QByteArray data = file_name.toLocal8Bit();
     int ret = playSource->CapPic(data.constData());
-    qDebug()<<"PlayWidget::Capture---ret="<<ret;
     return true;
 }
 
 void PlayWidget::paintEvent(QPaintEvent *event)
 {
-//    QPainter p(this);
-    qDebug()<<"PlayWidget::paintEvent ---"<<this->effectiveWinId();
-
-//    if(this->selected){
-//        p.setPen(Qt::yellow);
-
-//    }else{
-//        p.setPen(Qt::black);
-//    }
-//    QRect r(event->rect());
-//    r.adjust(0, 0, -1, -1);
-//    p.drawRect(r);
-//    p.drawText(10,10,QString::number(playIndex()));
-    //qDebug()<<"PlayWidget::paintEvent "<<playIndex()<<" rect "<<r;
-   // QWidget::paintEvent(event);
+    QPainter p(this);
+    if(this->selected){
+        p.setPen(Qt::yellow);
+    }else{
+        p.setPen(Qt::black);
+    }
+    QRect r(event->rect());
+    r.adjust(0, 0, -1, -1);
+    p.drawRect(r);
+    //p.drawText(10,10,QString::number(playIndex()));
+    QWidget::paintEvent(event);
 }
 

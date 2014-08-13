@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
-    <height>537</height>
+    <width>843</width>
+    <height>541</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -185,7 +185,7 @@
                <x>0</x>
                <y>0</y>
                <width>73</width>
-               <height>65</height>
+               <height>69</height>
               </rect>
              </property>
             </widget>
@@ -298,6 +298,9 @@
       </layout>
      </widget>
     </item>
+    <item>
+     <widget class="QColumnView" name="columnView"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -305,7 +308,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>750</width>
+     <width>843</width>
      <height>23</height>
     </rect>
    </property>

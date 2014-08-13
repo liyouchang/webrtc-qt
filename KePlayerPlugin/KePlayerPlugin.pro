@@ -8,11 +8,11 @@ TEMPLATE = lib
 QT += core
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = KePlayerPlugin
-CONFIG +=  dll
+CONFIG += dll
 
 
 win32{
-    RC_FILE  = KePlayerPlugin.rc
+    RC_FILE = KePlayerPlugin.rc
     QTPLUGIN += qwindows
 }
 #DEF_FILE = KePlayerPlugin.def

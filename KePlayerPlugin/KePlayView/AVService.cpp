@@ -75,6 +75,7 @@ int AVService::CloseSound()
 
 int AVService::InputStream(const char *data, int dataLen)
 {
+    //qDebug()<<"AVService::InputStream  "<<dataLen;
     AV_InputData(m_lPlayHandle,(long *)(data) , dataLen);
     return 0;
 }
