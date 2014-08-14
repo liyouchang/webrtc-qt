@@ -12,18 +12,21 @@ DEFINES += JSONCPP_RELATIVE_PATH LOGGING=1  \
 win32 {
 
 DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
-Debug {
-    DEFINES += _DEBUG
-    output_dir = $$PWD/../out/debug
+    Debug {
+        DEFINES += _DEBUG
+        output_dir = $$PWD/../out/debug
+    }
+
+    Release {
+        output_dir = $$PWD/../out/release
+    }
 }
+macx {
+    DEFINES += POSIX
+    output_dir = $$PWD/../out
+    DESTDIR = $$output_dir/libs
 
-Release {
-    output_dir = $$PWD/../out/release
 }
-
-
-}
-
 linux {
     DEFINES += POSIX LINUX
     output_dir = $$PWD/../out

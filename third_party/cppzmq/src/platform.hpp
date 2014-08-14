@@ -53,7 +53,7 @@
 /* #undef HAVE_LIBRPCRT4 */
 
 /* Define to 1 if you have the `rt' library (-lrt). */
-#define HAVE_LIBRT 1
+//#define HAVE_LIBRT 1
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
 /* #undef HAVE_LIBSOCKET */
@@ -106,7 +106,7 @@
 //#define HAVE_STRING_H 1
 
 /* Define to 1 if you have the <sys/eventfd.h> header file. */
-#define HAVE_SYS_EVENTFD_H 1
+//#define HAVE_SYS_EVENTFD_H 1
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #define HAVE_SYS_SOCKET_H 1
@@ -237,13 +237,13 @@
 /* #undef ZMQ_HAVE_TCP_KEEPALIVE */
 
 /* Whether TCP_KEEPCNT is supported. */
-#define ZMQ_HAVE_TCP_KEEPCNT 1
+//#define ZMQ_HAVE_TCP_KEEPCNT 1
 
 /* Whether TCP_KEEPIDLE is supported. */
-#define ZMQ_HAVE_TCP_KEEPIDLE 1
+//#define ZMQ_HAVE_TCP_KEEPIDLE 1
 
 /* Whether TCP_KEEPINTVL is supported. */
-#define ZMQ_HAVE_TCP_KEEPINTVL 1
+//#define ZMQ_HAVE_TCP_KEEPINTVL 1
 
 /* Have uio.h header. */
 //lht
