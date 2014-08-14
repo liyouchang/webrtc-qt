@@ -14,7 +14,11 @@ DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
         output_dir = $$PWD/../out/release
     }
 
-} else:macx {
+}
+
+macx {
+        DEFINES += POSIX
+        output_dir = $$PWD/../out
 }
 
 linux {
