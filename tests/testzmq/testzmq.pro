@@ -1,10 +1,12 @@
+QT       -= core gui
+
 TEMPLATE = app
 CONFIG += console
 CONFIG -= app_bundle
-CONFIG -= qt
+#CONFIG -= qt
 
 
-output_dir = $$PWD/../../out
+output_dir = $$PWD/../../out/ios
 
 
 OBJECTS_DIR = $$output_dir/obj/$$TARGET
@@ -16,7 +18,7 @@ INCLUDEPATH     +=  \
 
 
 LIBS += -L$$output_dir/libs
-LIBS += -lcppzmq -lpthread
+LIBS += -lcppzmq
 
 SOURCES += main.cpp
 

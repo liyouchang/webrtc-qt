@@ -4,7 +4,6 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
-
 include (../talk/talk_common.pri)
 include (../zmqclient/zmqdealer.pri)
 
@@ -18,7 +17,8 @@ win32 {
     LIBS += -L$$output_dir/libs
     LIBS += -ljsoncpp -lcppzmq
     LIBS += -ljingle_app -ljingle_p2p -ljingle
-} else {
+}
+linux {
     #QMAKE_CXXFLAGS += -std=c++11
     LIBS += -L$$output_dir/libs
     LIBS += -ljingle_app -ljingle_p2p -ljingle
@@ -27,6 +27,31 @@ win32 {
     #LIBS += -lprofiler
 }
 
+macx {
+    LIBS += -L$$output_dir/libs
+    LIBS += -ljingle_app -ljingle_p2p -ljingle
+    LIBS += -lcppzmq -ljsoncpp
+    LIBS +=  -ldl
+    LIBS += -framework Foundation -framework Carbon
+
+}
+ios {
+    LIBS += -framework Foundation -lstdc++
+
+    LIBS += -L$$output_dir/libs
+
+    LIBS += -ljingle_app -ljingle_p2p -ljingle
+    LIBS += -lcppzmq -ljsoncpp
+    LIBS +=  -ldl
+#    QMAKE_CXXFLAGS = -std=c++11 -stdlib=libstdc++
+#    QMAKE_LFLAGS = -std=c++11 -stdlib=libstdc++
+#                '-framework Foundation',
+#                '-framework IOKit',
+#                '-framework Security',
+#                '-framework SystemConfiguration',
+#                '-framework UIKit',
+
+}
 
 SOURCES += \
     TerminalSimulator.cpp \

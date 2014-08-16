@@ -17,8 +17,12 @@ DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 }
 
 macx {
-        DEFINES += POSIX
-        output_dir = $$PWD/../out
+        output_dir = $$PWD/../out/mac
+}
+
+ios {
+DEFINES += POSIX IOS
+        output_dir = $$PWD/../out/ios
 }
 
 linux {

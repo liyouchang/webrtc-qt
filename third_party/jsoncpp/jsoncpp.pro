@@ -12,7 +12,6 @@ CONFIG += staticlib
 
 include( ../third_party.pri)
 
-
 DEFINES += JSON_USE_EXCEPTION=0
 
 INCLUDEPATH     += \

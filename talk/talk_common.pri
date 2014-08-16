@@ -25,11 +25,17 @@ DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
     }
 }
 macx {
-    DEFINES += POSIX
-    output_dir = $$PWD/../out
+    DEFINES += POSIX OSX
+    output_dir = $$PWD/../out/mac
     DESTDIR = $$output_dir/libs
 
 }
+ios {
+    DEFINES += POSIX IOS
+    output_dir = $$PWD/../out/ios
+    DESTDIR = $$output_dir/libs
+}
+
 linux {
     DEFINES += POSIX LINUX
     output_dir = $$PWD/../out

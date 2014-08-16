@@ -19,13 +19,24 @@ win32 {
     LIBS += -L$$output_dir/libs
     LIBS += -ljsoncpp -lcppzmq
     LIBS += -ljingle_app -ljingle_p2p -ljingle
-} else {
+}
+
+linux {
     #QMAKE_CXXFLAGS += -std=c++11
     LIBS += -L$$output_dir/libs
     LIBS += -ljingle_app -ljingle_p2p -ljingle
     LIBS += -lcppzmq -ljsoncpp
     LIBS += -pthread -ldl
     #LIBS += -lprofiler
+}
+
+macx {
+    LIBS += -L$$output_dir/libs
+    LIBS += -ljingle_app -ljingle_p2p -ljingle
+    LIBS += -lcppzmq -ljsoncpp
+    LIBS +=  -ldl
+    LIBS += -framework Foundation -framework Carbon
+
 }
 
 SOURCES += \
