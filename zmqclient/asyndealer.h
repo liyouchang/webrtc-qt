@@ -37,6 +37,8 @@ public:
     void terminate();
     bool send(const std::string & addr,const std::string & data);
     void AsynSend(const std::string & addr,const std::string & data);
+    bool connect(const std::string & id,const std::string & router);
+    void disconnect();
     std::string id(){return id_;}
     std::string addr(){return router_;}
     sigslot::signal2<const std::string &,const std::string &> SignalReadData;
@@ -46,6 +48,8 @@ protected:
     void terminate_z();
     bool send_z(const std::string & addr,const std::string & data);
     void recv_z();
+    bool connect_z(const std::string & id,const std::string & router);
+    void disconnect_z();
 private:
     talk_base::Thread * zmq_thread_;
     zmq::context_t *context_;

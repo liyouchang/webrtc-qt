@@ -7,14 +7,23 @@ const char kByeMessage[] = "BYE";
 
 //const std::string routerURL = "tcp://192.168.0.182:5555";
 
-PeerConnectionClientDealer::PeerConnectionClientDealer()
+PeerConnectionClientDealer::PeerConnectionClientDealer():dealer_(NULL)
 {
+    dealer_ = new AsynDealer();
+}
+
+PeerConnectionClientDealer::~PeerConnectionClientDealer()
+{
+    if(dealer_){
+        delete dealer_;
+        dealer_ = NULL;
+    }
 }
 
 bool PeerConnectionClientDealer::Connect(const std::string &router,
                                         const std::string &id)
 {
-    dealer_.reset(new AsynDealer());
+//    delete dealer;
     dealer_->SignalReadData.connect(
                 this,&PeerConnectionClientDealer::OnMessageFromPeer);
     LOG(INFO)<<"connect to "<<router<<"  with id "<<id;
@@ -26,8 +35,8 @@ void PeerConnectionClientDealer::Reconnect()
     LOG(INFO)<<"PeerConnectionClientDealer::Reconnect---";
     std::string oldAddr = dealer_->addr();
     std::string oldId = dealer_->id();
-    dealer_->terminate();
-    dealer_->initialize(oldId,oldAddr);
+    dealer_->disconnect();
+    dealer_->connect(oldAddr,oldId);
 }
 
 

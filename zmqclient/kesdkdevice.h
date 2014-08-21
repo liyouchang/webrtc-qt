@@ -3,12 +3,18 @@
 
 
 #include "libjingle_app/ketunnelcamera.h"
+#include "talk/base/messagehandler.h"
 
-
-
-class KeSdkDevice : public kaerp2p::KeTunnelCamera
+class KeSdkDevice : public kaerp2p::KeTunnelCamera,public talk_base::MessageHandler
 {
 public:
+
+    enum{
+        MSG_MEDIA_CONTROL,
+        MSG_NET_CHECK,
+        MSG_CheckCloseStream,
+    };
+
     KeSdkDevice();
     virtual ~KeSdkDevice();
     bool Init(kaerp2p::PeerTerminalInterface *t);
@@ -17,9 +23,20 @@ public:
     void OnRecvTalkData(const std::string &peer_id, const char *data, int len);
     void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
 
+
+
+    virtual void OnMessage(talk_base::Message *msg);
+    bool MediaStreamOpen(int level);
+    void MediaGetIDR(int level);
+    std::string GetMacAddress();
+
+    void SetNtp(const std::string & ntpParam);
+
 protected:
     void SendVideoFrame(const char *data, int len,int level);
     void SendAudioFrame(const char *data, int len);
+
+    void InitVideoInfo();
 
     class RegisterCallBack{
     public:
@@ -31,9 +48,8 @@ protected:
         static int SubStreamCallBack(char * pFrameData,int iFrameLen);
         static int ExtStreamCallBack(char * pFrameData,int iFrameLen);
         static int AudioStreamCallBack(char * pFrameData,int iFrameLen);
-
-
     };
+
     int video1_handle_;
     int video2_handle_;
     int video3_handle_;
@@ -42,6 +58,18 @@ protected:
     kaerp2p::VideoInfo video1_info_;
     kaerp2p::VideoInfo video2_info_;
     kaerp2p::VideoInfo video3_info_;
+
+    int video1Count;
+    int video2Count;
+    int video3Count;
+    int audioCount;
+
+    talk_base::Thread *deviceThread;
+
+protected:
+    bool SetPtz(std::string control, int param);
+    Json::Value GetWifiJsonArray();
+    bool SetWifiInfo(Json::Value jparam);
 };
 
 class KeSdkProcess : public kaerp2p::KeMessageProcessCamera

@@ -33,9 +33,10 @@ client-->camera
 {
     "type":"tunnel",
     "command":"ptz",
-    "control":"move_left",//this could be "move_lef","move_right","move_up","move_down","stop"
+    "control":"move_left",//this could be "move_left","move_right","move_up","move_down","stop"
           // and others
     "param":10 //the param need to send to camera,
+
     //for the move control this param is not useful
 }
 //no use
@@ -61,9 +62,10 @@ camera-->client
     "command":"wifi_info",
     "wifis":[{
         "ssid":"", //the ssid of wifi
-        "quality":0,//信号质量
-        "enc":1,//加密方式
-        "mode":1//加密模式
+        "signalStrength":0,//信号强度
+        "encryptMode":1,//加密方式
+        "encryptFormat":1,//加密格式
+        "enable":0//正在使用 1,未使用 0
     }]
 }
 
@@ -76,9 +78,8 @@ client-->camera
         "ssid":"",  //ssid of wifi
         "key":"",  //password of wifi
         "enable":0,  //enable wifi 1,disable wifi 0
-        "auth":0,  //0-none auth,1-wep ,2-wpa,3-wpa2
-        "enc":0,  //0-enc tkip,1-enc aes
-        "mode":1
+        "encryptMode":0,  //0-none auth,1-wep ,2-wpa,3-wpa2
+        "encryptFormat":0,  //0-enc tkip,1-enc aes
     }
 }
 camera-->clent

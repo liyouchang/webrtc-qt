@@ -25,9 +25,7 @@ AsynDealer::AsynDealer():context_(NULL),socket_(NULL)
 
 AsynDealer::~AsynDealer()
 {
-    zmq_thread_->Invoke<void>(
-                talk_base::Bind(&AsynDealer::terminate_z, this));
-    zmq_thread_->Clear(this);
+    this->terminate();
     delete zmq_thread_;
 }
 
@@ -59,36 +57,35 @@ void AsynDealer::AsynSend(const std::string &addr, const std::string &data)
     zmq_thread_->Post(this,MSG_TOSEND,msgData);
 }
 
+bool AsynDealer::connect(const std::string &id, const std::string &router)
+{
+    return zmq_thread_->Invoke<bool>(
+                talk_base::Bind(&AsynDealer::connect_z,this,id,router));
+}
+
+void AsynDealer::disconnect()
+{
+    zmq_thread_->Invoke<void>(
+                talk_base::Bind(&AsynDealer::disconnect_z, this));
+}
+
 bool AsynDealer::initialize_z(const std::string &id, const std::string &router)
 {
     ASSERT(zmq_thread_->IsCurrent());
     try{
         context_ = new zmq::context_t();
         socket_ = new zmq::socket_t(*context_,ZMQ_DEALER);
-        if(id.empty()){
-            id_ = s_set_id(*socket_);
-        }
-        else{
-            socket_->setsockopt(ZMQ_IDENTITY,id.c_str(),id.length());
-            id_ = id;
-        }
-        LOG(INFO) << "AsynDealer::initialize_z---dealer id is "<<id_;
-        socket_->connect(router.c_str());
-        this->router_ = router;
-        zmq_thread_->PostDelayed(10,this,MSG_TOREAD);
     }catch(zmq::error_t e){
-        LOG(WARNING) << "AsynDealer::initialize_z---" <<
-                        "failed , enum:"<<e.num()<<" edes:" <<e.what();
+        LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
         return false;
     }
-    return true;
+    return connect_z(id,router);
 }
 
 void AsynDealer::terminate_z()
 {
-    ASSERT(zmq_thread_->IsCurrent());
+    disconnect_z();
     if(socket_){
-        socket_->disconnect(router_.c_str());
         delete socket_;
         socket_ = NULL;
     }
@@ -96,6 +93,7 @@ void AsynDealer::terminate_z()
         delete context_;
         context_ = NULL;
     }
+
 }
 
 bool AsynDealer::send_z(const std::string & addr,const std::string & data)
@@ -125,6 +123,37 @@ void AsynDealer::recv_z()
         std::string addr = msg.GetAddress();
         std::string data = msg.GetBody();
         SignalReadData(addr,data);
+    }
+}
+
+bool AsynDealer::connect_z(const std::string & id,const std::string & router)
+{
+    ASSERT(zmq_thread_->IsCurrent());
+    try{
+        if(id.empty()){
+            id_ = s_set_id(*socket_);
+        }
+        else{
+            socket_->setsockopt(ZMQ_IDENTITY,id.c_str(),id.length());
+            id_ = id;
+        }
+        LOG_T_F(INFO) << "dealer id is "<<id_;
+        socket_->connect(router.c_str());
+        this->router_ = router;
+        zmq_thread_->PostDelayed(10,this,MSG_TOREAD);
+    }catch(zmq::error_t e){
+        LOG_F(WARNING) <<"failed , enum:"<< e.num()<<" edes:" <<e.what();
+        return false;
+    }
+    return true;
+}
+
+void AsynDealer::disconnect_z()
+{
+    zmq_thread_->Clear(this,MSG_TOREAD);
+    zmq_thread_->Clear(this,MSG_TOSEND);
+    if(socket_){
+        socket_->disconnect(router_.c_str());
     }
 }
 

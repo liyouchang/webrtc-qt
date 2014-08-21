@@ -21,7 +21,7 @@ public:
                                  talk_base::Buffer &msg);
     virtual void SetVideoClarity(int);
     virtual int GetVideoClarity();
-    virtual void SetPtz(std::string ptz_key,int param);
+    //virtual void SetPtz(std::string ptz_key,int param);
     virtual void GetCameraVideoInfo(int level,VideoInfo * info) = 0;
 
 protected:
@@ -33,8 +33,6 @@ protected:
 
     virtual void OnRecvVideoClarity(std::string peer_id, int clarity);
     virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
-    virtual void RecvGetWifiInfo(std::string peer_id);
-    virtual void SetWifiInfo(std::string peer_id,std::string param);
     virtual void OnToPlayFile(const std::string &peer_id,
                               const std::string &filename);
     virtual void OnRecvTalkData(const std::string & peer_id,
