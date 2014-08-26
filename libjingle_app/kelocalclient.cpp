@@ -3,6 +3,7 @@
 #include "talk/base/logging.h"
 #include "talk/base/json.h"
 #include "talk/base/bind.h"
+#include "talk/base/socketaddress.h"
 
 namespace kaerp2p{
 
@@ -325,9 +326,10 @@ void KeLocalMessage::OnRecvSearchOnlineDeviceResp(talk_base::Buffer &msgData)
 
     Json::StyledWriter writer;
     Json::Value jmessage;
-    jmessage["ip"] = GetLittleEndianIp(pMsg->devIp);
-    jmessage["mask"] = GetLittleEndianIp(pMsg->devMask);
-    jmessage["gateway"] = GetLittleEndianIp(pMsg->devGateWay);
+
+    jmessage["ip"] = talk_base::SocketAddress::IPToString(pMsg->devIp);
+    jmessage["mask"] = talk_base::SocketAddress::IPToString(pMsg->devMask);
+    jmessage["gateway"] = talk_base::SocketAddress::IPToString(pMsg->devGateWay);
     jmessage["port"] = pMsg->port;
     jmessage["sn"] = pMsg->devSN;
     std::string msg = writer.write(jmessage);

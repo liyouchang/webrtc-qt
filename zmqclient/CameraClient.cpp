@@ -126,14 +126,12 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
         else if(type.compare("Terminal_NTP") == 0)
         {
             std::string ntpIp;
-            if(GetStringFromJsonObject(jmessage,"IP",&ntpIp)){
-                std::stringstream ss;
-                ss << "ntp="<<ntpIp<<"|123|+8:00";
-                std::string command = ss.str();
-                SignalNtpSet(command);
-            }else{
-                LOG(INFO)<<"get ntp ip error";
-            }
+            std::string timezone;
+            int port;
+            GetStringFromJsonObject(jmessage,"IP",&ntpIp);
+            GetIntFromJsonObject(jmessage,"port",&port);
+            GetStringFromJsonObject(jmessage,"TimeZone",&timezone);
+            SignalNtpSet(ntpIp,port,timezone);
         }else{
             LOG(WARNING)<<"no support backstage message";
         }

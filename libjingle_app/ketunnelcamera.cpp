@@ -77,12 +77,33 @@ void KeTunnelCamera::OnCommandJsonMsg(const std::string &peerId, Json::Value &jm
     }
 }
 
+void KeTunnelCamera::ReportResult(const std::string &peerId, const std::string &command, bool result)
+{
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = command;
+    jmessage["result"] = result;
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+    this->terminal_->SendByRouter(peerId,msg);
+
+}
+
+void KeTunnelCamera::ReportJsonMsg(const std::string &peerId, Json::Value &jmessage)
+{
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+    LOG(LS_VERBOSE)<<"send msg is "<< msg;
+    this->terminal_->SendByRouter(peerId,msg);
+
+}
+
 void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
                                      talk_base::Buffer &msg)
 {
     std::string strMsg(msg.data(),msg.length());
     Json::Reader reader;
-    LOG_T_F(INFO)<<"KeTunnelCamera::OnRouterMessage---"<<peer_id;
+//    LOG_T(INFO)<<"KeTunnelCamera::OnRouterMessage---"<<peer_id << " msg "<<msg.data();
     Json::Value jmessage;
     if (!reader.parse(strMsg, jmessage)) {
         LOG(WARNING) << "Received unknown message. ";
@@ -191,7 +212,7 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
         LOG_T_F(INFO)<<"play file control--position:"<< pMsg->playPos <<
                        " ,speed:"<<pMsg->playSpeed;
 
-        if(pMsg->playSpeed != 0 && pMsg->playSpeed != -1){
+        if(pMsg->playSpeed != -1){
             recordReader->SetSpeed(pMsg->playSpeed);
             this->RespPlayFileReq(RESP_CTRL);
         }

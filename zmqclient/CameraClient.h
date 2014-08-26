@@ -20,7 +20,7 @@ public:
     virtual bool Connect(const std::string &router, const std::string &id);
     virtual void Reconnect();
 
-    sigslot::signal1<const std::string &> SignalNtpSet;
+    sigslot::signal3<const std::string &,int, const std::string &> SignalNtpSet;
 
     enum
     {

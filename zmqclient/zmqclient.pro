@@ -4,6 +4,7 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
+
 include (../talk/talk_common.pri)
 include (zmqdealer.pri)
 

@@ -8,8 +8,7 @@
 class KeSdkDevice : public kaerp2p::KeTunnelCamera,public talk_base::MessageHandler
 {
 public:
-
-    enum{
+    enum {
         MSG_MEDIA_CONTROL,
         MSG_NET_CHECK,
         MSG_CheckCloseStream,
@@ -21,20 +20,22 @@ public:
     void GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info);
     void OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id);
     void OnRecvTalkData(const std::string &peer_id, const char *data, int len);
+
     void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
 
-
-
     virtual void OnMessage(talk_base::Message *msg);
-    bool MediaStreamOpen(int level);
+    void MediaStreamOpen(int level);
     void MediaGetIDR(int level);
     std::string GetMacAddress();
 
-    void SetNtp(const std::string & ntpParam);
+    void SetNtp(const std::string & ntpIp, int port, const std::string &zone);
 
 protected:
     void SendVideoFrame(const char *data, int len,int level);
     void SendAudioFrame(const char *data, int len);
+
+    void MediaStreamOpen_d(int level);
+    void CheckCloseStream_d();
 
     void InitVideoInfo();
 
@@ -59,14 +60,11 @@ protected:
     kaerp2p::VideoInfo video2_info_;
     kaerp2p::VideoInfo video3_info_;
 
-    int video1Count;
-    int video2Count;
-    int video3Count;
-    int audioCount;
-
     talk_base::Thread *deviceThread;
 
 protected:
+    bool SetOsdTitle(const std::string & title);
+
     bool SetPtz(std::string control, int param);
     Json::Value GetWifiJsonArray();
     bool SetWifiInfo(Json::Value jparam);

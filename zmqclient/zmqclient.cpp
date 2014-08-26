@@ -75,6 +75,7 @@ int main()
 //    terminal->Initialize("0.0.0.0:12345");
 
     device->Init(terminal);
+
     talk_base::Thread::Current()->Run();
     delete device;
     delete terminal;

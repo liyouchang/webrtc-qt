@@ -1,8 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    testzmq \
-    testios
+    testzmq
 
 #    testkep2p \
 #    TestUdpServer \
