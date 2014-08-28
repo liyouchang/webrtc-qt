@@ -5,6 +5,12 @@
 #include "talk/base/messagehandler.h"
 #include "libjingle_app/recorderavi.h"
 
+
+#include "zmq.h"
+#include "zmq.hpp"
+#include "zhelpers.hpp"
+#include "zmsg.hpp"
+
 namespace talk_base {
     class Thread;
     class Buffer;
@@ -29,6 +35,10 @@ protected:
 protected:
     kaerp2p::RecordReaderInterface * reader;
     std::string fileName;
+
+    zmq::context_t *context;
+    zmq::socket_t *publisher;
+
 };
 
 #endif // KEVIDEOSIMULATOR_H

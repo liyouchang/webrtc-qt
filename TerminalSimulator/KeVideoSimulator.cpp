@@ -20,11 +20,17 @@ KeVideoSimulator::KeVideoSimulator(const std::string &fileName):
     reader->SignalVideoData.connect(this,&KeVideoSimulator::OnFileVideoData);
     reader->SignalAudioData.connect(this,&KeVideoSimulator::OnFileAudioData);
     reader->SignalRecordEnd.connect(this,&KeVideoSimulator::OnFileReadEnd);
+
+    context = new zmq::context_t();
+    publisher = new zmq::socket_t(*context,ZMQ_PUB);
+    publisher->bind("tcp://*:5556");
 }
 
 KeVideoSimulator::~KeVideoSimulator()
 {
     delete reader;
+    delete publisher;
+    delete context;
 }
 
 bool KeVideoSimulator::Init(kaerp2p::PeerTerminalInterface *t)
@@ -56,11 +62,13 @@ void KeVideoSimulator::OnFileVideoData(const char *data, int len)
     this->SignalVideoData1(data,len);
     this->SignalVideoData2(data,len);
     this->SignalVideoData3(data,len);
+    publisher->send(data,len);
 }
 
 void KeVideoSimulator::OnFileAudioData(const char *data, int len)
 {
     this->SignalAudioData(data,len);
+//    publisher->send(data,len);
 }
 
 void KeVideoSimulator::OnRecvRecordQuery(std::string peer_id, std::string condition)
