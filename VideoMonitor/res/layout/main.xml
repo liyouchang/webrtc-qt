@@ -1,39 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TabHost xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/tabhost"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="match_parent"
-    android:background="@color/light_black" >
+    android:layout_height="fill_parent"
+    android:background="@android:color/white"
+    android:orientation="vertical" >
 
-    <FrameLayout
-        android:id="@android:id/tabcontent"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="65dp" />
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-        <TabWidget
-            android:id="@android:id/tabs"
+        <FrameLayout
+            android:id="@+id/tab_content"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="center_horizontal|center_vertical" />
+            android:layout_height="0dp"
+            android:layout_weight="1.0" />
 
-        <TextView
-            android:id="@+id/tv_exit_application"
+        <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignTop="@android:id/tabs"
-            android:background="@color/title_bg_black"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/app_exit"
-            android:textColor="@color/orange"
-            android:textSize="25dp"
-            android:visibility="invisible" />
-    </RelativeLayout>
+            android:layout_height="60.0dip"
+            android:baselineAligned="false"
+            android:orientation="horizontal" >
 
-</TabHost>
+            <RelativeLayout
+                android:id="@+id/tab_one_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="60.0dip"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1.0"
+                android:background="@color/title_bg_black"
+                android:gravity="center_horizontal"
+                android:onClick="onClick"
+                android:orientation="vertical" >
+
+                <ImageView
+                    android:id="@+id/tab_one_icon"
+                    android:layout_width="fill_parent"
+                    android:layout_height="60.0dip"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="2.0dip"
+                    android:layout_marginRight="2.0dip"
+                    android:background="#00000000"
+                    android:duplicateParentState="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@null"
+                    android:src="@drawable/common_bar_my_selector" />
+
+                <TextView
+                    android:id="@+id/tab_one_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="40.0dip"
+                    android:duplicateParentState="true"
+                    android:text="@string/own"
+                    android:textColor="@color/tab_text_selector"
+                    android:textSize="@dimen/tab_text_size" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/tab_two_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="60.0dip"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1.0"
+                android:background="@color/title_bg_black"
+                android:gravity="center_horizontal"
+                android:onClick="onClick"
+                android:orientation="vertical" >
+
+                <ImageView
+                    android:id="@+id/tab_two_icon"
+                    android:layout_width="fill_parent"
+                    android:layout_height="60.0dip"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="2.0dip"
+                    android:layout_marginRight="2.0dip"
+                    android:background="#00000000"
+                    android:duplicateParentState="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@null"
+                    android:src="@drawable/common_bar_message_selector" />
+
+                <TextView
+                    android:id="@+id/tab_two_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="40.0dip"
+                    android:duplicateParentState="true"
+                    android:text="@string/history"
+                    android:textColor="@color/tab_text_selector"
+                    android:textSize="@dimen/tab_text_size" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/tab_three_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="60.0dip"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1.0"
+                android:background="@color/title_bg_black"
+                android:onClick="onClick"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/tab_three_discover"
+                    android:layout_width="8.0dip"
+                    android:layout_height="60.0dip"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="5.0dip"
+                    android:background="#00000000" />
+
+                <ImageView
+                    android:id="@+id/tab_three_icon"
+                    android:layout_width="fill_parent"
+                    android:layout_height="60.0dip"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="2.0dip"
+                    android:layout_marginRight="2.0dip"
+                    android:background="#00000000"
+                    android:contentDescription="@null"
+                    android:duplicateParentState="true"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/common_bar_find_selector" />
+
+                <TextView
+                    android:id="@+id/tab_three_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="40.0dip"
+                    android:duplicateParentState="true"
+                    android:text="@string/msg"
+                    android:textColor="@color/tab_text_selector"
+                    android:textSize="@dimen/tab_text_size" />
+
+                <TextView
+                    android:id="@+id/tab_three_number"
+                    android:layout_width="20.0dip"
+                    android:layout_height="20.0dip"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginLeft="5.0dip"
+                    android:layout_marginTop="2.0dip"
+                    android:layout_toRightOf="@+id/tab_three_discover"
+                    android:background="@drawable/common_number_bg"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="10.0dip"
+                    android:visibility="invisible" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/tab_four_layout"
+                android:layout_width="fill_parent"
+                android:layout_height="60.0dip"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1.0"
+                android:background="@color/title_bg_black"
+                android:gravity="center_horizontal"
+                android:onClick="onClick"
+                android:orientation="vertical" >
+
+                <ImageView
+                    android:id="@+id/tab_four_icon"
+                    android:layout_width="fill_parent"
+                    android:layout_height="60.0dip"
+                    android:layout_alignParentTop="true"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="2.0dip"
+                    android:layout_marginRight="2.0dip"
+                    android:background="#00000000"
+                    android:duplicateParentState="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="@null"
+                    android:src="@drawable/common_bar_more_selector" />
+
+                <TextView
+                    android:id="@+id/tab_four_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="40.0dip"
+                    android:duplicateParentState="true"
+                    android:text="@string/more"
+                    android:textColor="@color/tab_text_selector"
+                    android:textSize="@dimen/tab_text_size" />
+            </RelativeLayout>
+        </LinearLayout>
+
+</LinearLayout>

@@ -31,11 +31,12 @@ import com.video.utils.Utils;
 
 public class XmlDevice {
 
+	public Context mContext;
 	private static String filePath = "";
-	public Context context;
+	private static String ItemNode = "node";
 	
 	public XmlDevice (Context context) {
-		this.context = context;
+		this.mContext = context;
 		init();
 	}
 	
@@ -44,7 +45,7 @@ public class XmlDevice {
 	 */
 	public void init() {
 		if (Utils.checkSDCard()) {
-			filePath = context.getFilesDir().getPath() + File.separator + "DeviceList.xml";
+			filePath = mContext.getFilesDir().getPath() + File.separator + "DeviceList.xml";
 			File file = new File(filePath);
 			if (!file.exists()) {
 				try {
@@ -103,12 +104,12 @@ public class XmlDevice {
 	 * 增加一个List列表
 	 * @return true: 增加成功  false: 增加失败
 	 */
-	public boolean addList(ArrayList<HashMap<String, String>> list) {
+	public boolean writeList(ArrayList<HashMap<String, String>> list) {
 		
 		int len = list.size();
 		try {
 			for (int i=0; i<len; i++) {
-				addItem(list.get(i));
+				writeItem(list.get(i));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -121,11 +122,12 @@ public class XmlDevice {
 	 * 增加一个Item节点
 	 * @return true: 增加成功  false: 增加失败
 	 */
-	public boolean addItem(HashMap<String, String> map) {
+	public boolean writeItem(HashMap<String, String> map) {
 
 		try {
 			Document document = loadInit(filePath);
-			Element itemElement = (Element) document.createElement("item");
+			Element itemElement = (Element) document.createElement(ItemNode);
+			
 			Element nameElement = (Element) document.createElement("name");
 			Element idElement = (Element) document.createElement("id");
 			Element stateElement = (Element) document.createElement("state");
@@ -171,7 +173,7 @@ public class XmlDevice {
 
 		Document document = loadInit(filePath);
 		try {
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
@@ -194,7 +196,7 @@ public class XmlDevice {
 
 		Document document = loadInit(filePath);
 		try {
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i = 0; i < len; i++) {
 				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
@@ -220,7 +222,7 @@ public class XmlDevice {
 	public boolean deleteItemBg(String mac) {
 		Document document = loadInit(filePath);
 		try {
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
@@ -260,7 +262,7 @@ public class XmlDevice {
 	public int getListSize() {
 		Document document = loadInit(filePath);
 		try {
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			return nodeList.getLength();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -275,8 +277,43 @@ public class XmlDevice {
 	 */
 	public boolean updateList(ArrayList<HashMap<String, String>> list) {
 		try {
-			deleteAllItem();
-			addList(list);
+			int listSize = list.size();
+			if (listSize == 0) {
+				return false;
+			}
+			ArrayList<HashMap<String, String>> xmlList = readXml();
+			if (xmlList.size() == 0) {
+				deleteAllItem();
+				writeList(list);
+				return true;
+			} else {
+				deleteAllItem();
+			}
+			ArrayList<HashMap<String, String>> newList = new ArrayList<HashMap<String, String>>();
+			for (int i=0; i<listSize; i++) {
+				boolean isExistItem = false;
+				String id = list.get(i).get("deviceID").trim();
+				for (int j=0; j<xmlList.size(); j++) {
+					String xmlId = xmlList.get(i).get("deviceID").trim();
+					if (xmlId.equals(id)) {
+						isExistItem = true;
+						HashMap<String, String> item = new HashMap<String, String>();
+						item.put("deviceName", list.get(i).get("deviceName"));
+						item.put("deviceID", list.get(i).get("deviceID"));
+						item.put("isOnline", list.get(i).get("isOnline"));
+						item.put("dealerName", list.get(i).get("dealerName"));
+						item.put("deviceBg", list.get(i).get("deviceBg"));
+						item.put("LinkState", list.get(i).get("LinkState"));
+						item.put(DeviceValue.HASH_PLAYER_CLARITY, xmlList.get(i).get(DeviceValue.HASH_PLAYER_CLARITY));
+						newList.add(item);
+						break;
+					}
+				}
+				if (!isExistItem) {
+					newList.add(list.get(i));
+				}
+			}
+			writeList(newList);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -292,7 +329,7 @@ public class XmlDevice {
 	public boolean updateItemState(String mac, String state, String dealerName) {
 		Document document = loadInit(filePath);
 		try {
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
@@ -319,12 +356,36 @@ public class XmlDevice {
 	public boolean updateItemName(String mac, String newName) {
 		Document document = loadInit(filePath);
 		try {
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
 				if (id.equals(mac)) {
 					document.getElementsByTagName("name").item(i).getFirstChild().setNodeValue(newName);
+					break;
+				}
+			}
+			writeXML(document, filePath);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("MyDebug: updateItem()异常！");
+		}
+		return false;
+	}
+	
+	/**
+	 * 改变终端播放的清晰度
+	 */
+	public boolean changePlayerClarity(String mac, int clarity) {
+		Document document = loadInit(filePath);
+		try {
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
+			int len = nodeList.getLength();
+			for (int i=0; i<len; i++) {
+				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
+				if (id.equals(mac)) {
+					document.getElementsByTagName(DeviceValue.XML_PLAYER_CLARITY).item(i).getFirstChild().setNodeValue(String.valueOf(clarity));
 					break;
 				}
 			}
@@ -344,7 +405,7 @@ public class XmlDevice {
 	public boolean updateItemBg(String mac, String bg) {
 		Document document = loadInit(filePath);
 		try {
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
@@ -369,7 +430,7 @@ public class XmlDevice {
 	public boolean updateItem(HashMap<String, String> map) {
 		Document document = loadInit(filePath);
 		try {
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
@@ -392,37 +453,52 @@ public class XmlDevice {
 	}
 	
 	/**
+	 * 获得一个节点的信息
+	 */
+	private HashMap<String, String> getNodeHashMap(Document document, int index) {
+		HashMap<String, String> item = new HashMap<String, String>();
+		try {
+			String name = document.getElementsByTagName("name").item(index).getFirstChild().getNodeValue();
+			String id = document.getElementsByTagName("id").item(index).getFirstChild().getNodeValue();
+			String state = document.getElementsByTagName("state").item(index).getFirstChild().getNodeValue();
+			String dealer = document.getElementsByTagName("dealer").item(index).getFirstChild().getNodeValue();
+			String bg = document.getElementsByTagName("bg").item(index).getFirstChild().getNodeValue();
+			String link = document.getElementsByTagName("link").item(index).getFirstChild().getNodeValue();
+			String clarity = document.getElementsByTagName(DeviceValue.XML_PLAYER_CLARITY).item(index).getFirstChild().getNodeValue();
+			item.put("deviceName", name);
+			item.put("deviceID", id);
+			item.put("isOnline", state);
+			item.put("dealerName", dealer);
+			item.put("deviceBg", bg);
+			item.put("LinkState", link);
+			item.put(DeviceValue.HASH_PLAYER_CLARITY, clarity);
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.w("MyDebug",": getNodeHashMap()异常！");
+		}
+		return item;
+	}
+	
+	/**
 	 * 获取XML文件的一个节点
 	 * @return 成功返回一个ArrayList列表的一个节点  失败返回null
 	 */
-	public HashMap<String, String> getItem(String mac) {
+	public HashMap<String, String> readItem(String mac) {
 		try {
 			Document document = loadInit(filePath);
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				String searchId = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
 				if (searchId.equals(mac)) {
 					HashMap<String, String> item = new HashMap<String, String>();
-					String name = document.getElementsByTagName("name").item(i).getFirstChild().getNodeValue();
-					String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
-					String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
-					String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
-					String bg = document.getElementsByTagName("bg").item(i).getFirstChild().getNodeValue();
-					String link = document.getElementsByTagName("link").item(i).getFirstChild().getNodeValue();
-					item.put("deviceName", name);
-					item.put("deviceID", id);
-					item.put("isOnline", state);
-					item.put("dealerName", dealer);
-					item.put("deviceBg", bg);
-					item.put("LinkState", link);
+					item = getNodeHashMap(document, i);
 					return item;
 				}
-				
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug",": getItem()异常！");
+			Log.w("MyDebug",": readItem()异常！");
 		}
 		return null;
 	}
@@ -435,23 +511,13 @@ public class XmlDevice {
 		try {
 			ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 			Document document = loadInit(filePath);
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
 				if (state.equals("true")) {
 					HashMap<String, String> item = new HashMap<String, String>();
-					String name = document.getElementsByTagName("name").item(i).getFirstChild().getNodeValue();
-					String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
-					String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
-					String bg = document.getElementsByTagName("bg").item(i).getFirstChild().getNodeValue();
-					String link = document.getElementsByTagName("link").item(i).getFirstChild().getNodeValue();
-					item.put("deviceName", name);
-					item.put("deviceID", id);
-					item.put("isOnline", state);
-					item.put("dealerName", dealer);
-					item.put("deviceBg", bg);
-					item.put("LinkState", link);
+					item = getNodeHashMap(document, i);
 					list.add(item);
 				}
 			}
@@ -494,22 +560,11 @@ public class XmlDevice {
 		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 		try {
 			Document document = loadInit(filePath);
-			NodeList nodeList = document.getElementsByTagName("item");
+			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			int len = nodeList.getLength();
 			for (int i=0; i<len; i++) {
 				HashMap<String, String> item = new HashMap<String, String>();
-				String name = document.getElementsByTagName("name").item(i).getFirstChild().getNodeValue();
-				String id = document.getElementsByTagName("id").item(i).getFirstChild().getNodeValue();
-				String state = document.getElementsByTagName("state").item(i).getFirstChild().getNodeValue();
-				String dealer = document.getElementsByTagName("dealer").item(i).getFirstChild().getNodeValue();
-				String bg = document.getElementsByTagName("bg").item(i).getFirstChild().getNodeValue();
-				String link = document.getElementsByTagName("link").item(i).getFirstChild().getNodeValue();
-				item.put("deviceName", name);
-				item.put("deviceID", id);
-				item.put("isOnline", state);
-				item.put("dealerName", dealer);
-				item.put("deviceBg", bg);
-				item.put("LinkState", link);
+				item = getNodeHashMap(document, i);
 				list.add(item);
 			}
 			return list;

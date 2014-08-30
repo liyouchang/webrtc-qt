@@ -2,13 +2,14 @@ package com.video.main;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,15 +19,17 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.video.R;
 import com.video.data.Value;
 import com.video.service.MainApplication;
@@ -49,10 +52,10 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	private Button button_delete_wifi_password;
 	private Dialog mDialog = null;
 	
-	private final int IS_REQUSTING = 1;
-	private final int REQUST_TIMEOUT = 2;
-	private final int IS_SETTING = 3;
-	private final int SET_TIMEOUT = 4;
+	private final static int IS_REQUSTING = 1;
+	private final static int REQUST_TIMEOUT = 2;
+	private final static int IS_SETTING = 3;
+	private final static int SET_TIMEOUT = 4;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -160,7 +163,42 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		return result;
 	}
 	
-	private Handler handler = new Handler() {
+	/**
+	 * 自定义Dialog
+	 * @param context 上下文
+	 * @param msg 显示的信息
+	 * @return 返回Dialog
+	 */
+	public Dialog createLoadingDialog(Context context, String msg) {
+		LayoutInflater inflater = LayoutInflater.from(context);
+		View v = inflater.inflate(R.layout.dialog_layout, null);
+		LinearLayout layout = (LinearLayout) v.findViewById(R.id.dialog_view);
+		ImageView spaceshipImage = (ImageView) v.findViewById(R.id.dialog_img);
+		TextView tipTextView = (TextView) v.findViewById(R.id.dialog_textView);
+		Animation hyperspaceJumpAnimation = AnimationUtils.loadAnimation(context, R.anim.dialog_anim);
+		spaceshipImage.startAnimation(hyperspaceJumpAnimation);
+		tipTextView.setText(msg);
+		Dialog loadingDialog = new Dialog(context, R.style.dialog_style);
+		loadingDialog.setCanceledOnTouchOutside(false);
+		loadingDialog.setOnCancelListener(new OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface arg0) {
+				if (handler.hasMessages(REQUST_TIMEOUT)) {
+					handler.removeMessages(REQUST_TIMEOUT);
+				}
+				if (handler.hasMessages(R.id.requst_wifi_list_id)) {
+					handler.removeMessages(R.id.requst_wifi_list_id);
+				}
+			}
+		});
+		loadingDialog.setContentView(layout, new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.FILL_PARENT,
+				LinearLayout.LayoutParams.FILL_PARENT));
+		return loadingDialog;
+	}
+	
+	@SuppressLint("HandlerLeak")
+	public Handler handler = new Handler() {
 
 		@SuppressWarnings("unchecked")
 		@Override
@@ -169,7 +207,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUSTING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在请求设备周围WiFi列表...");
+					mDialog = createLoadingDialog(mContext, "正在请求设备周围WiFi列表...");
 					mDialog.show();
 					break;
 				case REQUST_TIMEOUT:
@@ -177,6 +215,9 @@ public class WiFiActivity extends Activity implements OnClickListener {
 						mDialog.dismiss();
 					if (handler.hasMessages(REQUST_TIMEOUT)) {
 						handler.removeMessages(REQUST_TIMEOUT);
+					}
+					if (handler.hasMessages(R.id.requst_wifi_list_id)) {
+						handler.removeMessages(R.id.requst_wifi_list_id);
 					}
 					Toast.makeText(mContext, "请求WiFi列表失败，请重试！ ", Toast.LENGTH_SHORT).show();
 					break;

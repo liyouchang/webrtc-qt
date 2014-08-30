@@ -292,12 +292,18 @@ public class MainApplication extends Application {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "Client_Logout");
-			jsonObj.put("UserName", userName);
+			jsonObj.put("UserName", MainApplication.getInstance().userName);
 			return jsonObj.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public void sendLogoutData() {
+		// 发送注销消息
+		String data = generateLogoutJson();
+		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 	}
 	
 	/**
@@ -354,10 +360,6 @@ public class MainApplication extends Application {
 		// 删除缓存和缩略图文件夹
 		Utils.deleteDirectoryFiles(cacheFile);
 		Utils.deleteDirectoryFiles(thumbnailsFile);
-		
-		// 发送注销消息
-		String data = generateLogoutJson();
-		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		
 		// 复位全局变量
 		Value.resetValues();

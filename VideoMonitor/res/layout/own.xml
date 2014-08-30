@@ -52,7 +52,7 @@
         android:layout_below="@+id/rl_title_bar"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="invisible" >
+        android:visibility="gone" >
 
         <ImageView
             android:id="@+id/iv_device_list"
@@ -77,13 +77,22 @@
             android:textSize="16.0sp" />
     </RelativeLayout>
 
-    <ListView
-        android:id="@+id/device_list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+    <com.video.main.PullToRefreshHeaderView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/own_pull_refresh_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/rl_title_bar"
-        android:cacheColorHint="#00000000"
-        android:divider="@color/orange"
-        android:dividerHeight="1dp" />
+        android:background="@color/page_bg_grey"
+        android:orientation="vertical" >
+
+        <ListView
+            android:id="@+id/device_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:cacheColorHint="#00000000"
+            android:divider="@color/orange"
+            android:dividerHeight="1dp" />
+    </com.video.main.PullToRefreshHeaderView>
 
 </RelativeLayout>

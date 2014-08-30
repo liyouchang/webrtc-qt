@@ -5,8 +5,7 @@
     android:background="@color/page_bg_grey"
     android:orientation="vertical" >
 
-    <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout 
         android:id="@+id/add_device_title"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/title_height_size"
@@ -62,6 +61,7 @@
             android:layout_toLeftOf="@+id/btn_register_username_del"
             android:layout_toRightOf="@+id/iv_register_username"
             android:background="@null"
+            android:singleLine="true"
             android:hint="@string/hint_user"
             android:padding="0.0dip"
             android:textColor="@color/black"
@@ -107,6 +107,7 @@
             android:layout_toLeftOf="@+id/btn_register_email_del"
             android:layout_toRightOf="@+id/iv_register_email"
             android:background="@null"
+            android:singleLine="true"
             android:hint="@string/hint_email"
             android:inputType="textEmailAddress"
             android:padding="0.0dip"
@@ -153,6 +154,7 @@
             android:layout_toLeftOf="@+id/btn_register_password_del"
             android:layout_toRightOf="@+id/iv_register_password"
             android:background="@null"
+            android:singleLine="true"
             android:hint="@string/hint_pwd"
             android:inputType="textPassword"
             android:padding="0.0dip"
@@ -199,6 +201,7 @@
             android:layout_toLeftOf="@+id/btn_register_repassword_del"
             android:layout_toRightOf="@+id/iv_register_repassword"
             android:background="@null"
+            android:singleLine="true"
             android:hint="@string/hint_repwd"
             android:inputType="textPassword"
             android:padding="0.0dip"

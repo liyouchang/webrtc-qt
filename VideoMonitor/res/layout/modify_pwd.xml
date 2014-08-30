@@ -6,7 +6,6 @@
     android:orientation="vertical" >
     
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/add_device_title"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/title_height_size"
@@ -62,6 +61,7 @@
             android:layout_toLeftOf="@+id/btn_modify_old_password_del"
             android:layout_toRightOf="@+id/iv_modify_old_password"
             android:background="@null"
+            android:singleLine="true"
             android:hint="@string/old_pwd"
             android:inputType="textPassword"
             android:padding="0.0dip"
@@ -108,6 +108,7 @@
             android:layout_toLeftOf="@+id/btn_modify_new_password_del"
             android:layout_toRightOf="@+id/iv_modify_new_password"
             android:background="@null"
+            android:singleLine="true"
             android:hint="@string/new_pwd"
             android:inputType="textPassword"
             android:padding="0.0dip"
@@ -154,6 +155,7 @@
             android:layout_toLeftOf="@+id/btn_modify_new_repassword_del"
             android:layout_toRightOf="@+id/iv_modify_new_repassword"
             android:background="@null"
+            android:singleLine="true"
             android:hint="@string/new_repwd"
             android:inputType="textPassword"
             android:padding="0.0dip"
@@ -181,6 +183,6 @@
         android:background="@drawable/button_style"
         android:text="@string/submit"
         android:textColor="@color/white"
-        android:textSize="20dp" />
+        android:textSize="20sp" />
 
 </LinearLayout>
