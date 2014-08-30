@@ -4,12 +4,13 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
+
 include (../talk/talk_common.pri)
 include (zmqdealer.pri)
 
 DESTDIR = $$output_dir/$$TARGET
 
-#message("DESTDIR is "$$DESTDIR)
+#message("DESTDIR is " $$DESTDIR)
 
 win32 {
     #for zmqhelper
@@ -19,61 +20,83 @@ win32 {
     LIBS += -L$$output_dir/libs
     LIBS += -ljsoncpp -lcppzmq
     LIBS += -ljingle_app -ljingle_p2p -ljingle
-} else {
+}
+
+linux {
     #QMAKE_CXXFLAGS += -std=c++11
     LIBS += -L$$output_dir/libs
     LIBS += -ljingle_app -ljingle_p2p -ljingle
     LIBS += -lcppzmq -ljsoncpp
     LIBS += -pthread -ldl
     #LIBS += -lprofiler
+message (" this is linux system")
 }
 
-SOURCES += \
-    zmqclient.cpp \
+macx {
+    LIBS += -L$$output_dir/libs
+    LIBS += -ljingle_app -ljingle_p2p -ljingle
+    LIBS += -lcppzmq -ljsoncpp
+    LIBS +=  -ldl
+    LIBS += -framework Foundation -framework Carbon
 
+}
+
+android {
+
+SOURCES += \
+    jni/JniPeerConnection.cpp \
+    jni/JniUtil.cpp \
+    jni/KeJniTunnelClient.cpp \
+    jni/VideoPhone.cpp
+
+HEADERS += \
+    jni/JniPeerConnection.h \
+    jni/JniUtil.h \
+    jni/KeJniTunnelClient.h
+
+OTHER_FILES += \
+    jni/Android.mk
+
+}
 
 hisi {
-#    SOURCES += kesdkdevice.cpp
-#    HEADERS += kesdkdevice.h \
-#            keapi/media_define.h \
-#            keapi/media_api.h \
-#            keapi/common_define.h \
-#            keapi/common_api.h
+    SOURCES += kesdkdevice.cpp
+    HEADERS += kesdkdevice.h \
+            keapi/media_define.h \
+            keapi/media_api.h \
+            keapi/common_define.h \
+            keapi/common_api.h \
+            keapi/store_api.h \
+            keapi/store_define.h \
+            keapi/Web_api.h \
+            keapi/Web_define.h \
+            keapi/alarm_api.h \
+            keapi/alarm_define.h
 
-#    LIBS +=-L$$output_dir/libs/sdk -lmedia -lcommon
-#    LIBS += $$output_dir/libs/mpp/openssl-0.9.8d/libcrypto.a
-#    LIBS +=-L$$output_dir/libs/mpp/lib  -lmpi -lisp -lsns_ov9712_8 \
-#         -laec -lVoiceEngine -lanr -lresampler
+    LIBS +=-L$$output_dir/libs/sdk -lweb -lalarm -lmedia   -lcommon
+    LIBS += $$output_dir/libs/mpp/openssl-0.9.8d/libcrypto.a
+    LIBS +=-L$$output_dir/libs/mpp/lib  -lmpi -lisp -lsns_ov9712_8 \
+         -laec -lVoiceEngine -lanr -lresampler -laacenc
 
 
-    SOURCES += HisiMediaDevice.cpp
-    HEADERS += HisiMediaDevice.h \
-            keapi/RayCommIPC_ParamInfo.h \
-            keapi/keapi.h
-    LIBS += -lkeapi -lstore -lexfat
-}else {
-#    SOURCES +=  KeVideoSimulator.cpp
-#    HEADERS +=  KeVideoSimulator.h
+    target.path = /var/lib/tftpboot
+    INSTALLS += target
+    target_config.files  = $$PWD/config.json
+    target_config.path   = /var/lib/tftpboot  $$output_dir
+    INSTALLS  += target_config
 
+#    SOURCES += HisiMediaDevice.cpp
+#    HEADERS += HisiMediaDevice.h \
+#            keapi/RayCommIPC_ParamInfo.h \
+#            keapi/keapi.h
+#    LIBS += -lkeapi -lstore -lexfat
 }
 
 OTHER_FILES += \
     config.json
 
 
-hisi {
-    target_config.files  = $$OTHER_FILES $$DESTDIR/$$TARGET
-    target_config.path   = /var/lib/tftpboot
-    INSTALLS  += target_config
-}eles{
-#    target.files = $$DESTDIR/$$TARGET
-#    target.path =   /home/lht/workspace/P2PSystem/out/zmqclient
-#    INSTALLS += target
-
-##    target_config.files  = $$OTHER_FILES
-##    target_config.path   = $$output_dir/$$TARGET
-##    INSTALLS  += target_config
-
-}
+SOURCES += \
+    zmqclient.cpp \
 
 

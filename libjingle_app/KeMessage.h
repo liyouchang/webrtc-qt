@@ -65,10 +65,10 @@ struct KERTStreamHead
     int videoID;
     char channelNo;
 };
-struct KEFrameHead{
+struct KEFrameHead {
     short frameNo;
     short piecesNo;
-    int second;
+    int second;//时间戳
     char millisecond;//millisecond devide 10
     char frameType;// 0-D1 1-QCIF 3-HD1 7-VGA 10-720P 4-QVGA 50-audio_frame
     short frameLen;
@@ -107,6 +107,7 @@ struct KeDeviceGetKeyReq{
     int videoID;
     char deviceMac[16];
 };
+
 struct KeDeviceGetKeyResp{
     unsigned char protocal;
     unsigned char msgType;//0xD0
@@ -332,7 +333,7 @@ struct KEPlayRecordFileReq
     int clientID;
     char playSpeed;//speed /0x10 normal ,0x20 2x speed,0x40 4x speed,
     //0x08 1/2 speed,0x04 1/4 speed
-    char fileType;//1,new file play 2, file play control
+    char fileType;//1,new file play 2, file play control; 3,file play stop
     int playPos;//-1, pos not change,0~100 pos set percent. only used at filetype==2
     char startTime[6];//无用
     int clientIp;//0或本机ip

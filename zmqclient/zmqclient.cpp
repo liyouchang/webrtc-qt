@@ -13,12 +13,12 @@
 
 #ifndef ARM
 #else
-//#include "kesdkdevice.h"
-#include "HisiMediaDevice.h"
+#include "kesdkdevice.h"
+//#include "HisiMediaDevice.h"
 #endif//arm
 
 
-int kVersion = 53;
+int kVersion = 56;
 
 
 int main()
@@ -54,17 +54,17 @@ int main()
 #ifndef ARM
 
 #else
-    //KeSdkDevice * device = new KeSdkDevice();
-    HisiMediaDevice * device = new HisiMediaDevice();
+    KeSdkDevice * device = new KeSdkDevice();
+    //HisiMediaDevice * device = new HisiMediaDevice();
     if (strMac.empty()) {
-        strMac = device->GetHardwareId();
+        strMac = device->GetMacAddress();
     }
 
     CameraClient client(strMac,clientVer);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
 
-//    client.SignalNtpSet.connect(device,&HisiMediaDevice::SetNtp);
+    client.SignalNtpSet.connect(device,&KeSdkDevice::SetNtp);
 //    device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
 
 //    AlarmNotify::Instance()->SignalTerminalAlarm.connect(
@@ -75,6 +75,7 @@ int main()
 //    terminal->Initialize("0.0.0.0:12345");
 
     device->Init(terminal);
+
     talk_base::Thread::Current()->Run();
     delete device;
     delete terminal;

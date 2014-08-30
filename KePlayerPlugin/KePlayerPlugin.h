@@ -72,7 +72,7 @@ public:
 signals:
     void TunnelOpened(const QString &);
     void TunnelClosed(const QString &);
-    void RecordStatus(const QString &,int );
+    void RecordStatus(const QString &,int,int,int );
     void RecvPeerMsg(const QString &,const QString &);
     void RemoteFileDownloadEnd(QString peer_id);
     void LocalDeviceInfo(const QString & devInfo);
@@ -108,9 +108,9 @@ public slots:
 
     int SendCommand(QString peer_id,QString msg);
 
-    int PlayRecordFiles(QString peer_id,QString jstrRecordArray);
-    int StopPlayFile(QString peer_id);
-
+    bool PlayRecordFile(QString peer_id, QString remoteFile);
+    bool StopPlayFile(QString peer_id);
+    bool SetPlayPosition(QString peer_id,int pos);
     void setSavePath(const QString &path);
     QString savePath() const;
 
@@ -141,6 +141,10 @@ private:
     bool is_inited;
     QSettings *myconfig;
 
+
+    // QWidget interface
+protected:
+    void paintEvent(QPaintEvent *);
 };
 
 #endif // KEPLAYERPLUGIN_H

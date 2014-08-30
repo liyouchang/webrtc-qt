@@ -220,10 +220,10 @@ std::string ToStringVersion(int intVer)
 
 }
 
-std::string GetLittleEndianIp(int srcIp){
-    int netIp = talk_base::HostToNetwork32(srcIp);
-    talk_base::IPAddress addr(netIp);
-    return addr.ToString();
-}
+//std::string GetLittleEndianIp(int srcIp){
+//    int netIp = talk_base::HostToNetwork32(srcIp);
+//    talk_base::IPAddress addr(netIp);
+//    return addr.ToString();
+//}
 
 }

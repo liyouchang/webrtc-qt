@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>750</width>
-    <height>537</height>
+    <width>843</width>
+    <height>541</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,6 +36,21 @@
        <string>VideoWall</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>9</number>
+       </property>
+       <property name="topMargin">
+        <number>9</number>
+       </property>
+       <property name="rightMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
+        <number>9</number>
+       </property>
        <item>
         <widget class="KePlayerPlugin" name="playPlugin" native="true"/>
        </item>
@@ -76,7 +91,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>0090B01C0C32-72B5</string>
+          <string>0090B01C0C32-B0F8</string>
          </property>
         </widget>
        </item>
@@ -170,7 +185,7 @@
                <x>0</x>
                <y>0</y>
                <width>73</width>
-               <height>65</height>
+               <height>69</height>
               </rect>
              </property>
             </widget>
@@ -283,6 +298,9 @@
       </layout>
      </widget>
     </item>
+    <item>
+     <widget class="QColumnView" name="columnView"/>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -290,7 +308,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>750</width>
+     <width>843</width>
      <height>23</height>
     </rect>
    </property>

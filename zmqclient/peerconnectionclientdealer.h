@@ -3,7 +3,6 @@
 
 
 #include "libjingle_app/PeerConnectionClinetInterface.h"
-#include "talk/base/scoped_ptr.h"
 #include "asyndealer.h"
 
 class PeerConnectionClientDealer :
@@ -12,6 +11,7 @@ class PeerConnectionClientDealer :
 {
 public:
     PeerConnectionClientDealer();
+    virtual ~PeerConnectionClientDealer();
     //router
     virtual bool Connect(const std::string & router,const std::string & id);
     virtual void Reconnect();
@@ -22,7 +22,7 @@ public:
     bool IsSendingMessage();
     void OnMessageFromPeer(const std::string& peer_id, const std::string& message);
 protected:
-    talk_base::scoped_ptr<AsynDealer> dealer_;
+    AsynDealer * dealer_;
 };
 
 

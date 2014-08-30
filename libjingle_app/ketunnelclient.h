@@ -16,6 +16,11 @@ enum RecordStatus{
     kRecordPlaying = 4,//下载数据达到播放阈值
     kRequestMsgError//请求消息错误
 };
+enum RemotePlayType{
+    kRemotePlayStart = 1,
+    kRemotePlayControl = 2,
+    kRemotePlayStop = 3
+};
 
 class KeTunnelClient:public KeMsgProcessContainer{
     friend class KeMessageProcessClient;
@@ -42,10 +47,9 @@ public:
     //send talk data to camera
     sigslot::signal2<const char *, int > SignalTalkData;
     virtual void SendTalkData(const char * data,int len);
-    virtual bool DownloadRemoteFile(std::string  peerId,
-                                    std::string remoteFileName,
-                                    std::string saveFileName, int playSize);
-    virtual bool SetPlayFileStatus(std::string peerId,std::string jstrStatus);
+    virtual bool PlayRemoteFile(std::string  peerId,std::string remoteFileName);
+    virtual bool SetPlayFileStatus(std::string peerId, int type, int position, int speed);
+
     virtual void OnTunnelOpened(PeerTerminalInterface * t,
                                 const std::string & peer_id);
     virtual void OnRouterMessage(const std::string &peer_id,
@@ -55,8 +59,8 @@ public:
     virtual void OnRecvVideoData(const std::string & peer_id,
                                  const char * data,int len);
 protected:
-    virtual void OnRecordFileData(const std::string & peer_id,
-                                  const char * data,int len);
+//    virtual void OnRecordFileData(const std::string & peer_id,
+//                                  const char * data,int len);
     virtual void OnRecordStatus(const std::string & peer_id,int status,
                                 int position,int speed);
 };
@@ -72,7 +76,7 @@ public:
     void OnTalkData(const char * data,int len);
     bool StartVideoCut(const std::string &filename);
     bool StopVideoCut();
-    bool SetPlayFileStatus(int position ,int speed);
+    void SetPlayFileStatus(int type, int position , int speed);
     sigslot::signal3<const std::string &,const char *,int > SignalRecvVideoData;
     sigslot::signal3<const std::string &,const char *,int > SignalRecvAudioData;
 //    sigslot::signal3<const std::string &,const char *,int > SignalRecvFileData;

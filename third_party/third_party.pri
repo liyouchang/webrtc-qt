@@ -14,7 +14,15 @@ DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
         output_dir = $$PWD/../out/release
     }
 
-} else:macx {
+}
+
+macx {
+        output_dir = $$PWD/../out/mac
+}
+
+ios {
+DEFINES += POSIX IOS
+        output_dir = $$PWD/../out/ios
 }
 
 linux {
@@ -34,5 +42,5 @@ android{
 
 }
 
-DESTDIR = $$output_dir/libs
-OBJECTS_DIR = $$output_dir/obj/$$TARGET
+#DESTDIR = $$output_dir/libs
+#OBJECTS_DIR = $$output_dir/obj/$$TARGET

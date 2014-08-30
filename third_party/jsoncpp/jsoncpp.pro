@@ -12,6 +12,10 @@ CONFIG += staticlib
 
 include( ../third_party.pri)
 
+#target.path = $$output_dir/libs
+#INSTALLS += target
+DESTDIR = $$output_dir/libs
+
 
 DEFINES += JSON_USE_EXCEPTION=0
 

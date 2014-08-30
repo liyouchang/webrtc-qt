@@ -37,7 +37,9 @@ DEFINES += INLINE=__inline \
            SIZEOF_UNSIGNED_LONG=4 \
            SIZEOF_UNSIGNED_LONG_LONG=8
 
-} else {
+}
+
+linux {
 
 DEFINES += \
     HAVE_INT16_T \

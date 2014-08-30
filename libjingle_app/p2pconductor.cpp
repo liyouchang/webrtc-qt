@@ -239,7 +239,6 @@ void P2PConductor::AddIceServer(const std::string &uri,
     server.username = username.empty()? "lht":username;
     server.password = password.empty()? "123456":password;
     g_servers.push_back(server);
-
 }
 //将g_servers置为jstrServers中的server
 void P2PConductor::AddIceServers(std::string jstrServers)

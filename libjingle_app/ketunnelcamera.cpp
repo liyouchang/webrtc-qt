@@ -35,23 +35,6 @@ void KeTunnelCamera::OnRecvRecordQuery( std::string peer_id,
             <<peer_id<<" query:"<<condition ;
 }
 
-void KeTunnelCamera::SetPtz(std::string ptz_key, int param)
-{
-    LOG(INFO)<<"KeTunnelCamera::SetPtz---key:" <<ptz_key<<" param:"<<param;
-}
-
-
-void KeTunnelCamera::RecvGetWifiInfo(std::string peer_id)
-{
-    LOG(INFO)<<"KeTunnelCamera::OnRecvGetWifiInfo---from:" <<peer_id;
-}
-
-void KeTunnelCamera::SetWifiInfo(std::string peer_id, std::string param)
-{
-    LOG(INFO)<<"KeTunnelCamera::SetWifiInfo---from:"
-            <<peer_id<<" param:"<<param ;
-}
-
 void KeTunnelCamera::OnToPlayFile(const std::string &peer_id,
                                   const std::string &filename)
 {
@@ -73,21 +56,7 @@ void KeTunnelCamera::OnCommandJsonMsg(const std::string &peerId, Json::Value &jm
         LOG(WARNING)<<"get command error-"<<command<<" from"<<peerId ;
         return;
     }
-    if(command.compare("video_clarity") == 0){
-        int clarity;
-        GetIntFromJsonObject(jmessage,"value",&clarity);
-        OnRecvVideoClarity(peerId,clarity);
-    }
-    else if(command.compare("ptz") == 0){
-        std::string ptz_control;
-        GetStringFromJsonObject(jmessage,"control",&ptz_control);
-        int param;
-        GetIntFromJsonObject(jmessage,"param",&param);
-        std::string ptz_key = "ptz_";
-        ptz_key += ptz_control;
-        this->SetPtz(ptz_key,param);
-    }
-    else if(command.compare("query_record") == 0){
+    if(command.compare("query_record") == 0){
         Json::Value jcondition;
         if(!GetValueFromJsonObject(jmessage, "condition", &jcondition))
         {
@@ -98,19 +67,9 @@ void KeTunnelCamera::OnCommandJsonMsg(const std::string &peerId, Json::Value &jm
         OnRecvRecordQuery(peerId,condition);
     }
     else if(command.compare("echo") == 0){
+        LOG_F(INFO)<<"receive echo command "<<peerId<< " msg"<<strMsg;
+
         this->terminal_->SendByRouter(peerId,strMsg);
-    }
-    else if(command.compare("wifi_info") == 0){
-        this->RecvGetWifiInfo(peerId);
-    }else if(command.compare("set_wifi") == 0){
-        Json::Value jwifiParam;
-        if(!GetValueFromJsonObject(jmessage, "param", &jwifiParam)){
-            LOG(WARNING)<<"get set_wifi value error from"<<
-                          peerId<< " msg"<<strMsg;
-            return;
-        }
-        std::string paramStr = JsonValueToString(jwifiParam);
-        this->SetWifiInfo(peerId,paramStr);
     }
     else{
         LOG(WARNING)<<"receive unexpected command from "<<
@@ -118,18 +77,40 @@ void KeTunnelCamera::OnCommandJsonMsg(const std::string &peerId, Json::Value &jm
     }
 }
 
+void KeTunnelCamera::ReportResult(const std::string &peerId, const std::string &command, bool result)
+{
+    Json::Value jmessage;
+    jmessage["type"] = "tunnel";
+    jmessage["command"] = command;
+    jmessage["result"] = result;
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+    this->terminal_->SendByRouter(peerId,msg);
+
+}
+
+void KeTunnelCamera::ReportJsonMsg(const std::string &peerId, Json::Value &jmessage)
+{
+    Json::StyledWriter writer;
+    std::string msg = writer.write(jmessage);
+    LOG(LS_VERBOSE)<<"send msg is "<< msg;
+    this->terminal_->SendByRouter(peerId,msg);
+
+}
+
 void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
                                      talk_base::Buffer &msg)
 {
     std::string strMsg(msg.data(),msg.length());
-    LOG(INFO)<<"KeTunnelCamera::OnRouterMessage---";
     Json::Reader reader;
+//    LOG_T(INFO)<<"KeTunnelCamera::OnRouterMessage---"<<peer_id << " msg "<<msg.data();
     Json::Value jmessage;
     if (!reader.parse(strMsg, jmessage)) {
         LOG(WARNING) << "Received unknown message. ";
         return;
     }
-    OnCommandJsonMsg(peer_id,jmessage);
+
+    this->OnCommandJsonMsg(peer_id,jmessage);
 }
 
 void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
@@ -200,33 +181,38 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
 {
     KEPlayRecordFileReq * pMsg =
             reinterpret_cast<KEPlayRecordFileReq *>(msgData.data());
-    LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile--"<<pMsg->fileData;
     std::string fileName = pMsg->fileData;
 
     if(pMsg->fileType == 1){
-        if(recordReader != NULL){
+        LOG(INFO)<< "KeMessageProcessCamera::RecvPlayFile---start play"<<
+                    pMsg->fileData;
+        if(recordReader != NULL && recordReader->IsReading()){
             LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
                        "already start record read";
             RespPlayFileReq(RESP_NAK);
             return;
         }
-
-        recordReader = new RecordReaderAvi();
+        if(recordReader == NULL){
+            recordReader = new RecordReaderAvi();
+            recordReader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnAudioData);
+            recordReader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnVideoData);
+            recordReader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
+            recordReader->SignalReportProgress.connect(this,&KeMessageProcessCamera::OnRecordProcess);
+        }
         if(!recordReader->StartRead(fileName)){
-            LOG(INFO)<<"KeMessageProcessCamera::RecvPlayFile---"<<
-                       "start read failed";
+            LOG_T_F(WARNING)<<"KeMessageProcessCamera::RecvPlayFile---"<<"start read failed";
+            RespPlayFileReq(RESP_NAK);
             delete recordReader;
             recordReader = NULL;
-            RespPlayFileReq(RESP_NAK);
             return;
         }
-        recordReader->SignalAudioData.connect(this,&KeMessageProcessCamera::OnVideoData);
-        recordReader->SignalVideoData.connect(this,&KeMessageProcessCamera::OnAudioData);
-        recordReader->SignalRecordEnd.connect(this,&KeMessageProcessCamera::OnRecordReadEnd);
-        recordReader->SignalReportProgress.connect(this,&KeMessageProcessCamera::OnRecordProcess);
+        this->videoInfo_ = recordReader->recordInfo;
         RespPlayFileReq(RESP_ACK);
     }else if(pMsg->fileType == 2){
-        if(pMsg->playSpeed != 0 && pMsg->playSpeed != -1){
+        LOG_T_F(INFO)<<"play file control--position:"<< pMsg->playPos <<
+                       " ,speed:"<<pMsg->playSpeed;
+
+        if(pMsg->playSpeed != -1){
             recordReader->SetSpeed(pMsg->playSpeed);
             this->RespPlayFileReq(RESP_CTRL);
         }
@@ -234,6 +220,12 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
             recordReader->SetPosition(pMsg->playPos);
             this->RespPlayFileReq(RESP_CTRL);
         }
+    }else if(pMsg->fileType == 3){
+        LOG_T_F(INFO)<<"stop play file";
+        recordReader->StopRead();
+
+    }else{
+        LOG_T_F(WARNING)<<"unknown file type";
     }
 
 }
@@ -453,9 +445,11 @@ void KeMessageProcessCamera::OnRecordReadEnd(RecordReaderInterface *reader)
 {
     ASSERT(recordReader == reader);
     this->RespPlayFileReq(RESP_END);
-//    recordReader->StopRead();
+    recordReader->StopRead();
+
 //    delete recordReader;
 //    recordReader = NULL;
+
 //    int msgLen = sizeof(KEPlayRecordDataHead);
 //    talk_base::Buffer sendBuf;
 //    KEPlayRecordDataHead streamHead;

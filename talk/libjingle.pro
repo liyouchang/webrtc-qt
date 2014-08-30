@@ -21,8 +21,8 @@ DESTDIR = $$output_dir/libs
 
 DEFINES += SSL_USE_SCHANNEL
 
-INCLUDEPATH     += ../third_party/jsoncpp/overrides/include \
-                   ../third_party/jsoncpp/source/include
+INCLUDEPATH += ../third_party/jsoncpp/overrides/include \
+               ../third_party/jsoncpp/source/include
 
 
 
@@ -82,6 +82,46 @@ HEADERS += \
     base/latebindingsymboltable.h \
 
 }
+
+macx  {
+SOURCES += \
+    ../talk/base/posix.cc \
+    base/unixfilesystem.cc \
+    base/macutils.cc \
+
+
+#base/macasyncsocket.cc \
+#base/macconversion.cc \
+#base/macsocketserver.cc \
+#
+#base/macwindowpicker.cc \
+
+
+
+#OBJECTIVE_SOURCES += \
+#base/maccocoasocketserver.mm  \
+#base/scoped_autorelease_pool.mm
+
+
+HEADERS += \
+    base/macutils.h \
+
+
+#base/macasyncsocket.h \
+#base/maccocoasocketserver.h \
+#base/macconversion.h \
+#base/macsocketserver.h \
+#
+#base/macwindowpicker.h \
+
+}
+ios {
+SOURCES += \
+    ../talk/base/posix.cc \
+    base/unixfilesystem.cc \
+
+}
+
 SOURCES += \
     ../talk/base/socketaddress.cc \
     ../talk/base/ipaddress.cc \
@@ -196,7 +236,14 @@ HEADERS += \
     base/optionsfile.h \
     base/asyncpacketsocket.h \
     base/event.h \
+    base/maccocoathreadhelper.h \
+    base/scoped_autorelease_pool.h
 
 OTHER_FILES += \
     libjingle.gyp
+
+OBJECTIVE_SOURCES += \
+    base/maccocoathreadhelper.mm \
+    base/scoped_autorelease_pool.mm \
+    base/iosfilesystem.mm
 

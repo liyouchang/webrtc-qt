@@ -13,7 +13,7 @@ typedef enum
 	CLOCK_TYPE_HIRTC = 0,										//海思内部RTC时钟
 	CLOCK_TYPE_PCF8563,											//外部硬件时钟芯片
 	CLOCK_TYPE_NTP,												//网络校时
-	CLOCK_TYPE_COUNT	
+	CLOCK_TYPE_COUNT
 }	e_clock_type;
 
 typedef struct struct_clock_s
@@ -24,7 +24,7 @@ typedef struct struct_clock_s
 	int hour;
 	int minute;
 	int second;
-	int week;	
+	int week;
 }	st_clock_t;
 /**********************************************************************/
 //module config
@@ -400,6 +400,7 @@ struct SINGLELOST											//视频信号丢失报警参数
 	struct DEFTIME strategy[7];
 }__attribute__((packed));
 /***********************模组参数***************************/
+#define EXPOSURE_COMP		128
 struct SENSORPARAM											//模组参数
 {
 	char resolution;                                        //0-1080P;1-960P;2-720P
@@ -466,7 +467,7 @@ typedef enum
 {
 	GPIO_TYPE_ONCE = 0,									//一次性控制
 	GPIO_TYPE_CYCLE,									//周期性控制
-	GPIO_TYPE_COUNT	
+	GPIO_TYPE_COUNT
 }	e_gpio_control;
 
 /**********************************************************************/
@@ -483,7 +484,6 @@ typedef enum
 {
 	FIFO_TYPE_MEDIA = 0,
 	FIFO_TYPE_JPEG,
-	FIFO_TYPE_ALARM,
 	FIFO_TYPE_COUNT
 }	e_fifo_type;
 typedef struct st_fifo
@@ -491,12 +491,12 @@ typedef struct st_fifo
 	e_fifo_type enType;
 	int iGrp;
 	int iChn;
-	
+
 }	st_fifo_t;
 
 typedef enum
 {
-	FIFO_H264_MAIN = 0,
+	FIFO_H264_MAIN = 0,										//主码流
 	FIFO_H264_SUB,
 	FIFO_H264_EXT,
 	FIFO_H264_AUDIO,
@@ -504,6 +504,32 @@ typedef enum
 }	e_fifo_h264;
 typedef int (*FIFO_CALLBACK)(char * pFrameData,int iFrameLen);
 
+typedef enum
+{
+	FIFO_ALARM_SWITCH = 0,									//开关量
+	FIFO_ALARM_FAULT,										//故障
+	FIFO_ALARM_CAPACITY,									//能力
+	FIFO_ALARM_MV,											//移动侦测
+	FIFO_ALARM_OD,											//遮挡报警
+	FIFO_ALARM_SL,											//信号丢失
+	FIFO_ALARM_COUNT
+}	e_fifo_alarm;
+
+typedef enum
+{
+	FIFO_ALARM_READ_CURRENT = 0,							//最新的报警读指针
+	FIFO_ALARM_READ_EARLY,									//最早期的报警读指针
+	FIFO_ALARM_READ_COUNT
+}	e_fifo_read;
+
+typedef struct upload_alarm_info
+{
+	e_fifo_alarm enAlarm;									//报警的类型
+	int iChn;												//通道号
+	int iArea;												//子通道，或者区域号
+	int iStatus;											//0-停止 1开始
+	char cInfo[256];										//附加说明，或者可以存放一些自定义内容
+}	st_alarm_upload_t;
 /***********************视频输出格式***********************/
 typedef enum e_stream_type
 {											//类型  0-web stream 1-jpeg stream 2-rtp stream 3-avi stream 4-ts stream 5-ps stream 6-h264 stream
@@ -575,13 +601,13 @@ typedef struct st_rtsp_steup
 	char cSource[128];
 	int  iServerPort1;
 	int  iServerPort2;
-	
+
 }	st_rtsp_setup_t;
 
 typedef struct st_rtsp_play
 {
 	int  isTcp;
-	
+
 	int  iSpeed;
 	int  iPullTime;
 	char cFileName[128];
@@ -589,11 +615,41 @@ typedef struct st_rtsp_play
 	int  v_rtpseq;
 	int  a_rtptime;
 	int  a_rtpseq;
-	
+
 }	st_rtsp_play_t;
 
+typedef enum e_encrypt_mode_
+{
+	NONE = 0,
+	WEP,
+	WPA,
+	WPA2,
+	MODE_COUNT
+}	e_encrypt_mode;
+
+typedef enum e_encrypt_format_
+{
+	ASCII = 0,
+	HEX,
+	TKIP,
+	AES,
+	FORMAT_COUNT
+}	e_encrypt_format;
+
+typedef struct st_wifi_list
+{
+	char ssid[32];
+	char key[32];
+	int  enable;							//正在使用的
+	e_encrypt_mode encryptMode;				//加密方式
+	e_encrypt_format encryptFormat;			//加密格式
+	int	 wepPosition;						//wep方式下的密码位置
+	int  signalStrength;					//信号强度
+
+}	st_wifi_list_t;
+
 /**********************************************************************/
-//module Uaer
+//module Uart
 /**********************************************************************/
 typedef int (*UART_RECEIVE_CALLBACK)(int handle,char *pData,int iMaxSize);
 typedef int (*UART_PROTOCOL_CALLBACK)(int handle,char *pData,int iLen);
@@ -616,7 +672,7 @@ typedef struct attr_485
 /**********************************************************************/
 typedef struct ST_IOV
 {
-	int iov_len;						/**< Size of data */	
+	int iov_len;						/**< Size of data */
 	void * iov_base;					/**< Pointer on data */
 }__attribute__((packed))st_iov_t;
 

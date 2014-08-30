@@ -7,7 +7,9 @@
 
 #include "libjingle_app/defaults.h"
 
-const int kHeartInterval = 60000;//ms
+//const int kHeartInterval = 60000;//ms
+const int kHeartInterval = 3000;//ms
+const int kHeartReconnect = 1;//1次没有收到心跳则重连
 CameraClient::CameraClient(std::string mac,std::string ver):
     mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),
     heartCount(0),clientVersion(ver),oldNetType(-1),oldIp(-1)
@@ -64,10 +66,11 @@ void CameraClient::Reconnect()
     LOG(INFO)<<"CameraClient::Reconnect---with id "<<strDealerId<<" to addr "<<
                oldAddr;
 
-    this->Connect(oldAddr,"");
-    //dealer_->terminate();
-    //dealer_->initialize(strDealerId,oldAddr);
-    this->Login();
+//    this->Connect(oldAddr,"");
+
+    dealer_->disconnect();
+    dealer_->connect(strDealerId,oldAddr);
+//    this->Login();
 }
 
 
@@ -75,8 +78,8 @@ void CameraClient::Reconnect()
 void CameraClient::OnMessage(talk_base::Message *msg)
 {
     switch (msg->message_id) {
-    case MSG_LOGIN_HEART:{
-        if(++heartCount > 2){
+    case MSG_LOGIN_HEART: {
+        if(++heartCount > kHeartReconnect) {
             LOG(INFO)<<"heart count is "<<heartCount << " reconnect";
             this->Reconnect();
             heartCount = 0;
@@ -123,14 +126,12 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
         else if(type.compare("Terminal_NTP") == 0)
         {
             std::string ntpIp;
-            if(GetStringFromJsonObject(jmessage,"IP",&ntpIp)){
-                std::stringstream ss;
-                ss << "ntp="<<ntpIp<<"|123|+8:00";
-                std::string command = ss.str();
-                SignalNtpSet(command);
-            }else{
-                LOG(INFO)<<"get ntp ip error";
-            }
+            std::string timezone;
+            int port;
+            GetStringFromJsonObject(jmessage,"IP",&ntpIp);
+            GetIntFromJsonObject(jmessage,"port",&port);
+            GetStringFromJsonObject(jmessage,"TimeZone",&timezone);
+            SignalNtpSet(ntpIp,port,timezone);
         }else{
             LOG(WARNING)<<"no support backstage message";
         }

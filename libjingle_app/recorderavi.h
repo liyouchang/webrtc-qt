@@ -71,8 +71,10 @@ public:
     void OnMessage(talk_base::Message *msg);
     bool StartRead(const std::string & filename);
     bool StopRead();
+    bool IsReading();
+
     bool SetSpeed(int speed);//0x10 normal ,0x20 2x speed,0x40 4x speed,
-                            //0x08 1/2 speed,0x04 1/4 speed
+                            //0x08 1/2 speed,0x04 1/4 speed,0 pause,100 continue
     int GetSpeed();
     bool SetPosition(int percent);// 0-100 percent
     int GetPosition();

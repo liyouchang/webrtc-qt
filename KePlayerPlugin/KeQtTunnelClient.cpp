@@ -14,28 +14,32 @@ KeQtTunnelClient::KeQtTunnelClient(QObject *parent) :
 
 void KeQtTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *data, int len)
 {
+    //qDebug()<<"KeQtTunnelClient::OnRecvAudioData "<<len;
     QByteArray mediaData(data,len);
     emit SigRecvAudioData(peer_id.c_str(),mediaData);
 }
 
 void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *data, int len)
 {
+    //qDebug()<<"KeQtTunnelClient::OnRecvVideoData "<<len;
+
     QByteArray mediaData(data,len);
     emit SigRecvVideoData(peer_id.c_str(),mediaData);
 }
 
-void KeQtTunnelClient::OnRecordFileData(const std::string &peer_id, const char *data, int len)
+//void KeQtTunnelClient::OnRecordFileData(const std::string &peer_id, const char *data, int len)
+//{
+//    QByteArray mediaData(data,len);
+//    emit SigRecordFileData(peer_id.c_str(),mediaData);
+
+//}
+
+void KeQtTunnelClient::OnRecordStatus(const std::string &peer_id, int status,
+                                      int position, int speed)
 {
-    QByteArray mediaData(data,len);
-    emit SigRecordFileData(peer_id.c_str(),mediaData);
+//    qDebug()<<"KeTunnelClient::OnRecordStatus---"<<peer_id.c_str()<<" status "<<status;
 
-}
-
-void KeQtTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
-{
-    qDebug()<<"KeTunnelClient::OnRecordStatus---"<<peer_id.c_str()<<" status "<<status;
-
-    emit SigRecordStatus(peer_id.c_str(),status);
+    emit SigRecordStatus(peer_id.c_str(),status,position,speed);
 }
 
 void KeQtTunnelClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id)

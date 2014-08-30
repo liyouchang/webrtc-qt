@@ -87,7 +87,9 @@ public:
         groupBox->setSizePolicy(sizePolicy);
         groupBox->setMinimumSize(QSize(400, 300));
         horizontalLayout_2 = new QHBoxLayout(groupBox);
+        horizontalLayout_2->setSpacing(0);
         horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout_2"));
+        horizontalLayout_2->setContentsMargins(9, 9, 9, 9);
         playPlugin = new KePlayerPlugin(groupBox);
         playPlugin->setObjectName(QStringLiteral("playPlugin"));
 
@@ -280,7 +282,7 @@ public:
         groupBox->setTitle(QApplication::translate("TunnelClientUI", "VideoWall", 0));
         groupBox_2->setTitle(QApplication::translate("TunnelClientUI", "Control", 0));
         btn_init->setText(QApplication::translate("TunnelClientUI", "Init", 0));
-        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "0090B01C0C32-72B5", 0));
+        edit_peer_id->setText(QApplication::translate("TunnelClientUI", "0090B01C0C32-B0F8", 0));
         btn_connect->setText(QApplication::translate("TunnelClientUI", "ConnectToPeer", 0));
         btn_disconnect->setText(QApplication::translate("TunnelClientUI", "DisConnectToPeer", 0));
         getwifi->setText(QApplication::translate("TunnelClientUI", "get wifi", 0));

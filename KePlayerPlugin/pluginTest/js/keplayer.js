@@ -16,7 +16,7 @@ function load(){
         infoDiv.textContent = "RecvPeerMsg "+ peer + " msg "+ msg;
     }
     kePlayerObj.RecordStatus = function(peer,status){
-        infoDiv.textContent = "RecordStatus "+ peer + " status-"+ status;
+        //infoDiv.textContent = "RecordStatus "+ peer + " status-"+ status;
     }
     kePlayerObj.LocalDeviceInfo = function(devInfo){
         infoDiv.textContent = devInfo;
@@ -50,6 +50,14 @@ function SetDivision(num){
     KePlayerPlugin.SetDivision(num);
 }
 
+function SetPosition(){
+
+    var pos = parseInt(playPosition.value);
+    console.log(pos);
+
+//    KePlayerPlugin.SetPlayPosition(PeerID.value,parseInt(Position.value))
+}
+
 var eventFunction = function(){
 //IE should use these functions
     function kePlayerObj::TunnelOpened(peer) {
@@ -81,21 +89,22 @@ function QueryCameraRemoteFile(){
 function PlayCameraRemoteFile(){
     g_peer_id =  PeerID.value;
     //"/mnt/sd/20140428/video/01/104953_1.avi",
-    var record_list =
-            [{ "fileDate" : "20140428104953",
-                 "fileName" : "/mnt/sd/20140428/video/01/104953_1.avi",
-                 "fileSize" : 12136382 },
-             { "fileDate" : "20140428104750",
-                 "fileName" : "/mnt/sd/20140428/video/01/104750_1.avi",
-                 "fileSize" : 12323578 }];
-    var record_str = JSON.stringify(record_list);
-    kePlayerObj.PlayRecordFiles(g_peer_id,record_str);
+//    var record_list =
+//            [{ "fileDate" : "20140428104953",
+//                 "fileName" : "/mnt/sd/20140428/video/01/104953_1.avi",
+//                 "fileSize" : 12136382 },
+//             { "fileDate" : "20140428104750",
+//                 "fileName" : "/mnt/sd/20140428/video/01/104750_1.avi",
+//                 "fileSize" : 12323578 }];
+//    var record_str = JSON.stringify(record_list);
+    var recordFile = "test.avi";
+    kePlayerObj.PlayRecordFile(g_peer_id,recordFile);
 }
 
 function GetWifiList(){
     g_peer_id =  PeerID.value;
-    var wifiInfo =
-            {"type":"tunnel",
+    var wifiInfo = {
+        "type":"tunnel",
         "command":"wifi_info"
     };
     var wifiInfoStr = JSON.stringify(wifiInfo);
@@ -136,7 +145,6 @@ function StartCut(){
 function GetLocalDirPath(){
     var retStr = kePlayerObj.GetLocalPath();
     g_infoDiv.textContent = retStr;
-
 }
 
 function Echo(){

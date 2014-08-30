@@ -88,9 +88,7 @@ bool KeTunnelClient::StopPeerVideoCut(const std::string &peer_id)
     return process->StopVideoCut();
 }
 
-bool KeTunnelClient::DownloadRemoteFile(std::string peerId,
-                                        std::string remoteFileName,
-                                        std::string saveFileName,int playSize)
+bool KeTunnelClient::PlayRemoteFile(std::string peerId,std::string remoteFileName)
 {
     KeMessageProcessClient * process =
             dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peerId));
@@ -98,16 +96,15 @@ bool KeTunnelClient::DownloadRemoteFile(std::string peerId,
         LOG(WARNING) << "process not found "<<peerId;
         return false;
     }
-
     return  process->ReqestPlayFile(remoteFileName.c_str());
 }
 /**
  * @brief KeTunnelClient::SetPlayFileStatus
  * @param peerId
- * @param jstrStatus {position:,speed:}
+ * @param jstrStatus {position:50,speed:0x10,type:3}
  * @return
  */
-bool KeTunnelClient::SetPlayFileStatus(std::string peerId, std::string jstrStatus)
+bool KeTunnelClient::SetPlayFileStatus(std::string peerId, int type,int position ,int speed)
 {
     KeMessageProcessClient * process =
             dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peerId));
@@ -116,19 +113,8 @@ bool KeTunnelClient::SetPlayFileStatus(std::string peerId, std::string jstrStatu
                        "process not found "<<peerId;
         return false;
     }
-
-    Json::Reader reader;
-    Json::Value jmessage;
-    if (!reader.parse(jstrStatus, jmessage)) {
-        LOG(WARNING) << "Received unknown message. " << jstrStatus;
-        return false;
-    }
-    int speed = -1;
-    GetIntFromJsonObject(jmessage, "speed", &speed);
-    int position = -1;
-    GetIntFromJsonObject(jmessage, "position", &position);
-
-    process->SetPlayFileStatus(position,speed);
+    process->SetPlayFileStatus(type,position,speed);
+    return true;
 
 }
 
@@ -190,11 +176,11 @@ void KeTunnelClient::OnRecvVideoData(const std::string &peer_id,
     LOG(LS_VERBOSE)<<"KeTunnelClient::OnRecvVideoData";
 }
 
-void KeTunnelClient::OnRecordFileData(const std::string &peer_id,
-                                      const char *data, int len)
-{
-    LOG(INFO)<<"KeTunnelClient::OnRecordFileData";
-}
+//void KeTunnelClient::OnRecordFileData(const std::string &peer_id,
+//                                      const char *data, int len)
+//{
+//    LOG(INFO)<<"KeTunnelClient::OnRecordFileData";
+//}
 
 void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status, int position, int speed)
 {
@@ -303,21 +289,8 @@ bool KeMessageProcessClient::StopVideoCut()
     return ret;
 }
 
-bool KeMessageProcessClient::SetPlayFileStatus(int position ,int speed)
+void KeMessageProcessClient::SetPlayFileStatus(int type,int position ,int speed)
 {
-    //    Json::Reader reader;
-    //    Json::Value jmessage;
-    //    if (!reader.parse(jstrStatus, jmessage)) {
-    //        LOG(WARNING) << "Received unknown message. " << strMsg;
-    //        return;
-    //    }
-    //    std::string command;
-    //    bool ret = GetIntFromJsonObject(jmessage, kKaerMsgCommandName, &command);
-    //    if(!ret){
-    //        LOG(WARNING)<<"get command error"<<peer_id<<" Msg "<<strMsg;
-    //        return;
-    //    }
-
     talk_base::Buffer sendBuf;
     int msgLen = sizeof(KEPlayRecordFileReq);
     sendBuf.SetLength(msgLen);
@@ -329,11 +302,9 @@ bool KeMessageProcessClient::SetPlayFileStatus(int position ,int speed)
     pReqMsg->playSpeed = speed;
     pReqMsg->playPos = position;
     pReqMsg->videoID = 0;
-    pReqMsg->protocalType = 0;
+    pReqMsg->fileType = type;
     //    talk_base::strcpyn(pReqMsg->fileData,80,remoteFile);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
-
-
 }
 
 void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
@@ -393,8 +364,8 @@ void KeMessageProcessClient::OnRecvRecordMsg(talk_base::Buffer &msgData)
     KeTunnelClient *client  = static_cast<KeTunnelClient *>(container_);
 
     if(phead->resp == RESP_ACK){
-        const int data_pos = sizeof(KEPlayRecordDataHead);
-        int mediaDataLen = msgData.length() - data_pos;
+//        const int data_pos = sizeof(KEPlayRecordDataHead);
+//        int mediaDataLen = msgData.length() - data_pos;
 
         //        SignalRecvVideoData(this->peer_id(),msgData.data() +
         //                            sendStartPos,mediaDataLen);
@@ -422,19 +393,22 @@ void KeMessageProcessClient::RecvPlayFileResp(talk_base::Buffer &msgData)
 {
     KeTunnelClient *client  = static_cast< KeTunnelClient *>(container_);
     KEPlayRecordFileResp *msg = (KEPlayRecordFileResp*)msgData.data();
-    LOG(INFO)<<"KeMessageProcessClient::RecvPlayFileResp---resp="<<msg->resp<<
-               ",frateRate="<<msg->frameRate<<",framteResolution="<<
-               msg->frameResolution;
     if(msg->resp == RESP_ACK){
-        LOG(INFO)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
-                   "start playback";
-        client->OnRecordStatus(this->peer_id(),kRecordStartPlay,msg->playPos,msg->playSpeed);
+        LOG(INFO)<<"KeMessageProcessClient::RecvPlayFileResp---start remote play"<<
+                   ",frateRate="<<msg->frameRate<<",framteResolution="<<
+                   msg->frameResolution;
+        this->videoInfo_.frameRate = msg->frameRate;
+        this->videoInfo_.frameResolution = msg->frameResolution;
+        //client->OnRecordStatus(this->peer_id(),kRecordStartPlay,msg->playPos,msg->playSpeed);
         return;
     }else if(msg->resp == RESP_NAK){
         LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
                       "file error";
         client->OnRecordStatus(this->peer_id(),kRequestFileError,-1,-1);
     }else if(msg->resp == RESP_CTRL){
+//        LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---playing"<<
+//                      "position "<<msg->playPos;
+
         client->OnRecordStatus(this->peer_id(),kRecordPlaying,msg->playPos,msg->playSpeed);
     }else if(msg->resp == RESP_END){
         client->OnRecordStatus(this->peer_id(),kRecordPlayEnd,msg->playPos,msg->playSpeed);
