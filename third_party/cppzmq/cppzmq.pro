@@ -14,6 +14,12 @@ CONFIG += staticlib
 
 include( ../third_party.pri)
 
+DESTDIR = $$output_dir/libs
+
+#target.path = $$output_dir/libs
+#INSTALLS += target
+
+
 INCLUDEPATH   +=    include
 
 

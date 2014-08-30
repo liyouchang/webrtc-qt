@@ -27,7 +27,7 @@ DEFINES += _UNICODE UNICODE WIN32_LEAN_AND_MEAN
 macx {
     DEFINES += POSIX OSX
     output_dir = $$PWD/../out/mac
-    DESTDIR = $$output_dir/libs
+#    DESTDIR = $$output_dir/libs
 
 }
 ios {
@@ -39,7 +39,7 @@ ios {
 linux {
     DEFINES += POSIX LINUX
     output_dir = $$PWD/../out
-    DESTDIR = $$output_dir/libs
+#    DESTDIR = $$output_dir/libs
 }
 
 hisi {
@@ -47,11 +47,11 @@ hisi {
     output_dir = $$PWD/../out/arm
 }
 
+
 android{
     output_dir = $$PWD/../out/android
-
 }
-OBJECTS_DIR = $$output_dir/obj/$$TARGET
+#OBJECTS_DIR = $$output_dir/obj/$$TARGET
 
 #unix {
 #    target.path = /usr/lib

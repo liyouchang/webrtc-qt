@@ -62,6 +62,8 @@ void KeVideoSimulator::OnFileVideoData(const char *data, int len)
     this->SignalVideoData1(data,len);
     this->SignalVideoData2(data,len);
     this->SignalVideoData3(data,len);
+
+    publisher->send("55",2,ZMQ_SNDMORE);
     publisher->send(data,len);
 }
 

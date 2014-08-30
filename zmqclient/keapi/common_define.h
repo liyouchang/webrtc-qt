@@ -400,6 +400,7 @@ struct SINGLELOST											//视频信号丢失报警参数
 	struct DEFTIME strategy[7];
 }__attribute__((packed));
 /***********************模组参数***************************/
+#define EXPOSURE_COMP		128
 struct SENSORPARAM											//模组参数
 {
 	char resolution;                                        //0-1080P;1-960P;2-720P
@@ -468,15 +469,6 @@ typedef enum
 	GPIO_TYPE_CYCLE,									//周期性控制
 	GPIO_TYPE_COUNT
 }	e_gpio_control;
-/**********************************************************************/
-//module motor
-/**********************************************************************/
-typedef enum
-{
-	PELCO_D = 0,
-	PELCO_P,
-	PELCO_Y,
-}	e_motor_protocol;
 
 /**********************************************************************/
 //module fifo
@@ -492,7 +484,6 @@ typedef enum
 {
 	FIFO_TYPE_MEDIA = 0,
 	FIFO_TYPE_JPEG,
-	FIFO_TYPE_ALARM,
 	FIFO_TYPE_COUNT
 }	e_fifo_type;
 typedef struct st_fifo
@@ -505,7 +496,7 @@ typedef struct st_fifo
 
 typedef enum
 {
-	FIFO_H264_MAIN = 0,
+	FIFO_H264_MAIN = 0,										//主码流
 	FIFO_H264_SUB,
 	FIFO_H264_EXT,
 	FIFO_H264_AUDIO,
@@ -513,6 +504,32 @@ typedef enum
 }	e_fifo_h264;
 typedef int (*FIFO_CALLBACK)(char * pFrameData,int iFrameLen);
 
+typedef enum
+{
+	FIFO_ALARM_SWITCH = 0,									//开关量
+	FIFO_ALARM_FAULT,										//故障
+	FIFO_ALARM_CAPACITY,									//能力
+	FIFO_ALARM_MV,											//移动侦测
+	FIFO_ALARM_OD,											//遮挡报警
+	FIFO_ALARM_SL,											//信号丢失
+	FIFO_ALARM_COUNT
+}	e_fifo_alarm;
+
+typedef enum
+{
+	FIFO_ALARM_READ_CURRENT = 0,							//最新的报警读指针
+	FIFO_ALARM_READ_EARLY,									//最早期的报警读指针
+	FIFO_ALARM_READ_COUNT
+}	e_fifo_read;
+
+typedef struct upload_alarm_info
+{
+	e_fifo_alarm enAlarm;									//报警的类型
+	int iChn;												//通道号
+	int iArea;												//子通道，或者区域号
+	int iStatus;											//0-停止 1开始
+	char cInfo[256];										//附加说明，或者可以存放一些自定义内容
+}	st_alarm_upload_t;
 /***********************视频输出格式***********************/
 typedef enum e_stream_type
 {											//类型  0-web stream 1-jpeg stream 2-rtp stream 3-avi stream 4-ts stream 5-ps stream 6-h264 stream
@@ -527,25 +544,6 @@ typedef enum e_stream_type
 	FIFO_STREAM_COUNT
 }	e_fifo_stream;
 
-/**********************************************************************/
-//fifo
-/**********************************************************************/
-typedef struct upload_alarm_info
-{
-	int iChn;
-	int iType;                      //故障还是报警            //调用时使用上面宏定义
-	int iSubType;                   //具体哪种
-	int status;                     //开始或结束
-	int sendJpeg;                   //是否向中心传抓拍的图片
-	int iArea;                      //移动侦测的第几个区域
-	int iX1;                        //移动侦测的报警坐标
-	int iY1;
-	int iX2;
-	int iY2;
-	unsigned int uiStamp;
-	unsigned char outChan;
-	char * cInfo;
-}	UPLOADINFO;
 /**********************************************************************/
 //module net
 /**********************************************************************/

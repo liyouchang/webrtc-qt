@@ -8,6 +8,7 @@ QT       -= core gui
 
 TARGET = jingle_app
 TEMPLATE = lib
+
 CONFIG += staticlib
 
 CONFIG -= app_bundle
@@ -16,9 +17,13 @@ CONFIG -= qt
 
 include (../talk/talk_common.pri)
 
-
 DESTDIR = $$output_dir/libs
-
+#target.path = /libs
+#INSTALLS += target
+#target_lib.files = $$OUT_PWD/libjingle_app.a
+#target_lib.path = $$output_dir/libs
+#INSTALLS += target_lib
+#message($$OUT_PWD/$$TARGET)
 
 
 SOURCES += \

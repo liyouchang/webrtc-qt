@@ -65,7 +65,7 @@ struct KERTStreamHead
     int videoID;
     char channelNo;
 };
-struct KEFrameHead{
+struct KEFrameHead {
     short frameNo;
     short piecesNo;
     int second;//时间戳

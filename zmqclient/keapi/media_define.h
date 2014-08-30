@@ -6,6 +6,6 @@
 #include <unistd.h>
 #include <string.h>
 
-
+typedef int (*MEDIA_JPEG_CALLBACK)(char * pJpegData,int iJpegLen);
 
 #endif	//__MEDIA_DEFINE_H__
