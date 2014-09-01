@@ -18,7 +18,7 @@
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/local_picture"
             android:textColor="@color/orange"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_vp_video"
@@ -29,20 +29,7 @@
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/local_video"
             android:textColor="@color/white"
-            android:textSize="16dp" />
-
-        <!--
-             <TextView
-            android:id="@+id/tv_vp_terminal"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/title_height_size"
-            android:layout_weight="1"
-            android:background="@drawable/viewpage_unselected"
-            android:gravity="center_horizontal|center_vertical"
-            android:text="@string/terminal_video"
-            android:textColor="@color/white"
-            android:textSize="16dp" />
-        -->
+            android:textSize="16sp" />
     </LinearLayout>
 
     <com.video.utils.TextProgressBar

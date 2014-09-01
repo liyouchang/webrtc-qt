@@ -1,9 +1,12 @@
 package com.video.play;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
@@ -43,8 +46,11 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.video.R;
+import com.video.data.DeviceValue;
 import com.video.data.Value;
+import com.video.data.XmlDevice;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqThread;
@@ -54,6 +60,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 
 	private static Context mContext;
 	private boolean isLocalDevice = false;
+	private XmlDevice xmlDevice = null;
 	private String localDeviceIPandPort = "";
 	
 	private static VideoView videoView = null; //视频对象
@@ -65,6 +72,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	public static final String ALARM_DEFENCE_ACTION = "PlayerActivity.alarm_defence_action";
 
 	private TextView tv_title = null;
+	private static String deviceID = null;
 	private static String deviceName = null;
 	private static String dealerName = null;
 	
@@ -111,7 +119,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	
 	private Dialog mDialog = null;
 	private boolean isActivityShow = false;
-	private int player_clarity = 2; // 1:主通道高清  2:子通道标清  3:子通道流畅
+	private int playerClarity = DeviceValue.NORMAL_CLARITY; // 1:主通道高清  2:子通道标清  3:子通道流畅
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -132,11 +140,16 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	
 	private void initPlayer() {
 		mContext = PlayerActivity.this;
+		xmlDevice = new XmlDevice(mContext);
 		getScreenSize();
 		
 		Intent intent = this.getIntent();
 		deviceName = (String) intent.getCharSequenceExtra("deviceName");
 		dealerName = (String) intent.getCharSequenceExtra("dealerName");
+		if (!Value.isSharedUser) {
+			deviceID = (String) intent.getCharSequenceExtra("deviceID");
+			playerClarity = Integer.parseInt((String) intent.getCharSequenceExtra("playerClarity"));
+		}
 		if (intent.hasExtra("isLocalDevice")) {
 			isLocalDevice = intent.getBooleanExtra("isLocalDevice", false);
 		}
@@ -206,8 +219,8 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		if (!isLocalDevice) {
 			if (TunnelCommunication.getInstance().IsTunnelOpened(dealerName)) {
 				//【播放视频】 1:主通道高清  2:子通道标清  3:子通道流畅
-				player_clarity = 2;
-				TunnelCommunication.getInstance().startMediaData(dealerName, player_clarity);
+				selectVideoClarity(playerClarity);
+				TunnelCommunication.getInstance().startMediaData(dealerName, playerClarity);
 				videoView.playVideo();
 				sendHandlerMsg(DISPLAY_VIDEO_VIEW, 3000);
 			} else {
@@ -654,13 +667,13 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						clarity_high.setBackgroundResource(R.drawable.video_high_clarity_unselected);
 						clarity_normal.setBackgroundResource(R.drawable.video_normal_clarity_unselected);
 						clarity_low.setBackgroundResource(R.drawable.video_low_clarity_unselected);
-						if (player_clarity == 1) {
+						if (playerClarity == DeviceValue.HIGH_CLARITY) {
 							clarity_high.setBackgroundResource(R.drawable.video_high_clarity_selected);
 						}
-						else if (player_clarity == 2) {
+						else if (playerClarity == DeviceValue.NORMAL_CLARITY) {
 							clarity_normal.setBackgroundResource(R.drawable.video_normal_clarity_selected);
 						}
-						else if (player_clarity == 3) {
+						else if (playerClarity == DeviceValue.LOW_CLARITY) {
 							clarity_low.setBackgroundResource(R.drawable.video_low_clarity_selected);
 						}
 					}
@@ -702,21 +715,31 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		}
 		switch (clarity) {
 			case 1:
-				player_clarity = 1;
+				playerClarity = DeviceValue.HIGH_CLARITY;
 				video_clarity.setText("高清");
 				break;
 			case 2:
-				player_clarity = 2;
+				playerClarity = DeviceValue.NORMAL_CLARITY;
 				video_clarity.setText("均衡");
 				break;
 			case 3:
-				player_clarity = 3;
+				playerClarity = DeviceValue.LOW_CLARITY;
 				video_clarity.setText("流畅");
 				break;
 		}
 		hidePopupWindow();
 		sendHandlerMsg(CHANGE_VIDEO_TYPE, 3000);
-		TunnelCommunication.getInstance().startMediaData(dealerName, player_clarity);
+		TunnelCommunication.getInstance().startMediaData(dealerName, playerClarity);
+		if (!Value.isSharedUser) {
+			if (xmlDevice == null) {
+				xmlDevice = new XmlDevice(mContext);
+			}
+			xmlDevice.changePlayerClarity(deviceID, playerClarity);
+			ArrayList<HashMap<String, String>> xmlList = xmlDevice.readXml();
+			if (xmlList.size() > 0) {
+				MainApplication.getInstance().deviceList = xmlList;
+			}
+		}
 	}
 	
 	/**

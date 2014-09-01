@@ -16,7 +16,7 @@ import com.video.R;
 
 public class AlarmImageViewActivity extends Activity implements OnClickListener {
 	
-	private ImageView view;
+	private ImageView imageView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -28,18 +28,22 @@ public class AlarmImageViewActivity extends Activity implements OnClickListener 
 	}
 	
 	private void initView() {
-		view = (ImageView) findViewById(R.id.alarm_imageView);
-		view.setOnClickListener(this);
+		imageView = (ImageView) findViewById(R.id.alarm_imageView);
+		imageView.setOnClickListener(this);
 		ImageButton button_back = (ImageButton) this.findViewById(R.id.ib_alarm_back);
 		button_back.setOnClickListener(this);
 	}
 	
 	private void initData() {
 		Intent intent = this.getIntent();
-		File file = new File((String) intent.getCharSequenceExtra("imagePath"));
+		File imageFile = new File((String) intent.getCharSequenceExtra("imagePath"));
 		System.out.println("MyDebug: 图片的路径："+intent.getCharSequenceExtra("imagePath"));
-		Uri UriPath = Uri.fromFile(file);
-		view.setImageURI(UriPath);
+		if (imageFile.exists()) {
+			Uri UriPath = Uri.fromFile(imageFile);
+			imageView.setImageURI(UriPath);
+		} else {
+			imageView.setImageResource(R.drawable.message_image_default);
+		}
 	}
 
 	@Override

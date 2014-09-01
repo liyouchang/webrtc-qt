@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="@string/devices_shared"
+            android:text="@string/share_device_title"
             android:textColor="@color/orange"
             android:textSize="@dimen/title_text_size" />
     </RelativeLayout>

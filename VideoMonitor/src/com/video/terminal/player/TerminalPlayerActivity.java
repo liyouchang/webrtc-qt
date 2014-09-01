@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -45,7 +45,6 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.video.R;
 import com.video.data.Value;
 import com.video.play.AudioCache;
@@ -56,6 +55,7 @@ import com.video.service.BackstageService;
 import com.video.utils.Tools;
 import com.video.utils.Utils;
 
+@SuppressLint({ "Wakelock", "HandlerLeak" })
 public class TerminalPlayerActivity  extends Activity implements OnClickListener  {
 
 	private static Context mContext;
@@ -1216,7 +1216,7 @@ public class TerminalPlayerActivity  extends Activity implements OnClickListener
 			}
 			
 			//删除缓存文件
-			Utils.deleteFile(videoSavePath);
+			Utils.deleteAllFiles(videoSavePath);
 		} catch (Exception e) {
 			System.out.println("MyDebug: 关闭终端录像播放器异常！");
 			e.printStackTrace();

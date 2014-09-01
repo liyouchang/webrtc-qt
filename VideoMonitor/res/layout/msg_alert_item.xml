@@ -21,10 +21,9 @@
         android:paddingRight="10dp"
         android:text="@string/msg_item_time"
         android:textColor="@color/white"
-        android:textSize="16dp" />
+        android:textSize="16sp" />
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
         android:layout_height="120dp"
         android:background="@drawable/msg_item_view_bg"
@@ -35,9 +34,7 @@
             android:layout_width="110dp"
             android:layout_height="100dp"
             android:layout_centerVertical="true"
-            android:layout_marginBottom="5dp"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="5dp"
             android:background="@drawable/message_image_default"
             android:contentDescription="@null"
             android:scaleType="fitXY" />
@@ -52,7 +49,6 @@
             android:contentDescription="@null" />
 
         <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -68,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/msg_item_event"
                 android:textColor="@color/black"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/tv_msg_mac"
@@ -77,7 +73,7 @@
                 android:layout_marginTop="5dp"
                 android:text="@string/msg_item_mac"
                 android:textColor="@color/light_black"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
         </LinearLayout>
     </RelativeLayout>
 

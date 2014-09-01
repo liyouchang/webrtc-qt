@@ -40,9 +40,8 @@ public class BackstageService extends Service {
 	
 	static 
 	{
-		System.loadLibrary("gnustl_shared");
-		System.loadLibrary("p2p");
 		System.loadLibrary("h264");
+		System.loadLibrary("p2p");
 	}
 	
 	@Override

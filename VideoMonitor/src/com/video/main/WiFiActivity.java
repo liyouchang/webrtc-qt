@@ -374,7 +374,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		switch (v.getId()) {
 			case R.id.ib_wifi_back:
 				finish();
-				overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
+				overridePendingTransition(R.anim.fragment_nochange, R.anim.down_out);
 				break;
 			case R.id.btn_wifi_term_list:
 				onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
@@ -426,7 +426,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		// TODO Auto-generated method stub
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
 			finish();
-			overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
+			overridePendingTransition(R.anim.fragment_nochange, R.anim.down_out);
 		}
 		return super.onKeyDown(keyCode, event);
 	}

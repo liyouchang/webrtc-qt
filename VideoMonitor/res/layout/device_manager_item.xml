@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/device_item_parent_view_bg"
+    android:background="@drawable/button_white_style"
     android:paddingBottom="5dp"
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:layout_toRightOf="@+id/rl_device_bg"
-        android:background="@drawable/device_item_parent_view_bg"
+        android:background="@drawable/button_white_style"
         android:paddingBottom="5dp"
         android:paddingLeft="10dp"
         android:paddingTop="5dp" >
@@ -42,7 +42,7 @@
             android:paddingBottom="2dp"
             android:text="@string/device_item_name"
             android:textColor="@color/light_black"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_device_mac"
@@ -52,7 +52,7 @@
             android:layout_below="@+id/tv_device_name"
             android:text="@string/device_item_mac"
             android:textColor="@color/light_black"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
     </RelativeLayout>
 
     <ImageView

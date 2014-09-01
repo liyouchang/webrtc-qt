@@ -24,7 +24,6 @@ import org.w3c.dom.Text;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.content.Context;
-import android.util.Log;
 import android.util.Xml;
 
 import com.video.utils.Utils;
@@ -46,6 +45,7 @@ public class XmlDevice {
 	public void init() {
 		if (Utils.checkSDCard()) {
 			filePath = mContext.getFilesDir().getPath() + File.separator + "DeviceList.xml";
+//			filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "KaerVideo" + File.separator + "DeviceList.xml";
 			File file = new File(filePath);
 			if (!file.exists()) {
 				try {
@@ -53,7 +53,7 @@ public class XmlDevice {
 					initXmlFile(file);
 				} catch (IOException e) {
 					e.printStackTrace();
-					Log.w("MyDebug",": init()异常！");
+					Utils.log("init()异常！");
 				}
 			}
 		}
@@ -78,7 +78,7 @@ public class XmlDevice {
 			os.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug",": initXmlFile()异常！");
+			Utils.log("initXmlFile()异常！");
 		}
 	}
 
@@ -95,7 +95,7 @@ public class XmlDevice {
 			return document;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug"," loadInit()异常！");
+			Utils.log("loadInit()异常！");
 		}
 		return null;
 	}
@@ -104,7 +104,7 @@ public class XmlDevice {
 	 * 增加一个List列表
 	 * @return true: 增加成功  false: 增加失败
 	 */
-	public boolean writeList(ArrayList<HashMap<String, String>> list) {
+	public synchronized boolean writeList(ArrayList<HashMap<String, String>> list) {
 		
 		int len = list.size();
 		try {
@@ -113,7 +113,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug"," addList()异常！");
+			Utils.log("addList()异常！");
 		}
 		return false;
 	}
@@ -122,7 +122,7 @@ public class XmlDevice {
 	 * 增加一个Item节点
 	 * @return true: 增加成功  false: 增加失败
 	 */
-	public boolean writeItem(HashMap<String, String> map) {
+	public synchronized boolean writeItem(HashMap<String, String> map) {
 
 		try {
 			Document document = loadInit(filePath);
@@ -134,6 +134,7 @@ public class XmlDevice {
 			Element dealerNameElement = (Element) document.createElement("dealer");
 			Element bgElement = (Element) document.createElement("bg");
 			Element linkElement = (Element) document.createElement("link");
+			Element clarityElement = (Element) document.createElement("clarity");
 			
 			Text nameText = document.createTextNode(map.get("deviceName"));
 			nameElement.appendChild(nameText);
@@ -147,6 +148,8 @@ public class XmlDevice {
 			bgElement.appendChild(bgText);
 			Text linkText = document.createTextNode(map.get("LinkState"));
 			linkElement.appendChild(linkText);
+			Text clarityText = document.createTextNode(map.get("playerClarity"));
+			clarityElement.appendChild(clarityText);
 			
 			itemElement.appendChild(nameElement);
 			itemElement.appendChild(idElement);
@@ -154,13 +157,14 @@ public class XmlDevice {
 			itemElement.appendChild(dealerNameElement);
 			itemElement.appendChild(bgElement);
 			itemElement.appendChild(linkElement);
+			itemElement.appendChild(clarityElement);
 			Element rootElement = (Element) document.getDocumentElement();
-			rootElement.appendChild(linkElement);
+			rootElement.appendChild(itemElement);
 			writeXML(document, filePath);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug"," addItem()异常！");
+			Utils.log("addItem()异常！");
 		}
 		return false;
 	}
@@ -169,7 +173,7 @@ public class XmlDevice {
 	 * 是否存在一个Item节点
 	 * @return true: 存在  false: 不存在
 	 */
-	public boolean isItemExist(String deviceID) {
+	public synchronized boolean isItemExist(String deviceID) {
 
 		Document document = loadInit(filePath);
 		try {
@@ -183,7 +187,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug"," isItemExit()异常！");
+			Utils.log("isItemExit()异常！");
 		}
 		return false;
 	}
@@ -192,7 +196,7 @@ public class XmlDevice {
 	 * 删除一个Item节点
 	 * @return true: 删除成功  false: 删除失败
 	 */
-	public boolean deleteItem(String deviceID) {
+	public synchronized boolean deleteItem(String deviceID) {
 
 		Document document = loadInit(filePath);
 		try {
@@ -210,7 +214,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.i("MyDebug"," deleteItem()异常！");
+			Utils.log("deleteItem()异常！");
 		}
 		return false;
 	}
@@ -219,7 +223,7 @@ public class XmlDevice {
 	 * 删除一个Item节点的背景
 	 * @return true: 删除成功  false: 删除失败
 	 */
-	public boolean deleteItemBg(String mac) {
+	public synchronized boolean deleteItemBg(String mac) {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName(ItemNode);
@@ -235,7 +239,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.i("MyDebug",": deleteItemBg()异常！");
+			Utils.log("deleteItemBg()异常！");
 		}
 		return false;
 	}
@@ -244,7 +248,7 @@ public class XmlDevice {
 	 * 删除所有节点 *
 	 * @return true: 删除成功  false: 删除失败
 	 */
-	public boolean deleteAllItem() {
+	public synchronized boolean deleteAllItem() {
 		try {
 			File file = new File(filePath);
 			initXmlFile(file);
@@ -259,14 +263,14 @@ public class XmlDevice {
 	/**
 	 * 获得列表的大小
 	 */
-	public int getListSize() {
+	public synchronized int getListSize() {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName(ItemNode);
 			return nodeList.getLength();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getListSize()异常！");
+			Utils.log("getListSize()异常！");
 		}
 		return 0;
 	}
@@ -275,7 +279,7 @@ public class XmlDevice {
 	 * 更新一个List列表
 	 * @return true: 更新成功  false: 更新失败
 	 */
-	public boolean updateList(ArrayList<HashMap<String, String>> list) {
+	public synchronized boolean updateList(ArrayList<HashMap<String, String>> list) {
 		try {
 			int listSize = list.size();
 			if (listSize == 0) {
@@ -294,7 +298,7 @@ public class XmlDevice {
 				boolean isExistItem = false;
 				String id = list.get(i).get("deviceID").trim();
 				for (int j=0; j<xmlList.size(); j++) {
-					String xmlId = xmlList.get(i).get("deviceID").trim();
+					String xmlId = xmlList.get(j).get("deviceID").trim();
 					if (xmlId.equals(id)) {
 						isExistItem = true;
 						HashMap<String, String> item = new HashMap<String, String>();
@@ -317,7 +321,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()异常！");
+			Utils.log("updateItem()异常！");
 		}
 		return false;
 	}
@@ -326,7 +330,7 @@ public class XmlDevice {
 	 * 更新一个Item节点的状态
 	 * @return true: 更新成功  false: 更新失败
 	 */
-	public boolean updateItemState(String mac, String state, String dealerName) {
+	public synchronized boolean updateItemState(String mac, String state, String dealerName) {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName(ItemNode);
@@ -343,7 +347,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()异常！");
+			Utils.log("updateItem()异常！");
 		}
 		return false;
 	}
@@ -353,7 +357,7 @@ public class XmlDevice {
 	 * 更新一个Item节点的名称
 	 * @return true: 更新成功  false: 更新失败
 	 */
-	public boolean updateItemName(String mac, String newName) {
+	public synchronized boolean updateItemName(String mac, String newName) {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName(ItemNode);
@@ -369,7 +373,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()异常！");
+			Utils.log("updateItem()异常！");
 		}
 		return false;
 	}
@@ -377,7 +381,7 @@ public class XmlDevice {
 	/**
 	 * 改变终端播放的清晰度
 	 */
-	public boolean changePlayerClarity(String mac, int clarity) {
+	public synchronized boolean changePlayerClarity(String mac, int clarity) {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName(ItemNode);
@@ -393,7 +397,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()异常！");
+			Utils.log("updateItem()异常！");
 		}
 		return false;
 	}
@@ -402,7 +406,7 @@ public class XmlDevice {
 	 * 更新一个Item节点的背景的Url
 	 * @return true: 更新成功  false: 更新失败
 	 */
-	public boolean updateItemBg(String mac, String bg) {
+	public synchronized boolean updateItemBg(String mac, String bg) {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName(ItemNode);
@@ -418,7 +422,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItemBg()异常！");
+			Utils.log("updateItemBg()异常！");
 		}
 		return false;
 	}
@@ -427,7 +431,7 @@ public class XmlDevice {
 	 * 更新一个Item节点
 	 * @return true: 更新成功  false: 更新失败
 	 */
-	public boolean updateItem(HashMap<String, String> map) {
+	public synchronized boolean updateItem(HashMap<String, String> map) {
 		Document document = loadInit(filePath);
 		try {
 			NodeList nodeList = document.getElementsByTagName(ItemNode);
@@ -447,7 +451,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()异常！");
+			Utils.log("updateItem()异常！");
 		}
 		return false;
 	}
@@ -455,7 +459,7 @@ public class XmlDevice {
 	/**
 	 * 获得一个节点的信息
 	 */
-	private HashMap<String, String> getNodeHashMap(Document document, int index) {
+	private synchronized HashMap<String, String> getNodeHashMap(Document document, int index) {
 		HashMap<String, String> item = new HashMap<String, String>();
 		try {
 			String name = document.getElementsByTagName("name").item(index).getFirstChild().getNodeValue();
@@ -474,7 +478,7 @@ public class XmlDevice {
 			item.put(DeviceValue.HASH_PLAYER_CLARITY, clarity);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug",": getNodeHashMap()异常！");
+			Utils.log("getNodeHashMap()异常！");
 		}
 		return item;
 	}
@@ -483,7 +487,7 @@ public class XmlDevice {
 	 * 获取XML文件的一个节点
 	 * @return 成功返回一个ArrayList列表的一个节点  失败返回null
 	 */
-	public HashMap<String, String> readItem(String mac) {
+	public synchronized HashMap<String, String> readItem(String mac) {
 		try {
 			Document document = loadInit(filePath);
 			NodeList nodeList = document.getElementsByTagName(ItemNode);
@@ -498,7 +502,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug",": readItem()异常！");
+			Utils.log("readItem()异常！");
 		}
 		return null;
 	}
@@ -507,7 +511,7 @@ public class XmlDevice {
 	 * 获取XML文件在线的节点
 	 * @return 成功返回一个ArrayList列表的一个节点  失败返回null
 	 */
-	public ArrayList<HashMap<String, String>> getOnlineList() {
+	public synchronized ArrayList<HashMap<String, String>> getOnlineList() {
 		try {
 			ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 			Document document = loadInit(filePath);
@@ -528,7 +532,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug",": getItem()异常！");
+			Utils.log("getItem()异常！");
 		}
 		return null;
 	}
@@ -537,7 +541,7 @@ public class XmlDevice {
 	 * 保存document到XML文件
 	 * @return true: 保存成功  false: 保存失败
 	 */
-	public boolean writeXML(Document document, String filePath) {
+	public synchronized boolean writeXML(Document document, String filePath) {
 		try {
 			TransformerFactory tFactory = TransformerFactory.newInstance();
 			Transformer transformer = tFactory.newTransformer();
@@ -547,7 +551,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug",": writeXML()异常！");
+			Utils.log("writeXML()异常！");
 		}
 		return false;
 	}
@@ -556,7 +560,7 @@ public class XmlDevice {
 	 * 获取XML文件的所有节点
 	 * @return 成功返回一个ArrayList列表  失败返回null
 	 */
-	public ArrayList<HashMap<String, String>> readXml() {
+	public synchronized ArrayList<HashMap<String, String>> readXml() {
 		ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
 		try {
 			Document document = loadInit(filePath);
@@ -567,11 +571,11 @@ public class XmlDevice {
 				item = getNodeHashMap(document, i);
 				list.add(item);
 			}
-			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Log.w("MyDebug",": readXml()异常！");
+			Utils.log("readXml()异常！");
+			return null;
 		}
-		return null;
+		return list;
 	}
 }

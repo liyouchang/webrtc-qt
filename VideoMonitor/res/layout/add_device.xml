@@ -6,7 +6,6 @@
     android:orientation="vertical" >
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/add_device_title"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/title_height_size"
@@ -39,7 +38,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:background="@drawable/title_more_xml"
-            android:src="@drawable/title_more_selected"
+            android:src="@drawable/title_more_unselected"
             android:gravity="center_vertical|center_horizontal"
             android:contentDescription="@null" />
     </RelativeLayout>
@@ -144,6 +143,6 @@
         android:background="@drawable/button_style"
         android:text="@string/btn_ok"
         android:textColor="@color/white"
-        android:textSize="18dp" />
+        android:textSize="18sp" />
 
 </LinearLayout>

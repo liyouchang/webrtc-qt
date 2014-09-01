@@ -595,7 +595,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			thumbnailsList = thumbnails.listFiles();
 			thumbnailsCount = thumbnailsList.length;
 			if (thumbnailsCount == 0) {
-				Utils.deleteFile(file);
+				Utils.deleteAllFiles(file);
 				return null;
 			}
 			isExists = true;
@@ -635,7 +635,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			fileVideos.add(videoItem);
 		}
 		if (recordsCount == 0) {
-			Utils.deleteFile(file);
+			Utils.deleteAllFiles(file);
 		}
 		return fileVideos;
 	}

@@ -189,7 +189,7 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					if (mDialog == null) {
+					if ((mDialog == null) || (!mDialog.isShowing())) {
 						mDialog = Utils.createLoadingDialog(mContext, (String) msg.obj);
 						mDialog.show();
 					}
@@ -414,7 +414,7 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 		if (Utils.isNetworkAvailable(mContext)) {
 			String data = generateReqTermListJson();
 			if (!isPullToRefresh) {
-				sendHandlerMsg(IS_REQUESTING, "正在请求分享列表...");
+//				sendHandlerMsg(IS_REQUESTING, "正在请求分享列表...");
 			}
 			sendHandlerMsg(REQUEST_TIMEOUT, "请求分享列表失败，网络超时！", Value.REQ_TIME_10S);
 			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
@@ -443,7 +443,7 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 		switch (v.getId()) {
 			case R.id.btn_shared_back:
 				finish();
-				overridePendingTransition(R.anim.fragment_nochange, R.anim.up_out);
+				overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 				break;
 		}
 	}
@@ -475,7 +475,7 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
 			Value.isSharedUser = false;
 			finish();
-			overridePendingTransition(R.anim.fragment_nochange, R.anim.up_out);
+			overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 		}
 		return super.onKeyDown(keyCode, event);
 	}

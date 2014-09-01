@@ -84,7 +84,7 @@ public class VideoGridViewAdapter extends BaseAdapter {
 					e.printStackTrace();
 				}
 				holder.video_bg.setScaleType(ImageView.ScaleType.FIT_XY);
-				holder.video_bg.setLayoutParams(new RelativeLayout.LayoutParams(Utils.screenWidth/3, (Utils.screenWidth-120)/3));
+				holder.video_bg.setLayoutParams(new RelativeLayout.LayoutParams(Utils.screenWidth/4, (Utils.screenWidth-120)/4));
 				
 				holder.delete_video.setOnClickListener(new OnClickListener() {
 					@Override
