@@ -82,6 +82,7 @@
     <string name="scan_qr">扫描二维码</string>
     <string name="modify_device_name">修改终端名称</string>
     
+    <string name="my_device_shared_manager">设备分享管理</string>
     <string name="devices_shared">我的分享</string>
     <string name="share_device_title">分享设备</string>
     <string name="share_user_title">分享用户</string>

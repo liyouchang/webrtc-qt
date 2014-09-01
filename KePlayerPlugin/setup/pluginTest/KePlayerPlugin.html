@@ -11,7 +11,7 @@
 <body onload=load()>
 <div id="textDiv"></div>
 <p></p>
-<object ID="KePlayerPlugin" TYPE="application/keplayer-plugin">
+<object ID="KePlayerPlugin" TYPE="application/keplayer-plugin" height="200px" width="200px">
 [Object not available! Did you forget to build and register the server?]
 </object>
 <p></p>
@@ -19,16 +19,17 @@
 <input type="button" value="play local file" OnClick="KePlayerPlugin.PlayLocalFile();"/>
 <input type="button" value="choose dir" OnClick="GetLocalDirPath();"/>
 <input type="button" value="full screen" OnClick="KePlayerPlugin.FullScreen();"/>
+<input type="button" value="size" OnClick="SetSize();"/>
 
     <p></p>
-    <!--
+
     Division Number: <INPUT TYPE ="text" id="divisionNum" VALUE=" 1"/>
     <input type="button" value="Set Devision" OnClick="KePlayerPlugin.SetDivision(divisionNum.value)"/>
     <p></p>
-    -->
+
     <p></p>
 
-    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="test123456"/>
+    Peer ID:<INPUT TYPE ="text" id="PeerID" VALUE="123456"/>
     <input type="button" value="Open Tunnel" OnClick="KePlayerPlugin.OpenTunnel(PeerID.value);"/>
     <input type="button" value="Close Tunnel" OnClick="KePlayerPlugin.CloseTunnel(PeerID.value);"/>
     <input type="button" value="check open" OnClick="CheckOpen(PeerID.value);"/>
@@ -57,6 +58,10 @@
     <p></p>
     <input type="button" value="query record file" OnClick="QueryCameraRemoteFile()"/>
     <input type="button" value="play record file" OnClick="PlayCameraRemoteFile()"/>
+    <input type="button" value="stop record file" OnClick="KePlayerPlugin.StopPlayFile(PeerID.value)"/>
+    Position:<INPUT TYPE ="number" id="playPosition" VALUE="20"/>
+    <input type="button" value="set pos" OnClick="SetPosition()"/>
+    <p></p>
 
     <p></p>
     <input type="button" value="get wifi list" OnClick="GetWifiList()"/>

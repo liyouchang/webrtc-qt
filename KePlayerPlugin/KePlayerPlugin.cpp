@@ -4,14 +4,17 @@
 #include <QDir>
 #include <vector>
 
-#include "libjingle_app/defaults.h"
 #include "talk/base/logging.h"
+
+#include "libjingle_app/defaults.h"
 #include "libjingle_app/p2pconductor.h"
+#include "libjingle_app/peerterminal.h"
+
+#include "zmqclient/peerconnectionclientdealer.h"
+
 #include "VideoWall.h"
 #include "ke_recorder.h"
-#include "libjingle_app/p2pconductor.h"
-#include "zmqclient/peerconnectionclientdealer.h"
-#include "libjingle_app/peerterminal.h"
+
 #ifdef WIN32
 #include <windows.h>
 #include <Shlobj.h>
@@ -44,20 +47,18 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
       connection_(NULL),tunnel_(NULL),localClient_(NULL),
       is_inited(false)
 {
-    qDebug()<<"KePlayerPlugin::KePlayerPlugin--start ";
-
     QVBoxLayout *vbox = new QVBoxLayout(this);
     vbox->setMargin(0);
     video_wall_ = new VideoWall(this);
     vbox->addWidget(video_wall_);
-    video_wall_->setGeometry(0,0,400,300);
-    video_wall_->setContentsMargins(0,0,0,0);
-    this->setContentsMargins(0,0,0,0);
 
     QObject::connect(video_wall_,&VideoWall::SigNeedStopPeerPlay,
                      this,&KePlayerPlugin::StopVideo);
     QObject::connect(this,&KePlayerPlugin::TunnelClosed,
                      video_wall_,&VideoWall::StopPeerPlay);
+
+    QObject::connect(video_wall_,&VideoWall::SigToNoramlScreen,
+                     this,&KePlayerPlugin::ResizeToNormal);
 
     QString currentPath = QCoreApplication::applicationDirPath();
     QDir configDir(currentPath);
@@ -73,7 +74,7 @@ KePlayerPlugin::KePlayerPlugin(QWidget *parent)
 
     //set save path
     m_savePath = myconfig->value("plugin/save_path").toString();
-    if(savePath().isEmpty()){
+    if ( savePath().isEmpty() ) {
         QDir saveDir = QDir::home();
         saveDir.mkdir("ShijietongData");
         saveDir.cd("ShijietongData");
@@ -164,11 +165,13 @@ QString KePlayerPlugin::GetLocalPath()
 void KePlayerPlugin::FullScreen()
 {
     this->video_wall_->showfullScreenWall();
+//    qDebug()<<"resize to normal";
+//    emit this->ResizeToNormal();
 }
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 55;
+    const int kVersion = 57;
     return kVersion;
 }
 /**
@@ -346,7 +349,6 @@ bool KePlayerPlugin::CloseSound(QString peerId)
         return false;
     }
     return video_wall_->CloseSound(peerId);
-
 }
 
 bool KePlayerPlugin::StartTalk()
@@ -404,6 +406,14 @@ bool KePlayerPlugin::SetPlayPosition(QString peer_id,int pos)
     std::string strId = peer_id.toStdString();
     qDebug()<<"KePlayerPlugin::SetPlayPosition  "<< pos;
     return tunnel_->SetPlayFileStatus(strId,2,pos,-1);
+}
+
+bool KePlayerPlugin::SetPlaySpeed(QString peer_id, int speed)
+{
+    std::string strId = peer_id.toStdString();
+    qDebug()<<"KePlayerPlugin::SetPlaySpeed  "<< speed;
+    return tunnel_->SetPlayFileStatus(strId,2,-1,speed);
+
 }
 
 void KePlayerPlugin::setSavePath(const QString &path)
@@ -566,11 +576,17 @@ QString KePlayerPlugin::GetTimeFileName(QString peerId, QString extName, QString
     return fileDir.filePath(fileName);
 }
 
-void KePlayerPlugin::paintEvent(QPaintEvent *e)
-{
-//    e->ignore();
-//    qDebug()<<"KePlayerPlugin::paintEvent";
-}
+//void KePlayerPlugin::paintEvent(QPaintEvent *e)
+//{
+////    e->ignore();
+//    qDebug()<<"KePlayerPlugin::paintEvent "<<e->rect();
+//}
+
+//void KePlayerPlugin::resizeEvent(QResizeEvent *e)
+//{
+//    qDebug()<<"KePlayerPlugin::resizeEvent --- old size "<<e->oldSize()<<
+//              "  new size "<<e->size();
+//}
 
 QString KePlayerPlugin::savePath() const
 {

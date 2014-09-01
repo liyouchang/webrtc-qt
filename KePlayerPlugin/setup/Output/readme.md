@@ -1,4 +1,7 @@
 ###版本说明:
+V0.56
+1. 增加终端录像功能
+
 V0.54
 1. 修改了链接速度慢的问题
 2. 解决了一个关闭浏览器崩溃的bug
@@ -86,6 +89,38 @@ V0.32
 	
 	UDP广播查找本地终端设备
 	
+9. PlayRecordFile(peer_id, remoteFile);
+
+	开始终端远程录像回放	
+	
+	参数说明: 
+    peer_id(string): 通道id
+	remoteFile(string):远程文件名
+	
+	返回值说明:	
+	false - 失败	
+	true - 成功
+
+10. StopPlayFile(peer_id);
+
+	停止远程录像回放
+
+11. SetPlayPosition( peer_id, pos);
+
+	设置远程录像回放位置
+	
+	参数说明: 
+    peer_id(string): 通道id
+	pos(int): 位置 百分比 1-100
+
+12. SetPlaySpeed(QString peer_id,int speed);
+	
+	设置远程录像回放速度
+	
+	参数说明: 
+    peer_id(string): 通道id
+	speed(int): 0-暂停 100-继续
+
 ###回调说明:
 
 1. TunnelOpened(peerId);
@@ -98,6 +133,16 @@ V0.32
 
 	SearchLocalDevice查找设备返回,有一个设备回应函数回调一次
 	
+5. RecordStatus(peer_id, status, position,  speed )
+	
+	录像状态回调
+	
+	参数说明: 
+    peer_id(string): 通道id
+	status(int):远程回放状态,2-请求录像文件错误,3-回放结束,4-正在回放,5-回放消息错误
+	position(int):回放进度 1-100
+	speed:回放速度,暂无用
+
 	
 ###枚举类型说明:
 

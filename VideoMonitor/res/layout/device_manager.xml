@@ -5,7 +5,6 @@
     android:background="@color/page_bg_grey" >
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/add_device_manager_title"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/title_height_size"
@@ -31,44 +30,123 @@
             android:textSize="@dimen/title_text_size" />
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/rl_no_device_manager_list"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/add_device_manager_title"
-        android:gravity="center"
-        android:visibility="invisible" >
+        android:layout_below="@+id/add_device_manager_title" >
 
-        <ImageView
-            android:id="@+id/iv_device_manager_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:background="@null"
-            android:contentDescription="@null"
-            android:scaleType="fitCenter"
-            android:src="@drawable/no_device_list_icon" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
 
-        <TextView
-            android:id="@+id/tv_device_manager_list"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/iv_device_manager_list"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
-            android:background="@null"
-            android:text="@string/no_device_list"
-            android:textColor="@color/light_black"
-            android:textSize="16.0sp" />
-    </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/rl_device_item"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/button_white_style"
+                android:paddingBottom="5dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp" >
 
-    <ListView
-        android:id="@+id/lv_device_list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@+id/add_device_manager_title"
-        android:cacheColorHint="#00000000"
-        android:divider="@color/orange"
-        android:dividerHeight="1dp" />
+                <RelativeLayout
+                    android:id="@+id/rl_device_bg"
+                    android:layout_width="100dp"
+                    android:layout_height="90dp"
+                    android:background="@drawable/device_item_bg"
+                    android:contentDescription="@null" >
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/rl_device_info"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_toRightOf="@+id/rl_device_bg"
+                    android:background="@drawable/button_white_style"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="10dp"
+                    android:paddingTop="5dp" >
+
+                    <TextView
+                        android:id="@+id/tv_device_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="2dp"
+                        android:text="@string/device_item_name"
+                        android:textColor="@color/light_black"
+                        android:textSize="20sp" />
+
+                    <TextView
+                        android:id="@+id/tv_device_mac"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tv_device_name"
+                        android:paddingTop="2dp"
+                        android:text="@string/device_item_mac"
+                        android:textColor="@color/light_black"
+                        android:textSize="16sp" />
+                </RelativeLayout>
+
+                <ImageView
+                    android:id="@+id/rl_device_next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/icon_button_right"
+                    android:contentDescription="@null" />
+            </RelativeLayout>
+
+            <Button
+                android:id="@+id/btn_wifi"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/more_frgment_widget_height"
+                android:layout_below="@+id/rl_device_item"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/button_white_style"
+                android:drawableLeft="@drawable/wifi"
+                android:drawablePadding="10dp"
+                android:drawableRight="@drawable/icon_button_right"
+                android:gravity="center_vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="10dp"
+                android:text="@string/set_wifi"
+                android:textColor="@color/light_black"
+                android:textSize="18sp" />
+            
+            <Button
+                android:id="@+id/btn_shared_device_manager"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/more_frgment_widget_height"
+                android:layout_below="@+id/btn_wifi"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/button_white_style"
+                android:drawableLeft="@drawable/device_share"
+                android:drawablePadding="10dp"
+                android:drawableRight="@drawable/icon_button_right"
+                android:gravity="center_vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="10dp"
+                android:text="@string/my_device_shared_manager"
+                android:textColor="@color/light_black"
+                android:textSize="18sp" />
+            
+            <Button
+                android:id="@+id/btn_delete_device"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/more_frgment_widget_height"
+                android:layout_below="@+id/btn_shared_device_manager"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/redbtn_selector"
+                android:gravity="center_vertical|center"
+                android:text="@string/delete_device"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+        </RelativeLayout>
+    </ScrollView>
 
 </RelativeLayout>

@@ -74,13 +74,16 @@ signals:
     void TunnelClosed(const QString &);
     void RecordStatus(const QString &,int,int,int );
     void RecvPeerMsg(const QString &,const QString &);
-    void RemoteFileDownloadEnd(QString peer_id);
+//    void RemoteFileDownloadEnd(QString peer_id);
     void LocalDeviceInfo(const QString & devInfo);
+    //for ie to change the size of object after fullscreen the wall
+    void ResizeToNormal();
 
 public slots:
     void DestroyAll();
     //change the version when you need to auto update
     int GetVersion();
+
     void about();
     void SetDivision(int num);
     int PlayLocalFile();
@@ -111,6 +114,9 @@ public slots:
     bool PlayRecordFile(QString peer_id, QString remoteFile);
     bool StopPlayFile(QString peer_id);
     bool SetPlayPosition(QString peer_id,int pos);
+    //0-pause 100-continue
+    bool SetPlaySpeed(QString peer_id,int speed);
+
     void setSavePath(const QString &path);
     QString savePath() const;
 
@@ -144,7 +150,8 @@ private:
 
     // QWidget interface
 protected:
-    void paintEvent(QPaintEvent *);
+//    void paintEvent(QPaintEvent *);
+//    void resizeEvent(QResizeEvent *);
 };
 
 #endif // KEPLAYERPLUGIN_H

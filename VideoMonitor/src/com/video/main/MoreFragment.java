@@ -52,17 +52,14 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	}
 	
 	private void initView() {
+		Button button_shared_device = (Button)rootView.findViewById(R.id.btn_shared_device);
+		button_shared_device.setOnClickListener(this);
+		
 		Button button_modify_pwd = (Button)rootView.findViewById(R.id.btn_modify_pwd);
 		button_modify_pwd.setOnClickListener(this);
 		
 		Button button_setting = (Button)rootView.findViewById(R.id.btn_setting);
 		button_setting.setOnClickListener(this);
-		
-//		Button button_device_manager = (Button)mView.findViewById(R.id.btn_device_manager);
-//		button_device_manager.setOnClickListener(this);
-		
-		Button button_wifi = (Button)rootView.findViewById(R.id.btn_wifi);
-		button_wifi.setOnClickListener(this);
 		
 		Button button_help = (Button)rootView.findViewById(R.id.btn_help);
 		button_help.setOnClickListener(this);
@@ -133,20 +130,16 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
+			case R.id.btn_shared_device:
+				startActivity(new Intent(mActivity, SharedActivity.class));
+				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
+				break;
 			case R.id.btn_modify_pwd:
 				startActivityForResult(new Intent(mActivity, ModifyPwdActivity.class), 1);
 				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_setting:
 				startActivity(new Intent(mActivity, SettingsActivity.class));
-				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
-				break;
-//			case R.id.btn_device_manager:
-//				startActivity(new Intent(mActivity, DeviceManagerActivity.class));
-//				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
-//				break;
-			case R.id.btn_wifi:
-				startActivity(new Intent(mActivity, WiFiActivity.class));
 				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_help:

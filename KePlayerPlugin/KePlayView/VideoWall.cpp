@@ -324,6 +324,8 @@ void VideoWall::showNormalScreenWall()
     Qt::WindowFlags oldFlags = this->windowFlags();
     this->setWindowFlags(oldFlags & ~Qt::Dialog);
     this->showNormal();
+    //emit signal to let ie show normal size
+    emit SigToNoramlScreen();
 }
 
 void VideoWall::OnRecvMediaData(QString peer_id, QByteArray data)
@@ -399,6 +401,8 @@ void VideoWall::performDrag(PlayWidget *pw)
 
 void VideoWall::paintEvent(QPaintEvent *e)
 {
+
+    qDebug()<<"VideoWall::paintEvent --"<<e->rect().height()<<","<<e->rect().width();
 //    e->ignore();
     //    if(layout_changed_){
     //        for(int i=0;i<MAX_AVPLAYER;i++){
@@ -524,6 +528,8 @@ void VideoWall::keyPressEvent(QKeyEvent *e)
 {
 
     if(e->key() == Qt::Key_Escape){
+        qDebug()<<"get esc key press";
         showNormalScreenWall();
+        //this->update();
     }
 }
