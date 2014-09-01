@@ -41,6 +41,7 @@ import com.video.data.Value;
 import com.video.data.XmlDevice;
 import com.video.main.PullToRefreshHeaderView.OnHeaderRefreshListener;
 import com.video.play.PlayerActivity;
+import com.video.play.RemoteFilePlayerActivity;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqHandler;
@@ -591,6 +592,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 				mDeviceName = item.get("deviceName");
 				mDeviceId = item.get("deviceID");
 				mDeviceBg = item.get("deviceBg");
+				String dealerName = item.get("dealerName");
 				Intent intent = null;
 				switch (position) {
 					case 0: //设备管理
@@ -602,7 +604,15 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						mActivity.overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 						break;
 					case 1: //远程录像
-						
+						if (item.get("LinkState").equals("linked")) {
+							intent = new Intent(mActivity, RemoteFilePlayerActivity.class);
+							intent.putExtra("deviceName", mDeviceName);
+							intent.putExtra("deviceID", mDeviceId);
+							intent.putExtra("dealerName", dealerName);
+							startActivity(intent);
+						} else {
+							Toast.makeText(mActivity, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
+						}
 						break;
 				}
 				if (mPopupWindow.isShowing()) {

@@ -55,7 +55,13 @@ public class TunnelCommunication {
 	private native int naStartLocalVideo(String peerAddr);
 	private native int naStopLocalVideo(String peerAddr);
 	private native boolean naIsTunnelOpened(String peerId);
-
+	
+	//远程录像
+	private native int PlayRemoteFile(String peerId, String remoteFileName);
+	private native int StopRemoteFile(String peerId);
+	private native int SetPlayPosition(String peerId, int position);
+	private native int OnRecordStatus(String peerId, int status, int position, int speed);
+	
 	synchronized public static TunnelCommunication getInstance() {
 		if (tunnel == null) {
 			tunnel = new TunnelCommunication();
@@ -341,5 +347,45 @@ public class TunnelCommunication {
 			pushPosition += 4;
 			audioDataCache.push(data, pushPosition, dataLen - pushPosition);
 		}
+	}
+	
+	/**
+	 * 播放远程录像
+	 */
+	public int playRemoteFile(String peerId, String remoteFileName) {
+		return PlayRemoteFile(peerId, remoteFileName);
+	}
+	
+	/**
+	 * 停止播放远程录像
+	 */
+	public int stopRemoteFile(String peerId) {
+		return StopRemoteFile(peerId);
+	}
+	
+	/**
+	 * 设置远程录像播放指针
+	 */
+	public int setPlayPosition(String peerId, int position) {
+		return SetPlayPosition(peerId, position);
+	}
+	
+	/**
+	 * 远程录像状态信息（回调）
+	 * @param peerId 设备Mac
+	 * @param status 0：请求录像播放成功  2：请求录像文件错误  3：播放结束  4：正在播放,返回播放位置和播放速度  5：返回错误的消息
+	 * @param position 播放进度 0-100百分比
+	 * @param speed 播放速度,暂无用
+	 * @return
+	 */
+	public int recordStatus(String peerId, int status, int position, int speed) {
+		Intent intent = new Intent();
+		intent.putExtra("peerId", peerId);
+		intent.putExtra("status", status);
+		intent.putExtra("position", position);
+		intent.putExtra("speed", speed);
+		intent.setAction(RemoteFilePlayerActivity.REQUEST_REMOTE_FILE_PLAYER_ACTION);
+		MainApplication.getInstance().sendBroadcast(intent);
+		return 0;
 	}
 }

@@ -3,10 +3,9 @@ package com.video.main;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -27,7 +26,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
@@ -38,6 +36,7 @@ import com.video.socket.ZmqThread;
 import com.video.terminal.player.TerminalPlayerActivity;
 import com.video.utils.Utils;
 
+@SuppressLint("HandlerLeak")
 public class TerminalVideoListActivity extends Activity implements
 		OnClickListener, OnHeaderRefreshListener, OnFooterRefreshListener {
 
@@ -173,7 +172,6 @@ public class TerminalVideoListActivity extends Activity implements
 	}
 	
 	private Handler handler = new Handler() {
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public void handleMessage(Message msg) {
