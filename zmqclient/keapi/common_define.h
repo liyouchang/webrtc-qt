@@ -18,7 +18,7 @@ typedef enum
 	CLOCK_TYPE_PCF8563,											//外部硬件时钟芯片
 	CLOCK_TYPE_NTP,												//网络校时
 	CLOCK_TYPE_COUNT	
-}	e_clock_type;
+}e_clock_type;
 
 typedef struct struct_clock_s
 {

@@ -23,7 +23,7 @@ camera-->client
     },
     "totalNum":100,    //the total records from startime to endtime
     "recordList":[{"fileName":"",//the record dir stored in camera
-            "fileEndTime":"20140417175100",//the record file start  time
+            "fileEndTime":"2014/04/17 17:51:00",//the record file start  time
             "fileSize":256,//record file size
      }]
 }

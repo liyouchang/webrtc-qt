@@ -72,6 +72,7 @@ public:
 signals:
     void SigNeedStopPeerPlay(QString peer_id);
     void SigTalkData(QByteArray data);
+    void SigToNoramlScreen();
 public slots:
     void OnGetTalkData();
 

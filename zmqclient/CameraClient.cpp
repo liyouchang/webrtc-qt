@@ -7,8 +7,8 @@
 
 #include "libjingle_app/defaults.h"
 
-//const int kHeartInterval = 60000;//ms
-const int kHeartInterval = 3000;//ms
+const int kHeartInterval = 60000;//ms
+//const int kHeartInterval = 3000;//ms
 const int kHeartReconnect = 1;//1次没有收到心跳则重连
 CameraClient::CameraClient(std::string mac,std::string ver):
     mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),
@@ -106,7 +106,6 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
 {
     if(peer_id.compare("Backstage") == 0)
     {
-
         Json::Reader reader;
         Json::Value jmessage;
         if (!reader.parse(message, jmessage)) {
@@ -115,7 +114,8 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
         }
         std::string type;
         GetStringFromJsonObject(jmessage, "type", &type);
-        if(type.compare("Terminal_Login") == 0){
+        if(type.compare("Terminal_Login") == 0)
+        {
             int result;
             GetIntFromJsonObject(jmessage, "Result", &result);
             if(result == 0){
