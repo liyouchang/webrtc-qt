@@ -1,7 +1,8 @@
 #include "kesdkdevice.h"
 
 
-#include <regex.h>
+//#include <regex.h>
+#include <time.h>
 
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
@@ -17,7 +18,8 @@
 #include "keapi/common_define.h"
 #include "keapi/media_api.h"
 #include "keapi/store_api.h"
-#include "keapi/Web_api.h"
+#include "keapi/web_api.h"
+#include "keapi/alarm_api.h"
 
 #include "libjingle_app/defaults.h"
 #include "libjingle_app/jsonconfig.h"
@@ -70,7 +72,8 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
     SYSTEM_Initialize();
 
     MEDIA_Initialize();
-//    STORE_Initialize();
+    clock_handle = CLOCK_Open(CLOCK_TYPE_HIRTC);
+    STORE_Initialize();
 
 
     deviceThread = talk_base::Thread::Current();
@@ -100,23 +103,21 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
 //    printf("localIP:%d.%d.%d.%d  username:%s  password:%s\n",net.localIP[0],net.localIP[1],net.localIP[2],net.localIP[3],net.username,net.password);
 
     NET_Initialize();
-//    ALARM_Initialize();
+    ALARM_Initialize();
 //    sleep(10);
     WEB_Initialize();
 }
 
 KeSdkDevice::~KeSdkDevice()
 {
-//    STORE_Cleanup();
+    STORE_Cleanup();
+    CLOCK_Close(clock_handle);
     WEB_Cleanup();
-//    ALARM_Cleanup();
+    ALARM_Cleanup();
     NET_Cleanup();
     MEDIA_Cleanup();
     SYSTEM_Cleanup();
-//    NET_Cleanup();
     CONFIG_Cleanup();
-
-
 }
 
 bool KeSdkDevice::Init(kaerp2p::PeerTerminalInterface *t)
@@ -168,7 +169,7 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
     const int nalLen = 4;
     int dataPos =  sizeof(KEFrameHead);
     if(head->frameLen == len - dataPos){
-        MDDIA_Audio_Talk(const_cast<char *>(data+dataPos),head->frameLen);
+        MEDIA_Audio_Talk(const_cast<char *>(data+dataPos),head->frameLen);
     }else{
         LOG_F(WARNING)<<"tal from "<<peer_id<<" frame format error";
     }
@@ -198,9 +199,10 @@ void KeSdkDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmess
             LOG(WARNING)<<"get query_record value error from" << peerId ;
             return;
         }
-        std::string condition = JsonValueToString(jcondition);
-        LOG_F(INFO)<<condition;
-        //OnRecvRecordQuery(peerId,condition);
+//        std::string condition = JsonValueToString(jcondition);
+//        LOG_F(INFO)<<condition;
+        QueryRecord(jcondition);
+
     }
     else if(command.compare("wifi_info") == 0){
         Json::Value jwifi = GetWifiJsonArray();
@@ -437,7 +439,7 @@ bool KeSdkDevice::SetPtz(std::string control, int param)
         return false;
     }
 //
-    int ret = Control_MOTOR(0,cmd,kDefaultSpeed,param);
+    int ret = MOTOR_Control(0,cmd,kDefaultSpeed,param);
     LOG_F(INFO)<<" Control_MOTOR result "<< ret;
     return true;
 }
@@ -491,25 +493,81 @@ bool KeSdkDevice::SetWifiInfo(Json::Value jparam)
     }
 }
 
-void KeSdkDevice::OnRecvRecordQuery(std::string peer_id, std::string condition)
+bool StringToClock(std::string strTime,st_clock_t * time)
 {
-//                    st_clock_t startTime;
-//                    startTime.year = 2014;
-//                    startTime.month = 8;
-//                    startTime.day = 25;
-//                    startTime.hour = 0;
-//                    startTime.minute = 0;
-//                    startTime.second = 0;
-//                    st_clock_t endTime;
-//                    endTime.year = 2014;
-//                    endTime.month = 8;
-//                    endTime.day = 28;
-//                    endTime.hour = 23;
-//                    endTime.minute = 59;
-//                    endTime.second = 59;
-//                    st_store_list_t stList[100];
-//                    int list_num = STORE_Get_File_List(&startTime,&endTime,0,STORE_TYPE_PLAN,100,stList);
-//                    printf("STORE_Get_File_List = %d\n",list_num);
+    struct tm tm_t;
+    if(strptime(strTime.c_str(),"%Y/%m/%d %H:%M:%S", &tm_t) == NULL){
+        return false;
+    }
+    time->year = tm_t.tm_year;
+    time->month = tm_t.tm_mon;
+    time->day = tm_t.tm_mday;
+    time->hour  = tm_t.tm_hour;
+    time->minute = tm_t.tm_min;
+    time->second = tm_t.tm_sec;
+    return true;
+}
+std::string ClockToString(st_clock_t  time)
+{
+    char timebuf[64];
+    //2014/04/17 17:51:00
+    sprintf(timebuf,"%04d%02d%02d%02d%02d%02d",time.year,time.month,time.day,time.hour,time.minute,time.second);
+    return timebuf;
+}
+
+Json::Value KeSdkDevice::QueryRecord(Json::Value jcondition)
+{    
+
+    std::string startTime,endTime;
+    int offset,toQuery;
+
+    if( GetStringFromJsonObject(jcondition,"startTime",&startTime) ||
+           GetStringFromJsonObject(jcondition,"endTime",&endTime) ||
+           GetIntFromJsonObject(jcondition,"offset",&offset) ||
+           GetIntFromJsonObject(jcondition,"toQuery",&toQuery))
+    {
+
+    }
+
+
+    st_clock_t startClock,endClock;
+    st_store_list_t * stList  = new st_store_list_t[toQuery];
+    int list_num  = 0;
+    if(StringToClock(startTime,&startClock) && StringToClock(startTime,&startClock))
+    {
+       list_num = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,100,stList);
+
+    }else{
+        LOG_F(WARNING)<<"parse input time error";
+    }
+
+//    st_clock_t startTime;
+//    startTime.year = 2014;
+//    startTime.month = 8;
+//    startTime.day = 25;
+//    startTime.hour = 0;
+//    startTime.minute = 0;
+//    startTime.second = 0;
+//    st_clock_t endTime;
+//    endTime.year = 2014;
+//    endTime.month = 8;
+//    endTime.day = 28;
+//    endTime.hour = 23;
+//    endTime.minute = 59;
+//    endTime.second = 59;
+//  printf("STORE_Get_File_List = %d\n",list_num);
+
+
+    Json::Value jrecordList(Json::arrayValue);
+    for (int i = 0;i < list_num;i++) {
+        Json::Value jrecord;
+        jrecord["fileName"] = stList[i].filePath;
+//        jrecord["fileDate"] = stList[i].stEndTime;
+        jrecord["fileSize"] = stList[i].iFileSize;
+        jrecordList.append(jrecord);
+    }
+    return jrecordList;
+
 }
 
 

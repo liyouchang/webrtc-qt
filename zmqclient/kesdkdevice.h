@@ -73,13 +73,15 @@ protected:
 
     talk_base::Thread *deviceThread;
 
+    int clock_handle;
+
 protected:
     bool SetOsdTitle(const std::string & title);
 
     bool SetPtz(std::string control, int param);
     Json::Value GetWifiJsonArray();
     bool SetWifiInfo(Json::Value jparam);
-    virtual void OnRecvRecordQuery(std::string peer_id, std::string condition);
+    Json::Value  QueryRecord(Json::Value condition);
 
 };
 

@@ -8,23 +8,30 @@
 
 #include "common_define.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum
 {
-	STORE_TYPE_SWITCH = 0,									//¿ª¹ØÁ¿
-	STORE_TYPE_MV,											//ÒÆ¶¯Õì²â
-	STORE_TYPE_PLAN,										//¼Æ»®Â¼Ïñ
-	STORE_TYPE_MANUAL,										//ÊÖ¶¯Â¼Ïñ
-	STORE_TYPE_JPEG,										//ÊÖ¶¯Â¼Ïñ
+	STORE_TYPE_SWITCH = 0,									//å¼€å…³é‡
+	STORE_TYPE_MV,											//ç§»åŠ¨ä¾¦æµ‹
+	STORE_TYPE_PLAN,										//è®¡åˆ’å½•åƒ
+	STORE_TYPE_MANUAL,										//æ‰‹åŠ¨å½•åƒ
+	STORE_TYPE_JPEG,										//æ‰‹åŠ¨å½•åƒ
+	STORE_TYPE_ALL,	
 	STORE_TYPE_COUNT
 }	e_store_type;
 
 typedef struct store_list
 {
-	char filePath[48];										//ÎÄ¼şÂ·¾¶¼ÓÃû³Æ£¬Ãû³ÆÀïÃæ°üº¬¿ªÊ¼Ê±¼ä
-	int iFileSize;											//ÎÄ¼ş´óĞ¡
-	st_clock_t stEndTime;									//ÎÄ¼şµÄ½áÊøÊ±¼ä
+	char filePath[48];										//æ–‡ä»¶è·¯å¾„åŠ åç§°ï¼Œåç§°é‡Œé¢åŒ…å«å¼€å§‹æ—¶é—´
+	int iFileSize;											//æ–‡ä»¶å¤§å°
+	st_clock_t stEndTime;									//æ–‡ä»¶çš„ç»“æŸæ—¶é—´
 }	st_store_list_t;
 
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif	//__STORE_DEFINE_H__

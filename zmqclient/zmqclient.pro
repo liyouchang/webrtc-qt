@@ -29,7 +29,7 @@ linux {
     LIBS += -lcppzmq -ljsoncpp
     LIBS += -pthread -ldl
     #LIBS += -lprofiler
-message (" this is linux system")
+#message (" this is linux system")
 }
 
 macx {
@@ -68,12 +68,12 @@ hisi {
             keapi/common_api.h \
             keapi/store_api.h \
             keapi/store_define.h \
-            keapi/Web_api.h \
-            keapi/Web_define.h \
+            keapi/web_api.h \
+            keapi/web_define.h \
             keapi/alarm_api.h \
             keapi/alarm_define.h
 
-    LIBS +=-L$$output_dir/libs/sdk -lweb -lalarm -lmedia   -lcommon
+    LIBS +=-L$$output_dir/libs/sdk -lweb  -lstore  -lmedia  -lalarm -lcommon
     LIBS += $$output_dir/libs/mpp/openssl-0.9.8d/libcrypto.a
     LIBS +=-L$$output_dir/libs/mpp/lib  -lmpi -lisp -lsns_ov9712_8 \
          -laec -lVoiceEngine -lanr -lresampler -laacenc

@@ -324,6 +324,7 @@ struct KEDevGetSerialDataHead
     short dataLen;
 };
 
+
 struct KEPlayRecordFileReq
 {
     unsigned char protocal;

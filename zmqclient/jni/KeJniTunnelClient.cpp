@@ -31,9 +31,10 @@ void KeJniTunnelClient::OnRecvVideoData(const std::string& peer_id,
 
 }
 
-void KeJniTunnelClient::OnRecordStatus(const std::string &peer_id, int status)
+void KeJniTunnelClient::OnRecordStatus(const std::string & peer_id,int status,
+                                       int position,int speed)
 {
-    JniUtil::GetInstance()->JniRecordStatus(peer_id.c_str(),status);
+    JniUtil::GetInstance()->JniRecordStatus(peer_id.c_str(),status,position,speed);
 }
 
 //on tunnel closed
