@@ -408,6 +408,14 @@ bool KePlayerPlugin::SetPlayPosition(QString peer_id,int pos)
     return tunnel_->SetPlayFileStatus(strId,2,pos,-1);
 }
 
+bool KePlayerPlugin::SetPlaySpeed(QString peer_id, int speed)
+{
+    std::string strId = peer_id.toStdString();
+    qDebug()<<"KePlayerPlugin::SetPlaySpeed  "<< speed;
+    return tunnel_->SetPlayFileStatus(strId,2,-1,speed);
+
+}
+
 void KePlayerPlugin::setSavePath(const QString &path)
 {
     qDebug()<<"KePlayerPlugin::setSavePath---path:"<<path;

@@ -11,9 +11,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
+import android.annotation.SuppressLint;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningTaskInfo;
 import android.app.Dialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,6 +37,7 @@ import android.widget.TextView;
 
 import com.video.R;
 
+@SuppressLint({ "DefaultLocale", "SimpleDateFormat" })
 public class Utils {
 	
 	public static String Tag = "MyDebug:";
@@ -97,6 +103,21 @@ public class Utils {
 		}
 		return result;
 	}
+	
+	/**
+	 * 判断当前应用程序处于前台还是后台
+	 */
+	public static boolean isApplicationRunningBackground(Context context) {
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<RunningTaskInfo> tasks = am.getRunningTasks(1);
+        if (!tasks.isEmpty()) {
+            ComponentName topActivity = tasks.get(0).topActivity;
+            if (!topActivity.getPackageName().equals(context.getPackageName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 	/**
 	 * 检测String中是否有中文
@@ -276,7 +297,7 @@ public class Utils {
 	/**
 	 * 删除文件夹的所有文件
 	 */
-	public static void deleteFile(File file) {
+	public static void deleteAllFiles(File file) {
 		if (file.isFile()) {
 			file.delete();
 			return ;
@@ -288,7 +309,7 @@ public class Utils {
 				return ;
 			}
 			for (int i=0; i<childFiles.length; i++) {
-				deleteFile(childFiles[i]);
+				deleteAllFiles(childFiles[i]);
 			}
 			file.delete();
 		}
@@ -304,7 +325,7 @@ public class Utils {
 			File[] childFiles = file.listFiles();
 			if ((childFiles != null) && (childFiles.length > 0)) {
 				for (int i=0; i<childFiles.length; i++) {
-					deleteFile(childFiles[i]);
+					deleteAllFiles(childFiles[i]);
 				}
 			}
 		}
@@ -558,6 +579,20 @@ public class Utils {
 		}
 	}
 	
+	
+	/**
+	 * 删除本地文件
+	 * @param filePath 本地文件路径
+	 */
+	public static void deleteLocalFile(String filePath) {
+		if (filePath == null) {
+			return ;
+		}
+		File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+	}
 }
 
 

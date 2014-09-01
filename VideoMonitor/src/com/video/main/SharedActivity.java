@@ -7,6 +7,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -15,6 +16,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,6 +38,7 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.main.PullToRefreshHeaderView.OnHeaderRefreshListener;
 import com.video.play.PlayerActivity;
 import com.video.play.TunnelCommunication;
 import com.video.service.BackstageService;
@@ -49,15 +52,16 @@ import com.video.utils.OkOnlyDialog;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
-public class SharedActivity extends Activity implements OnClickListener {
+@SuppressLint("HandlerLeak")
+public class SharedActivity extends Activity implements OnClickListener, OnHeaderRefreshListener {
 	
 	private Context mContext;
+	private PreferData preferData = null;
 	//终端列表项
 	private static String mDeviceName = null;
 	private static String mDeviceId = null;
 	private static int listPosition = 0;
 	private static int listSize = 0;
-	private RelativeLayout noDeviceLayout = null;
 	
 	private PopupWindow mPopupWindow;
 	private Dialog mDialog = null;
@@ -73,6 +77,11 @@ public class SharedActivity extends Activity implements OnClickListener {
 	
 	private LinkDeviceThread linkDeviceThread = null;
 	
+	private RelativeLayout noDeviceLayout = null;
+	private PullToRefreshHeaderView mPullToRefreshHeaderView;
+	private String shared_refresh_time = null;
+	private String shared_refresh_terminal = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -87,6 +96,8 @@ public class SharedActivity extends Activity implements OnClickListener {
 		back.setOnClickListener(this);
 		
 		noDeviceLayout = (RelativeLayout) this.findViewById(R.id.rl_no_shared_list);
+		mPullToRefreshHeaderView = (PullToRefreshHeaderView) this.findViewById(R.id.shared_pull_refresh_view);
+		mPullToRefreshHeaderView.setOnHeaderRefreshListener(this);
 		
 		lv_list = (ListView) this.findViewById(R.id.shared_list);
 		lv_list.setOnItemClickListener(new OnItemClickListenerImpl());
@@ -97,6 +108,18 @@ public class SharedActivity extends Activity implements OnClickListener {
 		//初始化Activity要使用的参数
 		mContext = SharedActivity.this;
 		ZmqHandler.mHandler = handler;
+		preferData = new PreferData(mContext);
+		
+		//初始化下拉刷新的显示
+		if (preferData.isExist("sharedRefreshTime")) {
+			shared_refresh_time = preferData.readString("sharedRefreshTime");
+		}
+		if (preferData.isExist("sharedRefreshTerminal")) {
+			shared_refresh_terminal = preferData.readString("sharedRefreshTerminal");
+		}
+		if ((shared_refresh_time != null) && (shared_refresh_terminal != null)) {
+			mPullToRefreshHeaderView.onHeaderRefreshComplete(shared_refresh_time, shared_refresh_terminal);
+		}
 		
 		Value.isSharedUser = true;
 		
@@ -108,7 +131,23 @@ public class SharedActivity extends Activity implements OnClickListener {
         registerReceiver(serviceReceiver, mFilter);
 		
 		//初始化终端列表的显示
-		reqTermListEvent();
+		reqTermListEvent(false);
+	}
+	
+	/**
+	 * 下拉刷新
+	 * yyyy-MM-dd hh:mm:ss 12小时制  yyyy-MM-dd HH:mm:ss 24小时制
+	 */
+	@Override
+	public void onHeaderRefresh(PullToRefreshHeaderView view) {
+		// TODO Auto-generated method stub
+		mPullToRefreshHeaderView.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				//初始化终端列表的显示
+				reqTermListEvent(true);
+			}
+		}, 500);
 	}
 	
 	/**
@@ -143,7 +182,6 @@ public class SharedActivity extends Activity implements OnClickListener {
 	}
 	
 	private Handler handler = new Handler() {
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public void handleMessage(Message msg) {
@@ -151,7 +189,7 @@ public class SharedActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					if (mDialog == null) {
+					if ((mDialog == null) || (!mDialog.isShowing())) {
 						mDialog = Utils.createLoadingDialog(mContext, (String) msg.obj);
 						mDialog.show();
 					}
@@ -163,6 +201,9 @@ public class SharedActivity extends Activity implements OnClickListener {
 					}
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);
+					}
+					if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
+						mPullToRefreshHeaderView.onHeaderRefreshComplete();
 					}
 					Toast.makeText(mContext, ""+msg.obj, Toast.LENGTH_SHORT).show();
 					listSize = 0;
@@ -176,6 +217,13 @@ public class SharedActivity extends Activity implements OnClickListener {
 							mDialog = null;
 						}
 						if (msg.arg1 == 0) {
+							if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
+								shared_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
+								shared_refresh_terminal = "终端: "+Build.MODEL;
+								preferData.writeData("sharedRefreshTime", shared_refresh_time);
+								preferData.writeData("sharedRefreshTerminal", shared_refresh_terminal);
+								mPullToRefreshHeaderView.onHeaderRefreshComplete(shared_refresh_time, shared_refresh_terminal);
+							}
 							ArrayList<HashMap<String, String>> listObj = (ArrayList<HashMap<String, String>>) msg.obj;
 							if (listObj != null) {
 								sharedList = listObj;
@@ -240,10 +288,12 @@ public class SharedActivity extends Activity implements OnClickListener {
 					}
 					break;
 			}
-			if (listSize == 0) {
-				noDeviceLayout.setVisibility(View.VISIBLE);
+			if (listSize > 0) {
+				noDeviceLayout.setVisibility(View.GONE);
+				mPullToRefreshHeaderView.setVisibility(View.VISIBLE);
 			} else {
-				noDeviceLayout.setVisibility(View.INVISIBLE);
+				noDeviceLayout.setVisibility(View.VISIBLE);
+				mPullToRefreshHeaderView.setVisibility(View.GONE);
 			}
 		}
 	};
@@ -360,10 +410,12 @@ public class SharedActivity extends Activity implements OnClickListener {
 	/**
 	 * 请求终端分享列表的网络操作
 	 */
-	public void reqTermListEvent() {
+	public void reqTermListEvent(boolean isPullToRefresh) {
 		if (Utils.isNetworkAvailable(mContext)) {
 			String data = generateReqTermListJson();
-			sendHandlerMsg(IS_REQUESTING, "正在请求分享列表...");
+			if (!isPullToRefresh) {
+//				sendHandlerMsg(IS_REQUESTING, "正在请求分享列表...");
+			}
 			sendHandlerMsg(REQUEST_TIMEOUT, "请求分享列表失败，网络超时！", Value.REQ_TIME_10S);
 			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		} else {
@@ -391,8 +443,18 @@ public class SharedActivity extends Activity implements OnClickListener {
 		switch (v.getId()) {
 			case R.id.btn_shared_back:
 				finish();
-				overridePendingTransition(R.anim.fragment_nochange, R.anim.up_out);
+				overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 				break;
+		}
+	}
+	
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		if ((mDialog != null) && (mDialog.isShowing())) {
+			mDialog.dismiss();
+			mDialog = null;
 		}
 	}
 	
@@ -413,7 +475,7 @@ public class SharedActivity extends Activity implements OnClickListener {
 		if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
 			Value.isSharedUser = false;
 			finish();
-			overridePendingTransition(R.anim.fragment_nochange, R.anim.up_out);
+			overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 		}
 		return super.onKeyDown(keyCode, event);
 	}

@@ -2,7 +2,7 @@ package com.video.main;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -19,7 +19,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
-
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
@@ -28,6 +27,7 @@ import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
+@SuppressLint("HandlerLeak")
 public class ModifyDeviceNameActivity extends Activity implements OnClickListener {
 
 	private Context mContext;

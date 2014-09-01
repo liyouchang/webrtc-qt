@@ -3,6 +3,7 @@ package com.video.service;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,6 +23,7 @@ import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
+@SuppressLint("HandlerLeak")
 public class BackstageService extends Service {
 
 	public static boolean isRun = false;
@@ -38,9 +40,8 @@ public class BackstageService extends Service {
 	
 	static 
 	{
-		System.loadLibrary("gnustl_shared");
-		System.loadLibrary("p2p");
 		System.loadLibrary("h264");
+		System.loadLibrary("p2p");
 	}
 	
 	@Override
@@ -330,11 +331,11 @@ public class BackstageService extends Service {
 					sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 				} 
 				else if (Value.isLoginSuccess) {
+					Utils.log("【没有可用网络】");
 					networkChangeFlag = true;
 					Value.resetValues();
 					closeAPPAndService();
 					ZmqCtrl.getInstance().exit();
-					Utils.log("【没有可用网络】");
 				}
 			}
 			else if (action.equals(TUNNEL_REQUEST_ACTION)) {

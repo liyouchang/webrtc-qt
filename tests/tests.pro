@@ -1,8 +1,10 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    testzmq
+    testandroid
 
 #    testkep2p \
 #    TestUdpServer \
-
+#    testzmq \
+#    testShareLib \
+#    testios \

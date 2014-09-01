@@ -114,6 +114,8 @@ public slots:
     bool PlayRecordFile(QString peer_id, QString remoteFile);
     bool StopPlayFile(QString peer_id);
     bool SetPlayPosition(QString peer_id,int pos);
+    //0-pause 100-continue
+    bool SetPlaySpeed(QString peer_id,int speed);
 
     void setSavePath(const QString &path);
     QString savePath() const;

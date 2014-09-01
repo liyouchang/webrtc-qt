@@ -23,19 +23,8 @@
             android:textSize="@dimen/title_text_size" />
 
         <ImageButton
-            android:id="@+id/btn_device_share"
-            android:layout_width="40dp"
-            android:layout_height="@dimen/title_height_size"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/btn_add_device"
-            android:background="@drawable/title_more_xml"
-            android:contentDescription="@null"
-            android:gravity="center_vertical|center_horizontal"
-            android:src="@drawable/device_share" />
-
-        <ImageButton
             android:id="@+id/btn_add_device"
-            android:layout_width="40dp"
+            android:layout_width="60dp"
             android:layout_height="@dimen/title_height_size"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
@@ -52,7 +41,7 @@
         android:layout_below="@+id/rl_title_bar"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="invisible" >
+        android:visibility="gone" >
 
         <ImageView
             android:id="@+id/iv_device_list"
@@ -77,13 +66,22 @@
             android:textSize="16.0sp" />
     </RelativeLayout>
 
-    <ListView
-        android:id="@+id/device_list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+    <com.video.main.PullToRefreshHeaderView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/own_pull_refresh_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/rl_title_bar"
-        android:cacheColorHint="#00000000"
-        android:divider="@color/orange"
-        android:dividerHeight="1dp" />
+        android:background="@color/page_bg_grey"
+        android:orientation="vertical" >
+
+        <ListView
+            android:id="@+id/device_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:cacheColorHint="#00000000"
+            android:divider="@color/orange"
+            android:dividerHeight="1dp" />
+    </com.video.main.PullToRefreshHeaderView>
 
 </RelativeLayout>

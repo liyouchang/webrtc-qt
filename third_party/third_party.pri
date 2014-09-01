@@ -42,5 +42,5 @@ android{
 
 }
 
-DESTDIR = $$output_dir/libs
-OBJECTS_DIR = $$output_dir/obj/$$TARGET
+#DESTDIR = $$output_dir/libs
+#OBJECTS_DIR = $$output_dir/obj/$$TARGET

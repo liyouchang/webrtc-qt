@@ -113,7 +113,14 @@ V0.32
     peer_id(string): 通道id
 	pos(int): 位置 百分比 1-100
 
+12. SetPlaySpeed(QString peer_id,int speed);
 	
+	设置远程录像回放速度
+	
+	参数说明: 
+    peer_id(string): 通道id
+	speed(int): 0-暂停 100-继续
+
 ###回调说明:
 
 1. TunnelOpened(peerId);

@@ -399,7 +399,7 @@ void KeMessageProcessClient::RecvPlayFileResp(talk_base::Buffer &msgData)
                    msg->frameResolution;
         this->videoInfo_.frameRate = msg->frameRate;
         this->videoInfo_.frameResolution = msg->frameResolution;
-        //client->OnRecordStatus(this->peer_id(),kRecordStartPlay,msg->playPos,msg->playSpeed);
+        client->OnRecordStatus(this->peer_id(),kRecordStartPlay,msg->playPos,msg->playSpeed);
         return;
     }else if(msg->resp == RESP_NAK){
         LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<

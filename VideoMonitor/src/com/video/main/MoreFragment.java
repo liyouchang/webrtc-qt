@@ -19,8 +19,8 @@ import com.video.utils.OkCancelDialog;
 
 public class MoreFragment extends Fragment implements OnClickListener {
 
+	private View rootView;
 	private FragmentActivity mActivity;
-	private View mView;
 	
 	private Button button_logout;
 	private PreferData preferData = null;
@@ -31,7 +31,14 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
-		return inflater.inflate(R.layout.more, container, false);
+		if (rootView == null) {
+			rootView = inflater.inflate(R.layout.more, null);
+		}
+		container = (ViewGroup) rootView.getParent();
+		if (container != null) {
+			container.removeView(rootView);
+		}
+		return rootView;
 	}
 
 	@Override
@@ -39,32 +46,28 @@ public class MoreFragment extends Fragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onActivityCreated(savedInstanceState);
 		mActivity = getActivity();
-		mView = getView();
 		
 		initView();
 		initData();
 	}
 	
 	private void initView() {
-		Button button_modify_pwd = (Button)mView.findViewById(R.id.btn_modify_pwd);
+		Button button_shared_device = (Button)rootView.findViewById(R.id.btn_shared_device);
+		button_shared_device.setOnClickListener(this);
+		
+		Button button_modify_pwd = (Button)rootView.findViewById(R.id.btn_modify_pwd);
 		button_modify_pwd.setOnClickListener(this);
 		
-		Button button_setting = (Button)mView.findViewById(R.id.btn_setting);
+		Button button_setting = (Button)rootView.findViewById(R.id.btn_setting);
 		button_setting.setOnClickListener(this);
 		
-//		Button button_device_manager = (Button)mView.findViewById(R.id.btn_device_manager);
-//		button_device_manager.setOnClickListener(this);
-		
-		Button button_wifi = (Button)mView.findViewById(R.id.btn_wifi);
-		button_wifi.setOnClickListener(this);
-		
-		Button button_help = (Button)mView.findViewById(R.id.btn_help);
+		Button button_help = (Button)rootView.findViewById(R.id.btn_help);
 		button_help.setOnClickListener(this);
 		
-		Button button_about = (Button)mView.findViewById(R.id.btn_about);
+		Button button_about = (Button)rootView.findViewById(R.id.btn_about);
 		button_about.setOnClickListener(this);
 		
-		button_logout = (Button)mView.findViewById(R.id.btn_logout);
+		button_logout = (Button)rootView.findViewById(R.id.btn_logout);
 		button_logout.setOnClickListener(this);
  	}
 	
@@ -111,8 +114,13 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				preferData.deleteItem("AutoLogin");
 			}
 		}
+		
+		// 发送注销数据
+		MainApplication.getInstance().sendLogoutData();
+		
 		// 终止主程序和服务广播
 		MainApplication.getInstance().stopActivityandService();
+		
 		// 启动登录界面
 		startActivity(new Intent(mActivity, LoginActivity.class));
 		mActivity.finish();
@@ -122,20 +130,16 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {
+			case R.id.btn_shared_device:
+				startActivity(new Intent(mActivity, SharedActivity.class));
+				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
+				break;
 			case R.id.btn_modify_pwd:
 				startActivityForResult(new Intent(mActivity, ModifyPwdActivity.class), 1);
 				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_setting:
 				startActivity(new Intent(mActivity, SettingsActivity.class));
-				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
-				break;
-//			case R.id.btn_device_manager:
-//				startActivity(new Intent(mActivity, DeviceManagerActivity.class));
-//				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
-//				break;
-			case R.id.btn_wifi:
-				startActivity(new Intent(mActivity, WiFiActivity.class));
 				mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_help:

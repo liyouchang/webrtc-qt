@@ -13,7 +13,7 @@
         android:layout_alignParentTop="true"
         android:background="@color/title_bg_black"
         android:orientation="horizontal" >
-        
+
         <ImageButton
             android:id="@+id/btn_shared_back"
             android:layout_width="60dp"
@@ -29,10 +29,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="@string/devices_shared"
+            android:text="@string/share_device_title"
             android:textColor="@color/orange"
             android:textSize="@dimen/title_text_size" />
-
     </RelativeLayout>
 
     <RelativeLayout
@@ -42,7 +41,7 @@
         android:layout_below="@+id/rl_title_bar"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="invisible" >
+        android:visibility="gone" >
 
         <ImageView
             android:id="@+id/iv_shared_list"
@@ -67,13 +66,22 @@
             android:textSize="16.0sp" />
     </RelativeLayout>
 
-    <ListView
-        android:id="@+id/shared_list"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+    <com.video.main.PullToRefreshHeaderView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/shared_pull_refresh_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/rl_title_bar"
-        android:cacheColorHint="#00000000"
-        android:divider="@color/orange"
-        android:dividerHeight="1dp" />
+        android:background="@color/page_bg_grey"
+        android:orientation="vertical" >
+
+        <ListView
+            android:id="@+id/shared_list"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:cacheColorHint="#00000000"
+            android:divider="@color/orange"
+            android:dividerHeight="1dp" />
+    </com.video.main.PullToRefreshHeaderView>
 
 </RelativeLayout>

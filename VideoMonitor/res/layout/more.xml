@@ -25,13 +25,27 @@
             android:paddingBottom="10dp" >
 
             <Button
+                android:id="@+id/btn_shared_device"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/more_frgment_widget_height"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/button_white_style"
+                android:drawableLeft="@drawable/device_share"
+                android:drawablePadding="10dp"
+                android:drawableRight="@drawable/icon_button_right"
+                android:gravity="center_vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="10dp"
+                android:text="@string/share_device_title"
+                android:textColor="@color/light_black"
+                android:textSize="18sp" />
+
+            <Button
                 android:id="@+id/btn_modify_pwd"
                 android:layout_width="fill_parent"
                 android:layout_height="@dimen/more_frgment_widget_height"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/button_updown_alone"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/button_white_style"
                 android:drawableLeft="@drawable/modify"
                 android:drawablePadding="10dp"
                 android:drawableRight="@drawable/icon_button_right"
@@ -39,17 +53,20 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="10dp"
                 android:text="@string/modify_pwd"
-                android:textColor="@color/title_bg_black"
-                android:textSize="18dp" />
+                android:textColor="@color/light_black"
+                android:textSize="18sp" />
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@color/page_bg_grey" />
 
             <Button
                 android:id="@+id/btn_setting"
                 android:layout_width="fill_parent"
                 android:layout_height="@dimen/more_frgment_widget_height"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/button_up"
+                android:layout_marginTop="-1.0dip"
+                android:background="@drawable/button_white_style"
                 android:drawableLeft="@drawable/setting"
                 android:drawablePadding="10dp"
                 android:drawableRight="@drawable/icon_button_right"
@@ -57,54 +74,15 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="10dp"
                 android:text="@string/setting"
-                android:textColor="@color/title_bg_black"
-                android:textSize="18dp" />
-
-            <!--
-                 <Button
-                android:id="@+id/btn_device_manager"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:background="@drawable/button_updown_middle"
-                android:drawableLeft="@drawable/icon_device_name"
-                android:drawablePadding="10dp"
-                android:drawableRight="@drawable/icon_button_right"
-                android:gravity="center_vertical"
-                android:paddingLeft="15dp"
-                android:paddingRight="10dp"
-                android:text="@string/device_manager"
-                android:textColor="@color/title_bg_black"
-                android:textSize="18dp" />
-            -->
-
-            <Button
-                android:id="@+id/btn_wifi"
-                android:layout_width="fill_parent"
-                android:layout_height="@dimen/more_frgment_widget_height"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="-1.0dip"
-                android:background="@drawable/button_down"
-                android:drawableLeft="@drawable/wifi"
-                android:drawablePadding="10dp"
-                android:drawableRight="@drawable/icon_button_right"
-                android:gravity="center_vertical"
-                android:paddingLeft="15dp"
-                android:paddingRight="10dp"
-                android:text="@string/set_wifi"
-                android:textColor="@color/title_bg_black"
-                android:textSize="18dp" />
+                android:textColor="@color/light_black"
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btn_help"
                 android:layout_width="fill_parent"
                 android:layout_height="@dimen/more_frgment_widget_height"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/button_up"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/button_white_style"
                 android:drawableLeft="@drawable/help"
                 android:drawablePadding="10dp"
                 android:drawableRight="@drawable/icon_button_right"
@@ -112,17 +90,20 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="10dp"
                 android:text="@string/help"
-                android:textColor="@color/title_bg_black"
-                android:textSize="18dp" />
+                android:textColor="@color/light_black"
+                android:textSize="18sp" />
+
+            <View
+                android:layout_width="fill_parent"
+                android:layout_height="1dp"
+                android:background="@color/page_bg_grey" />
 
             <Button
                 android:id="@+id/btn_about"
                 android:layout_width="fill_parent"
                 android:layout_height="@dimen/more_frgment_widget_height"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
                 android:layout_marginTop="-1.0dip"
-                android:background="@drawable/button_down"
+                android:background="@drawable/button_white_style"
                 android:drawableLeft="@drawable/about"
                 android:drawablePadding="10dp"
                 android:drawableRight="@drawable/icon_button_right"
@@ -130,8 +111,8 @@
                 android:paddingLeft="15dp"
                 android:paddingRight="10dp"
                 android:text="@string/about"
-                android:textColor="@color/title_bg_black"
-                android:textSize="18dp" />
+                android:textColor="@color/light_black"
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/btn_logout"
@@ -139,12 +120,12 @@
                 android:layout_height="@dimen/more_frgment_widget_height"
                 android:layout_marginLeft="5dp"
                 android:layout_marginRight="5dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="15dp"
                 android:background="@drawable/redbtn_selector"
                 android:gravity="center_vertical|center"
                 android:text="@string/logout"
                 android:textColor="@color/white"
-                android:textSize="20dp" />
+                android:textSize="20sp" />
         </LinearLayout>
     </ScrollView>
 

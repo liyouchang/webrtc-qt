@@ -1,7 +1,8 @@
 #include "kesdkdevice.h"
 
 
-#include <regex.h>
+//#include <regex.h>
+#include <time.h>
 
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
@@ -16,6 +17,9 @@
 #include "keapi/common_api.h"
 #include "keapi/common_define.h"
 #include "keapi/media_api.h"
+#include "keapi/store_api.h"
+#include "keapi/web_api.h"
+#include "keapi/alarm_api.h"
 
 #include "libjingle_app/defaults.h"
 #include "libjingle_app/jsonconfig.h"
@@ -53,6 +57,11 @@ int ResoToFramType(int resoValue){
     }
 }
 
+int netAppCallBack(void * pData)
+{
+    printf("%s:%d to do\n",__FUNCTION__,__LINE__);
+    return 0;
+}
 
 KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
     video2_handle_(kNullStreamHandle),video3_handle_(kNullStreamHandle),
@@ -60,49 +69,55 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
 {
 
     CONFIG_Initialize();
+    SYSTEM_Initialize();
+
+    MEDIA_Initialize();
+    clock_handle = CLOCK_Open(CLOCK_TYPE_HIRTC);
+    STORE_Initialize();
 
 
     deviceThread = talk_base::Thread::Current();
 //    deviceThread = new talk_base::Thread();
 //    deviceThread->Start();
 
+    struct NETPARAM	net;
+    CONFIG_Register_Callback(CONFIG_TYPE_NET,netAppCallBack);
+//    CONFIG_Get(CONFIG_TYPE_NET,(void *)&net);
+//    printf("localIP:%d.%d.%d.%d\n",net.localIP[0],net.localIP[1],net.localIP[2],net.localIP[3]);
+//    net.localIP[0] = 10;
+//    net.localIP[1] = 10;
+//    net.localIP[2] = 0;
+//    net.localIP[3] = 230;
+//    net.gateIP[0]    = 10;
+//    net.gateIP[1]    = 10;
+//    net.gateIP[2]    = 0;
+//    net.gateIP[3]    = 1;
+//    net.netMask[0]   = 255;
+//    net.netMask[1]   = 255;
+//    net.netMask[2]   = 255;
+//    net.netMask[3]   = 0;
+//    memcpy(net.username,"system",8);
+//    memcpy(net.password,"123456",8);
+//    CONFIG_Set(CONFIG_TYPE_NET,(void *)&net);
+//    CONFIG_Get(CONFIG_TYPE_NET,(void *)&net);
+//    printf("localIP:%d.%d.%d.%d  username:%s  password:%s\n",net.localIP[0],net.localIP[1],net.localIP[2],net.localIP[3],net.username,net.password);
 
-    //    struct NETPARAM	net;
-    //    CONFIG_Get(CONFIG_TYPE_NET,(void *)&net);
-    //    LOG_F(INFO)<< "local ip is "<<(int)net.localIP[0]<<"."<<(int)net.localIP[1]<<"."<<
-    //                 (int)net.localIP[2]<<"."<<(int)net.localIP[3];
-    //    std::string ret((const char *)net.macAddress);
-    //    LOG_F(INFO)<<"get mac id is "<<ret;
-
-
-    //    NET_Initialize();
-    //    struct MEDIAPARAM media;
-    //    CONFIG_Get(CONFIG_TYPE_MEDIA,(void *)&media);
-    //    printf("resolution %d frame_rate %d rate_ctrl_mode %d bitrate %d piclevel %d\n",
-    //            media.main[0].resolution,media.main[0].frame_rate,
-    //            media.main[0].rate_ctrl_mode,media.main[0].bitrate,
-    //            media.main[0].piclevel);
-
-    //    media.main[0].frame_rate = 25;
-    //    media.main[0].resolution = RESO_720P;
-    //    media.main[0].bitrate = 512;
-    //    media.main[0].piclevel = 0;
-    //    media.minor[0].frame_rate = 25;
-    //    media.minor[0].resolution = RESO_D1;
-    //    media.minor[0].bitrate = 256;
-    //    media.minor[0].piclevel = 0;
-
-    //    CONFIG_Set(CONFIG_TYPE_MEDIA,(void *)&media);
-
+    NET_Initialize();
+    ALARM_Initialize();
+//    sleep(10);
+    WEB_Initialize();
 }
 
 KeSdkDevice::~KeSdkDevice()
 {
-    MEDIA_Cleanup();
+    STORE_Cleanup();
+    CLOCK_Close(clock_handle);
+    WEB_Cleanup();
+    ALARM_Cleanup();
     NET_Cleanup();
+    MEDIA_Cleanup();
+    SYSTEM_Cleanup();
     CONFIG_Cleanup();
-
-
 }
 
 bool KeSdkDevice::Init(kaerp2p::PeerTerminalInterface *t)
@@ -115,7 +130,6 @@ bool KeSdkDevice::Init(kaerp2p::PeerTerminalInterface *t)
     RegisterCallBack::Instance()->SignalAudioFrame.connect(
                 this,&KeSdkDevice::SendAudioFrame);
 
-    MEDIA_Initialize();
 
     deviceThread->PostDelayed(kCheckStreamDelay,this,MSG_CheckCloseStream);
     //    video1_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,0);
@@ -150,11 +164,12 @@ void KeSdkDevice::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::s
 
 void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, int len)
 {
-    //    LOG_T_F(INFO)<<" talk data "<< len;
     KEFrameHead * head = (KEFrameHead *)data;
+//    LOG_T_F(INFO)<<" talk data "<< head->frameLen;
+    const int nalLen = 4;
     int dataPos =  sizeof(KEFrameHead);
     if(head->frameLen == len - dataPos){
-        audioStreamDown(const_cast<char *>(data+dataPos),head->frameLen);
+        MEDIA_Audio_Talk(const_cast<char *>(data+dataPos),head->frameLen);
     }else{
         LOG_F(WARNING)<<"tal from "<<peer_id<<" frame format error";
     }
@@ -184,9 +199,10 @@ void KeSdkDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmess
             LOG(WARNING)<<"get query_record value error from" << peerId ;
             return;
         }
-        std::string condition = JsonValueToString(jcondition);
-        LOG_F(INFO)<<condition;
-        //OnRecvRecordQuery(peerId,condition);
+//        std::string condition = JsonValueToString(jcondition);
+//        LOG_F(INFO)<<condition;
+        QueryRecord(jcondition);
+
     }
     else if(command.compare("wifi_info") == 0){
         Json::Value jwifi = GetWifiJsonArray();
@@ -249,6 +265,7 @@ void KeSdkDevice::SendVideoFrame(const char *data, int len, int level)
                 static_cast<kaerp2p::KeMessageProcessCamera *>(processes_[i]);
         if(camProcess->video_status == level){
             camProcess->OnVideoData(data,len);
+            LOG_F(INFO)<<"send video "<< camProcess->peer_id();
         }
     }
 }
@@ -422,7 +439,7 @@ bool KeSdkDevice::SetPtz(std::string control, int param)
         return false;
     }
 //
-    int ret = Control_MOTOR(0,cmd,kDefaultSpeed,param);
+    int ret = MOTOR_Control(0,cmd,kDefaultSpeed,param);
     LOG_F(INFO)<<" Control_MOTOR result "<< ret;
     return true;
 }
@@ -476,6 +493,83 @@ bool KeSdkDevice::SetWifiInfo(Json::Value jparam)
     }
 }
 
+bool StringToClock(std::string strTime,st_clock_t * time)
+{
+    struct tm tm_t;
+    if(strptime(strTime.c_str(),"%Y/%m/%d %H:%M:%S", &tm_t) == NULL){
+        return false;
+    }
+    time->year = tm_t.tm_year;
+    time->month = tm_t.tm_mon;
+    time->day = tm_t.tm_mday;
+    time->hour  = tm_t.tm_hour;
+    time->minute = tm_t.tm_min;
+    time->second = tm_t.tm_sec;
+    return true;
+}
+std::string ClockToString(st_clock_t  time)
+{
+    char timebuf[64];
+    //2014/04/17 17:51:00
+    sprintf(timebuf,"%04d%02d%02d%02d%02d%02d",time.year,time.month,time.day,time.hour,time.minute,time.second);
+    return timebuf;
+}
+
+Json::Value KeSdkDevice::QueryRecord(Json::Value jcondition)
+{    
+
+    std::string startTime,endTime;
+    int offset,toQuery;
+
+    if( GetStringFromJsonObject(jcondition,"startTime",&startTime) ||
+           GetStringFromJsonObject(jcondition,"endTime",&endTime) ||
+           GetIntFromJsonObject(jcondition,"offset",&offset) ||
+           GetIntFromJsonObject(jcondition,"toQuery",&toQuery))
+    {
+
+    }
+
+
+    st_clock_t startClock,endClock;
+    st_store_list_t * stList  = new st_store_list_t[toQuery];
+    int list_num  = 0;
+    if(StringToClock(startTime,&startClock) && StringToClock(startTime,&startClock))
+    {
+       list_num = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,100,stList);
+
+    }else{
+        LOG_F(WARNING)<<"parse input time error";
+    }
+
+//    st_clock_t startTime;
+//    startTime.year = 2014;
+//    startTime.month = 8;
+//    startTime.day = 25;
+//    startTime.hour = 0;
+//    startTime.minute = 0;
+//    startTime.second = 0;
+//    st_clock_t endTime;
+//    endTime.year = 2014;
+//    endTime.month = 8;
+//    endTime.day = 28;
+//    endTime.hour = 23;
+//    endTime.minute = 59;
+//    endTime.second = 59;
+//  printf("STORE_Get_File_List = %d\n",list_num);
+
+
+    Json::Value jrecordList(Json::arrayValue);
+    for (int i = 0;i < list_num;i++) {
+        Json::Value jrecord;
+        jrecord["fileName"] = stList[i].filePath;
+//        jrecord["fileDate"] = stList[i].stEndTime;
+        jrecord["fileSize"] = stList[i].iFileSize;
+        jrecordList.append(jrecord);
+    }
+    return jrecordList;
+
+}
+
 
 KeSdkDevice::RegisterCallBack::RegisterCallBack()
 {
@@ -492,6 +586,7 @@ KeSdkDevice::RegisterCallBack *KeSdkDevice::RegisterCallBack::Instance(){
 
 int KeSdkDevice::RegisterCallBack::MainStreamCallBack(char *pFrameData, int iFrameLen)
 {
+    LOG(INFO) <<" MainStreamCallBack ---"<< iFrameLen;
     RegisterCallBack::Instance()->SignalVideoFrame(pFrameData,iFrameLen,1);
 }
 
@@ -564,25 +659,25 @@ void KeSdkDevice::MediaStreamOpen_d(int level)
     switch (level) {
     case kLevelMainStream:
         if(video1_handle_ == kNullStreamHandle){
-            video1_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,0);
+            video1_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,0,0);
             LOG_F(INFO)<<"open video1 stream " << video1_handle_;
         }
         break;
     case kLevelSubStream:
         if( video2_handle_ == kNullStreamHandle){
-            video2_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,1);
+            video2_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,1,0);
             LOG_F(INFO)<<"open video2 stream"<<video2_handle_;
         }
         break;
     case kLevelExtStream:
         if( video3_handle_ == kNullStreamHandle){
-            video3_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,2);
+            video3_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,2,0);
             LOG_F(INFO)<<"open video3 stream"<<video3_handle_;
         }
         break;
     case kLevelAudioStream:
         if( audio_handle_ == kNullStreamHandle ){
-            audio_handle_ = FIFO_Stream_Open(FIFO_STREAM_AUDIO,0,0);
+            audio_handle_ = FIFO_Stream_Open(FIFO_STREAM_AUDIO,0,0,0);
             LOG_F(INFO)<<"open audio stream"<<audio_handle_;
         }
         break;

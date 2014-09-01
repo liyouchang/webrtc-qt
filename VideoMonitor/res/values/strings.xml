@@ -2,11 +2,21 @@
 <resources>
 
     <string name="app_name">视界通</string>
-    <string name="app_version">版本: V1.1.7</string>
+    <string name="app_version">版本: V1.1.8</string>
     <string name="company_website">公司网址: www.kaer.cn</string>
     <string name="company_phone">公司电话: 4006080787</string>
     <string name="company">山东卡尔电气股份有限公司</string>
     <string name="copyright">版权所有: 山东卡尔电气股份有限公司</string>
+    
+    <string name="own">实时</string>
+    <string name="history">历史</string>
+    <string name="msg">消息</string>
+    <string name="more">更多</string>
+    
+    <string name="btn_ok">确定</string>
+    <string name="btn_back">返回</string>
+    <string name="add">添加</string>
+    <string name="app_exit">退出应用</string>
     
     <string name="use_now">立即体验</string>
     <string name="login">登录</string>
@@ -29,14 +39,6 @@
     <string name="new_repwd">请再次输入新密码</string>
     <string name="hint_wifi_ssid">点击搜索WiFi</string>
     <string name="hint_wifi_pwd">请输入WiFi密码</string>
-    
-    <string name="btn_ok">确定</string>
-    <string name="btn_back">返回</string>
-    <string name="own">实时</string>
-    <string name="msg">消息</string>
-    <string name="add">添加</string>
-    <string name="more">更多</string>
-    <string name="app_exit">退出应用</string>
     
     <string name="network_upgrade">升级APK</string>
     <string name="network_check_upgrade">检查升级应用程序</string>
@@ -80,6 +82,7 @@
     <string name="scan_qr">扫描二维码</string>
     <string name="modify_device_name">修改终端名称</string>
     
+    <string name="my_device_shared_manager">设备分享管理</string>
     <string name="devices_shared">我的分享</string>
     <string name="share_device_title">分享设备</string>
     <string name="share_user_title">分享用户</string>

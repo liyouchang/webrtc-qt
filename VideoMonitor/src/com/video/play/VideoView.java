@@ -99,7 +99,9 @@ public class VideoView extends View {
 		isPlayVideo = false;
 		TunnelCommunication.videoDataCache.clearBuffer();
 		try {
-			playVideoThread.join();
+			if (playVideoThread != null) {
+				playVideoThread.join();
+			}
 			Utils.log("【停止视频】");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
