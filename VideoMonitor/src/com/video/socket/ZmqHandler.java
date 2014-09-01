@@ -9,11 +9,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 
 import com.video.R;
-import com.video.data.PreferData;
+import com.video.data.DeviceValue;
 import com.video.data.Value;
 import com.video.data.XmlMessage;
 import com.video.main.MainActivity;
@@ -61,6 +62,7 @@ public class ZmqHandler extends Handler {
 					item.put("deviceBg", obj.getString("PictureURL"));
 				}
 				item.put("LinkState", "notlink"); // 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
+				item.put(DeviceValue.HASH_PLAYER_CLARITY, String.valueOf(DeviceValue.NORMAL_CLARITY));
 				list.add(item);
 	    	}
 	    	return list;
@@ -241,16 +243,15 @@ public class ZmqHandler extends Handler {
 			if (type.equals("Backstage_message")) {
 				Value.isNeedReqAlarmListFlag = true;
 				Value.newAlarmMessageCount++;
-				PreferData preferData = new PreferData(MainActivity.mContext);
 				int alarmCount = 0;
-				if (preferData.isExist("AlarmCount")) {
-					alarmCount = preferData.readInt("AlarmCount");
+				if (MainApplication.getInstance().preferData.isExist("AlarmCount")) {
+					alarmCount = MainApplication.getInstance().preferData.readInt("AlarmCount");
 				}
 				alarmCount++;
-				preferData.writeData("AlarmCount", alarmCount);
+				MainApplication.getInstance().preferData.writeData("AlarmCount", alarmCount);
 				MainActivity.mainHandler.obtainMessage(0, alarmCount, 0).sendToTarget();
 				
-				if (MainActivity.isCurrentTab(3)) {
+				if (MainActivity.isCurrentTab(MainActivity.TAB_THREE)) {
 					Intent intent = new Intent();
 					intent.setAction(BackstageService.BACKSTAGE_MESSAGE_ACTION);
 					MainApplication.getInstance().sendBroadcast(intent);
@@ -297,17 +298,23 @@ public class ZmqHandler extends Handler {
 			else if ((Value.ownFragmentRequestAlarmFlag) && (type.equals("Client_ReqAlarm"))) {
 				int resultCode = obj.getInt("Result");
 				if (resultCode == 0) {
-					Value.isNeedReqAlarmListFlag = false;
-					XmlMessage xmlData = new XmlMessage(MainApplication.getInstance());
-					JSONArray jsonArray = obj.getJSONArray("AlarmData");
-					ArrayList<HashMap<String, String>> msgList = new ArrayList<HashMap<String, String>>();
-					msgList = getReqAlarmList(jsonArray);
-					if (msgList != null) {
-						xmlData.updateList(msgList);
-					} else {
-						xmlData.deleteAllItem();
-					}
 					Utils.log("【请求报警数据成功】");
+					Value.isNeedReqAlarmListFlag = false;
+					
+					if (!obj.isNull("AlarmData")) {
+						ArrayList<HashMap<String, String>> msgList = new ArrayList<HashMap<String, String>>();
+						XmlMessage xmlData = new XmlMessage(MainApplication.getInstance());
+						JSONArray jsonArray = obj.getJSONArray("AlarmData");
+						msgList = getReqAlarmList(jsonArray);
+						if (msgList != null) {
+							xmlData.updateList(msgList);
+						} else {
+							xmlData.deleteAllItem();
+						}
+					}
+					
+					MainApplication.getInstance().preferData.writeData("msgRefreshTime", "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss"));
+					MainApplication.getInstance().preferData.writeData("msgRefreshTerminal", "终端: "+Build.MODEL);
 				} else {
 					Utils.log("【请求报警数据失败】");
 				}

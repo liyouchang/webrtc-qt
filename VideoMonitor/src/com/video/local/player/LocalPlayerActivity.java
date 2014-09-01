@@ -3,7 +3,7 @@ package com.video.local.player;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.LinkedList;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -35,11 +35,11 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.video.R;
 import com.video.local.player.LocalSoundView.OnVolumeChangedListener;
 import com.video.local.player.LocalVideoView.MySizeChangeLinstener;
 
+@SuppressLint("HandlerLeak")
 public class LocalPlayerActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
@@ -364,11 +364,11 @@ public class LocalPlayerActivity extends Activity implements OnClickListener {
 					setVideoScale(SCREEN_FULL);
 				}
 				isFullScreen = !isFullScreen;
-
 				if (isControllerShow) {
 					showController();
 				}
 				hideControllerDelay();
+				sendHandlerMsg(myHandler, IS_PAUSE_PLAYER);
 				break;
 			case R.id.ib_front_file: // 前一个视频文件
 				isOnline = false;
@@ -451,12 +451,21 @@ public class LocalPlayerActivity extends Activity implements OnClickListener {
 		}
 		super.onActivityResult(requestCode, resultCode, data);
 	}
-
+	
+	/**
+	 * 发送Handler消息
+	 */
+	public void sendHandlerMsg(Handler handler, int what) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessage(msg);
+	}
+	
 	private final static int PROGRESS_CHANGED = 0;
 	private final static int HIDE_CONTROLER = 1;
+	private final static int IS_PAUSE_PLAYER = 2;
 
 	Handler myHandler = new Handler() {
-
 		@Override
 		public void handleMessage(Message msg) {
 			// TODO Auto-generated method stub
@@ -482,6 +491,15 @@ public class LocalPlayerActivity extends Activity implements OnClickListener {
 					break;
 				case HIDE_CONTROLER:// 隐藏控制器
 					hideController();// 隐藏控制器
+					break;
+				case IS_PAUSE_PLAYER:
+					if (isPaused) {
+						videoView.pause();
+						button_play_pause.setImageResource(R.drawable.local_player_play);
+					} else {
+						videoView.start();
+						button_play_pause.setImageResource(R.drawable.local_player_pause);
+					}
 					break;
 			}
 
@@ -650,9 +668,9 @@ public class LocalPlayerActivity extends Activity implements OnClickListener {
 				getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 				break;
 		}
-		videoView.start();
-		button_play_pause.setImageResource(R.drawable.local_player_pause);
-		isPaused = false;
+//		videoView.start();
+//		button_play_pause.setImageResource(R.drawable.local_player_pause);
+//		isPaused = false;
 	}
 
 	private int findAlphaFromSound() {// 设置声音按键透明度

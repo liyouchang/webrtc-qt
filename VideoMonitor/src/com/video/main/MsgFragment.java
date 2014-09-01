@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -31,6 +32,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ListView;
 import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.video.R;
@@ -49,10 +51,11 @@ import com.video.utils.OkOnlyDialog;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
+@SuppressLint("HandlerLeak")
 public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRefreshListener, OnFooterRefreshListener {
 
+	private View rootView;
 	private FragmentActivity mActivity;
-	private View mView;
 	private XmlMessage xmlData = null;
 	private PreferData preferData = null;
 	private Dialog mDialog = null;
@@ -71,7 +74,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private int listSize = 0;
 	private int listPosition = 0;
 	private PopupWindow mPopupWindow;
-//	private RelativeLayout noMsgLayout = null;
+	private RelativeLayout noMsgLayout = null;
 	
 	private static ArrayList<HashMap<String, String>> msgList = null;
 	private MessageItemAdapter msgAdapter = null;
@@ -87,16 +90,21 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
-		return inflater.inflate(R.layout.msg, container, false);
+		if (rootView == null) {
+			rootView = inflater.inflate(R.layout.msg, null);
+		}
+		container = (ViewGroup) rootView.getParent();
+		if (container != null) {
+			container.removeView(rootView);
+		}
+		return rootView;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onActivityCreated(savedInstanceState);
-		
 		mActivity = getActivity();
-		mView = getView();
 		
 		initView();
 		initData();
@@ -107,7 +115,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		// TODO Auto-generated method stub
 		super.onResume();
 		if (Value.isLoginSuccess) {
-			if (MainActivity.isCurrentTab(3)) {
+			if (MainActivity.isCurrentTab(MainActivity.TAB_THREE)) {
 				ZmqHandler.mHandler = handler;
 				//需要请求报警消息
 				if (Value.isNeedReqAlarmListFlag) {
@@ -127,31 +135,39 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 				}
 			}
 		} else {
-			final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
-			myDialog.setTitle("温馨提示");
-			myDialog.setMessage("网络不稳定，请重新登录！");
-			myDialog.setPositiveButton("确认", new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					myDialog.dismiss();
-					if (Value.beatHeartFailFlag) {
-						Value.beatHeartFailFlag = false;
+			if (Utils.isNetworkAvailable(mActivity)) {
+				final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
+				myDialog.setTitle("温馨提示");
+				myDialog.setMessage("网络不稳定，请重新登录！");
+				myDialog.setPositiveButton("确认", new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						myDialog.dismiss();
+						// 发送注销数据
+						MainApplication.getInstance().sendLogoutData();
+						
+						// 终止主程序和服务广播
+						MainApplication.getInstance().stopActivityandService();
+						
+						//登录界面
+						mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
+						mActivity.finish();
 					}
-					//登录界面
-					mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
-				}
-			});
+				});
+			} else {
+				Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 	
 	private void initView() {
-		lv_list = (ListView) mView.findViewById(R.id.msg_list);
+		lv_list = (ListView) rootView.findViewById(R.id.msg_list);
 		lv_list.setOnItemClickListener(new OnItemClickListenerImpl());
 		lv_list.setOnItemLongClickListener(new OnItemLongClickListenerImpl());
 		
-//		noMsgLayout = (RelativeLayout) mView.findViewById(R.id.rl_no_alert_msg_image);
+		noMsgLayout = (RelativeLayout) rootView.findViewById(R.id.rl_no_alert_msg_image);
 		
-		mPullToRefreshView = (PullToRefreshView) mView.findViewById(R.id.main_pull_refresh_view);
+		mPullToRefreshView = (PullToRefreshView) rootView.findViewById(R.id.main_pull_refresh_view);
 		mPullToRefreshView.setOnHeaderRefreshListener(this);
         mPullToRefreshView.setOnFooterRefreshListener(this);
 	}
@@ -189,6 +205,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			listSize = msgList.size();
 			msgAdapter = new MessageItemAdapter(mActivity, msgList);
 			lv_list.setAdapter(msgAdapter);
+		}
+		if (listSize > 0) {
+			noMsgLayout.setVisibility(View.GONE);
+			mPullToRefreshView.setVisibility(View.VISIBLE);
+		} else {
+			noMsgLayout.setVisibility(View.VISIBLE);
+			mPullToRefreshView.setVisibility(View.GONE);
 		}
 	}
 	
@@ -403,6 +426,13 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 							MainApplication.getInstance().requestUnreadAlarmCountEvent();
 							//实时更新列表的大小和未读报警消息的数量
 							listSize = xmlData.getListSize();
+							if (listSize > 0) {
+								noMsgLayout.setVisibility(View.GONE);
+								mPullToRefreshView.setVisibility(View.VISIBLE);
+							} else {
+								noMsgLayout.setVisibility(View.VISIBLE);
+								mPullToRefreshView.setVisibility(View.GONE);
+							}
 						} else {
 							Toast.makeText(mActivity, msg.obj+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
@@ -411,11 +441,6 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 					}
 					break;
 			}
-//			if (listSize == 0) {
-//				noMsgLayout.setVisibility(View.VISIBLE);
-//			} else {
-//				noMsgLayout.setVisibility(View.INVISIBLE);
-//			}
 		}
 	};
 	
@@ -464,11 +489,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			@Override
 			public void run() {
 				reqAlarmType = 1;
+				ZmqHandler.mHandler = handler;
 				String data = MainApplication.getInstance().generateRequestAlarmJson(xmlData.getMinUpdateID(), 5);
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, data);
 			}
-		}, 1000);
+		}, 500);
 	}
 	
 	/**
@@ -481,11 +507,12 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			@Override
 			public void run() {
 				reqAlarmType = 0;
+				ZmqHandler.mHandler = handler;
 				String data = MainApplication.getInstance().generateRequestAlarmJson(0, 5);
 				sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, data);
 			}
-		}, 1000);
+		}, 500);
 	}
 	
 	@Override
@@ -556,7 +583,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		pop_listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				
+				ZmqHandler.mHandler = handler;
 				HashMap<String, String> item = msgList.get(listPosition);
 				mMsgID = item.get("msgID");
 				String sendData = null;
@@ -603,10 +630,22 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	}
 	
 	@Override
+	public void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		if ((mDialog != null) && (mDialog.isShowing())) {
+			mDialog.dismiss();
+			mDialog = null;
+		}
+	}
+	
+	@Override
 	public void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		mActivity.unregisterReceiver(backstageMessageReceiver);
+		if (backstageMessageReceiver != null) {
+			mActivity.unregisterReceiver(backstageMessageReceiver);
+		}
 	}
 
 	@Override

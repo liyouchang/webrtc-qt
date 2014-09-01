@@ -2,10 +2,9 @@ package com.video.play;
 
 import java.io.File;
 import java.util.HashMap;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -44,7 +43,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.video.R;
 import com.video.data.Value;
 import com.video.service.BackstageService;
@@ -122,8 +120,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		PowerManager pm = (PowerManager)getSystemService(POWER_SERVICE);
 		wakeLock = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP|PowerManager.FULL_WAKE_LOCK, "WakeLock");
 		wakeLock.acquire(); // 设置屏幕保持唤醒
-		
-		initPlayer();
 	}
 	
 	@Override
@@ -131,6 +127,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		// TODO Auto-generated method stub
 		super.onStart();
 		isActivityShow = true;
+		initPlayer();
 	}
 	
 	private void initPlayer() {
@@ -224,7 +221,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			Utils.log("正在打开本地设备通道...");
 			video_clarity.setVisibility(View.INVISIBLE);
 		}
-		if (mDialog == null) {
+		if ((isActivityShow) && (mDialog == null)) {
 			mDialog = createLoadingDialog("正在请求视频，请稍后...");
 			mDialog.show();
 		}
@@ -275,6 +272,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		return loadingDialog;
 	}
 	
+	@SuppressLint("HandlerLeak")
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -320,6 +318,13 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					if (!audioThread.isAlive()) {
 						audioThread.start();
 						audioThread.startAudioThread();
+					}
+					if (isVoiceEnable) {
+						player_sound.setBackgroundResource(R.drawable.player_sound_enable);
+						audioThread.openAudioTrackVolume();
+					} else {
+						player_sound.setBackgroundResource(R.drawable.player_sound_disable);
+						audioThread.closeAudioTrackVolume();
 					}
 					if (isActivityShow) {
 						isPopupWindowShow = true;
@@ -847,6 +852,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		isActivityShow = false;
 	}
 
+	@SuppressLint("Wakelock")
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub

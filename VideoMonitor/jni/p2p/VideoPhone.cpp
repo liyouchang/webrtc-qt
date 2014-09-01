@@ -10,10 +10,11 @@
 #include "talk/base/logging.h"
 
 #include "libjingle_app/p2pconductor.h"
-
+#include "libjingle_app/peerterminal.h"
 KeJniTunnelClient * client = NULL;
-JniPeerConnection * jniPeer = NULL;
+JniPeerConnection * jniConnection = NULL;
 KeJniLocalClient * localClient = NULL;
+kaerp2p::PeerTerminal * jniPeer  = NULL;
 
 /*
  * @param jstrIceServers : the servers used by ice protocal to accomplish NAT traversal,
@@ -25,8 +26,9 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring jstrIceServers) {
   env->GetJavaVM(&JniUtil::GetInstance()->g_vm_);
   JniUtil::GetInstance()->g_obj_ = env->NewGlobalRef(thiz);
 
-  jniPeer = new JniPeerConnection();
+  jniConnection = new JniPeerConnection();
   client = new KeJniTunnelClient();
+  jniPeer = new kaerp2p::PeerTerminal(jniConnection);
   client->Init(jniPeer);
 
   kaerp2p::LocalTerminal * lt = new kaerp2p::LocalTerminal();
@@ -44,14 +46,19 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring jstrIceServers) {
 
 jint naTerminate(JNIEnv *env, jobject thiz)
 {
+	  if (client) {
+	      delete client;
+	      client = NULL;
+	    }
+
   if (jniPeer) {
       delete jniPeer;
       jniPeer = NULL;
     }
-  if (client) {
-      delete client;
-      client = NULL;
-    }
+  if(jniConnection){
+	  delete jniConnection;
+	  jniConnection = NULL;
+  }
   if(localClient) {
       delete localClient;
       localClient = NULL;
@@ -80,7 +87,7 @@ jint naMessageFromPeer(JNIEnv *env, jobject thiz,
     }
   const char * pid = env->GetStringUTFChars(peer_id, NULL);
   const char * pMsg = env->GetStringUTFChars(message,NULL);
-  jniPeer->OnMessageFromPeer(pid,pMsg);
+  jniConnection->OnMessageFromPeer(pid,pMsg);
   env->ReleaseStringUTFChars(peer_id,pid);
   env->ReleaseStringUTFChars(message,pMsg);
   return 0;

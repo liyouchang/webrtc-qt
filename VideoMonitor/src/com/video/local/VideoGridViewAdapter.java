@@ -64,6 +64,7 @@ public class VideoGridViewAdapter extends BaseAdapter {
 			convertView = LayoutInflater.from(this.mContext).inflate(R.layout.local_video_gridview_item, null);
 			holder.video_bg = (ImageView) convertView.findViewById(R.id.iv_local_video_bg);
 			holder.video_view = (ImageView) convertView.findViewById(R.id.iv_local_video_icon);
+			holder.delete_video = (ImageView) convertView.findViewById(R.id.iv_delete_local_video);
 			convertView.setTag(holder);
 		} else {
 			holder = (ViewHolder) convertView.getTag();
@@ -84,7 +85,8 @@ public class VideoGridViewAdapter extends BaseAdapter {
 				}
 				holder.video_bg.setScaleType(ImageView.ScaleType.FIT_XY);
 				holder.video_bg.setLayoutParams(new RelativeLayout.LayoutParams(Utils.screenWidth/3, (Utils.screenWidth-120)/3));
-				holder.video_bg.setOnClickListener(new OnClickListener() {
+				
+				holder.delete_video.setOnClickListener(new OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
@@ -137,5 +139,6 @@ public class VideoGridViewAdapter extends BaseAdapter {
 	private class ViewHolder {
 		ImageView video_bg;
 		ImageView video_view;
+		ImageView delete_video;
 	}
 }

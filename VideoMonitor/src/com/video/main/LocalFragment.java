@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.video.R;
 import com.video.local.ImageListViewAdapter;
 import com.video.local.LocalFileItem;
@@ -35,10 +34,11 @@ import com.video.utils.TextProgressBar;
 import com.video.utils.Utils;
 import com.video.utils.ViewPagerAdapter;
 
+@SuppressLint("HandlerLeak")
 public class LocalFragment extends Fragment implements OnClickListener, OnPageChangeListener {
 
+	private View rootView;
 	private FragmentActivity mActivity;
-	private View mView;
 	
 	private TextView viewpage_video;
 	private TextView viewpage_image;
@@ -91,16 +91,21 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
-		return inflater.inflate(R.layout.local, container, false);
+		if (rootView == null) {
+			rootView = inflater.inflate(R.layout.local, null);
+		}
+		container = (ViewGroup) rootView.getParent();
+		if (container != null) {
+			container.removeView(rootView);
+		}
+		return rootView;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onActivityCreated(savedInstanceState);
-		
 		mActivity = getActivity();
-		mView = getView();
 		
 		initViewPageView(0);
 		initView();
@@ -127,16 +132,16 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		pageList.add(video_page);
 //		pageList.add(terminal_page);
 		
-		mViewPager = (ViewPager)mView.findViewById(R.id.local_viewpager);
+		mViewPager = (ViewPager)rootView.findViewById(R.id.local_viewpager);
 		mViewPager.setOnPageChangeListener(this);
 		mViewPager.setAdapter(new ViewPagerAdapter(pageList));
 		mViewPager.setCurrentItem(whichPage);
 	}
 	
 	private void initView() {
-		viewpage_image = (TextView)mView.findViewById(R.id.tv_vp_image);
+		viewpage_image = (TextView)rootView.findViewById(R.id.tv_vp_image);
 		viewpage_image.setOnClickListener(this);
-		viewpage_video = (TextView)mView.findViewById(R.id.tv_vp_video);
+		viewpage_video = (TextView)rootView.findViewById(R.id.tv_vp_video);
 		viewpage_video.setOnClickListener(this);
 //		viewpage_terminal = (TextView)mView.findViewById(R.id.tv_vp_terminal);
 //		viewpage_terminal.setOnClickListener(this);
@@ -162,7 +167,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		
 		if (Utils.checkSDCard()) {
 			//获得SD的信息
-			progressBarSD = (TextProgressBar) mView.findViewById(R.id.progressBar_sd);
+			progressBarSD = (TextProgressBar) rootView.findViewById(R.id.progressBar_sd);
 			progressBarSD.setMax(100);
 			double SDTotal = Utils.getTotalSDSize();
 			double SDAvailable = Utils.getAvailableSDSize();
@@ -277,7 +282,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	}
 	
 	public Handler handler = new Handler() {
-
 		@Override
 		public void handleMessage(Message msg) {
 			// TODO Auto-generated method stub
@@ -570,6 +574,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	 * @param files 文件集合
 	 * @return 返回录像的文件集合
 	 */
+	@SuppressLint("DefaultLocale")
 	private ArrayList<HashMap<String, Object>> listAllVideoRecords(File file, File[] fileList) {
 		if (fileList == null) {
 			return null;

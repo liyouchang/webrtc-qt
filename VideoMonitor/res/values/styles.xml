@@ -6,6 +6,15 @@
     <style name="MyThemeBlack" parent="android:Theme.Black" />
     <style name="AppMyDialogActivity" parent="@android:style/Theme.Dialog"/>
     
+    <style name="CustomWindowTitleBackground">
+        <item name="android:background">@color/title_bg_black</item>
+    </style>
+    
+    <style name="CustomWindowTitleBar" parent="android:Theme">
+        <item name="android:windowTitleSize">@dimen/title_height_size</item>
+        <item name="android:windowTitleBackgroundStyle">@style/CustomWindowTitleBackground</item>
+    </style>
+    
 	<style name="AppThemeDialog" parent="@android:style/Theme.Dialog">
 	　　<item name="android:windowIsFloating">true</item>
 	　　<item name="android:windowNoTitle">true</item>

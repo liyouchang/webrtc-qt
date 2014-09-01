@@ -1,13 +1,14 @@
 package com.video.main;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
@@ -15,42 +16,52 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TabHost;
-import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
-import com.video.main.FragmentTabAdapter.OnMyTabChangedListener;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.user.LoginActivity;
 import com.video.utils.OkCancelDialog;
-import com.video.utils.TabFactory;
 import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
 
-public class MainActivity extends FragmentActivity {
-	
-	public ArrayList<Fragment> fragments = new ArrayList<Fragment>();
+@SuppressLint({ "CutPasteId", "HandlerLeak" })
+public class MainActivity extends FragmentActivity implements OnClickListener {
 	
 	public static Context mContext;
 	private PreferData preferData = null;
-	private TabHost mTabHost;
-	private TextView app_exit;
+	
+	private static List<Fragment> mFragmentList = new ArrayList<Fragment>();
+    private FragmentManager mFragmentManager;  
+    private FragmentTransaction mFragmentTransaction; 
+    public static int lastFragment = 0;
+    
+    public static final int TAB_ONE = 0;
+    public static final int TAB_TWO = 1;
+    public static final int TAB_THREE = 2;
+    public static final int TAB_FOUR = 3;
+    
+    private static TextView tab_three_number;
+    private RelativeLayout tab_one_layout;
+    private RelativeLayout tab_two_layout;
+    private RelativeLayout tab_three_layout;
+    private RelativeLayout tab_four_layout;
 	
 	private String userName = "";
 	private String userPwd = "";
@@ -59,9 +70,6 @@ public class MainActivity extends FragmentActivity {
 	private boolean isActivityShow = false;
 	private boolean isStartupThreadRun = false;
 	public static boolean isPlayAlarmMusic = true;
-	private boolean isTextViewShow = false;
-	private static TextView tv_alarm_msg = null;
-	private static String currentTab = "";
 	
 	private static Dialog mDialog = null;
 	private int loginTimes = 0;
@@ -76,7 +84,6 @@ public class MainActivity extends FragmentActivity {
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
         mContext = MainActivity.this;
         preferData = new PreferData(mContext);
         ZmqCtrl.getInstance().init();
@@ -145,8 +152,8 @@ public class MainActivity extends FragmentActivity {
 			isStartupThreadRun = false;
 			//已登录成功
 			setContentView(R.layout.main);
-			initData();
 			initView();
+			initData();
 		}
     }
 
@@ -157,6 +164,32 @@ public class MainActivity extends FragmentActivity {
 		isActivityShow = true;
 	}
 
+	private void initView() {
+		tab_three_number = (TextView) this.findViewById(R.id.tab_three_number);
+    	tab_one_layout = (RelativeLayout) this.findViewById(R.id.tab_one_layout);
+    	tab_two_layout = (RelativeLayout) this.findViewById(R.id.tab_two_layout);
+    	tab_three_layout = (RelativeLayout) this.findViewById(R.id.tab_three_layout);
+    	tab_four_layout = (RelativeLayout) this.findViewById(R.id.tab_four_layout);
+	}
+	
+	private void initData() {
+		DisplayMetrics dm = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+        Utils.screenWidth = dm.widthPixels;
+        Utils.screenHeight = dm.heightPixels;
+        
+        if (preferData.isExist("PlayAlarmMusic")) {
+			isPlayAlarmMusic = preferData.readBoolean("PlayAlarmMusic");
+		}
+        mFragmentList.clear();
+        mFragmentList.add(new OwnFragment());
+        mFragmentList.add(new LocalFragment());
+        mFragmentList.add(new MsgFragment());
+        mFragmentList.add(new MoreFragment());
+        setCurrentFragment(lastFragment);
+        showAlarmMsgCount(MainApplication.getInstance().unreadAlarmCount);
+	}
+	
 	/**
 	 * 设置全屏
 	 */
@@ -174,147 +207,66 @@ public class MainActivity extends FragmentActivity {
 		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 	}
 	
-	private void initData() {
-		DisplayMetrics dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-        Utils.screenWidth = dm.widthPixels;
-        Utils.screenHeight = dm.heightPixels;
-        
-        if (preferData.isExist("PlayAlarmMusic")) {
-			isPlayAlarmMusic = preferData.readBoolean("PlayAlarmMusic");
-		}
-        
-        app_exit = (TextView) this.findViewById(R.id.tv_exit_application);
-        app_exit.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				exitVideoMonitorApp();
-			}
-		});
-	}
-	
-	private void initView() {
-		mTabHost = (TabHost)findViewById(android.R.id.tabhost);
-		mTabHost.setup();
-		
-		TabHost.TabSpec tabSpec = mTabHost.newTabSpec("tab1");
-		tabSpec.setIndicator("实时",
-				getResources().getDrawable(R.drawable.tab_own_xml))
-		.setContent(new TabFactory(mContext));
-		mTabHost.addTab(tabSpec);
-		
-		tabSpec = mTabHost.newTabSpec("tab2");
-		tabSpec.setIndicator("历史",
-				getResources().getDrawable(R.drawable.tab_video_xml));
-		tabSpec.setContent(new TabFactory(mContext));
-		mTabHost.addTab(tabSpec);
-		
-		tabSpec = mTabHost.newTabSpec("tab3");
-		tabSpec.setIndicator("消息",
-				getResources().getDrawable(R.drawable.tab_msg_xml));
-		tabSpec.setContent(new TabFactory(mContext));
-		mTabHost.addTab(tabSpec);
-		
-		tabSpec = mTabHost.newTabSpec("tab4");
-		tabSpec.setIndicator("更多",
-				getResources().getDrawable(R.drawable.tab_more_xml));
-		tabSpec.setContent(new TabFactory(mContext));
-		mTabHost.addTab(tabSpec);
-		
-		mTabHost.setCurrentTab(0);
-		mTabHost.getCurrentTab();
-		
-		TabWidget tabWidget = mTabHost.getTabWidget();  
-		tabWidget.setStripEnabled(false);
-        for (int i = 0; i < tabWidget.getChildCount(); i++) { 
-        	tabWidget.getChildAt(i).setBackgroundDrawable(getResources().getDrawable(R.color.title_bg_black));
-            TextView tv = (TextView) tabWidget.getChildAt(i).findViewById(android.R.id.title);  
-            ImageView iv = (ImageView) tabWidget.getChildAt(i).findViewById(android.R.id.icon); 
-            
-            RelativeLayout.LayoutParams paramsImage = new RelativeLayout.LayoutParams(  
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,  
-                    RelativeLayout.LayoutParams.WRAP_CONTENT);  
-            paramsImage.addRule(RelativeLayout.CENTER_HORIZONTAL);  
-            paramsImage.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);  
-            iv.setLayoutParams(paramsImage);  
-              
-            RelativeLayout.LayoutParams paramsText = new RelativeLayout.LayoutParams(  
-                    RelativeLayout.LayoutParams.WRAP_CONTENT,  
-                    RelativeLayout.LayoutParams.WRAP_CONTENT);  
-            paramsText.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);  
-            paramsText.addRule(RelativeLayout.CENTER_HORIZONTAL, RelativeLayout.TRUE);  
-            tv.setLayoutParams(paramsText);  
-            tv.setTextColor(Color.WHITE); 
-            tv.setTextSize(16);
-        }
-        updateTab(mTabHost);
-        if (preferData.isExist("AlarmCount")) {
-        	MainApplication.getInstance().unreadAlarmCount = preferData.readInt("AlarmCount");
-        	setAlarmIconAndText(MainApplication.getInstance().unreadAlarmCount);
-        } else {
-        	MainApplication.getInstance().unreadAlarmCount = 0;
-        	setAlarmIconAndText(MainApplication.getInstance().unreadAlarmCount);
-        }
-        
-        fragments.add(new OwnFragment());
-        fragments.add(new LocalFragment());
-        fragments.add(new MsgFragment());
-        fragments.add(new MoreFragment());
-    
-        final FragmentTabAdapter tabAdapter = new FragmentTabAdapter(this, fragments, android.R.id.tabcontent, mTabHost);
-        tabAdapter.setOnMyTabChangedListener(new OnMyTabChangedListener() {
-			@Override
-			public void MyTabChanged(FragmentTabAdapter adapter) {
-				// TODO Auto-generated method stub
-				updateTab(mTabHost);
-			}
-		});
-	}
-	
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		// TODO Auto-generated method stub
-		super.onSaveInstanceState(outState);
+	public void onClick(View v) {
+		if ((mFragmentList == null) || (mFragmentList.size() != 4) || (!Value.isLoginSuccess)) {
+			mFragmentList = new ArrayList<Fragment>();
+			mFragmentList.clear();
+	        mFragmentList.add(new OwnFragment());
+	        mFragmentList.add(new LocalFragment());
+	        mFragmentList.add(new MsgFragment());
+	        mFragmentList.add(new MoreFragment());
+		}
+		switch (v.getId()) {
+			case R.id.tab_one_layout:
+				setCurrentFragment(TAB_ONE);
+				break;
+			case R.id.tab_two_layout:
+				setCurrentFragment(TAB_TWO);
+				break;
+			case R.id.tab_three_layout:
+				setCurrentFragment(TAB_THREE);
+				break;
+			case R.id.tab_four_layout:
+				setCurrentFragment(TAB_FOUR);
+				break;
+		}
 	}
-
-	private void updateTab(final TabHost _TabHost) {
+	
+	private void setCurrentFragment(int curFragment) {
+		tab_one_layout.setEnabled(true);
+		tab_two_layout.setEnabled(true);
+		tab_three_layout.setEnabled(true);
+		tab_four_layout.setEnabled(true);
 		
-		currentTab = mTabHost.getCurrentTabTag();
-		
-		if (preferData.isExist("AlarmCount")) {
-			MainApplication.getInstance().unreadAlarmCount = preferData.readInt("AlarmCount");
+		mFragmentManager = getSupportFragmentManager();
+    	mFragmentTransaction = mFragmentManager.beginTransaction();
+		if (mFragmentList.get(curFragment).isAdded()) {
+			mFragmentTransaction.hide(mFragmentList.get(lastFragment));
+			mFragmentTransaction.show(mFragmentList.get(curFragment));
 		} else {
-			MainApplication.getInstance().unreadAlarmCount = 0;
+			mFragmentTransaction.add(R.id.tab_content, mFragmentList.get(curFragment));
 		}
-        
-		for (int i = 0; i < _TabHost.getTabWidget().getChildCount(); i++) {
-			TextView tv = (TextView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
-    		if (_TabHost.getCurrentTab() == i) {
-    			if (i == 2) {
-    				if (MainApplication.getInstance().unreadAlarmCount > 0) {
-    	        		tv.setTextColor(mContext.getResources().getColorStateList(R.color.red));
-    	        	} else {
-        				tv.setTextColor(this.getResources().getColorStateList(R.color.tab_text_color));
-        			}
-    			} else {
-    				tv.setTextColor(this.getResources().getColorStateList(R.color.tab_text_color));
-    			}
-			} else {
-				if (i == 2) {
-    				if (MainApplication.getInstance().unreadAlarmCount > 0) {
-    	        		tv.setTextColor(mContext.getResources().getColorStateList(R.color.red));
-    	        	} else {
-    	        		tv.setTextColor(this.getResources().getColorStateList(R.color.white));
-        			}
-    			} else {
-    				tv.setTextColor(this.getResources().getColorStateList(R.color.white));
-    			}
-			}
-			if (i ==2) {
-				tv_alarm_msg = (TextView) _TabHost.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
-			}
+		
+		switch (curFragment) {
+			case TAB_ONE:
+				tab_one_layout.setEnabled(false);
+				break;
+			case TAB_TWO:
+				tab_two_layout.setEnabled(false);
+				break;
+			case TAB_THREE:
+				tab_three_layout.setEnabled(false);
+				break;
+			case TAB_FOUR:
+				tab_four_layout.setEnabled(false);
+				break;
 		}
+		
+		mFragmentTransaction.hide(mFragmentList.get(lastFragment));
+		mFragmentTransaction.show(mFragmentList.get(curFragment));
+		mFragmentTransaction.commit();
+		lastFragment = curFragment;
 	}
 	
 	/**
@@ -323,33 +275,26 @@ public class MainActivity extends FragmentActivity {
 	 * @return 是返回true 否返回false
 	 */
 	public static boolean isCurrentTab(int tabNum) {
-		if (currentTab.equals("tab"+tabNum)) {
+		if (tabNum == lastFragment) {
 			return true;
 		}
 		return false;
 	}
 	
 	/**
-	 * 设置消息tab的报警显示
-	 * @param msg 多少条消息
+	 * 设置显示报警消息的数量
 	 */
-	public static void setAlarmIconAndText(int msg) {
-		if (tv_alarm_msg != null) {
-			if (msg <= 0) {
-				tv_alarm_msg.setText("消息");
-				if (isCurrentTab(3)) {
-					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.tab_text_color));
-				} else {
-					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.white));
-				}
+	public static void showAlarmMsgCount(int alarmCount) {
+		if (tab_three_number != null) {
+			if ((alarmCount > 0) && (alarmCount < 100)) {
+				tab_three_number.setVisibility(View.VISIBLE);
+				tab_three_number.setText(""+alarmCount);
+			} 
+			else if (alarmCount >= 100) {
+				tab_three_number.setVisibility(View.VISIBLE);
+				tab_three_number.setText("99+");
 			} else {
-				if (msg < 100) {
-					tv_alarm_msg.setText("消息("+msg+")");
-					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.red));
-				} else {
-					tv_alarm_msg.setText("消息99+");
-					tv_alarm_msg.setTextColor(mContext.getResources().getColorStateList(R.color.red));
-				}
+				tab_three_number.setVisibility(View.INVISIBLE);
 			}
 		}
 	}
@@ -361,8 +306,7 @@ public class MainActivity extends FragmentActivity {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case 0:
-					setAlarmIconAndText(msg.arg1);
-					
+					showAlarmMsgCount(msg.arg1);
 					try {
 						//播放报警语音
 						if (!Value.isPlayMp3 && isPlayAlarmMusic) {
@@ -463,8 +407,8 @@ public class MainActivity extends FragmentActivity {
 								MainApplication.getInstance().userName = userName;
 								MainApplication.getInstance().userPwd = userPwd;
 								setContentView(R.layout.main);
-						        initData();
-						        initView();
+								initView();
+								initData();
 						        new UpdateAPK(mContext).startCheckUpgadeThread();
 							} else {
 								Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
@@ -501,9 +445,9 @@ public class MainActivity extends FragmentActivity {
 	}
 	
 	/**
-	 * 退出微视界
+	 * 退出应用
 	 */
-	private void exitVideoMonitorApp() {
+	public void exitVideoMonitorApp() {
 		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
 		myDialog.setTitle("温馨提示");
 		myDialog.setMessage("确认退出视界通？");
@@ -519,23 +463,8 @@ public class MainActivity extends FragmentActivity {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
-				hideExitView();
 			}
 		});
-	}
-	
-	private void showExitView() {
-		isTextViewShow = true;
-		app_exit.setVisibility(View.VISIBLE);
-		Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_in);  
-		app_exit.startAnimation(animation);
-	}
-	
-	private void hideExitView() {
-		isTextViewShow = false;
-		app_exit.setVisibility(View.INVISIBLE);
-		Animation animation = AnimationUtils.loadAnimation(mContext, R.anim.popupwindow_menu_out);  
-		app_exit.startAnimation(animation);
 	}
 
 	@Override
@@ -552,22 +481,33 @@ public class MainActivity extends FragmentActivity {
 			handler.removeMessages(R.id.login_id);
 		}
 		if (keyCode == KeyEvent.KEYCODE_MENU  && event.getRepeatCount() == 0) {
-			if (isTextViewShow == false) {
-				showExitView();
-			} else {
-				hideExitView();
-			}
-		} else if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
-			if ((!isStartupThreadRun) && (!Value.isLoginSuccess)) {
-				return false;
-			}
-			else if (isTextViewShow) {
-				hideExitView();
-				return false;
-			}
+			super.openOptionsMenu();
+			return true;
+		} 
+		else if (keyCode == KeyEvent.KEYCODE_BACK  && event.getRepeatCount() == 0) {
+			
 		}
 		return super.onKeyDown(keyCode, event);
 	}
+	
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		menu.add(Menu.NONE, 1, 1, "退出视界通").setIcon(R.drawable.icon_close);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case 1:
+				exitVideoMonitorApp();
+				break;
+			default:
+				return super.onOptionsItemSelected(item);
+		}
+		return true;
+	}
+
 	
 	@Override
 	protected void onStop() {
@@ -590,7 +530,7 @@ public class MainActivity extends FragmentActivity {
 		}
 		Value.isManulLogout = false;
 	}
-	
+
 	public class MainReceiver extends BroadcastReceiver {
 
 		@Override
@@ -599,7 +539,7 @@ public class MainActivity extends FragmentActivity {
 			String action = intent.getAction();
 			// 更新未读报警消息的显示
 			if (action.equals(UNREAD_ALARM_COUNT_ACTION)) {
-				setAlarmIconAndText(MainApplication.getInstance().unreadAlarmCount);
+				showAlarmMsgCount(MainApplication.getInstance().unreadAlarmCount);
 				if (preferData == null) {
 					preferData = new PreferData(mContext);
 				}

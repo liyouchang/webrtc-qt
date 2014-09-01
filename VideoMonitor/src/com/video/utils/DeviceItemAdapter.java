@@ -128,7 +128,7 @@ public class DeviceItemAdapter extends BaseAdapter {
 					if (Utils.getOnlineState(list.get(position).get("isOnline"))) {
 						
 						if (Value.isLoginSuccess) {
-							if (MainActivity.isCurrentTab(2)) {
+							if (MainActivity.isCurrentTab(MainActivity.TAB_TWO)) {
 								//请求终端录像
 								Intent intent = new Intent(context, SetDateActivity.class);
 								intent.putExtra("dealerName", list.get(position).get("dealerName"));
@@ -146,15 +146,19 @@ public class DeviceItemAdapter extends BaseAdapter {
 									if (!isProtectTraffic) {
 										//实时视频
 										Intent intent = new Intent(context, PlayerActivity.class);
+										intent.putExtra("deviceID", list.get(position).get("deviceID"));
 										intent.putExtra("deviceName", name);
 										intent.putExtra("dealerName", list.get(position).get("dealerName"));
+										intent.putExtra("playerClarity", list.get(position).get("playerClarity"));
 										context.startActivity(intent);
 									} else {
 										if (Utils.isWiFiNetwork(context)) {
 											//实时视频
 											Intent intent = new Intent(context, PlayerActivity.class);
+											intent.putExtra("deviceID", list.get(position).get("deviceID"));
 											intent.putExtra("deviceName", name);
 											intent.putExtra("dealerName", list.get(position).get("dealerName"));
+											intent.putExtra("playerClarity", list.get(position).get("playerClarity"));
 											context.startActivity(intent);
 										} else {
 											final OkCancelDialog myDialog=new OkCancelDialog(context);
@@ -166,8 +170,10 @@ public class DeviceItemAdapter extends BaseAdapter {
 													myDialog.dismiss();
 													//实时视频
 													Intent intent = new Intent(context, PlayerActivity.class);
+													intent.putExtra("deviceID", list.get(position).get("deviceID"));
 													intent.putExtra("deviceName", name);
 													intent.putExtra("dealerName", list.get(position).get("dealerName"));
+													intent.putExtra("playerClarity", list.get(position).get("playerClarity"));
 													context.startActivity(intent);
 												}
 											});

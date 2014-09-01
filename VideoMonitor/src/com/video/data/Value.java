@@ -1,11 +1,14 @@
 package com.video.data;
 
+import com.video.main.MainActivity;
+
 
 public class Value {
 	
 	/**
 	 * 服务器IP和Port
 	 */
+//	public final static String BackstageIPPort = "tcp://192.168.40.179:5555";
 	public final static String BackstageIPPort = "tcp://222.174.213.181:5555";
 //	public final static String BackstageIPPort = "tcp://192.168.60.198:5555";
 //	public final static String BackstageIPPort = "tcp://192.168.0.185:5555";
@@ -121,5 +124,6 @@ public class Value {
 		isTunnelOpened = false;
 		isSharedUser = false;
 		ownFragmentRequestAlarmFlag = false;
+		MainActivity.lastFragment = 0;
 	}
 }

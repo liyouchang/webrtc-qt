@@ -3,10 +3,9 @@ package com.video.main;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -36,7 +35,6 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.qrcode.view.CaptureActivity;
 import com.video.R;
 import com.video.data.PreferData;
@@ -50,6 +48,7 @@ import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 import com.video.utils.WiFiAlertDialog;
 
+@SuppressLint("HandlerLeak")
 public class AddDeviceActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
@@ -225,7 +224,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 						if (msg.arg1 == 0) {
 							String dealerName = (String)msg.obj;
 							HashMap<String, String> item = getDeviceItem(mDeviceName, mDeviceId, dealerName);
-							xmlData.addItem(item);
+							xmlData.writeItem(item);
 							MainApplication.getInstance().deviceList.add(item);
 							Toast.makeText(mContext, "添加终端成功！", Toast.LENGTH_SHORT).show();
 							setResult(3, null);

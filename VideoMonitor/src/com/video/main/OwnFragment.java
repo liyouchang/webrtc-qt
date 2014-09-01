@@ -8,12 +8,14 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -35,7 +37,10 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.video.R;
+import com.video.data.DeviceValue;
+import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.main.PullToRefreshHeaderView.OnHeaderRefreshListener;
 import com.video.play.PlayerActivity;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
@@ -48,10 +53,12 @@ import com.video.utils.OkOnlyDialog;
 import com.video.utils.PopupWindowAdapter;
 import com.video.utils.Utils;
 
-public class OwnFragment extends Fragment implements OnClickListener {
+@SuppressLint("HandlerLeak")
+public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRefreshListener {
 	
+	private View rootView;
 	private static FragmentActivity mActivity;
-	private View mView;
+	private PreferData preferData = null;
 	private String userName = null;
 	//终端列表项
 	private static String mDeviceName = null;
@@ -73,10 +80,22 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	
 	private OwnReceiver ownReceiver = null;
 	
+	private PullToRefreshHeaderView mPullToRefreshHeaderView;
+	private String own_refresh_time = null;
+	private String own_refresh_terminal = null;
+	private Boolean isPullToRefresh = false;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
-		return inflater.inflate(R.layout.own, container, false);
+		if (rootView == null) {
+			rootView = inflater.inflate(R.layout.own, null);
+		}
+		container = (ViewGroup) rootView.getParent();
+		if (container != null) {
+			container.removeView(rootView);
+		}
+		return rootView;
 	}
 	
 	@Override
@@ -84,46 +103,65 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onActivityCreated(savedInstanceState);
 		mActivity = getActivity();
-		mView = getView();
 		initView();
-		initData();
-	}
-	
-	@Override
-	public void onResume() {
-		// TODO Auto-generated method stub
-		super.onResume();
-		if (MainActivity.isCurrentTab(1)) {
-			ZmqHandler.mHandler = deviceHandler;
-		}
-	}
-	
-	private void initView () {
-		ImageButton button_shared = (ImageButton) mView.findViewById(R.id.btn_device_share);
-		button_shared.setOnClickListener(this);
-		
-		button_add = (ImageButton)mView.findViewById(R.id.btn_add_device);
-		button_add.setOnClickListener(this);
-		
-		noDeviceLayout = (RelativeLayout) mView.findViewById(R.id.rl_no_device_list);
-		
-		lv_list = (ListView) mView.findViewById(R.id.device_list);
-		lv_list.setOnItemClickListener(new OnItemClickListenerImpl());
-		lv_list.setOnItemLongClickListener(new OnItemLongClickListenerImpl());
-	}
-	
-	private void initData() {
-		// 初始化Activity要使用的参数
-		ZmqHandler.mHandler = deviceHandler;
-		if (MainApplication.getInstance().preferData.isExist("UserName")) {
-			userName = MainApplication.getInstance().preferData.readString("UserName");
-		}
-		
 		// 注册广播
 		ownReceiver = new OwnReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(BackstageService.CHANGE_DEVICE_LIST_ACTION);
 		mActivity.registerReceiver(ownReceiver, filter);
+	}
+	
+	@Override
+	public void onStart() {
+		// TODO Auto-generated method stub
+		super.onStart();
+		initData();
+	}
+
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if (MainActivity.isCurrentTab(MainActivity.TAB_ONE)) {
+			ZmqHandler.mHandler = deviceHandler;
+		}
+	}
+	
+	private void initView () {
+		ImageButton button_shared = (ImageButton) rootView.findViewById(R.id.btn_device_share);
+		button_shared.setOnClickListener(this);
+		
+		button_add = (ImageButton)rootView.findViewById(R.id.btn_add_device);
+		button_add.setOnClickListener(this);
+		
+		noDeviceLayout = (RelativeLayout) rootView.findViewById(R.id.rl_no_device_list);
+		
+		lv_list = (ListView) rootView.findViewById(R.id.device_list);
+		lv_list.setOnItemClickListener(new OnItemClickListenerImpl());
+		lv_list.setOnItemLongClickListener(new OnItemLongClickListenerImpl());
+		
+		mPullToRefreshHeaderView = (PullToRefreshHeaderView) rootView.findViewById(R.id.own_pull_refresh_view);
+		mPullToRefreshHeaderView.setOnHeaderRefreshListener(this);
+	}
+	
+	private void initData() {
+		// 初始化Activity要使用的参数
+		preferData = new PreferData(mActivity);
+		ZmqHandler.mHandler = deviceHandler;
+		if (preferData.isExist("UserName")) {
+			userName = preferData.readString("UserName");
+		}
+		
+		//初始化下拉刷新的显示
+		if (preferData.isExist("ownRefreshTime")) {
+			own_refresh_time = preferData.readString("ownRefreshTime");
+		}
+		if (preferData.isExist("ownRefreshTerminal")) {
+			own_refresh_terminal = preferData.readString("ownRefreshTerminal");
+		}
+		if ((own_refresh_time != null) && (own_refresh_terminal != null)) {
+			mPullToRefreshHeaderView.onHeaderRefreshComplete(own_refresh_time, own_refresh_terminal);
+		}
 		
 		if (MainApplication.getInstance().deviceList == null) {
 			MainApplication.getInstance().deviceList = new ArrayList<HashMap<String, String>>();
@@ -138,16 +176,36 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		deviceAdapter = new DeviceItemAdapter(mActivity, MainApplication.getInstance().deviceList);
 		lv_list.setAdapter(deviceAdapter);
 		
-		if (listSize == 0) {
-			noDeviceLayout.setVisibility(View.VISIBLE);
-		} else {
-			noDeviceLayout.setVisibility(View.INVISIBLE);
-		}
-		
-		if (Value.isNeedReqTermListFlag) {
+		if ((Value.isNeedReqTermListFlag) && (MainActivity.isCurrentTab(MainActivity.TAB_ONE))) {
 			// 从服务器请求设备列表
 			reqTermListEvent();
+		} else {
+			if (listSize > 0) {
+				noDeviceLayout.setVisibility(View.GONE);
+				mPullToRefreshHeaderView.setVisibility(View.VISIBLE);
+			} else {
+				noDeviceLayout.setVisibility(View.VISIBLE);
+				mPullToRefreshHeaderView.setVisibility(View.GONE);
+			}
 		}
+	}
+	
+	/**
+	 * 下拉刷新
+	 * yyyy-MM-dd hh:mm:ss 12小时制  yyyy-MM-dd HH:mm:ss 24小时制
+	 */
+	@Override
+	public void onHeaderRefresh(PullToRefreshHeaderView view) {
+		// TODO Auto-generated method stub
+		mPullToRefreshHeaderView.postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				isPullToRefresh = true;
+				ZmqHandler.mHandler = deviceHandler;
+				// 从服务器请求设备列表
+				reqTermListEvent();
+			}
+		}, 500);
 	}
 	
 	/**
@@ -224,7 +282,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	public void requestAlarmEvent() {
 		Value.ownFragmentRequestAlarmFlag = true;
 		String data = MainApplication.getInstance().generateRequestAlarmJson(0, 5);
-		MainApplication.getInstance().sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, data);
+		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, data);
 	}
 	
 	/**
@@ -251,8 +309,36 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		return listObj;
 	}
 	
+	/**
+	 * 发送Handler消息
+	 */
+	public void sendHandlerMsg(Handler handler, int what) {
+		Message msg = new Message();
+		msg.what = what;
+		handler.sendMessage(msg);
+	}
+	public void sendHandlerMsg(Handler handler, int what, String obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
+		handler.sendMessage(msg);
+	}
+	public void sendHandlerMsg(Handler handler, int what, String obj, int timeout) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
+		handler.sendMessageDelayed(msg, timeout);
+	}
+	public void sendHandlerMsg(Handler handler, int what, int arg1, int arg2, Object obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.arg1 = arg1;
+		msg.arg2 = arg2;
+		msg.obj = obj;
+		handler.sendMessage(msg);
+	}
+	
 	private Handler deviceHandler = new Handler() {
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public void handleMessage(Message msg) {
@@ -273,6 +359,10 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					if (deviceHandler.hasMessages(REQUEST_TIMEOUT)) {
 						deviceHandler.removeMessages(REQUEST_TIMEOUT);
 					}
+					if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
+						mPullToRefreshHeaderView.onHeaderRefreshComplete();
+					}
+					isPullToRefresh = false;
 					Value.isNeedReqTermListFlag = true;
 					Toast.makeText(mActivity, ""+msg.obj, Toast.LENGTH_SHORT).show();
 					if (listSize > 1) {
@@ -295,6 +385,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						if (msg.arg1 == 0) {
 							//请求终端列表成功
 							Value.isNeedReqTermListFlag = false;
+							if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
+								own_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
+								own_refresh_terminal = "终端: "+Build.MODEL;
+								preferData.writeData("ownRefreshTime", own_refresh_time);
+								preferData.writeData("ownRefreshTerminal", own_refresh_terminal);
+								mPullToRefreshHeaderView.onHeaderRefreshComplete(own_refresh_time, own_refresh_terminal);
+							}
 							ArrayList<HashMap<String, String>> listObj = (ArrayList<HashMap<String, String>>) msg.obj;
 							if (listObj != null) {
 								MainApplication.getInstance().xmlDevice.updateList(listObj);
@@ -319,8 +416,12 @@ public class OwnFragment extends Fragment implements OnClickListener {
 						} else {
 							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
-						//请求报警数据
-						requestAlarmEvent();
+						if (!isPullToRefresh) {
+							//请求报警数据
+							requestAlarmEvent();
+						} else {
+							isPullToRefresh = false;
+						}
 					} else {
 						deviceHandler.removeMessages(R.id.request_terminal_list_id);
 					}
@@ -412,10 +513,12 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					break;
 			}
 			listSize = MainApplication.getInstance().getDeviceListSize();
-			if (listSize == 0) {
-				noDeviceLayout.setVisibility(View.VISIBLE);
+			if (listSize > 0) {
+				noDeviceLayout.setVisibility(View.GONE);
+				mPullToRefreshHeaderView.setVisibility(View.VISIBLE);
 			} else {
-				noDeviceLayout.setVisibility(View.INVISIBLE);
+				noDeviceLayout.setVisibility(View.VISIBLE);
+				mPullToRefreshHeaderView.setVisibility(View.GONE);
 			}
 		}
 	};
@@ -435,13 +538,36 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	 * 请求终端列表的网络操作
 	 */
 	public void reqTermListEvent() {
-		if (Utils.isNetworkAvailable(mActivity)) {
+		if (Value.isLoginSuccess) {
 			String data = generateReqTermListJson();
-			MainApplication.getInstance().sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在请求终端列表...");
-			MainApplication.getInstance().sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "请求终端列表失败，网络超时！", Value.REQ_TIME_10S);
-			MainApplication.getInstance().sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+			if (!isPullToRefresh) {
+				sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在请求终端列表...");
+			}
+			sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "请求终端列表失败，网络超时！", Value.REQ_TIME_10S);
+			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		} else {
-			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			if (Utils.isNetworkAvailable(mActivity)) {
+				final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
+				myDialog.setTitle("温馨提示");
+				myDialog.setMessage("网络不稳定，请重新登录！");
+				myDialog.setPositiveButton("确认", new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						myDialog.dismiss();
+						// 发送注销数据
+						MainApplication.getInstance().sendLogoutData();
+						
+						// 终止主程序和服务广播
+						MainApplication.getInstance().stopActivityandService();
+						
+						//登录界面
+						mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
+						mActivity.finish();
+					}
+				});
+			} else {
+				Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 	
@@ -451,9 +577,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 	public void delTermItemEvent(String id) {
 		if (Utils.isNetworkAvailable(mActivity)) {
 			String data = generateDelTermItemJson(id);
-			MainApplication.getInstance().sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在删除终端绑定...");
-			MainApplication.getInstance().sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "删除终端绑定失败，网络超时！", Value.REQ_TIME_10S);
-			MainApplication.getInstance().sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+			sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在删除终端绑定...");
+			sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "删除终端绑定失败，网络超时！", Value.REQ_TIME_10S);
+			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		} else {
 			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
 		}
@@ -493,23 +619,27 @@ public class OwnFragment extends Fragment implements OnClickListener {
 					if (Value.isLoginSuccess) {
 						//读取流量保护开关设置
 						boolean isProtectTraffic = true;
-						if (MainApplication.getInstance().preferData.isExist("ProtectTraffic")) {
-							isProtectTraffic = MainApplication.getInstance().preferData.readBoolean("ProtectTraffic");
+						if (preferData.isExist("ProtectTraffic")) {
+							isProtectTraffic = preferData.readBoolean("ProtectTraffic");
 						}
 						
 						if (MainApplication.getInstance().deviceList.get(position).get("LinkState").equals("linked")) {
 							if (!isProtectTraffic) {
 								//实时视频
 								Intent intent = new Intent(mActivity, PlayerActivity.class);
+								intent.putExtra("deviceID", mDeviceId);
 								intent.putExtra("deviceName", mDeviceName);
 								intent.putExtra("dealerName", MainApplication.getInstance().deviceList.get(position).get("dealerName"));
+								intent.putExtra(DeviceValue.HASH_PLAYER_CLARITY, MainApplication.getInstance().deviceList.get(position).get(DeviceValue.HASH_PLAYER_CLARITY));
 								mActivity.startActivity(intent);
 							} else {
 								if (Utils.isWiFiNetwork(mActivity)) {
 									//实时视频
 									Intent intent = new Intent(mActivity, PlayerActivity.class);
+									intent.putExtra("deviceID", mDeviceId);
 									intent.putExtra("deviceName", mDeviceName);
 									intent.putExtra("dealerName", MainApplication.getInstance().deviceList.get(position).get("dealerName"));
+									intent.putExtra(DeviceValue.HASH_PLAYER_CLARITY, MainApplication.getInstance().deviceList.get(position).get(DeviceValue.HASH_PLAYER_CLARITY));
 									mActivity.startActivity(intent);
 								} else {
 									final OkCancelDialog myDialog=new OkCancelDialog(mActivity);
@@ -521,8 +651,10 @@ public class OwnFragment extends Fragment implements OnClickListener {
 											myDialog.dismiss();
 											//实时视频
 											Intent intent = new Intent(mActivity, PlayerActivity.class);
+											intent.putExtra("deviceID", mDeviceId);
 											intent.putExtra("deviceName", mDeviceName);
 											intent.putExtra("dealerName", MainApplication.getInstance().deviceList.get(position).get("dealerName"));
+											intent.putExtra(DeviceValue.HASH_PLAYER_CLARITY, MainApplication.getInstance().deviceList.get(position).get(DeviceValue.HASH_PLAYER_CLARITY));
 											mActivity.startActivity(intent);
 										}
 									});
@@ -545,11 +677,15 @@ public class OwnFragment extends Fragment implements OnClickListener {
 							@Override
 							public void onClick(View v) {
 								myDialog.dismiss();
-								if (Value.beatHeartFailFlag) {
-									Value.beatHeartFailFlag = false;
-								}
+								// 发送注销数据
+								MainApplication.getInstance().sendLogoutData();
+								
+								// 终止主程序和服务广播
+								MainApplication.getInstance().stopActivityandService();
+								 
 								//登录界面
 								mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
+								mActivity.finish();
 							}
 						});
 					}
@@ -604,6 +740,7 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		pop_listView.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				ZmqHandler.mHandler = deviceHandler;
 				HashMap<String, String> item = MainApplication.getInstance().deviceList.get(listPosition);
 				mDeviceName = item.get("deviceName");
 				mDeviceId = item.get("deviceID");
@@ -642,9 +779,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 								public void onClick(View v) {
 									myDialog1.dismiss();
 									String data = generateDeleteImageJson(mDeviceId);
-									MainApplication.getInstance().sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在删除图片...");
-									MainApplication.getInstance().sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
-									MainApplication.getInstance().sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
+									sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在删除图片...");
+									sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
+									sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 								}
 							});
 							myDialog1.setNegativeButton("取消", new OnClickListener() {
@@ -703,9 +840,9 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			Bundle bundle = data.getExtras();
 			String path = bundle.getString("ImageBgPath");
 			String sendData = generateUploadImageJson(mDeviceId, path);
-			MainApplication.getInstance().sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在上传图片...");
-			MainApplication.getInstance().sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "上传图片失败，请重试！", 15000);
-			MainApplication.getInstance().sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, sendData);
+			sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在上传图片...");
+			sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "上传图片失败，请重试！", 15000);
+			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, sendData);
 		}
 		else if (resultCode == 3) {
 			// 添加终端设备
@@ -726,7 +863,17 @@ public class OwnFragment extends Fragment implements OnClickListener {
 				noDeviceLayout.setVisibility(View.INVISIBLE);
 			}
 		}
-		MainApplication.getInstance().sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST);
+		sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST);
+	}
+	
+	@Override
+	public void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		if ((mDialog != null) && (mDialog.isShowing())) {
+			mDialog.dismiss();
+			mDialog = null;
+		}
 	}
 
 	@Override
@@ -734,11 +881,12 @@ public class OwnFragment extends Fragment implements OnClickListener {
 		// TODO Auto-generated method stub
 		super.onDestroy();
 		// 注销广播
-		mActivity.unregisterReceiver(ownReceiver);
+		if (ownReceiver != null) {
+			mActivity.unregisterReceiver(ownReceiver);
+		}
 	}
 
 	public class OwnReceiver extends BroadcastReceiver {
-
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
@@ -746,9 +894,13 @@ public class OwnFragment extends Fragment implements OnClickListener {
 			if (action.equals(BackstageService.CHANGE_DEVICE_LIST_ACTION)) {
 				if (intent.hasExtra("isTermActive")) {
 					boolean isTermActive = intent.getBooleanExtra("isTermActive", false);
-					MainApplication.getInstance().sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST, 0, 0, isTermActive);
+					if (isTermActive) {
+						sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST, 0, 0, isTermActive);
+					} else {
+						sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST, 0, 0, null);
+					}
 				} else {
-					MainApplication.getInstance().sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST, 0, 0, null);
+					sendHandlerMsg(deviceHandler, REFRESH_DEVICE_LIST, 0, 0, null);
 				}
 			}
 		}
