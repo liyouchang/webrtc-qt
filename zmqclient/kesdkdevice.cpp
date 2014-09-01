@@ -3,6 +3,7 @@
 
 //#include <regex.h>
 #include <time.h>
+#include <algorithm>
 
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
@@ -199,9 +200,13 @@ void KeSdkDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmess
             LOG(WARNING)<<"get query_record value error from" << peerId ;
             return;
         }
-//        std::string condition = JsonValueToString(jcondition);
-//        LOG_F(INFO)<<condition;
-        QueryRecord(jcondition);
+        int totalNum = 0;
+        Json::Value jrecordList(Json::arrayValue);
+        bool result =  QueryRecord(jcondition,&jrecordList,&totalNum);
+        jmessage["result"] = result;
+        jmessage["totalNum"] = totalNum;
+        jmessage["recordList"] = jrecordList;
+        this->ReportJsonMsg(peerId,jmessage);
 
     }
     else if(command.compare("wifi_info") == 0){
@@ -265,7 +270,7 @@ void KeSdkDevice::SendVideoFrame(const char *data, int len, int level)
                 static_cast<kaerp2p::KeMessageProcessCamera *>(processes_[i]);
         if(camProcess->video_status == level){
             camProcess->OnVideoData(data,len);
-            LOG_F(INFO)<<"send video "<< camProcess->peer_id();
+            LOG_F(LS_VERBOSE)<<"send video "<< camProcess->peer_id();
         }
     }
 }
@@ -511,13 +516,13 @@ std::string ClockToString(st_clock_t  time)
 {
     char timebuf[64];
     //2014/04/17 17:51:00
-    sprintf(timebuf,"%04d%02d%02d%02d%02d%02d",time.year,time.month,time.day,time.hour,time.minute,time.second);
+    sprintf(timebuf,"%04d/%02d/%02d %02d:%02d:%02d",
+            time.year,time.month,time.day,time.hour,time.minute,time.second);
     return timebuf;
 }
 
-Json::Value KeSdkDevice::QueryRecord(Json::Value jcondition)
+bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, int *totalNum)
 {    
-
     std::string startTime,endTime;
     int offset,toQuery;
 
@@ -526,48 +531,44 @@ Json::Value KeSdkDevice::QueryRecord(Json::Value jcondition)
            GetIntFromJsonObject(jcondition,"offset",&offset) ||
            GetIntFromJsonObject(jcondition,"toQuery",&toQuery))
     {
-
+        LOG_F(WARNING)<<"parse condition error";
+        return false;
     }
 
 
     st_clock_t startClock,endClock;
-    st_store_list_t * stList  = new st_store_list_t[toQuery];
-    int list_num  = 0;
-    if(StringToClock(startTime,&startClock) && StringToClock(startTime,&startClock))
+    if(!StringToClock(startTime,&startClock) || !StringToClock(startTime,&startClock))
     {
-       list_num = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,100,stList);
-
-    }else{
-        LOG_F(WARNING)<<"parse input time error";
+        LOG_F(WARNING)<<"input time  format error";
+        return false;
     }
 
-//    st_clock_t startTime;
-//    startTime.year = 2014;
-//    startTime.month = 8;
-//    startTime.day = 25;
-//    startTime.hour = 0;
-//    startTime.minute = 0;
-//    startTime.second = 0;
-//    st_clock_t endTime;
-//    endTime.year = 2014;
-//    endTime.month = 8;
-//    endTime.day = 28;
-//    endTime.hour = 23;
-//    endTime.minute = 59;
-//    endTime.second = 59;
-//  printf("STORE_Get_File_List = %d\n",list_num);
+    int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,0,NULL);
+    if(list_num <= 0){
+        *totalNum = 0;
+        LOG_F(WARNING)<<"No record found";
+        return true;
+    }
+    *totalNum = list_num;
 
+    if(offset > list_num ){
+        LOG_F(WARNING)<<" offset is large than total num ";
+        return false;
+    }
+    st_store_list_t * stList  = new st_store_list_t[list_num];
+    STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,list_num,stList);
 
-    Json::Value jrecordList(Json::arrayValue);
-    for (int i = 0;i < list_num;i++) {
+    int copyNum = std::min(list_num-offset,toQuery);
+
+    for (int i = offset ; i < offset + copyNum ; i++) {
         Json::Value jrecord;
         jrecord["fileName"] = stList[i].filePath;
-//        jrecord["fileDate"] = stList[i].stEndTime;
+        jrecord["fileEndTime"] = ClockToString(stList[i].stEndTime);
         jrecord["fileSize"] = stList[i].iFileSize;
-        jrecordList.append(jrecord);
+        jrecordList->append(jrecord);
     }
-    return jrecordList;
-
+    delete [] stList;
+    return true;
 }
 
 
@@ -586,7 +587,7 @@ KeSdkDevice::RegisterCallBack *KeSdkDevice::RegisterCallBack::Instance(){
 
 int KeSdkDevice::RegisterCallBack::MainStreamCallBack(char *pFrameData, int iFrameLen)
 {
-    LOG(INFO) <<" MainStreamCallBack ---"<< iFrameLen;
+    LOG(LS_VERBOSE) <<" MainStreamCallBack ---"<< iFrameLen;
     RegisterCallBack::Instance()->SignalVideoFrame(pFrameData,iFrameLen,1);
 }
 
