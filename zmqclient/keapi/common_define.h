@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /**********************************************************************/
 //module clock
 /**********************************************************************/
@@ -13,7 +17,7 @@ typedef enum
 	CLOCK_TYPE_HIRTC = 0,										//海思内部RTC时钟
 	CLOCK_TYPE_PCF8563,											//外部硬件时钟芯片
 	CLOCK_TYPE_NTP,												//网络校时
-	CLOCK_TYPE_COUNT
+	CLOCK_TYPE_COUNT	
 }	e_clock_type;
 
 typedef struct struct_clock_s
@@ -24,7 +28,7 @@ typedef struct struct_clock_s
 	int hour;
 	int minute;
 	int second;
-	int week;
+	int week;	
 }	st_clock_t;
 /**********************************************************************/
 //module config
@@ -217,7 +221,7 @@ struct VENC
 struct MEDIAPARAM
 {
 	unsigned char vFormat;								//视频制式0:P制 1:N制
-	unsigned char aFormat;								//音频格式0:G711 1:G726
+	unsigned char aFormat;								//音频格式0:G711 1:G726 2:AAC
 	struct VENC	main[MAXVIDEOCHNS];
 	struct VENC	minor[MAXVIDEOCHNS];
 }__attribute__((packed));
@@ -467,7 +471,7 @@ typedef enum
 {
 	GPIO_TYPE_ONCE = 0,									//一次性控制
 	GPIO_TYPE_CYCLE,									//周期性控制
-	GPIO_TYPE_COUNT
+	GPIO_TYPE_COUNT	
 }	e_gpio_control;
 
 /**********************************************************************/
@@ -491,7 +495,7 @@ typedef struct st_fifo
 	e_fifo_type enType;
 	int iGrp;
 	int iChn;
-
+	
 }	st_fifo_t;
 
 typedef enum
@@ -530,6 +534,7 @@ typedef struct upload_alarm_info
 	int iStatus;											//0-停止 1开始
 	char cInfo[256];										//附加说明，或者可以存放一些自定义内容
 }	st_alarm_upload_t;
+
 /***********************视频输出格式***********************/
 typedef enum e_stream_type
 {											//类型  0-web stream 1-jpeg stream 2-rtp stream 3-avi stream 4-ts stream 5-ps stream 6-h264 stream
@@ -601,13 +606,13 @@ typedef struct st_rtsp_steup
 	char cSource[128];
 	int  iServerPort1;
 	int  iServerPort2;
-
+	
 }	st_rtsp_setup_t;
 
 typedef struct st_rtsp_play
 {
 	int  isTcp;
-
+	
 	int  iSpeed;
 	int  iPullTime;
 	char cFileName[128];
@@ -615,7 +620,7 @@ typedef struct st_rtsp_play
 	int  v_rtpseq;
 	int  a_rtptime;
 	int  a_rtpseq;
-
+	
 }	st_rtsp_play_t;
 
 typedef enum e_encrypt_mode_
@@ -645,7 +650,7 @@ typedef struct st_wifi_list
 	e_encrypt_format encryptFormat;			//加密格式
 	int	 wepPosition;						//wep方式下的密码位置
 	int  signalStrength;					//信号强度
-
+	
 }	st_wifi_list_t;
 
 /**********************************************************************/
@@ -672,8 +677,13 @@ typedef struct attr_485
 /**********************************************************************/
 typedef struct ST_IOV
 {
-	int iov_len;						/**< Size of data */
+	int iov_len;						/**< Size of data */	
 	void * iov_base;					/**< Pointer on data */
 }__attribute__((packed))st_iov_t;
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif		//COMMAND_DEFINE_H

@@ -23,7 +23,16 @@ protected:
                                  const char * data,int len);
     virtual void OnRecvVideoData(const std::string & peer_id,
                                  const char * data,int len);
-    virtual void OnRecordStatus(const std::string & peer_id,int status);
+    /**
+     * @brief OnRecordStatus
+     * @param peer_id
+     * @param status : 0- 请求录像播放成功 2-请求录像文件错误 3-播放结束 4-正在播放,返回播放位置和播放速度
+     *                      5-返回错误的消息
+     * @param position : 播放进度 0-100百分比
+     * @param speed : 播放速度,暂无用
+     */
+    virtual void OnRecordStatus(const std::string & peer_id,int status,
+                                int position,int speed);
 };
 
 

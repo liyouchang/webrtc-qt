@@ -56,17 +56,7 @@ void KeTunnelCamera::OnCommandJsonMsg(const std::string &peerId, Json::Value &jm
         LOG(WARNING)<<"get command error-"<<command<<" from"<<peerId ;
         return;
     }
-    if(command.compare("query_record") == 0){
-        Json::Value jcondition;
-        if(!GetValueFromJsonObject(jmessage, "condition", &jcondition))
-        {
-            LOG(WARNING)<<"get query_record value error from" << peerId <<" msg" << strMsg;
-            return;
-        }
-        std::string condition = JsonValueToString(jcondition);
-        OnRecvRecordQuery(peerId,condition);
-    }
-    else if(command.compare("echo") == 0){
+   if(command.compare("echo") == 0){
         LOG_F(INFO)<<"receive echo command "<<peerId<< " msg"<<strMsg;
 
         this->terminal_->SendByRouter(peerId,strMsg);

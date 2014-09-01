@@ -17,9 +17,10 @@ int MEDIA_Cleanup(void);								//反初始化媒体编码
 int MEDIA_Get_IDR(int iGrp,int iSubChn);				//获取idr帧
 unsigned long long MEDIA_Get_Stamp(int iGrp,int iSubChn);//获取当前编码的最新时间戳。
 
-int MDDIA_Audio_Talk(char *pAudioData,int iLen);		//对讲音频调用接口，pAudioData是纯音频数据，iLen是数据的长度，这里数据部分不需要任何处理G.711 160字节的纯数据，不包含0 0 0 1
-int MEDIA_Jpeg_Generate(int iJpegNum,int iJpegGop,MEDIA_JPEG_CALLBACK jpeg_callback);
+//对讲音频调用接口，pAudioData是纯音频数据，iLen是数据的长度，这里数据部分不需要任何处理G.711 160字节的纯数据，不包含0 0 0 1
+int MEDIA_Audio_Talk(char *pAudioData,int iLen);
 
+int MEDIA_Jpeg_Generate(int iJpegNum,int iJpegGop,MEDIA_JPEG_CALLBACK jpeg_callback);
 
 #ifdef __cplusplus
 }

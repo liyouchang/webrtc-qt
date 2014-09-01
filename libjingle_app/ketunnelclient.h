@@ -10,11 +10,11 @@ class RecordSaverInterface;
 
 enum RecordStatus{
     kRecordStartPlay = 0,//请求录像下载成功
-    kRecordPlayError = 1,//录像保存失败
+    kRecordPlayError = 1,//
     kRequestFileError = 2,//请求录像文件错误
-    kRecordPlayEnd = 3,//下载结束
-    kRecordPlaying = 4,//下载数据达到播放阈值
-    kRequestMsgError//请求消息错误
+    kRecordPlayEnd = 3,//播放结束
+    kRecordPlaying = 4,//正在播放,返回播放位置和播放速度
+    kRequestMsgError = 5//返回错误的消息
 };
 enum RemotePlayType{
     kRemotePlayStart = 1,

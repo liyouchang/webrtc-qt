@@ -43,6 +43,12 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring jstrIceServers) {
 
     return 0;
 }
+void naChangeIceServers(JNIEnv *env, jobject thiz, jstring jstrIceServers)
+{
+    const char * iceservers = env->GetStringUTFChars(jstrIceServers, NULL);
+    kaerp2p::P2PConductor::AddIceServers(iceservers);
+    env->ReleaseStringUTFChars(jstrIceServers,iceservers);
+}
 
 jint naTerminate(JNIEnv *env, jobject thiz)
 {
@@ -163,7 +169,8 @@ jint naStartPeerVideoCut(JNIEnv *env, jobject thiz,
 
 }
 
-jint naStopPeerVideoCut(JNIEnv *env, jobject thiz,jstring peer_id){
+jint naStopPeerVideoCut(JNIEnv *env, jobject thiz,jstring peer_id)
+{
     if (client == NULL){
         return -1;
     }
@@ -175,27 +182,54 @@ jint naStopPeerVideoCut(JNIEnv *env, jobject thiz,jstring peer_id){
     return 0;
 }
 
-//jint naDownloadRemoteFile(JNIEnv *env, jobject thiz,
-//                          jstring peerId,jstring remoteFileName,
-//                          jstring toSaveFileName,jint toPlaySize){
-//  if (client == NULL){
-//      return -1;
-//    }
-//  const char *pid = env->GetStringUTFChars(peerId, NULL);
-//  const char *remoteFile = env->GetStringUTFChars(remoteFileName, NULL);
-//  const char *saveFile = env->GetStringUTFChars(toSaveFileName, NULL);
+jint naPlayRemoteFile(JNIEnv *env, jobject thiz,jstring peerId,jstring remoteFileName)
+{
+    if (client == NULL){
+        return -1;
+    }
+    const char *pid = env->GetStringUTFChars(peerId, NULL);
+    const char *remoteFile = env->GetStringUTFChars(remoteFileName, NULL);
 
-//  bool result = client->DownloadRemoteFile(pid,remoteFile,saveFile,toPlaySize);
-//  int returnValue = 0;
-//  if(!result){
-//      returnValue = -2;
-//    }
+    bool result = client->PlayRemoteFile(pid,remoteFile);
+    int returnValue = 0;
+    if(!result){
+        returnValue = -2;
+    }
 
-//  env->ReleaseStringUTFChars(peerId,pid);
-//  env->ReleaseStringUTFChars(remoteFileName,remoteFile);
-//  env->ReleaseStringUTFChars(toSaveFileName,saveFile);
-//  return returnValue;
-//}
+    env->ReleaseStringUTFChars(peerId,pid);
+    env->ReleaseStringUTFChars(remoteFileName,remoteFile);
+    return returnValue;
+}
+jint naStopRemoteFile(JNIEnv *env, jobject thiz,jstring peerId)
+{
+    if (client == NULL){
+        return -1;
+    }
+    const char *pid = env->GetStringUTFChars(peerId, NULL);
+    int returnValue = 0;
+    if(!client->SetPlayFileStatus(pid,3,-1,-1)){
+        returnValue = -2;
+    }
+
+    env->ReleaseStringUTFChars(peerId,pid);
+    return 0;
+
+}
+
+jint naSetPlayPosition(JNIEnv *env, jobject thiz,jstring peerId,jint position){
+    if (client == NULL){
+        return -1;
+    }
+    const char *pid = env->GetStringUTFChars(peerId, NULL);
+
+    int returnValue = 0;
+    if(!client->SetPlayFileStatus(pid,2,position,-1)){
+        returnValue = -2;
+    }
+
+    env->ReleaseStringUTFChars(peerId,pid);
+    return returnValue;
+}
 
 jint naSearchLocalDevice(JNIEnv *env, jobject thiz){
     if (localClient == NULL) {
@@ -282,19 +316,27 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
 
     JNINativeMethod nm[] = {
         { "naInitialize", "(Ljava/lang/String;)I", (void*) naInitialize },
+        { "ChangeIceServers", "(Ljava/lang/String;)V", (void*) naChangeIceServers },
         { "naTerminate", "()I", (void*) naTerminate },
+
         { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
         { "naCloseTunnel", "(Ljava/lang/String;)I", (void*) naCloseTunnel },
         { "naStartMediaData", "(Ljava/lang/String;I)I", (void*) naStartMediaData },
         { "naStopMediaData", "(Ljava/lang/String;)I", (void*) naStopMediaData },
         { "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naMessageFromPeer },
+
         { "naSendTalkData", "([BI)I", (void*) naSendTalkData },
+
         { "naStartPeerVideoCut", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naStartPeerVideoCut },
         { "naStopPeerVideoCut", "(Ljava/lang/String;)I", (void*) naStopPeerVideoCut },
-        //    { "naDownloadRemoteFile", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)I",
-        //      (void*) naDownloadRemoteFile },
+
+        { "PlayRemoteFile", "(Ljava/lang/String;Ljava/lang/String;)I",
+          (void*) naPlayRemoteFile },
+        { "StopRemoteFile", "(Ljava/lang/String;)I", (void*) naStopRemoteFile },
+        { "SetPlayPosition", "(Ljava/lang/String;I)I", (void*) naSetPlayPosition },
+
         { "naSearchLocalDevice","()I",(void*) naSearchLocalDevice},
         { "naConnectLocalDevice", "(Ljava/lang/String;)I", (void*) naConnectLocalDevice },
         { "naDisconnectLocalDevice", "(Ljava/lang/String;)I", (void*) naDisconnectLocalDevice },
