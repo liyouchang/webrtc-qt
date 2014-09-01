@@ -38,7 +38,7 @@
 //};
 
 const int kNullStreamHandle = -1;
-const int kCheckStreamDelay = 5000;
+const int kCheckStreamDelay = 60000;
 enum StreamLevel{
     kLevelNoneStream = 0,
     kLevelMainStream = 1,
@@ -81,7 +81,7 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
 //    deviceThread = new talk_base::Thread();
 //    deviceThread->Start();
 
-    struct NETPARAM	net;
+//    struct NETPARAM	net;
     CONFIG_Register_Callback(CONFIG_TYPE_NET,netAppCallBack);
 //    CONFIG_Get(CONFIG_TYPE_NET,(void *)&net);
 //    printf("localIP:%d.%d.%d.%d\n",net.localIP[0],net.localIP[1],net.localIP[2],net.localIP[3]);
@@ -123,21 +123,16 @@ KeSdkDevice::~KeSdkDevice()
 
 bool KeSdkDevice::Init(kaerp2p::PeerTerminalInterface *t)
 {
-
     InitVideoInfo();
-
     RegisterCallBack::Instance()->SignalVideoFrame.connect(
                 this,&KeSdkDevice::SendVideoFrame);
     RegisterCallBack::Instance()->SignalAudioFrame.connect(
                 this,&KeSdkDevice::SendAudioFrame);
-
-
     deviceThread->PostDelayed(kCheckStreamDelay,this,MSG_CheckCloseStream);
     //    video1_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,0);
     //    video2_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,1);
     //    video3_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,2);
     //    audio_handle_ = FIFO_Stream_Open(FIFO_STREAM_AUDIO,0,0);
-
     SetOsdTitle("23456");
     return KeTunnelCamera::Init(t);
 }
@@ -166,7 +161,7 @@ void KeSdkDevice::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::s
 void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, int len)
 {
     KEFrameHead * head = (KEFrameHead *)data;
-//    LOG_T_F(INFO)<<" talk data "<< head->frameLen;
+    LOG_T_F(LS_VERBOSE)<<" talk data "<< head->frameLen;
     const int nalLen = 4;
     int dataPos =  sizeof(KEFrameHead);
     if(head->frameLen == len - dataPos){
@@ -174,7 +169,6 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
     }else{
         LOG_F(WARNING)<<"tal from "<<peer_id<<" frame format error";
     }
-
 }
 
 void KeSdkDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage)
@@ -207,7 +201,6 @@ void KeSdkDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmess
         jmessage["totalNum"] = totalNum;
         jmessage["recordList"] = jrecordList;
         this->ReportJsonMsg(peerId,jmessage);
-
     }
     else if(command.compare("wifi_info") == 0){
         Json::Value jwifi = GetWifiJsonArray();
@@ -347,6 +340,7 @@ bool KeSdkDevice::SetOsdTitle(const std::string &title)
     CONFIG_Set(CONFIG_TYPE_OSDTITLE,(void *)&osdTitle);
     return true;
 }
+
 //level 1~4 , 1- video1 ,2-video2,3-video3,4-audio stream
 void KeSdkDevice::MediaStreamOpen(int level)
 {
@@ -357,7 +351,8 @@ void KeSdkDevice::MediaStreamOpen(int level)
 void KeSdkDevice::MediaGetIDR(int level)
 {
     if(level != kLevelMainStream && level != kLevelSubStream &&
-            level != kLevelExtStream){
+            level != kLevelExtStream)
+    {
         LOG_F(WARNING)<<"level param error "<<level;
         return;
     }
@@ -504,8 +499,8 @@ bool StringToClock(std::string strTime,st_clock_t * time)
     if(strptime(strTime.c_str(),"%Y/%m/%d %H:%M:%S", &tm_t) == NULL){
         return false;
     }
-    time->year = tm_t.tm_year;
-    time->month = tm_t.tm_mon;
+    time->year = tm_t.tm_year + 1900;
+    time->month = tm_t.tm_mon + 1;
     time->day = tm_t.tm_mday;
     time->hour  = tm_t.tm_hour;
     time->minute = tm_t.tm_min;
@@ -526,32 +521,31 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
     std::string startTime,endTime;
     int offset,toQuery;
 
-    if( GetStringFromJsonObject(jcondition,"startTime",&startTime) ||
-           GetStringFromJsonObject(jcondition,"endTime",&endTime) ||
-           GetIntFromJsonObject(jcondition,"offset",&offset) ||
-           GetIntFromJsonObject(jcondition,"toQuery",&toQuery))
+    if( !GetStringFromJsonObject(jcondition,"startTime",&startTime) ||
+           !GetStringFromJsonObject(jcondition,"endTime",&endTime) ||
+          ! GetIntFromJsonObject(jcondition,"offset",&offset) ||
+           !GetIntFromJsonObject(jcondition,"toQuery",&toQuery))
     {
         LOG_F(WARNING)<<"parse condition error";
         return false;
     }
 
-
     st_clock_t startClock,endClock;
-    if(!StringToClock(startTime,&startClock) || !StringToClock(startTime,&startClock))
+    if(!StringToClock(startTime,&startClock) || !StringToClock(endTime,&endClock))
     {
         LOG_F(WARNING)<<"input time  format error";
         return false;
     }
 
-    int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,0,NULL);
+    int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,100,NULL);
     if(list_num <= 0){
         *totalNum = 0;
         LOG_F(WARNING)<<"No record found";
         return true;
     }
+    LOG_F(INFO)<<"get num "<<list_num;
     *totalNum = list_num;
-
-    if(offset > list_num ){
+    if(offset > list_num ) {
         LOG_F(WARNING)<<" offset is large than total num ";
         return false;
     }

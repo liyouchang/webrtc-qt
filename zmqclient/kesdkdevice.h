@@ -81,7 +81,7 @@ protected:
     bool SetPtz(std::string control, int param);
     Json::Value GetWifiJsonArray();
     bool SetWifiInfo(Json::Value jparam);
-    bool  QueryRecord(Json::Value condition,Json::Value * jrecordList,int * totalNum);
+    bool QueryRecord(Json::Value condition,Json::Value * jrecordList,int * totalNum);
 
 };
 

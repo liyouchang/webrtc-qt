@@ -230,6 +230,21 @@ jint naSetPlayPosition(JNIEnv *env, jobject thiz,jstring peerId,jint position){
     env->ReleaseStringUTFChars(peerId,pid);
     return returnValue;
 }
+//0-puase 100-continue
+jint naSetPlaySpeed(JNIEnv *env, jobject thiz,jstring peerId,jint speed){
+    if (client == NULL){
+        return -1;
+    }
+    const char *pid = env->GetStringUTFChars(peerId, NULL);
+
+    int returnValue = 0;
+    if(!client->SetPlayFileStatus(pid,2,-1,speed)){
+        returnValue = -2;
+    }
+
+    env->ReleaseStringUTFChars(peerId,pid);
+    return returnValue;
+}
 
 jint naSearchLocalDevice(JNIEnv *env, jobject thiz){
     if (localClient == NULL) {
@@ -316,7 +331,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
 
     JNINativeMethod nm[] = {
         { "naInitialize", "(Ljava/lang/String;)I", (void*) naInitialize },
-        { "ChangeIceServers", "(Ljava/lang/String;)V", (void*) naChangeIceServers },
+        { "naChangeIceServers", "(Ljava/lang/String;)V", (void*) naChangeIceServers },
         { "naTerminate", "()I", (void*) naTerminate },
 
         { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
@@ -332,10 +347,11 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
           (void*) naStartPeerVideoCut },
         { "naStopPeerVideoCut", "(Ljava/lang/String;)I", (void*) naStopPeerVideoCut },
 
-        { "PlayRemoteFile", "(Ljava/lang/String;Ljava/lang/String;)I",
+        { "naPlayRemoteFile", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naPlayRemoteFile },
-        { "StopRemoteFile", "(Ljava/lang/String;)I", (void*) naStopRemoteFile },
-        { "SetPlayPosition", "(Ljava/lang/String;I)I", (void*) naSetPlayPosition },
+        { "naStopRemoteFile", "(Ljava/lang/String;)I", (void*) naStopRemoteFile },
+        { "naSetPlayPosition", "(Ljava/lang/String;I)I", (void*) naSetPlayPosition },
+        { "naSetPlaySpeed", "(Ljava/lang/String;I)I", (void*) naSetPlaySpeed },
 
         { "naSearchLocalDevice","()I",(void*) naSearchLocalDevice},
         { "naConnectLocalDevice", "(Ljava/lang/String;)I", (void*) naConnectLocalDevice },
