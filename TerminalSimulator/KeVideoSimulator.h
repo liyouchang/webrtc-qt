@@ -29,8 +29,9 @@ public:
     void OnFileReadEnd(kaerp2p::RecordReaderInterface *);
     void OnFileVideoData(const char * data,int len);
     void OnFileAudioData(const char * data,int len);
+
 protected:
-    void OnRecvRecordQuery(std::string peer_id, std::string condition);
+    void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
 
 protected:
     kaerp2p::RecordReaderInterface * reader;
@@ -38,7 +39,6 @@ protected:
 
     zmq::context_t *context;
     zmq::socket_t *publisher;
-
 };
 
 #endif // KEVIDEOSIMULATOR_H
