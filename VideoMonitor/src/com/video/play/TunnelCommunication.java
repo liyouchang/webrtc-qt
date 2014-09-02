@@ -57,9 +57,10 @@ public class TunnelCommunication {
 	private native boolean naIsTunnelOpened(String peerId);
 	
 	//远程录像
-	private native int PlayRemoteFile(String peerId, String remoteFileName);
-	private native int StopRemoteFile(String peerId);
-	private native int SetPlayPosition(String peerId, int position);
+	private native int naPlayRemoteFile(String peerId, String remoteFileName);
+	private native int naStopRemoteFile(String peerId);
+	private native int naSetPlayPosition(String peerId, int position);
+	private native int naSetPlaySpeed(String peerId, int speed);
 	private native int OnRecordStatus(String peerId, int status, int position, int speed);
 	
 	synchronized public static TunnelCommunication getInstance() {
@@ -353,21 +354,28 @@ public class TunnelCommunication {
 	 * 播放远程录像
 	 */
 	public int playRemoteFile(String peerId, String remoteFileName) {
-		return PlayRemoteFile(peerId, remoteFileName);
+		return naPlayRemoteFile(peerId, remoteFileName);
 	}
 	
 	/**
 	 * 停止播放远程录像
 	 */
 	public int stopRemoteFile(String peerId) {
-		return StopRemoteFile(peerId);
+		return naStopRemoteFile(peerId);
 	}
 	
 	/**
 	 * 设置远程录像播放指针
 	 */
 	public int setPlayPosition(String peerId, int position) {
-		return SetPlayPosition(peerId, position);
+		return naSetPlayPosition(peerId, position);
+	}
+	
+	/**
+	 * 设置远程录像播放速度0：puase 100：continue
+	 */
+	public int setPlaySpeed(String peerId, int speed) {
+		return naSetPlaySpeed(peerId, speed);
 	}
 	
 	/**
