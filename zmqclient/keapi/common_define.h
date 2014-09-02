@@ -5,10 +5,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 /**********************************************************************/
 //module clock
 /**********************************************************************/
@@ -18,7 +14,7 @@ typedef enum
 	CLOCK_TYPE_PCF8563,											//外部硬件时钟芯片
 	CLOCK_TYPE_NTP,												//网络校时
 	CLOCK_TYPE_COUNT	
-}e_clock_type;
+}	e_clock_type;
 
 typedef struct struct_clock_s
 {
@@ -54,7 +50,8 @@ typedef enum
 	CONFIG_TYPE_SENSE,
 	CONFIG_TYPE_OVERLAY,
 	CONFIG_TYPE_LOSTSINGLE,
-	CONFIG_TYPE_WIRLESS,
+	CONFIG_TYPE_WIRLESS_OLD,
+	CONFIG_TYPE_WIRLESS_NEW,
 	CONFIG_TYPE_VO,
 	CONFIG_TYPE_COUNT
 }	e_config_type;
@@ -464,6 +461,26 @@ struct VOPARAM
 }__attribute__((packed));
 typedef int (*CONFIG_CALLBACK)(void * pData);
 
+struct WIRELESS_ALARM
+{
+	char wireless_name[64];
+	char wireless_uuid[16];
+	char notifyCenter;										//上报中心
+	char enable;
+	char triggerBuzzer;										//触发蜂鸣器
+	char triggerSwitch;										//触发开关量输出
+	char triggerJpeg;										//触发抓拍开关
+	char jpegChn;											//触发抓拍的通道
+	char jpegNum;											//触发抓拍张数
+	char jpegGop;											//触发抓拍间隔
+	
+	char triggerRecord;										//触发录像开关
+	char recordChn;											//触发录像通道
+	char recordDelay;										//触发录像时长
+	char recordPreTime;										//触发录像预录时间
+	struct DEFTIME  strategy[7];
+}__attribute__((packed));
+
 /**********************************************************************/
 //module gpio
 /**********************************************************************/
@@ -654,7 +671,7 @@ typedef struct st_wifi_list
 }	st_wifi_list_t;
 
 /**********************************************************************/
-//module Uart
+//module Uaer
 /**********************************************************************/
 typedef int (*UART_RECEIVE_CALLBACK)(int handle,char *pData,int iMaxSize);
 typedef int (*UART_PROTOCOL_CALLBACK)(int handle,char *pData,int iLen);
@@ -680,10 +697,5 @@ typedef struct ST_IOV
 	int iov_len;						/**< Size of data */	
 	void * iov_base;					/**< Pointer on data */
 }__attribute__((packed))st_iov_t;
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif		//COMMAND_DEFINE_H

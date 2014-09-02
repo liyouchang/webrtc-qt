@@ -329,8 +329,8 @@ bool LocalUdpTerminal::SendByTunnel(const std::string &peerAddr,
         //LOG_T_F(INFO)<<"send "<<sent;
     }
     return true;
-
 }
+
 const int kLocalSocketStartPort = 22555;
 const int kLocalSocketEndPort = 22600;
 

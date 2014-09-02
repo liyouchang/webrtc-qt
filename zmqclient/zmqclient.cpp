@@ -51,21 +51,31 @@ int main()
     GetStringFromJson(mac_value,&strMac);
     GetStringFromJson(dealer_value,&strDealerId);
 
+    bool isSetNet;
+    GetBoolFromJson(JsonConfig::Instance()->Get("setNet",false),&isSetNet);
+
+
 #ifndef ARM
 
 #else
     KeSdkDevice * device = new KeSdkDevice();
     //HisiMediaDevice * device = new HisiMediaDevice();
+
+    if (isSetNet) {
+        device->SetNetInfo();
+    }
+
     if (strMac.empty()) {
         strMac = device->GetMacAddress();
     }
+
 
     CameraClient client(strMac,clientVer);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
 
     client.SignalNtpSet.connect(device,&KeSdkDevice::SetNtp);
-//    device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
+    device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
 
 //    AlarmNotify::Instance()->SignalTerminalAlarm.connect(
 //                &client,&CameraClient::SendAlarm);

@@ -48,7 +48,19 @@ client-->camera
 //    "channel":1,//1:主通道，2：子通道
 //    "value":1,    //1:low,2:normal,3:high. 1~3 设置通道清晰度；101或者无此字段:获取通道清晰度
 //}
+3. get camera wifi status
 
+client-->camera
+{
+    "type":"tunnel",
+    "command":"wifi_status"
+}
+camera-->client
+{
+    "type":"tunnel",
+    "command":"wifi_status",
+    "status":""
+}
 
 4.get camera wifi info
 client-->camera
@@ -113,7 +125,7 @@ client<--camera
 client<-->camera
 {
     "type":"tunnel",
-    "command":"alarm_status",
+    "command":"arming_status",
     "value":1,    //0:disable alarm,1:enabble status；
                 //无此字段:获取报警状态
 }

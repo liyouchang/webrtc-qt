@@ -39,6 +39,7 @@
 
 const int kNullStreamHandle = -1;
 const int kCheckStreamDelay = 60000;
+const int kCheckNetDelay = 5000;
 enum StreamLevel{
     kLevelNoneStream = 0,
     kLevelMainStream = 1,
@@ -60,52 +61,24 @@ int ResoToFramType(int resoValue){
 
 int netAppCallBack(void * pData)
 {
-    printf("%s:%d to do\n",__FUNCTION__,__LINE__);
+    LOG_F(INFO) <<" net app call back";
+    //    printf("%s:%d to do\n",__FUNCTION__,__LINE__);
     return 0;
 }
 
 KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
     video2_handle_(kNullStreamHandle),video3_handle_(kNullStreamHandle),
-    audio_handle_(kNullStreamHandle)
+    audio_handle_(kNullStreamHandle),oldIp(-1)
 {
+    deviceThread = talk_base::Thread::Current();
 
     CONFIG_Initialize();
     SYSTEM_Initialize();
-
     MEDIA_Initialize();
     clock_handle = CLOCK_Open(CLOCK_TYPE_HIRTC);
     STORE_Initialize();
-
-
-    deviceThread = talk_base::Thread::Current();
-//    deviceThread = new talk_base::Thread();
-//    deviceThread->Start();
-
-//    struct NETPARAM	net;
-    CONFIG_Register_Callback(CONFIG_TYPE_NET,netAppCallBack);
-//    CONFIG_Get(CONFIG_TYPE_NET,(void *)&net);
-//    printf("localIP:%d.%d.%d.%d\n",net.localIP[0],net.localIP[1],net.localIP[2],net.localIP[3]);
-//    net.localIP[0] = 10;
-//    net.localIP[1] = 10;
-//    net.localIP[2] = 0;
-//    net.localIP[3] = 230;
-//    net.gateIP[0]    = 10;
-//    net.gateIP[1]    = 10;
-//    net.gateIP[2]    = 0;
-//    net.gateIP[3]    = 1;
-//    net.netMask[0]   = 255;
-//    net.netMask[1]   = 255;
-//    net.netMask[2]   = 255;
-//    net.netMask[3]   = 0;
-//    memcpy(net.username,"system",8);
-//    memcpy(net.password,"123456",8);
-//    CONFIG_Set(CONFIG_TYPE_NET,(void *)&net);
-//    CONFIG_Get(CONFIG_TYPE_NET,(void *)&net);
-//    printf("localIP:%d.%d.%d.%d  username:%s  password:%s\n",net.localIP[0],net.localIP[1],net.localIP[2],net.localIP[3],net.username,net.password);
-
     NET_Initialize();
     ALARM_Initialize();
-//    sleep(10);
     WEB_Initialize();
 }
 
@@ -128,12 +101,18 @@ bool KeSdkDevice::Init(kaerp2p::PeerTerminalInterface *t)
                 this,&KeSdkDevice::SendVideoFrame);
     RegisterCallBack::Instance()->SignalAudioFrame.connect(
                 this,&KeSdkDevice::SendAudioFrame);
+
+
+    oldIp = talk_base::NetworkToHost32(NET_Get_RouteIP(NULL));
+    LOG_F(INFO) << "get old ip is "<<oldIp;
     deviceThread->PostDelayed(kCheckStreamDelay,this,MSG_CheckCloseStream);
+    deviceThread->PostDelayed(kCheckNetDelay,this,MSG_NET_CHECK);
+
     //    video1_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,0);
     //    video2_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,1);
     //    video3_handle_ = FIFO_Stream_Open(FIFO_STREAM_H264,0,2);
     //    audio_handle_ = FIFO_Stream_Open(FIFO_STREAM_AUDIO,0,0);
-    SetOsdTitle("23456");
+    //    SetOsdTitle("23456");
     return KeTunnelCamera::Init(t);
 }
 
@@ -170,6 +149,8 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
         LOG_F(WARNING)<<"tal from "<<peer_id<<" frame format error";
     }
 }
+
+const int kCommandGetValue  = 101;
 
 void KeSdkDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage)
 {
@@ -230,6 +211,14 @@ void KeSdkDevice::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmess
         LOG(INFO)<<"receive rename message ,set device title - "<<name<<
                    " ;result "<<r;
         this->ReportResult(peerId,command,r);
+    }else  if(command.compare("arming_status") == 0){
+        int status;
+        if(GetIntFromJsonObject(jmessage,"value",&status) &&
+                status != kCommandGetValue){//set value
+            SetArmingStatus(status);
+        }
+        jmessage["value"] = this->GetArmingStatus();
+        this->ReportJsonMsg(peerId,jmessage);
     }
     else{
         kaerp2p::KeTunnelCamera::OnCommandJsonMsg(peerId,jmessage);
@@ -249,6 +238,10 @@ void KeSdkDevice::OnMessage(talk_base::Message *msg)
         this->MediaStreamOpen_d(mcd->data());
         delete mcd;
     }
+        break;
+    case MSG_NET_CHECK:
+        CheckNetIp_d();
+        deviceThread->PostDelayed(kCheckNetDelay,this,MSG_NET_CHECK);
         break;
     default:
         break;
@@ -305,8 +298,8 @@ void KeSdkDevice::CheckCloseStream_d()
         }
     }
 
-//    LOG_F(INFO)<<"count main "<<mainStreamCount<<" sub "<<subStreamCount<<
-//                 " ext "<<extStreamCount<<" audio "<<audioCount;
+    //    LOG_F(INFO)<<"count main "<<mainStreamCount<<" sub "<<subStreamCount<<
+    //                 " ext "<<extStreamCount<<" audio "<<audioCount;
     if(mainStreamCount == 0 && video1_handle_ != kNullStreamHandle){
         LOG_F(INFO) << " close main video " << video1_handle_;
         FIFO_Stream_Close(video1_handle_);
@@ -326,6 +319,19 @@ void KeSdkDevice::CheckCloseStream_d()
         LOG_F(INFO) << " close audio " << audio_handle_;
         FIFO_Stream_Close(audio_handle_);
         audio_handle_ = kNullStreamHandle;
+    }
+}
+
+void KeSdkDevice::CheckNetIp_d()
+{
+    //在程序开始的一段时间内,获得的ip会是0;在网络切换的一段时间内获得的ip会是0
+    int newIp  = NET_Get_RouteIP(NULL);
+    newIp = talk_base::NetworkToHost32(newIp);
+    if( newIp != oldIp){
+        LOG_F(INFO)<<"ip changed new ip is "<<talk_base::SocketAddress::IPToString(newIp)<<
+                     " and old ip is "<<talk_base::SocketAddress::IPToString(oldIp);
+        this->SignalNetStatusChange();
+        oldIp = newIp;
     }
 }
 
@@ -401,9 +407,9 @@ void KeSdkDevice::InitVideoInfo()
 {
     struct MEDIAPARAM media;
     CONFIG_Get(CONFIG_TYPE_MEDIA,(void *)&media);
-//    printf("resolution %d frame_rate %d rate_ctrl_mode %d bitrate %d piclevel %d\n",
-//           media.main[0].resolution,media.main[0].frame_rate,
-//            media.main[0].rate_ctrl_mode,media.main[0].bitrate,media.main[0].piclevel);
+    //    printf("resolution %d frame_rate %d rate_ctrl_mode %d bitrate %d piclevel %d\n",
+    //           media.main[0].resolution,media.main[0].frame_rate,
+    //            media.main[0].rate_ctrl_mode,media.main[0].bitrate,media.main[0].piclevel);
     video1_info_.frameRate = media.main[0].frame_rate;
     video1_info_.frameResolution = ResoToFramType(media.main[0].resolution);
     video1_info_.frameInterval = 1000/video1_info_.frameRate;
@@ -438,7 +444,7 @@ bool KeSdkDevice::SetPtz(std::string control, int param)
         LOG_F(WARNING)<<" wrong ptz control";
         return false;
     }
-//
+    //
     int ret = MOTOR_Control(0,cmd,kDefaultSpeed,param);
     LOG_F(INFO)<<" Control_MOTOR result "<< ret;
     return true;
@@ -483,14 +489,9 @@ bool KeSdkDevice::SetWifiInfo(Json::Value jparam)
     GetIntFromJsonObject(jparam,"encryptFormat",&encryptFormat);
     wifiParam.encryptFormat =(e_encrypt_format) encryptFormat;
     GetIntFromJsonObject(jparam,"wepPosition",&wifiParam.wepPosition);
-
     int ret = NET_Set_Wifi(&wifiParam);
-    LOG_F(INFO)<<"NET_Set_Wifi "<<ret;
-    if(ret == 0){
-        return false;
-    }else{
-        return true;
-    }
+    //    LOG_F(INFO)<<"NET_Set_Wifi "<<ret;
+    return true;
 }
 
 bool StringToClock(std::string strTime,st_clock_t * time)
@@ -522,9 +523,9 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
     int offset,toQuery;
 
     if( !GetStringFromJsonObject(jcondition,"startTime",&startTime) ||
-           !GetStringFromJsonObject(jcondition,"endTime",&endTime) ||
-          ! GetIntFromJsonObject(jcondition,"offset",&offset) ||
-           !GetIntFromJsonObject(jcondition,"toQuery",&toQuery))
+            !GetStringFromJsonObject(jcondition,"endTime",&endTime) ||
+            ! GetIntFromJsonObject(jcondition,"offset",&offset) ||
+            !GetIntFromJsonObject(jcondition,"toQuery",&toQuery))
     {
         LOG_F(WARNING)<<"parse condition error";
         return false;
@@ -537,7 +538,7 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
         return false;
     }
 
-    int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,100,NULL);
+    int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,100000,NULL);
     if(list_num <= 0){
         *totalNum = 0;
         LOG_F(WARNING)<<"No record found";
@@ -564,6 +565,56 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
     delete [] stList;
     return true;
 }
+
+bool KeSdkDevice::SetArmingStatus(int status)
+{
+    LOG_F(INFO) << status;
+    if(status == 1){
+        STORE_Start_Plan(0);
+    }else if(status == 0){
+        STORE_Stop_Plan(0);
+    }else{
+        LOG_F(WARNING)<<"status param error";
+        return false;
+    }
+    return true;
+}
+
+int KeSdkDevice::GetArmingStatus()
+{
+    int plan;
+    STORE_Get_Store_Status(0,&plan,NULL,NULL,NULL);
+    return plan;
+}
+
+void KeSdkDevice::SetNetInfo()
+{
+    struct NETPARAM	net;
+    CONFIG_Register_Callback(CONFIG_TYPE_NET,netAppCallBack);
+    CONFIG_Get(CONFIG_TYPE_NET,(void *)&net);
+    //    printf("localIP:%d.%d.%d.%d\n",net.localIP[0],net.localIP[1],net.localIP[2],net.localIP[3]);
+    LOG_F(INFO)<<" dhcp enable is "<< (int)net.dhcpEnable;
+    //    net.localIP[0] = 10;
+    //    net.localIP[1] = 10;
+    //    net.localIP[2] = 0;
+    //    net.localIP[3] = 212;
+    //    net.gateIP[0]    = 10;
+    //    net.gateIP[1]    = 10;
+    //    net.gateIP[2]    = 0;
+    //    net.gateIP[3]    = 1;
+    //    net.netMask[0]   = 255;
+    //    net.netMask[1]   = 255;
+    //    net.netMask[2]   = 255;
+    //    net.netMask[3]   = 0;
+    net.dhcpEnable = 1;
+    //    memcpy(net.username,"system",8);
+    //    memcpy(net.password,"123456",8);
+    CONFIG_Set(CONFIG_TYPE_NET,(void *)&net);
+    //        CONFIG_Get(CONFIG_TYPE_NET,(void *)&net);
+    //        printf("localIP:%d.%d.%d.%d  username:%s  password:%s\n",net.localIP[0],net.localIP[1],net.localIP[2],net.localIP[3],net.username,net.password);
+
+}
+
 
 
 KeSdkDevice::RegisterCallBack::RegisterCallBack()
@@ -613,8 +664,8 @@ void KeSdkProcess::ConnectMedia(int video, int audio, int talk)
     //get video info from container
     camera->GetCameraVideoInfo(video,&this->videoInfo_);
     LOG_F(INFO)<<"KeMessageProcessCamera::ConnectMedia--- video "<<video<<
-               " listen-"<<audio<<" talk-"<<talk<<"; frameResolution="<<
-               this->videoInfo_.frameResolution<<" ;framerate="<<videoInfo_.frameRate;
+                 " listen-"<<audio<<" talk-"<<talk<<"; frameResolution="<<
+                 this->videoInfo_.frameResolution<<" ;framerate="<<videoInfo_.frameRate;
 
     if(video == 0){//stop
         video_status = video;

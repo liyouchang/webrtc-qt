@@ -81,7 +81,7 @@ hisi {
 
     target.path = /var/lib/tftpboot
     INSTALLS += target
-    target_config.files  = $$PWD/config.json
+    target_config.files  = $$PWD/config.json $$PWD/start_zmqclient.sh  $$PWD/stop_zmqclient.sh
     target_config.path   = /var/lib/tftpboot  $$output_dir
     INSTALLS  += target_config
 
@@ -90,10 +90,15 @@ hisi {
 #            keapi/RayCommIPC_ParamInfo.h \
 #            keapi/keapi.h
 #    LIBS += -lkeapi -lstore -lexfat
+
+OTHER_FILES += \
+    start_zmqclient.sh \
+    stop_zmqclient.sh
+
 }
 
 OTHER_FILES += \
-    config.json
+    config.json \
 
 
 SOURCES += \

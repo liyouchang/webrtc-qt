@@ -2,11 +2,12 @@
     "camera" : {
         "mac" : ""
     },
-    "dealerId" : "lht123",
+    "dealerId" : "",
     "routerUrl":"tcp://192.168.40.179:5555",
     "logParams":"tstamp thread info debug",
     "logSaveFile":"/tmp/zmqclient.log",
     "servers":[{"uri":"stun:192.168.40.179:5389"}],
     "clarity":2,
     "sampleFileName":"Sample.avi",
+    "setNet":false
 }

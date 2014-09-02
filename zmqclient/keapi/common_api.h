@@ -98,11 +98,12 @@ int UDP_Server_Send(int iSock,int iIP,short sPort,char *pData,int iLen);				//�
 int UDP_Server_Destory(int iSock);														//销毁udp server
 
 int NET_Initialize(void);																//初始化系统网络
-int NET_Get_WanStatus(void);															//获取
+int NET_Get_WanStatus(void);															//由此接口来判断设备是否能够连接到公网
 int NET_Get_RouteIP(char * cIP);														//获取当前路由使用的网卡的ip
 int NET_Get_Status(st_net_status_t * status);											//获取各个网卡的状态
 int NET_Get_WifiList(int iMaxList,st_wifi_list_t *);									//获取wifi网络列表 最多查询iMaxList条放入wifi列表里面，返回实际查询出来的条数
-int NET_Set_Wifi(st_wifi_list_t *);
+int NET_Set_Wifi(st_wifi_list_t *);														//设置连接wifi参数
+int Net_Get_WifiLink_Status(void);														//设置wifi连接的状态，0-未开始+未使能(插着网线同时wifi未设置)，1-未开始+已使能(wifi参数已经设置但插着网线)，2-开始+未使能(网线拔掉了但wifi未设置)，3-开始连接或者正在连接，4-连接成功
 int NET_Cleanup(void);																	//反初始化系统网络
 
 int RTSP_Options(int iSock,char *pData,int iLen,char *pOut);							//
@@ -143,9 +144,10 @@ int UTILITY_BASE64_Encode(unsigned char *src,int len,char *dst);						//base64�
 int UTILITY_MEDIA_Convert_Size(int resolution,int *width,int *high);					//分辨率转换成宽高	
 int UTILITY_MEDIA_Convert_Format(int reso);												//编码参数的分辨率（由小到大表示分辨率由小到大),转换成卡尔协议使用的分辨率的定义规则
 int UTILITY_MEDIA_Convert_Resolution(int format);										//卡尔协议传下来的参数转化成程序中实际应用的分辨率（由小到大表示分辨率由小到大)
-int UTILITY_String_IP(char *src,char *cip,int *iip);									//字符串ip转换成4字节十六进制ip或int类型ip
 int UTILITY_B64_ntop(unsigned char const *,size_t, char *,size_t);
 int UTILITY_B64_pton(char const *,unsigned char *,size_t);
+int UTILITY_String_IP(char *src,char *cip,int *iip);									//字符串ip转换成4字节十六进制ip或int类型ip
+int UTILITY_String_MAC(char *src,char *char_mac,char *hex_mac);							//字符串mac转换成小写mac字符串，和十六进制mac
 
 #ifdef __cplusplus
 }

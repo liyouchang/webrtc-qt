@@ -24,6 +24,9 @@ public:
 
     virtual void OnMessage(talk_base::Message *msg);
 
+    //emit when the net status changed
+    sigslot::signal0<> SignalNetStatusChange;
+
     // open a level of stream ,the level is 1~4 ,
     // 1 for main video stream , 2 for sub video stream ,3 for extern video stream ,
     // 4 for audio stream
@@ -31,12 +34,24 @@ public:
 
     //get a IDR frame , the IDR frame will get in 5 frames.
     void MediaGetIDR(int level);
+    void SetNetInfo();
 
     std::string GetMacAddress();
     //设置Ntp,zone is like +8:00
     void SetNtp(const std::string & ntpIp, int port, const std::string &zone);
     //接受对讲数据
     void OnRecvTalkData(const std::string &peer_id, const char *data, int len);
+
+    //设备控制函数封装
+protected:
+
+    bool SetOsdTitle(const std::string & title);
+    bool SetPtz(std::string control, int param);
+    Json::Value GetWifiJsonArray();
+    bool SetWifiInfo(Json::Value jparam);
+    bool QueryRecord(Json::Value condition,Json::Value * jrecordList,int * totalNum);
+    bool SetArmingStatus(int status);
+    int GetArmingStatus();
 
 protected:
     //发送视频帧数据,level 1~3
@@ -47,6 +62,8 @@ protected:
     void MediaStreamOpen_d(int level);
     //检查stream是否正在被请求
     void CheckCloseStream_d();
+
+    void CheckNetIp_d();
     //初始化视频信息
     void InitVideoInfo();
 
@@ -75,13 +92,7 @@ protected:
 
     int clock_handle;
 
-protected:
-    bool SetOsdTitle(const std::string & title);
-
-    bool SetPtz(std::string control, int param);
-    Json::Value GetWifiJsonArray();
-    bool SetWifiInfo(Json::Value jparam);
-    bool QueryRecord(Json::Value condition,Json::Value * jrecordList,int * totalNum);
+    int oldIp;
 
 };
 

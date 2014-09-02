@@ -43,11 +43,12 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring jstrIceServers) {
 
     return 0;
 }
-void naChangeIceServers(JNIEnv *env, jobject thiz, jstring jstrIceServers)
+jint naChangeIceServers(JNIEnv *env, jobject thiz, jstring jstrIceServers)
 {
     const char * iceservers = env->GetStringUTFChars(jstrIceServers, NULL);
     kaerp2p::P2PConductor::AddIceServers(iceservers);
     env->ReleaseStringUTFChars(jstrIceServers,iceservers);
+    return 0;
 }
 
 jint naTerminate(JNIEnv *env, jobject thiz)
@@ -330,7 +331,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
     LOG_F(INFO)<<" loading labrary";
     JNINativeMethod nm[] = {
         { "naInitialize", "(Ljava/lang/String;)I", (void*) naInitialize },
-        { "naChangeIceServers", "(Ljava/lang/String;)V", (void*) naChangeIceServers },
+        { "naChangeIceServers", "(Ljava/lang/String;)I", (void*) naChangeIceServers },
         { "naTerminate", "()I", (void*) naTerminate },
 
         { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
