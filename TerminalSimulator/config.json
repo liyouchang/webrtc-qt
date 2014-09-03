@@ -1,15 +1,9 @@
 {
 
     "camera" : {
-<<<<<<< HEAD
         "mac" : "tt123456"
     },
     "dealerId" : "tt123456",
-=======
-        "mac" : "tt789"
-    },
-    "dealerId" : "tt789",
->>>>>>> 1ace5157269999db67df18ab36d16cdf1b6842a6
     "routerUrl":"tcp://192.168.40.179:5555",
     "logParams":"tstamp thread info debug",
     "logSaveFile":"/tmp/zmqclient.log",
