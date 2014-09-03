@@ -80,7 +80,7 @@ void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &
         LOG(WARNING)<<"get command error-"<<command<<" from"<<peerId ;
         return;
     }
-
+    LOG_F(INFO)<<"receive command "<<command;
     if(command.compare("ptz") == 0){
         std::string ptz_control;
         int param;
@@ -98,7 +98,7 @@ void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &
         Json::Value jrecordList(Json::arrayValue);
         for (int i = 0 ; i < 10 ; i++) {
             Json::Value jrecord;
-            jrecord["fileName"] = "Samplie.avi";
+            jrecord["fileName"] = "Sample.avi";
             jrecord["fileEndTime"] ="2014/9/11 12:00:00";
             jrecord["fileSize"] = 256;
             jrecordList.append(jrecord);

@@ -3,29 +3,35 @@ var g_peer_id;
 var g_infoDiv;
 
 function load(){
+
     var infoDiv = document.getElementById("textDiv");
     g_infoDiv = document.getElementById("textDiv");
     kePlayerObj = document.getElementById("KePlayerPlugin");
-    kePlayerObj.TunnelOpened = function (peer){
+
+    kePlayerObj.TunnelOpened = function (peer) {
         infoDiv.textContent = "TunnelOpened "+ peer;
     }
-    kePlayerObj.TunnelClosed = function (peer){
+
+    kePlayerObj.TunnelClosed = function (peer) {
         infoDiv.textContent = "TunnelClosed "+ peer;
     }
-    kePlayerObj.RecvPeerMsg = function (peer,msg){
+
+    kePlayerObj.RecvPeerMsg = function (peer,msg) {
         infoDiv.textContent = "RecvPeerMsg "+ peer + " msg "+ msg;
     }
-    kePlayerObj.RecordStatus = function(peer,status){
+
+    kePlayerObj.RecordStatus = function(peer,status) {
         //infoDiv.textContent = "RecordStatus "+ peer + " status-"+ status;
     }
-    kePlayerObj.LocalDeviceInfo = function(devInfo){
+
+    kePlayerObj.LocalDeviceInfo = function(devInfo) {
         infoDiv.textContent = devInfo;
     }
 
-    var iceServers = [{"uri":"stun:192.168.40.179:5389"}];
+//    var iceServers = [{"uri":"stun:192.168.40.179:5389"},
 //                      {"uri":"turn:192.168.40.179:5766","username":"lht1","password":"1234567"}];
 
-//    var iceServers = [{"uri":"stun:222.174.213.181:5389"}];
+    var iceServers = [{"uri":"stun:192.168.40.179:5389"}];
     var strIceServers = JSON.stringify(iceServers);
 //    var strRouterUrl = "tcp://222.174.213.181:5555"
     var strRouterUrl = "tcp://192.168.40.179:5555"
@@ -41,9 +47,7 @@ window.onbeforeunload = function (e){
 }
 
 function SetSize(){
-//    message();
     console.log("SetSize");
-
     kePlayerObj.style.height = "300px";
     kePlayerObj.style.width = "300px";
 }
@@ -92,8 +96,8 @@ var eventFunction = function(){
 function QueryCameraRemoteFile(){
     g_peer_id =  PeerID.value;
     var query_command = {type:"tunnel",command:"query_record",
-        condition:{startTime:"20130417175100",
-            endTime:"20140618175500",offset:0,toQuery:3}};
+        condition:{startTime:"2013/04/17 17:51:00",
+            endTime:"2014/06/18 17:55:00",offset:0,toQuery:3}};
     var query_str = JSON.stringify(query_command);
     kePlayerObj.SendCommand(g_peer_id,query_str);
 }
