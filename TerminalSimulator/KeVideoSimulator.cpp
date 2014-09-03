@@ -98,8 +98,11 @@ void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &
         Json::Value jrecordList(Json::arrayValue);
         for (int i = 0 ; i < 10 ; i++) {
             Json::Value jrecord;
-            jrecord["fileName"] = "Samplie.avi";
-            jrecord["fileEndTime"] ="2014/9/11 12:00:00";
+            char timebuf[64];
+            jrecord["fileName"] = "Sample.avi";
+            sprintf(timebuf,"2014/9/11 %02d:00:00",i);
+
+            jrecord["fileEndTime"] = timebuf;
             jrecord["fileSize"] = 256;
             jrecordList.append(jrecord);
         }
