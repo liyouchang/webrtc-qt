@@ -402,7 +402,7 @@ void VideoWall::performDrag(PlayWidget *pw)
 void VideoWall::paintEvent(QPaintEvent *e)
 {
 
-    qDebug()<<"VideoWall::paintEvent --"<<e->rect().height()<<","<<e->rect().width();
+//    qDebug()<<"VideoWall::paintEvent --"<<e->rect().height()<<","<<e->rect().width();
 //    e->ignore();
     //    if(layout_changed_){
     //        for(int i=0;i<MAX_AVPLAYER;i++){
