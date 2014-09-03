@@ -541,6 +541,7 @@ bool RecordReaderAvi::StartRead(const std::string &filename)
     this->recordInfo.frameInterval = avih.dwMicroSecPerFrame/1000;
     this->totalFrame = avih.dwTotalFrame;
 
+
     filePos += 4 + listLen + 4;//hdr1 listlen list,to list len
     aviFile_->SetPosition(filePos);
     result = aviFile_->Read(&listLen,4,NULL,NULL);
@@ -552,7 +553,7 @@ bool RecordReaderAvi::StartRead(const std::string &filename)
                    "The frame resolution is "<< this->recordInfo.frameResolution <<
                    "; frame rate is "<<this->recordInfo.frameRate<<
                    "; frame interval is "<< this->recordInfo.frameInterval<<
-                   "; list len is "<< listLen;
+                   "; list len is "<< listLen<<"; total frame is "<<this->totalFrame;
 
     char listType[5] = {0};
     result = aviFile_->Read(listType,4,NULL,NULL);
@@ -566,6 +567,7 @@ bool RecordReaderAvi::StartRead(const std::string &filename)
         return false;
     }
     //
+    recordIndex.clear();
     indexPos = filePos + listLen + 4;
     this->MoveTo(0);
 
@@ -658,7 +660,7 @@ void RecordReaderAvi::MoveTo(int percent)
     int pos = recordIndex.size()*percent/100;
     AVIINDEXENTRY index = recordIndex[pos];
     aviFile_->SetPosition(index.dwChunkOffset);
-    currentFrame = pos;
+    this->currentFrame = pos;
 //    LOG_T_F(INFO)<<"move start";
 //    readThread->Post(this,MSG_READ);
 }
@@ -691,8 +693,9 @@ void RecordReaderAvi::ReadRecord()
         }
         ++this->currentFrame;
 
-        if(GetPlayedPercent() != oldPercent){
-            oldPercent = GetPlayedPercent();
+        int newPercent = GetPlayedPercent();
+        if(newPercent != oldPercent){
+            oldPercent = newPercent;
             this->SignalReportProgress(oldPercent);
         }
         int delayInterval = this->recordInfo.frameInterval*speed/kNormalSpeed;
@@ -726,7 +729,6 @@ int RecordReaderAvi::GetPlayedPercent()
         return 0;
     }
     return currentFrame*100/totalFrame;
-
 }
 
 FakeRecordReaderAvi::FakeRecordReaderAvi(int interval):interval(interval)
