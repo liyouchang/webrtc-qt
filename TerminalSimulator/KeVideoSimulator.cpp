@@ -71,18 +71,74 @@ void KeVideoSimulator::OnFileAudioData(const char *data, int len)
 //    publisher->send(data,len);
 }
 
-void KeVideoSimulator::OnRecvRecordQuery(std::string peer_id, std::string condition)
+
+void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage)
 {
-    LOG(INFO)<<"KeVideoSimulator::OnRecvRecordQuery ---"<<
-               peer_id<<" query:"<<condition;
-    Json::StyledWriter writer;
-    Json::Value jmessage;
-    jmessage["type"] = "tunnel";
-    jmessage["command"] = "queryRecord";
-    jmessage["condition"] = condition;
-    jmessage["totalNum"] = 10;
-    Json::Value jrecord;
-    jmessage["recordList"].append(jrecord);
-    std::string msg = writer.write(jmessage);
-    this->terminal_->SendByRouter(peer_id,msg);
+    std::string command;
+    bool ret = GetStringFromJsonObject(jmessage,kaerp2p::kKaerMsgCommandName, &command);
+    if(!ret){
+        LOG(WARNING)<<"get command error-"<<command<<" from"<<peerId ;
+        return;
+    }
+//    LOG_F(INFO)<<"receive command "<<command;
+    if(command.compare("ptz") == 0){
+        std::string ptz_control;
+        int param;
+        GetStringFromJsonObject(jmessage,"control",&ptz_control);
+        GetIntFromJsonObject(jmessage,"param",&param);
+    }
+    else if(command.compare("query_record") == 0){
+        Json::Value jcondition;
+        if(!GetValueFromJsonObject(jmessage, "condition", &jcondition))
+        {
+            LOG(WARNING)<<"get query_record value error from" << peerId ;
+            return;
+        }
+        int totalNum = 10;
+        Json::Value jrecordList(Json::arrayValue);
+        for (int i = 0 ; i < 10 ; i++) {
+            Json::Value jrecord;
+            char timebuf[64];
+            jrecord["fileName"] = "Sample.avi";
+            sprintf(timebuf,"2014/9/11 %02d:00:00",i);
+
+            jrecord["fileEndTime"] = timebuf;
+            jrecord["fileSize"] = 256;
+            jrecordList.append(jrecord);
+        }
+        jmessage["result"] = true;
+        jmessage["totalNum"] = totalNum;
+        jmessage["recordList"] = jrecordList;
+        this->ReportJsonMsg(peerId,jmessage);
+    }
+    else if(command.compare("wifi_info") == 0){
+        Json::Value jresult;
+        jresult["type"] = "tunnel";
+        jresult["command"] = "wifi_info";
+
+        this->ReportJsonMsg(peerId,jresult);
+    }
+    else if(command.compare("set_wifi") == 0){
+        Json::Value jwifiParam;
+        if(!GetValueFromJsonObject(jmessage, "param", &jwifiParam)){
+            LOG(WARNING)<<"get set_wifi value error from"<<peerId;
+            return;
+        }
+        this->ReportResult(peerId,command,true);
+    }
+    else if(command.compare("rename") == 0){
+        std::string name;
+        if(!GetStringFromJsonObject(jmessage,"name", &name)){
+            LOG_F(WARNING) <<" receive rename msg error ";
+            return;
+        }
+        this->ReportResult(peerId,command,true);
+    }else  if(command.compare("arming_status") == 0){
+        jmessage["value"] = 1;
+        this->ReportJsonMsg(peerId,jmessage);
+    }
+    else{
+        kaerp2p::KeTunnelCamera::OnCommandJsonMsg(peerId,jmessage);
+    }
+
 }

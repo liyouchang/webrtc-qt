@@ -212,8 +212,13 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
         }
     }else if(pMsg->fileType == 3){
         LOG_T_F(INFO)<<"stop play file";
-        recordReader->StopRead();
+        if(recordReader != NULL){
+            recordReader->StopRead();
+        }else{
+            LOG_T_F(WARNING)<<"stop play file error file not start";
 
+        }
+//        recordReader->StopRead();
     }else{
         LOG_T_F(WARNING)<<"unknown file type";
     }

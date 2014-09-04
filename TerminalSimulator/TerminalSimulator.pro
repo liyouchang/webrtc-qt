@@ -7,7 +7,7 @@ CONFIG -= qt
 include (../talk/talk_common.pri)
 include (../zmqclient/zmqdealer.pri)
 
-#DESTDIR = $$output_dir/$$TARGET
+DESTDIR = $$output_dir/$$TARGET
 
 win32 {
     #for zmqhelper

@@ -70,7 +70,7 @@ void CameraClient::Reconnect()
 
     dealer_->disconnect();
     dealer_->connect(strDealerId,oldAddr);
-//    this->Login();
+    this->Login();
 }
 
 

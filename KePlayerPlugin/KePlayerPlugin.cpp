@@ -397,7 +397,6 @@ bool KePlayerPlugin::StopPlayFile(QString peer_id)
         qWarning() << "tunnel StopPlayFile error ";
         return false;
     }
-    this->video_wall_->StopPeerPlay(peer_id);
     return 0;
 }
 
