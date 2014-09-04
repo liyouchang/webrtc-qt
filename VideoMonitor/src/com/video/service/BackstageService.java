@@ -38,19 +38,12 @@ public class BackstageService extends Service {
 	public static final String CHANGE_DEVICE_LIST_ACTION = "BackstageService.change_device_list"; // 更新设备列表状态
 	public static final String TERM_ONLINE_STATE_ACTION = "BackstageService.term_online_state"; // 终端上下线状态
 	
-	static 
-	{
-		System.loadLibrary("gnustl_shared");
-		System.loadLibrary("h264");
-		System.loadLibrary("p2p");
-	}
-	
 	@Override
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
 		// 初始化通道
-		TunnelCommunication.getInstance().tunnelInitialize(MainApplication.getInstance().generateStunandTurnJson(Value.turn, Value.stun));
+		TunnelCommunication.getInstance().tunnelInitialize(MainApplication.getInstance().generateStunJson(Value.stun));
 	}
 	
 	@Override
@@ -342,7 +335,7 @@ public class BackstageService extends Service {
 			else if (action.equals(TUNNEL_REQUEST_ACTION)) {
 				// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
 				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
-				String peerId = intent.getStringExtra("PeerId");
+				String peerId = intent.getStringExtra("peerId");
 				int position = MainApplication.getInstance().getDeviceListPositionByDealerName(peerId);
 				if (position == -1) {
 					return ;

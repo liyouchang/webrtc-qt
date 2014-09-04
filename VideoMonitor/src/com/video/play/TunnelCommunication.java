@@ -14,7 +14,6 @@ import com.video.R;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqThread;
-import com.video.terminal.player.TerminalPlayerActivity;
 import com.video.utils.Tools;
 import com.video.utils.Utils;
 
@@ -37,7 +36,15 @@ public class TunnelCommunication {
 	public static byte audioFrameType; 
 	public static AudioCache audioDataCache = null;
 	
+	static 
+	{
+		System.loadLibrary("gnustl_shared");
+		System.loadLibrary("p2p");
+		System.loadLibrary("h264");
+	}
+	
 	//P2P动态库接口
+	private native int naChangeIceServers(String iceServersValue);
 	private native int naInitialize(String iceServersValue);
 	private native int naTerminate();
 	private native int naOpenTunnel(String peerId);
@@ -61,13 +68,19 @@ public class TunnelCommunication {
 	private native int naStopRemoteFile(String peerId);
 	private native int naSetPlayPosition(String peerId, int position);
 	private native int naSetPlaySpeed(String peerId, int speed);
-	private native int OnRecordStatus(String peerId, int status, int position, int speed);
-	
+
 	synchronized public static TunnelCommunication getInstance() {
 		if (tunnel == null) {
 			tunnel = new TunnelCommunication();
 		}
 		return tunnel;
+	}
+	
+	/**
+	 * 初始化IceServers
+	 */
+	public int changeIceServers(String iceServersValue) {
+		return naChangeIceServers(iceServersValue);
 	}
 
 	/**
@@ -111,7 +124,7 @@ public class TunnelCommunication {
 		
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 0);
-		intent.putExtra("PeerId", peerId);
+		intent.putExtra("peerId", peerId);
 		intent.setAction(BackstageService.TUNNEL_REQUEST_ACTION);
 		MainApplication.getInstance().sendBroadcast(intent);
 	}
@@ -124,7 +137,7 @@ public class TunnelCommunication {
 		
 		Intent intent = new Intent();
 		intent.putExtra("TunnelEvent", 1);
-		intent.putExtra("PeerId", peerId);
+		intent.putExtra("peerId", peerId);
 		intent.setAction(BackstageService.TUNNEL_REQUEST_ACTION);
 		MainApplication.getInstance().sendBroadcast(intent);
 	}
@@ -176,33 +189,6 @@ public class TunnelCommunication {
 	 */
 	public int sendTalkData(byte[] ulawData, int ulawDataLen) {
 		return naSendTalkData(ulawData, ulawDataLen);
-	}
-	
-	/**
-	 * 下载终端录像文件
-	 */
-	public int downloadRemoteFile(String peerId, String remoteFileName, String saveFilePath, int playSize) {
-		return naDownloadRemoteFile(peerId, remoteFileName, saveFilePath, playSize);
-	}
-	
-	/**
-	 * 下载终端录像文件(回调)
-	 * status的值如下:
-	 * 0:请求录像成功
-	 * 1:保存录像失败
-	 * 2:请求文件错误
-	 * 3:下载录像完成
-	 * 4:达到播放阀值
-	 * 5:请求消息错误
-	 */
-	public void RecordStatus(String peerId, int status) {
-		Log.i("tunnel","MyDebug: 【"+peerId+"】下载终端录像文件回调值："+status);
-		
-		Intent intent = new Intent();
-		intent.putExtra("PeerId", peerId);
-		intent.putExtra("RecordStatus", status);
-		intent.setAction(TerminalPlayerActivity.REQUEST_TERMINAL_VIDEO_ACTION);
-		MainApplication.getInstance().sendBroadcast(intent);
 	}
 	
 	/**
@@ -372,7 +358,7 @@ public class TunnelCommunication {
 	}
 	
 	/**
-	 * 设置远程录像播放速度0：puase 100：continue
+	 * 设置远程录像播放速度0：pause 100：continue
 	 */
 	public int setPlaySpeed(String peerId, int speed) {
 		return naSetPlaySpeed(peerId, speed);
@@ -386,7 +372,8 @@ public class TunnelCommunication {
 	 * @param speed 播放速度,暂无用
 	 * @return
 	 */
-	public int recordStatus(String peerId, int status, int position, int speed) {
+	public void RecordStatus(String peerId, int status, int position, int speed) {
+		Utils.log("peerId:"+peerId+" status:"+status+" position:"+position+" speed"+speed);
 		Intent intent = new Intent();
 		intent.putExtra("peerId", peerId);
 		intent.putExtra("status", status);
@@ -394,6 +381,5 @@ public class TunnelCommunication {
 		intent.putExtra("speed", speed);
 		intent.setAction(RemoteFilePlayerActivity.REQUEST_REMOTE_FILE_PLAYER_ACTION);
 		MainApplication.getInstance().sendBroadcast(intent);
-		return 0;
 	}
 }

@@ -241,7 +241,6 @@ jint naSetPlaySpeed(JNIEnv *env, jobject thiz,jstring peerId,jint speed){
     if(!client->SetPlayFileStatus(pid,2,-1,speed)){
         returnValue = -2;
     }
-
     env->ReleaseStringUTFChars(peerId,pid);
     return returnValue;
 }
@@ -328,7 +327,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
     if (pVm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
         return -1;
     }
-
+    LOG_F(INFO)<<" loading labrary";
     JNINativeMethod nm[] = {
         { "naInitialize", "(Ljava/lang/String;)I", (void*) naInitialize },
         { "naChangeIceServers", "(Ljava/lang/String;)V", (void*) naChangeIceServers },

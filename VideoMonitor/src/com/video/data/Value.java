@@ -31,8 +31,12 @@ public class Value {
 	 */
 //	public final static String stun = "stun:222.174.213.185:5389";
 //	public final static String turn = "turn:222.174.213.185:5766";
-	public final static String stun = "stun:222.174.213.181:5389";
-	public final static String turn = "turn:222.174.213.181:5766";
+	
+//	public final static String stun = "stun:222.174.213.181:5389";
+//	public final static String turn = "turn:222.174.213.181:5766";
+	
+	public final static String stun = "stun:192.168.40.179:5389";
+	public final static String turn = "turn:192.168.40.179:5766";
 	
 	/**
 	 * 服务器上比较版本的xml文件地址

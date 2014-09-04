@@ -144,6 +144,7 @@ public class AudioThread extends Thread {
 	 */
 	public void openAudioTrackVolume() {
 		if (audioTrack != null) {
+			isPlayAudio = true;
 			audioTrack.setStereoVolume(1.0f, 1.0f);
 		}
 	}
@@ -153,6 +154,7 @@ public class AudioThread extends Thread {
 	 */
 	public void closeAudioTrackVolume() {
 		if (audioTrack != null) {
+			isPlayAudio = false;
 			audioTrack.setStereoVolume(0.0f, 0.0f);
 		}
 	}

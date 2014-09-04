@@ -4,10 +4,9 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -28,13 +27,13 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
 import com.video.R;
 import com.video.data.Value;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.Utils;
 
+@SuppressLint("HandlerLeak")
 public class SetDateActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
@@ -170,10 +169,10 @@ public class SetDateActivity extends Activity implements OnClickListener {
 	private String generateTerminalVideoFileList() {
 		JSONObject jsonObj = new JSONObject();
 		DecimalFormat df = new DecimalFormat("00");
-		startDateJson = ""+startDate.mYear + df.format(startDate.mMonth)
-				+ df.format(startDate.mDay) + df.format(startDate.mHour) + df.format(startDate.mMinute) + "00";
-		endDateJson = ""+endDate.mYear + df.format(endDate.mMonth)
-				+ df.format(endDate.mDay) + df.format(endDate.mHour) + df.format(endDate.mMinute) + "00";
+		startDateJson = startDate.mYear + "/" + df.format(startDate.mMonth) + "/" + df.format(startDate.mDay) + " "
+				+ df.format(startDate.mHour) + ":" + df.format(startDate.mMinute) + ":" + "00";
+		endDateJson = endDate.mYear + "/" + df.format(endDate.mMonth) + "/" + df.format(endDate.mDay) + " "
+				+ df.format(endDate.mHour) + ":" + df.format(endDate.mMinute) + ":" + "00";
 		try {
 			jsonObj.put("type", "tunnel");
 			jsonObj.put("command", "query_record");
@@ -228,7 +227,6 @@ public class SetDateActivity extends Activity implements OnClickListener {
 	}
 	
 	private Handler handler = new Handler() {
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public void handleMessage(Message msg) {

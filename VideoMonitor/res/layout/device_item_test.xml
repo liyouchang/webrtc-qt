@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:text="@string/device_item_name"
             android:textColor="@color/light_black"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_device_mac"
@@ -62,7 +62,7 @@
             android:layout_below="@+id/tv_device_name"
             android:text="@string/device_item_mac"
             android:textColor="@color/light_black"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
        <TextView
             android:id="@+id/tv_device_link"
             android:layout_width="wrap_content"
@@ -71,7 +71,7 @@
             android:layout_below="@+id/tv_device_mac"
             android:text="@string/device_link"
             android:textColor="#9c9c9c"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
     </RelativeLayout>
 
     <ImageView

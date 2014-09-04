@@ -41,7 +41,6 @@ import com.video.data.Value;
 import com.video.data.XmlDevice;
 import com.video.main.PullToRefreshHeaderView.OnHeaderRefreshListener;
 import com.video.play.PlayerActivity;
-import com.video.play.RemoteFilePlayerActivity;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqHandler;
@@ -360,6 +359,10 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 								}
 							}
 						} else {
+							// 请求终端列表失败
+							if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
+								mPullToRefreshHeaderView.onHeaderRefreshComplete();
+							}
 							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 						if (!isPullToRefresh) {
@@ -557,7 +560,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 			// TODO Auto-generated method stub
 			listPosition = position;
 			showPopupWindow(lv_list);
-			return false;
+			return true;
 		}
 	}
 
@@ -600,12 +603,13 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						intent.putExtra("deviceName", mDeviceName);
 						intent.putExtra("deviceID", mDeviceId);
 						intent.putExtra("deviceBg", mDeviceBg);
+						intent.putExtra("dealerName", dealerName);
 						startActivityForResult(intent, 0);
 						mActivity.overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 						break;
 					case 1: //远程录像
 						if (item.get("LinkState").equals("linked")) {
-							intent = new Intent(mActivity, RemoteFilePlayerActivity.class);
+							intent = new Intent(mActivity, SetDateActivity.class);
 							intent.putExtra("deviceName", mDeviceName);
 							intent.putExtra("deviceID", mDeviceId);
 							intent.putExtra("dealerName", dealerName);

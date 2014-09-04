@@ -10,14 +10,14 @@
 
     <RelativeLayout
         android:id="@+id/rl_device_bg"
-        android:layout_width="100dp"
-        android:layout_height="90dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:background="@drawable/device_item_view_bg" >
 
         <ImageView
             android:id="@+id/iv_device_icon"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:background="@drawable/no_device_list_icon"
@@ -27,7 +27,6 @@
     </RelativeLayout>
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
@@ -41,7 +40,7 @@
             android:layout_height="wrap_content"
             android:text="@string/device_item_name"
             android:textColor="@color/light_black"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_terminal_file_size"
@@ -50,7 +49,7 @@
             android:layout_marginTop="5dp"
             android:text="@string/device_item_mac"
             android:textColor="@color/light_black"
-            android:textSize="16dp" />
+            android:textSize="16sp" />
     </LinearLayout>
 
 </LinearLayout>
