@@ -80,7 +80,7 @@ void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &
         LOG(WARNING)<<"get command error-"<<command<<" from"<<peerId ;
         return;
     }
-    LOG_F(INFO)<<"receive command "<<command;
+//    LOG_F(INFO)<<"receive command "<<command;
     if(command.compare("ptz") == 0){
         std::string ptz_control;
         int param;

@@ -171,7 +171,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 57;
+    const int kVersion = 60;
     return kVersion;
 }
 /**
