@@ -15,16 +15,6 @@
         android:background="@null"
         android:text="@string/terminal_player_play_normal"
         android:textColor="@color/video_record_color"
-        android:textSize="20dp" />
-
-    <TextView
-        android:id="@+id/tv_info_download"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:background="@null"
-        android:text="@string/terminal_player_download_size"
-        android:textColor="@color/green"
-        android:textSize="12dp" />
+        android:textSize="20sp" />
 
 </LinearLayout>

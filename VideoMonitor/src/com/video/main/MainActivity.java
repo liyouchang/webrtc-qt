@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.play.TunnelCommunication;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
@@ -410,6 +411,8 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 								initView();
 								initData();
 						        new UpdateAPK(mContext).startCheckUpgadeThread();
+						    // 初始化IceServers
+							TunnelCommunication.getInstance().tunnelInitialize(MainApplication.getInstance().generateIceServersJson(Value.stun, Value.turn, userName, userPwd));
 							} else {
 								Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 								startActivity(new Intent(mContext, LoginActivity.class));

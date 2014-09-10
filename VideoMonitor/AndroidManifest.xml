@@ -181,7 +181,8 @@
         <activity
             android:name=".main.AddShareActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppThemeNoTitle" >
+            android:theme="@style/AppThemeNoTitle"
+            android:windowSoftInputMode="adjustPan|adjustResize" >
         </activity>
         <!-- 我的分享 -->
         <activity
@@ -208,9 +209,9 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle" >
         </activity>
-        <!-- 终端录像播放器  -->
+        <!-- 远程录像播放器  -->
         <activity
-            android:name=".terminal.player.TerminalPlayerActivity"
+            android:name=".play.RemoteFilePlayerActivity"
             android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppThemeFullscreen" >

@@ -98,18 +98,6 @@ public class WiFiAlertDialog {
 			}
 		});
 	}
-	
-	public void setOnItemClickListenerButton(final View tv_name, final ArrayList<HashMap<String, String>> list) {
-		final Button button = (Button) tv_name;
-		wifiList.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				button.setText((CharSequence) list.get(position).get("deviceName"));
-				WiFiActivity.onlineDealerName = ""+list.get(position).get("dealerName");
-				dismiss();
-			}
-		});
-	}
 
 	public void dismiss() {
 		alertDialog.dismiss();

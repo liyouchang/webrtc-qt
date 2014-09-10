@@ -119,7 +119,7 @@
     
     <string name="video_loaded_text"><![CDATA[已加载(0%)，请稍后...]]></string>
     <string name="local_player_time_init">00:00:00</string>
-    <string name="terminal_player_play_normal">正常播放</string>
+    <string name="terminal_player_play_normal">正在播放</string>
     <string name="terminal_player_played_size">已播放: 0000000B</string>
     <string name="terminal_player_total_size">总大小: 0000000B</string>
     <string name="terminal_player_download_size">已缓冲: 0B</string>

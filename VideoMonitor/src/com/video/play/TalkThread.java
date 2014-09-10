@@ -57,7 +57,7 @@ public class TalkThread extends Thread {
 		
 		while (runFlag) {
 			try {
-				int bufferReadResult = audioRecord.read(buffer, 0, 640); // 读取的音频数据是160的整数倍
+				int bufferReadResult = audioRecord.read(buffer, 0, 320); // 读取的音频数据是160的整数倍
 				ulawDataLen = G711EnCoder(ulawData, buffer, bufferReadResult);
 				if (ulawDataLen > 0) {
 					TunnelCommunication.getInstance().sendTalkData(ulawData, ulawDataLen);

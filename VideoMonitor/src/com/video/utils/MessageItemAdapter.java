@@ -105,10 +105,15 @@ public class MessageItemAdapter extends BaseAdapter {
 				String UrlPath = list.get(position).get("imageURL");
 				if (!UrlPath.equals("null")) {
 					String filePath = imageCache+File.separator+UrlPath.substring(UrlPath.lastIndexOf("/")+1);
-					intent = new Intent(context, AlarmImageViewActivity.class);
-					intent.putExtra("imagePath", filePath);
-					context.startActivity(intent);
-					((Activity) context).overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
+					File imageFile = new File(filePath);
+					if (imageFile.exists()) {
+						intent = new Intent(context, AlarmImageViewActivity.class);
+						intent.putExtra("imagePath", filePath);
+						context.startActivity(intent);
+						((Activity) context).overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
+					} else {
+						Toast.makeText(context, "加载图片失败", Toast.LENGTH_SHORT).show();
+					}
 				} else {
 					Toast.makeText(context, "该条报警消息暂无图片", Toast.LENGTH_SHORT).show();
 				}

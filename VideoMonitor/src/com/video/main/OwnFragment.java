@@ -359,6 +359,10 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 								}
 							}
 						} else {
+							// 请求终端列表失败
+							if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
+								mPullToRefreshHeaderView.onHeaderRefreshComplete();
+							}
 							Toast.makeText(mActivity, msg.obj+"，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 						if (!isPullToRefresh) {
@@ -556,7 +560,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 			// TODO Auto-generated method stub
 			listPosition = position;
 			showPopupWindow(lv_list);
-			return false;
+			return true;
 		}
 	}
 
@@ -591,6 +595,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 				mDeviceName = item.get("deviceName");
 				mDeviceId = item.get("deviceID");
 				mDeviceBg = item.get("deviceBg");
+				String dealerName = item.get("dealerName");
 				Intent intent = null;
 				switch (position) {
 					case 0: //设备管理
@@ -598,11 +603,20 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						intent.putExtra("deviceName", mDeviceName);
 						intent.putExtra("deviceID", mDeviceId);
 						intent.putExtra("deviceBg", mDeviceBg);
+						intent.putExtra("dealerName", dealerName);
 						startActivityForResult(intent, 0);
 						mActivity.overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 						break;
 					case 1: //远程录像
-						
+						if (item.get("LinkState").equals("linked")) {
+							intent = new Intent(mActivity, SetDateActivity.class);
+							intent.putExtra("deviceName", mDeviceName);
+							intent.putExtra("deviceID", mDeviceId);
+							intent.putExtra("dealerName", dealerName);
+							startActivity(intent);
+						} else {
+							Toast.makeText(mActivity, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
+						}
 						break;
 				}
 				if (mPopupWindow.isShowing()) {

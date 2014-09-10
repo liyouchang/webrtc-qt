@@ -2,8 +2,10 @@ package com.video.main;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
@@ -19,9 +21,9 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,9 +32,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.video.R;
 import com.video.data.Value;
-import com.video.service.MainApplication;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
 import com.video.utils.OkCancelDialog;
@@ -42,15 +44,14 @@ import com.video.utils.WiFiAlertDialog;
 public class WiFiActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
-	private ArrayList<HashMap<String, String>> onlineTermList = null;
-	private Button button_wifi_term_select;
-	public static String onlineDealerName = "";
-	public static HashMap<String, Object> selectedWiFi = null;
+	private Dialog mDialog = null;
 	
-	private Button btn_wifi_name;
+	private Button btn_wifi_list;
 	private EditText et_wifi_pwd;
 	private Button button_delete_wifi_password;
-	private Dialog mDialog = null;
+	
+	public static HashMap<String, Object> selectedWiFi = null;
+	private String mDealerName = null;
 	
 	private final static int IS_REQUSTING = 1;
 	private final static int REQUST_TIMEOUT = 2;
@@ -68,21 +69,16 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	}
 
 	private void initView() {
-		ImageButton button_back = (ImageButton) super.findViewById(R.id.ib_wifi_back);
+		ImageButton button_back = (ImageButton) this.findViewById(R.id.ib_wifi_back);
 		button_back.setOnClickListener(this);
 		
-		button_wifi_term_select = (Button) super.findViewById(R.id.btn_wifi_term_list);
-		button_wifi_term_select.setOnClickListener(this);
-		
-		btn_wifi_name = (Button) this.findViewById(R.id.btn_wifi_name);
-		btn_wifi_name.setOnClickListener(this);
-		
-		btn_wifi_name = (Button) super.findViewById(R.id.btn_wifi_name);
+		btn_wifi_list = (Button) this.findViewById(R.id.btn_wifi_list);
+		btn_wifi_list.setOnClickListener(this);
 		
 		button_delete_wifi_password = (Button) this.findViewById(R.id.btn_wifi_password_del);
 		button_delete_wifi_password.setOnClickListener(this);
 		
-		et_wifi_pwd = (EditText) super.findViewById(R.id.et_wifi_password);
+		et_wifi_pwd = (EditText) this.findViewById(R.id.et_wifi_password);
 		et_wifi_pwd.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -92,75 +88,62 @@ public class WiFiActivity extends Activity implements OnClickListener {
 					button_delete_wifi_password.setVisibility(View.VISIBLE);
 				}
 			}
-			
 			@Override
-			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-			}
-			
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 			@Override
-			public void afterTextChanged(Editable s) {
-			}
+			public void afterTextChanged(Editable s) {}
 		});
 		
-		Button button_submit = (Button) super.findViewById(R.id.btn_wifi_submit);
+		Button button_submit = (Button) this.findViewById(R.id.btn_wifi_submit);
 		button_submit.setOnClickListener(this);
 	}
 	
 	private void initData() {
 		mContext = WiFiActivity.this;
 		ZmqHandler.mHandler = handler;
-		onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
-		if ((onlineTermList != null) && (onlineTermList.size() > 0)) {
-			button_wifi_term_select.setText((CharSequence) onlineTermList.get(0).get("deviceName"));
-			onlineDealerName = ""+onlineTermList.get(0).get("dealerName");
-		} else {
-			button_wifi_term_select.setText("没有在线设备");
-		}
+		
+		Bundle bundle = this.getIntent().getExtras();
+		mDealerName = bundle.getString("dealerName");
 	}
 	
 	/**
 	 * 生成JSON请求WiFi列表信息字符串
 	 */
 	private String generateGetWiFiInfoJson() {
-		String result = "";
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "tunnel");
 			jsonObj.put("command", "wifi_info");
+			return jsonObj.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		result = jsonObj.toString();
-		return result;
+		return null;
 	}
 	
 	/**
 	 * 生成JSON配置设备WiFi网络字符串
 	 */
 	private String generateSetTermWiFiInfoJson(String key) {
-		String result = "";
-		if (key == null) {
-			key = "";
+		if (selectedWiFi == null) {
+			return null;
 		}
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "tunnel");
 			jsonObj.put("command", "set_wifi");
 			JSONObject subObj = new JSONObject();
+				subObj.put("ssid", selectedWiFi.get("WiFiSSID"));
+				subObj.put("key", key);
 				subObj.put("enable", 1); //1:打开WiFi  0:关闭WiFi
-				if (selectedWiFi != null) {
-					subObj.put("ssid", selectedWiFi.get("WiFiSSID"));
-					subObj.put("key", key);
-					subObj.put("auth", selectedWiFi.get("WiFAuth"));
-					subObj.put("enc", selectedWiFi.get("WiFiEnc"));
-					subObj.put("mode", selectedWiFi.get("WiFiMode"));
-				}
+				subObj.put("encryptMode", selectedWiFi.get("WiFiEncryptMode")); //0-none auth,1-wep ,2-wpa,3-wpa2
+				subObj.put("encryptFormat", selectedWiFi.get("WiFiEncryptFormat")); //0-enc tkip,1-enc aes
 			jsonObj.put("param", subObj);
+			return jsonObj.toString();
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		result = jsonObj.toString();
-		return result;
+		return null;
 	}
 	
 	/**
@@ -199,7 +182,6 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	
 	@SuppressLint("HandlerLeak")
 	public Handler handler = new Handler() {
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public void handleMessage(Message msg) {
@@ -207,12 +189,16 @@ public class WiFiActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUSTING:
-					mDialog = createLoadingDialog(mContext, "正在请求设备周围WiFi列表...");
-					mDialog.show();
+					if ((mDialog == null) || (!mDialog.isShowing())) {
+						mDialog = createLoadingDialog(mContext, "正在请求设备周围WiFi列表...");
+						mDialog.show();
+					}
 					break;
 				case REQUST_TIMEOUT:
-					if (mDialog != null)
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(REQUST_TIMEOUT)) {
 						handler.removeMessages(REQUST_TIMEOUT);
 					}
@@ -224,10 +210,11 @@ public class WiFiActivity extends Activity implements OnClickListener {
 				case R.id.requst_wifi_list_id:
 					if (handler.hasMessages(REQUST_TIMEOUT)) {
 						handler.removeMessages(REQUST_TIMEOUT);
-						if (mDialog != null)
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
-						int resultCode = msg.arg1;
-						if (resultCode == 0) {
+							mDialog = null;
+						}
+						if (msg.arg1 == 0) {
 							showWiFiListDialog((ArrayList<HashMap<String, Object>>) msg.obj);
 						} else {
 							Toast.makeText(mContext, "设备附近暂时没有WiFi信号！ ", Toast.LENGTH_SHORT).show();
@@ -237,12 +224,16 @@ public class WiFiActivity extends Activity implements OnClickListener {
 					}
 					break;
 				case IS_SETTING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在配置设备WiFi网络...");
-					mDialog.show();
+					if ((mDialog == null) || (!mDialog.isShowing())) {
+						mDialog = Utils.createLoadingDialog(mContext, "正在配置设备WiFi网络...");
+						mDialog.show();
+					}
 					break;
 				case SET_TIMEOUT:
-					if (mDialog != null)
+					if ((mDialog != null) && (mDialog.isShowing())) {
 						mDialog.dismiss();
+						mDialog = null;
+					}
 					if (handler.hasMessages(SET_TIMEOUT)) {
 						handler.removeMessages(SET_TIMEOUT);
 					}
@@ -251,10 +242,11 @@ public class WiFiActivity extends Activity implements OnClickListener {
 				case R.id.set_term_wifi_id:
 					if (handler.hasMessages(SET_TIMEOUT)) {
 						handler.removeMessages(SET_TIMEOUT);
-						if (mDialog != null)
+						if ((mDialog != null) && (mDialog.isShowing())) {
 							mDialog.dismiss();
-						int resultCode = msg.arg1;
-						if (resultCode == 1) {
+							mDialog = null;
+						}
+						if (msg.arg1 == 1) {
 							Toast.makeText(mContext, "配置设备WiFi网络成功！ ", Toast.LENGTH_SHORT).show();
 						} else {
 							Toast.makeText(mContext, "配置设备WiFi网络失败，请重试！ ", Toast.LENGTH_SHORT).show();
@@ -296,7 +288,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		sendHandlerMsg(IS_REQUSTING);
 		sendHandlerMsg(REQUST_TIMEOUT, Value.REQ_TIME_10S);
 		HashMap<String, String> map = new HashMap<String, String>();
-		map.put("peerId", onlineDealerName);
+		map.put("peerId", mDealerName);
 		map.put("peerData", data);
 		sendHandlerMsg(sendHandler, R.id.send_to_peer_id, map);
 	}
@@ -307,32 +299,16 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	private void setTermWiFiInfoEvent(String key) {
 		Handler sendHandler = ZmqThread.zmqThreadHandler;
 		String data = generateSetTermWiFiInfoJson(key);
+		if (data == null) {
+			Toast.makeText(mContext, "读取WiFi数据错误，请重新搜索WiFi！", Toast.LENGTH_SHORT).show();
+			return ;
+		}
 		sendHandlerMsg(IS_SETTING);
 		sendHandlerMsg(SET_TIMEOUT, Value.REQ_TIME_10S);
 		HashMap<String, String> map = new HashMap<String, String>();
-		map.put("peerId", onlineDealerName);
+		map.put("peerId", mDealerName);
 		map.put("peerData", data);
 		sendHandlerMsg(sendHandler, R.id.send_to_peer_id, map);
-	}
-	
-	/**
-	 * 显示在线终端设备对话框
-	 */
-	private void showOnlineTermList() {
-		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
-		HashMap<String, Object> map = null;
-		int len = onlineTermList.size();
-		for (int i=0; i<len; i++) {
-			map = new HashMap<String, Object>();
-			map.put("WiFiSSID", onlineTermList.get(i).get("deviceName"));
-			map.put("WiFiLevel", R.drawable.icon_device_name);
-			list.add(map);
-		}
-		WiFiAlertDialog wifiDialog = new WiFiAlertDialog(mContext);
-		wifiDialog.setTitle("在线设备列表");
-		WiFiAdapter adapter = new WiFiAdapter(mContext, list);
-		wifiDialog.setAdapter(adapter);
-		wifiDialog.setOnItemClickListenerButton(button_wifi_term_select, onlineTermList);
 	}
 	
 	/**
@@ -343,7 +319,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		wifiDialog.setTitle("WiFi列表");
 		WiFiAdapter adapter = new WiFiAdapter(mContext, list);
 		wifiDialog.setAdapter(adapter);
-		wifiDialog.setOnItemClickListenerWiFiButton(btn_wifi_name, list);
+		wifiDialog.setOnItemClickListenerWiFiButton(btn_wifi_list, list);
 	}
 	
 	/**
@@ -376,41 +352,33 @@ public class WiFiActivity extends Activity implements OnClickListener {
 				finish();
 				overridePendingTransition(R.anim.fragment_nochange, R.anim.down_out);
 				break;
-			case R.id.btn_wifi_term_list:
-				onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
-				if ((onlineTermList != null) && (onlineTermList.size() > 0)) {
-					showOnlineTermList();
-					System.out.println("MyDebug: dealerName："+onlineDealerName);
-				} else {
-					Toast.makeText(mContext, "没有在线设备 ", Toast.LENGTH_SHORT).show();
-				}
-				break;
 			case R.id.btn_wifi_password_del:
 				et_wifi_pwd.setText("");	
 				break;
-			case R.id.btn_wifi_name:
-				onlineTermList = MainApplication.getInstance().getOnlineDeviceList();
-				if ((onlineTermList != null) && (onlineTermList.size() > 0)) {
-					getWiFiListInfoEvent();
-				} else {
-					Toast.makeText(mContext, "没有在线设备，无法请求WiFi列表！ ", Toast.LENGTH_SHORT).show();
-				}
+			case R.id.btn_wifi_list:
+				getWiFiListInfoEvent();
 				break;
 			case R.id.btn_wifi_submit:
-				if ((onlineTermList != null) && (onlineTermList.size() > 0)) {
-					String pwd = et_wifi_pwd.getText().toString().trim();
-					if (selectedWiFi == null) {
-						Toast.makeText(mContext, "请先搜索WiFi，再配置", Toast.LENGTH_SHORT).show();
-					}
-					else if (pwd.length() == 0) {
-						showSetTermWiFiTip();
-					} else {
-						setTermWiFiInfoEvent(pwd);
-					}
+				String pwd = et_wifi_pwd.getText().toString().trim();
+				if (selectedWiFi == null) {
+					Toast.makeText(mContext, "请先搜索WiFi，再配置", Toast.LENGTH_SHORT).show();
+				}
+				else if ((pwd == null) || (pwd.length() == 0)) {
+					showSetTermWiFiTip();
 				} else {
-					Toast.makeText(mContext, "设备不在线，无法配置网络 ", Toast.LENGTH_SHORT).show();
+					setTermWiFiInfoEvent(pwd);
 				}
 				break;
+		}
+	}
+	
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		if ((mDialog != null) && (mDialog.isShowing())) {
+			mDialog.dismiss();
+			mDialog = null;
 		}
 	}
 	

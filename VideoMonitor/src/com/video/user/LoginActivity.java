@@ -2,7 +2,7 @@ package com.video.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -28,7 +28,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
@@ -43,6 +42,7 @@ import com.video.utils.UpdateAPK;
 import com.video.utils.Utils;
 import com.video.utils.WiFiAlertDialog;
 
+@SuppressLint("HandlerLeak")
 public class LoginActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
@@ -189,7 +189,6 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 	
 	private Handler handler = new Handler() {
-
 		@Override
 		public void handleMessage(Message msg) {
 			// TODO Auto-generated method stub
@@ -255,6 +254,8 @@ public class LoginActivity extends Activity implements OnClickListener {
 							Value.isLoginSuccess = true;
 							startActivity(new Intent(mContext, MainActivity.class));
 							LoginActivity.this.finish();
+							// 初始化IceServers
+							TunnelCommunication.getInstance().tunnelInitialize(MainApplication.getInstance().generateIceServersJson(Value.stun, Value.turn, userName, userPwd));
 						} else {
 							Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}

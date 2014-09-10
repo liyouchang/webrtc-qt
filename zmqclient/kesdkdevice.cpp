@@ -53,8 +53,9 @@ int ResoToFramType(int resoValue){
     case RESO_CIF:return kaerp2p::kFrameCIF;
     case RESO_D1:return kaerp2p::kFrameD1;
     case RESO_720P:return kaerp2p::kFrame720P;
+    case RESO_VGA: return kaerp2p::kFrameVGA;
     default:
-        LOG_F(WARNING)<<"false";
+        LOG_F(WARNING)<<"the camera reso is not support "<<resoValue;
         return 0;
     }
 }

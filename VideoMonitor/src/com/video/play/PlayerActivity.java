@@ -144,17 +144,17 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		getScreenSize();
 		
 		Intent intent = this.getIntent();
-		deviceName = (String) intent.getCharSequenceExtra("deviceName");
-		dealerName = (String) intent.getCharSequenceExtra("dealerName");
-		if (!Value.isSharedUser) {
-			deviceID = (String) intent.getCharSequenceExtra("deviceID");
-			playerClarity = Integer.parseInt((String) intent.getCharSequenceExtra("playerClarity"));
-		}
 		if (intent.hasExtra("isLocalDevice")) {
 			isLocalDevice = intent.getBooleanExtra("isLocalDevice", false);
 		}
 		if (isLocalDevice) {
 			localDeviceIPandPort = (String) intent.getCharSequenceExtra("localDeviceIPandPort");
+		}
+		deviceName = (String) intent.getCharSequenceExtra("deviceName");
+		dealerName = (String) intent.getCharSequenceExtra("dealerName");
+		if ((!Value.isSharedUser) && (!isLocalDevice)) {
+			deviceID = (String) intent.getCharSequenceExtra("deviceID");
+			playerClarity = Integer.parseInt((String) intent.getCharSequenceExtra("playerClarity"));
 		}
 		
 		//注册广播
@@ -167,8 +167,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		// 视频
 		videoView = new VideoView(mContext);
 		setContentView(videoView);
-		videoView.setDrawingCacheEnabled(false);
-		videoView.setWillNotCacheDrawing(true);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		
 		// 音频
@@ -219,8 +217,8 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		if (!isLocalDevice) {
 			if (TunnelCommunication.getInstance().IsTunnelOpened(dealerName)) {
 				//【播放视频】 1:主通道高清  2:子通道标清  3:子通道流畅
-				selectVideoClarity(playerClarity);
 				TunnelCommunication.getInstance().startMediaData(dealerName, playerClarity);
+				changeClarityView(playerClarity);
 				videoView.playVideo();
 				sendHandlerMsg(DISPLAY_VIDEO_VIEW, 3000);
 			} else {
@@ -353,8 +351,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					}
 					if (isLocalDevice) {
 						toastNotify(mContext, "请求本地设备视频超时！", Toast.LENGTH_SHORT);
-						TunnelCommunication.getInstance().stopLocalVideo(localDeviceIPandPort);
-						TunnelCommunication.getInstance().disconnectLocalDevice(localDeviceIPandPort);
+						PlayerActivity.this.finish();
 					}
 					break;
 			}
@@ -713,20 +710,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			mDialog = createLoadingDialog("正在请求视频，请稍后...");
 			mDialog.show();
 		}
-		switch (clarity) {
-			case 1:
-				playerClarity = DeviceValue.HIGH_CLARITY;
-				video_clarity.setText("高清");
-				break;
-			case 2:
-				playerClarity = DeviceValue.NORMAL_CLARITY;
-				video_clarity.setText("均衡");
-				break;
-			case 3:
-				playerClarity = DeviceValue.LOW_CLARITY;
-				video_clarity.setText("流畅");
-				break;
-		}
+		changeClarityView(clarity);
 		hidePopupWindow();
 		sendHandlerMsg(CHANGE_VIDEO_TYPE, 3000);
 		TunnelCommunication.getInstance().startMediaData(dealerName, playerClarity);
@@ -740,6 +724,26 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				MainApplication.getInstance().deviceList = xmlList;
 			}
 		}
+	}
+	
+	/**
+	 * 【视频清晰度显示】 1:高清  2:均衡  3:流畅
+	 */
+	private void changeClarityView (int clarity) {
+		switch (clarity) {
+		case 1:
+			playerClarity = DeviceValue.HIGH_CLARITY;
+			video_clarity.setText("高清");
+			break;
+		case 2:
+			playerClarity = DeviceValue.NORMAL_CLARITY;
+			video_clarity.setText("均衡");
+			break;
+		case 3:
+			playerClarity = DeviceValue.LOW_CLARITY;
+			video_clarity.setText("流畅");
+			break;
+	}
 	}
 	
 	/**
@@ -872,6 +876,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	protected void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
+		destroyDialogView();
 		isActivityShow = false;
 	}
 
@@ -941,7 +946,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			try {
 				if (videoView != null) {
 					videoView.stopVideo();
-					videoView = null;
 				}
 				if (audioThread != null) {
 					audioThread.stopAudioThread();
@@ -972,6 +976,10 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			// TODO Auto-generated method stub
 			String action = intent.getAction();
 			if (action.equals(BackstageService.TUNNEL_REQUEST_ACTION)) {
+				String peerId = (String) intent.getCharSequenceExtra("peerId");
+				if (!peerId.equals(dealerName)) {
+					return ;
+				}
 				if (intent.getIntExtra("TunnelEvent", 1) == 0) {
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
 						handler.removeMessages(REQUEST_TIMEOUT);

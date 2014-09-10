@@ -18,7 +18,7 @@
 #endif//arm
 
 
-int kVersion = 56;
+int kVersion = 60;
 
 
 int main()
