@@ -171,16 +171,15 @@ public class ZmqHandler extends Handler {
 		ArrayList<HashMap<String, Object>> list = new ArrayList<HashMap<String, Object>>();
 		HashMap<String, Object> map = null;
 		int len = jsonArray.length();
-		  
 	    try {
 	    	for (int i=0; i<len; i++) { 
 		    	JSONObject obj = (JSONObject) jsonArray.get(i); 
 		    	map = new HashMap<String, Object>();
 		    	map.put("WiFiSSID", obj.getString("ssid"));
-		    	map.put("WiFiLevel", getWiFiLevelIconResource(obj.getInt("quality")));
-		    	map.put("WiFAuth", obj.getInt("auth"));
-		    	map.put("WiFiMode", obj.getInt("mode"));
-		    	map.put("WiFiEnc", obj.getInt("enc"));
+		    	map.put("WiFiLevel", getWiFiLevelIconResource(obj.getInt("signalStrength")));
+		    	map.put("WiFiEncryptMode", obj.getInt("encryptMode"));
+		    	map.put("WiFiEncryptFormat", obj.getInt("encryptFormat"));
+		    	map.put("WiFiEnable", obj.getInt("enable"));
 				list.add(map);
 	    	}
 	    	return list;
@@ -214,11 +213,11 @@ public class ZmqHandler extends Handler {
 		    	JSONObject obj = (JSONObject) jsonArray.get(i); 
 		    	map = new HashMap<String, Object>();
 		    	map.put("fileName", obj.getString("fileName"));
-		    	map.put("fileDate", obj.getString("fileDate"));
+		    	map.put("fileDate", obj.getString("fileEndTime"));
 
 		    	DecimalFormat df = new DecimalFormat("0.00");
 		    	double fileSize = obj.getInt("fileSize");
-		    	double fileSizeDouble = fileSize/1024/1024;
+		    	double fileSizeDouble = fileSize/1024;
 		    	map.put("fileSize", df.format(fileSizeDouble)+"MB");
 		    	map.put("fileSizeInt", ""+obj.getInt("fileSize"));
 		    	
@@ -500,8 +499,12 @@ public class ZmqHandler extends Handler {
 							}
 						}
 						else if (resultCode.equals("set_wifi")) {
-							int result = obj.getInt("result");//0:失败  1:成功
-							mHandler.obtainMessage(R.id.set_term_wifi_id, result, 0).sendToTarget();
+							boolean result = obj.getBoolean("result");//0:失败  1:成功
+							if (result) {
+								mHandler.obtainMessage(R.id.set_term_wifi_id, 1, 0).sendToTarget();
+							} else {
+								mHandler.obtainMessage(R.id.set_term_wifi_id, 0, 0).sendToTarget();
+							}
 						}
 						else if (resultCode.equals("query_record")) {
 							int totalNum = obj.getInt("totalNum");//录像文件总数

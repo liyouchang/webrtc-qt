@@ -1,12 +1,12 @@
 package com.video.main;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -33,11 +33,12 @@ import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.main.PullToRefreshView.OnFooterRefreshListener;
 import com.video.main.PullToRefreshView.OnHeaderRefreshListener;
+import com.video.play.RemoteFilePlayerActivity;
 import com.video.socket.ZmqHandler;
 import com.video.socket.ZmqThread;
-import com.video.terminal.player.TerminalPlayerActivity;
 import com.video.utils.Utils;
 
+@SuppressLint("HandlerLeak")
 public class TerminalVideoListActivity extends Activity implements
 		OnClickListener, OnHeaderRefreshListener, OnFooterRefreshListener {
 
@@ -143,13 +144,12 @@ public class TerminalVideoListActivity extends Activity implements
 	 * 请求终端录像文件列表
 	 */
 	private void requestTerminalVideoFile(int offset) {
-		Handler sendHandler = ZmqThread.zmqThreadHandler;
 		String data = generateTerminalVideoFileList(offset);
 		sendHandlerMsg(REQUST_TIMEOUT, Value.REQ_TIME_10S);
 		HashMap<String, String> map = new HashMap<String, String>();
 		map.put("peerId", dealerName);
 		map.put("peerData", data);
-		sendHandlerMsg(sendHandler, R.id.send_to_peer_id, map);
+		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.send_to_peer_id, map);
 	}
 	
 	/**
@@ -173,7 +173,6 @@ public class TerminalVideoListActivity extends Activity implements
 	}
 	
 	private Handler handler = new Handler() {
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public void handleMessage(Message msg) {
@@ -268,10 +267,10 @@ public class TerminalVideoListActivity extends Activity implements
 
 		@Override
 		public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-			Intent intent = new Intent(mContext, TerminalPlayerActivity.class);
-			intent.putExtra("fileIndex", arg2);
-			intent.putExtra("fileList", fileList);
+			Intent intent = new Intent(mContext, RemoteFilePlayerActivity.class);
 			intent.putExtra("dealerName", dealerName);
+			intent.putExtra("fileList", fileList);
+			intent.putExtra("fileIndex", arg2);
 			startActivity(intent);
 		}
 	}
@@ -336,8 +335,7 @@ public class TerminalVideoListActivity extends Activity implements
 				holder = (ViewHolder) convertView.getTag();
 			}
 			String dateString = list.get(position).get("fileDate");
-			Date date = Utils.StringToDate(dateString, "yyyyMMddHHmmss");
-			holder.file_name.setText("开始时间：" + Utils.DateToString(date, "yyyy-MM-dd HH:mm:ss"));
+			holder.file_name.setText("结束时间：" + dateString);
 			holder.file_size.setText("文件大小：" + list.get(position).get("fileSize"));
 
 			return convertView;

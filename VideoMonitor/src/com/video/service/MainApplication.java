@@ -236,15 +236,31 @@ public class MainApplication extends Application {
 	/**
 	 * 生成JSON的turn和stun字符串
 	 */
-	public String generateStunandTurnJson(String turn, String stun) {
+	public String generateStunJson(String stun) {
+		try {
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put("uri", stun);
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 生成JSON的turn和stun字符串
+	 */
+	public String generateIceServersJson(String stun, String turn, String userName, String userPwd) {
 		JSONArray jsonArr = new JSONArray();
 		JSONObject jsonObj = null;
 		try {
 			jsonObj = new JSONObject();
-			jsonObj.put("uri", turn);
+			jsonObj.put("uri", stun);
 			jsonArr.put(jsonObj);
 			jsonObj = new JSONObject();
-			jsonObj.put("uri", stun);
+			jsonObj.put("uri", turn);
+			jsonObj.put("username", userName);
+			jsonObj.put("password", userPwd);
 			jsonArr.put(jsonObj);
 			return jsonArr.toString();
 		} catch (JSONException e) {

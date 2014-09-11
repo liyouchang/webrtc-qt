@@ -50,6 +50,7 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	private static String mDeviceName = null;
 	private static String mDeviceID = null;
 	private static String mDeviceBg = null;
+	private static String mDealerName = null;
 	
 	private RelativeLayout rl_device_item;
 	private RelativeLayout rl_device_bg;
@@ -114,6 +115,7 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 		mDeviceName = (String) intent.getCharSequenceExtra("deviceName");
 		mDeviceID = (String) intent.getCharSequenceExtra("deviceID");
 		mDeviceBg = (String) intent.getCharSequenceExtra("deviceBg");
+		mDealerName = (String) intent.getCharSequenceExtra("dealerName");
 		
 		if (mDeviceName != null) {
 			tv_device_name.setText(mDeviceName);
@@ -153,15 +155,12 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 				break;
 			case R.id.rl_device_bg:
 				intent = new Intent(mContext, SetDeviceBgActivity.class);
-				intent.putExtra("deviceName", mDeviceName);
-				intent.putExtra("deviceID", mDeviceID);
 				startActivityForResult(intent, 1);
 				overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 				break;
 			case R.id.btn_wifi:
 				intent = new Intent(mContext, WiFiActivity.class);
-				intent.putExtra("deviceName", mDeviceName);
-				intent.putExtra("deviceID", mDeviceID);
+				intent.putExtra("dealerName", mDealerName);
 				startActivityForResult(intent, 1);
 				overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 				break;

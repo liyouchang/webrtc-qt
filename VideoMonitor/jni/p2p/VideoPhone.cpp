@@ -43,7 +43,8 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring jstrIceServers) {
 
     return 0;
 }
-jint  naChangeIceServers(JNIEnv *env, jobject thiz, jstring jstrIceServers)
+
+jint naChangeIceServers(JNIEnv *env, jobject thiz, jstring jstrIceServers)
 {
     const char * iceservers = env->GetStringUTFChars(jstrIceServers, NULL);
     kaerp2p::P2PConductor::AddIceServers(iceservers);
@@ -331,9 +332,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
     LOGI(" loading labrary~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
     JNINativeMethod nm[] = {
         { "naInitialize", "(Ljava/lang/String;)I", (void*) naInitialize },
-        { "naChangeIceServers", "(Ljava/lang/String;)I", (void*) naChangeIceServers },
         { "naTerminate", "()I", (void*) naTerminate },
-
         { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
         { "naCloseTunnel", "(Ljava/lang/String;)I", (void*) naCloseTunnel },
         { "naStartMediaData", "(Ljava/lang/String;I)I", (void*) naStartMediaData },
@@ -358,7 +357,8 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naDisconnectLocalDevice", "(Ljava/lang/String;)I", (void*) naDisconnectLocalDevice },
         { "naStartLocalVideo", "(Ljava/lang/String;)I", (void*) naStartLocalVideo },
         { "naStopLocalVideo", "(Ljava/lang/String;)I", (void*) naStopLocalVideo },
-        { "naIsTunnelOpened", "(Ljava/lang/String;)Z", (void*) naIsTunnelOpened }
+        { "naIsTunnelOpened", "(Ljava/lang/String;)Z", (void*) naIsTunnelOpened },
+        { "naChangeIceServers", "(Ljava/lang/String;)I", (void*) naChangeIceServers },
 
     };
 

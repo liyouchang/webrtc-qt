@@ -6,7 +6,6 @@
     android:orientation="vertical" >
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="fill_parent"
         android:layout_height="@dimen/title_height_size"
         android:background="@color/title_bg_black"

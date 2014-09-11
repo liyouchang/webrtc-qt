@@ -96,8 +96,9 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		
 		Bundle bundle = this.getIntent().getExtras();
 		mDeviceName = bundle.getString("deviceName");
-		et_name.setText(mDeviceName);
 		mDeviceId = bundle.getString("deviceID");
+		
+		et_name.setText(mDeviceName);
 	}
 	
 	/**

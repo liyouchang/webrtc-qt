@@ -217,6 +217,7 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 							mDialog = null;
 						}
 						if (msg.arg1 == 0) {
+							//请求分享的终端列表成功
 							if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
 								shared_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
 								shared_refresh_terminal = "终端: "+Build.MODEL;
@@ -240,6 +241,10 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 								}
 							}
 						} else {
+							//请求分享的终端列表失败
+							if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
+								mPullToRefreshHeaderView.onHeaderRefreshComplete();
+							}
 							Toast.makeText(mContext, msg.obj+"，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
@@ -609,14 +614,13 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 	}
 	
 	private BroadcastReceiver serviceReceiver = new BroadcastReceiver() {
-		
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String action = intent.getAction();
 			if (action.equals(BackstageService.TUNNEL_REQUEST_ACTION)) {
 				// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
 				int TunnelEvent = intent.getIntExtra("TunnelEvent", 1);
-				String peerId = intent.getStringExtra("PeerId");
+				String peerId = intent.getStringExtra("peerId");
 				int position = getDeviceListPositionByDealerName(peerId);
 				if (position == -1) {
 					return ;
