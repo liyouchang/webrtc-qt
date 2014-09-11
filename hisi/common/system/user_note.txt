@@ -1,0 +1,57 @@
+Copyright (c) 2014-2015 Kaer Corporation - All Rights Reserved.
+
+version:
+0.00.01	first version.finished by Jesson.
+
+Compile:
+
+please read config.cfg at the next higher level first,choose your chip'type that you used.
+if not found,you need add the type ourself,the same as the sample.
+then,execute Makefile command as make liba or make liba CHIP=HI3518(your chip type).
+
+Module usage:
+
+instruction:this system module is a application with system state,we provided some interfaces as follow.
+==================================================
+int SYSTEM_Initialize(void);
+description:
+you can use this interface to initalize the system and watch dog.
+
+return value£º
+	vlaue that Greater than zero is returned indicate SUCCESS other is failed.
+
+==================================================
+int SYSTEM_Cleanup(void);
+description:
+you can use this interface to quit,usually when power down or reset this interface is used.
+
+return value£º
+	the same as above.
+
+==================================================
+int SYSTEM_Set_Reboot(void);
+description:
+you can use this interface to reboot the system.
+	
+return value£º
+	the same as above.
+	
+==================================================
+int SYSTEM_Get_Run(void);
+description:
+you can use this interface to get the state that system execute.
+	
+return value£º
+	The state of system'execute.
+	
+==================================================
+int SYSTEM_Get_Mem(int *total,int *free);
+description:
+you can use this interface to get memery'capacity free and usage.
+	
+return value£º
+	the value is usage of memery used.
+	
+==================================================
+
+this word finished by Jesson.

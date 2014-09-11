@@ -1,0 +1,78 @@
+Copyright (c) 2014-2015 Kaer Corporation - All Rights Reserved.
+
+version:
+0.00.01	first version.finished by Jesson.
+
+Compile:
+
+please read config.cfg at the next higher level first,choose your chip'type that you used.
+if not found,you need add the type ourself,the same as the sample.
+then,execute Makefile command as make liba or make liba CHIP=HI3518(your chip type).
+
+Module usage:
+
+instruction:this gpio module is a application with gpio,we provided some interfaces as follow.
+==================================================
+int GPIO_Open(char *devName);
+description:
+you can use this interface to open the system'gpio device,we operate the gpio'interface must execute it.
+	devName:it is generated with the gpio driver.
+
+return value£º
+	vlaue that Greater than zero is returned indicate SUCCESS and this value is handle,other is failed.errno can use follow interface CLOCK_Get_Error to get.
+
+==================================================
+int GPIO_Close(int handle);
+description:
+you can use this interface to close gpio's device file,usually when power down or reset this interface is used.
+	handle:the value is returnd when open the gpio.
+
+return value£º
+	the same as above.
+
+==================================================
+int GPIO_Set_Dir(int gpio_group,int gpio_bit,int value);
+description:
+you can use this interface to set system gpio is input or output.
+	gpio_group:the value is gpio's group.
+	gpio_bit:the value is gpio's bit.
+	value:the value is gpio's direction,0 is input,1 is output.
+	
+return value£º
+	the same as above.
+	
+==================================================
+int GPIO_Set_Value(int gpio_group,int gpio_bit,int value)
+description:
+you can use this interface to set system a gpio's bit is low or high.
+	gpio_group:the value is gpio's group.
+	gpio_bit:the value is gpio's bit.
+	value:the value is output state(low or high).
+	
+return value£º
+	the same as above.
+	
+==================================================
+int GPIO_Get_Value(int gpio_group,int gpio_bit);
+description:
+you can use this interface to get a gpio bit's state.
+	gpio_group:the value is gpio's group.
+	gpio_bit:the value is gpio's bit.
+	
+return value£º
+	the value is the io'state(low or high).
+	
+==================================================
+int GPIO_Control(int gpio_group,int gpio_bit,e_gpio_control enCtrl,int ms_value,int isHigh);
+you can use this interface to set a io.
+	gpio_group:the value is gpio's group.
+	gpio_bit:the value is gpio's bit.
+	enCtrl:include disposable operation¡¢aperiodic operation
+	ms_value:the value is duration in disposable operation, or the value is a period in aperiodic operation
+	isHigh:set the io current state.
+	
+return value£º
+	the same as GPIO_Open.
+
+
+this word finished by Jesson.

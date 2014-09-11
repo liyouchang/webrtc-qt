@@ -16,11 +16,13 @@ namespace talk_base {
     class Buffer;
 }
 
-class KeVideoSimulator:public kaerp2p::KeTunnelCamera
+class KeVideoSimulator:public kaerp2p::KeTunnelCamera,public talk_base::MessageHandler
 {
 public:
     enum {
-        MSG_SENDFILEVIDEO
+        MSG_SENDFILEVIDEO,
+        MSG_ZMQ_RECV
+
     };
     KeVideoSimulator(const std::string &fileName);
     virtual ~KeVideoSimulator();
@@ -30,15 +32,22 @@ public:
     void OnFileVideoData(const char * data,int len);
     void OnFileAudioData(const char * data,int len);
 
+    void OnMessage(talk_base::Message *msg);
+
 protected:
-    void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
+    void OnCommandJsonMsg(const Json::Value &jmessage,Json::Value *jresult);
 
 protected:
     kaerp2p::RecordReaderInterface * reader;
     std::string fileName;
 
-    zmq::context_t *context;
+    zmq::context_t *zmqContext;
     zmq::socket_t *publisher;
+
+    zmq::socket_t *repSocket;
+
+    talk_base::Thread *zmqThread;
+
 };
 
 #endif // KEVIDEOSIMULATOR_H

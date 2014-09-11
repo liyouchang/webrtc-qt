@@ -8,10 +8,6 @@
 
 #include "common_define.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef enum
 {
 	STORE_TYPE_SWITCH = 0,									//开关量
@@ -19,7 +15,7 @@ typedef enum
 	STORE_TYPE_PLAN,										//计划录像
 	STORE_TYPE_MANUAL,										//手动录像
 	STORE_TYPE_JPEG,										//手动录像
-	STORE_TYPE_ALL,	
+	STORE_TYPE_ALL,
 	STORE_TYPE_COUNT
 }	e_store_type;
 
@@ -30,8 +26,6 @@ typedef struct store_list
 	st_clock_t stEndTime;									//文件的结束时间
 }	st_store_list_t;
 
-#ifdef __cplusplus
-}
-#endif
+
 
 #endif	//__STORE_DEFINE_H__

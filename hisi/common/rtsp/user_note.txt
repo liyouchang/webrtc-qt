@@ -1,0 +1,73 @@
+Copyright (c) 2014-2015 Kaer Corporation - All Rights Reserved.
+
+version:
+0.00.01	first version.finished by Jesson.
+
+Compile:
+
+please read config.cfg at the next higher level first,choose your chip'type that you used.
+if not found,you need add the type ourself,the same as the sample.
+then,execute Makefile command as make liba or make liba CHIP=HI3518A(your chip type).
+
+Module usage:
+
+instruction:this clock module is a application with pcf8563,hisilicon'hirtc and ntp just time,we provided some interfaces as follow.
+==================================================
+int CLOCK_Open(e_clock_type enType);
+description:
+you can use this interface to run a clock,the same time system'clock changed with hardware'clock.
+	enType:include CLOCK_TYPE_HIRTC,CLOCK_TYPE_PCF8563 and CLOCK_TYPE_NTP,please read the part of CLOCK in common_define.h.
+
+return value£º
+	vlaue that Greater than zero is returned indicate SUCCESS and this value is handle,other is failed.errno can use follow interface CLOCK_Get_Error to get.
+	#define CLOCK_ALREADY_USED	-1
+	#define CLOCK_OPEN_FAILD	-2
+	#define CLOCK_NONE_EXIST	-3
+
+==================================================
+int CLOCK_Close(int handle);
+description:
+you can use this interface to stop a clock,usually when power down or reset this interface is used.
+	handle:the value is returnd when open the clock.
+
+return value£º
+	the same as above.
+
+==================================================
+int CLOCK_Get(int handle,st_clock_t *);
+description:
+you can use this interface to get system time of current.
+	handle:the value is returnd when open the clock.
+	st_clock_t:struct is year month day hour minute second week.year is 20XX.
+	
+return value£º
+	the same as above.
+	
+==================================================
+int CLOCK_Set(int handle,st_clock_t *);
+you can use this interface to set system time,the same time time is written to the clock chip.
+	handle:the value is returnd when open the clock.
+	st_clock_t:struct is year month day hour minute second week.year is 20XX.
+	
+return value£º
+	the same as above.
+
+==================================================
+int CLOCK_Get_Error(int handle);
+you can use this interface to get the error that above interface generate.
+	handle:the value is returnd when open the clock.
+	
+return value£º
+	the same as above.
+
+==================================================
+int CLOCK_Version(void);										//1.00.00=0x10000  0.00.01=0x000001
+you can use this interface to get the clock module, version.
+	
+return value£º
+	the version with integer.V1.00.00=0x10000  V0.00.01=0x000001
+
+ATTENTION:
+    the ntp module only get time from internet at open. it can not be set.
+
+this word finished by Jesson.

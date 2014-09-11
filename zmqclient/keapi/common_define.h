@@ -13,7 +13,7 @@ typedef enum
 	CLOCK_TYPE_HIRTC = 0,										//海思内部RTC时钟
 	CLOCK_TYPE_PCF8563,											//外部硬件时钟芯片
 	CLOCK_TYPE_NTP,												//网络校时
-	CLOCK_TYPE_COUNT	
+	CLOCK_TYPE_COUNT
 }	e_clock_type;
 
 typedef struct struct_clock_s
@@ -24,7 +24,7 @@ typedef struct struct_clock_s
 	int hour;
 	int minute;
 	int second;
-	int week;	
+	int week;
 }	st_clock_t;
 /**********************************************************************/
 //module config
@@ -473,7 +473,7 @@ struct WIRELESS_ALARM
 	char jpegChn;											//触发抓拍的通道
 	char jpegNum;											//触发抓拍张数
 	char jpegGop;											//触发抓拍间隔
-	
+
 	char triggerRecord;										//触发录像开关
 	char recordChn;											//触发录像通道
 	char recordDelay;										//触发录像时长
@@ -488,8 +488,13 @@ typedef enum
 {
 	GPIO_TYPE_ONCE = 0,									//一次性控制
 	GPIO_TYPE_CYCLE,									//周期性控制
-	GPIO_TYPE_COUNT	
+	GPIO_TYPE_COUNT
 }	e_gpio_control;
+
+/**********************************************************************/
+//module system
+/**********************************************************************/
+typedef int (*SYSTEM_CALLBACK)(void);
 
 /**********************************************************************/
 //module fifo
@@ -512,7 +517,7 @@ typedef struct st_fifo
 	e_fifo_type enType;
 	int iGrp;
 	int iChn;
-	
+
 }	st_fifo_t;
 
 typedef enum
@@ -525,6 +530,8 @@ typedef enum
 }	e_fifo_h264;
 typedef int (*FIFO_CALLBACK)(char * pFrameData,int iFrameLen);
 
+//==========================================================
+#define FIFO_ALARM_MAX_SHEET	16
 typedef enum
 {
 	FIFO_ALARM_SWITCH = 0,									//开关量
@@ -533,6 +540,7 @@ typedef enum
 	FIFO_ALARM_MV,											//移动侦测
 	FIFO_ALARM_OD,											//遮挡报警
 	FIFO_ALARM_SL,											//信号丢失
+	FIFO_BELL_PRESS,										//门铃按键
 	FIFO_ALARM_COUNT
 }	e_fifo_alarm;
 
@@ -623,13 +631,13 @@ typedef struct st_rtsp_steup
 	char cSource[128];
 	int  iServerPort1;
 	int  iServerPort2;
-	
+
 }	st_rtsp_setup_t;
 
 typedef struct st_rtsp_play
 {
 	int  isTcp;
-	
+
 	int  iSpeed;
 	int  iPullTime;
 	char cFileName[128];
@@ -637,7 +645,7 @@ typedef struct st_rtsp_play
 	int  v_rtpseq;
 	int  a_rtptime;
 	int  a_rtpseq;
-	
+
 }	st_rtsp_play_t;
 
 typedef enum e_encrypt_mode_
@@ -667,11 +675,11 @@ typedef struct st_wifi_list
 	e_encrypt_format encryptFormat;			//加密格式
 	int	 wepPosition;						//wep方式下的密码位置
 	int  signalStrength;					//信号强度
-	
+
 }	st_wifi_list_t;
 
 /**********************************************************************/
-//module Uaer
+//module Uart
 /**********************************************************************/
 typedef int (*UART_RECEIVE_CALLBACK)(int handle,char *pData,int iMaxSize);
 typedef int (*UART_PROTOCOL_CALLBACK)(int handle,char *pData,int iLen);
@@ -694,7 +702,7 @@ typedef struct attr_485
 /**********************************************************************/
 typedef struct ST_IOV
 {
-	int iov_len;						/**< Size of data */	
+	int iov_len;						/**< Size of data */
 	void * iov_base;					/**< Pointer on data */
 }__attribute__((packed))st_iov_t;
 

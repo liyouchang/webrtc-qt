@@ -37,7 +37,9 @@ int GPIO_Close(int handle);																//关闭gpio设备
 int GPIO_Set_Dir(int gpio_group,int gpio_bit,int value);								//设置某个gpio的输入输出功能0-input 1-output
 int GPIO_Set_Value(int gpio_group,int gpio_bit,int value);								//控制输出模式的gpio输出value状态
 int GPIO_Get_Value(int gpio_group,int gpio_bit);										//获取输入模式的gpio口的当前状态
-int GPIO_Control(int gpio_group,int gpio_bit,e_gpio_control enCtrl,int ms_value,int isHigh);//控制输出模式的gpio按照参数规律输出
+int GPIO_Control(int gpio_group,int gpio_bit,e_gpio_control enCtrl,int ms_value,int isHigh);//控制输出模式的gpio按照参数规律输出enCtrl分为周期性和一次性两种：
+																						//周期性ms_value表示高低变化的停留时间
+																						//一次性当ms_value为0时则表示一直设置成isHigh状态，ms_value不为0则表示在ms_value时间内保持isHigh状态，过了时间状态停留在翻转的状态
 /**********************************************************************/
 //module system
 /**********************************************************************/
@@ -45,9 +47,12 @@ int SYSTEM_Initialize(void);															//初始化系统
 int SYSTEM_Cleanup(void);																//系统模块退出
 int SYSTEM_Get_Mem(int *total,int *free);												//获取内存总容量，剩余容量和占用率
 int SYSTEM_Get_Cpu(void);																//获取cpu占用率
-int SYSTEM_Set_Reboot(void);															//执行reboot
+int SYSTEM_Set_Reboot(void);															//重启操作系统
+int SYSTEM_Set_RestartApp(void);														//重启应用程序
 int SYSTEM_Get_Run(void);																//获取当前是否要reboot的标志
 int SYSTEM_Command(char *command);														//系统命令调用，封装了system在执行时加锁
+int SYSTEM_Register_Callback(SYSTEM_CALLBACK system_reboot_callback);					//系统重启的时候回调给zmqclient
+
 /**********************************************************************/
 //module fifo
 /**********************************************************************/
@@ -99,7 +104,7 @@ int UDP_Server_Destory(int iSock);														//销毁udp server
 
 int NET_Initialize(void);																//初始化系统网络
 int NET_Get_WanStatus(void);															//由此接口来判断设备是否能够连接到公网
-int NET_Get_RouteIP(char * cIP);														//获取当前路由使用的网卡的ip
+int NET_Get_RouteIP(char * cIP);														//获取当前路由使用的网卡的ip 返回值int类型的ip，cIP是字符串类型的ip如"192.168.0.230"
 int NET_Get_Status(st_net_status_t * status);											//获取各个网卡的状态
 int NET_Get_WifiList(int iMaxList,st_wifi_list_t *);									//获取wifi网络列表 最多查询iMaxList条放入wifi列表里面，返回实际查询出来的条数
 int NET_Set_Wifi(st_wifi_list_t *);														//设置连接wifi参数
@@ -141,7 +146,7 @@ int MOTOR_Control(int iChn, int iCmd,int iSpeed,int iParam);
 int UTILITY_MD5(unsigned char *Src, unsigned char *dst, int len);						//MD5加密算法
 int UTILITY_HMAC1_IOV(st_iov_t* iov,int iov_num,unsigned char* key,int key_len,unsigned char* dst);//哈希加密算法
 int UTILITY_BASE64_Encode(unsigned char *src,int len,char *dst);						//base64加密算法
-int UTILITY_MEDIA_Convert_Size(int resolution,int *width,int *high);					//分辨率转换成宽高	
+int UTILITY_MEDIA_Convert_Size(int resolution,int *width,int *high);					//分辨率转换成宽高
 int UTILITY_MEDIA_Convert_Format(int reso);												//编码参数的分辨率（由小到大表示分辨率由小到大),转换成卡尔协议使用的分辨率的定义规则
 int UTILITY_MEDIA_Convert_Resolution(int format);										//卡尔协议传下来的参数转化成程序中实际应用的分辨率（由小到大表示分辨率由小到大)
 int UTILITY_B64_ntop(unsigned char const *,size_t, char *,size_t);

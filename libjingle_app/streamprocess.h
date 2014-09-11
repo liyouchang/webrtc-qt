@@ -17,7 +17,6 @@ public:
     virtual ~StreamProcess();
     bool ProcessStream(talk_base::StreamInterface* stream);
 
-    void Close();
     bool WriteStream(const char * data,int len);
     //bool ReadStream(void *buffer, size_t bytes, size_t *bytes_read = 0);
     sigslot::signal2<StreamProcess*, talk_base::Buffer &> SignalReadData;

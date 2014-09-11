@@ -964,16 +964,16 @@ bool SdpDeserialize(const std::string& message,
       return ParseFailed("", description.str(), error);
     }
     // Media Description
-//    if (!ParseMediaDescription(message, session_td, session_extmaps,
-//                               supports_msid, &current_pos, desc, &candidates,
-//                               error)) {
-//        delete desc;
-//        for (std::vector<JsepIceCandidate*>::const_iterator
-//             it = candidates.begin(); it != candidates.end(); ++it) {
-//            delete *it;
-//        }
-//        return false;
-//    }
+    if (!ParseMediaDescription(message, session_td, session_extmaps,
+                               supports_msid, &current_pos, desc, &candidates,
+                               error)) {
+        delete desc;
+        for (std::vector<JsepIceCandidate*>::const_iterator
+             it = candidates.begin(); it != candidates.end(); ++it) {
+            delete *it;
+        }
+        return false;
+    }
 
     jdesc->Initialize(desc, session_id, session_version);
 
@@ -2083,160 +2083,160 @@ static const StaticPayloadAudioCodec kStaticPayloadAudioCodecs[] = {
 //    return media_desc;
 //}
 
-//bool ParseMediaDescription(const std::string& message,
-//                           const TransportDescription& session_td,
-//                           const RtpHeaderExtensions& session_extmaps,
-//                           bool supports_msid,
-//                           size_t* pos,
-//                           cricket::SessionDescription* desc,
-//                           std::vector<JsepIceCandidate*>* candidates,
-//                           SdpParseError* error) {
-//  ASSERT(desc != NULL);
-//  std::string line;
-//  int mline_index = -1;
+bool ParseMediaDescription(const std::string& message,
+                           const TransportDescription& session_td,
+                           const RtpHeaderExtensions& session_extmaps,
+                           bool supports_msid,
+                           size_t* pos,
+                           cricket::SessionDescription* desc,
+                           std::vector<JsepIceCandidate*>* candidates,
+                           SdpParseError* error) {
+  ASSERT(desc != NULL);
+  std::string line;
+  int mline_index = -1;
 
-//  // Zero or more media descriptions
-//  // RFC 4566
-//  // m=<media> <port> <proto> <fmt>
-//  while (GetLineWithType(message, pos, &line, kLineTypeMedia)) {
-//    ++mline_index;
+  // Zero or more media descriptions
+  // RFC 4566
+  // m=<media> <port> <proto> <fmt>
+  while (GetLineWithType(message, pos, &line, kLineTypeMedia)) {
+    ++mline_index;
 
-//    std::vector<std::string> fields;
-//    talk_base::split(line.substr(kLinePrefixLength),
-//                     kSdpDelimiterSpace, &fields);
-//    const size_t expected_min_fields = 4;
-//    if (fields.size() < expected_min_fields) {
-//      return ParseFailedExpectMinFieldNum(line, expected_min_fields, error);
-//    }
-//    bool rejected = false;
-//    // RFC 3264
-//    // To reject an offered stream, the port number in the corresponding stream
-//    // in the answer MUST be set to zero.
-//    if (fields[1] == kMediaPortRejected) {
-//      rejected = true;
-//    }
+    std::vector<std::string> fields;
+    talk_base::split(line.substr(kLinePrefixLength),
+                     kSdpDelimiterSpace, &fields);
+    const size_t expected_min_fields = 4;
+    if (fields.size() < expected_min_fields) {
+      return ParseFailedExpectMinFieldNum(line, expected_min_fields, error);
+    }
+    bool rejected = false;
+    // RFC 3264
+    // To reject an offered stream, the port number in the corresponding stream
+    // in the answer MUST be set to zero.
+    if (fields[1] == kMediaPortRejected) {
+      rejected = true;
+    }
 
-//    std::string protocol = fields[2];
-//    bool is_sctp = (protocol == cricket::kMediaProtocolDtlsSctp);
+    std::string protocol = fields[2];
+    bool is_sctp = (protocol == cricket::kMediaProtocolDtlsSctp);
 
-//    // <fmt>
-//    std::vector<int> codec_preference;
-//    for (size_t j = 3 ; j < fields.size(); ++j) {
-//      codec_preference.push_back(talk_base::FromString<int>(fields[j]));
-//    }
+    // <fmt>
+    std::vector<int> codec_preference;
+    for (size_t j = 3 ; j < fields.size(); ++j) {
+      codec_preference.push_back(talk_base::FromString<int>(fields[j]));
+    }
 
-//    // Make a temporary TransportDescription based on |session_td|.
-//    // Some of this gets overwritten by ParseContent.
-//    TransportDescription transport(NS_JINGLE_ICE_UDP,
-//                                   session_td.transport_options,
-//                                   session_td.ice_ufrag,
-//                                   session_td.ice_pwd,
-//                                   session_td.ice_mode,
-//                                   session_td.connection_role,
-//                                   session_td.identity_fingerprint.get(),
-//                                   Candidates());
+    // Make a temporary TransportDescription based on |session_td|.
+    // Some of this gets overwritten by ParseContent.
+    TransportDescription transport(NS_JINGLE_ICE_UDP,
+                                   session_td.transport_options,
+                                   session_td.ice_ufrag,
+                                   session_td.ice_pwd,
+                                   session_td.ice_mode,
+                                   session_td.connection_role,
+                                   session_td.identity_fingerprint.get(),
+                                   Candidates());
 
-//    talk_base::scoped_ptr<MediaContentDescription> content;
-//    std::string content_name;
-//    if (HasAttribute(line, kMediaTypeVideo)) {
-//      content.reset(ParseContentDescription<VideoContentDescription>(
-//                    message, cricket::MEDIA_TYPE_VIDEO, mline_index, protocol,
-//                    codec_preference, pos, &content_name,
-//                    &transport, candidates, error));
-//    } else if (HasAttribute(line, kMediaTypeAudio)) {
-//      content.reset(ParseContentDescription<AudioContentDescription>(
-//                    message, cricket::MEDIA_TYPE_AUDIO, mline_index, protocol,
-//                    codec_preference, pos, &content_name,
-//                    &transport, candidates, error));
-//      MaybeCreateStaticPayloadAudioCodecs(
-//          codec_preference,
-//          static_cast<AudioContentDescription*>(content.get()));
-//    } else if (HasAttribute(line, kMediaTypeData)) {
-//      DataContentDescription* desc =
-//          ParseContentDescription<DataContentDescription>(
-//                    message, cricket::MEDIA_TYPE_DATA, mline_index, protocol,
-//                    codec_preference, pos, &content_name,
-//                    &transport, candidates, error);
+    talk_base::scoped_ptr<MediaContentDescription> content;
+    std::string content_name;
+    if (HasAttribute(line, kMediaTypeVideo)) {
+      content.reset(ParseContentDescription<VideoContentDescription>(
+                    message, cricket::MEDIA_TYPE_VIDEO, mline_index, protocol,
+                    codec_preference, pos, &content_name,
+                    &transport, candidates, error));
+    } else if (HasAttribute(line, kMediaTypeAudio)) {
+      content.reset(ParseContentDescription<AudioContentDescription>(
+                    message, cricket::MEDIA_TYPE_AUDIO, mline_index, protocol,
+                    codec_preference, pos, &content_name,
+                    &transport, candidates, error));
+      MaybeCreateStaticPayloadAudioCodecs(
+          codec_preference,
+          static_cast<AudioContentDescription*>(content.get()));
+    } else if (HasAttribute(line, kMediaTypeData)) {
+      DataContentDescription* desc =
+          ParseContentDescription<DataContentDescription>(
+                    message, cricket::MEDIA_TYPE_DATA, mline_index, protocol,
+                    codec_preference, pos, &content_name,
+                    &transport, candidates, error);
 
-//      if (protocol == cricket::kMediaProtocolDtlsSctp) {
-//        // Add the SCTP Port number as a pseudo-codec "port" parameter
-//        cricket::DataCodec codec_port(
-//            cricket::kGoogleSctpDataCodecId, cricket::kGoogleSctpDataCodecName,
-//            0);
-//        codec_port.SetParam(cricket::kCodecParamPort, fields[3]);
-//        LOG(INFO) << "ParseMediaDescription: Got SCTP Port Number "
-//                  << fields[3];
-//        desc->AddCodec(codec_port);
-//      }
+      if (protocol == cricket::kMediaProtocolDtlsSctp) {
+        // Add the SCTP Port number as a pseudo-codec "port" parameter
+        cricket::DataCodec codec_port(
+            cricket::kGoogleSctpDataCodecId, cricket::kGoogleSctpDataCodecName,
+            0);
+        codec_port.SetParam(cricket::kCodecParamPort, fields[3]);
+        LOG(INFO) << "ParseMediaDescription: Got SCTP Port Number "
+                  << fields[3];
+        desc->AddCodec(codec_port);
+      }
 
-//      content.reset(desc);
+      content.reset(desc);
 
-//      // We should always use the default bandwidth for RTP-based data
-//      // channels.  Don't allow SDP to set the bandwidth, because that
-//      // would give JS the opportunity to "break the Internet".
-//      // TODO(pthatcher): But we need to temporarily allow the SDP to control
-//      // this for backwards-compatibility.  Once we don't need that any
-//      // more, remove this.
-//      bool support_dc_sdp_bandwidth_temporarily = true;
-//      if (content.get() && !support_dc_sdp_bandwidth_temporarily) {
-//        content->set_bandwidth(cricket::kAutoBandwidth);
-//      }
-//    } else {
-//      LOG(LS_WARNING) << "Unsupported media type: " << line;
-//      continue;
-//    }
-//    if (!content.get()) {
-//      // ParseContentDescription returns NULL if failed.
-//      return false;
-//    }
+      // We should always use the default bandwidth for RTP-based data
+      // channels.  Don't allow SDP to set the bandwidth, because that
+      // would give JS the opportunity to "break the Internet".
+      // TODO(pthatcher): But we need to temporarily allow the SDP to control
+      // this for backwards-compatibility.  Once we don't need that any
+      // more, remove this.
+      bool support_dc_sdp_bandwidth_temporarily = true;
+      if (content.get() && !support_dc_sdp_bandwidth_temporarily) {
+        content->set_bandwidth(cricket::kAutoBandwidth);
+      }
+    } else {
+      LOG(LS_WARNING) << "Unsupported media type: " << line;
+      continue;
+    }
+    if (!content.get()) {
+      // ParseContentDescription returns NULL if failed.
+      return false;
+    }
 
-//    if (!is_sctp) {
-//      // Make sure to set the media direction correctly. If the direction is not
-//      // MD_RECVONLY or Inactive and no streams are parsed,
-//      // a default MediaStream will be created to prepare for receiving media.
-//      if (supports_msid && content->streams().empty() &&
-//          content->direction() == cricket::MD_SENDRECV) {
-//        content->set_direction(cricket::MD_RECVONLY);
-//      }
+    if (!is_sctp) {
+      // Make sure to set the media direction correctly. If the direction is not
+      // MD_RECVONLY or Inactive and no streams are parsed,
+      // a default MediaStream will be created to prepare for receiving media.
+      if (supports_msid && content->streams().empty() &&
+          content->direction() == cricket::MD_SENDRECV) {
+        content->set_direction(cricket::MD_RECVONLY);
+      }
 
-//      // Set the extmap.
-//      if (!session_extmaps.empty() &&
-//          !content->rtp_header_extensions().empty()) {
-//        return ParseFailed("",
-//                           "The a=extmap MUST be either all session level or "
-//                           "all media level.",
-//                           error);
-//      }
-//      for (size_t i = 0; i < session_extmaps.size(); ++i) {
-//        content->AddRtpHeaderExtension(session_extmaps[i]);
-//      }
-//    }
-//    content->set_protocol(protocol);
-//    desc->AddContent(content_name,
-//                     is_sctp ? cricket::NS_JINGLE_DRAFT_SCTP :
-//                               cricket::NS_JINGLE_RTP,
-//                     rejected,
-//                     content.release());
+      // Set the extmap.
+      if (!session_extmaps.empty() &&
+          !content->rtp_header_extensions().empty()) {
+        return ParseFailed("",
+                           "The a=extmap MUST be either all session level or "
+                           "all media level.",
+                           error);
+      }
+      for (size_t i = 0; i < session_extmaps.size(); ++i) {
+        content->AddRtpHeaderExtension(session_extmaps[i]);
+      }
+    }
+    content->set_protocol(protocol);
+    desc->AddContent(content_name,
+                     is_sctp ? cricket::NS_JINGLE_DRAFT_SCTP :
+                               cricket::NS_JINGLE_RTP,
+                     rejected,
+                     content.release());
 
-//    // Create TransportInfo with the media level "ice-pwd" and "ice-ufrag".
-//    TransportInfo transport_info(content_name, transport);
+    // Create TransportInfo with the media level "ice-pwd" and "ice-ufrag".
+    TransportInfo transport_info(content_name, transport);
 
-//    if (!desc->AddTransportInfo(transport_info)) {
-//      std::ostringstream description;
-//      description << "Failed to AddTransportInfo with content name: "
-//                  << content_name;
-//      return ParseFailed("", description.str(), error);
-//    }
+    if (!desc->AddTransportInfo(transport_info)) {
+      std::ostringstream description;
+      description << "Failed to AddTransportInfo with content name: "
+                  << content_name;
+      return ParseFailed("", description.str(), error);
+    }
 
-//  }
+  }
 
-//  size_t end_of_message = message.size();
-//  if (mline_index == -1 && *pos != end_of_message) {
-//    ParseFailed(message, *pos, "Expects m line.", error);
-//    return false;
-//  }
-//  return true;
-//}
+  size_t end_of_message = message.size();
+  if (mline_index == -1 && *pos != end_of_message) {
+    ParseFailed(message, *pos, "Expects m line.", error);
+    return false;
+  }
+  return true;
+}
 
 bool VerifyCodec(const cricket::Codec& codec) {
     // Codec has not been populated correctly unless the name has been set. This
