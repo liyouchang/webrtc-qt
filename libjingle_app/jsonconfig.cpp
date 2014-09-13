@@ -31,8 +31,6 @@ std::string JsonConfig::ToString()
 
 bool JsonConfig::FromFile(const std::string &filename)
 {
-
-
     if(filename.empty())
         return false;
 

@@ -11,27 +11,27 @@
 extern "C" {
 #endif
 
-int STORE_Initialize(void);								//åˆå§‹åŒ–åª’ä½“ç¼–ç 
-int STORE_Cleanup(void);								//ååˆå§‹åŒ–åª’ä½“ç¼–ç 
+int STORE_Initialize(void);								//³õÊ¼»¯Ã½Ìå±àÂë
+int STORE_Cleanup(void);								//·´³õÊ¼»¯Ã½Ìå±àÂë
 short STORE_Get_Lib_Version(void);
 
-int STORE_SaveDataToFile(char * path_name,char *pBuf,int datalen);//å­˜å‚¨ä¸€å¼ å›¾ç‰‡æˆ–ä¸€ä¸ªæ–‡ä»¶ï¼Œå†…å®¹åœ¨pBufä¸­ï¼Œpath_nameä¸ºç»å¯¹è·¯å¾„åŒ…æ‹¬æ–‡ä»¶å
-int STORE_Get_Disk_Free(int ctrl, int drive);			//è·å–ç£ç›˜å‰©ä½™å®¹é‡ï¼Œè¿”å›å€¼å•ä½æ˜¯Mï¼Œctrlå’Œdriveéƒ½å¡«0
-int STORE_Get_Disk_Capacity(int ctrl, int drive);		//è·å–ç£ç›˜æ€»å®¹é‡ï¼Œè¿”å›å€¼å•ä½æ˜¯Mï¼Œctrlå’Œdriveéƒ½å¡«0
-int STORE_Get_Disk_Status(int ctrl, int drive);			//è·å–å½“å‰ç£ç›˜çš„çŠ¶æ€
-int STORE_Get_Store_Status(int iChn,int *plan,int *alarmIN,int *alarmMD,int *manual);//è·å–é€šé“çš„å­˜å‚¨çŠ¶æ€
-int STORE_Set_Disk_Format(int ctrl, int drive);			//æ ¼å¼åŒ–
-                                                        //è·å–æ–‡ä»¶åˆ—è¡¨startTime endTimeæ˜¯æŸ¥è¯¢èµ·æ­¢çš„æ—¶é—´æ®µï¼ŒiChnæ˜¯é€šé“å·0å¼€å§‹ï¼ŒenTypeæŸ¥è¯¢å›¾åƒçš„ç±»å‹ï¼ŒiMaxListNumæ˜¯æœ€å¤šæŸ¥è¯¢çš„æ¡æ•°ï¼ŒstListæ˜¯æ–‡ä»¶åˆ—è¡¨ï¼Œç©ºé—´ç”±è°ƒç”¨è€…åˆ†é…
-int STORE_Get_File_List(st_clock_t * startTime,st_clock_t *endTime,int iChn,e_store_type enType,int iMaxListNum,st_store_list_t * stList);	//è¿”å›çš„å€¼ä¸ºå®é™…æŸ¥è¯¢åˆ°çš„æ–‡ä»¶åˆ—è¡¨çš„æ¡æ•°
+int STORE_SaveDataToFile(char * path_name,char *pBuf,int datalen);//´æ´¢Ò»ÕÅÍ¼Æ¬»òÒ»¸öÎÄ¼ş£¬ÄÚÈİÔÚpBufÖĞ£¬path_nameÎª¾ø¶ÔÂ·¾¶°üÀ¨ÎÄ¼şÃû
+int STORE_Get_Disk_Free(int ctrl, int drive);			//»ñÈ¡´ÅÅÌÊ£ÓàÈİÁ¿£¬·µ»ØÖµµ¥Î»ÊÇM£¬ctrlºÍdrive¶¼Ìî0
+int STORE_Get_Disk_Capacity(int ctrl, int drive);		//»ñÈ¡´ÅÅÌ×ÜÈİÁ¿£¬·µ»ØÖµµ¥Î»ÊÇM£¬ctrlºÍdrive¶¼Ìî0
+int STORE_Get_Disk_Status(int ctrl, int drive);			//»ñÈ¡µ±Ç°´ÅÅÌµÄ×´Ì¬
+int STORE_Get_Store_Status(int iChn,int *plan,int *alarmIN,int *alarmMD,int *manual);//»ñÈ¡Í¨µÀµÄ´æ´¢×´Ì¬
+int STORE_Set_Disk_Format(int ctrl, int drive);			//¸ñÊ½»¯
+														//»ñÈ¡ÎÄ¼şÁĞ±ístartTime endTimeÊÇ²éÑ¯ÆğÖ¹µÄÊ±¼ä¶Î£¬iChnÊÇÍ¨µÀºÅ0¿ªÊ¼£¬enType²éÑ¯Í¼ÏñµÄÀàĞÍ£¬iMaxListNumÊÇ×î¶à²éÑ¯µÄÌõÊı£¬stListÊÇÎÄ¼şÁĞ±í£¬¿Õ¼äÓÉµ÷ÓÃÕß·ÖÅä
+int STORE_Get_File_List(st_clock_t * startTime,st_clock_t *endTime,int iChn,e_store_type enType,int iMaxListNum,st_store_list_t * stList);	//·µ»ØµÄÖµÎªÊµ¼Ê²éÑ¯µ½µÄÎÄ¼şÁĞ±íµÄÌõÊı
 
-void STORE_Stop_Manual(int chans);
-void STORE_Start_Manual(int chans);
-void STORE_Start_Switch(int chans, int alarmInputNum);
-void STORE_Stop_Switch(int chans,int alarmInputNum);
-void STORE_Start_Motion(int chans,int area);
-void STORE_Stop_Motion(int chans);
-void STORE_Stop_Plan(int chans);
-void STORE_Start_Plan(int chans);
+void STORE_Stop_Manual(int chans);						//Í£Ö¹ÊÖ¶¯Â¼Ïñchans±íÊ¾Â¼ÏñµÄÍ¨µÀ
+void STORE_Start_Manual(int chans);						//¿ªÊ¼ÊÖ¶¯Â¼Ïñchans±íÊ¾Â¼ÏñµÄÍ¨µÀ
+void STORE_Start_Switch(int chans, int alarmInputNum);	//¿ªÊ¼¿ª¹ØÁ¿±¨¾¯Â¼Ïñchans±íÊ¾Â¼ÏñµÄÍ¨µÀ£¬alarmInputNum±íÊ¾±¨¾¯Æ÷µÄÍ¨µÀºÅ
+void STORE_Stop_Switch(int chans,int alarmInputNum);	//Í£Ö¹¿ª¹ØÁ¿±¨¾¯Â¼Ïñchans±íÊ¾Â¼ÏñµÄÍ¨µÀ£¬alarmInputNum±íÊ¾±¨¾¯Æ÷µÄÍ¨µÀºÅ
+void STORE_Start_Motion(int chans,int area);			//¿ªÊ¼ÒÆ¶¯Õì²â±¨¾¯Â¼Ïñchans±íÊ¾´¥·¢ÒÆ¶¯Õì²âµÄÍ¨µÀ£¬²»ÊÇĞèÒªÂ¼ÏñµÄÍ¨µÀ£¬area±íÊ¾´¥·¢ÒÆ¶¯Õì²â±¨¾¯µÄÇøÓòºÅ
+void STORE_Stop_Motion(int chans);						//Í£Ö¹ÒÆ¶¯Õì²â±¨¾¯Â¼ÏñchansÂ¼ÏñµÄÍ¨µÀ
+void STORE_Stop_Plan(int chans);						//¿ªÊ¼¼Æ»®Â¼Ïñchans±íÊ¾Â¼ÏñµÄÍ¨µÀ
+void STORE_Start_Plan(int chans);						//Í£Ö¹¼Æ»®Â¼Ïñchans±íÊ¾Â¼ÏñµÄÍ¨µÀ
 
 #ifdef __cplusplus
 }

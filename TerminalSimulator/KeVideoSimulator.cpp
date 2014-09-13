@@ -21,16 +21,40 @@ KeVideoSimulator::KeVideoSimulator(const std::string &fileName):
     reader->SignalAudioData.connect(this,&KeVideoSimulator::OnFileAudioData);
     reader->SignalRecordEnd.connect(this,&KeVideoSimulator::OnFileReadEnd);
 
-    context = new zmq::context_t();
-    publisher = new zmq::socket_t(*context,ZMQ_PUB);
+    zmqContext = new zmq::context_t(1,2);
+    publisher = new zmq::socket_t(*zmqContext,ZMQ_PUB);
     publisher->bind("tcp://*:5556");
+
+    repSocket = new zmq::socket_t(*zmqContext,ZMQ_REP);
+    repSocket->bind("tcp://*:22555");
+    //        int reconnectInterval = 10000;
+    //        repSocket->setsockopt(ZMQ_RECONNECT_IVL,&reconnectInterval,sizeof(reconnectInterval));
+    int highwater = 100;
+    repSocket->setsockopt(ZMQ_SNDHWM,&highwater,sizeof(highwater));
+    repSocket->setsockopt(ZMQ_RCVHWM,&highwater,sizeof(highwater));
+
+    publisher->setsockopt(ZMQ_SNDHWM,&highwater,sizeof(highwater));
+    publisher->setsockopt(ZMQ_RCVHWM,&highwater,sizeof(highwater));
+
+
+    int ligger = 100;
+    repSocket->setsockopt(ZMQ_LINGER,&ligger,sizeof(ligger));
+
+    publisher->setsockopt(ZMQ_LINGER,&ligger,sizeof(ligger));
+
+
+    zmqThread = new talk_base::Thread();
+    zmqThread->Start();
+
+    zmqThread->Post(this,MSG_ZMQ_RECV);
+
 }
 
 KeVideoSimulator::~KeVideoSimulator()
 {
     delete reader;
     delete publisher;
-    delete context;
+    delete zmqContext;
 }
 
 bool KeVideoSimulator::Init(kaerp2p::PeerTerminalInterface *t)
@@ -68,16 +92,52 @@ void KeVideoSimulator::OnFileVideoData(const char *data, int len)
 void KeVideoSimulator::OnFileAudioData(const char *data, int len)
 {
     this->SignalAudioData(data,len);
-//    publisher->send(data,len);
+    //    publisher->send(data,len);
+}
+
+void KeVideoSimulator::OnMessage(talk_base::Message *msg)
+{
+    switch (msg->message_id) {
+    case MSG_ZMQ_RECV:{
+        LOG_F(INFO) << " start recv rep";
+        zmq::message_t zmsg;
+        repSocket->recv(&zmsg);
+        std::string strMsg((char *)zmsg.data(),zmsg.size());
+        Json::Reader reader;
+        LOG_F(INFO)<<"rep msg "<<strMsg;
+        Json::Value jmessage;
+        if (!reader.parse(strMsg, jmessage)) {
+            LOG(WARNING) << "Received unknown message. ";
+            strMsg = "unknown message";
+            repSocket->send(strMsg.c_str(),strMsg.length());
+        }else{
+            Json::Value jresult;
+
+            this->OnCommandJsonMsg(jmessage,&jresult);
+
+            if(!jresult.isNull()){
+                Json::StyledWriter writer;
+                strMsg = writer.write(jresult);
+                LOG(LS_VERBOSE)<<"send msg is "<< msg;
+                repSocket->send(strMsg.c_str(),strMsg.length());
+            }
+        }
+        zmqThread->Post(this,MSG_ZMQ_RECV);
+    }
+        break;
+    default:
+        break;
+    }
+
 }
 
 
-void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage)
+void KeVideoSimulator::OnCommandJsonMsg(const  Json::Value &jmessage,Json::Value *jresult)
 {
     std::string command;
     bool ret = GetStringFromJsonObject(jmessage,kaerp2p::kKaerMsgCommandName, &command);
     if(!ret){
-        LOG(WARNING)<<"get command error-"<<command<<" from"<<peerId ;
+        LOG(WARNING)<<"get command error-"<<command ;
         return;
     }
 //    LOG_F(INFO)<<"receive command "<<command;
@@ -91,7 +151,7 @@ void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &
         Json::Value jcondition;
         if(!GetValueFromJsonObject(jmessage, "condition", &jcondition))
         {
-            LOG(WARNING)<<"get query_record value error from" << peerId ;
+            LOG(WARNING)<<"get query_record value error from" ;
             return;
         }
         int totalNum = 10;
@@ -106,25 +166,22 @@ void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &
             jrecord["fileSize"] = 256;
             jrecordList.append(jrecord);
         }
-        jmessage["result"] = true;
-        jmessage["totalNum"] = totalNum;
-        jmessage["recordList"] = jrecordList;
-        this->ReportJsonMsg(peerId,jmessage);
+        (*jresult) = jmessage;
+        (*jresult)["result"] = true;
+        (*jresult)["totalNum"] = totalNum;
+        (*jresult)["recordList"] = jrecordList;
     }
     else if(command.compare("wifi_info") == 0){
-        Json::Value jresult;
-        jresult["type"] = "tunnel";
-        jresult["command"] = "wifi_info";
-
-        this->ReportJsonMsg(peerId,jresult);
+        (*jresult)["type"] = "tunnel";
+        (*jresult)["command"] = "wifi_info";
     }
     else if(command.compare("set_wifi") == 0){
         Json::Value jwifiParam;
         if(!GetValueFromJsonObject(jmessage, "param", &jwifiParam)){
-            LOG(WARNING)<<"get set_wifi value error from"<<peerId;
+            LOG(WARNING)<<"get set_wifi value error from";
             return;
         }
-        this->ReportResult(peerId,command,true);
+        (*jresult) = this->GetResultMsg(command,true);
     }
     else if(command.compare("rename") == 0){
         std::string name;
@@ -132,13 +189,13 @@ void KeVideoSimulator::OnCommandJsonMsg(const std::string &peerId, Json::Value &
             LOG_F(WARNING) <<" receive rename msg error ";
             return;
         }
-        this->ReportResult(peerId,command,true);
+        (*jresult) = this->GetResultMsg(command,true);
     }else  if(command.compare("arming_status") == 0){
-        jmessage["value"] = 1;
-        this->ReportJsonMsg(peerId,jmessage);
+        (*jresult) = jmessage;
+        (*jresult)["value"] = 1;
     }
     else{
-        kaerp2p::KeTunnelCamera::OnCommandJsonMsg(peerId,jmessage);
+        kaerp2p::KeTunnelCamera::OnCommandJsonMsg(jmessage,jresult);
     }
 
 }

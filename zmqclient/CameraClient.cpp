@@ -125,6 +125,7 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
         }
         else if(type.compare("Terminal_NTP") == 0)
         {
+            LOG_F(INFO)<<"get ntp msg "<< message;
             std::string ntpIp;
             std::string timezone;
             int port;

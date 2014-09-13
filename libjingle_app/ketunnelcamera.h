@@ -37,9 +37,9 @@ protected:
                               const std::string &filename);
     virtual void OnRecvTalkData(const std::string & peer_id,
                                 const char * data,int len);
-    virtual void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
-    virtual void ReportResult(const std::string &peerId,
-                              const std::string & command, bool result);
+    virtual void OnCommandJsonMsg(const Json::Value &jmessage,
+                                  Json::Value * jresult);
+    virtual Json::Value GetResultMsg(const std::string & command, bool result);
     virtual void ReportJsonMsg(const std::string &peerId,Json::Value &jmessage);
 };
 

@@ -272,6 +272,8 @@ PseudoTcp::PseudoTcp(IPseudoTcpNotify* notify, uint32 conv)
 }
 
 PseudoTcp::~PseudoTcp() {
+    LOG_T_F(INFO)<<" destroyed ";
+
 }
 
 int PseudoTcp::Connect() {

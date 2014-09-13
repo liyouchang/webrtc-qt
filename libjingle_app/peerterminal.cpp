@@ -135,7 +135,7 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
         ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
         if(aTunnel == NULL){
             LOG(WARNING)<<"read  p2p msg and create tunnel error "<<peer_id;
-            SendTunnelError(peer_id);
+            SendTunnelError(peer_id,"max_tunnel");
             return;
         }
         std::string peerMsg;
@@ -231,16 +231,19 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
         LOG(WARNING)<<"PeerTerminal::GetOrCreateTunnel---"<<
                        "tunnel number is more than the max number "<<
                        tunnels_.size();
+
     }
     return aTunnel;
 }
 
-void PeerTerminal::SendTunnelError(const std::string &peer_id)
+void PeerTerminal::SendTunnelError(const std::string &peer_id,
+                                   const std::string errorType)
 {
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage["type"] = "tunnel";
     jmessage["command"] = "p2p_error";
+    jmessage["errorType"] = errorType;
     std::string msg = writer.write(jmessage);
     this->SendByRouter(peer_id,msg);
 }

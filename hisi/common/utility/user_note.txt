@@ -1,0 +1,74 @@
+Copyright (c) 2014-2015 Kaer Corporation - All Rights Reserved.
+
+version:
+0.00.01	first version.finished by Jesson.
+
+Compile:
+
+please read config.cfg at the next higher level first,choose your chip'type that you used.
+if not found,you need add the type ourself,the same as the sample.
+then,execute Makefile command as make liba or make liba CHIP=HI3518A(your chip type).
+
+Module usage:
+
+instruction:this utility module supplied MD5 BASE64 HMAC1 etc.we provided some interfaces as follow.
+==================================================
+int UTILITY_MD5(unsigned char *Src, unsigned char *dst, int len);
+description:
+you can use this interface to encrypt with MD5.
+	Src:it is the data that we want to encrypt.
+	dst:it is the data that we obtain after encryption.
+	len:it is the length of Src.
+	
+return value：
+	
+
+==================================================
+int UTILITY_HMAC1_IOV(st_iov_t* iov,int iov_num,unsigned char* key,int key_len,unsigned char* dst);
+description:
+
+return value：
+	the same as above.
+
+==================================================
+int UTILITY_BASE64_Encode(unsigned char *src,int len,char *dst);
+description:
+	
+return value：
+	the same as above.
+	
+==================================================
+int UTILITY_MEDIA_Convert_Size(int resolution,int *width,int *high);
+description:
+	分辨率转换成宽高	
+return value：
+	the same as above.
+
+==================================================
+int UTILITY_MEDIA_Convert_Format(int reso);
+	
+return value：
+	the same as above.
+
+==================================================
+int UTILITY_String_IP(char *src,char *cip,int *iip);
+	
+return value：
+	
+
+==================================================
+int UTILITY_B64_ntop(unsigned char const *,size_t, char *,size_t);
+	
+return value：
+	
+
+==================================================
+int UTILITY_B64_pton(char const *,unsigned char *,size_t);
+	
+return value：
+	
+
+ATTENTION:
+    
+
+this word finished by Jesson.

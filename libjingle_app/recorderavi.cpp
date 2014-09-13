@@ -637,7 +637,7 @@ void RecordReaderAvi::MoveTo(int percent)
         aviFile_->SetPosition(indexPos);
         char indexType[5] = {0};
         result = aviFile_->Read(indexType,4,NULL,NULL);
-        if(strcmp(indexType,"idx1") != 0){
+        if(strcmp(indexType,"idx1") != 0) {
             LOG_F(WARNING)<<"index type error ";
             return ;
         }

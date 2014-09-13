@@ -59,7 +59,7 @@ camera-->client
 {
     "type":"tunnel",
     "command":"wifi_status",
-    "status":4
+    "status":4 //wifi连接的状态，0-未开始+未使能(插着网线同时wifi未设置)，1-未开始+已使能(wifi参数已经设置但插着网线)，2-开始+未使能(网线拔掉了但wifi未设置)，3-开始连接或者正在连接，4-连接成功
 }
 
 4.get camera wifi info
@@ -112,12 +112,12 @@ camera<-->clent
 client-->camera
 {
     "type":"tunnel",
-    "command":"restart"
+    "command":"reboot"
 }
 client<--camera
 {
     "type":"tunnel",
-    "command":"restart",
+    "command":"reboot",
     "result":0
 }
 
@@ -143,6 +143,14 @@ client<--camera
     "type":"tunnel",
     "command":"rename",
     "result":0,
+}
+
+10. 设备链接错误消息
+camera --> client
+{
+    "type":"tunnel",
+    "command":"ntp",
+    "ip":"192.168.40.187",
 }
 
 //10. set ntp param

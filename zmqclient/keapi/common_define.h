@@ -10,10 +10,10 @@
 /**********************************************************************/
 typedef enum
 {
-	CLOCK_TYPE_HIRTC = 0,										//æµ·æ€å†…éƒ¨RTCæ—¶é’Ÿ
-	CLOCK_TYPE_PCF8563,											//å¤–éƒ¨ç¡¬ä»¶æ—¶é’ŸèŠ¯ç‰‡
-	CLOCK_TYPE_NTP,												//ç½‘ç»œæ ¡æ—¶
-	CLOCK_TYPE_COUNT	
+	CLOCK_TYPE_HIRTC = 0,										//º£Ë¼ÄÚ²¿RTCÊ±ÖÓ
+	CLOCK_TYPE_PCF8563,											//Íâ²¿Ó²¼şÊ±ÖÓĞ¾Æ¬
+	CLOCK_TYPE_NTP,												//ÍøÂçĞ£Ê±
+	CLOCK_TYPE_COUNT
 }	e_clock_type;
 
 typedef struct struct_clock_s
@@ -24,18 +24,18 @@ typedef struct struct_clock_s
 	int hour;
 	int minute;
 	int second;
-	int week;	
+	int week;
 }	st_clock_t;
 /**********************************************************************/
 //module config
 /**********************************************************************/
-#define MAXVIDEOCHNS				8					//é€šé“æ•°
-#define MAX_ALARMINPUTS				16					//æŠ¥è­¦è¾“å…¥
+#define MAXVIDEOCHNS				8					//Í¨µÀÊı
+#define MAX_ALARMINPUTS				16					//±¨¾¯ÊäÈë
 #define MAX_ALARMOUTPUTS			16
 typedef enum
 {
-	CONFIG_TYPE_DEV = 0,										//æµ·æ€å†…éƒ¨RTCæ—¶é’Ÿ
-	CONFIG_TYPE_NET,											//å¤–éƒ¨ç¡¬ä»¶æ—¶é’ŸèŠ¯ç‰‡
+	CONFIG_TYPE_DEV = 0,										//º£Ë¼ÄÚ²¿RTCÊ±ÖÓ
+	CONFIG_TYPE_NET,											//Íâ²¿Ó²¼şÊ±ÖÓĞ¾Æ¬
 	CONFIG_TYPE_MEDIA,
 	CONFIG_TYPE_INPUT,
 	CONFIG_TYPE_OUTPUT,
@@ -56,63 +56,63 @@ typedef enum
 	CONFIG_TYPE_COUNT
 }	e_config_type;
 
-/*************************è®¾å¤‡å‚æ•°*************************/
+/*************************Éè±¸²ÎÊı*************************/
 struct DEVHARDPARAM
 {
 	unsigned int  InputAlarmNum;
-	unsigned int  InputAlarmPort[MAX_ALARMINPUTS];		//16ä¸ªè¾“å…¥æŠ¥è­¦çš„gpioç«¯å£
-	unsigned int  InputAlarmBit[MAX_ALARMINPUTS];		//16ä¸ªè¾“å…¥æŠ¥è­¦çš„gpio bit
-	unsigned int  OutputAlarmNum;						//è¾“å‡ºæŠ¥è­¦çš„ä¸ªæ•°
-	unsigned int  OutputAarmPort[MAX_ALARMOUTPUTS];		//16ä¸ªè¾“å‡ºæŠ¥è­¦çš„gpioç«¯å£
-	unsigned int  OutputAlarmBit[MAX_ALARMOUTPUTS];		//16ä¸ªè¾“å‡ºæŠ¥è­¦çš„gpio bit
-	unsigned int  VideoAdType;							//è§†é¢‘adçš„å‹å·      å°äº10æ˜¯æ ‡æ¸…å°äº20æ˜¯720På°äº30æ˜¯960På°äº40æ˜¯1080På°äº50æ˜¯300wå°äº60æ˜¯500W
-	unsigned int  AudioAiAdType;						//éŸ³é¢‘ai adçš„å‹å·   0=tlv320aic23 1=tw2815 2=aic320aic31
-	unsigned int  AudioAoAdType;						//éŸ³é¢‘ao adçš„å‹å·   0=tlv320aic21 1=tw2815 2=aic320aic31
-	unsigned int  AudioInputMode;						//éŸ³é¢‘çš„è¾“å…¥æ¨¡å¼    0=mic         1=line
-	unsigned int  VideoChanNum;							//è§†é¢‘é€šé“æ•°
-	unsigned int  RecordDeviceType;						//å½•åƒè®¾å¤‡çš„ç±»å‹ï¼›
-	unsigned int  SD_enable;							//sdå¡ä½¿èƒ½æ ‡å¿—
-	unsigned int  USB_enable;							//usbè®¾å¤‡ä½¿èƒ½æ ‡å¿—;
-	unsigned int  SATA_enable;							//SATAè®¾å¤‡ä½¿èƒ½æ ‡å¿—
-	unsigned int  hardver;								//ç¡¬ä»¶ç‰ˆæœ¬
-	unsigned int  softver;								//è½¯ä»¶ç‰ˆæœ¬
-	unsigned int  encodever;							//ç¼–ç å™¨ç‰ˆæœ¬
-	unsigned int  LampBit;                              //å·¥ä½œæŒ‡ç¤ºç¯çš„ä½
-	unsigned int  LampPort;                             //å·¥ä½œæŒ‡ç¤ºç¯çš„ç«¯å£
-	unsigned int  IrCardPort;                           //ircardæ§åˆ¶å£çš„ç»„
-	unsigned int  IrCardBit;                            //ircardæ§åˆ¶å£çš„bit
-	unsigned int  LightSensorPort;                      //å…‰æ•ç”µé˜»æ£€æµ‹å£çš„ç»„
-	unsigned int  LightSensorBit;                       //å…‰æ•ç”µé˜»æ£€æµ‹å£çš„bit
-	char          DeviceType[20];						//è®¾å¤‡ç±»å‹
-	char          OEM_Type[20];                         //OEMå‹å·
+	unsigned int  InputAlarmPort[MAX_ALARMINPUTS];		//16¸öÊäÈë±¨¾¯µÄgpio¶Ë¿Ú
+	unsigned int  InputAlarmBit[MAX_ALARMINPUTS];		//16¸öÊäÈë±¨¾¯µÄgpio bit
+	unsigned int  OutputAlarmNum;						//Êä³ö±¨¾¯µÄ¸öÊı
+	unsigned int  OutputAarmPort[MAX_ALARMOUTPUTS];		//16¸öÊä³ö±¨¾¯µÄgpio¶Ë¿Ú
+	unsigned int  OutputAlarmBit[MAX_ALARMOUTPUTS];		//16¸öÊä³ö±¨¾¯µÄgpio bit
+	unsigned int  VideoAdType;							//ÊÓÆµadµÄĞÍºÅ      Ğ¡ÓÚ10ÊÇ±êÇåĞ¡ÓÚ20ÊÇ720PĞ¡ÓÚ30ÊÇ960PĞ¡ÓÚ40ÊÇ1080PĞ¡ÓÚ50ÊÇ300wĞ¡ÓÚ60ÊÇ500W
+	unsigned int  AudioAiAdType;						//ÒôÆµai adµÄĞÍºÅ   0=tlv320aic23 1=tw2815 2=aic320aic31
+	unsigned int  AudioAoAdType;						//ÒôÆµao adµÄĞÍºÅ   0=tlv320aic21 1=tw2815 2=aic320aic31
+	unsigned int  AudioInputMode;						//ÒôÆµµÄÊäÈëÄ£Ê½    0=mic         1=line
+	unsigned int  VideoChanNum;							//ÊÓÆµÍ¨µÀÊı
+	unsigned int  RecordDeviceType;						//Â¼ÏñÉè±¸µÄÀàĞÍ£»
+	unsigned int  SD_enable;							//sd¿¨Ê¹ÄÜ±êÖ¾
+	unsigned int  USB_enable;							//usbÉè±¸Ê¹ÄÜ±êÖ¾;
+	unsigned int  SATA_enable;							//SATAÉè±¸Ê¹ÄÜ±êÖ¾
+	unsigned int  hardver;								//Ó²¼ş°æ±¾
+	unsigned int  softver;								//Èí¼ş°æ±¾
+	unsigned int  encodever;							//±àÂëÆ÷°æ±¾
+	unsigned int  LampBit;                              //¹¤×÷Ö¸Ê¾µÆµÄÎ»
+	unsigned int  LampPort;                             //¹¤×÷Ö¸Ê¾µÆµÄ¶Ë¿Ú
+	unsigned int  IrCardPort;                           //ircard¿ØÖÆ¿ÚµÄ×é
+	unsigned int  IrCardBit;                            //ircard¿ØÖÆ¿ÚµÄbit
+	unsigned int  LightSensorPort;                      //¹âÃôµç×è¼ì²â¿ÚµÄ×é
+	unsigned int  LightSensorBit;                       //¹âÃôµç×è¼ì²â¿ÚµÄbit
+	char          DeviceType[20];						//Éè±¸ÀàĞÍ
+	char          OEM_Type[20];                         //OEMĞÍºÅ
 	unsigned int  NetWork;
-	unsigned int  ModulePowerPort[4];		            //4ä¸ªæ¨¡å—ç”µæºçš„gpioç«¯å£
-	unsigned int  ModulePowerbit[4];		            //4ä¸ªæ¨¡å—ç”µæºçš„gpio bit
-	unsigned int  ModuleResetPort[4];		            //4ä¸ªæ¨¡å—å¤ä½çš„gpioç«¯å£
-	unsigned int  ModuleResetbit[4];		            //4ä¸ªæ¨¡å—å¤ä½çš„gpio bit
-	unsigned int  ModuleClosePort[4];		            //4ä¸ªæ¨¡å—å…³æœºçš„gpioç«¯å£
-	unsigned int  ModuleCLosebit[4];		            //4ä¸ªæ¨¡å—å…³æœºçš„gpio bit
-	unsigned int  ResetKeyPort;                         //æ¢å¤å‡ºå‚è®¾ç½®çš„æŒ‰é’®çš„gpioç«¯å£
-	unsigned int  ResetKeyBit;                          //æ¢å¤å‡ºå‚è®¾ç½®çš„æŒ‰é’®çš„gpiobit
-	unsigned int  usbControlPort;						//usbæ§åˆ¶ç”µæºçš„ç«¯å£ port
-	unsigned int  usbControlBit;						//usbæ§åˆ¶ç”µæºçš„ç«¯å£ bit
+	unsigned int  ModulePowerPort[4];		            //4¸öÄ£¿éµçÔ´µÄgpio¶Ë¿Ú
+	unsigned int  ModulePowerbit[4];		            //4¸öÄ£¿éµçÔ´µÄgpio bit
+	unsigned int  ModuleResetPort[4];		            //4¸öÄ£¿é¸´Î»µÄgpio¶Ë¿Ú
+	unsigned int  ModuleResetbit[4];		            //4¸öÄ£¿é¸´Î»µÄgpio bit
+	unsigned int  ModuleClosePort[4];		            //4¸öÄ£¿é¹Ø»úµÄgpio¶Ë¿Ú
+	unsigned int  ModuleCLosebit[4];		            //4¸öÄ£¿é¹Ø»úµÄgpio bit
+	unsigned int  ResetKeyPort;                         //»Ö¸´³ö³§ÉèÖÃµÄ°´Å¥µÄgpio¶Ë¿Ú
+	unsigned int  ResetKeyBit;                          //»Ö¸´³ö³§ÉèÖÃµÄ°´Å¥µÄgpiobit
+	unsigned int  usbControlPort;						//usb¿ØÖÆµçÔ´µÄ¶Ë¿Ú port
+	unsigned int  usbControlBit;						//usb¿ØÖÆµçÔ´µÄ¶Ë¿Ú bit
 	unsigned int  wirelessAlarm;
-	char          wifiEth[16];                          //wifiæ¨¡å—ä½¿ç”¨çš„è®¾å¤‡å·
-	unsigned int  voltageDetect;                        //æ˜¯å¦å¯ç”¨æ— é”¡çš„ç°å®ç”µæ± ç”µå‹çš„åŠŸèƒ½
-	int           vencNumber;                           //æ‰‹æœºä¸‰ç æµç¼–ç çš„é€šé“å·
-	unsigned int  talkCtrl;                             //å‰ç«¯å¯¹è®²çš„æŠ¥è­¦è¾“å…¥é€šé“å·è®¾ç½®æˆ100ä¸èµ·ä½œç”¨
-	char          infoDevice_1[16];                     //çŸ­ä¿¡æŸ¥è¯¢çš„å¡1è®¾å¤‡å·
-	char          infoDevice_2[16];                     //çŸ­ä¿¡æŸ¥è¯¢çš„å¡2è®¾å¤‡å·
-	unsigned int  uartFlag;								//ä½¿ç”¨ä¸²å£çš„æ ‡å¿—ï¼Œ0ï¼š485ï¼Œ1ï¼š232ï¼Œå°¤å…¶å¯¹çƒæœºæ—¢è¦æ§åˆ¶äº‘å°åˆè¦é€šè¿‡232å‘é€æ•°æ®
-	unsigned int  rtpMode;                              //vlcè®¿é—®ä¸¤ç§æ¨¡å¼ï¼Œä¸€ç§0ï¼šrtspè¯·æ±‚ï¼›1ï¼šç›´æ¥rtpå‘æµ
-	unsigned int  singleton;                            //å•å…µ å°†å¼€å…³é‡
-	unsigned int  tvp5150Reset;							//tvp5150å¤ä½åŠŸèƒ½
-	char          doubleModule[4];                      //å››ä¸ªæ•°å­—ä¸¤ä¸ªä¸¤ä¸ª1ç»„åˆ†åˆ«è¡¨ç¤ºå­ç±»å‹(æ¨¡å—å…·ä½“å‹å·)å’Œä¸»ç±»å‹(æ¨¡å—ç§ç±»è·ŸnetWorkå¯¹åº”)
-	unsigned int  GpsFromModem;                         //åŒç½‘ç»œæ—¶ä¸€ä¸ªæ¨¡å—ä¼ è§†é¢‘ä¸€ä¸ªæ¨¡å—ä¼ GPSä¿¡æ¯
-	unsigned int  NetcardType;							//æœ‰çº¿ä½¿ç”¨ç½‘å¡å‹å·0=rtl8201  1=ksz8041
+	char          wifiEth[16];                          //wifiÄ£¿éÊ¹ÓÃµÄÉè±¸ºÅ
+	unsigned int  voltageDetect;                        //ÊÇ·ñÆôÓÃÎŞÎıµÄÏÖÊµµç³ØµçÑ¹µÄ¹¦ÄÜ
+	int           vencNumber;                           //ÊÖ»úÈıÂëÁ÷±àÂëµÄÍ¨µÀºÅ
+	unsigned int  talkCtrl;                             //Ç°¶Ë¶Ô½²µÄ±¨¾¯ÊäÈëÍ¨µÀºÅÉèÖÃ³É100²»Æğ×÷ÓÃ
+	char          infoDevice_1[16];                     //¶ÌĞÅ²éÑ¯µÄ¿¨1Éè±¸ºÅ
+	char          infoDevice_2[16];                     //¶ÌĞÅ²éÑ¯µÄ¿¨2Éè±¸ºÅ
+	unsigned int  uartFlag;								//Ê¹ÓÃ´®¿ÚµÄ±êÖ¾£¬0£º485£¬1£º232£¬ÓÈÆä¶ÔÇò»ú¼ÈÒª¿ØÖÆÔÆÌ¨ÓÖÒªÍ¨¹ı232·¢ËÍÊı¾İ
+	unsigned int  rtpMode;                              //vlc·ÃÎÊÁ½ÖÖÄ£Ê½£¬Ò»ÖÖ0£ºrtspÇëÇó£»1£ºÖ±½Órtp·¢Á÷
+	unsigned int  singleton;                            //µ¥±ø ½«¿ª¹ØÁ¿
+	unsigned int  tvp5150Reset;							//tvp5150¸´Î»¹¦ÄÜ
+	char          doubleModule[4];                      //ËÄ¸öÊı×ÖÁ½¸öÁ½¸ö1×é·Ö±ğ±íÊ¾×ÓÀàĞÍ(Ä£¿é¾ßÌåĞÍºÅ)ºÍÖ÷ÀàĞÍ(Ä£¿éÖÖÀà¸únetWork¶ÔÓ¦)
+	unsigned int  GpsFromModem;                         //Ë«ÍøÂçÊ±Ò»¸öÄ£¿é´«ÊÓÆµÒ»¸öÄ£¿é´«GPSĞÅÏ¢
+	unsigned int  NetcardType;							//ÓĞÏßÊ¹ÓÃÍø¿¨ĞÍºÅ0=rtl8201  1=ksz8041
 	unsigned int  P2P_Enable;
 }__attribute__((packed));
-/*************************ç½‘ç»œå‚æ•°*************************/
+/*************************ÍøÂç²ÎÊı*************************/
 struct modem_t
 {
     unsigned char   jrh[32];
@@ -132,20 +132,20 @@ struct DDNSInfo
 	char server[32];
 	unsigned short port;
 	char enable;
-	char serverType;        							//0-æ¯æ­¥ï¼›1-èŠ±ç”Ÿå£³
+	char serverType;        							//0-Ã¿²½£»1-»¨Éú¿Ç
 }__attribute__((packed));
-struct NETPARAM											//ç½‘ç»œå‚æ•°
+struct NETPARAM											//ÍøÂç²ÎÊı
 {
-    unsigned char   localIP[4];             			//IPåœ°å€
-    unsigned char   gateIP[4];							//ç½‘å…³
-    unsigned char   netMask[4];             			//å­ç½‘æ©ç 
-    unsigned short  dnsPort;                			//DNSç«¯å£
+    unsigned char   localIP[4];             			//IPµØÖ·
+    unsigned char   gateIP[4];							//Íø¹Ø
+    unsigned char   netMask[4];             			//×ÓÍøÑÚÂë
+    unsigned short  dnsPort;                			//DNS¶Ë¿Ú
     unsigned short	webMediaPort;
-    unsigned char   dnsIP[4];               			//DNSæœåŠ¡å™¨IP
-    unsigned char   domainName[32];         			//ä¸­å¿ƒ(æ¥å…¥æœåŠ¡å™¨)åŸŸå
-    unsigned char   hostName[32];           			//è®¾å¤‡ä¸»æœºå
-    unsigned char   username[8];            			//æ¥å…¥æœåŠ¡å™¨ç™»é™†ç”¨æˆ·å
-    unsigned char   password[8];            			//æ¥å…¥æœåŠ¡å™¨ç™»é™†å¯†ç 
+    unsigned char   dnsIP[4];               			//DNS·şÎñÆ÷IP
+    unsigned char   domainName[32];         			//ÖĞĞÄ(½ÓÈë·şÎñÆ÷)ÓòÃû
+    unsigned char   hostName[32];           			//Éè±¸Ö÷»úÃû
+    unsigned char   username[8];            			//½ÓÈë·şÎñÆ÷µÇÂ½ÓÃ»§Ãû
+    unsigned char   password[8];            			//½ÓÈë·şÎñÆ÷µÇÂ½ÃÜÂë
     unsigned char   pppoeEnable;
     unsigned char   pppoeIPType;
     unsigned char   pppoeUser[30];
@@ -154,7 +154,7 @@ struct NETPARAM											//ç½‘ç»œå‚æ•°
     unsigned char   wifiEnable;
     unsigned char   wifiNum;
     unsigned char   wifiMode;
-    unsigned char   wifiASC;                			//åå…­è¿›åˆ¶(0)ASCII(1) TKIP(0) AES(1)
+    unsigned char   wifiASC;                			//Ê®Áù½øÖÆ(0)ASCII(1) TKIP(0) AES(1)
     unsigned char   wifiIP[4];
     unsigned char   wifimask[4];
     unsigned char   wifigateway[4];
@@ -165,7 +165,7 @@ struct NETPARAM											//ç½‘ç»œå‚æ•°
     unsigned char   changeTime;
     struct ctrl_t   card_ctrl[2];
     unsigned char   macAddress[32];
-	unsigned short  webServicePort;						//web Serviceç«¯å£
+	unsigned short  webServicePort;						//web Service¶Ë¿Ú
 	unsigned char   ntpIP[4];
 	unsigned short  ntpPort;
 	unsigned char	ntpZone[4];
@@ -174,13 +174,13 @@ struct NETPARAM											//ç½‘ç»œå‚æ•°
 	unsigned char   wirelessEnable;
 	unsigned short  netSleep;
 	unsigned char   telephoneInfo[128];
-	unsigned char   bEnablePass; 	  					//dvr å¯ç”¨å¯†ç ä½¿èƒ½
+	unsigned char   bEnablePass; 	  					//dvr ÆôÓÃÃÜÂëÊ¹ÄÜ
 
 	struct DDNSInfo ddns;								//ddns
-	unsigned char   wifiDhcp;                           //wifi dhcpçš„å¯ç”¨å¼€å…³
+	unsigned char   wifiDhcp;                           //wifi dhcpµÄÆôÓÃ¿ª¹Ø
     unsigned int    routePort;
 }__attribute__((packed));
-/*************************ç¼–ç å‚æ•°*************************/
+/*************************±àÂë²ÎÊı*************************/
 #define RESO_QCIF 1
 #define RESO_CIF 2
 #define RESO_HD1 3
@@ -194,22 +194,22 @@ struct NETPARAM											//ç½‘ç»œå‚æ•°
 #define RC_CBRP 1
 struct VENC
 {
-	char			enable;								//é€šé“æ˜¯å¦å¼€å¯
-	unsigned char	resolution;							//å›¾åƒåˆ†è¾¨ç‡:
+	char			enable;								//Í¨µÀÊÇ·ñ¿ªÆô
+	unsigned char	resolution;							//Í¼Ïñ·Ö±æÂÊ:
 														//1-QCIF,2-CIF,3-HD1,4-D1,//5-QVGA,6-VGA,//7-720P,8-960P,9-1080P
-	unsigned int	frame_rate;							//å¸§ç‡  1~60
-	unsigned int	idr_interval;						//å…³é”®å¸§é—´éš”
-	char			rate_ctrl_mode;						//ç ç‡æ§åˆ¶æ–¹å¼:0-VBR,1-CBR,2-ABR,3-FIXQP
+	unsigned int	frame_rate;							//Ö¡ÂÊ  1~60
+	unsigned int	idr_interval;						//¹Ø¼üÖ¡¼ä¸ô
+	char			rate_ctrl_mode;						//ÂëÂÊ¿ØÖÆ·½Ê½:0-VBR,1-CBR,2-ABR,3-FIXQP
 	unsigned int	bitrate;
-                                            			//CBR/ABR æ¨¡å¼,è¡¨ç¤ºå¹³å‡ç ç‡ã€‚//VBR æ¨¡å¼,è¡¨ç¤ºæœ€å¤§ç ç‡ã€‚//FIXQP æ¨¡å¼,è¯¥å€¼æ— æ•ˆã€‚//å–å€¼èŒƒå›´:[1, 20000],å•ä½ Kbpsã€‚
-    char			piclevel;							//å›¾åƒç­‰çº§,ä»… VBR/CBR æ¨¡å¼ä¸‹æœ‰æ•ˆã€‚
-                                            			//VBR æ¨¡å¼ä¸‹,è¡¨ç¤ºå›¾åƒçš„è´¨é‡ç­‰çº§ã€‚å–å€¼èŒƒå›´:[0, 5],å€¼è¶Šå°,å›¾åƒè´¨é‡è¶Šå¥½ã€‚
-                                            			//CBR æ¨¡å¼ä¸‹,è¡¨ç¤ºç ç‡æ³¢åŠ¨èŒƒå›´ã€‚å–å€¼èŒƒå›´:[0, 5]ã€‚
-                                            			//0:è‡ªåŠ¨æ§åˆ¶ç ç‡,æ¨èä½¿ç”¨ã€‚1~5:å¯¹åº”ç ç‡æ³¢åŠ¨èŒƒå›´åˆ†åˆ«ä¸ºÂ±10%~Â±50%ã€‚
-	char			qp_i;								//I å¸§ QPã€‚FIXQP æ¨¡å¼ä¸‹æœ‰æ•ˆã€‚å–å€¼èŒƒå›´:[10, 50]ã€‚
-	char			qp_p;								//P å¸§ QPã€‚FIXQP æ¨¡å¼ä¸‹æœ‰æ•ˆã€‚å–å€¼èŒƒå›´:[10, 50]ã€‚
+                                            			//CBR/ABR Ä£Ê½,±íÊ¾Æ½¾ùÂëÂÊ¡£//VBR Ä£Ê½,±íÊ¾×î´óÂëÂÊ¡£//FIXQP Ä£Ê½,¸ÃÖµÎŞĞ§¡£//È¡Öµ·¶Î§:[1, 20000],µ¥Î» Kbps¡£
+    char			piclevel;							//Í¼ÏñµÈ¼¶,½ö VBR/CBR Ä£Ê½ÏÂÓĞĞ§¡£
+                                            			//VBR Ä£Ê½ÏÂ,±íÊ¾Í¼ÏñµÄÖÊÁ¿µÈ¼¶¡£È¡Öµ·¶Î§:[0, 5],ÖµÔ½Ğ¡,Í¼ÏñÖÊÁ¿Ô½ºÃ¡£
+                                            			//CBR Ä£Ê½ÏÂ,±íÊ¾ÂëÂÊ²¨¶¯·¶Î§¡£È¡Öµ·¶Î§:[0, 5]¡£
+                                            			//0:×Ô¶¯¿ØÖÆÂëÂÊ,ÍÆ¼öÊ¹ÓÃ¡£1~5:¶ÔÓ¦ÂëÂÊ²¨¶¯·¶Î§·Ö±ğÎª¡À10%~¡À50%¡£
+	char			qp_i;								//I Ö¡ QP¡£FIXQP Ä£Ê½ÏÂÓĞĞ§¡£È¡Öµ·¶Î§:[10, 50]¡£
+	char			qp_p;								//P Ö¡ QP¡£FIXQP Ä£Ê½ÏÂÓĞĞ§¡£È¡Öµ·¶Î§:[10, 50]¡£
 
-	int				rate_statistic;						//ç ç‡ç»Ÿè®¡æ—¶æ®µã€‚ABR æ¨¡å¼ä¸‹æœ‰æ•ˆã€‚ABR,å³ç ç‡çŸ­æ—¶é—´æ³¢åŠ¨,é•¿æ—¶é—´å¹³ç¨³ã€‚é•¿æ—¶é—´ç ç‡çš„ç»Ÿè®¡,ä»¥æ­¤æ—¶é—´ä¸ºå‡†ã€‚
+	int				rate_statistic;						//ÂëÂÊÍ³¼ÆÊ±¶Î¡£ABR Ä£Ê½ÏÂÓĞĞ§¡£ABR,¼´ÂëÂÊ¶ÌÊ±¼ä²¨¶¯,³¤Ê±¼äÆ½ÎÈ¡£³¤Ê±¼äÂëÂÊµÄÍ³¼Æ,ÒÔ´ËÊ±¼äÎª×¼¡£
 
 	char		    wm_enable;
 	char			wm_key[8];
@@ -217,55 +217,55 @@ struct VENC
 }__attribute__((packed));
 struct MEDIAPARAM
 {
-	unsigned char vFormat;								//è§†é¢‘åˆ¶å¼0:Påˆ¶ 1:Nåˆ¶
-	unsigned char aFormat;								//éŸ³é¢‘æ ¼å¼0:G711 1:G726 2:AAC
+	unsigned char vFormat;								//ÊÓÆµÖÆÊ½0:PÖÆ 1:NÖÆ
+	unsigned char aFormat;								//ÒôÆµ¸ñÊ½0:G711 1:G726 2:AAC
 	struct VENC	main[MAXVIDEOCHNS];
 	struct VENC	minor[MAXVIDEOCHNS];
 }__attribute__((packed));
-/*************************å›¾ç‰‡å‚æ•°*************************/
+/*************************Í¼Æ¬²ÎÊı*************************/
 struct JPEGPARAM
 {
-	unsigned char resolution;							//å›¾åƒå°ºå¯¸å¤§å°cif,d1,qcif
-    unsigned char picLevel;								//é‡åŒ–ç³»æ•°
+	unsigned char resolution;							//Í¼Ïñ³ß´ç´óĞ¡cif,d1,qcif
+    unsigned char picLevel;								//Á¿»¯ÏµÊı
 }__attribute__((packed));
-/**********************å¼€å…³é‡è¾“å…¥å‚æ•°**********************/
+/**********************¿ª¹ØÁ¿ÊäÈë²ÎÊı**********************/
 struct DEFTIME
 {
-    unsigned short begin[3];                 			//å¸ƒé˜²çš„èµ·å§‹æ—¶é—´
-    unsigned short end[3];                   			//æ’¤é˜²çš„åœæ­¢æ—¶é—´
+    unsigned short begin[3];                 			//²¼·ÀµÄÆğÊ¼Ê±¼ä
+    unsigned short end[3];                   			//³··ÀµÄÍ£Ö¹Ê±¼ä
 }__attribute__((packed));
 struct PTZACTION
 {
     unsigned char enable[16];
 	unsigned char pztPosition[16];
 }__attribute__((packed));
-struct ALMINPUT											//æŠ¥è­¦è¾“å…¥å‚æ•°
+struct ALMINPUT											//±¨¾¯ÊäÈë²ÎÊı
 {
-    unsigned char	TypeAlarmor;						//æŠ¥è­¦å™¨ç±»å‹(å¸¸å¼€=0æˆ–å¸¸é—­=1)
-    unsigned char	CallCenter;                         //æ˜¯å¦ä¸ŠæŠ¥ä¸­å¿ƒè­¦æ–¹å¼
-    unsigned char	Soundor;                            //å£°éŸ³æŠ¥è­¦æ–¹å¼
-    unsigned char	TypeOutBurst;                       //å¤–éƒ¨è§¦å‘æŠ¥è­¦æ–¹å¼
-    unsigned char	OutChan;							//æŠ¥è­¦å™¨é€šé“
-    unsigned char	JpegSheet;							//æŠ“æ‹å¼ æ•°
-    unsigned char	JpegIntv;			                //æŠ“æ‹é—´éš”
-    unsigned int	JpegChn;							//è§¦å‘æŠ“æ‹é€šé“é€‰æ‹©
-    unsigned int	RecChn;				               	//å½•åƒé€šé“
-    unsigned char	RecDelay;							//å½•åƒå»¶æ—¶æ—¶é—´
-    unsigned char	PreRecord;				            //é¢„å½•åƒæ—¶é—´
-    unsigned char	Enable;								//æ˜¯å¦å¯ç”¨1ä¸ºå¯ç”¨é»˜è®¤0ä¸å¯ç”¨
-    unsigned int	AlmTime;							//è¾“å…¥æŠ¥è­¦æ—¶é•¿
+    unsigned char	TypeAlarmor;						//±¨¾¯Æ÷ÀàĞÍ(³£¿ª=0»ò³£±Õ=1)
+    unsigned char	CallCenter;                         //ÊÇ·ñÉÏ±¨ÖĞĞÄ¾¯·½Ê½
+    unsigned char	Soundor;                            //ÉùÒô±¨¾¯·½Ê½
+    unsigned char	TypeOutBurst;                       //Íâ²¿´¥·¢±¨¾¯·½Ê½
+    unsigned char	OutChan;							//±¨¾¯Æ÷Í¨µÀ
+    unsigned char	JpegSheet;							//×¥ÅÄÕÅÊı
+    unsigned char	JpegIntv;			                //×¥ÅÄ¼ä¸ô
+    unsigned int	JpegChn;							//´¥·¢×¥ÅÄÍ¨µÀÑ¡Ôñ
+    unsigned int	RecChn;				               	//Â¼ÏñÍ¨µÀ
+    unsigned char	RecDelay;							//Â¼ÏñÑÓÊ±Ê±¼ä
+    unsigned char	PreRecord;				            //Ô¤Â¼ÏñÊ±¼ä
+    unsigned char	Enable;								//ÊÇ·ñÆôÓÃ1ÎªÆôÓÃÄ¬ÈÏ0²»ÆôÓÃ
+    unsigned int	AlmTime;							//ÊäÈë±¨¾¯Ê±³¤
 	struct DEFTIME  strategy[7];
 	struct PTZACTION ptz;
 }__attribute__((packed));
-/**********************å¼€å…³é‡è¾“å‡ºå‚æ•°**********************/
-struct ALMOUTPUT										//æŠ¥è­¦è¾“å‡ºå‚æ•°
+/**********************¿ª¹ØÁ¿Êä³ö²ÎÊı**********************/
+struct ALMOUTPUT										//±¨¾¯Êä³ö²ÎÊı
 {
-	unsigned short AlarmLong;							//æŠ¥è­¦æ—¶é•¿
-	unsigned char  Type;								//æŠ¥è­¦è¾“å‡ºæ–¹å¼
-	unsigned char  Enable;                              //æ˜¯å¦å¯ç”¨1ä¸ºå¯ç”¨é»˜è®¤0ä¸å¯ç”¨
+	unsigned short AlarmLong;							//±¨¾¯Ê±³¤
+	unsigned char  Type;								//±¨¾¯Êä³ö·½Ê½
+	unsigned char  Enable;                              //ÊÇ·ñÆôÓÃ1ÎªÆôÓÃÄ¬ÈÏ0²»ÆôÓÃ
 	struct DEFTIME strategy[7];
 }__attribute__((packed));
-/*************************åç§°å‚æ•°*************************/
+/*************************Ãû³Æ²ÎÊı*************************/
 struct NAMEINFO
 {
     char devName[40];
@@ -277,20 +277,20 @@ struct WEB_USER
 {
     char cUser[9];
     char cPass[9];
-	char bPTZ;											//æ§åˆ¶äº‘å°
-	char bRecord;										//å½•åƒæƒé™
-	char bSetParam;										//è®¾ç½®å‚æ•°
-	char bPlayRecord;									//æ’­æ”¾å½•åƒæƒé™
-	char bTools;										//ä¿®æ”¹å·¥å…·æƒé™
+	char bPTZ;											//¿ØÖÆÔÆÌ¨
+	char bRecord;										//Â¼ÏñÈ¨ÏŞ
+	char bSetParam;										//ÉèÖÃ²ÎÊı
+	char bPlayRecord;									//²¥·ÅÂ¼ÏñÈ¨ÏŞ
+	char bTools;										//ĞŞ¸Ä¹¤¾ßÈ¨ÏŞ
 	char bUser;
 }__attribute__((packed));
-struct NAMEPARAM										//åç§°å‚æ•°
+struct NAMEPARAM										//Ãû³Æ²ÎÊı
 {
-	struct NAMEINFO nameInfo;							//è®¾å¤‡ã€é€šé“ã€æŠ¥è­¦å™¨ç­‰åç§°
+	struct NAMEINFO nameInfo;							//Éè±¸¡¢Í¨µÀ¡¢±¨¾¯Æ÷µÈÃû³Æ
 
-	struct WEB_USER user[16];							//webç”¨æˆ·åç§°
+	struct WEB_USER user[16];							//webÓÃ»§Ãû³Æ
 }__attribute__((packed));
-/*************************ä¸²å£å‚æ•°*************************/
+/*************************´®¿Ú²ÎÊı*************************/
 struct PTZ
 {
 	char Protocol;
@@ -298,33 +298,33 @@ struct PTZ
 }__attribute__((packed));
 struct SERIAL
 {
-	unsigned short baudRate;							//æ§åˆ¶äº‘å°æ³¢ç‰¹ç‡
-	unsigned char  udata;								//ä¸²å£å‚æ•°
-	unsigned char  ustop;								// åœæ­¢ä½
-	unsigned char  ucheck;								//æ ¡éªŒä½
+	unsigned short baudRate;							//¿ØÖÆÔÆÌ¨²¨ÌØÂÊ
+	unsigned char  udata;								//´®¿Ú²ÎÊı
+	unsigned char  ustop;								// Í£Ö¹Î»
+	unsigned char  ucheck;								//Ğ£ÑéÎ»
 	struct PTZ ptz[MAXVIDEOCHNS];
 }__attribute__((packed));
-/*************************å­˜å‚¨å‚æ•°*************************/
+/*************************´æ´¢²ÎÊı*************************/
 struct STORPARAM
 {
-    unsigned char   Enable;                 			//å­˜å‚¨å¼€å…³ 1:å¼€0:å…³
-    unsigned char   overwrite;              			//å¾ªç¯è¦†ç›–å­˜å‚¨å¼€å…³
-    unsigned short  SpaceAlarm;             			//ç©ºé—´ä¸è¶³æŠ¥è­¦é˜€å€¼
-    unsigned int    channel;                			//å½•åƒé€šé“é€‰æ‹©
+    unsigned char   Enable;                 			//´æ´¢¿ª¹Ø 1:¿ª0:¹Ø
+    unsigned char   overwrite;              			//Ñ­»·¸²¸Ç´æ´¢¿ª¹Ø
+    unsigned short  SpaceAlarm;             			//¿Õ¼ä²»×ã±¨¾¯·§Öµ
+    unsigned int    channel;                			//Â¼ÏñÍ¨µÀÑ¡Ôñ
 
-    unsigned char   packinterval;						//æ–‡ä»¶æ‰“åŒ…é—´éš”
-    unsigned char   snapeswitch;						//æŠ“æ‹å­˜å‚¨å¼€å…³
-    unsigned char   alarmswitch;						//ä¼ æ„Ÿå™¨æŠ¥è­¦å½•åƒå¼€å…³
-    unsigned char   senseswitch;						//ç§»åŠ¨ä¾¦æµ‹å½•åƒå¼€å…³
-    unsigned int    diskspace;							//ç¡¬ç›˜å®¹é‡
-    unsigned char   StoreCycle[16];         			//å­˜å‚¨å‘¨æœŸ
+    unsigned char   packinterval;						//ÎÄ¼ş´ò°ü¼ä¸ô
+    unsigned char   snapeswitch;						//×¥ÅÄ´æ´¢¿ª¹Ø
+    unsigned char   alarmswitch;						//´«¸ĞÆ÷±¨¾¯Â¼Ïñ¿ª¹Ø
+    unsigned char   senseswitch;						//ÒÆ¶¯Õì²âÂ¼Ïñ¿ª¹Ø
+    unsigned int    diskspace;							//Ó²ÅÌÈİÁ¿
+    unsigned char   StoreCycle[16];         			//´æ´¢ÖÜÆÚ
     unsigned short  valveAlarm;
-    unsigned short  saveWithSubChannel;     			//ä½¿ç”¨å­é€šé“è¿›è¡Œå­˜å‚¨æ¯ä¸€ä½ä»£è¡¨ä¸€è·¯ 0-è¡¨ç¤ºä¸ç”¨å­é€šé“ 1-è¡¨ç¤ºä½¿ç”¨å­é€šé“
+    unsigned short  saveWithSubChannel;     			//Ê¹ÓÃ×ÓÍ¨µÀ½øĞĞ´æ´¢Ã¿Ò»Î»´ú±íÒ»Â· 0-±íÊ¾²»ÓÃ×ÓÍ¨µÀ 1-±íÊ¾Ê¹ÓÃ×ÓÍ¨µÀ
 
     struct DEFTIME  strategy[MAXVIDEOCHNS][7];
 }__attribute__((packed));
-/**********************OSDæ ‡é¢˜å‚æ•°*************************/
-struct TITLEOSD											//æ ‡é¢˜OSDæ˜¾ç¤ºå‚æ•°
+/**********************OSD±êÌâ²ÎÊı*************************/
+struct TITLEOSD											//±êÌâOSDÏÔÊ¾²ÎÊı
 {
 	unsigned short X;
 	unsigned short Y;
@@ -337,62 +337,62 @@ struct TITLEOSD											//æ ‡é¢˜OSDæ˜¾ç¤ºå‚æ•°
 	unsigned short Len;
 	unsigned char  Contert[32];
 }__attribute__((packed));
-/**********************OSDæ—¶é—´å‚æ•°*************************/
+/**********************OSDÊ±¼ä²ÎÊı*************************/
 struct TIMEOSD
 {
-	unsigned char  Switch;								//38-38 æ—¶é’Ÿæ˜¾ç¤ºå¼€å…³
-	unsigned short X;									// xè½´åº§æ ‡
-	unsigned short Y;									// yè½´åº§æ ‡
-	unsigned char  Trans;								//é€æ˜åº¦
-	unsigned char  Layer;								//å›¾å±‚
-	unsigned char  Color[3];							//æ˜¾ç¤ºé¢œè‰²
-	unsigned char  Format;								//æ˜¾ç¤ºæ ¼å¼
-	unsigned char  Reso;								//10-10 å›¾åƒå°ºå¯¸å¤§å°cif,d1,qcif
+	unsigned char  Switch;								//38-38 Ê±ÖÓÏÔÊ¾¿ª¹Ø
+	unsigned short X;									// xÖá×ù±ê
+	unsigned short Y;									// yÖá×ù±ê
+	unsigned char  Trans;								//Í¸Ã÷¶È
+	unsigned char  Layer;								//Í¼²ã
+	unsigned char  Color[3];							//ÏÔÊ¾ÑÕÉ«
+	unsigned char  Format;								//ÏÔÊ¾¸ñÊ½
+	unsigned char  Reso;								//10-10 Í¼Ïñ³ß´ç´óĞ¡cif,d1,qcif
 }__attribute__((packed));
-/********************OSDéšç§ä¿æŠ¤å‚æ•°***********************/
+/********************OSDÒşË½±£»¤²ÎÊı***********************/
 struct PRITOSD
 {
-	unsigned short X;			  //xè½´åº§æ ‡
-	unsigned short Y;			  // yè½´åº§æ ‡
-	unsigned short Width;		  //å®½åº¦
-	unsigned short Height; 	  //é«˜åº¦
-	unsigned char  Type;		  //é®æŒ¡åŒºåŸŸç±»å‹
-	unsigned char  Color[3];	  //é®æŒ¡åŒºåŸŸå¡«å……è‰²
+	unsigned short X;			  //xÖá×ù±ê
+	unsigned short Y;			  // yÖá×ù±ê
+	unsigned short Width;		  //¿í¶È
+	unsigned short Height; 	  //¸ß¶È
+	unsigned char  Type;		  //ÕÚµ²ÇøÓòÀàĞÍ
+	unsigned char  Color[3];	  //ÕÚµ²ÇøÓòÌî³äÉ«
 }__attribute__((packed));
-/*********************å›¾åƒé®æŒ¡å‚æ•°*************************/
+/*********************Í¼ÏñÕÚµ²²ÎÊı*************************/
 struct OVALM
 {
-	unsigned char   Level;                                 //æŠ¥è­¦çµæ•åº¦ç­‰çº§0~9   [0=åŠŸèƒ½å…³]
-	unsigned char   Speed;                                 //é˜²æŠ–åŠ¨å¤„ç†ï¼Œæ£€æµ‹é€Ÿåº¦
-	unsigned char   Enable;                                //æ˜¯å¦å¯ç”¨
- 	unsigned char   CallCenter; 	                       //æ˜¯å¦ä¸ŠæŠ¥ä¸­å¿ƒè­¦æ–¹å¼
-	unsigned char   Soundor;    	                       //å£°éŸ³æŠ¥è­¦æ–¹å¼
-	unsigned char   OutChan;		                       //æŠ¥è­¦å™¨è¾“å‡ºé€šé“
+	unsigned char   Level;                                 //±¨¾¯ÁéÃô¶ÈµÈ¼¶0~9   [0=¹¦ÄÜ¹Ø]
+	unsigned char   Speed;                                 //·À¶¶¶¯´¦Àí£¬¼ì²âËÙ¶È
+	unsigned char   Enable;                                //ÊÇ·ñÆôÓÃ
+ 	unsigned char   CallCenter; 	                       //ÊÇ·ñÉÏ±¨ÖĞĞÄ¾¯·½Ê½
+	unsigned char   Soundor;    	                       //ÉùÒô±¨¾¯·½Ê½
+	unsigned char   OutChan;		                       //±¨¾¯Æ÷Êä³öÍ¨µÀ
 	struct DEFTIME  strategy[7];
 }__attribute__((packed));
-/*********************ç§»åŠ¨ä¾¦æµ‹å‚æ•°*************************/
-struct SENSE												//ç§»åŠ¨ä¾¦æµ‹å‚æ•°
+/*********************ÒÆ¶¯Õì²â²ÎÊı*************************/
+struct SENSE												//ÒÆ¶¯Õì²â²ÎÊı
 {
-    unsigned short  RangeStart[2];							//ä¾¦æµ‹å¼€å§‹åæ ‡
-	unsigned short  RangeStop[2];							//ä¾¦æµ‹åœæ­¢åæ ‡
-	unsigned char   Level;									//æŠ¥è­¦çµæ•åº¦ç­‰çº§0~9
-	unsigned char   Speed;									//é˜²æŠ–åŠ¨å¤„ç†ï¼Œæ£€æµ‹é€Ÿåº¦
-	unsigned char   Enable;									//æ˜¯å¦å¯ç”¨
-	unsigned char   CallCenter;								//æ˜¯å¦ä¸ŠæŠ¥ä¸­å¿ƒè­¦æ–¹å¼
-    unsigned char   Soundor;								//å£°éŸ³æŠ¥è­¦æ–¹å¼
-    unsigned char   OutChan;								//æŠ¥è­¦å™¨è¾“å‡ºé€šé“
-    unsigned char   PreRecord;								//é¢„å½•åƒæ—¶é—´
-    unsigned char 	JpegSheet;								//æŠ“æ‹å¼ æ•°
-    unsigned char 	JpegIntv;								//æŠ“æ‹é—´éš”
-    unsigned int	JpegChn;								//è§¦å‘æŠ“æ‹é€šé“é€‰æ‹©
-    unsigned int	RecChn;									//8è·¯æŠ¥è­¦è§¦å‘å½•åƒé€šé“é€‰æ‹©
-    unsigned char 	RecDelay;								//æŠ¥è­¦ç»“æŸåå½•åƒå»¶è¿Ÿæ—¶é—´ï¼ˆç§’ï¼‰
-    unsigned char   DrawLine;								//ç§»åŠ¨æŠ¥è­¦æ—¶ç”»çº¿æ ‡å¿—
+    unsigned short  RangeStart[2];							//Õì²â¿ªÊ¼×ø±ê
+	unsigned short  RangeStop[2];							//Õì²âÍ£Ö¹×ø±ê
+	unsigned char   Level;									//±¨¾¯ÁéÃô¶ÈµÈ¼¶0~9
+	unsigned char   Speed;									//·À¶¶¶¯´¦Àí£¬¼ì²âËÙ¶È
+	unsigned char   Enable;									//ÊÇ·ñÆôÓÃ
+	unsigned char   CallCenter;								//ÊÇ·ñÉÏ±¨ÖĞĞÄ¾¯·½Ê½
+    unsigned char   Soundor;								//ÉùÒô±¨¾¯·½Ê½
+    unsigned char   OutChan;								//±¨¾¯Æ÷Êä³öÍ¨µÀ
+    unsigned char   PreRecord;								//Ô¤Â¼ÏñÊ±¼ä
+    unsigned char 	JpegSheet;								//×¥ÅÄÕÅÊı
+    unsigned char 	JpegIntv;								//×¥ÅÄ¼ä¸ô
+    unsigned int	JpegChn;								//´¥·¢×¥ÅÄÍ¨µÀÑ¡Ôñ
+    unsigned int	RecChn;									//8Â·±¨¾¯´¥·¢Â¼ÏñÍ¨µÀÑ¡Ôñ
+    unsigned char 	RecDelay;								//±¨¾¯½áÊøºóÂ¼ÏñÑÓ³ÙÊ±¼ä£¨Ãë£©
+    unsigned char   DrawLine;								//ÒÆ¶¯±¨¾¯Ê±»­Ïß±êÖ¾
     unsigned char   NUL[5];
-	struct DEFTIME  strategy[7];								//ç§»åŠ¨ä¾¦æµ‹å¸ƒé˜²æ—¶é—´
+	struct DEFTIME  strategy[7];								//ÒÆ¶¯Õì²â²¼·ÀÊ±¼ä
 }__attribute__((packed));
-/*********************å·ä¸¢å¤±æŠ¥å‚æ•°*************************/
-struct SINGLELOST											//è§†é¢‘ä¿¡å·ä¸¢å¤±æŠ¥è­¦å‚æ•°
+/*********************ºÅ¶ªÊ§±¨²ÎÊı*************************/
+struct SINGLELOST											//ÊÓÆµĞÅºÅ¶ªÊ§±¨¾¯²ÎÊı
 {
 	unsigned char  Enable;
 	unsigned char  CallCenter;
@@ -400,53 +400,53 @@ struct SINGLELOST											//è§†é¢‘ä¿¡å·ä¸¢å¤±æŠ¥è­¦å‚æ•°
 	unsigned char  OutChan;
 	struct DEFTIME strategy[7];
 }__attribute__((packed));
-/***********************æ¨¡ç»„å‚æ•°***************************/
+/***********************Ä£×é²ÎÊı***************************/
 #define EXPOSURE_COMP		128
-struct SENSORPARAM											//æ¨¡ç»„å‚æ•°
+struct SENSORPARAM											//Ä£×é²ÎÊı
 {
 	char resolution;                                        //0-1080P;1-960P;2-720P
-    char whiteBalance;                                      //0-è‡ªåŠ¨;1-å®¤å†…;2-å®¤å¤–;3-é¢„ç•™;4-ATW;5-æ‰‹åŠ¨
-    char redGain;                                           //0-å¤ä½;1-"-";2-"+";3-ä¿æŒä¸å˜
-    char blueGain;                                          //0-å¤ä½;1-"-";2-"+";3-ä¿æŒä¸å˜
-    char focusAuto;                                         //0-è‡ªåŠ¨;1-æ‰‹åŠ¨                     èšç„¦
-    char focusChange;                                       //0-åœæ­¢;1-è¿‘;2-è¿œ;3-ä¿æŒä¸å˜
-    char zoomChange;                                        //0-åœæ­¢;1-å°;2-å¤§;3-ä¿æŒä¸å˜       å˜å€
-    char exposure;                                          //0-è‡ªåŠ¨;1-æ‰‹åŠ¨;2-å¿«é—¨ä¼˜å…ˆ;3-å…‰åœˆä¼˜å…ˆ;
-    char shutterSpeed;                                      //0-åœæ­¢;1-æ…¢;2-å¿«;3-ä¿æŒä¸å˜
-    char IRISGain;                                          //0-åœæ­¢;1-å°;2-å¤§;3-ä¿æŒä¸å˜
-    char exposureGain;                                      //0-åœæ­¢;1-"-";2-"+";3-ä¿æŒä¸å˜     å¢ç›Š
-    char exposureComp;                                      //0-å…³;1-å¼€
-    char exposureCompChange;                                //0-åœæ­¢;1-"-";2-"+";3-ä¿æŒä¸å˜     èƒŒå…‰è¡¥å¿
-    char turn_h;                                            //æ°´å¹³ç¿»è½¬ 0-å…³;1-å¼€
-    char turn_v;                                            //å‚ç›´ç¿»è½¬ 0-å…³;1-å¼€
-    char dayMode;                                           //è‡ªåŠ¨åˆ‡æ¢ 0-å…³;1-å¼€
-    char dayOrNight;                                        //0-å¤œæ¨¡å¼;1-æ—¥æ¨¡å¼;3-æ— æ•ˆ
-    char apertureChange;                                    //0-åœæ­¢;1-"-";2-"+";3-ä¿æŒä¸å˜     é”åº¦
-    char cameraMode;                                        //0-åˆ é™¤;1-è®¾ç½®é¢„ç½®ç‚¹;2-é¢„ç½®ç‚¹è°ƒç”¨;3æ— æ•ˆ
-    unsigned char cameraNumber;                             //1-128;é¢„ç½®ç‚¹å·
+    char whiteBalance;                                      //0-×Ô¶¯;1-ÊÒÄÚ;2-ÊÒÍâ;3-Ô¤Áô;4-ATW;5-ÊÖ¶¯
+    char redGain;                                           //0-¸´Î»;1-"-";2-"+";3-±£³Ö²»±ä
+    char blueGain;                                          //0-¸´Î»;1-"-";2-"+";3-±£³Ö²»±ä
+    char focusAuto;                                         //0-×Ô¶¯;1-ÊÖ¶¯                     ¾Û½¹
+    char focusChange;                                       //0-Í£Ö¹;1-½ü;2-Ô¶;3-±£³Ö²»±ä
+    char zoomChange;                                        //0-Í£Ö¹;1-Ğ¡;2-´ó;3-±£³Ö²»±ä       ±ä±¶
+    char exposure;                                          //0-×Ô¶¯;1-ÊÖ¶¯;2-¿ìÃÅÓÅÏÈ;3-¹âÈ¦ÓÅÏÈ;
+    char shutterSpeed;                                      //0-Í£Ö¹;1-Âı;2-¿ì;3-±£³Ö²»±ä
+    char IRISGain;                                          //0-Í£Ö¹;1-Ğ¡;2-´ó;3-±£³Ö²»±ä
+    char exposureGain;                                      //0-Í£Ö¹;1-"-";2-"+";3-±£³Ö²»±ä     ÔöÒæ
+    char exposureComp;                                      //0-¹Ø;1-¿ª
+    char exposureCompChange;                                //0-Í£Ö¹;1-"-";2-"+";3-±£³Ö²»±ä     ±³¹â²¹³¥
+    char turn_h;                                            //Ë®Æ½·­×ª 0-¹Ø;1-¿ª
+    char turn_v;                                            //´¹Ö±·­×ª 0-¹Ø;1-¿ª
+    char dayMode;                                           //×Ô¶¯ÇĞ»» 0-¹Ø;1-¿ª
+    char dayOrNight;                                        //0-Ò¹Ä£Ê½;1-ÈÕÄ£Ê½;3-ÎŞĞ§
+    char apertureChange;                                    //0-Í£Ö¹;1-"-";2-"+";3-±£³Ö²»±ä     Èñ¶È
+    char cameraMode;                                        //0-É¾³ı;1-ÉèÖÃÔ¤ÖÃµã;2-Ô¤ÖÃµãµ÷ÓÃ;3ÎŞĞ§
+    unsigned char cameraNumber;                             //1-128;Ô¤ÖÃµãºÅ
     char zoomSpeed;
 
-	unsigned short luma;									//äº®åº¦
-	unsigned short contrast;								//å¯¹æ¯”åº¦
-	unsigned short saturation;								//é¥±å’Œåº¦
-	unsigned short chroma;									//è‰²åº¦æˆ–ç°åº¦
+	unsigned short luma;									//ÁÁ¶È
+	unsigned short contrast;								//¶Ô±È¶È
+	unsigned short saturation;								//±¥ºÍ¶È
+	unsigned short chroma;									//É«¶È»ò»Ò¶È
 	unsigned short sharpen;
-	unsigned char  resetValue;                              //1-å›å¤é»˜è®¤å€¼ä½¿èƒ½ 0-å›å¤é»˜è®¤å€¼å…³é—­
-	unsigned char  drcEnable;                               //å®½åŠ¨æ€å¼€å…³0-å…³ 1-å¼€
-	unsigned short drcStrength;                             //å®½åŠ¨æ€å¼ºåº¦
-	unsigned short denoise2D;                               //2Då»å™ªå¼ºåº¦
-	unsigned char  dn3DEnable;                              //3Då»å™ªä½¿èƒ½
-	unsigned short sfStrength;                              //ç©ºåŸŸå»å™ªå¼ºåº¦
-	unsigned short tfStrength;                              //æ—¶åŸŸå»å™ªå¼ºåº¦
-	unsigned char  antifogEnable;                           //å»é›¾
-	unsigned short antifogStrength;                         //å»é›¾å¼ºåº¦
+	unsigned char  resetValue;                              //1-»Ø¸´Ä¬ÈÏÖµÊ¹ÄÜ 0-»Ø¸´Ä¬ÈÏÖµ¹Ø±Õ
+	unsigned char  drcEnable;                               //¿í¶¯Ì¬¿ª¹Ø0-¹Ø 1-¿ª
+	unsigned short drcStrength;                             //¿í¶¯Ì¬Ç¿¶È
+	unsigned short denoise2D;                               //2DÈ¥ÔëÇ¿¶È
+	unsigned char  dn3DEnable;                              //3DÈ¥ÔëÊ¹ÄÜ
+	unsigned short sfStrength;                              //¿ÕÓòÈ¥ÔëÇ¿¶È
+	unsigned short tfStrength;                              //Ê±ÓòÈ¥ÔëÇ¿¶È
+	unsigned char  antifogEnable;                           //È¥Îí
+	unsigned short antifogStrength;                         //È¥ÎíÇ¿¶È
 	unsigned short rGain;                                   //red gain
 	unsigned short gGain;                                   //green gain
 	unsigned short bGain; 	                                //blue gain
 	unsigned char  exposureTime;
     unsigned int zoomPosition;
 }__attribute__((packed));
-/***********************è§†é¢‘è¾“å‡ºå‚æ•°***********************/
+/***********************ÊÓÆµÊä³ö²ÎÊı***********************/
 struct VODEV
 {
 	unsigned char mode;
@@ -465,19 +465,19 @@ struct WIRELESS_ALARM
 {
 	char wireless_name[64];
 	char wireless_uuid[16];
-	char notifyCenter;										//ä¸ŠæŠ¥ä¸­å¿ƒ
+	char notifyCenter;										//ÉÏ±¨ÖĞĞÄ
 	char enable;
-	char triggerBuzzer;										//è§¦å‘èœ‚é¸£å™¨
-	char triggerSwitch;										//è§¦å‘å¼€å…³é‡è¾“å‡º
-	char triggerJpeg;										//è§¦å‘æŠ“æ‹å¼€å…³
-	char jpegChn;											//è§¦å‘æŠ“æ‹çš„é€šé“
-	char jpegNum;											//è§¦å‘æŠ“æ‹å¼ æ•°
-	char jpegGop;											//è§¦å‘æŠ“æ‹é—´éš”
-	
-	char triggerRecord;										//è§¦å‘å½•åƒå¼€å…³
-	char recordChn;											//è§¦å‘å½•åƒé€šé“
-	char recordDelay;										//è§¦å‘å½•åƒæ—¶é•¿
-	char recordPreTime;										//è§¦å‘å½•åƒé¢„å½•æ—¶é—´
+	char triggerBuzzer;										//´¥·¢·äÃùÆ÷
+	char triggerSwitch;										//´¥·¢¿ª¹ØÁ¿Êä³ö
+	char triggerJpeg;										//´¥·¢×¥ÅÄ¿ª¹Ø
+	char jpegChn;											//´¥·¢×¥ÅÄµÄÍ¨µÀ
+	char jpegNum;											//´¥·¢×¥ÅÄÕÅÊı
+	char jpegGop;											//´¥·¢×¥ÅÄ¼ä¸ô
+
+	char triggerRecord;										//´¥·¢Â¼Ïñ¿ª¹Ø
+	char recordChn;											//´¥·¢Â¼ÏñÍ¨µÀ
+	char recordDelay;										//´¥·¢Â¼ÏñÊ±³¤
+	char recordPreTime;										//´¥·¢Â¼ÏñÔ¤Â¼Ê±¼ä
 	struct DEFTIME  strategy[7];
 }__attribute__((packed));
 
@@ -486,10 +486,15 @@ struct WIRELESS_ALARM
 /**********************************************************************/
 typedef enum
 {
-	GPIO_TYPE_ONCE = 0,									//ä¸€æ¬¡æ€§æ§åˆ¶
-	GPIO_TYPE_CYCLE,									//å‘¨æœŸæ€§æ§åˆ¶
-	GPIO_TYPE_COUNT	
+	GPIO_TYPE_ONCE = 0,									//Ò»´ÎĞÔ¿ØÖÆ
+	GPIO_TYPE_CYCLE,									//ÖÜÆÚĞÔ¿ØÖÆ
+	GPIO_TYPE_COUNT
 }	e_gpio_control;
+
+/**********************************************************************/
+//module system
+/**********************************************************************/
+typedef int (*SYSTEM_CALLBACK)(void);
 
 /**********************************************************************/
 //module fifo
@@ -512,12 +517,12 @@ typedef struct st_fifo
 	e_fifo_type enType;
 	int iGrp;
 	int iChn;
-	
+
 }	st_fifo_t;
 
 typedef enum
 {
-	FIFO_H264_MAIN = 0,										//ä¸»ç æµ
+	FIFO_H264_MAIN = 0,										//Ö÷ÂëÁ÷
 	FIFO_H264_SUB,
 	FIFO_H264_EXT,
 	FIFO_H264_AUDIO,
@@ -525,36 +530,39 @@ typedef enum
 }	e_fifo_h264;
 typedef int (*FIFO_CALLBACK)(char * pFrameData,int iFrameLen);
 
+//==========================================================
+#define FIFO_ALARM_MAX_SHEET	16
 typedef enum
 {
-	FIFO_ALARM_SWITCH = 0,									//å¼€å…³é‡
-	FIFO_ALARM_FAULT,										//æ•…éšœ
-	FIFO_ALARM_CAPACITY,									//èƒ½åŠ›
-	FIFO_ALARM_MV,											//ç§»åŠ¨ä¾¦æµ‹
-	FIFO_ALARM_OD,											//é®æŒ¡æŠ¥è­¦
-	FIFO_ALARM_SL,											//ä¿¡å·ä¸¢å¤±
+	FIFO_ALARM_SWITCH = 0,									//¿ª¹ØÁ¿
+	FIFO_ALARM_FAULT,										//¹ÊÕÏ
+	FIFO_ALARM_CAPACITY,									//ÄÜÁ¦
+	FIFO_ALARM_MV,											//ÒÆ¶¯Õì²â
+	FIFO_ALARM_OD,											//ÕÚµ²±¨¾¯
+	FIFO_ALARM_SL,											//ĞÅºÅ¶ªÊ§
+	FIFO_BELL_PRESS,										//ÃÅÁå°´¼ü
 	FIFO_ALARM_COUNT
 }	e_fifo_alarm;
 
 typedef enum
 {
-	FIFO_ALARM_READ_CURRENT = 0,							//æœ€æ–°çš„æŠ¥è­¦è¯»æŒ‡é’ˆ
-	FIFO_ALARM_READ_EARLY,									//æœ€æ—©æœŸçš„æŠ¥è­¦è¯»æŒ‡é’ˆ
+	FIFO_ALARM_READ_CURRENT = 0,							//×îĞÂµÄ±¨¾¯¶ÁÖ¸Õë
+	FIFO_ALARM_READ_EARLY,									//×îÔçÆÚµÄ±¨¾¯¶ÁÖ¸Õë
 	FIFO_ALARM_READ_COUNT
 }	e_fifo_read;
 
 typedef struct upload_alarm_info
 {
-	e_fifo_alarm enAlarm;									//æŠ¥è­¦çš„ç±»å‹
-	int iChn;												//é€šé“å·
-	int iArea;												//å­é€šé“ï¼Œæˆ–è€…åŒºåŸŸå·
-	int iStatus;											//0-åœæ­¢ 1å¼€å§‹
-	char cInfo[256];										//é™„åŠ è¯´æ˜ï¼Œæˆ–è€…å¯ä»¥å­˜æ”¾ä¸€äº›è‡ªå®šä¹‰å†…å®¹
+	e_fifo_alarm enAlarm;									//±¨¾¯µÄÀàĞÍ
+	int iChn;												//Í¨µÀºÅ
+	int iArea;												//×ÓÍ¨µÀ£¬»òÕßÇøÓòºÅ
+	int iStatus;											//0-Í£Ö¹ 1¿ªÊ¼
+	char cInfo[256];										//¸½¼ÓËµÃ÷£¬»òÕß¿ÉÒÔ´æ·ÅÒ»Ğ©×Ô¶¨ÒåÄÚÈİ
 }	st_alarm_upload_t;
 
-/***********************è§†é¢‘è¾“å‡ºæ ¼å¼***********************/
+/***********************ÊÓÆµÊä³ö¸ñÊ½***********************/
 typedef enum e_stream_type
-{											//ç±»å‹  0-web stream 1-jpeg stream 2-rtp stream 3-avi stream 4-ts stream 5-ps stream 6-h264 stream
+{											//ÀàĞÍ  0-web stream 1-jpeg stream 2-rtp stream 3-avi stream 4-ts stream 5-ps stream 6-h264 stream
 	FIFO_STREAM_RTP = 0,
 	FIFO_STREAM_AVI,
 	FIFO_STREAM_TS,
@@ -574,14 +582,14 @@ typedef int (*NET_PROTOCOL_CALLBACK)(int iSock,char *pData,int iLen);
 typedef int (*UDP_PROTOCOL_CALLBACK)(int iIp,short sPort,int iSock,char *pData,int iLen);
 typedef struct net_card
 {
-	int sDevice;                            //ç½‘å¡çŠ¶æ€å…·ä½“è§ä¸‹é¢æè¿°
+	int sDevice;                            //Íø¿¨×´Ì¬¾ßÌå¼ûÏÂÃæÃèÊö
 	int iIP;
 	char devName[16];
 }	NET_CARD;
 
 typedef struct net_statue
 {
-	NET_CARD lan;					        //sDevice æœ‰çº¿ç½‘å¡çŠ¶æ€0-æœªæ’ç½‘çº¿;1-æœªæ‰¾åˆ°ç½‘å¡è®¾å¤‡;0x10-10M;0x11-100M;
+	NET_CARD lan;					        //sDevice ÓĞÏßÍø¿¨×´Ì¬0-Î´²åÍøÏß;1-Î´ÕÒµ½Íø¿¨Éè±¸;0x10-10M;0x11-100M;
 	NET_CARD adsl;
 	NET_CARD wifi;
 }	st_net_status_t;
@@ -623,13 +631,13 @@ typedef struct st_rtsp_steup
 	char cSource[128];
 	int  iServerPort1;
 	int  iServerPort2;
-	
+
 }	st_rtsp_setup_t;
 
 typedef struct st_rtsp_play
 {
 	int  isTcp;
-	
+
 	int  iSpeed;
 	int  iPullTime;
 	char cFileName[128];
@@ -637,7 +645,7 @@ typedef struct st_rtsp_play
 	int  v_rtpseq;
 	int  a_rtptime;
 	int  a_rtpseq;
-	
+
 }	st_rtsp_play_t;
 
 typedef enum e_encrypt_mode_
@@ -662,16 +670,17 @@ typedef struct st_wifi_list
 {
 	char ssid[32];
 	char key[32];
-	int  enable;							//æ­£åœ¨ä½¿ç”¨çš„
-	e_encrypt_mode encryptMode;				//åŠ å¯†æ–¹å¼
-	e_encrypt_format encryptFormat;			//åŠ å¯†æ ¼å¼
-	int	 wepPosition;						//wepæ–¹å¼ä¸‹çš„å¯†ç ä½ç½®
-	int  signalStrength;					//ä¿¡å·å¼ºåº¦
-	
+	int  enable;							//ÕıÔÚÊ¹ÓÃµÄ
+	e_encrypt_mode encryptMode;				//¼ÓÃÜ·½Ê½
+	e_encrypt_format encryptFormat;			//¼ÓÃÜ¸ñÊ½
+	int	 wepPosition;						//wep·½Ê½ÏÂµÄÃÜÂëÎ»ÖÃ
+	int  signalStrength;					//ĞÅºÅÇ¿¶È
+
 }	st_wifi_list_t;
+typedef int (*SOUND_CALLBACK)(char * pFileName);
 
 /**********************************************************************/
-//module Uaer
+//module Uart
 /**********************************************************************/
 typedef int (*UART_RECEIVE_CALLBACK)(int handle,char *pData,int iMaxSize);
 typedef int (*UART_PROTOCOL_CALLBACK)(int handle,char *pData,int iLen);
@@ -694,7 +703,7 @@ typedef struct attr_485
 /**********************************************************************/
 typedef struct ST_IOV
 {
-	int iov_len;						/**< Size of data */	
+	int iov_len;						/**< Size of data */
 	void * iov_base;					/**< Pointer on data */
 }__attribute__((packed))st_iov_t;
 

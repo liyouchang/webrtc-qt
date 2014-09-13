@@ -76,7 +76,7 @@ bool P2PConductor::ConnectToPeer(const std::string &peer_id)
         peer_id_ = peer_id;
         peer_connection_->CreateOffer(this,"tcp");
     } else {
-        LOG(LS_INFO) <<"initialize connection error";
+        LOG(LS_INFO) << "initialize connection error";
         return false;
     }
     return true;
@@ -88,7 +88,7 @@ void P2PConductor::DisconnectFromCurrentPeer()
         LOG(INFO)<<"the tunnel is disconnecting!";
         return;
     }
-    if (peer_connection_.get()) {
+    if ( peer_connection_.get() ) {
         signal_thread_->Post(this,MSG_DISCONNECT);
         SignalNeedSendToPeer(peer_id_,kByeMessage);
         this->signal_thread_->PostDelayed(kDisConnectTimeout,this,
@@ -105,7 +105,7 @@ StreamProcess *P2PConductor::GetStreamProcess()
 void P2PConductor::OnTunnelEstablished()
 {
     ASSERT(stream_process_);
-    LOG(INFO)<<"P2PConductor::OnTunnelEstablished---"<<talk_base::Thread::Current()->name();
+    LOG_T_F(INFO)<<" established";
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     this->setTunnelState(kTunnelEstablished);
     SignalStreamOpened(this->GetPeerID());
@@ -114,15 +114,18 @@ void P2PConductor::OnTunnelEstablished()
 void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
 {
     //ASSERT(this->GetStreamProcess() == stream);
-    LOG(INFO) << "P2PConductor::OnTunnelTerminate---end";
+    LOG(INFO) << "P2PConductor::OnTunnelTerminate---no nothing";
 }
 
 void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
                                        const std::string &message)
 {
+    //为了防止在断开链接是依然有消息从对端发送过来(对端尚未收到bye消息时正在获取candidate),
+    //在收到bye消息后发送seeyou消息,用于对tunnel的状态进行控制
+    //发送bye消息后进入disconnecting状态,
     if (tunnelState == kTunnelDisconnecting) {
-        if(message.length() == (sizeof(kEndMsg) - 1) &&
-                message.compare(kEndMsg) == 0) {
+        if( message.length() == ( sizeof(kEndMsg) - 1 ) &&
+                message.compare(kEndMsg) == 0 ) {
             LOG(INFO)<<"receive end message from "<<peerId <<",tunnel is end";
             ConductorClose();
         } else {
@@ -132,7 +135,7 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
         return;
     }
 
-    if (message.length() == (sizeof(kByeMessage) - 1) &&
+    if ( message.length() == (sizeof(kByeMessage) - 1 ) &&
             message.compare(kByeMessage) == 0) {
         LOG(INFO)<<"receive bye message from "<<peerId;
         if (peerId == peer_id_ && peer_connection_.get()) {
@@ -143,7 +146,7 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
         return;
     }
 
-    if(!peer_connection_.get()) {
+    if(!peer_connection_.get()) { //kTunnelClosed状态
         if(!this->peer_id_.empty()){
             LOG(LS_ERROR) << "peer_id_ is not empty when peer_connection_ is not set";
             return;
@@ -301,7 +304,7 @@ bool P2PConductor::InitializePeerConnection()
 
 void P2PConductor::DeletePeerConnection()
 {
-    LOG(INFO) << "P2PConductor::DeletePeerConnection---" << this->peer_id_;
+
     setTunnelState(kTunnelDisconnecting);
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     //when close peer_connection the session will terminate and destroy the channels
@@ -310,6 +313,8 @@ void P2PConductor::DeletePeerConnection()
         peer_connection_->Close();
         peer_connection_.release();
     }
+    LOG_T_F(INFO) << "delete stream";
+    stream_process_.reset();
 }
 
 void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
@@ -320,6 +325,7 @@ void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
     talk_base::StreamInterface* stream = peer_connection_->GetStream();
     if(!stream_process_)
     {
+        LOG_F(WARNING) << " get stream error";
         return ;
     }
     bool result = stream_thread_->Invoke<bool>(

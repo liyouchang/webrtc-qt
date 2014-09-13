@@ -11,8 +11,8 @@
 extern "C" {
 #endif
 
-int ALARM_Initialize(void);								//åˆå§‹åŒ–åª’ä½“ç¼–ç 
-int ALARM_Cleanup(void);								//ååˆå§‹åŒ–åª’ä½“ç¼–ç 
+int ALARM_Initialize(void);								//³õÊ¼»¯Ã½Ìå±àÂë
+int ALARM_Cleanup(void);								//·´³õÊ¼»¯Ã½Ìå±àÂë
 
 int ALARM_Register_Callback(ALARM_CALLBACK alarm_callback);
 
