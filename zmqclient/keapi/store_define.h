@@ -10,20 +10,20 @@
 
 typedef enum
 {
-	STORE_TYPE_SWITCH = 0,									//开关量
-	STORE_TYPE_MV,											//移动侦测
-	STORE_TYPE_PLAN,										//计划录像
-	STORE_TYPE_MANUAL,										//手动录像
-	STORE_TYPE_JPEG,										//手动录像
+	STORE_TYPE_SWITCH = 0,									//������
+	STORE_TYPE_MV,											//�ƶ����
+	STORE_TYPE_PLAN,										//�ƻ�¼��
+	STORE_TYPE_MANUAL,										//�ֶ�¼��
+	STORE_TYPE_JPEG,										//�ֶ�¼��
 	STORE_TYPE_ALL,
 	STORE_TYPE_COUNT
 }	e_store_type;
 
 typedef struct store_list
 {
-	char filePath[48];										//文件路径加名称，名称里面包含开始时间
-	int iFileSize;											//文件大小
-	st_clock_t stEndTime;									//文件的结束时间
+	char filePath[48];										//�ļ�·�������ƣ��������������ʼʱ��
+	int iFileSize;											//�ļ���С
+	st_clock_t stEndTime;									//�ļ��Ľ���ʱ��
 }	st_store_list_t;
 
 

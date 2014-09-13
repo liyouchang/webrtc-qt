@@ -90,8 +90,6 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
         repSocket->setsockopt(ZMQ_RCVHWM,&highwater,sizeof(highwater));
         int ligger = 100;
         repSocket->setsockopt(ZMQ_LINGER,&ligger,sizeof(ligger));
-
-
     }catch(zmq::error_t e){
         LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
     }
@@ -116,7 +114,22 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
 
 KeSdkDevice::~KeSdkDevice()
 {
-    delete zmqThread;
+//    LOG_F(INFO) << "destroy device";
+//    zmqThread->Quit();
+//    try{
+//        LOG_F(INFO) << "delete zmq socket";
+//        delete repSocket;
+//        repSocket = NULL;
+//        LOG_F(INFO) << "delete zmq context";
+//        delete zmqContext;
+//        zmqContext = NULL;
+//    }catch(zmq::error_t e){
+//        LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
+//    }
+
+//    LOG_F(INFO) << "delete zmq thread";
+
+//    delete zmqThread;
 
     if( video1_handle_ != kNullStreamHandle){
         FIFO_Stream_Close(video1_handle_);
@@ -268,6 +281,7 @@ void KeSdkDevice::OnCommandJsonMsg(const Json::Value &jmessage,Json::Value * jre
         int wifiStatus = Net_Get_WifiLink_Status();
         (*jresult) = jmessage;
         (*jresult)["status"] = wifiStatus;
+        LOG_F(INFO) <<"get wifi status "<< wifiStatus;
         //        this->ReportJsonMsg(peerId,jmessage);
     }
     else if( command.compare("rename") == 0 ) {
@@ -292,7 +306,7 @@ void KeSdkDevice::OnCommandJsonMsg(const Json::Value &jmessage,Json::Value * jre
     }
     else if( command.compare("reboot") == 0 ) {
         *jresult = this->GetResultMsg(command,ret);
-//        this->QuitMainThread();
+        //        this->QuitMainThread();
         SYSTEM_Set_Reboot();
     }
     else{
@@ -320,7 +334,9 @@ void KeSdkDevice::OnMessage(talk_base::Message *msg)
         break;
     case MSG_ZMQ_RECV:{
         ZmqRepMsg_z();
-        zmqThread->Post(this,MSG_ZMQ_RECV);
+        if(repSocket){
+            zmqThread->Post(this,MSG_ZMQ_RECV);
+        }
     }
         break;
     default:
@@ -450,7 +466,7 @@ bool KeSdkDevice::SetOsdTitle(const std::string &title)
     Utf8ToGb2312((char *)osdTitle.Contert,32,title.c_str(),title.length());
 
 
-//    talk_base::strcpyn((char *)osdTitle.Contert,32,title.c_str(),title.length());
+    //    talk_base::strcpyn((char *)osdTitle.Contert,32,title.c_str(),title.length());
 
     CONFIG_Set(CONFIG_TYPE_OSDTITLE,(void *)&osdTitle);
     return true;
@@ -534,7 +550,13 @@ void KeSdkDevice::InitVideoInfo()
 void KeSdkDevice::ZmqRepMsg_z()
 {
     zmq::message_t zmsg;
-    repSocket->recv(&zmsg);
+    try{
+        repSocket->recv(&zmsg);
+    }catch(zmq::error_t e){
+        LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
+        return;
+    }
+
     std::string strMsg((char *)zmsg.data(),zmsg.size());
     Json::Reader reader;
     LOG_F(INFO)<<"rep msg "<<strMsg;
@@ -614,6 +636,7 @@ bool KeSdkDevice::SetWifiInfo(Json::Value jparam)
     GetStringFromJsonObject(jparam,"key",&key);
     talk_base::asccpyn(wifiParam.key,32,key.c_str());
     GetIntFromJsonObject(jparam,"enable",&wifiParam.enable);
+
     int encryptMode;
     GetIntFromJsonObject(jparam,"encryptMode",&encryptMode);
     wifiParam.encryptMode =(e_encrypt_mode) encryptMode;
@@ -621,8 +644,9 @@ bool KeSdkDevice::SetWifiInfo(Json::Value jparam)
     GetIntFromJsonObject(jparam,"encryptFormat",&encryptFormat);
     wifiParam.encryptFormat =(e_encrypt_format) encryptFormat;
     GetIntFromJsonObject(jparam,"wepPosition",&wifiParam.wepPosition);
+    LOG_F(INFO)<<"NET_Set_Wifi --- enable "<< wifiParam.enable<<"  ssid "<<wifiParam.ssid;
+
     int ret = NET_Set_Wifi(&wifiParam);
-    //    LOG_F(INFO)<<"NET_Set_Wifi "<<ret;
     return true;
 }
 
@@ -722,6 +746,8 @@ int KeSdkDevice::GetArmingStatus()
 void KeSdkDevice::QuitMainThread()
 {
     this->deviceThread->Quit();
+    LOG_F(WARNING)<<" quit main thread";
+
 }
 
 void KeSdkDevice::SetNetInfo()
@@ -761,6 +787,7 @@ KeSdkDevice::RegisterCallBack::RegisterCallBack()
     FIFO_Register_Callback(FIFO_H264_EXT,&RegisterCallBack::ExtStreamCallBack);
     FIFO_Register_Callback(FIFO_H264_AUDIO,&RegisterCallBack::AudioStreamCallBack);
     SYSTEM_Register_Callback(&RegisterCallBack::RebootCallback);
+    ALARM_Register_Callback(&RegisterCallBack::AlarmCallback);
 }
 
 KeSdkDevice::RegisterCallBack *KeSdkDevice::RegisterCallBack::Instance(){
@@ -791,7 +818,7 @@ int KeSdkDevice::RegisterCallBack::AudioStreamCallBack(char *pFrameData, int iFr
 
 int KeSdkDevice::RegisterCallBack::RebootCallback()
 {
-    LOG(WARNING) << "call back reboot call back, the process will end";
+    LOG(WARNING) << " call back reboot call back, the process will end ";
     RegisterCallBack::Instance()->SignalReboot();
 }
 
@@ -805,7 +832,7 @@ int KeSdkDevice::RegisterCallBack::AlarmCallback(st_alarm_upload_t *alarmInfo, c
     }
 
     RegisterCallBack::Instance()->SignalTerminalAlarm(alarmInfo->enAlarm,alarmInfo->cInfo,
-                                                 picBase64Data);
+                                                      picBase64Data);
     return 0;
 
 }

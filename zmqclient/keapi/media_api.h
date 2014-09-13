@@ -11,23 +11,25 @@
 extern "C" {
 #endif
 
-int MEDIA_Initialize(void);								//åˆå§‹åŒ–åª’ä½“ç¼–ç 
-int MEDIA_Cleanup(void);								//ååˆå§‹åŒ–åª’ä½“ç¼–ç 
+int MEDIA_Initialize(void);								//³õÊ¼»¯Ã½Ìå±àÂë
+int MEDIA_Cleanup(void);								//·´³õÊ¼»¯Ã½Ìå±àÂë
 
-int MEDIA_Get_IDR(int iGrp,int iSubChn);				//è·å–idrå¸§
-unsigned long long MEDIA_Get_Stamp(int iGrp,int iSubChn);//è·å–å½“å‰ç¼–ç çš„æœ€æ–°æ—¶é—´æˆ³ã€‚
+int MEDIA_Get_IDR(int iGrp,int iSubChn);				//»ñÈ¡idrÖ¡
+unsigned long long MEDIA_Get_Stamp(int iGrp,int iSubChn);//»ñÈ¡µ±Ç°±àÂëµÄ×îĞÂÊ±¼ä´Á¡£
 
-int MEDIA_Audio_Talk(char *pAudioData,int iLen);		//å¯¹è®²éŸ³é¢‘è°ƒç”¨æ¥å£ï¼ŒpAudioDataæ˜¯çº¯éŸ³é¢‘æ•°æ®ï¼ŒiLenæ˜¯æ•°æ®çš„é•¿åº¦ï¼Œè¿™é‡Œæ•°æ®éƒ¨åˆ†ä¸éœ€è¦ä»»ä½•å¤„ç†G.711 160å­—èŠ‚çš„çº¯æ•°æ®ï¼Œä¸åŒ…å«0 0 0 1
-int MEDIA_Jpeg_Generate(int iJpegNum,int iJpegGop,MEDIA_JPEG_CALLBACK jpeg_callback);//ç”ŸæˆiJpegNumå¼ å›¾ç‰‡ï¼Œé—´éš”iJpegGopå¸§ç”Ÿæˆä¸€å¼ ï¼Œå¹¶ä¸”å°†ç”Ÿæˆçš„å›¾ç‰‡åŒè¿‡jpeg_callbackå›è°ƒç»™è°ƒç”¨è€…
+int MEDIA_Audio_Talk(char *pAudioData,int iLen);		//¶Ô½²ÒôÆµµ÷ÓÃ½Ó¿Ú£¬pAudioDataÊÇ´¿ÒôÆµÊı¾İ£¬iLenÊÇÊı¾İµÄ³¤¶È£¬ÕâÀïÊı¾İ²¿·Ö²»ĞèÒªÈÎºÎ´¦ÀíG.711 160×Ö½ÚµÄ´¿Êı¾İ£¬²»°üº¬0 0 0 1
+int MEDIA_Audio_SoundFromFile(char *pFileName);			//Êä³öÉùÒôÎÄ¼ş£¬pFileNameÎªÉùÒôÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
+int MEDIA_Jpeg_Generate(int iChn,int iJpegNum,int iJpegGop,MEDIA_JPEG_CALLBACK jpeg_callback);//Éú³ÉiJpegNumÕÅÍ¼Æ¬£¬¼ä¸ôiJpegGopÖ¡Éú³ÉÒ»ÕÅ£¬²¢ÇÒ½«Éú³ÉµÄÍ¼Æ¬Í¬¹ıjpeg_callback»Øµ÷¸øµ÷ÓÃÕß
 
-int MEDIA_VDA_MD_Start(int iGrp,int iArea);				//å¼€å§‹æ£€æµ‹ç§»åŠ¨ä¾¦æµ‹
-int MEDIA_VDA_MD_Stop(int iGrp,int iArea);				//åœæ­¢æ£€æµ‹ç§»åŠ¨ä¾¦æµ‹
+int MEDIA_VDA_MD_Start(int iGrp,int iArea);				//¿ªÊ¼¼ì²âÒÆ¶¯Õì²â
+int MEDIA_VDA_MD_Stop(int iGrp,int iArea);				//Í£Ö¹¼ì²âÒÆ¶¯Õì²â
 
-int MEDIA_VDA_OD_Start(int iChn);						//å¼€å§‹æ£€æµ‹é®æŒ¡æŠ¥è­¦
-int MEDIA_VDA_OD_Stop(int iChn);						//åœæ­¢æ£€æµ‹é®æŒ¡æŠ¥è­¦
+int MEDIA_VDA_OD_Start(int iChn);						//¿ªÊ¼¼ì²âÕÚµ²±¨¾¯
+int MEDIA_VDA_OD_Stop(int iChn);						//Í£Ö¹¼ì²âÕÚµ²±¨¾¯
 
-int MEDIA_VDA_SL_Start(int iChn);						//å¼€å§‹æ£€æµ‹ä¿¡å·ä¸¢å¤±æŠ¥è­¦
-int MEDIA_VDA_SL_Stop(int iChn);						//åœæ­¢æ£€æµ‹ä¿¡å·ä¸¢å¤±æŠ¥è­¦
+int MEDIA_VDA_SL_Start(int iChn);						//¿ªÊ¼¼ì²âĞÅºÅ¶ªÊ§±¨¾¯
+int MEDIA_VDA_SL_Stop(int iChn);						//Í£Ö¹¼ì²âĞÅºÅ¶ªÊ§±¨¾¯
+
 
 #ifdef __cplusplus
 }

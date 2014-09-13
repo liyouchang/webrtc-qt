@@ -14,102 +14,103 @@ extern "C" {
 /**********************************************************************/
 //module config
 /**********************************************************************/
-int CONFIG_Initialize(void);															//åˆå§‹åŒ–å‚æ•°é…ç½®æ¨¡å—
-int CONFIG_Cleanup(void);																//å…³é—­å‚æ•°é…ç½®æ¨¡å—
-int CONFIG_Register_Callback(e_config_type enAttrId,CONFIG_CALLBACK config_callback);	//æ³¨å†Œé…ç½®å‚æ•°çš„å›è°ƒå‡½æ•°
-int CONFIG_Get(e_config_type enAttrId,void * pData);									//è·å–æŸç±»å‚æ•°
-int CONFIG_Set(e_config_type enAttrId,void * pData);									//è®¾ç½®æŸç±»å‚æ•°
+int CONFIG_Initialize(void);															//³õÊ¼»¯²ÎÊıÅäÖÃÄ£¿é
+int CONFIG_Cleanup(void);																//¹Ø±Õ²ÎÊıÅäÖÃÄ£¿é
+int CONFIG_Register_Callback(e_config_type enAttrId,CONFIG_CALLBACK config_callback);	//×¢²áÅäÖÃ²ÎÊıµÄ»Øµ÷º¯Êı
+int CONFIG_Get(e_config_type enAttrId,void * pData);									//»ñÈ¡Ä³Àà²ÎÊı
+int CONFIG_Set(e_config_type enAttrId,void * pData);									//ÉèÖÃÄ³Àà²ÎÊı
 /**********************************************************************/
 //module clock
 /**********************************************************************/
-int CLOCK_Open(e_clock_type enType);													//å¯åŠ¨æ—¶é’ŸåŠŸèƒ½
-int CLOCK_Close(int handle);															//å…³é—­æ—¶é’ŸåŠŸèƒ½
-int CLOCK_Get(st_clock_t *);															//è·å–å½“å‰æ—¶é—´
-int CLOCK_Set(st_clock_t *);															//è®¾ç½®ç³»ç»Ÿæ—¶é—´
+int CLOCK_Open(e_clock_type enType);													//Æô¶¯Ê±ÖÓ¹¦ÄÜ
+int CLOCK_Close(int handle);															//¹Ø±ÕÊ±ÖÓ¹¦ÄÜ
+int CLOCK_Get(st_clock_t *);															//»ñÈ¡µ±Ç°Ê±¼ä
+int CLOCK_Set(st_clock_t *);															//ÉèÖÃÏµÍ³Ê±¼ä
 int CLOCK_Get_Error(int handle);
 int CLOCK_Version(void);																//1.00.00=0x10000  0.00.01=0x000001
-int CLOCK_Set_NTP(int ip,short port,signed int zero);									//å¦‚æœå¯ç”¨NTPæ ¡æ—¶ï¼Œåˆ™å¿…é¡»å…ˆè°ƒç”¨æ­¤æ¥å£è®¾ç½®NTPçš„æœåŠ¡å™¨å’Œæ—¶åŒº
+int CLOCK_Set_NTP(int ip,short port,signed int zero);									//Èç¹ûÆôÓÃNTPĞ£Ê±£¬Ôò±ØĞëÏÈµ÷ÓÃ´Ë½Ó¿ÚÉèÖÃNTPµÄ·şÎñÆ÷ºÍÊ±Çø
 /**********************************************************************/
 //module gpio
 /**********************************************************************/
-int GPIO_Open(char *devName);															//æ‰“å¼€gpioè®¾å¤‡
-int GPIO_Close(int handle);																//å…³é—­gpioè®¾å¤‡
-int GPIO_Set_Dir(int gpio_group,int gpio_bit,int value);								//è®¾ç½®æŸä¸ªgpioçš„è¾“å…¥è¾“å‡ºåŠŸèƒ½0-input 1-output
-int GPIO_Set_Value(int gpio_group,int gpio_bit,int value);								//æ§åˆ¶è¾“å‡ºæ¨¡å¼çš„gpioè¾“å‡ºvalueçŠ¶æ€
-int GPIO_Get_Value(int gpio_group,int gpio_bit);										//è·å–è¾“å…¥æ¨¡å¼çš„gpioå£çš„å½“å‰çŠ¶æ€
-int GPIO_Control(int gpio_group,int gpio_bit,e_gpio_control enCtrl,int ms_value,int isHigh);//æ§åˆ¶è¾“å‡ºæ¨¡å¼çš„gpioæŒ‰ç…§å‚æ•°è§„å¾‹è¾“å‡ºenCtrlåˆ†ä¸ºå‘¨æœŸæ€§å’Œä¸€æ¬¡æ€§ä¸¤ç§ï¼š
-																						//å‘¨æœŸæ€§ms_valueè¡¨ç¤ºé«˜ä½å˜åŒ–çš„åœç•™æ—¶é—´
-																						//ä¸€æ¬¡æ€§å½“ms_valueä¸º0æ—¶åˆ™è¡¨ç¤ºä¸€ç›´è®¾ç½®æˆisHighçŠ¶æ€ï¼Œms_valueä¸ä¸º0åˆ™è¡¨ç¤ºåœ¨ms_valueæ—¶é—´å†…ä¿æŒisHighçŠ¶æ€ï¼Œè¿‡äº†æ—¶é—´çŠ¶æ€åœç•™åœ¨ç¿»è½¬çš„çŠ¶æ€
+int GPIO_Open(char *devName);															//´ò¿ªgpioÉè±¸
+int GPIO_Close(int handle);																//¹Ø±ÕgpioÉè±¸
+int GPIO_Set_Dir(int gpio_group,int gpio_bit,int value);								//ÉèÖÃÄ³¸ögpioµÄÊäÈëÊä³ö¹¦ÄÜ0-input 1-output
+int GPIO_Set_Value(int gpio_group,int gpio_bit,int value);								//¿ØÖÆÊä³öÄ£Ê½µÄgpioÊä³övalue×´Ì¬
+int GPIO_Get_Value(int gpio_group,int gpio_bit);										//»ñÈ¡ÊäÈëÄ£Ê½µÄgpio¿ÚµÄµ±Ç°×´Ì¬
+int GPIO_Control(int gpio_group,int gpio_bit,e_gpio_control enCtrl,int ms_value,int isHigh);//¿ØÖÆÊä³öÄ£Ê½µÄgpio°´ÕÕ²ÎÊı¹æÂÉÊä³öenCtrl·ÖÎªÖÜÆÚĞÔºÍÒ»´ÎĞÔÁ½ÖÖ£º
+																						//ÖÜÆÚĞÔms_value±íÊ¾¸ßµÍ±ä»¯µÄÍ£ÁôÊ±¼ä
+																						//Ò»´ÎĞÔµ±ms_valueÎª0Ê±Ôò±íÊ¾Ò»Ö±ÉèÖÃ³ÉisHigh×´Ì¬£¬ms_value²»Îª0Ôò±íÊ¾ÔÚms_valueÊ±¼äÄÚ±£³ÖisHigh×´Ì¬£¬¹ıÁËÊ±¼ä×´Ì¬Í£ÁôÔÚ·­×ªµÄ×´Ì¬
 /**********************************************************************/
 //module system
 /**********************************************************************/
-int SYSTEM_Initialize(void);															//åˆå§‹åŒ–ç³»ç»Ÿ
-int SYSTEM_Cleanup(void);																//ç³»ç»Ÿæ¨¡å—é€€å‡º
-int SYSTEM_Get_Mem(int *total,int *free);												//è·å–å†…å­˜æ€»å®¹é‡ï¼Œå‰©ä½™å®¹é‡å’Œå ç”¨ç‡
-int SYSTEM_Get_Cpu(void);																//è·å–cpuå ç”¨ç‡
-int SYSTEM_Set_Reboot(void);															//é‡å¯æ“ä½œç³»ç»Ÿ
-int SYSTEM_Set_RestartApp(void);														//é‡å¯åº”ç”¨ç¨‹åº
-int SYSTEM_Get_Run(void);																//è·å–å½“å‰æ˜¯å¦è¦rebootçš„æ ‡å¿—
-int SYSTEM_Command(char *command);														//ç³»ç»Ÿå‘½ä»¤è°ƒç”¨ï¼Œå°è£…äº†systemåœ¨æ‰§è¡Œæ—¶åŠ é”
-int SYSTEM_Register_Callback(SYSTEM_CALLBACK system_reboot_callback);					//ç³»ç»Ÿé‡å¯çš„æ—¶å€™å›è°ƒç»™zmqclient
+int SYSTEM_Initialize(void);															//³õÊ¼»¯ÏµÍ³
+int SYSTEM_Cleanup(void);																//ÏµÍ³Ä£¿éÍË³ö
+int SYSTEM_Get_Mem(int *total,int *free);												//»ñÈ¡ÄÚ´æ×ÜÈİÁ¿£¬Ê£ÓàÈİÁ¿ºÍÕ¼ÓÃÂÊ
+int SYSTEM_Get_Cpu(void);																//»ñÈ¡cpuÕ¼ÓÃÂÊ
+int SYSTEM_Set_Reboot(void);															//ÖØÆô²Ù×÷ÏµÍ³
+int SYSTEM_Set_RestartApp(void);														//ÖØÆôÓ¦ÓÃ³ÌĞò
+int SYSTEM_Get_Run(void);																//»ñÈ¡µ±Ç°ÊÇ·ñÒªrebootµÄ±êÖ¾
+int SYSTEM_Command(char *command);														//ÏµÍ³ÃüÁîµ÷ÓÃ£¬·â×°ÁËsystemÔÚÖ´ĞĞÊ±¼ÓËø
+int SYSTEM_Register_Callback(SYSTEM_CALLBACK system_reboot_callback);					//ÏµÍ³ÖØÆôµÄÊ±ºò»Øµ÷¸øzmqclient
 
 /**********************************************************************/
 //module fifo
 /**********************************************************************/
-int FIFO_Initialize(void);																//åˆå§‹åŒ–FIFOåŠŸèƒ½æ¨¡å—
-int FIFO_Create(st_fifo_t stFifo,int iCapacity);										//åˆ›å»ºä¸€ä¸ªFIFO
-int FIFO_Write(int iHandle,char *pData,int iLen);										//å‘FIFOçš„ç¼“å†²åŒºé‡Œé¢å†™å…¥æ•°æ®
-int FIFO_Destory(int iHandle);															//é”€æ¯åˆ›å»ºçš„FIFO
-int FIFO_Request(st_fifo_t stFifo,int * pHandle,int second);							//è¯·æ±‚ä¸€ä¸ªFIFOçš„è¯»æŒ‡é’ˆ,æ­¤æ¥å£ä¼šè¿”å›æ‰€ç”³è¯·çš„FIFOçš„å¥æŸ„
-int FIFO_Get_MediaInfo(st_fifo_t stFifo,char * sps,int * sps_len,char *pps,int * pps_len);//è·å–H264çš„spsï¼Œpps
-int FIFO_Read(int iHandle,int rId,char *pData);											//è¯»å–FIFOçš„æ•°æ®
-int FIFO_Release(int iHandle,int rId);													//é‡Šæ”¾è¯·æ±‚çš„FIFOè¯»æŒ‡é’ˆ
-int FIFO_Cleanup(void);																	//FIFOæ¨¡å—å…³é—­
+int FIFO_Initialize(void);																//³õÊ¼»¯FIFO¹¦ÄÜÄ£¿é
+int FIFO_Create(st_fifo_t stFifo,int iCapacity);										//´´½¨Ò»¸öFIFO
+int FIFO_Write(int iHandle,char *pData,int iLen);										//ÏòFIFOµÄ»º³åÇøÀïÃæĞ´ÈëÊı¾İ
+int FIFO_Destory(int iHandle);															//Ïú»Ù´´½¨µÄFIFO
+int FIFO_Request(st_fifo_t stFifo,int * pHandle,int second);							//ÇëÇóÒ»¸öFIFOµÄ¶ÁÖ¸Õë,´Ë½Ó¿Ú»á·µ»ØËùÉêÇëµÄFIFOµÄ¾ä±ú
+int FIFO_Get_MediaInfo(st_fifo_t stFifo,char * sps,int * sps_len,char *pps,int * pps_len);//»ñÈ¡H264µÄsps£¬pps
+int FIFO_Read(int iHandle,int rId,char *pData);											//¶ÁÈ¡FIFOµÄÊı¾İ
+int FIFO_Release(int iHandle,int rId);													//ÊÍ·ÅÇëÇóµÄFIFO¶ÁÖ¸Õë
+int FIFO_Cleanup(void);																	//FIFOÄ£¿é¹Ø±Õ
 
-int FIFO_Register_Callback(e_fifo_h264 enStreamChn,FIFO_CALLBACK fifo_callback);		//æ³¨å†Œçº¯H264ç æµçš„å›è°ƒå‡½æ•°
+int FIFO_Register_Callback(e_fifo_h264 enStreamChn,FIFO_CALLBACK fifo_callback);		//×¢²á´¿H264ÂëÁ÷µÄ»Øµ÷º¯Êı
 
-int FIFO_Stream_Open(e_fifo_stream enStream,int iGroup,int iChn,int second);			//æ‰“å¼€æŸç§ç±»å‹ç æµçš„è½¬æ¢çº¿ç¨‹ï¼Œå¦‚æœæ˜¯çº¯H264ç æµä»å›è°ƒåé¦ˆç»™è°ƒç”¨è€…ï¼Œæ¯æ¬¡è¿”å›ä¸€å¸§ï¼ŒiGroupå’ŒiChnä»0å¼€å§‹
-int FIFO_Stream_Set_(int iHandle,char *filename,int speed,int pulltime);				//è®¾ç½®ä¸€äº›ç‰¹æ®Šçš„å‚æ•°åˆ°è½¬æ¢çº¿ç¨‹
-int FIFO_Stream_RequestID(int iHandle);													//è¯·æ±‚ä¸€ä¸ªè¯»æŒ‡é’ˆ
+int FIFO_Stream_Open(e_fifo_stream enStream,int iGroup,int iChn,int second);			//´ò¿ªÄ³ÖÖÀàĞÍÂëÁ÷µÄ×ª»»Ïß³Ì£¬Èç¹ûÊÇ´¿H264ÂëÁ÷´Ó»Øµ÷·´À¡¸øµ÷ÓÃÕß£¬Ã¿´Î·µ»ØÒ»Ö¡£¬iGroupºÍiChn´Ó0¿ªÊ¼
+int FIFO_Stream_Set_(int iHandle,char *filename,int speed,int pulltime);				//ÉèÖÃÒ»Ğ©ÌØÊâµÄ²ÎÊıµ½×ª»»Ïß³Ì
+int FIFO_Stream_RequestID(int iHandle);													//ÇëÇóÒ»¸ö¶ÁÖ¸Õë
 //int FIFO_Stream_Write(int iHandle,int iID,char *pData,int iLen);
-int FIFO_Stream_Read(int iHandle,int iID,char *pData);									//è¯»å–è½¬æ¢åçš„æµæ•°æ®
-int FIFO_Stream_ReleaseID(int iHandle,int iID);											//é‡Šæ”¾è¯»æŒ‡é’ˆ
-int FIFO_Stream_Close(int iHandle);														//åœæ­¢ç æµçš„è½¬æ¢
+int FIFO_Stream_Read(int iHandle,int iID,char *pData);									//¶ÁÈ¡×ª»»ºóµÄÁ÷Êı¾İ
+int FIFO_Stream_ReleaseID(int iHandle,int iID);											//ÊÍ·Å¶ÁÖ¸Õë
+int FIFO_Stream_Close(int iHandle);														//Í£Ö¹ÂëÁ÷µÄ×ª»»
 
 void FIFO_Stream_Get_AviHead(char *head_buf,int *ptr,int reso,int frame);
 void FIFO_Stream_Get_HeadIndex(char *index_buf,int *index_len,int len);
 void FIFO_Stream_Get_DataIndex(int isAudio,char idrFlag,char *index_buf,int *index_len,int len);
 
-int FIFO_Alarm_Write(st_alarm_upload_t *cInfo);											//å†™å…¥ä¸€æ¡æŠ¥è­¦æ¶ˆæ¯
-int FIFO_Alarm_Get_Wpoint(e_fifo_read enRead);														//è·å–å½“å‰çš„æŠ¥è­¦å†™æŒ‡é’ˆ
+int FIFO_Alarm_Write(st_alarm_upload_t *cInfo);											//Ğ´ÈëÒ»Ìõ±¨¾¯ÏûÏ¢
+int FIFO_Alarm_Get_Wpoint(e_fifo_read enRead);														//»ñÈ¡µ±Ç°µÄ±¨¾¯Ğ´Ö¸Õë
 int FIFO_Alarm_Read(int iReader,st_alarm_upload_t *cInfo);								//
 /**********************************************************************/
 //module net
 /**********************************************************************/
-int TCP_Server_Create(short sPort,int iMaxConn,int iTimeout);							//åˆ›å»ºä¸€ä¸ªtcpçš„server
-int TCP_Server_Wait(int handle,int *pSock,int iRcvSize,NET_RECEIVE_CALLBACK,NET_PROTOCOL_CALLBACK);//tcp serverç­‰å¾…ä¸€ä¸ªè¿æ¥ æ•°æ®æ¥æ”¶å’Œåè®®å¤„ç†åœ¨å›è°ƒä¸­å®Œæˆ
-int TCP_Server_Send(int handle,int link,char *pData,int iLen);							//åœ¨æŸä¸ªè¿æ¥ä¸Šå‘é€æ•°æ®
-int TCP_Server_GetLinkIP(int handle,int link,int ip);									//è·å–è¿æ¥è¿‡æ¥çš„clientçš„ip
-int TCP_Server_Finish(int handle,int link);												//æ–­å¼€æŸä¸ªè¿æ¥
-int TCP_Server_Destory(int handle);														//é”€æ¯tcp serverã€‚
+int TCP_Server_Create(short sPort,int iMaxConn,int iTimeout);							//´´½¨Ò»¸ötcpµÄserver
+int TCP_Server_Wait(int handle,int *pSock,int iRcvSize,NET_RECEIVE_CALLBACK,NET_PROTOCOL_CALLBACK);//tcp serverµÈ´ıÒ»¸öÁ¬½Ó Êı¾İ½ÓÊÕºÍĞ­Òé´¦ÀíÔÚ»Øµ÷ÖĞÍê³É
+int TCP_Server_Send(int handle,int link,char *pData,int iLen);							//ÔÚÄ³¸öÁ¬½ÓÉÏ·¢ËÍÊı¾İ
+int TCP_Server_GetLinkIP(int handle,int link,int ip);									//»ñÈ¡Á¬½Ó¹ıÀ´µÄclientµÄip
+int TCP_Server_Finish(int handle,int link);												//¶Ï¿ªÄ³¸öÁ¬½Ó
+int TCP_Server_Destory(int handle);														//Ïú»Ùtcp server¡£
 
-int TCP_Client_Create(int iIp,short sPort,int iTimeout,int iRcvSize,NET_RECEIVE_CALLBACK,NET_PROTOCOL_CALLBACK);//åˆ›å»ºä¸€ä¸ªtcp client æ•°æ®æ¥æ”¶å’Œåè®®å¤„ç†åœ¨å›è°ƒä¸­å®Œæˆ
-int TCP_Client_BindPYH(int iSock,char * phy);											//tcp clientç«¯ç»‘å®šæŸä¸ªç½‘å¡ï¼Œä¸»è¦ä¸ºæ— çº¿è®¾å¤‡å‡†å¤‡çš„æ¥å£
-int TCP_Client_Send(int iSock,char *pData,int iLen);									//åœ¨æ­¤è¿æ¥ä¸Šå‘é€æ•°æ®
-int TCP_Client_Destory(int iSock);														//æ–­å¼€tcpè¿æ¥ï¼Œé”€æ¯tcp client
+int TCP_Client_Create(int iIp,short sPort,int iTimeout,int iRcvSize,NET_RECEIVE_CALLBACK,NET_PROTOCOL_CALLBACK);//´´½¨Ò»¸ötcp client Êı¾İ½ÓÊÕºÍĞ­Òé´¦ÀíÔÚ»Øµ÷ÖĞÍê³É
+int TCP_Client_BindPHY(int iSock,char * phy);											//tcp client¶Ë°ó¶¨Ä³¸öÍø¿¨£¬Ö÷ÒªÎªÎŞÏßÉè±¸×¼±¸µÄ½Ó¿Ú
+int TCP_Client_Send(int iSock,char *pData,int iLen);									//ÔÚ´ËÁ¬½ÓÉÏ·¢ËÍÊı¾İ
+int TCP_Client_Destory(int iSock);														//¶Ï¿ªtcpÁ¬½Ó£¬Ïú»Ùtcp client
 
-int UDP_Server_Create(short sPort,int iRcvSize,UDP_PROTOCOL_CALLBACK);					//åˆ›å»ºä¸€ä¸ªUDP server
-int UDP_Server_Send(int iSock,int iIP,short sPort,char *pData,int iLen);				//å‘é€udpæ•°æ®
-int UDP_Server_Destory(int iSock);														//é”€æ¯udp server
+int UDP_Server_Create(short sPort,int iRcvSize,UDP_PROTOCOL_CALLBACK);					//´´½¨Ò»¸öUDP server
+int UDP_Server_Send(int iSock,int iIP,short sPort,char *pData,int iLen);				//·¢ËÍudpÊı¾İ
+int UDP_Server_Destory(int iSock);														//Ïú»Ùudp server
 
-int NET_Initialize(void);																//åˆå§‹åŒ–ç³»ç»Ÿç½‘ç»œ
-int NET_Get_WanStatus(void);															//ç”±æ­¤æ¥å£æ¥åˆ¤æ–­è®¾å¤‡æ˜¯å¦èƒ½å¤Ÿè¿æ¥åˆ°å…¬ç½‘
-int NET_Get_RouteIP(char * cIP);														//è·å–å½“å‰è·¯ç”±ä½¿ç”¨çš„ç½‘å¡çš„ip è¿”å›å€¼intç±»å‹çš„ipï¼ŒcIPæ˜¯å­—ç¬¦ä¸²ç±»å‹çš„ipå¦‚"192.168.0.230"
-int NET_Get_Status(st_net_status_t * status);											//è·å–å„ä¸ªç½‘å¡çš„çŠ¶æ€
-int NET_Get_WifiList(int iMaxList,st_wifi_list_t *);									//è·å–wifiç½‘ç»œåˆ—è¡¨ æœ€å¤šæŸ¥è¯¢iMaxListæ¡æ”¾å…¥wifiåˆ—è¡¨é‡Œé¢ï¼Œè¿”å›å®é™…æŸ¥è¯¢å‡ºæ¥çš„æ¡æ•°
-int NET_Set_Wifi(st_wifi_list_t *);														//è®¾ç½®è¿æ¥wifiå‚æ•°
-int Net_Get_WifiLink_Status(void);														//è®¾ç½®wifiè¿æ¥çš„çŠ¶æ€ï¼Œ0-æœªå¼€å§‹+æœªä½¿èƒ½(æ’ç€ç½‘çº¿åŒæ—¶wifiæœªè®¾ç½®)ï¼Œ1-æœªå¼€å§‹+å·²ä½¿èƒ½(wifiå‚æ•°å·²ç»è®¾ç½®ä½†æ’ç€ç½‘çº¿)ï¼Œ2-å¼€å§‹+æœªä½¿èƒ½(ç½‘çº¿æ‹”æ‰äº†ä½†wifiæœªè®¾ç½®)ï¼Œ3-å¼€å§‹è¿æ¥æˆ–è€…æ­£åœ¨è¿æ¥ï¼Œ4-è¿æ¥æˆåŠŸ
-int NET_Cleanup(void);																	//ååˆå§‹åŒ–ç³»ç»Ÿç½‘ç»œ
+int NET_Initialize(void);																//³õÊ¼»¯ÏµÍ³ÍøÂç
+int NET_Get_WanStatus(void);															//ÓÉ´Ë½Ó¿ÚÀ´ÅĞ¶ÏÉè±¸ÊÇ·ñÄÜ¹»Á¬½Óµ½¹«Íø
+int NET_Get_RouteIP(char * cIP);														//»ñÈ¡µ±Ç°Â·ÓÉÊ¹ÓÃµÄÍø¿¨µÄip ·µ»ØÖµintÀàĞÍµÄip£¬cIPÊÇ×Ö·û´®ÀàĞÍµÄipÈç"192.168.0.230"
+int NET_Get_Status(st_net_status_t * status);											//»ñÈ¡¸÷¸öÍø¿¨µÄ×´Ì¬
+int NET_Get_WifiList(int iMaxList,st_wifi_list_t *);									//»ñÈ¡wifiÍøÂçÁĞ±í ×î¶à²éÑ¯iMaxListÌõ·ÅÈëwifiÁĞ±íÀïÃæ£¬·µ»ØÊµ¼Ê²éÑ¯³öÀ´µÄÌõÊı
+int NET_Set_Wifi(st_wifi_list_t *);														//ÉèÖÃÁ¬½Ówifi²ÎÊı
+int Net_Get_WifiLink_Status(void);														//ÉèÖÃwifiÁ¬½ÓµÄ×´Ì¬£¬0-Î´¿ªÊ¼+Î´Ê¹ÄÜ(²å×ÅÍøÏßÍ¬Ê±wifiÎ´ÉèÖÃ)£¬1-Î´¿ªÊ¼+ÒÑÊ¹ÄÜ(wifi²ÎÊıÒÑ¾­ÉèÖÃµ«²å×ÅÍøÏß)£¬2-¿ªÊ¼+Î´Ê¹ÄÜ(ÍøÏß°ÎµôÁËµ«wifiÎ´ÉèÖÃ)£¬3-¿ªÊ¼Á¬½Ó»òÕßÕıÔÚÁ¬½Ó£¬4-Á¬½Ó³É¹¦
+int NET_Cleanup(void);																	//·´³õÊ¼»¯ÏµÍ³ÍøÂç
+int NET_Register_Callback(SOUND_CALLBACK sound_callback);		//×¢²á´¿H264ÂëÁ÷µÄ»Øµ÷º¯Êı
 
 int RTSP_Options(int iSock,char *pData,int iLen,char *pOut);							//
 int RTSP_Describe(int iSock,char *pData,int iLen,e_rtsp_type enRtsp,void *pAttr,char *pOut);
@@ -120,39 +121,40 @@ int RTSP_Teardown(int iSock,char *pData,int iLen,char *pOut);
 int RTSP_SetParameter(int iSock,char *pData,int iLen,char *pOut);
 int RTSP_SetError(int iSock,char *pData,int iLen,int error,char *pOut);
 
-int gethostbyname_my(char * host,char * ip);											//è·å–åŸŸåçš„ip
-int searchStr(char *src,char *dst,char *content,int add);								//è·å–æ–‡æœ¬å­—ç¬¦ä¸²
+int gethostbyname_my(char * host,char * ip);											//»ñÈ¡ÓòÃûµÄip
+int searchStr(char *src,char *dst,char *content,int add);								//»ñÈ¡ÎÄ±¾×Ö·û´®
+
 /**********************************************************************/
 //module Uart
 /**********************************************************************/
-int UART_Open(char * pName,UART_RECEIVE_CALLBACK receive,UART_PROTOCOL_CALLBACK protocol);//æ‰“å¼€ä¸²å£
-int UART_Set_Attr(int handle,st_uart_attr_t * attr,st_485_ctrl_t *ctrl);				//è®¾ç½®ä¸²å£å±æ€§
-int UART_Send(int handle,char * pData,int iLen);										//ä»ä¸²å£å‘é€æ•°æ®
-int UART_Close(int handle);																//å…³é—­ä¸²å£
+int UART_Open(char * pName,UART_RECEIVE_CALLBACK receive,UART_PROTOCOL_CALLBACK protocol);//´ò¿ª´®¿Ú
+int UART_Set_Attr(int handle,st_uart_attr_t * attr,st_485_ctrl_t *ctrl);				//ÉèÖÃ´®¿ÚÊôĞÔ
+int UART_Send(int handle,char * pData,int iLen);										//´Ó´®¿Ú·¢ËÍÊı¾İ
+int UART_Close(int handle);																//¹Ø±Õ´®¿Ú
 /**********************************************************************/
 //module Motor
 /**********************************************************************/
 int MOTOR_Send(char * pData,int iLen);
-//iCmdå–å€¼ï¼šåœæ­¢0,ä¸Š1,ä¸‹2,å·¦3,å³4,å·¦ä¸Š5,å·¦ä¸‹6,å³ä¸Š7,å³ä¸‹8,//å…‰åœˆè‡ªåŠ¨9,å…‰åœˆå¼€10 open,å…‰åœˆå…³11 close,å…‰åœˆå˜åŒ–åœæ­¢12,
-//ç„¦ç‚¹è¿‘13 near,ç„¦ç‚¹è¿œ14 far,ç„¦ç‚¹å˜åŒ–åœæ­¢15,å˜å€å°16 IN,å˜å€å¤§17 OUT,å˜å€å˜åŒ–åœæ­¢18,//è‡ªåŠ¨å¼€å§‹19,è‡ªåŠ¨åœæ­¢20,
-//é›¨åˆ·å¼€21,é›¨åˆ·å…³22,ç¯å…‰å¼€23,ç¯å…‰å…³24,è°ƒç”¨é¢„ç½®ç‚¹25,è®¾ç½®é¢„ç½®ç‚¹26,æ¸…é™¤é¢„ç½®ç‚¹27,
-//æ¨¡å¼å¼€28,æ¨¡å¼å…³29,è¿è¡Œæ¨¡å¼30,180åº¦ç¿»è½¬31,æ¸…é™¤æ‰€æœ‰é¢„ç½®ä½32,æ¸…é™¤æ‰€æœ‰é¢„ç½®ä½33
-//iSpeedäº‘å°è½¬åŠ¨é€Ÿåº¦ï¼Œé»˜è®¤63
-//iParamé¢„ç½®ä½
+//iCmdÈ¡Öµ£ºÍ£Ö¹0,ÉÏ1,ÏÂ2,×ó3,ÓÒ4,×óÉÏ5,×óÏÂ6,ÓÒÉÏ7,ÓÒÏÂ8,//¹âÈ¦×Ô¶¯9,¹âÈ¦¿ª10 open,¹âÈ¦¹Ø11 close,¹âÈ¦±ä»¯Í£Ö¹12,
+//½¹µã½ü13 near,½¹µãÔ¶14 far,½¹µã±ä»¯Í£Ö¹15,±ä±¶Ğ¡16 IN,±ä±¶´ó17 OUT,±ä±¶±ä»¯Í£Ö¹18,//×Ô¶¯¿ªÊ¼19,×Ô¶¯Í£Ö¹20,
+//ÓêË¢¿ª21,ÓêË¢¹Ø22,µÆ¹â¿ª23,µÆ¹â¹Ø24,µ÷ÓÃÔ¤ÖÃµã25,ÉèÖÃÔ¤ÖÃµã26,Çå³ıÔ¤ÖÃµã27,
+//Ä£Ê½¿ª28,Ä£Ê½¹Ø29,ÔËĞĞÄ£Ê½30,180¶È·­×ª31,Çå³ıËùÓĞÔ¤ÖÃÎ»32,Çå³ıËùÓĞÔ¤ÖÃÎ»33
+//iSpeedÔÆÌ¨×ª¶¯ËÙ¶È£¬Ä¬ÈÏ63
+//iParamÔ¤ÖÃÎ»
 int MOTOR_Control(int iChn, int iCmd,int iSpeed,int iParam);
 /**********************************************************************/
 //module Utility
 /**********************************************************************/
-int UTILITY_MD5(unsigned char *Src, unsigned char *dst, int len);						//MD5åŠ å¯†ç®—æ³•
-int UTILITY_HMAC1_IOV(st_iov_t* iov,int iov_num,unsigned char* key,int key_len,unsigned char* dst);//å“ˆå¸ŒåŠ å¯†ç®—æ³•
-int UTILITY_BASE64_Encode(unsigned char *src,int len,char *dst);						//base64åŠ å¯†ç®—æ³•
-int UTILITY_MEDIA_Convert_Size(int resolution,int *width,int *high);					//åˆ†è¾¨ç‡è½¬æ¢æˆå®½é«˜
-int UTILITY_MEDIA_Convert_Format(int reso);												//ç¼–ç å‚æ•°çš„åˆ†è¾¨ç‡ï¼ˆç”±å°åˆ°å¤§è¡¨ç¤ºåˆ†è¾¨ç‡ç”±å°åˆ°å¤§),è½¬æ¢æˆå¡å°”åè®®ä½¿ç”¨çš„åˆ†è¾¨ç‡çš„å®šä¹‰è§„åˆ™
-int UTILITY_MEDIA_Convert_Resolution(int format);										//å¡å°”åè®®ä¼ ä¸‹æ¥çš„å‚æ•°è½¬åŒ–æˆç¨‹åºä¸­å®é™…åº”ç”¨çš„åˆ†è¾¨ç‡ï¼ˆç”±å°åˆ°å¤§è¡¨ç¤ºåˆ†è¾¨ç‡ç”±å°åˆ°å¤§)
+int UTILITY_MD5(unsigned char *Src, unsigned char *dst, int len);						//MD5¼ÓÃÜËã·¨
+int UTILITY_HMAC1_IOV(st_iov_t* iov,int iov_num,unsigned char* key,int key_len,unsigned char* dst);//¹şÏ£¼ÓÃÜËã·¨
+int UTILITY_BASE64_Encode(unsigned char *src,int len,char *dst);						//base64¼ÓÃÜËã·¨
+int UTILITY_MEDIA_Convert_Size(int resolution,int *width,int *high);					//·Ö±æÂÊ×ª»»³É¿í¸ß
+int UTILITY_MEDIA_Convert_Format(int reso);												//±àÂë²ÎÊıµÄ·Ö±æÂÊ£¨ÓÉĞ¡µ½´ó±íÊ¾·Ö±æÂÊÓÉĞ¡µ½´ó),×ª»»³É¿¨¶ûĞ­ÒéÊ¹ÓÃµÄ·Ö±æÂÊµÄ¶¨Òå¹æÔò
+int UTILITY_MEDIA_Convert_Resolution(int format);										//¿¨¶ûĞ­Òé´«ÏÂÀ´µÄ²ÎÊı×ª»¯³É³ÌĞòÖĞÊµ¼ÊÓ¦ÓÃµÄ·Ö±æÂÊ£¨ÓÉĞ¡µ½´ó±íÊ¾·Ö±æÂÊÓÉĞ¡µ½´ó)
 int UTILITY_B64_ntop(unsigned char const *,size_t, char *,size_t);
 int UTILITY_B64_pton(char const *,unsigned char *,size_t);
-int UTILITY_String_IP(char *src,char *cip,int *iip);									//å­—ç¬¦ä¸²ipè½¬æ¢æˆ4å­—èŠ‚åå…­è¿›åˆ¶ipæˆ–intç±»å‹ip
-int UTILITY_String_MAC(char *src,char *char_mac,char *hex_mac);							//å­—ç¬¦ä¸²macè½¬æ¢æˆå°å†™macå­—ç¬¦ä¸²ï¼Œå’Œåå…­è¿›åˆ¶mac
+int UTILITY_String_IP(char *src,char *cip,int *iip);									//×Ö·û´®ip×ª»»³É4×Ö½ÚÊ®Áù½øÖÆip»òintÀàĞÍip
+int UTILITY_String_MAC(char *src,char *char_mac,char *hex_mac);							//×Ö·û´®mac×ª»»³ÉĞ¡Ğ´mac×Ö·û´®£¬ºÍÊ®Áù½øÖÆmac
 
 #ifdef __cplusplus
 }

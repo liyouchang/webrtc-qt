@@ -19,7 +19,7 @@
 #endif//arm
 
 
-int kVersion = 62;
+int kVersion = 63;
 
 
 int main()
@@ -107,6 +107,7 @@ int main()
     delete device;
     delete terminal;
 #endif //arm
+    LOG(INFO)<<"quit main "<<mainRet;
 
     return mainRet;
 
