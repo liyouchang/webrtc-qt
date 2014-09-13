@@ -254,6 +254,7 @@ void P2PConductor::AddIceServers(std::string jstrServers)
     //每次都重新添加
     g_servers.clear();
     std::vector<Json::Value> jServersArray;
+    LOG_F(INFO)<<" add ice servers "<< jstrServers;
     if(JsonArrayToValueVector(jservers,&jServersArray)){
         for(int i=0;i<jServersArray.size();i++){
             Json::Value jserver = jServersArray[i];

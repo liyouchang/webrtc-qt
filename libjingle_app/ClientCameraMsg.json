@@ -59,7 +59,7 @@ camera-->client
 {
     "type":"tunnel",
     "command":"wifi_status",
-    "status":""
+    "status":4
 }
 
 4.get camera wifi info
