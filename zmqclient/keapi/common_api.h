@@ -52,7 +52,7 @@ int SYSTEM_Set_RestartApp(void);														//重启应用程序
 int SYSTEM_Get_Run(void);																//获取当前是否要reboot的标志
 int SYSTEM_Command(char *command);														//系统命令调用，封装了system在执行时加锁
 int SYSTEM_Register_Callback(SYSTEM_CALLBACK system_reboot_callback);					//系统重启的时候回调给zmqclient
-
+int SYSTEM_Get_Model(char *dev_Model);													//获取设备型号，输入参数最小16字节
 /**********************************************************************/
 //module fifo
 /**********************************************************************/

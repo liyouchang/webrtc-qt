@@ -10,9 +10,9 @@
 const int kHeartInterval = 60000;//ms
 //const int kHeartInterval = 3000;//ms
 const int kHeartReconnect = 1;//1次没有收到心跳则重连
-CameraClient::CameraClient(std::string mac,std::string ver):
+CameraClient::CameraClient(std::string mac, std::string ver, std::string terminalType):
     mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),
-    heartCount(0),clientVersion(ver),oldNetType(-1),oldIp(-1)
+    heartCount(0),clientVersion(ver),oldNetType(-1),oldIp(-1),terminalType(terminalType)
 {
     comm_thread_ = talk_base::Thread::Current();
 }
@@ -24,6 +24,7 @@ void CameraClient::Login()
     jmessage["type"] = "Terminal_Login";
     jmessage["MAC"] = mac_;
     jmessage["Version"] = clientVersion;
+    jmessage["TermType"] = terminalType;
     std::string msg = writer.write(jmessage);
     this->SendToPeer(messageServer,msg);
 }
@@ -42,6 +43,7 @@ void CameraClient::SendAlarm(int alarmType, const std::string &alarmInfo,
     jmessage["DateTime"] = kaerp2p::GetCurrentDatetime("%F %T");
 
     std::string msg = writer.write(jmessage);
+//    LOG_F(INFO)<<" send alarm "<<msg;
     this->SendToPeer(alarmServer,msg);
 }
 

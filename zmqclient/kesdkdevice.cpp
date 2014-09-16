@@ -5,8 +5,8 @@
 #include <time.h>
 #include <algorithm>
 #include <iostream>
-#include <iconv.h>
 #include <errno.h>
+
 
 #include "talk/base/logging.h"
 #include "talk/base/stringutils.h"
@@ -24,6 +24,8 @@
 #include "keapi/web_api.h"
 #include "keapi/alarm_api.h"
 #include "keapi/platform_api.h"
+#include "keapi/unicode.h"
+
 
 #include "libjingle_app/defaults.h"
 #include "libjingle_app/jsonconfig.h"
@@ -39,6 +41,7 @@
 //    FRAM_VGA = 7,
 //    FRAM_720P = 10
 //};
+#define WEB
 
 const int kNullStreamHandle = -1;
 const int kCheckStreamDelay = 60000;
@@ -106,7 +109,10 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
 
     STORE_Initialize();
     ALARM_Initialize();
+
+#ifdef WEB
     WEB_Initialize();
+#endif
 
     PLATFORM_Tools_Open();
     PLATFORM_Update_Open();
@@ -151,7 +157,9 @@ KeSdkDevice::~KeSdkDevice()
     PLATFORM_Update_Close();
 
     PLATFORM_Tools_Close();
+#ifdef WEB
     WEB_Cleanup();
+#endif
 
     ALARM_Cleanup();
     STORE_Cleanup();
@@ -207,7 +215,7 @@ void KeSdkDevice::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t,
                                  const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
-    LOG(INFO)<<"KeSdkDevice::OnTunnelOpened---"<<peer_id;
+//    LOG(INFO)<<"KeSdkDevice::OnTunnelOpened---"<<peer_id;
     KeSdkProcess *process = new KeSdkProcess(peer_id,this);
     this->AddMsgProcess(process);
 }
@@ -220,6 +228,7 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
     int dataPos =  sizeof(KEFrameHead);
 
     if(head->frameLen == len - dataPos){
+//        LOG_F(INFO) << "talk data " << len;
         MEDIA_Audio_Talk(const_cast<char *>(data+dataPos),head->frameLen);
     }else{
         LOG_F(WARNING)<<"tal from "<<peer_id<<" frame format error";
@@ -377,8 +386,8 @@ void KeSdkDevice::CheckCloseStream_d()
     int audioCount = 0;
 
     {
-        talk_base::CritScope cs( &crit_ );
-        for( int i = 0 ; i < processes_.size() ; i++ ){
+        talk_base::CritScope cs(&crit_);
+        for(int i = 0 ; i < processes_.size() ; i++) {
             kaerp2p::KeMessageProcessCamera * camProcess =
                     static_cast<kaerp2p::KeMessageProcessCamera *>(processes_[i]);
             if(camProcess->video_status == kLevelMainStream){
@@ -404,6 +413,8 @@ void KeSdkDevice::CheckCloseStream_d()
     if(subStreamCount == 0 && video2_handle_ != kNullStreamHandle){
         LOG_F(INFO) << " close sub video " << video2_handle_;
         FIFO_Stream_Close(video2_handle_);
+        LOG_F(INFO) << "sub video closed";
+
         video2_handle_ = kNullStreamHandle;
     }
     if(extStreamCount == 0 && video3_handle_ != kNullStreamHandle){
@@ -430,44 +441,13 @@ void KeSdkDevice::CheckNetIp_d()
         oldIp = newIp;
     }
 }
-static int Utf8ToGb2312(char *sOut, int iMaxOutLen, const char *sIn, int iInLen)
-{
-    char *pIn = (char *)sIn;
-    char *pOut = sOut;
-    size_t ret;
-    size_t iLeftLen=iMaxOutLen;
-    iconv_t cd;
-
-    cd = iconv_open("gb2312", "utf-8");
-    if (cd == (iconv_t) - 1)
-    {
-        return -1;
-    }
-    size_t iSrcLen=iInLen;
-    ret = iconv(cd, &pIn,&iSrcLen, &pOut,&iLeftLen);
-    if (ret == (size_t) - 1)
-    {
-        iconv_close(cd);
-        return -1;
-    }
-
-    iconv_close(cd);
-
-    return (iMaxOutLen - iLeftLen);
-}
 
 bool KeSdkDevice::SetOsdTitle(const std::string &title)
 {
     TITLEOSD osdTitle;
     CONFIG_Get(CONFIG_TYPE_OSDTITLE,(void *)&osdTitle);	//获取某类参数
-    LOG_F(INFO)<<" get osd "<< osdTitle.Contert <<" enable "<<osdTitle.Enable;
-
-
-    Utf8ToGb2312((char *)osdTitle.Contert,32,title.c_str(),title.length());
-
-
-    //    talk_base::strcpyn((char *)osdTitle.Contert,32,title.c_str(),title.length());
-
+    u2g(osdTitle.Contert,(const unsigned char *)title.c_str());
+//    memcpy(osdTitle.Contert,title.c_str(),title.length());
     CONFIG_Set(CONFIG_TYPE_OSDTITLE,(void *)&osdTitle);
     return true;
 }
@@ -502,24 +482,31 @@ std::string KeSdkDevice::GetMacAddress()
     return ret;
 }
 
+std::string KeSdkDevice::GetTerminalType()
+{
+    char devModel[64];
+    SYSTEM_Get_Model(devModel);
+    return devModel;
+}
+
 void KeSdkDevice::SetNtp(const std::string &ntpIp, int port, const std::string &zone)
 {
     int iNetIp = talk_base::SocketAddress::StringToIP(ntpIp);
 
     int zonesecond = 0*60*60;
-    if(zone.size() > 2 ){
+    if( zone.size() > 2 ){
         int pos = zone.find(':');
         if(pos != std::string::npos){
             int hour = atoi(zone.substr(1,pos).c_str());
             int minute = atoi(zone.substr(pos+1).c_str());
             if(zone[0] == '+'){
                 zonesecond = hour*60*60 + minute*60;
-            }else if(zone[0] == '-'){
+            } else if (zone[0] == '-') {
                 zonesecond = -(hour*60*60 + minute*60);
-            }else{
+            } else {
                 LOG_F(WARNING)<<" zone format error";
             }
-        }else{
+        } else {
             LOG_F(WARNING)<<" zone format error";
         }
     }
@@ -530,7 +517,6 @@ void KeSdkDevice::SetNtp(const std::string &ntpIp, int port, const std::string &
 
 void KeSdkDevice::InitVideoInfo()
 {
-
     struct MEDIAPARAM media;
     CONFIG_Get(CONFIG_TYPE_MEDIA,(void *)&media);
     //    printf("resolution %d frame_rate %d rate_ctrl_mode %d bitrate %d piclevel %d\n",
@@ -693,8 +679,9 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
         LOG_F(WARNING)<<"input time  format error";
         return false;
     }
+    LOG_F(INFO)<<"get file start 1";
+    int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,0,NULL);
 
-    int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,100000,NULL);
     if(list_num <= 0){
         *totalNum = 0;
         LOG_F(WARNING)<<"No record found";
@@ -707,11 +694,14 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
         return false;
     }
     st_store_list_t * stList  = new st_store_list_t[list_num];
+    LOG_F(INFO)<<"get file start 2";
+
     STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,list_num,stList);
+    LOG_F(INFO)<<"get file end";
 
     int copyNum = std::min(list_num-offset,toQuery);
 
-    for (int i = offset ; i < offset + copyNum ; i++) {
+    for(int i = offset ; i < offset + copyNum ; i++) {
         Json::Value jrecord;
         jrecord["fileName"] = stList[i].filePath;
         jrecord["fileEndTime"] = ClockToString(stList[i].stEndTime);
@@ -726,9 +716,9 @@ bool KeSdkDevice::SetArmingStatus(int status)
 {
     LOG_F(INFO) << status;
     if(status == 1){
-        STORE_Start_Plan(0);
+        ALARM_MD_Defense(0);
     }else if(status == 0){
-        STORE_Stop_Plan(0);
+        ALARM_MD_UnDefense(0);
     }else{
         LOG_F(WARNING)<<"status param error";
         return false;
@@ -834,7 +824,6 @@ int KeSdkDevice::RegisterCallBack::AlarmCallback(st_alarm_upload_t *alarmInfo, c
     RegisterCallBack::Instance()->SignalTerminalAlarm(alarmInfo->enAlarm,alarmInfo->cInfo,
                                                       picBase64Data);
     return 0;
-
 }
 
 
@@ -853,10 +842,10 @@ void KeSdkProcess::ConnectMedia(int video, int audio, int talk)
                  " listen-"<<audio<<" talk-"<<talk<<"; frameResolution="<<
                  this->videoInfo_.frameResolution<<" ;framerate="<<videoInfo_.frameRate;
 
-    if(video == 0){//stop
+    if( video == 0 ) {//stop
         video_status = video;
     }
-    else if(0 == video_status){
+    else if( 0 == video_status ) {
         this->RespAskMediaReq(this->videoInfo_);
         video_status = video;
         //try to open stream

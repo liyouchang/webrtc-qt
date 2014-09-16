@@ -18,18 +18,14 @@
 #include "keapi/common_api.h"
 #endif//arm
 
-
-int kVersion = 63;
-
+int kVersion = 65;
 
 int main()
 {
     //read config
-//    std::string configFilePath = kaerp2p::GetAppFilePath("config.json");
     std::string configFilePath = "/root/run/config.json";
-    if(!JsonConfig::Instance()->FromFile(configFilePath)){
-        LOG_ERR(LERROR)<<" get router value error. ";
-        return 3;
+    if( !JsonConfig::Instance()->FromFile(configFilePath)){
+        std::cout<<" get config from file error  " << configFilePath << std::endl;
     }
 
     Json::Value mac_value = JsonConfig::Instance()->Get("camera.mac","");
@@ -46,7 +42,7 @@ int main()
                                             jlogsaveFile.asString().c_str());
 
     //Json::Value jntp = JsonConfig::Instance()->Get("ntpconfig","");
-    LOG(INFO) << " the config file path is "<< configFilePath;
+//    LOG(INFO) << " the config file path is "<< configFilePath;
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
     std::string clientVer = kaerp2p::ToStringVersion(kVersion);
     LOG(INFO)<<"zmqclient current version is "<<clientVer;
@@ -63,7 +59,7 @@ int main()
     GetBoolFromJson(JsonConfig::Instance()->Get("setNet",false),&isSetNet);
 
     std::string strRouter = router_value.asString();
-    if(strRouter.empty()){
+    if(strRouter.empty()) {
         LOG_ERR(LERROR)<<" get router value error. ";
         return 3;
     }
@@ -72,7 +68,6 @@ int main()
 
 #else
     KeSdkDevice * device = new KeSdkDevice();
-    //HisiMediaDevice * device = new HisiMediaDevice();
 
     if (isSetNet) {
         device->SetNetInfo();
@@ -81,9 +76,9 @@ int main()
     if (strMac.empty()) {
         strMac = device->GetMacAddress();
     }
-
-
-    CameraClient client(strMac,clientVer);
+    std::string terminalType = device->GetTerminalType();
+    LOG(INFO) << "dev model is "<<terminalType;
+    CameraClient client(strMac,clientVer,terminalType);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
 
@@ -93,7 +88,7 @@ int main()
     KeSdkDevice::RegisterCallBack::Instance()->SignalTerminalAlarm.connect(
                 &client,&CameraClient::SendAlarm);
 
-    const int kMaxP2PConnections = 5;
+    const int kMaxP2PConnections = 2;
     kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client,kMaxP2PConnections);
 //    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
 //    terminal->Initialize("0.0.0.0:12345");

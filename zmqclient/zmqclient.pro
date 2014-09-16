@@ -107,6 +107,11 @@ OTHER_FILES += \
 
 SOURCES += \
     zmqclient.cpp \
+    keapi/unicode.c
+
+HEADERS += \
+    keapi/iconv.h \
+    keapi/unicode.h
 
 
 

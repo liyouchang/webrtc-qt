@@ -4,17 +4,20 @@
 #include "talk/base/bind.h"
 namespace kaerp2p {
 
-#ifdef ARM
+//#ifdef ARM
 
-const int kWriteBufferSize = 512*1024;
-const int kReadBufferSize = 64*1024;
+//const int kWriteBufferSize = 500*1024;
+//const int kReadBufferSize = 60*1024;
 
-#else
+//#else
 
-const int kWriteBufferSize = 512*1024;
-const int kReadBufferSize = 256*1024;
+//const int kWriteBufferSize = 512*1024;
+//const int kReadBufferSize = 256*1024;
 
-#endif
+//#endif
+
+const int kWriteBufferSize = 500*1024;
+const int kReadBufferSize = 60*1024;
 
 StreamProcess::StreamProcess(talk_base::Thread * stream_thread):
     write_buf_(kWriteBufferSize,stream_thread),
@@ -167,7 +170,7 @@ bool StreamProcess::WriteStream(const char *data, int len)
     }
     int error;
     talk_base::StreamResult result = write_buf_.Write(data,len,&wlen,&error);
-    if(result != talk_base::SR_SUCCESS){
+    if( result != talk_base::SR_SUCCESS ){
         LOG(INFO) << "StreamProcess::WriteStream---"<<
                      "write_buf_ write buf error ";
         return false;

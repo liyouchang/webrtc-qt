@@ -226,6 +226,7 @@ void P2PConductor::ConductorClose()
     setTunnelState(kTunnelClosed);
     SignalStreamClosed(peer_id_);
     peer_id_.clear();
+    stream_process_.reset();
 }
 
 void P2PConductor::setTunnelState(P2PConductor::TunnelState state)
@@ -303,7 +304,6 @@ bool P2PConductor::InitializePeerConnection()
 
 void P2PConductor::DeletePeerConnection()
 {
-
     setTunnelState(kTunnelDisconnecting);
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     //when close peer_connection the session will terminate and destroy the channels
@@ -312,8 +312,6 @@ void P2PConductor::DeletePeerConnection()
         peer_connection_->Close();
         peer_connection_.release();
     }
-    LOG_T_F(INFO) << "delete stream";
-    stream_process_.reset();
 }
 
 void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)

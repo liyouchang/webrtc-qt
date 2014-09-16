@@ -1,13 +1,13 @@
 {
 
     "camera" : {
-        "mac" : "tt1234567"
+        "mac" : "tt12345678"
     },
-    "dealerId" : "tt1234567",
-    "routerUrl":"tcp://192.168.40.179:5555",
+    "dealerId" : "tt12345678",
+    "routerUrl":"tcp://222.174.213.181:5555",
     "logParams":"tstamp thread info debug",
     "logSaveFile":"/tmp/zmqclient.log",
-    "servers":[{"uri":"stun:192.168.40.179:5389"}],
+    "servers":[{"uri":"stun:222.174.213.181:5389"}],
     "clarity":2,
     "sampleFileName":"Sample.avi",
 }

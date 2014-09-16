@@ -9,7 +9,7 @@ namespace kaerp2p {
 
 PeerTerminal::PeerTerminal(kaerp2p::PeerConnectionClientInterface * client,
                            int max_tunnel):
-    client_(client),max_tunnel_num_(max_tunnel)
+    client_(client),max_tunnel_num_(max_tunnel),tunnel_out_action(1)
 {
     client_->SignalMessageFromPeer.connect(this,&PeerTerminal::OnRouterReadData);
 }
@@ -135,7 +135,6 @@ void PeerTerminal::OnRouterReadData(const std::string & peer_id,
         ScopedTunnel aTunnel = this->GetOrCreateTunnel(peer_id);
         if(aTunnel == NULL){
             LOG(WARNING)<<"read  p2p msg and create tunnel error "<<peer_id;
-            SendTunnelError(peer_id,"max_tunnel");
             return;
         }
         std::string peerMsg;
@@ -167,7 +166,7 @@ void PeerTerminal::OnTunnelNeedSend(const std::string &peer_id,
 ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
 {
     talk_base::CritScope cs(&crit_);
-    std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
+    std::deque<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
         if ((*it)->GetPeerID().compare(peer_id) == 0) {
             break;
@@ -181,7 +180,7 @@ ScopedTunnel PeerTerminal::GetTunnel(const std::string &peer_id)
 ScopedTunnel PeerTerminal::GetTunnel(kaerp2p::StreamProcess *stream)
 {
     talk_base::CritScope cs(&crit_);
-    std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
+    std::deque<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
         if ((*it)->GetStreamProcess() == stream) {
             break;
@@ -196,7 +195,7 @@ int PeerTerminal::CountAvailableTunnels()
 {
     talk_base::CritScope cs(&crit_);
     int notUsedNum = max_tunnel_num_ - tunnels_.size();
-    std::vector<ScopedTunnel>::iterator it = tunnels_.begin();
+    std::deque<ScopedTunnel>::iterator it = tunnels_.begin();
     for (; it != tunnels_.end(); ++it) {
         if ((*it)->GetPeerID().empty()) {
             notUsedNum++;
@@ -206,7 +205,7 @@ int PeerTerminal::CountAvailableTunnels()
     return notUsedNum;
 }
 
-ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
+ScopedTunnel PeerTerminal:: GetOrCreateTunnel(const std::string &peer_id)
 {
     ScopedTunnel aTunnel = this->GetTunnel(peer_id);
     if(aTunnel){
@@ -218,21 +217,33 @@ ScopedTunnel PeerTerminal::GetOrCreateTunnel(const std::string &peer_id)
         return aTunnel;
     }
     if(tunnels_.size() <= max_tunnel_num_ ||
-            max_tunnel_num_ == kInfiniteTunnel){
-        aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
-        aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
-        aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
-        aTunnel->SignalStreamClosed.connect(this,&PeerTerminal::OnTunnelClosed);
-        talk_base::CritScope cs(&crit_);
-        tunnels_.push_back(aTunnel);
+            max_tunnel_num_ == kInfiniteTunnel) {
+        aTunnel = CreateNewTunnel();
         LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<
                    "create a new tunnel, total tunnel num is "<< tunnels_.size();
     } else {
-        LOG(WARNING)<<"PeerTerminal::GetOrCreateTunnel---"<<
-                       "tunnel number is more than the max number "<<
-                       tunnels_.size();
-
+        LOG_F(WARNING)<<"tunnel number is more than the max number "<<tunnels_.size()<<
+                        " ; action is "<<tunnel_out_action;
+        if(tunnel_out_action == 1){
+            SendTunnelError(peer_id,"tunnel_max");
+        }else if(tunnel_out_action == 2){
+            aTunnel = tunnels_.front();
+            std::string toRemovePeer = aTunnel->GetPeerID();
+            aTunnel->DisconnectFromCurrentPeer();
+            SendTunnelError(toRemovePeer,"tunnel_replace");
+        }
     }
+    return aTunnel;
+}
+
+ScopedTunnel PeerTerminal::CreateNewTunnel()
+{
+    ScopedTunnel aTunnel = new talk_base::RefCountedObject<kaerp2p::P2PConductor>();
+    aTunnel->SignalNeedSendToPeer.connect(this,&PeerTerminal::OnTunnelNeedSend);
+    aTunnel->SignalStreamOpened.connect(this,&PeerTerminal::OnTunnelOpened);
+    aTunnel->SignalStreamClosed.connect(this,&PeerTerminal::OnTunnelClosed);
+    talk_base::CritScope cs(&crit_);
+    tunnels_.push_back(aTunnel);
     return aTunnel;
 }
 
