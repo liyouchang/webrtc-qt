@@ -46,7 +46,7 @@ camera-->client
 {
     "type":"tunnel",
     "command":"p2p_error",
-    "errorType":"tunnel_max" // tunnel_max 设备最大连接数
+    "errorType":"tunnel_max" // tunnel_max 设备最大连接数,tunnel_replace 此链接被其他链接替换
 }
 
 3. get camera wifi status
