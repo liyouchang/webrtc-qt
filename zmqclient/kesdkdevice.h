@@ -48,6 +48,7 @@ public:
     void SetNetInfo();
 
     std::string GetMacAddress();
+    std::string GetTerminalType();
     //设置Ntp,zone is like +8:00
     void SetNtp(const std::string & ntpIp, int port, const std::string &zone);
     //接受对讲数据

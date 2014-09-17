@@ -677,7 +677,8 @@ void RecordReaderAvi::ReadRecord()
         talk_base::scoped_ptr<char[]> moviBuf(new char[moviLen]);
         result = aviFile_->ReadAll(moviBuf.get(),moviLen,NULL,NULL);
         if(result != talk_base::SR_SUCCESS){
-            LOG_T_F(WARNING)<<"RecordReaderAvi::OnMessage---"<<"read file error ";
+            LOG_T_F(WARNING)<<"Read video---"<<"read file error ";
+            SignalRecordEnd(this);
             return ;
         }
         bool  isIdr = ((moviBuf.get()[4]&0x1f)==0x07) ;//判断idr帧
@@ -706,7 +707,8 @@ void RecordReaderAvi::ReadRecord()
         talk_base::scoped_ptr<char[]> moviBuf(new char[moviLen]);
         result = aviFile_->ReadAll(moviBuf.get(),moviLen,NULL,NULL);
         if(result != talk_base::SR_SUCCESS){
-            LOG(WARNING)<<"RecordReaderAvi::OnMessage---"<<"read file error ";
+            LOG_F(WARNING)<<"read audio---"<<"read file error ";
+            SignalRecordEnd(this);
             return ;
         }
         //if(speed == kNormalSpeed){

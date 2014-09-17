@@ -54,7 +54,7 @@ void KeTunnelCamera::OnCommandJsonMsg(const Json::Value &jmessage,
     std::string command;
     bool ret = GetStringFromJsonObject(jmessage, kKaerMsgCommandName, &command);
     if( !ret ){
-        LOG(WARNING)<<"get command error-"<<command<<" from" ;
+        LOG(WARNING)<<"get command error-"<<command<<" from";
         return;
     }
     if( command.compare("echo") == 0 ) {
@@ -221,9 +221,7 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
             recordReader->StopRead();
         }else{
             LOG_T_F(WARNING)<<"stop play file error file not start";
-
         }
-        //        recordReader->StopRead();
     }else{
         LOG_T_F(WARNING)<<"unknown file type";
     }

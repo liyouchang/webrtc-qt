@@ -134,7 +134,7 @@ bool AsynDealer::connect_z(const std::string & id,const std::string & router)
         socket_ = new zmq::socket_t(*context_,ZMQ_DEALER);
         int reconnectInterval = 10000;
         socket_->setsockopt(ZMQ_RECONNECT_IVL,&reconnectInterval,sizeof(reconnectInterval));
-        int highwater = 10;
+        int highwater = 3;
         socket_->setsockopt(ZMQ_SNDHWM,&highwater,sizeof(highwater));
         socket_->setsockopt(ZMQ_RCVHWM,&highwater,sizeof(highwater));
         int ligger = 100;

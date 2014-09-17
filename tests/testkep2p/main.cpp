@@ -32,9 +32,13 @@ int main()
     std::string pid = "tt1234567";
    // std::string pid = "10.10.0.151:22555";
     client->OpenTunnel(pid);
-//    talk_base::Thread::Current()->ProcessMessages(5000);
+    talk_base::Thread::Current()->ProcessMessages(5000);
+    char talkData;
+    while(true){
+
+    }
 //    client->StartPeerMedia(pid,1);
-    talk_base::Thread::Current()->ProcessMessages(60000);
+//    talk_base::Thread::Current()->ProcessMessages(60000);
     //talk_base::Thread::Current()->Run();
 
     return 0;
