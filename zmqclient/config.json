@@ -9,5 +9,6 @@
     "servers":[{"uri":"stun:192.168.40.179:5389"}],
     "clarity":2,
     "sampleFileName":"Sample.avi",
-    "setNet":false
+    "setNet":false,
+    "maxP2PConnections":2
 }

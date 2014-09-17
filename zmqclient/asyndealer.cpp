@@ -50,6 +50,7 @@ bool AsynDealer::send(const std::string & addr, const std::string & data)
 
 void AsynDealer::AsynSend(const std::string &addr, const std::string &data)
 {
+
     zmq::zmsg * pzmsg = new zmq::zmsg() ;
     pzmsg->wrap(addr,"");
     pzmsg->append(data);
@@ -179,11 +180,11 @@ void AsynDealer::OnMessage(talk_base::Message *msg)
         break;
     case MSG_TOSEND:
     {
-        talk_base::scoped_ptr<PostZmqMessage>  pData(
-                    static_cast <PostZmqMessage*>(msg->pdata));
+        PostZmqMessage *pData = static_cast <PostZmqMessage*>(msg->pdata);
         zmq::zmsg * pzmsg = pData->data().get();
         pzmsg->send(*socket_);
         SignalSent();
+        delete pData;
     }
         break;
     default:

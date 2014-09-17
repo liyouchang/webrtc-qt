@@ -16,7 +16,7 @@ namespace kaerp2p {
 
 //#endif
 
-const int kWriteBufferSize = 500*1024;
+const int kWriteBufferSize = 400*1024;
 const int kReadBufferSize = 60*1024;
 
 StreamProcess::StreamProcess(talk_base::Thread * stream_thread):

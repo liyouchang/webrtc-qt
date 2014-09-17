@@ -10,6 +10,8 @@ include (zmqdealer.pri)
 
 DESTDIR = $$output_dir/$$TARGET
 
+
+#DEFINES += NOT_USE_WEB
 #message("DESTDIR is " $$DESTDIR)
 
 win32 {
@@ -29,7 +31,6 @@ linux {
     LIBS += -lcppzmq -ljsoncpp
     LIBS += -pthread -ldl
     #LIBS += -lprofiler
-#message (" this is linux system")
 }
 
 macx {

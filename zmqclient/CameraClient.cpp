@@ -17,6 +17,15 @@ CameraClient::CameraClient(std::string mac, std::string ver, std::string termina
     comm_thread_ = talk_base::Thread::Current();
 }
 
+void CameraClient::ntp()
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] = "Terminal_NTP";
+    std::string msg = writer.write(jmessage);
+    this->SendToPeer(messageServer,msg);
+}
+
 void CameraClient::Login()
 {
     Json::StyledWriter writer;
@@ -26,6 +35,7 @@ void CameraClient::Login()
     jmessage["Version"] = clientVersion;
     jmessage["TermType"] = terminalType;
     std::string msg = writer.write(jmessage);
+//    LOG_F(INFO)<< "client login " <<msg;
     this->SendToPeer(messageServer,msg);
 }
 
@@ -43,8 +53,10 @@ void CameraClient::SendAlarm(int alarmType, const std::string &alarmInfo,
     jmessage["DateTime"] = kaerp2p::GetCurrentDatetime("%F %T");
 
     std::string msg = writer.write(jmessage);
-//    LOG_F(INFO)<<" send alarm "<<msg;
     this->SendToPeer(alarmServer,msg);
+    LOG_F(INFO)<<" send alarm "<< alarmType <<" msg size "<< msg.size() <<
+                 " alarm time "<< kaerp2p::GetCurrentDatetime("%F %T");
+
 }
 
 bool CameraClient::Connect(const std::string &router, const std::string &id)

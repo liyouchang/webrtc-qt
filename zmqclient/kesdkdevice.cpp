@@ -41,7 +41,6 @@
 //    FRAM_VGA = 7,
 //    FRAM_720P = 10
 //};
-#define WEB
 
 const int kNullStreamHandle = -1;
 const int kCheckStreamDelay = 60000;
@@ -110,7 +109,7 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
     STORE_Initialize();
     ALARM_Initialize();
 
-#ifdef WEB
+#ifndef NOT_USE_WEB
     WEB_Initialize();
 #endif
 
@@ -120,22 +119,22 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
 
 KeSdkDevice::~KeSdkDevice()
 {
-//    LOG_F(INFO) << "destroy device";
-//    zmqThread->Quit();
-//    try{
-//        LOG_F(INFO) << "delete zmq socket";
-//        delete repSocket;
-//        repSocket = NULL;
-//        LOG_F(INFO) << "delete zmq context";
-//        delete zmqContext;
-//        zmqContext = NULL;
-//    }catch(zmq::error_t e){
-//        LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
-//    }
+    //    LOG_F(INFO) << "destroy device";
+    //    zmqThread->Quit();
+    //    try{
+    //        LOG_F(INFO) << "delete zmq socket";
+    //        delete repSocket;
+    //        repSocket = NULL;
+    //        LOG_F(INFO) << "delete zmq context";
+    //        delete zmqContext;
+    //        zmqContext = NULL;
+    //    }catch(zmq::error_t e){
+    //        LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
+    //    }
 
-//    LOG_F(INFO) << "delete zmq thread";
+    //    LOG_F(INFO) << "delete zmq thread";
 
-//    delete zmqThread;
+    //    delete zmqThread;
 
     if( video1_handle_ != kNullStreamHandle){
         FIFO_Stream_Close(video1_handle_);
@@ -157,7 +156,7 @@ KeSdkDevice::~KeSdkDevice()
     PLATFORM_Update_Close();
 
     PLATFORM_Tools_Close();
-#ifdef WEB
+#ifndef NOT_USE_WEB
     WEB_Cleanup();
 #endif
 
@@ -189,7 +188,7 @@ bool KeSdkDevice::Init(kaerp2p::PeerTerminalInterface *t)
 
     oldIp = talk_base::NetworkToHost32(NET_Get_RouteIP(NULL));
     LOG_F(INFO) << "get old ip is "<<oldIp;
-    deviceThread->PostDelayed(kCheckStreamDelay,this,MSG_CheckCloseStream);
+    //    deviceThread->PostDelayed(kCheckStreamDelay,this,MSG_CheckCloseStream);
     deviceThread->PostDelayed(kCheckNetDelay,this,MSG_NET_CHECK);
 
     return KeTunnelCamera::Init(t);
@@ -215,7 +214,7 @@ void KeSdkDevice::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t,
                                  const std::string &peer_id)
 {
     ASSERT(terminal_ == t);
-//    LOG(INFO)<<"KeSdkDevice::OnTunnelOpened---"<<peer_id;
+    //    LOG(INFO)<<"KeSdkDevice::OnTunnelOpened---"<<peer_id;
     KeSdkProcess *process = new KeSdkProcess(peer_id,this);
     this->AddMsgProcess(process);
 }
@@ -228,8 +227,16 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
     int dataPos =  sizeof(KEFrameHead);
 
     if(head->frameLen == len - dataPos){
+
 //        LOG_F(INFO) << "talk data " << len;
-        MEDIA_Audio_Talk(const_cast<char *>(data+dataPos),head->frameLen);
+        //放入另外的线程播放声音,以防止在数据接受线程中阻塞.若阻塞会产生异常
+
+        talk_base::ScopedMessageData<talk_base::Buffer> *talkData =
+                new talk_base::ScopedMessageData<talk_base::Buffer>(
+                    new talk_base::Buffer(data+dataPos,head->frameLen));
+
+        deviceThread->Post(this,MSG_RECV_TALK,talkData);
+        //        MEDIA_Audio_Talk(const_cast<char *>(data+dataPos),head->frameLen);
     }else{
         LOG_F(WARNING)<<"tal from "<<peer_id<<" frame format error";
     }
@@ -339,13 +346,20 @@ void KeSdkDevice::OnMessage(talk_base::Message *msg)
         break;
     case MSG_NET_CHECK:
         CheckNetIp_d();
+        //        RegisterCallBack::Instance()->SignalTerminalAlarm(6,"test alarm","");
         deviceThread->PostDelayed(kCheckNetDelay,this,MSG_NET_CHECK);
         break;
-    case MSG_ZMQ_RECV:{
+    case MSG_ZMQ_RECV:
         ZmqRepMsg_z();
         if(repSocket){
             zmqThread->Post(this,MSG_ZMQ_RECV);
         }
+        break;
+    case MSG_RECV_TALK:{
+        talk_base::ScopedMessageData<talk_base::Buffer> * msgData =
+                static_cast<talk_base::ScopedMessageData<talk_base::Buffer>*>(msg->pdata);
+        MEDIA_Audio_Talk(const_cast<char *>(msgData->data()->data()),msgData->data()->length());
+        delete msgData;
     }
         break;
     default:
@@ -447,7 +461,7 @@ bool KeSdkDevice::SetOsdTitle(const std::string &title)
     TITLEOSD osdTitle;
     CONFIG_Get(CONFIG_TYPE_OSDTITLE,(void *)&osdTitle);	//获取某类参数
     u2g(osdTitle.Contert,(const unsigned char *)title.c_str());
-//    memcpy(osdTitle.Contert,title.c_str(),title.length());
+    //    memcpy(osdTitle.Contert,title.c_str(),title.length());
     CONFIG_Set(CONFIG_TYPE_OSDTITLE,(void *)&osdTitle);
     return true;
 }
@@ -728,9 +742,8 @@ bool KeSdkDevice::SetArmingStatus(int status)
 
 int KeSdkDevice::GetArmingStatus()
 {
-    int plan;
-    STORE_Get_Store_Status(0,&plan,NULL,NULL,NULL);
-    return plan;
+    return  ALARM_Get_Defense_Status(FIFO_ALARM_MV,0,0);
+    //    return 0;
 }
 
 void KeSdkDevice::QuitMainThread()
@@ -814,15 +827,35 @@ int KeSdkDevice::RegisterCallBack::RebootCallback()
 
 int KeSdkDevice::RegisterCallBack::AlarmCallback(st_alarm_upload_t *alarmInfo, char *pJpegData, int iJpegLen)
 {
-    LOG(INFO) << "alrm call back "<<alarmInfo->enAlarm;
+    LOG(INFO) << "alrm call back "<<alarmInfo->enAlarm << "; picture lenght "<<iJpegLen;
 
     std::string picBase64Data;
     if (iJpegLen > 0) {
         talk_base::Base64::EncodeFromArray(pJpegData,iJpegLen,&picBase64Data);
     }
 
-    RegisterCallBack::Instance()->SignalTerminalAlarm(alarmInfo->enAlarm,alarmInfo->cInfo,
+    char utf8Result[256] = {0};
+    if(g2u((unsigned char *)utf8Result,(unsigned char *)alarmInfo->cInfo) == 0){//error
+        LOG_F(WARNING)<<" alarm info convert error";
+    }
+    RegisterCallBack::Instance()->SignalTerminalAlarm(alarmInfo->enAlarm,utf8Result,
                                                       picBase64Data);
+
+    //    Json::StyledWriter writer;
+    //    Json::Value jmessage;
+
+    //    jmessage["type"] = "Terminal_Alarm";
+    //    jmessage["MAC"] = mac_;
+    //    jmessage["AlarmType"] = alarmType;
+    //    jmessage["AlarmInfo"] = alarmInfo;
+    //    jmessage["Picture"] = picture;
+    //    jmessage["DateTime"] = kaerp2p::GetCurrentDatetime("%F %T");
+
+    //    std::string msg = writer.write(jmessage);
+    //    this->SendToPeer(alarmServer,msg);
+    //    LOG_F(INFO)<<" send alarm "<< alarmType <<" msg size "<< msg.size() <<
+    //                 " alarm time "<< kaerp2p::GetCurrentDatetime("%F %T");
+
     return 0;
 }
 

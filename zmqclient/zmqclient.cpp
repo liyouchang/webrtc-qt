@@ -18,7 +18,7 @@
 #include "keapi/common_api.h"
 #endif//arm
 
-int kVersion = 65;
+int kVersion = 66;
 
 int main()
 {
@@ -58,6 +58,10 @@ int main()
     bool isSetNet;
     GetBoolFromJson(JsonConfig::Instance()->Get("setNet",false),&isSetNet);
 
+    int maxP2PConnections;
+    GetIntFromJson(JsonConfig::Instance()->Get("maxP2PConnections",-1),
+                   &maxP2PConnections); // infinate for default
+
     std::string strRouter = router_value.asString();
     if(strRouter.empty()) {
         LOG_ERR(LERROR)<<" get router value error. ";
@@ -77,10 +81,11 @@ int main()
         strMac = device->GetMacAddress();
     }
     std::string terminalType = device->GetTerminalType();
-    LOG(INFO) << "dev model is "<<terminalType;
+    LOG(INFO) << "dev model is "<<terminalType <<" max connection is "<<maxP2PConnections;
     CameraClient client(strMac,clientVer,terminalType);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
+    client.ntp();
 
     client.SignalNtpSet.connect(device,&KeSdkDevice::SetNtp);
     device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
@@ -88,8 +93,7 @@ int main()
     KeSdkDevice::RegisterCallBack::Instance()->SignalTerminalAlarm.connect(
                 &client,&CameraClient::SendAlarm);
 
-    const int kMaxP2PConnections = 2;
-    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client,kMaxP2PConnections);
+    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client,maxP2PConnections);
 //    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
 //    terminal->Initialize("0.0.0.0:12345");
 

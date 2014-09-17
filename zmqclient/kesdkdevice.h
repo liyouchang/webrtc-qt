@@ -21,7 +21,8 @@ public:
         MSG_MEDIA_CONTROL,
         MSG_NET_CHECK,
         MSG_CheckCloseStream,
-        MSG_ZMQ_RECV
+        MSG_ZMQ_RECV,
+        MSG_RECV_TALK
     };
 
     KeSdkDevice();

@@ -48,7 +48,7 @@ int main()
 
 //    ProfilerStart("zmq.prof");
 
-    CameraClient client(strMac,clientVer);
+    CameraClient client(strMac,clientVer,"simulator");
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
 
