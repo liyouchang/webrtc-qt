@@ -153,9 +153,9 @@ void KeTunnelClient::SendTalkData(const char *data, int len)
     frameHead.frameNo = 0;
     frameHead.piecesNo = 0;
     //time span is not use
-    //int ams = talk_base::Time();
-    //frameHead.second = ams/1000;
-    //frameHead.millisecond = (ams%1000)/10;
+    int ams = talk_base::Time();
+    frameHead.second = ams/1000;
+    frameHead.millisecond = (ams%1000)/10;
     //frame type: is not use
     frameHead.frameType = 80;
     frameHead.frameLen = len;

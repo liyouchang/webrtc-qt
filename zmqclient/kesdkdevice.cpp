@@ -218,11 +218,21 @@ void KeSdkDevice::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t,
     KeSdkProcess *process = new KeSdkProcess(peer_id,this);
     this->AddMsgProcess(process);
 }
+class TalkPacket : public talk_base::MessageData {
+ public:
+  TalkPacket(const char* data, size_t size, int timespan)
+        : timespan(timespan), talkData(data,size){
+  }
+  talk_base::Buffer talkData;
+  int timespan;
+};
 
 void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, int len)
 {
     KEFrameHead * head = (KEFrameHead *)data;
-    LOG_T_F(LS_VERBOSE)<<" talk data "<< head->frameLen;
+    int nowTime = talk_base::Time();
+    LOG_T_F(INFO)<<" talk time is "<< head->second*1000 + head->millisecond*10<<
+                   " now time is "<< nowTime;
     const int nalLen = 4;
     int dataPos =  sizeof(KEFrameHead);
 
@@ -231,10 +241,7 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
 //        LOG_F(INFO) << "talk data " << len;
         //放入另外的线程播放声音,以防止在数据接受线程中阻塞.若阻塞会产生异常
 
-        talk_base::ScopedMessageData<talk_base::Buffer> *talkData =
-                new talk_base::ScopedMessageData<talk_base::Buffer>(
-                    new talk_base::Buffer(data+dataPos,head->frameLen));
-
+        TalkPacket *talkData = new TalkPacket(data+dataPos,head->frameLen,nowTime);
         deviceThread->Post(this,MSG_RECV_TALK,talkData);
         //        MEDIA_Audio_Talk(const_cast<char *>(data+dataPos),head->frameLen);
     }else{
@@ -356,9 +363,8 @@ void KeSdkDevice::OnMessage(talk_base::Message *msg)
         }
         break;
     case MSG_RECV_TALK:{
-        talk_base::ScopedMessageData<talk_base::Buffer> * msgData =
-                static_cast<talk_base::ScopedMessageData<talk_base::Buffer>*>(msg->pdata);
-        MEDIA_Audio_Talk(const_cast<char *>(msgData->data()->data()),msgData->data()->length());
+        TalkPacket * msgData = static_cast<TalkPacket *>(msg->pdata);
+        MEDIA_Audio_Talk(const_cast<char *>(msgData->talkData.data()),msgData->talkData.length());
         delete msgData;
     }
         break;
