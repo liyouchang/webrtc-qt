@@ -171,7 +171,7 @@ void KePlayerPlugin::FullScreen()
 
 int KePlayerPlugin::GetVersion()
 {
-    const int kVersion = 57;
+    const int kVersion = 60;
     return kVersion;
 }
 /**
@@ -285,7 +285,7 @@ QString KePlayerPlugin::StartCut(QString peerId)
         fileDir.cd("RecordFiles");
         QString fileName = KePlayerPlugin::GetTimeFileName(peerId,"avi",fileDir.path());
         info = fileName;
-        if(!tunnel_->StartPeerVideoCut(strId,fileName.toLocal8Bit().constData())){
+        if(!tunnel_->StartPeerVideoCut(strId,fileName.toStdString())){
             result = false;
             break;
         }

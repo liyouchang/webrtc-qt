@@ -606,6 +606,7 @@ void P2PTransportChannel::OnUseCandidate(Connection* conn) {
   if (conn->write_state() == Connection::STATE_WRITABLE) {
     if (best_connection_ != conn) {
       pending_best_connection_ = NULL;
+      LOG_F(INFO) <<"lht SwitchBestConnectionTo 111111111";
       SwitchBestConnectionTo(conn);
       // Now we have selected the best connection, time to prune other existing
       // connections and update the read/write state of the channel.
@@ -952,8 +953,9 @@ void P2PTransportChannel::SortConnections() {
 
   // If necessary, switch to the new choice.
   if (protocol_type_ != ICEPROTO_RFC5245 || ice_role_ == ICEROLE_CONTROLLING) {
-    if (ShouldSwitch(best_connection_, top_connection))
+    if (ShouldSwitch(best_connection_, top_connection)){
       SwitchBestConnectionTo(top_connection);
+    }
   }
 
   // We can prune any connection for which there is a writable connection on
@@ -1210,6 +1212,8 @@ void P2PTransportChannel::OnConnectionStateChange(Connection* connection) {
   if (protocol_type_ == ICEPROTO_RFC5245 && ice_role_ == ICEROLE_CONTROLLED) {
     if (connection == pending_best_connection_ && connection->writable()) {
       pending_best_connection_ = NULL;
+      LOG_F(INFO) <<"lht SwitchBestConnectionTo 3333333";
+
       SwitchBestConnectionTo(connection);
     }
   }
@@ -1246,6 +1250,8 @@ void P2PTransportChannel::OnConnectionDestroyed(Connection* connection) {
   // Since this connection is no longer an option, we can just set best to NULL
   // and re-choose a best assuming that there was no best connection.
   if (best_connection_ == connection) {
+      LOG_F(INFO) <<"lht SwitchBestConnectionTo 4444444";
+
     SwitchBestConnectionTo(NULL);
     RequestSort();
   }

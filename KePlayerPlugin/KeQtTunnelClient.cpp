@@ -37,7 +37,7 @@ void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *d
 void KeQtTunnelClient::OnRecordStatus(const std::string &peer_id, int status,
                                       int position, int speed)
 {
-//    qDebug()<<"KeTunnelClient::OnRecordStatus---"<<peer_id.c_str()<<" status "<<status;
+    qDebug()<<"KeTunnelClient::OnRecordStatus---"<<peer_id.c_str()<<" status "<<status;
 
     emit SigRecordStatus(peer_id.c_str(),status,position,speed);
 }
