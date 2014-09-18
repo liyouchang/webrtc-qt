@@ -11,7 +11,7 @@ include (zmqdealer.pri)
 DESTDIR = $$output_dir/$$TARGET
 
 
-#DEFINES += NOT_USE_WEB
+DEFINES += NOT_USE_WEB
 #message("DESTDIR is " $$DESTDIR)
 
 win32 {

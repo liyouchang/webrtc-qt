@@ -466,7 +466,7 @@ bool KeSdkDevice::SetOsdTitle(const std::string &title)
     return true;
 }
 
-//level 1~4 , 1- video1 ,2-video2,3-video3,4-audio stream
+//level 1~4 , 1-video1 ,2-video2,3-video3,4-audio stream
 void KeSdkDevice::MediaStreamOpen(int level)
 {
     talk_base::TypedMessageData<int> * data = new talk_base::TypedMessageData<int>(level);
