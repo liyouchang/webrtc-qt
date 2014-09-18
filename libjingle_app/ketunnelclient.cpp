@@ -45,7 +45,7 @@ bool KeTunnelClient::StartPeerMedia(std::string peer_id, int video)
         return false;
     }
 //    process->AskVideo(0,0,0);
-    process->AskVideo(video,1,0);
+    process->AskVideo(video,1,1);
     return true;
 }
 
