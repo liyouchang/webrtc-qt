@@ -298,7 +298,7 @@ void KeMsgProcessContainer::AddMsgProcess(KeMsgProcess *process)
     process->SignalNeedSendData.connect(
                 this,&KeMsgProcessContainer::SendProcessData);
     process->SignalHeartStop.connect(this,&KeMsgProcessContainer::OnHeartStop);
-    process->StartHeartBeat();
+//    process->StartHeartBeat();
     talk_base::CritScope cs(&crit_);
     processes_.push_back(process);
 }

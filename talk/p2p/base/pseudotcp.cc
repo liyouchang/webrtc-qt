@@ -145,8 +145,8 @@ const long CLOSED_TIMEOUT = 60 * 1000; // If the connection is closed, once per 
 //const uint32 IDLE_PING = 20 * 1000; // 20 seconds (note: WinXP SP2 firewall udp timeout is 90 seconds)
 //const uint32 IDLE_TIMEOUT = 90 * 1000; // 90 seconds;
 
-const uint32 IDLE_PING = 2 * 1000; // 20 seconds (note: WinXP SP2 firewall udp timeout is 90 seconds)
-const uint32 IDLE_TIMEOUT = 9 * 1000; // 90 seconds;
+const uint32 IDLE_PING = 4 * 1000; // 20 seconds (note: WinXP SP2 firewall udp timeout is 90 seconds)
+const uint32 IDLE_TIMEOUT = 17 * 1000; // 90 seconds;
 #endif // PSEUDO_KEEPALIVE
 
 //////////////////////////////////////////////////////////////////////
