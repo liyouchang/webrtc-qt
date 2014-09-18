@@ -119,6 +119,7 @@ KeSdkDevice::KeSdkDevice():video1_handle_(kNullStreamHandle),
 
 KeSdkDevice::~KeSdkDevice()
 {
+    // zmq 的线程不要终止,否则会阻塞
     //    LOG_F(INFO) << "destroy device";
     //    zmqThread->Quit();
     //    try{
@@ -131,9 +132,7 @@ KeSdkDevice::~KeSdkDevice()
     //    }catch(zmq::error_t e){
     //        LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
     //    }
-
     //    LOG_F(INFO) << "delete zmq thread";
-
     //    delete zmqThread;
 
     if( video1_handle_ != kNullStreamHandle){
@@ -231,19 +230,14 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
 {
     KEFrameHead * head = (KEFrameHead *)data;
     int nowTime = talk_base::Time();
-    LOG_T_F(INFO)<<" talk time is "<< head->second*1000 + head->millisecond*10<<
-                   " now time is "<< nowTime;
-    const int nalLen = 4;
+//    LOG_T_F(INFO)<<" talk time is "<< head->second*1000 + head->millisecond*10<<
+//                   " now time is "<< nowTime;
+//    const int nalLen = 4;
     int dataPos =  sizeof(KEFrameHead);
-
     if(head->frameLen == len - dataPos){
-
-//        LOG_F(INFO) << "talk data " << len;
         //放入另外的线程播放声音,以防止在数据接受线程中阻塞.若阻塞会产生异常
-
         TalkPacket *talkData = new TalkPacket(data+dataPos,head->frameLen,nowTime);
         deviceThread->Post(this,MSG_RECV_TALK,talkData);
-        //        MEDIA_Audio_Talk(const_cast<char *>(data+dataPos),head->frameLen);
     }else{
         LOG_F(WARNING)<<"tal from "<<peer_id<<" frame format error";
     }
@@ -557,6 +551,7 @@ void KeSdkDevice::ZmqRepMsg_z()
 {
     zmq::message_t zmsg;
     try{
+        //TODO: 使用非阻塞模式接收数据
         repSocket->recv(&zmsg);
     }catch(zmq::error_t e){
         LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
@@ -755,8 +750,17 @@ int KeSdkDevice::GetArmingStatus()
 void KeSdkDevice::QuitMainThread()
 {
     this->deviceThread->Quit();
-    LOG_F(WARNING)<<" quit main thread";
+    LOG_F(WARNING) << " quit main thread";
 
+}
+
+bool KeSdkDevice::TalkAvaliable()
+{
+    if(MEDIA_Audio_isTalking() == 1 ){
+        return false;
+    }else {
+        return true;
+    }
 }
 
 void KeSdkDevice::SetNetInfo()
@@ -849,14 +853,12 @@ int KeSdkDevice::RegisterCallBack::AlarmCallback(st_alarm_upload_t *alarmInfo, c
 
     //    Json::StyledWriter writer;
     //    Json::Value jmessage;
-
     //    jmessage["type"] = "Terminal_Alarm";
     //    jmessage["MAC"] = mac_;
     //    jmessage["AlarmType"] = alarmType;
     //    jmessage["AlarmInfo"] = alarmInfo;
     //    jmessage["Picture"] = picture;
     //    jmessage["DateTime"] = kaerp2p::GetCurrentDatetime("%F %T");
-
     //    std::string msg = writer.write(jmessage);
     //    this->SendToPeer(alarmServer,msg);
     //    LOG_F(INFO)<<" send alarm "<< alarmType <<" msg size "<< msg.size() <<
@@ -884,32 +886,35 @@ void KeSdkProcess::ConnectMedia(int video, int audio, int talk)
     if( video == 0 ) {//stop
         video_status = video;
     }
-    else if( 0 == video_status ) {
+    else if( 0 == video_status && video > 0  ) {
         this->RespAskMediaReq(this->videoInfo_);
         video_status = video;
         //try to open stream
         camera->MediaStreamOpen(video);
-
         camera->MediaGetIDR(video);
     }else{ //video > 0
         camera->MediaGetIDR(video);
     }
 
-    if(audio == 0){
+    if (audio == 0) {
         audio_status = 0;
     }
-    else if(0 == audio_status){
+    else if (0 == audio_status && audio > 0) {
         audio_status = audio;
         camera->MediaStreamOpen(4);
     }
 
-    if(talk == 0){
+    if(talk == 0) {
         this->SignalRecvTalkData.disconnect(camera);
         talk_status = 0;
     }
-    else if(0 == talk_status){
-        this->SignalRecvTalkData.connect(camera,&KeSdkDevice::OnRecvTalkData);
-        talk_status = talk;
+    else if( 0 == talk_status && talk > 0 ) {
+        if(!camera->TalkAvaliable()){
+            LOG_F(INFO) <<" talk is in use , not avaliable for now";
+        }else{
+            this->SignalRecvTalkData.connect(camera,&KeSdkDevice::OnRecvTalkData);
+            talk_status = talk;
+        }
     }
 
 }

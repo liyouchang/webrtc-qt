@@ -502,7 +502,7 @@ bool KaerSession::CreateChannels(const cricket::SessionDescription *desc)
             new cricket::PseudoTcpChannel(this->worker_thread(), this);
     newChannel->Connect(CN_TUNNEL,"tcp", 1);
 //    newChannel->SetOption(cricket::PseudoTcp::OPT_SNDBUF,kChannelWriteBufferSize);
-    newChannel->SetOption(cricket::PseudoTcp::OPT_RCVBUF,kChannelReadBufferSize);
+//    newChannel->SetOption(cricket::PseudoTcp::OPT_RCVBUF,kChannelReadBufferSize);
     channel_ = newChannel;
 //    channel_ = new kaerp2p::UdpStreamChannel(this->worker_thread(), this);
 //    channel_->Connect(CN_TUNNEL,"udp",1);

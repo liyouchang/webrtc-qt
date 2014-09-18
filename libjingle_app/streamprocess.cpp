@@ -68,7 +68,7 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
     }
     if (events & talk_base::SE_OPEN) {
         LOG_F(INFO)<<" Tunnel Connected, stream opened";
-        SignalOpened();
+        SignalOpened(this);
     }
     size_t count;
     if (events & talk_base::SE_WRITE) {
@@ -143,6 +143,7 @@ void StreamProcess::WriteStreamInternel()
 
 void StreamProcess::Cleanup(talk_base::StreamInterface *stream, bool delay) {
     LOG_T_F(INFO) << "StreamProcess Cleanup";
+    stream->SignalEvent.disconnect(this);
     stream->Close();
     SignalClosed(this);
 }

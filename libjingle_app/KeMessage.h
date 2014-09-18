@@ -32,6 +32,7 @@ enum KEMsgType
 #define RESP_NAK 0x05
 #define RESP_END 0x06
 #define RESP_CTRL 0x07
+#define RESP_TALK_INUSE 0x08
 
 #define KE_Terminal_Port 22616
 

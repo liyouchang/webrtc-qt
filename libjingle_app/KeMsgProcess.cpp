@@ -11,9 +11,9 @@
 
 namespace kaerp2p{
 
-const int kHeartStop = 20; //20s without receive heart
-const int kHeartDelay = 1000;  // 500 milliseconds
-const int kMsgMaxLen = 512*1024;
+const int kHeartStop = 15; //20s without receive heart
+const int kHeartDelay = 2000;  // 500 milliseconds
+const int kMsgMaxLen = 400*1024;
 
 
 KeMsgProcess::KeMsgProcess(std::string peer_id, KeMsgProcessContainer *container):
@@ -155,7 +155,7 @@ void KeMsgProcess::OnMessage(talk_base::Message *msg)
         LOG(LS_VERBOSE)<<"heart beat "<<heart_count_;
         if(++heart_count_ > heartMissStop){
             //SignalHeartStop(peer_id_);
-            this->container_->OnHeartStop(peer_id_);
+//            this->container_->OnHeartStop(peer_id_);
             break;
         }
         SendHeart();

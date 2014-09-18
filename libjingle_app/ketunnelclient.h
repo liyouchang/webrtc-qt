@@ -41,6 +41,8 @@ public:
      */
     virtual bool StartPeerMedia(std::string  peer_id,int video);
     virtual bool StopPeerMedia(std::string peer_id);
+    virtual bool StartPeerTalk(std::string  peer_id,bool withListen = false);
+    virtual bool StopPeerTalk(std::string  peer_id,bool withListen = false);
     virtual bool StartPeerVideoCut(const std::string &peer_id,
                                    const std::string & filename);
     virtual bool StopPeerVideoCut(const std::string & peer_id);

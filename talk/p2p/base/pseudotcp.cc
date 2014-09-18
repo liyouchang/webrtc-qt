@@ -115,8 +115,8 @@ const uint32 DEFAULT_SND_BUF_SIZE = 90 * 1024;
 //    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 //////////////////////////////////////////////////////////////////////
-
-#define PSEUDO_KEEPALIVE 0
+//lht use this?
+#define PSEUDO_KEEPALIVE 1
 
 const uint32 HEADER_SIZE = 24;
 const uint32 PACKET_OVERHEAD = HEADER_SIZE + UDP_HEADER_SIZE + IP_HEADER_SIZE + JINGLE_HEADER_SIZE;
@@ -142,8 +142,11 @@ const long CLOSED_TIMEOUT = 60 * 1000; // If the connection is closed, once per 
 
 #if PSEUDO_KEEPALIVE
 // !?! Rethink these times
-const uint32 IDLE_PING = 20 * 1000; // 20 seconds (note: WinXP SP2 firewall udp timeout is 90 seconds)
-const uint32 IDLE_TIMEOUT = 90 * 1000; // 90 seconds;
+//const uint32 IDLE_PING = 20 * 1000; // 20 seconds (note: WinXP SP2 firewall udp timeout is 90 seconds)
+//const uint32 IDLE_TIMEOUT = 90 * 1000; // 90 seconds;
+
+const uint32 IDLE_PING = 2 * 1000; // 20 seconds (note: WinXP SP2 firewall udp timeout is 90 seconds)
+const uint32 IDLE_TIMEOUT = 9 * 1000; // 90 seconds;
 #endif // PSEUDO_KEEPALIVE
 
 //////////////////////////////////////////////////////////////////////
@@ -356,13 +359,13 @@ void PseudoTcp::NotifyClock(uint32 now) {
 
 #if PSEUDO_KEEPALIVE
   // Check for idle timeout
-  if ((m_state == TCP_ESTABLISHED) && (TimeDiff(m_lastrecv + IDLE_TIMEOUT, now) <= 0)) {
+  if ((m_state == TCP_ESTABLISHED) && (talk_base::TimeDiff(m_lastrecv + IDLE_TIMEOUT, now) <= 0)) {
     closedown(ECONNABORTED);
     return;
   }
 
   // Check for ping timeout (to keep udp mapping open)
-  if ((m_state == TCP_ESTABLISHED) && (TimeDiff(m_lasttraffic + (m_bOutgoing ? IDLE_PING * 3/2 : IDLE_PING), now) <= 0)) {
+  if ((m_state == TCP_ESTABLISHED) && (talk_base::TimeDiff(m_lasttraffic + (m_bOutgoing ? IDLE_PING * 3/2 : IDLE_PING), now) <= 0)) {
     packet(m_snd_nxt, 0, 0, 0);
   }
 #endif // PSEUDO_KEEPALIVE
@@ -1138,7 +1141,7 @@ PseudoTcp::closedown(uint32 err) {
   if (m_notify) {
     m_notify->OnTcpClosed(this, err);
   }
-  //notify(evClose, err);
+//  notify(evClose, err);
 }
 
 void

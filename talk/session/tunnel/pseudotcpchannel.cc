@@ -444,7 +444,8 @@ void PseudoTcpChannel::OnTcpWriteable(PseudoTcp* tcp) {
 }
 
 void PseudoTcpChannel::OnTcpClosed(PseudoTcp* tcp, uint32 nError) {
-  LOG_F(LS_VERBOSE) << "[" << channel_name_ << "]";
+//  LOG_F(LS_VERBOSE) << "[" << channel_name_ << "]";
+     LOG_F(LS_INFO) << "[" << channel_name_ << "]";
   ASSERT(cs_.CurrentThreadIsOwner());
   ASSERT(worker_thread_->IsCurrent());
   ASSERT(tcp == tcp_);

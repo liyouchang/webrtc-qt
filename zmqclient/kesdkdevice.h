@@ -43,6 +43,7 @@ public:
     // 1 for main video stream , 2 for sub video stream ,3 for extern video stream ,
     // 4 for audio stream
     void MediaStreamOpen(int level);
+    bool TalkAvaliable();
 
     //get a IDR frame , the IDR frame will get in 5 frames.
     void MediaGetIDR(int level);
@@ -66,7 +67,6 @@ protected:
     bool SetArmingStatus(int status);
     int GetArmingStatus();
     void QuitMainThread();
-
 protected:
     //发送视频帧数据,level 1~3
     void SendVideoFrame(const char *data, int len,int level);

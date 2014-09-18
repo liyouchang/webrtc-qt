@@ -44,8 +44,8 @@ bool KeTunnelClient::StartPeerMedia(std::string peer_id, int video)
         LOG(WARNING) << "process not found "<<peer_id;
         return false;
     }
-    process->AskVideo(0,0,0);
-    process->AskVideo(video,1,1);
+//    process->AskVideo(0,0,0);
+    process->AskVideo(video,1,0);
     return true;
 }
 
@@ -60,6 +60,40 @@ bool KeTunnelClient::StopPeerMedia(std::string peer_id)
 
     process->AskVideo(0,0,0);
     process->StopVideoCut();
+    return true;
+}
+
+bool KeTunnelClient::StartPeerTalk(std::string peer_id,bool withListen)
+{
+    KeMessageProcessClient * process =
+            dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peer_id));
+    if (process == NULL) {
+        LOG(WARNING) << "process not found "<<peer_id;
+        return false;
+    }
+    if(withListen){//连同监听一起开启
+        process->AskVideo(-1,1,1);
+    }else{
+        process->AskVideo(-1,-1,1);
+    }
+    this->SignalTalkData.connect(process,&KeMessageProcessClient::OnTalkData);
+    return true;
+}
+
+bool KeTunnelClient::StopPeerTalk(std::string peer_id, bool withListen)
+{
+    KeMessageProcessClient * process =
+            dynamic_cast<KeMessageProcessClient *>(this->GetProcess(peer_id));
+    if (process == NULL) {
+        LOG(WARNING) << "process not found "<<peer_id;
+        return false;
+    }
+    if(withListen) {//连同监听一起关闭
+        process->AskVideo(-1,0,0);
+    } else {//监听保持原状态
+        process->AskVideo(-1,-1,0);
+    }
+    this->SignalTalkData.disconnect(process);
     return true;
 }
 
@@ -125,7 +159,6 @@ void KeTunnelClient::OnTunnelOpened(PeerTerminalInterface *t,
     KeMessageProcessClient * process = new KeMessageProcessClient(peer_id,this);
     process->SignalRecvAudioData.connect(this,&KeTunnelClient::OnRecvAudioData);
     process->SignalRecvVideoData.connect(this,&KeTunnelClient::OnRecvVideoData);
-    this->SignalTalkData.connect(process,&KeMessageProcessClient::OnTalkData);
     this->AddMsgProcess(process);
 }
 
@@ -198,7 +231,7 @@ KeMessageProcessClient::~KeMessageProcessClient()
 {
     StopVideoCut();
 }
-
+// -1 表示保持原状 0 表示关闭 >0 表示开启
 void KeMessageProcessClient::AskVideo(int video, int listen, int talk)
 {
     talk_base::Buffer sendBuf;
