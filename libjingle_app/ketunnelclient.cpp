@@ -40,7 +40,7 @@ bool KeTunnelClient::StartPeerMedia(std::string peer_id, int video)
 {
     KeMessageProcessClient * process =
             dynamic_cast<KeMessageProcessClient *>( this->GetProcess(peer_id));
-    if(process == NULL){
+    if(process == NULL) {
         LOG(WARNING) << "process not found "<<peer_id;
         return false;
     }
@@ -57,7 +57,6 @@ bool KeTunnelClient::StopPeerMedia(std::string peer_id)
         LOG(WARNING) << "process not found "<<peer_id;
         return false;
     }
-
     process->AskVideo(0,0,0);
     process->StopVideoCut();
     return true;
@@ -217,14 +216,22 @@ void KeTunnelClient::OnRecvVideoData(const std::string &peer_id,
 
 void KeTunnelClient::OnRecordStatus(const std::string &peer_id, int status, int position, int speed)
 {
-    LOG(INFO)<<"KeTunnelClient::OnRecordStatus---"<<peer_id<<" status "<<status;
+    LOG_F(INFO)<<peer_id<<" status "<<status;
+}
+
+void KeTunnelClient::OnMediaStatus(const std::string &peer_id, int video, int audio, int talk)
+{
+    LOG_F(INFO)<<" from "<<peer_id<<", video-"<<video<<", audio-"<<audio<<
+                 ", talk-"<<talk;
+
 }
 
 
 KeMessageProcessClient::KeMessageProcessClient(std::string peer_id,
                                                KeTunnelClient * container):
-    KeMsgProcess(peer_id,container),recordSaver(NULL)
+    KeMsgProcess(peer_id,container),recordSaver(NULL),talk_status(0)
 {
+
 }
 
 KeMessageProcessClient::~KeMessageProcessClient()
@@ -366,6 +373,10 @@ void KeMessageProcessClient::OnMessageRespond(talk_base::Buffer &msgData)
         OnRecvRecordMsg(msgData);
         break;
     }
+    case KEMSG_TYPE_MEDIASTATUS:{
+        this->RecvMediaStatus(msgData);
+        break;
+    }
     default:
         KeMsgProcess::OnMessageRespond(msgData);
         break;
@@ -427,33 +438,46 @@ void KeMessageProcessClient::RecvPlayFileResp(talk_base::Buffer &msgData)
     KeTunnelClient *client  = static_cast< KeTunnelClient *>(container_);
     KEPlayRecordFileResp *msg = (KEPlayRecordFileResp*)msgData.data();
     if(msg->resp == RESP_ACK){
-        LOG(INFO)<<"KeMessageProcessClient::RecvPlayFileResp---start remote play"<<
-                   ",frateRate="<<msg->frameRate<<",framteResolution="<<
-                   msg->frameResolution;
+        LOG_F(INFO)<<"start remote play, frateRate="<<msg->frameRate<<
+                     ", framteResolution="<<msg->frameResolution;
         this->videoInfo_.frameRate = msg->frameRate;
         this->videoInfo_.frameResolution = msg->frameResolution;
         client->OnRecordStatus(this->peer_id(),kRecordStartPlay,msg->playPos,msg->playSpeed);
         return;
     }else if(msg->resp == RESP_NAK){
-        LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
-                      "file error";
+        LOG_F(WARNING)<<"file error";
         client->OnRecordStatus(this->peer_id(),kRequestFileError,-1,-1);
     }else if(msg->resp == RESP_CTRL){
-//        LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---playing"<<
-//                      "position "<<msg->playPos;
-
         client->OnRecordStatus(this->peer_id(),kRecordPlaying,msg->playPos,msg->playSpeed);
     }else if(msg->resp == RESP_END){
         client->OnRecordStatus(this->peer_id(),kRecordPlayEnd,msg->playPos,msg->playSpeed);
     }
     else{
-        LOG(WARNING)<<"KeMessageProcessClient::RecvPlayFileResp---"<<
-                      "message error";
+        LOG_F(WARNING)<<"message error";
         client->OnRecordStatus(this->peer_id(),kRequestMsgError,-1,-1);
     }
     //    recordSaver->StopSave();
     //    delete recordSaver;
     //    recordSaver = NULL;
+}
+
+void KeMessageProcessClient::RecvMediaStatus(talk_base::Buffer &msgData)
+{
+    KeTunnelClient *client  = static_cast< KeTunnelClient *>(container_);
+
+    KEMediaStatus * msg = (KEMediaStatus *)msgData.data();
+
+    if( talk_status != msg->talk && msg->talk != -1){
+        LOG_F(INFO)<<"media status: video-"<<msg->video<<" audio-"<<msg->listen<<" talk-"<<msg->talk;
+        talk_status = msg->talk;
+        if(talk_status == 1){
+            client->SignalTalkData.connect(this,&KeMessageProcessClient::OnTalkData);
+        }else if(talk_status == 0){
+            client->SignalTalkData.disconnect(this);
+        }
+        client->OnMediaStatus(this->peer_id(),msg->video,msg->listen,msg->talk);
+    }
+
 }
 
 }

@@ -259,6 +259,24 @@ void KeMessageProcessCamera::RespAskMediaReq(const VideoInfo &info)
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
+void KeMessageProcessCamera::ReportMediaStatus(int video, int audio, int talk)
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KEMediaStatus);
+    sendBuf.SetLength(msgLen);
+    KEMediaStatus * msg = (KEMediaStatus *)sendBuf.data();
+    msg->protocal = PROTOCOL_HEAD;
+    msg->msgType = KEMSG_TYPE_MEDIASTATUS;
+    msg->msgLength = msgLen;
+    msg->videoID = 0;
+    msg->channelNo = 0;
+    msg->respType = 0;
+    msg->video = video;
+    msg->listen = audio;
+    msg->talk = talk;
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+}
+
 void KeMessageProcessCamera::RespPlayFileReq(int resp)
 {
     talk_base::Buffer sendBuf;
@@ -325,6 +343,7 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
         this->SignalRecvTalkData.connect(camera,&KeTunnelCamera::OnRecvTalkData);
         talk_status = talk;
     }
+    ReportMediaStatus(video_status,audio_status,talk_status);
 }
 
 void KeMessageProcessCamera::OnRecordProcess(int percent)
