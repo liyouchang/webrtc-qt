@@ -223,7 +223,7 @@ ScopedTunnel PeerTerminal:: GetOrCreateTunnel(const std::string &peer_id)
                    "create a new tunnel, total tunnel num is "<< tunnels_.size()<<
                    " and max tunnel num is "<<max_tunnel_num_;
     } else {
-        LOG_F(WARNING)<<"tunnel number is more than the max number "<<tunnels_.size()<<
+        LOG_F(WARNING)<<"tunnel number is more than the max number ,totol is"<<tunnels_.size()<<
                         " ; max number is "<< max_tunnel_num_<<
                         " ; action is "<<tunnel_out_action;
         if(tunnel_out_action == 1){

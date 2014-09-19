@@ -258,7 +258,12 @@ void KeMessageProcessCamera::RespAskMediaReq(const VideoInfo &info)
     msg->frameType = info.frameResolution;
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
-
+/**
+ * @brief KeMessageProcessCamera::ReportMediaStatus
+ * @param video
+ * @param audio
+ * @param talk 0-对讲未开始 1-可以对讲 2-对讲失败,已有对讲
+ */
 void KeMessageProcessCamera::ReportMediaStatus(int video, int audio, int talk)
 {
     talk_base::Buffer sendBuf;
@@ -292,7 +297,7 @@ void KeMessageProcessCamera::RespPlayFileReq(int resp)
     msg->resp = resp;
     msg->frameRate = recordReader->recordInfo.frameRate;
     msg->frameResolution = recordReader->recordInfo.frameResolution;
-    //    talk_base::strcpyn(msg->fileName,80,fileName);
+    //talk_base::strcpyn(msg->fileName,80,fileName);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 

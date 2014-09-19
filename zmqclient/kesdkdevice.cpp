@@ -50,7 +50,7 @@ enum StreamLevel{
     kLevelMainStream = 1,
     kLevelSubStream = 2,
     kLevelExtStream = 3,
-    kLevelAudioStream
+    kLevelAudioStream = 4
 };
 
 int ResoToFramType(int resoValue){
@@ -756,7 +756,9 @@ void KeSdkDevice::QuitMainThread()
 
 bool KeSdkDevice::TalkAvaliable()
 {
-    if(MEDIA_Audio_isTalking() == 1 ){
+    int isTalking = MEDIA_Audio_isTalking();
+    LOG_F(INFO) << isTalking;
+    if(isTalking == 1 ){
         return false;
     }else {
         return true;
@@ -886,7 +888,7 @@ void KeSdkProcess::ConnectMedia(int video, int audio, int talk)
     if( video == 0 ) {//stop
         video_status = video;
     }
-    else if( 0 == video_status && video > 0  ) {
+    else if( 0 == video_status && video != MEDIA_NOCHANGE ) {
         this->RespAskMediaReq(this->videoInfo_);
         video_status = video;
         //try to open stream
@@ -899,18 +901,19 @@ void KeSdkProcess::ConnectMedia(int video, int audio, int talk)
     if (audio == 0) {
         audio_status = 0;
     }
-    else if (0 == audio_status && audio > 0) {
+    else if (0 == audio_status && audio != MEDIA_NOCHANGE) {
         audio_status = audio;
-        camera->MediaStreamOpen(4);
+        camera->MediaStreamOpen(kLevelAudioStream);
     }
 
     if(talk == 0) {
         this->SignalRecvTalkData.disconnect(camera);
         talk_status = 0;
     }
-    else if(0 == talk_status && talk > 0) {
+    else if(0 == talk_status && talk != MEDIA_NOCHANGE) {
         if(!camera->TalkAvaliable()){
             LOG_F(INFO) <<" talk is in use , not avaliable for now ";
+            ReportMediaStatus(MEDIA_NOCHANGE,MEDIA_NOCHANGE,2);
         } else {
             this->SignalRecvTalkData.connect(camera,&KeSdkDevice::OnRecvTalkData);
             talk_status = talk;
