@@ -187,40 +187,39 @@ int KePlayerPlugin::Initialize(QString routerUrl, QString jstrIceServers)
     qDebug()<<"KePlayerPlugin::Initialize---routerUrl:"<<routerUrl<<
               " iceServers"<<jstrIceServers;
     LOG(INFO)<<"KePlayerPlugin version is "<<kaerp2p::ToStringVersion(this->GetVersion());
-
     //init ice servers
     std::string servers = jstrIceServers.toStdString();
     kaerp2p::P2PConductor::AddIceServers(servers);
-
     if(is_inited){
         qDebug()<<"KePlayerPlugin::Initialize---alreay init";
         return KE_SUCCESS;
     }
     connection_ = new PeerConnectionClientDealer();
-
     if(!connection_->Connect(routerUrl.toStdString(),"")){
         qWarning()<<"KePlayerPlugin::Initialize---connect error";
         return KE_FAILED;
     }
-
     kaerp2p::PeerTerminal * peerTerminal = new kaerp2p::PeerTerminal(connection_);
-
     tunnel_ = new KeQtTunnelClient(this);
     tunnel_->Init(peerTerminal);
-    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvVideoData,
-                     this->video_wall_,&VideoWall::OnRecvMediaData);
-    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvAudioData,
-                     this->video_wall_,&VideoWall::OnRecvMediaData);
-    QObject::connect(tunnel_,&KeQtTunnelClient::SigTunnelOpened,
+    QObject::connect(tunnel_, &KeQtTunnelClient::SigRecvVideoData,
+                     this->video_wall_, &VideoWall::OnRecvMediaData);
+    QObject::connect(tunnel_, &KeQtTunnelClient::SigRecvAudioData,
+                     this->video_wall_, &VideoWall::OnRecvMediaData);
+    QObject::connect(tunnel_, &KeQtTunnelClient::SigTunnelOpened,
                      this,&KePlayerPlugin::TunnelOpened);
-    QObject::connect(tunnel_,&KeQtTunnelClient::SigTunnelClosed,
-                     this,&KePlayerPlugin::TunnelClosed);
-    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecordStatus,
-                     this,&KePlayerPlugin::RecordStatus);
-    QObject::connect(tunnel_,&KeQtTunnelClient::SigRecvPeerMsg,
-                     this,&KePlayerPlugin::RecvPeerMsg);
-    QObject::connect(this->video_wall_,&VideoWall::SigTalkData,
-                     this->tunnel_,&KeQtTunnelClient::OnTalkData);
+    QObject::connect(tunnel_, &KeQtTunnelClient::SigTunnelClosed,
+                     this, &KePlayerPlugin::TunnelClosed);
+    QObject::connect(tunnel_, &KeQtTunnelClient::SigRecordStatus,
+                     this, &KePlayerPlugin::RecordStatus);
+    QObject::connect(tunnel_, &KeQtTunnelClient::SigRecvPeerMsg,
+                     this, &KePlayerPlugin::RecvPeerMsg);
+    QObject::connect(tunnel_, &KeQtTunnelClient::SigMediaStatus,
+                     this, &KePlayerPlugin::OnMediaStatus);
+
+    QObject::connect(this->video_wall_, &VideoWall::SigTalkData,
+                     this->tunnel_, &KeQtTunnelClient::OnTalkData);
+
     this->is_inited = true;
     localClient_ = new KeQtLocalClient(this);
     kaerp2p::LocalTerminal * local = new kaerp2p::LocalTerminal();
@@ -249,18 +248,18 @@ int KePlayerPlugin::StartVideo(QString peer_id, int video)
         return KE_VIDEO_START_FAILED;
     }
     int index = video_wall_->SetPeerPlay(peer_id);
-    qDebug()<<"KePlayerPlugin::StartVideo play index is "<<index;
+    qDebug() << "KePlayerPlugin::StartVideo play index is "<<index;
     return KE_SUCCESS;
 }
 
 int KePlayerPlugin::StopVideo(QString peerId)
 {
-    if(peerId.isEmpty()){
+    if (peerId.isEmpty()) {
         return KE_PARAM_ERROR;
     }
     video_wall_->StopPeerPlay(peerId);
     std::string strId = peerId.toStdString();
-    if(!tunnel_->StopPeerMedia(strId)){
+    if(!tunnel_->StopPeerMedia(strId)) {
         return KE_FAILED;
     }
     return KE_SUCCESS;
@@ -290,7 +289,6 @@ QString KePlayerPlugin::StartCut(QString peerId)
             break;
         }
     }while(false);
-
     QJsonObject jreturn;
     jreturn.insert("result",result);
     jreturn.insert("info",info);
@@ -351,14 +349,31 @@ bool KePlayerPlugin::CloseSound(QString peerId)
     return video_wall_->CloseSound(peerId);
 }
 
-bool KePlayerPlugin::StartTalk()
+bool KePlayerPlugin::StartTalk(QString peerId)
 {
-    return video_wall_->StartTalk();
+    if (peerId.isEmpty()) {
+        return false;
+    }
+    std::string strId = peerId.toStdString();
+    return tunnel_->StartPeerTalk(strId);
 }
 
-bool KePlayerPlugin::StopTalk()
+bool KePlayerPlugin::StopTalk(QString peerId)
 {
-    return video_wall_->StopTalk();
+    if (peerId.isEmpty()) {
+        return false;
+    }
+    std::string strId = peerId.toStdString();
+    return tunnel_->StopPeerTalk(strId);
+}
+
+void KePlayerPlugin::OnMediaStatus(const QString &peerId, int video, int audio , int talk)
+{
+    if(talk == 1){
+        bool ret = video_wall_->StartTalk();
+        qDebug()<<"KePlayerPlugin::OnMediaStatus -- start talk "<<ret;
+    }
+    emit MediaStatus(peerId,video,audio,talk);
 }
 
 int KePlayerPlugin::SendCommand(QString peer_id, QString msg)
@@ -385,7 +400,6 @@ bool KePlayerPlugin::PlayRecordFile(QString peerId, QString remoteFile)
 
 bool KePlayerPlugin::StopPlayFile(QString peer_id)
 {
-
     if(peer_id.isEmpty()){
         return false;
     }
@@ -412,7 +426,6 @@ bool KePlayerPlugin::SetPlaySpeed(QString peer_id, int speed)
     std::string strId = peer_id.toStdString();
     qDebug()<<"KePlayerPlugin::SetPlaySpeed  "<< speed;
     return tunnel_->SetPlayFileStatus(strId,2,-1,speed);
-
 }
 
 void KePlayerPlugin::setSavePath(const QString &path)
@@ -425,30 +438,10 @@ void KePlayerPlugin::setSavePath(const QString &path)
     myconfig->setValue("plugin/save_path",savePath());
 }
 
-void KePlayerPlugin::OnRecordStatus(QString peer_id, int status)
-{
-    //    std::string str_id = peer_id.toStdString();
-    //    if(status == 6){//download end , download another file
-    //        if(!need_play_records_.empty()){
-    //            RecordFileInfo file = need_play_records_.dequeue();
-    //            ASSERT(str_id == file.peer_id);
-    //            tunnel_->DownloadRemoteFile(str_id,need_play_records_.at(0).remote_name);
-
-    //            KeRecorder * recorder = this->findChild<KeRecorder *>(peer_id);
-    //            if(recorder){
-    //                this->video_wall_->SetLocalPlayFileSize(peer_id,recorder->GetFileSize());
-    //            }
-    //        }else{ //download end
-    //            emit RemoteFileDownloadEnd(peer_id);
-    //        }
-    //    }
-}
-
 QString KePlayerPlugin::GetSaveDirList(QString saveType)
 {
     bool result = true;
     QJsonArray jdateDirArray;
-
     QDir fileDir(savePath());
     if(!fileDir.cd(saveType)){
         result = false;
@@ -592,10 +585,11 @@ QString KePlayerPlugin::savePath() const
     return m_savePath;
 }
 
+
 int KePlayerPlugin::OpenTunnel(QString peerId)
 {
     std::string strId = peerId.toStdString();
-    if(! tunnel_->OpenTunnel(strId)){
+    if(!tunnel_->OpenTunnel(strId)){
         return KE_FAILED;
     }
     return KE_SUCCESS;

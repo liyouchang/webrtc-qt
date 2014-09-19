@@ -45,7 +45,7 @@ bool KeTunnelClient::StartPeerMedia(std::string peer_id, int video)
         return false;
     }
 //    process->AskVideo(0,0,0);
-    process->AskVideo(video,1,1);
+    process->AskVideo(video,1,0);
     return true;
 }
 
@@ -70,7 +70,7 @@ bool KeTunnelClient::StartPeerTalk(std::string peer_id,bool withListen)
         LOG(WARNING) << "process not found "<<peer_id;
         return false;
     }
-    if(withListen){//连同监听一起开启
+    if (withListen) {//连同监听一起开启
         process->AskVideo(-1,1,1);
     }else{
         process->AskVideo(-1,-1,1);
@@ -87,7 +87,7 @@ bool KeTunnelClient::StopPeerTalk(std::string peer_id, bool withListen)
         LOG(WARNING) << "process not found "<<peer_id;
         return false;
     }
-    if(withListen) {//连同监听一起关闭
+    if (withListen) {//连同监听一起关闭
         process->AskVideo(-1,0,0);
     } else {//监听保持原状态
         process->AskVideo(-1,-1,0);

@@ -6,9 +6,9 @@ CONFIG -= qt
 
 include (../talk/talk_common.pri)
 
-#DESTDIR = $$output_dir
 
 TARGET = kaerturnserver
+#DESTDIR = $$output_dir
 
 INCLUDEPATH  +=  \
     ../third_party/jsoncpp/overrides/include ../third_party/jsoncpp/source/include \
