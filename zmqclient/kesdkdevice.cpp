@@ -908,15 +908,15 @@ void KeSdkProcess::ConnectMedia(int video, int audio, int talk)
         this->SignalRecvTalkData.disconnect(camera);
         talk_status = 0;
     }
-    else if( 0 == talk_status && talk > 0 ) {
+    else if(0 == talk_status && talk > 0) {
         if(!camera->TalkAvaliable()){
-            LOG_F(INFO) <<" talk is in use , not avaliable for now";
-        }else{
+            LOG_F(INFO) <<" talk is in use , not avaliable for now ";
+        } else {
             this->SignalRecvTalkData.connect(camera,&KeSdkDevice::OnRecvTalkData);
             talk_status = talk;
         }
     }
-
+    ReportMediaStatus(video_status,audio_status,talk_status);
 }
 
 void KeSdkDevice::MediaStreamOpen_d(int level)

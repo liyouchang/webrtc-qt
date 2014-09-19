@@ -65,6 +65,7 @@ protected:
 //                                  const char * data,int len);
     virtual void OnRecordStatus(const std::string & peer_id,int status,
                                 int position,int speed);
+    virtual void OnMediaStatus(const std::string &peer_id,int video,int audio,int talk);
 };
 
 
@@ -90,10 +91,12 @@ protected:
     virtual void OnRecvRecordMsg(talk_base::Buffer & msgData);
     virtual void RecvAskMediaResp(talk_base::Buffer & msgData);
     virtual void RecvPlayFileResp(talk_base::Buffer & msgData);
+    virtual void RecvMediaStatus(talk_base::Buffer &msgData);
 private:
     //RecorderAvi *cutter_;
     RecordSaverInterface *recordSaver;
     std::string requestReocrdFileName;
+    int talk_status;
 };
 
 }

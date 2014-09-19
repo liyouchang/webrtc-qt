@@ -37,6 +37,11 @@ void KeJniTunnelClient::OnRecordStatus(const std::string & peer_id,int status,
     JniUtil::GetInstance()->JniRecordStatus(peer_id.c_str(),status,position,speed);
 }
 
+void KeJniTunnelClient::OnMediaStatus(const std::string &peer_id, int video, int audio, int talk)
+{
+
+}
+
 //on tunnel closed
 void KeJniTunnelClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface* t,
                                        const std::string& peer_id) {
