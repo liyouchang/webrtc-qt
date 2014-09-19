@@ -37,6 +37,8 @@ enum KEMsgType
 
 #define KE_Terminal_Port 22616
 
+#define MEDIA_NOCHANGE 100
+
 inline int CreateCameraID(int vid,int chNo){
     return (vid<<8) + chNo;
 }
@@ -236,9 +238,9 @@ struct KEVideoServerReq
     int videoID;
     int clientID;
     char channelNo;
-    char video;//视频=1 request main,2 request sub   =0 停止
-    char listen;//监听=1请求 =0 停止
-    char talk;// 对讲=1请求 =0 停止
+    char video;//视频=1 request main,2 request sub   =0 停止 100 状态不变
+    char listen;//监听=1请求 =0 停止 100 状态不变
+    char talk;// 对讲=1请求 =0 停止 100 状态不变
     char protocalType;//0/tcp ,1/udp
     int transSvrIp;//服务器IP
 };
@@ -263,9 +265,9 @@ struct KEMediaStatus{
     int clientID;
     int videoID;
     char channelNo;
-    int video;//0:无视频,1:主通道视频(高清),2:子通道视频(均衡),3:扩展通道视频(流畅),-1:无效
-    int listen;//0:无监听,1:有监听,-1:无效
-    int talk;//1:有对讲,0:无对讲,-1:无效
+    int video;//0:无视频,1:主通道视频(高清),2:子通道视频(均衡),3:扩展通道视频(流畅),100:无效
+    int listen;//0:无监听,1:有监听,100:无效
+    int talk;//1:有对讲,0:无对讲,100:无效
     char respType;//error num 预留
 };
 
