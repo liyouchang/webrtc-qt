@@ -230,8 +230,8 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
 {
     KEFrameHead * head = (KEFrameHead *)data;
     int nowTime = talk_base::Time();
-//    LOG_T_F(INFO)<<" talk time is "<< head->second*1000 + head->millisecond*10<<
-//                   " now time is "<< nowTime;
+    LOG_T_F(INFO)<<" talk time is "<< head->second*1000 + head->millisecond*10<<
+                   " now time is "<< nowTime;
 //    const int nalLen = 4;
     int dataPos =  sizeof(KEFrameHead);
     if(head->frameLen == len - dataPos){
@@ -358,6 +358,7 @@ void KeSdkDevice::OnMessage(talk_base::Message *msg)
         break;
     case MSG_RECV_TALK:{
         TalkPacket * msgData = static_cast<TalkPacket *>(msg->pdata);
+        LOG_F(INFO)<<" talk "<<msgData->talkData.length();
         MEDIA_Audio_Talk(const_cast<char *>(msgData->talkData.data()),msgData->talkData.length());
         delete msgData;
     }
@@ -694,7 +695,6 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
         LOG_F(WARNING)<<"input time  format error";
         return false;
     }
-    LOG_F(INFO)<<"get file start 1";
     int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,0,NULL);
 
     if(list_num <= 0){
@@ -709,10 +709,8 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
         return false;
     }
     st_store_list_t * stList  = new st_store_list_t[list_num];
-    LOG_F(INFO)<<"get file start 2";
 
     STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,list_num,stList);
-    LOG_F(INFO)<<"get file end";
 
     int copyNum = std::min(list_num-offset,toQuery);
 
@@ -744,14 +742,12 @@ bool KeSdkDevice::SetArmingStatus(int status)
 int KeSdkDevice::GetArmingStatus()
 {
     return  ALARM_Get_Defense_Status(FIFO_ALARM_MV,0,0);
-    //    return 0;
 }
 
 void KeSdkDevice::QuitMainThread()
 {
     this->deviceThread->Quit();
     LOG_F(WARNING) << " quit main thread";
-
 }
 
 bool KeSdkDevice::TalkAvaliable()
@@ -894,7 +890,7 @@ void KeSdkProcess::ConnectMedia(int video, int audio, int talk)
         //try to open stream
         camera->MediaStreamOpen(video);
         camera->MediaGetIDR(video);
-    }else{ //video > 0
+    }else if(video != MEDIA_NOCHANGE){ //video > 0
         camera->MediaGetIDR(video);
     }
 

@@ -74,7 +74,7 @@ bool KeTunnelClient::StartPeerTalk(std::string peer_id,bool withListen)
     }else{
         process->AskVideo(MEDIA_NOCHANGE,MEDIA_NOCHANGE,1);
     }
-    this->SignalTalkData.connect(process,&KeMessageProcessClient::OnTalkData);
+//    this->SignalTalkData.connect(process,&KeMessageProcessClient::OnTalkData);
     return true;
 }
 

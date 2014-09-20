@@ -213,7 +213,7 @@ ScopedTunnel PeerTerminal:: GetOrCreateTunnel(const std::string &peer_id)
     }
     aTunnel = this->GetTunnel("");
     if(aTunnel){
-        LOG(INFO)<<"PeerTerminal::GetOrCreateTunnel---"<<"reuse a empty tunnel";
+        LOG_F(INFO)<<"reuse a empty tunnel" ;
         return aTunnel;
     }
     if(tunnels_.size() < max_tunnel_num_ ||
