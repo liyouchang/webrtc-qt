@@ -92,7 +92,6 @@ void P2PConductor::DisconnectFromCurrentPeer()
         //异步调用DeletePeerConnection,进入Disconnecting状态
         signal_thread_->Post(this,MSG_DISCONNECT);
         //这里发送Bye消息,如果提前收到seeyou消息,会被忽略,待超时后关闭通道
-        SignalNeedSendToPeer(peer_id_,kByeMessage);
     }
 }
 
@@ -201,10 +200,11 @@ void P2PConductor::DeletePeerConnection()
         peer_connection_->Close();
     }
     //防止设备打开不成功时未调用OnTunnelTerminate
-    if (peer_connection_.get()) {
+    if(peer_connection_.get()){
         LOG_T_F(INFO) <<" delete peer connction " << peer_connection_.get();
         peer_connection_.release();
         setTunnelState(kTunnelDisconnecting);
+        SignalNeedSendToPeer(peer_id_,kByeMessage);
         this->signal_thread_->PostDelayed(kDisConnectTimeout,this,
                                           MSG_DISCONNECT_TIMEOUT);
     }
@@ -225,6 +225,7 @@ void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
     LOG_T_F(INFO)<< " delete peer connction " <<peer_connection_.get();
     peer_connection_.release();
     setTunnelState(kTunnelDisconnecting);
+    SignalNeedSendToPeer(peer_id_,kByeMessage);
     this->signal_thread_->PostDelayed(kDisConnectTimeout,this,
                                       MSG_DISCONNECT_TIMEOUT);
 }
@@ -236,8 +237,8 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
     //在收到bye消息后发送seeyou消息,用于对tunnel的状态进行控制
     //发送bye消息后进入disconnecting状态,
     if (tunnelState == kTunnelDisconnecting) {
-        if( message.length() == ( sizeof(kEndMsg) - 1 ) &&
-                message.compare(kEndMsg) == 0 ) {
+        if( message.length() == ( sizeof(kByeMessage) - 1 ) &&
+                message.compare(kByeMessage) == 0 ) {
             LOG(INFO)<<"receive end message from "<<peerId <<",tunnel is end";
             ConductorClose();
         } else {
@@ -251,7 +252,7 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
          message.compare(kByeMessage) == 0) {
         LOG(INFO)<<"receive bye message from "<<peerId;
         if (peerId == peer_id_ && peer_connection_.get()) {
-            SignalNeedSendToPeer(peer_id_,kEndMsg);
+//            SignalNeedSendToPeer(peer_id_,kEndMsg);
             DeletePeerConnection();
             ConductorClose();
         }
