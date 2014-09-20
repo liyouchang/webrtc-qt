@@ -117,8 +117,6 @@ jint naCloseTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
     return ret;
 }
 
-
-
 jint naStartMediaData(JNIEnv *env, jobject thiz, jstring peer_id,jint level) {
     LOGI("5. naAskMediaData()");
     if (client == NULL) {

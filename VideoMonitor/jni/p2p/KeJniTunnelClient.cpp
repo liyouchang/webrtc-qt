@@ -12,22 +12,22 @@ KeJniTunnelClient::KeJniTunnelClient() {
 }
 
 KeJniTunnelClient::~KeJniTunnelClient() {
-	// TODO Auto-generated destructor stub
+    // TODO Auto-generated destructor stub
 }
 void KeJniTunnelClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface * t,
                                        const std::string & peer_id){
-	KeTunnelClient::OnTunnelOpened(t,peer_id);
-	JniUtil::GetInstance()->JniTunnelOpened(peer_id.c_str());
+    KeTunnelClient::OnTunnelOpened(t,peer_id);
+    JniUtil::GetInstance()->JniTunnelOpened(peer_id.c_str());
 }
 void KeJniTunnelClient::OnRecvAudioData(const std::string& peer_id,
-		const char* data, int len) {
-	 JniUtil::GetInstance()->JniRecvAudioData(peer_id.c_str(),data,len);
+                                        const char* data, int len) {
+    JniUtil::GetInstance()->JniRecvAudioData(peer_id.c_str(),data,len);
 
 }
 
 void KeJniTunnelClient::OnRecvVideoData(const std::string& peer_id,
-		const char* data, int len) {
-	 JniUtil::GetInstance()->JniRecvVideoData(peer_id.c_str(),data,len);
+                                        const char* data, int len) {
+    JniUtil::GetInstance()->JniRecvVideoData(peer_id.c_str(),data,len);
 
 }
 
@@ -37,10 +37,15 @@ void KeJniTunnelClient::OnRecordStatus(const std::string & peer_id,int status,
     JniUtil::GetInstance()->JniRecordStatus(peer_id.c_str(),status,position,speed);
 }
 
+void KeJniTunnelClient::OnMediaStatus(const std::string &peer_id, int video, int audio, int talk)
+{
+
+}
+
 //on tunnel closed
 void KeJniTunnelClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface* t,
-                                        const std::string& peer_id) {
-	KeTunnelClient::OnTunnelClosed(t,peer_id);
+                                       const std::string& peer_id) {
+    KeTunnelClient::OnTunnelClosed(t,peer_id);
     JniUtil::GetInstance()->JniTunnelMethodCallback("TunnelClosed",
                                                     peer_id.c_str());
 }
