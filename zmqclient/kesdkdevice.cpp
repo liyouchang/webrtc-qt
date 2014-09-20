@@ -230,9 +230,7 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
 {
     KEFrameHead * head = (KEFrameHead *)data;
     int nowTime = talk_base::Time();
-    LOG_T_F(INFO)<<" talk time is "<< head->second*1000 + head->millisecond*10<<
-                   " now time is "<< nowTime;
-//    const int nalLen = 4;
+    LOG_T_F(LS_VERBOSE)<<"talk data len "<<len;
     int dataPos =  sizeof(KEFrameHead);
     if(head->frameLen == len - dataPos){
         //放入另外的线程播放声音,以防止在数据接受线程中阻塞.若阻塞会产生异常
@@ -358,7 +356,7 @@ void KeSdkDevice::OnMessage(talk_base::Message *msg)
         break;
     case MSG_RECV_TALK:{
         TalkPacket * msgData = static_cast<TalkPacket *>(msg->pdata);
-        LOG_F(INFO)<<" talk "<<msgData->talkData.length();
+        LOG_T_F(LS_VERBOSE)<<" post time is  "<< msgData->timespan<<" now time is "<< talk_base::Time();
         MEDIA_Audio_Talk(const_cast<char *>(msgData->talkData.data()),msgData->talkData.length());
         delete msgData;
     }
