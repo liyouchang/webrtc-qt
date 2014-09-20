@@ -118,6 +118,14 @@ V0.32
     peer_id(string): 通道id
 	speed(int): 0-暂停 100-继续
 
+13. bool StartTalk(QString peerId);
+
+	开始对讲,通过MediaStatus,获取对讲状态
+
+14. bool StopTalk(QString peerId);
+
+	停止对讲,通过MediaStatus,获取对讲状态
+
 ###回调说明:
 
 1. TunnelOpened(peerId);
@@ -139,6 +147,14 @@ V0.32
 	status(int):远程回放状态,2-请求录像文件错误,3-回放结束,4-正在回放,5-回放消息错误
 	position(int):回放进度 1-100
 	speed:回放速度,暂无用
+
+6. MediaStatus(peer_id, video , audio , talk);
+	
+	媒体状态回调
+	
+	参数说明:
+    peer_id(string): 通道id
+	talk : 目前仅此参数有用, 0:对讲停止 1:对讲开始 2:对讲错误,已有对讲
 
 	
 ###枚举类型说明:
