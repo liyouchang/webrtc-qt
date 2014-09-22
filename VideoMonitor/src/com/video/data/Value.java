@@ -8,13 +8,15 @@ public class Value {
 	/**
 	 * 服务器IP和Port
 	 */
-	public final static String BackstageIPPort = "tcp://192.168.40.179:5555";
+//	public final static String BackstageIPPort = "tcp://192.168.40.179:5555";
 //	public final static String BackstageIPPort = "tcp://222.174.213.181:5555";
 //	public final static String BackstageIPPort = "tcp://192.168.60.198:5555";
 //	public final static String BackstageIPPort = "tcp://192.168.0.185:5555";
 //	public final static String BackstageIPPort = "tcp://222.174.213.185:5555";
 //	public final static String BackstageIPPort = "tcp://192.168.40.192:5555";
-//	public final static String BackstageIPPort = "tcp://218.56.11.182:5555";
+//	public final static String BackstageIPPort = "tcp://218.56.11.180:5555";
+//	public final static String BackstageIPPort = "tcp://192.168.40.180:5555";
+	public final static String BackstageIPPort = "tcp://218.56.11.181:5555";
 
 	/**
 	 * 设备服务器名称
@@ -35,14 +37,24 @@ public class Value {
 //	public final static String stun = "stun:222.174.213.181:5389";
 //	public final static String turn = "turn:222.174.213.181:5766";
 	
-	public final static String stun = "stun:192.168.40.179:5389";
-	public final static String turn = "turn:192.168.40.179:5766";
+	public final static String stun = "stun:218.56.11.181:5389";
+	public final static String turn = "turn:218.56.11.181:5766";
+	
+//	public final static String stun = "stun:192.168.40.179:5389";
+//	public final static String turn = "turn:192.168.40.179:5766";
+	
+//	public final static String stun = "stun:218.56.11.180:5389";
+//	public final static String turn = "turn:218.56.11.180:5766";
+	
+//	public final static String stun = "stun:192.168.40.180:5389";
+//	public final static String turn = "turn:192.168.40.180:5766";
 	
 	/**
 	 * 服务器上比较版本的xml文件地址
 	 */
 //	public final static String ApkXmlPath = "http://222.174.213.185:8088/plugin/VideoMonitorXml.xml";
-	public final static String ApkXmlPath = "http://222.174.213.181:8088/plugin/VideoMonitorXml.xml";
+//	public final static String ApkXmlPath = "http://222.174.213.181:8088/plugin/VideoMonitorXml.xml";
+	public final static String ApkXmlPath = "http://218.56.11.181:8088/plugin/VideoMonitorXml.xml";
 	
 	/**
 	 * realm
@@ -61,6 +73,7 @@ public class Value {
 	public final static int REQ_TIME_10S = 10000;
 	public final static int REQ_TIME_15S = 15000;
 	public final static int REQ_TIME_30S = 30000;
+	public final static int REQ_TIME_60S = 60000;
 	
 	/**
 	 * 是否需要请求报警记录的标志

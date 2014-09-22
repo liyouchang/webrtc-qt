@@ -19,6 +19,7 @@ import android.widget.RelativeLayout;
 import com.video.R;
 import com.video.local.player.LocalPlayerActivity;
 import com.video.main.LocalFragment;
+import com.video.service.MainApplication;
 import com.video.utils.OkCancelDialog;
 import com.video.utils.Utils;
 
@@ -91,9 +92,10 @@ public class VideoGridViewAdapter extends BaseAdapter {
 					public void onClick(View v) {
 						// TODO Auto-generated method stub
 						final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-						myDialog.setTitle("温馨提示");
-						myDialog.setMessage("确认删除当前的本地录像？");
-						myDialog.setPositiveButton("确定", new OnClickListener() {
+						myDialog.setTitle(MainApplication.getInstance().getResources().getString(R.string.tips)); // 温馨提示
+						// wxtest getResources().getText(R.string.prompt)
+						myDialog.setMessage(MainApplication.getInstance().getResources().getString(R.string.delete_the_current_local_video));// 确认删除当前的本地录像
+						myDialog.setPositiveButton(MainApplication.getInstance().getResources().getString(R.string.confirm), new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								myDialog.dismiss();
@@ -110,7 +112,7 @@ public class VideoGridViewAdapter extends BaseAdapter {
 								mContext.sendBroadcast(intent);
 							}
 						});
-						myDialog.setNegativeButton("取消", new OnClickListener() {
+						myDialog.setNegativeButton(MainApplication.getInstance().getResources().getString(R.string.cancel), new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								myDialog.dismiss();

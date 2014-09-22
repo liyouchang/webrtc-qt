@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.video"
-    android:versionCode="18"
-    android:versionName="1.1.8" >
+    android:versionCode="19"
+    android:versionName="1.1.9" >
 
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="19"/>
     
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission android:name="android.permission.GET_TASKS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>  
@@ -22,6 +21,8 @@
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"/> 
+	<uses-permission android:name="android.permission.DISABLE_KEYGUARD"/> 
 
     <application
         android:name=".service.MainApplication"
@@ -33,7 +34,8 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppThemeNoTitle"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustPan|adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -47,7 +49,8 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
-            android:theme="@style/AppThemeNoTitle" >
+            android:theme="@style/AppThemeNoTitle"
+            android:windowSoftInputMode="adjustPan|adjustResize" >
         </activity>
         <!-- 历史 -->
         <activity
@@ -55,7 +58,8 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
-            android:theme="@style/AppThemeNoTitle" >
+            android:theme="@style/AppThemeNoTitle"
+            android:windowSoftInputMode="adjustPan|adjustResize" >
         </activity>
         <!-- 消息 -->
         <activity
@@ -63,7 +67,8 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
-            android:theme="@style/AppThemeNoTitle" >
+            android:theme="@style/AppThemeNoTitle"
+            android:windowSoftInputMode="adjustPan|adjustResize" >
         </activity>
         <!-- 更多 -->
         <activity
@@ -71,7 +76,8 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:launchMode="singleTask"
-            android:theme="@style/AppThemeNoTitle" >
+            android:theme="@style/AppThemeNoTitle"
+            android:windowSoftInputMode="adjustPan|adjustResize" >
         </activity>
         <!-- 注册 -->
         <activity
@@ -216,6 +222,25 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/AppThemeFullscreen" >
         </activity>
+        <!-- 智能门铃弹出窗口  -->
+        <activity
+            android:name=".main.PopupVideoActivity"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTask"
+            android:theme="@style/DialogActivityTheme" >
+        </activity>
+        <!-- AP搜索界面 -->
+        <activity
+            android:name=".main.APSearchActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+		</activity>
+		<!-- AP配置界面 -->
+        <activity
+            android:name=".main.APListActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppThemeNoTitle" >
+		</activity>
     </application>
 
 </manifest>

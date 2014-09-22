@@ -22,7 +22,9 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Toast;
 
+import com.video.R;
 import com.video.data.Value;
+import com.video.service.MainApplication;
 
 public class UpdateAPK {
 
@@ -112,15 +114,15 @@ public class UpdateAPK {
 	 */
 	private void showUpgradeVersionDialog() {
 		StringBuffer info = new StringBuffer();
-		info.append("视界通更新信息\n");
-		info.append("新版本号："+xmlHashMap.get("versionName")+"\n");
-		info.append("软件大小："+xmlHashMap.get("apkLeagth")+"\n");
+		info.append(MainApplication.getInstance().getResources().getString(R.string.horizon_Updates)+"/n");
+		info.append(MainApplication.getInstance().getResources().getString(R.string.the_new_version_number)+":"+xmlHashMap.get("versionName")+"\n");
+		info.append(MainApplication.getInstance().getResources().getString(R.string.software_Size)+":"+xmlHashMap.get("apkLeagth")+"\n");
 		info.append(xmlHashMap.get("upgradeReason"));
 		
 		final DownloadAlertDialog myDialog=new DownloadAlertDialog(mContext);
-		myDialog.setTitle("视界通已更新");
+		myDialog.setTitle(MainApplication.getInstance().getResources().getString(R.string.horizon_Updated));
 		myDialog.setMessage(""+info);
-		myDialog.setPositiveButton("现在升级", new OnClickListener() {
+		myDialog.setPositiveButton(MainApplication.getInstance().getResources().getString(R.string.upgrade_Now), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
@@ -128,7 +130,7 @@ public class UpdateAPK {
 			}
 		});
 
-		myDialog.setNegativeButton("忽略升级", new OnClickListener() {
+		myDialog.setNegativeButton(MainApplication.getInstance().getResources().getString(R.string.ignore_upgrade), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
@@ -141,16 +143,16 @@ public class UpdateAPK {
 	 */
 	private void showDownloadDialog() {
 		StringBuffer info = new StringBuffer();
-		info.append("视界通更新信息\n");
-		info.append("新版本号："+xmlHashMap.get("versionName")+"\n");
-		info.append("软件大小："+xmlHashMap.get("apkLeagth")+"\n");
+		info.append(MainApplication.getInstance().getResources().getString(R.string.horizon_Updates)+"/n");
+		info.append(MainApplication.getInstance().getResources().getString(R.string.the_new_version_number)+":"+xmlHashMap.get("versionName")+"\n");
+		info.append(MainApplication.getInstance().getResources().getString(R.string.software_Size)+":"+xmlHashMap.get("apkLeagth")+"\n");
 		info.append(xmlHashMap.get("upgradeReason"));
 		
 		downLoadDialog = new DownloadAlertDialogProgressBar(mContext);
 		downLoadDialog.setProgressPercent(0);
-		downLoadDialog.setTitle("正在下载软件包");
+		downLoadDialog.setTitle(MainApplication.getInstance().getResources().getString(R.string.downloading_the_package));
 		downLoadDialog.setMessage(""+info);
-		downLoadDialog.setNegativeButton("取消下载", new OnClickListener() {
+		downLoadDialog.setNegativeButton(MainApplication.getInstance().getResources().getString(R.string.cancel_download), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				downLoadDialog.dismiss();
@@ -308,7 +310,7 @@ public class UpdateAPK {
 					e.printStackTrace();
 				}
 			} else {
-				Toast.makeText(mContext, "您手机的SD卡不可用！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, MainApplication.getInstance().getResources().getString(R.string.your_SD_card_available), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}

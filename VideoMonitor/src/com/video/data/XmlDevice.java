@@ -43,18 +43,16 @@ public class XmlDevice {
 	 * 初始化xml文件
 	 */
 	public void init() {
-		if (Utils.checkSDCard()) {
-			filePath = mContext.getFilesDir().getPath() + File.separator + "DeviceList.xml";
+		filePath = mContext.getFilesDir().getPath() + File.separator + "DeviceList.xml";
 //			filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "KaerVideo" + File.separator + "DeviceList.xml";
-			File file = new File(filePath);
-			if (!file.exists()) {
-				try {
-					file.createNewFile();
-					initXmlFile(file);
-				} catch (IOException e) {
-					e.printStackTrace();
-					Utils.log("init()异常！");
-				}
+		File file = new File(filePath);
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+				initXmlFile(file);
+			} catch (IOException e) {
+				e.printStackTrace();
+				Utils.log("init() abnormal！");
 			}
 		}
 	}
@@ -78,7 +76,7 @@ public class XmlDevice {
 			os.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("initXmlFile()异常！");
+			Utils.log("initXmlFile() abnormal！");
 		}
 	}
 
@@ -95,7 +93,7 @@ public class XmlDevice {
 			return document;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("loadInit()异常！");
+			Utils.log("loadInit() abnormal！");
 		}
 		return null;
 	}
@@ -113,7 +111,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("addList()异常！");
+			Utils.log("addList() abnormal ！");
 		}
 		return false;
 	}
@@ -164,7 +162,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("addItem()异常！");
+			Utils.log("addItem() abnormal！");
 		}
 		return false;
 	}
@@ -187,7 +185,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("isItemExit()异常！");
+			Utils.log("isItemExit() abnormal！");
 		}
 		return false;
 	}
@@ -214,7 +212,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("deleteItem()异常！");
+			Utils.log("deleteItem() abnormal！");
 		}
 		return false;
 	}
@@ -239,7 +237,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("deleteItemBg()异常！");
+			Utils.log("deleteItemBg() abnormal！");
 		}
 		return false;
 	}
@@ -255,7 +253,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: deleteAllItem()异常！");
+			System.out.println("MyDebug: deleteAllItem()abnormal！");
 		}
 		return false;
 	}
@@ -270,7 +268,7 @@ public class XmlDevice {
 			return nodeList.getLength();
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("getListSize()异常！");
+			Utils.log("getListSize() abnormal！");
 		}
 		return 0;
 	}
@@ -321,7 +319,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("updateItem()异常！");
+			Utils.log("updateItem() abnormal！");
 		}
 		return false;
 	}
@@ -347,7 +345,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("updateItem()异常！");
+			Utils.log("updateItem() abnormal！");
 		}
 		return false;
 	}
@@ -373,7 +371,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("updateItem()异常！");
+			Utils.log("updateItem() abnormal！");
 		}
 		return false;
 	}
@@ -397,7 +395,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("updateItem()异常！");
+			Utils.log("updateItem() abnormal！");
 		}
 		return false;
 	}
@@ -422,7 +420,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("updateItemBg()异常！");
+			Utils.log("updateItemBg() abnormal！");
 		}
 		return false;
 	}
@@ -451,7 +449,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("updateItem()异常！");
+			Utils.log("updateItem() abnormal！");
 		}
 		return false;
 	}
@@ -478,7 +476,7 @@ public class XmlDevice {
 			item.put(DeviceValue.HASH_PLAYER_CLARITY, clarity);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("getNodeHashMap()异常！");
+			Utils.log("getNodeHashMap() abnormal！");
 		}
 		return item;
 	}
@@ -502,7 +500,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("readItem()异常！");
+			Utils.log("readItem() abnormal！");
 		}
 		return null;
 	}
@@ -532,7 +530,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("getItem()异常！");
+			Utils.log("getItem() abnormal！");
 		}
 		return null;
 	}
@@ -551,7 +549,7 @@ public class XmlDevice {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("writeXML()异常！");
+			Utils.log("writeXML() abnormal！");
 		}
 		return false;
 	}
@@ -573,7 +571,7 @@ public class XmlDevice {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			Utils.log("readXml()异常！");
+			Utils.log("readXml() abnormal！");
 			return null;
 		}
 		return list;

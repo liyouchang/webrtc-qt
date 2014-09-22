@@ -219,8 +219,8 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 						if (msg.arg1 == 0) {
 							//请求分享的终端列表成功
 							if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
-								shared_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
-								shared_refresh_terminal = "终端: "+Build.MODEL;
+								shared_refresh_time = getResources().getString(R.string.last_Updated_on)+":"+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
+								shared_refresh_terminal = getResources().getString(R.string.terminal)+":"+Build.MODEL;
 								preferData.writeData("sharedRefreshTime", shared_refresh_time);
 								preferData.writeData("sharedRefreshTerminal", shared_refresh_terminal);
 								mPullToRefreshHeaderView.onHeaderRefreshComplete(shared_refresh_time, shared_refresh_terminal);
@@ -263,9 +263,9 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 							sharedList.remove(listPosition);
 							deviceAdapter.notifyDataSetChanged();
 							listSize = sharedList.size();
-							Toast.makeText(mContext, "删除终端分享成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext,getResources().getString(R.string.canceling_terminal_share_success), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "删除终端分享失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.share_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_device_share_id);
@@ -421,10 +421,10 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 			if (!isPullToRefresh) {
 //				sendHandlerMsg(IS_REQUESTING, "正在请求分享列表...");
 			}
-			sendHandlerMsg(REQUEST_TIMEOUT, "请求分享列表失败，网络超时！", Value.REQ_TIME_10S);
+			sendHandlerMsg(REQUEST_TIMEOUT,getResources().getString(R.string.request_to_a_list_failed), Value.REQ_TIME_10S);
 			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -434,11 +434,11 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 	public void delTermItemEvent(String id) {
 		if (Utils.isNetworkAvailable(mContext)) {
 			String data = generateDelShareTermItemJson(id);
-			sendHandlerMsg(IS_REQUESTING, "正在删除终端分享...");
-			sendHandlerMsg(REQUEST_TIMEOUT, "删除终端分享失败，网络超时！", Value.REQ_TIME_10S);
+			sendHandlerMsg(IS_REQUESTING, getResources().getString(R.string.is_canceling_terminal_share));
+			sendHandlerMsg(REQUEST_TIMEOUT, getResources().getString(R.string.canceling_terminal_share_failed), Value.REQ_TIME_10S);
 			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -524,9 +524,9 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 									mContext.startActivity(intent);
 								} else {
 									final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-									myDialog.setTitle("温馨提示");
-									myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
-									myDialog.setPositiveButton("确认", new OnClickListener() {
+									myDialog.setTitle("");
+									myDialog.setMessage(getResources().getString(R.string.the_current_network_is_not_WiFi));
+									myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 										@Override
 										public void onClick(View v) {
 											myDialog.dismiss();
@@ -537,7 +537,7 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 											mContext.startActivity(intent);
 										}
 									});
-									myDialog.setNegativeButton("取消", new OnClickListener() {
+									myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 										@Override
 										public void onClick(View v) {
 											myDialog.dismiss();
@@ -546,13 +546,13 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 								}
 							}
 						} else {
-							Toast.makeText(mContext, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.not_online), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						final OkOnlyDialog myDialog=new OkOnlyDialog(mContext);
-						myDialog.setTitle("温馨提示");
-						myDialog.setMessage("网络不稳定，请重新登录！");
-						myDialog.setPositiveButton("确认", new OnClickListener() {
+						myDialog.setTitle("");
+						myDialog.setMessage(getResources().getString(R.string.network_instability));
+						myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								myDialog.dismiss();
@@ -565,10 +565,10 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 						});
 					}
 				} else {
-					Toast.makeText(mContext, "【"+mDeviceName+"】终端设备不在线！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, "【"+mDeviceName+"】"+getResources().getString(R.string.equipment_is_not_online), Toast.LENGTH_SHORT).show();
 				}
 			} else {
-				Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -668,7 +668,7 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
 		
 		List<String> item_list = new ArrayList<String>();
-		item_list.add("删除终端分享");
+		item_list.add(getResources().getString(R.string.delete_terminal_share));
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mContext, item_list);
 		pop_listView.setAdapter(popAdapter);
 		

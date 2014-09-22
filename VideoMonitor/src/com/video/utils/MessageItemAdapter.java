@@ -86,7 +86,7 @@ public class MessageItemAdapter extends BaseAdapter {
 		holder.msg_time.setText(list.get(position).get("msgTime"));
 		
 		String msg_image_url = list.get(position).get("imageURL");
-		if (!msg_image_url.equals("null")) {
+		if ((MainApplication.isSDExist) && (!msg_image_url.equals("null"))) {
 			AsyncImageTask task = new AsyncImageTask(holder.iv_image, msg_image_url);
 			task.execute();
 		}
@@ -112,10 +112,10 @@ public class MessageItemAdapter extends BaseAdapter {
 						context.startActivity(intent);
 						((Activity) context).overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 					} else {
-						Toast.makeText(context, "加载图片失败", Toast.LENGTH_SHORT).show();
+						Toast.makeText(context, MainApplication.getInstance().getResources().getString(R.string.load_picture_fails), Toast.LENGTH_SHORT).show();
 					}
 				} else {
-					Toast.makeText(context, "该条报警消息暂无图片", Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, MainApplication.getInstance().getResources().getString(R.string.no_picture_which_alarm_messages), Toast.LENGTH_SHORT).show();
 				}
 			}
 		});

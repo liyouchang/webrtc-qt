@@ -165,7 +165,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 			switch (msg.what) {
 				case IS_MODIFYING:
 					if (mDialog == null) {
-						mDialog = Utils.createLoadingDialog(mContext, "正在提交...");
+						mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_Submitting));
 						mDialog.show();
 					}
 					break;
@@ -177,7 +177,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 					if (handler.hasMessages(MODIFY_TIMEOUT)) {
 						handler.removeMessages(MODIFY_TIMEOUT);
 					}
-					Toast.makeText(mContext, "修改密码失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.change_password_failed_timeout), Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.modify_pwd_id:
 					if (handler.hasMessages(MODIFY_TIMEOUT)) {
@@ -187,13 +187,13 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 							mDialog = null;
 						}
 						if (msg.arg1 == 0) {
-							Toast.makeText(mContext, "恭喜您，修改密码成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.change_the_password_successfully), Toast.LENGTH_SHORT).show();
 							Intent intent = new Intent();
 							setResult(1, intent);
 							finish();
 							overridePendingTransition(R.anim.fragment_nochange, R.anim.right_out);
 						} else {
-							Toast.makeText(mContext, "修改密码失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.change_password_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.modify_pwd_id);
@@ -232,7 +232,7 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(MODIFY_TIMEOUT, Value.REQ_TIME_10S);
 			}
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -282,45 +282,45 @@ public class ModifyPwdActivity extends Activity implements OnClickListener {
 		
 		if (userOldPwd.equals("")) {
 			resultFlag = false;
-			Toast.makeText(mContext, "请输入旧密码！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext,getResources().getString(R.string.please_enter_your_old_password), Toast.LENGTH_SHORT).show();
 		}
 		else if (Utils.isChineseString(userOldPwd)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_SHORT).show();
 		}
 		else if (!userOldPwd.equals(userPwd)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "旧密码输入错误！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.enter_the_old_password_wrong), Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			if (userNewPwd.equals("")) {
 				resultFlag = false;
-				Toast.makeText(mContext, "请输入新密码！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.please_enter_a_new_password), Toast.LENGTH_SHORT).show();
 			}
 			else if (Utils.isChineseString(userNewPwd)) {
 				resultFlag = false;
-				Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_SHORT).show();
 			}
 			else if ((userNewPwd.length()<6) || (userNewPwd.length()>20)) {
 				resultFlag = false;
-				Toast.makeText(mContext, "密码长度范围6~20！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.password_length), Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 				if (userNewRepwd.equals("")) {
 					resultFlag = false;
-					Toast.makeText(mContext, "请再次输入新密码！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.please_enter_the_new_password_again), Toast.LENGTH_SHORT).show();
 				}
 				else if (Utils.isChineseString(userNewRepwd)) {
 					resultFlag = false;
-					Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_SHORT).show();
 				}
 				else if ((userNewRepwd.length()<6) || (userNewRepwd.length()>20)) {
 					resultFlag = false;
-					Toast.makeText(mContext, "确认密码长度范围6~20！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.confirm_password_length), Toast.LENGTH_SHORT).show();
 				}
 				else if (!userNewPwd.equals(userNewRepwd)) {
 					resultFlag = false;
-					Toast.makeText(mContext, "两次输入的密码不一致！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.two_passwords_do_not_match), Toast.LENGTH_SHORT).show();
 				} else {
 					resultFlag = true;
 				}

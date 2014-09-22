@@ -110,7 +110,7 @@ public class SetDeviceBgActivity extends Activity implements OnClickListener {
 					ArrayList<String> imageFileStringArray = handleImageFileName(currentFiles);
 					
 					if (imageFileStringArray == null) {
-						Toast.makeText(mContext, "没有本地抓拍图片", Toast.LENGTH_SHORT).show();
+						Toast.makeText(mContext, getResources().getString(R.string.no_local_capture_pictures), Toast.LENGTH_SHORT).show();
 					} else {
 						for (int i=0; i<imageFileCount; i++) {
 							//文件夹下的图片

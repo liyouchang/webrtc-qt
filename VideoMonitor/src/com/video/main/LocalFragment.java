@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,6 +27,8 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.video.R;
 import com.video.local.ImageListViewAdapter;
 import com.video.local.LocalFileItem;
@@ -42,13 +45,11 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	
 	private TextView viewpage_video;
 	private TextView viewpage_image;
-//	private TextView viewpage_terminal;
 	
 	private ViewPager mViewPager;
 	private List<View> pageList;
 	private View video_page;
 	private View image_page;
-//	private View terminal_page;
 	private TextProgressBar progressBarSD;
 	
 	private String SD_path = "";
@@ -79,13 +80,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	private VideoListViewAdapter videoListAdapter = null;
 	private List<LocalFileItem> videoLocalFile = null;
 	private RelativeLayout noVideoLayout = null;
-	
-	//终端录像初始化
-//	private ArrayList<HashMap<String, String>> deviceList = null;
-//	private DeviceItemAdapter deviceAdapter = null;
-//	private ListView terminalListView = null;
-//	private int listSize = 0;
-//	private RelativeLayout noDeviceLayout = null;
 	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -125,12 +119,10 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		LayoutInflater inflater = LayoutInflater.from(mActivity);
 		image_page = inflater.inflate(R.layout.local_image, null);
 		video_page = inflater.inflate(R.layout.local_video, null);
-//		terminal_page = inflater.inflate(R.layout.local_terminal, null);
 		
 		pageList = new ArrayList<View>();
 		pageList.add(image_page);
 		pageList.add(video_page);
-//		pageList.add(terminal_page);
 		
 		mViewPager = (ViewPager)rootView.findViewById(R.id.local_viewpager);
 		mViewPager.setOnPageChangeListener(this);
@@ -143,8 +135,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		viewpage_image.setOnClickListener(this);
 		viewpage_video = (TextView)rootView.findViewById(R.id.tv_vp_video);
 		viewpage_video.setOnClickListener(this);
-//		viewpage_terminal = (TextView)mView.findViewById(R.id.tv_vp_terminal);
-//		viewpage_terminal.setOnClickListener(this);
 		
 		//抓拍图片初始化
 		imageListView = (ListView) image_page.findViewById(R.id.local_image_listView);
@@ -153,12 +143,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		//本地录像初始化
 		videoListView = (ListView) video_page.findViewById(R.id.local_video_listView);
 		noVideoLayout = (RelativeLayout) video_page.findViewById(R.id.rl_no_local_file_video);
-		
-		//终端录像初始化
-//		terminalListView = (ListView) terminal_page.findViewById(R.id.lv_local_device_list);
-//		terminalListView.setOnItemClickListener(new OnItemClickListenerImpl());
-//		noDeviceLayout = (RelativeLayout) terminal_page.findViewById(R.id.rl_no_local_device_list);
-		
 		//注册广播
 		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
@@ -173,8 +157,11 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			double SDAvailable = Utils.getAvailableSDSize();
 			int SDScale = (int) ((SDAvailable/SDTotal)*100);
 			DecimalFormat df = new DecimalFormat("0.00");
-			progressBarSD.setText("SD卡："+df.format(SDTotal)+"GB    可用："+df.format(SDAvailable)+"GB");
+			progressBarSD.setText(getResources().getString(R.string.SD_card)+"："+df.format(SDTotal)+"GB"+getResources().getString(R.string.available)+df.format(SDAvailable)+"GB");
 			progressBarSD.setProgress(SDScale);
+		} else {
+			Toast.makeText(mActivity, getResources().getString(R.string.phone_has_no_SD_card), Toast.LENGTH_SHORT).show();
+			return ;
 		}
 	}
 	
@@ -186,22 +173,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			
 			//本地录像初始化
 			new LocalVideoThread().start();
-			
-			//终端录像初始化
-//			deviceList = new ArrayList<HashMap<String, String>>();
-//			ArrayList<HashMap<String, String>> readList = MainApplication.getInstance().getOnlineDeviceList();
-//			if (readList != null) {
-//				deviceList = readList;
-//			}
-//			listSize = deviceList.size();
-//			if (listSize == 0) {
-//				deviceList.clear();
-//				noDeviceLayout.setVisibility(View.VISIBLE);
-//			} else {
-//				noDeviceLayout.setVisibility(View.INVISIBLE);
-//			}
-//			deviceAdapter = new DeviceItemAdapter(mActivity, deviceList);
-//			terminalListView.setAdapter(deviceAdapter);
+		} else {
+			Toast.makeText(mActivity, getResources().getString(R.string.phone_has_no_SD_card), Toast.LENGTH_SHORT).show();
+			return ;
 		}
 	}
 	
@@ -211,11 +185,9 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 	private void changeViewPage(int index) {
 		viewpage_image.setBackgroundResource(R.drawable.viewpage_unselected);
 		viewpage_video.setBackgroundResource(R.drawable.viewpage_unselected);
-//		viewpage_terminal.setBackgroundResource(R.drawable.viewpage_unselected);
 		
 		viewpage_image.setTextColor(getResources().getColorStateList(R.color.white));
 		viewpage_video.setTextColor(getResources().getColorStateList(R.color.white));
-//		viewpage_terminal.setTextColor(getResources().getColorStateList(R.color.white));
 		
 		switch (index) {
 			case 0:
@@ -228,11 +200,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 				viewpage_video.setTextColor(getResources().getColorStateList(R.color.orange));
 				mViewPager.setCurrentItem(1);
 				break;
-//			case 2:
-//				viewpage_terminal.setBackgroundResource(R.drawable.viewpage_selected);
-//				viewpage_terminal.setTextColor(getResources().getColorStateList(R.color.orange));
-//				mViewPager.setCurrentItem(2);
-//				break;
 		}
 	}
 	
@@ -246,9 +213,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 			case R.id.tv_vp_video:
 				changeViewPage(1);
 				break;
-//			case R.id.tv_vp_terminal:
-//				changeViewPage(2);
-//				break;
 		}
 	}
 
@@ -292,7 +256,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 					if (imageLocalFile == null || imageLocalFile.size() == 0) {
 						if (noImageLayout != null)
 							noImageLayout.setVisibility(View.VISIBLE);
-						System.out.println("MyDebug: --------------> 更新抓拍图片");
+						System.out.println("MyDebug: --------------> Update snapshot pictures 更新抓拍图片");
 						imageFileCount = 0;
 						if (imageLocalFile != null) {
 							imageLocalFile.clear();
@@ -322,7 +286,7 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 					if (videoLocalFile == null || videoLocalFile.size() == 0) {
 						if (noVideoLayout != null)
 							noVideoLayout.setVisibility(View.VISIBLE);
-						System.out.println("MyDebug: --------------> 更新本地录像");
+						System.out.println("MyDebug: --------------> Update the local video 更新本地录像");
 						videoFileCount = 0;
 						if (videoLocalFile != null) {
 							videoLocalFile.clear();
@@ -639,21 +603,6 @@ public class LocalFragment extends Fragment implements OnClickListener, OnPageCh
 		}
 		return fileVideos;
 	}
-	
-	//-----------------------------------------------------------------------------------
-	//终端录像处理
-	//-----------------------------------------------------------------------------------
-//	private class OnItemClickListenerImpl implements OnItemClickListener {
-//		@Override
-//		public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-//			// TODO Auto-generated method stub
-//			//请求终端录像
-//			Intent intent = new Intent(mActivity, SetDateActivity.class);
-//			intent.putExtra("dealerName", deviceList.get(position).get("dealerName"));
-//			startActivity(intent);
-//			mActivity.overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
-//		}
-//	}
 	
 	@Override
 	public void onDestroy() {

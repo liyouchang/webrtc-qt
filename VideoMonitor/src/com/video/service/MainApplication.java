@@ -38,7 +38,7 @@ public class MainApplication extends Application {
 	public XmlDevice xmlDevice = null;
 	
 	// 应用程序文件夹路径
-	public boolean isSDExist = false;
+	public static boolean isSDExist = false;
 	public String SDPath = null; 
 	public String KaerVideoPath = null;
 	public File KaerVideoFile = null; 
@@ -53,7 +53,6 @@ public class MainApplication extends Application {
 	
 	// 终端设备列表
 	public ArrayList<HashMap<String, String>> deviceList = null;
-	public int unreadAlarmCount = 0;
 	
 	@Override  
     public void onCreate() {  
@@ -374,8 +373,10 @@ public class MainApplication extends Application {
         }
 		
 		// 删除缓存和缩略图文件夹
-		Utils.deleteDirectoryFiles(cacheFile);
-		Utils.deleteDirectoryFiles(thumbnailsFile);
+		if (isSDExist) {
+			Utils.deleteDirectoryFiles(cacheFile);
+			Utils.deleteDirectoryFiles(thumbnailsFile);
+		}
 		
 		// 复位全局变量
 		Value.resetValues();

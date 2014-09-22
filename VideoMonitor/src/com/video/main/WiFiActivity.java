@@ -190,7 +190,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 			switch (msg.what) {
 				case IS_REQUSTING:
 					if ((mDialog == null) || (!mDialog.isShowing())) {
-						mDialog = createLoadingDialog(mContext, "正在请求设备周围WiFi列表...");
+						mDialog = createLoadingDialog(mContext, getResources().getString(R.string.request_wifi_list));
 						mDialog.show();
 					}
 					break;
@@ -205,7 +205,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 					if (handler.hasMessages(R.id.requst_wifi_list_id)) {
 						handler.removeMessages(R.id.requst_wifi_list_id);
 					}
-					Toast.makeText(mContext, "请求WiFi列表失败，请重试！ ", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.request_wifi_list_failed), Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.requst_wifi_list_id:
 					if (handler.hasMessages(REQUST_TIMEOUT)) {
@@ -217,7 +217,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 						if (msg.arg1 == 0) {
 							showWiFiListDialog((ArrayList<HashMap<String, Object>>) msg.obj);
 						} else {
-							Toast.makeText(mContext, "设备附近暂时没有WiFi信号！ ", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.no_wifi_around_equitment), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.requst_wifi_list_id);
@@ -225,7 +225,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 					break;
 				case IS_SETTING:
 					if ((mDialog == null) || (!mDialog.isShowing())) {
-						mDialog = Utils.createLoadingDialog(mContext, "正在配置设备WiFi网络...");
+						mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.setting_wifi));
 						mDialog.show();
 					}
 					break;
@@ -247,9 +247,9 @@ public class WiFiActivity extends Activity implements OnClickListener {
 							mDialog = null;
 						}
 						if (msg.arg1 == 1) {
-							Toast.makeText(mContext, "配置设备WiFi网络成功！ ", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.setting_wifi_succesed), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "配置设备WiFi网络失败，请重试！ ", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.setting_wifi_failed), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.set_term_wifi_id);
@@ -300,7 +300,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 		Handler sendHandler = ZmqThread.zmqThreadHandler;
 		String data = generateSetTermWiFiInfoJson(key);
 		if (data == null) {
-			Toast.makeText(mContext, "读取WiFi数据错误，请重新搜索WiFi！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.reading_wifi_data_error), Toast.LENGTH_SHORT).show();
 			return ;
 		}
 		sendHandlerMsg(IS_SETTING);
@@ -316,27 +316,27 @@ public class WiFiActivity extends Activity implements OnClickListener {
 	 */
 	private void showWiFiListDialog(ArrayList<HashMap<String, Object>> list) {
 		WiFiAlertDialog wifiDialog = new WiFiAlertDialog(mContext);
-		wifiDialog.setTitle("WiFi列表");
+		wifiDialog.setTitle(getResources().getString(R.string.wifi_list));
 		WiFiAdapter adapter = new WiFiAdapter(mContext, list);
 		wifiDialog.setAdapter(adapter);
 		wifiDialog.setOnItemClickListenerWiFiButton(btn_wifi_list, list);
 	}
 	
 	/**
-	 * 配置设备WiFi温馨提示
+	 * 配置设备WiFi
 	 */
 	private void showSetTermWiFiTip() {
 		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-		myDialog.setTitle("温馨提示");
-		myDialog.setMessage("确认要配置的WiFi没有密码？");
-		myDialog.setPositiveButton("确认", new OnClickListener() {
+		myDialog.setTitle("");
+		myDialog.setMessage(getResources().getString(R.string.set_wifi_code));
+		myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
 				setTermWiFiInfoEvent("");
 			}
 		});
-		myDialog.setNegativeButton("取消", new OnClickListener() {
+		myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
@@ -361,7 +361,7 @@ public class WiFiActivity extends Activity implements OnClickListener {
 			case R.id.btn_wifi_submit:
 				String pwd = et_wifi_pwd.getText().toString().trim();
 				if (selectedWiFi == null) {
-					Toast.makeText(mContext, "请先搜索WiFi，再配置", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.search_wifi_first), Toast.LENGTH_SHORT).show();
 				}
 				else if ((pwd == null) || (pwd.length() == 0)) {
 					showSetTermWiFiTip();
