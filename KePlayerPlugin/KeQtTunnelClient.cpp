@@ -22,7 +22,6 @@ void KeQtTunnelClient::OnRecvAudioData(const std::string &peer_id, const char *d
 void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *data, int len)
 {
     //qDebug()<<"KeQtTunnelClient::OnRecvVideoData "<<len;
-
     QByteArray mediaData(data,len);
     emit SigRecvVideoData(peer_id.c_str(),mediaData);
 }
@@ -31,15 +30,18 @@ void KeQtTunnelClient::OnRecvVideoData(const std::string &peer_id, const char *d
 //{
 //    QByteArray mediaData(data,len);
 //    emit SigRecordFileData(peer_id.c_str(),mediaData);
-
 //}
 
 void KeQtTunnelClient::OnRecordStatus(const std::string &peer_id, int status,
                                       int position, int speed)
 {
-//    qDebug()<<"KeTunnelClient::OnRecordStatus---"<<peer_id.c_str()<<" status "<<status;
-
+    qDebug()<<"KeTunnelClient::OnRecordStatus---"<<peer_id.c_str()<<" status "<<status;
     emit SigRecordStatus(peer_id.c_str(),status,position,speed);
+}
+
+void KeQtTunnelClient::OnMediaStatus(const std::string &peer_id, int video, int audio, int talk)
+{
+    emit SigMediaStatus(peer_id.c_str(),video,audio,talk);
 }
 
 void KeQtTunnelClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id)
@@ -58,9 +60,8 @@ void KeQtTunnelClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface *t, const s
 
 void KeQtTunnelClient::OnRouterMessage(const std::string &peer_id, talk_base::Buffer &msg)
 {
-
     std::string strMsg(msg.data(),msg.length());
-    LOG(INFO)<<"KeQtTunnelClient::OnRouterMessage---"<<peer_id<<",msg:"<<strMsg;
+    LOG_F(INFO)<<peer_id<<",msg:"<<strMsg;
     emit SigRecvPeerMsg(peer_id.c_str(),strMsg.c_str());
 }
 
@@ -68,12 +69,6 @@ void KeQtTunnelClient::OnTalkData(QByteArray data)
 {
     this->SendTalkData(data.constData(),data.length());
 }
-
-
-
-
-
-
 
 //void KeQtTunnelClient::ExtractMessage(QByteArray &allBytes)
 //{
@@ -158,7 +153,6 @@ void KeQtTunnelClient::OnTalkData(QByteArray data)
 
 KeQtLocalClient::KeQtLocalClient(QObject *parent): QObject(parent)
 {
-
 }
 
 void KeQtLocalClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peerAddr)
@@ -166,7 +160,6 @@ void KeQtLocalClient::OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const st
     qDebug()<<"KeQtLocalClient::OnTunnelOpened";
     KeLocalClient::OnTunnelOpened(t,peerAddr);
     emit SigTunnelOpened(peerAddr.c_str());
-
 }
 
 void KeQtLocalClient::OnTunnelClosed(kaerp2p::PeerTerminalInterface *t, const std::string &peerAddr)
@@ -192,5 +185,4 @@ void KeQtLocalClient::OnSearchedDeviceInfo(const std::string &devInfo)
 {
     qDebug()<<"KeQtLocalClient::OnSearchedDeviceInfo---"<<devInfo.c_str();
     emit SigSearchedDeviceInfo(devInfo.c_str());
-
 }

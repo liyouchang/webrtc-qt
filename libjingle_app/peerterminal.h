@@ -6,6 +6,8 @@
 #include "PeerTerminalInterface.h"
 #include "PeerConnectionClinetInterface.h"
 #include <vector>
+#include <deque>
+
 #include "talk/p2p/base/basicpacketsocketfactory.h"
 #include "talk/base/asyncudpsocket.h"
 
@@ -49,13 +51,16 @@ private:
     int CountAvailableTunnels();
     ScopedTunnel GetOrCreateTunnel(const std::string & peer_id);
 
-    void SendTunnelError(const std::string &peer_id);
+    ScopedTunnel CreateNewTunnel();
+    void SendTunnelError(const std::string &peer_id, const std::string errorType);
     kaerp2p::PeerConnectionClientInterface * client_;
     //talk_base::scoped_refptr<kaerp2p::P2PConductor> conductor_;
-    std::vector<ScopedTunnel> tunnels_;
+    std::deque<ScopedTunnel> tunnels_;
     talk_base::CriticalSection crit_;
 
     int max_tunnel_num_;
+    int tunnel_out_action;//链接超过最大数的行为,1,忽略;2,断开前一个
+
 
 };
 

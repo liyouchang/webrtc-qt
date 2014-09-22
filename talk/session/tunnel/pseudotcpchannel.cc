@@ -117,6 +117,8 @@ PseudoTcpChannel::PseudoTcpChannel(Thread* stream_thread, BaseSession* session)
     ASSERT(NULL != session_);
 }
 PseudoTcpChannel::~PseudoTcpChannel() {
+    LOG_T_F(INFO)<<" destroyed ";
+
   ASSERT(signal_thread_->IsCurrent());
   ASSERT(worker_thread_ == NULL);
   ASSERT(session_ == NULL);
@@ -442,7 +444,8 @@ void PseudoTcpChannel::OnTcpWriteable(PseudoTcp* tcp) {
 }
 
 void PseudoTcpChannel::OnTcpClosed(PseudoTcp* tcp, uint32 nError) {
-  LOG_F(LS_VERBOSE) << "[" << channel_name_ << "]";
+//  LOG_F(LS_VERBOSE) << "[" << channel_name_ << "]";
+     LOG_F(LS_INFO) << "[" << channel_name_ << "]";
   ASSERT(cs_.CurrentThreadIsOwner());
   ASSERT(worker_thread_->IsCurrent());
   ASSERT(tcp == tcp_);

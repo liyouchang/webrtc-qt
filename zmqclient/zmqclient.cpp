@@ -15,20 +15,23 @@
 #else
 #include "kesdkdevice.h"
 //#include "HisiMediaDevice.h"
+#include "keapi/common_api.h"
 #endif//arm
 
-
-int kVersion = 60;
-
+int kVersion = 70;
 
 int main()
 {
     //read config
-    JsonConfig::Instance()->FromFile(kaerp2p::GetAppFilePath("config.json"));
+    std::string configFilePath = "/root/run/config.json";
+    if( !JsonConfig::Instance()->FromFile(configFilePath)){
+        std::cout<<" get config from file error  " << configFilePath << std::endl;
+    }
+
     Json::Value mac_value = JsonConfig::Instance()->Get("camera.mac","");
     Json::Value dealer_value = JsonConfig::Instance()->Get("dealerId","");
-    Json::Value router_value =
-            JsonConfig::Instance()->Get("routerUrl","tcp://192.168.40.191:5555");
+    Json::Value router_value = JsonConfig::Instance()->Get("routerUrl","");
+
     Json::Value logParamsValue =
             JsonConfig::Instance()->Get("logParams","tstamp thread info debug");
     Json::Value jservers = JsonConfig::Instance()->Get("servers","");
@@ -39,6 +42,7 @@ int main()
                                             jlogsaveFile.asString().c_str());
 
     //Json::Value jntp = JsonConfig::Instance()->Get("ntpconfig","");
+//    LOG(INFO) << " the config file path is "<< configFilePath;
     LOG(INFO)<<"json config : "<<JsonConfig::Instance()->ToString();
     std::string clientVer = kaerp2p::ToStringVersion(kVersion);
     LOG(INFO)<<"zmqclient current version is "<<clientVer;
@@ -54,12 +58,20 @@ int main()
     bool isSetNet;
     GetBoolFromJson(JsonConfig::Instance()->Get("setNet",false),&isSetNet);
 
+    int maxP2PConnections;
+    GetIntFromJson(JsonConfig::Instance()->Get("maxP2PConnections",-1),
+                   &maxP2PConnections); // infinate for default
+
+    std::string strRouter = router_value.asString();
+    if(strRouter.empty()) {
+        LOG_ERR(LERROR)<<" get router value error. ";
+        return 3;
+    }
 
 #ifndef ARM
 
 #else
     KeSdkDevice * device = new KeSdkDevice();
-    //HisiMediaDevice * device = new HisiMediaDevice();
 
     if (isSetNet) {
         device->SetNetInfo();
@@ -68,29 +80,35 @@ int main()
     if (strMac.empty()) {
         strMac = device->GetMacAddress();
     }
-
-
-    CameraClient client(strMac,clientVer);
+    std::string terminalType = device->GetTerminalType();
+    LOG(INFO) << "dev model is "<<terminalType <<" max connection is "<<maxP2PConnections;
+    CameraClient client(strMac,clientVer,terminalType);
     client.Connect(router_value.asString(),strDealerId);
     client.Login();
+    client.ntp();
 
     client.SignalNtpSet.connect(device,&KeSdkDevice::SetNtp);
     device->SignalNetStatusChange.connect(&client,&CameraClient::Reconnect);
 
-//    AlarmNotify::Instance()->SignalTerminalAlarm.connect(
-//                &client,&CameraClient::SendAlarm);
+    KeSdkDevice::RegisterCallBack::Instance()->SignalTerminalAlarm.connect(
+                &client,&CameraClient::SendAlarm);
 
-    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client);
+    kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client,maxP2PConnections);
 //    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
 //    terminal->Initialize("0.0.0.0:12345");
 
-    device->Init(terminal);
 
+    device->Init(terminal);
     talk_base::Thread::Current()->Run();
+
+    int mainRet = SYSTEM_Get_Run();
+
     delete device;
     delete terminal;
-
 #endif //arm
-    return 0;
+    LOG(INFO)<<"quit main "<<mainRet;
+
+    return mainRet;
+
 }
 

@@ -446,10 +446,12 @@ void BasicPortAllocatorSession::DoAllocate() {
         continue;
       }
       // lht add to avoid the 192.168.254.230 use the stun port
-      if(networks[i]->prefix().ToString().compare("192.168.254.0")==0){
-          //LOG(WARNING)<<"No 192.168.254.230 should be work;";
+      if(networks[i]->prefix().ToString().compare("192.168.254.0")==0 ||
+              networks[i]->ip().ToString().compare("10.110.110.1") == 0 ){
+          LOG(WARNING)<<"ip "<<networks[i]->ip().ToString()<<" should not be work;";
           continue;
       }
+
 
       AllocationSequence* sequence =
           new AllocationSequence(this, networks[i], config, sequence_flags);

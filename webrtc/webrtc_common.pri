@@ -22,5 +22,10 @@ linux {
     output_dir = $$webrtc_root/out
 }
 
+hisi {
+    output_dir = $$webrtc_root/out/arm
+}
+
 DESTDIR = $$output_dir/libs
-OBJECTS_DIR = $$output_dir/obj/$$TARGET
+
+#OBJECTS_DIR = $$output_dir/obj/$$TARGET

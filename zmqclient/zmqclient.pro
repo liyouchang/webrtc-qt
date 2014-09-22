@@ -10,6 +10,8 @@ include (zmqdealer.pri)
 
 DESTDIR = $$output_dir/$$TARGET
 
+
+#DEFINES += NOT_USE_WEB
 #message("DESTDIR is " $$DESTDIR)
 
 win32 {
@@ -29,7 +31,6 @@ linux {
     LIBS += -lcppzmq -ljsoncpp
     LIBS += -pthread -ldl
     #LIBS += -lprofiler
-#message (" this is linux system")
 }
 
 macx {
@@ -60,6 +61,7 @@ OTHER_FILES += \
 }
 
 hisi {
+
     SOURCES += kesdkdevice.cpp
     HEADERS += kesdkdevice.h \
             keapi/media_define.h \
@@ -71,9 +73,12 @@ hisi {
             keapi/web_api.h \
             keapi/web_define.h \
             keapi/alarm_api.h \
-            keapi/alarm_define.h
+            keapi/alarm_define.h \
+            keapi/platform_api.h \
+            keapi/platform_define.h
 
-    LIBS +=-L$$output_dir/libs/sdk -lweb  -lstore  -lmedia  -lalarm -lcommon
+
+    LIBS +=-L$$output_dir/libs/sdk -lplatform -lweb  -lstore  -lmedia  -lalarm -lcommon
     LIBS += $$output_dir/libs/mpp/openssl-0.9.8d/libcrypto.a
     LIBS +=-L$$output_dir/libs/mpp/lib  -lmpi -lisp -lsns_ov9712_8 \
          -laec -lVoiceEngine -lanr -lresampler -laacenc
@@ -103,5 +108,11 @@ OTHER_FILES += \
 
 SOURCES += \
     zmqclient.cpp \
+    keapi/unicode.c
+
+HEADERS += \
+    keapi/iconv.h \
+    keapi/unicode.h
+
 
 

@@ -39,7 +39,7 @@ protected:
 };
 
 P2PConductor::P2PConductor():
-    stream_thread_(NULL),signal_thread_(NULL),tunnelState(kTunnelNew)
+    stream_thread_(NULL),signal_thread_(NULL),tunnelState(kTunnelClosed)
 {
     if(stream_thread_ == NULL){
         stream_thread_ = new talk_base::Thread();
@@ -54,7 +54,7 @@ P2PConductor::P2PConductor():
 P2PConductor::~P2PConductor()
 {
     signal_thread_->Invoke<void>(talk_base::Bind(
-        &P2PConductor::DeletePeerConnection,this));
+                                     &P2PConductor::DeletePeerConnection,this));
     if(signal_thread_)
         delete signal_thread_;
     if(stream_thread_)
@@ -76,7 +76,7 @@ bool P2PConductor::ConnectToPeer(const std::string &peer_id)
         peer_id_ = peer_id;
         peer_connection_->CreateOffer(this,"tcp");
     } else {
-        LOG(LS_INFO) <<"initialize connection error";
+        LOG(LS_INFO) << "initialize connection error";
         return false;
     }
     return true;
@@ -88,11 +88,10 @@ void P2PConductor::DisconnectFromCurrentPeer()
         LOG(INFO)<<"the tunnel is disconnecting!";
         return;
     }
-    if (peer_connection_.get()) {
+    if ( peer_connection_.get() ) {
+        //异步调用DeletePeerConnection,进入Disconnecting状态
         signal_thread_->Post(this,MSG_DISCONNECT);
-        SignalNeedSendToPeer(peer_id_,kByeMessage);
-        this->signal_thread_->PostDelayed(kDisConnectTimeout,this,
-                                          MSG_DISCONNECT_TIMEOUT);
+        //这里发送Bye消息,如果提前收到seeyou消息,会被忽略,待超时后关闭通道
     }
 }
 
@@ -102,10 +101,119 @@ StreamProcess *P2PConductor::GetStreamProcess()
     return stream_process_.get();
 }
 
-void P2PConductor::OnTunnelEstablished()
+
+void P2PConductor::ConductorClose()
 {
-    ASSERT(stream_process_);
-    LOG(INFO)<<"P2PConductor::OnTunnelEstablished---"<<talk_base::Thread::Current()->name();
+    signal_thread_->Clear(this,MSG_DISCONNECT_TIMEOUT);
+    setTunnelState(kTunnelClosed);
+    SignalStreamClosed(peer_id_);
+    peer_id_.clear();
+    stream_process_.reset();
+}
+
+void P2PConductor::setTunnelState(P2PConductor::TunnelState state)
+{
+    tunnelState = state;
+}
+
+void P2PConductor::AddIceServer(const std::string &uri,
+                                const std::string &username,
+                                const std::string &password)
+{
+    PeerTunnelInterface::IceServer server;
+    server.uri = uri;
+    server.username = username.empty()? "lht":username;
+    server.password = password.empty()? "123456":password;
+    g_servers.push_back(server);
+}
+//将g_servers置为jstrServers中的server
+void P2PConductor::AddIceServers(std::string jstrServers)
+{
+
+    Json::Reader reader;
+    Json::Value jservers;
+    if (!reader.parse(jstrServers, jservers)) {
+        LOG(WARNING) << "P2PConductor::AddIceServers---"<<
+                        "unknown json string " << jstrServers;
+        return;
+    }
+    //每次都重新添加
+    g_servers.clear();
+    std::vector<Json::Value> jServersArray;
+    LOG_F(INFO)<<" add ice servers "<< jstrServers;
+    if(JsonArrayToValueVector(jservers,&jServersArray)){
+        for(int i=0;i<jServersArray.size();i++){
+            Json::Value jserver = jServersArray[i];
+            std::string uri,username,password;
+            GetStringFromJsonObject(jserver,"uri",&uri);
+            GetStringFromJsonObject(jserver,"username",&username);
+            GetStringFromJsonObject(jserver,"password",&password);
+            P2PConductor::AddIceServer(uri,username,password);
+        }
+    }
+}
+
+
+bool P2PConductor::InitializePeerConnection()
+{
+    if(kTunnelClosed != this->tunnelState){
+        LOG_T_F(WARNING)<<" the stat should be kTunnelClosed";
+    }
+
+    if(g_servers.empty()){
+        //lht TODO: turn server should get by the server
+        //        P2PConductor::AddIceServer("stun:222.174.213.181:5389","","");
+        P2PConductor::AddIceServer(GetPeerConnectionString(),"","");
+        //        P2PConductor::AddIceServer("turn:222.174.213.185:5766",
+        //                                   "lht","123456");
+    }
+
+    stream_process_.reset(new StreamProcess(stream_thread_));
+    stream_process_->SignalOpened.connect(
+                this,&P2PConductor::OnTunnelEstablished);
+    stream_process_->SignalClosed.connect(
+                this,&P2PConductor::OnTunnelTerminate);
+
+    talk_base::scoped_refptr<PeerTunnel> pt (
+                new talk_base::RefCountedObject<PeerTunnel>(
+                    signal_thread_,stream_thread_));
+    if(!pt->Initialize(g_servers,this)){
+        return false;
+    }
+    setTunnelState(kTunnelConnecting);
+
+    peer_connection_ = PeerTunnelProxy::Create(pt->signaling_thread(), pt);
+    LOG(INFO)<<"P2PConductor::InitializePeerConnection---connect timeout is "<<kConnectTimeout;
+    signal_thread_->PostDelayed(kConnectTimeout,this,MSG_CONNECT_TIMEOUT);
+
+    return true;
+}
+
+void P2PConductor::DeletePeerConnection()
+{
+    signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
+    //when close peer_connection the session will terminate and destroy the channels
+    //the channel destroy will make the StreamProcess clean up
+    //and then the stream process will call the OnTunnelTerminate function
+    if (peer_connection_.get()) {
+        LOG_T_F(INFO) <<" close peer connction " << peer_connection_.get();
+        peer_connection_->Close();
+    }
+    //防止设备打开不成功时未调用OnTunnelTerminate
+    if(peer_connection_.get()){
+        LOG_T_F(INFO) <<" delete peer connction " << peer_connection_.get();
+        peer_connection_.release();
+        setTunnelState(kTunnelDisconnecting);
+        SignalNeedSendToPeer(peer_id_,kByeMessage);
+        this->signal_thread_->PostDelayed(kDisConnectTimeout,this,
+                                          MSG_DISCONNECT_TIMEOUT);
+    }
+}
+
+void P2PConductor::OnTunnelEstablished(StreamProcess * stream)
+{
+    ASSERT(stream_process_== stream);
+    //    LOG_T_F(INFO)<<" established ";
     signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
     this->setTunnelState(kTunnelEstablished);
     SignalStreamOpened(this->GetPeerID());
@@ -113,16 +221,24 @@ void P2PConductor::OnTunnelEstablished()
 
 void P2PConductor::OnTunnelTerminate(StreamProcess * stream)
 {
-    //ASSERT(this->GetStreamProcess() == stream);
-    LOG(INFO) << "P2PConductor::OnTunnelTerminate---end";
+    ASSERT(this->GetStreamProcess() == stream);
+    LOG_T_F(INFO)<< " delete peer connction " <<peer_connection_.get();
+    peer_connection_.release();
+    setTunnelState(kTunnelDisconnecting);
+    SignalNeedSendToPeer(peer_id_,kByeMessage);
+    this->signal_thread_->PostDelayed(kDisConnectTimeout,this,
+                                      MSG_DISCONNECT_TIMEOUT);
 }
 
 void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
                                        const std::string &message)
 {
+    //为了防止在断开链接是依然有消息从对端发送过来(对端尚未收到bye消息时正在获取candidate),
+    //在收到bye消息后发送seeyou消息,用于对tunnel的状态进行控制
+    //发送bye消息后进入disconnecting状态,
     if (tunnelState == kTunnelDisconnecting) {
-        if(message.length() == (sizeof(kEndMsg) - 1) &&
-                message.compare(kEndMsg) == 0) {
+        if( message.length() == ( sizeof(kByeMessage) - 1 ) &&
+                message.compare(kByeMessage) == 0 ) {
             LOG(INFO)<<"receive end message from "<<peerId <<",tunnel is end";
             ConductorClose();
         } else {
@@ -132,18 +248,18 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
         return;
     }
 
-    if (message.length() == (sizeof(kByeMessage) - 1) &&
-            message.compare(kByeMessage) == 0) {
+    if ( message.length() == (sizeof(kByeMessage) - 1 ) &&
+         message.compare(kByeMessage) == 0) {
         LOG(INFO)<<"receive bye message from "<<peerId;
         if (peerId == peer_id_ && peer_connection_.get()) {
-            SignalNeedSendToPeer(peer_id_,kEndMsg);
+//            SignalNeedSendToPeer(peer_id_,kEndMsg);
             DeletePeerConnection();
             ConductorClose();
         }
         return;
     }
 
-    if(!peer_connection_.get()) {
+    if(!peer_connection_.get()) { //kTunnelClosed状态
         if(!this->peer_id_.empty()){
             LOG(LS_ERROR) << "peer_id_ is not empty when peer_connection_ is not set";
             return;
@@ -160,6 +276,9 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
         return;
     }
 
+    if(kTunnelConnecting != this->tunnelState){
+        LOG_T_F(WARNING)<<" the stat should be kTunnelConnecting";
+    }
     Json::Reader reader;
     Json::Value jmessage;
     if (!reader.parse(message, jmessage)) {
@@ -217,108 +336,19 @@ void P2PConductor::OnMessageFromPeer_s(const std::string &peerId,
     }
 }
 
-void P2PConductor::ConductorClose()
-{
-    signal_thread_->Clear(this,MSG_DISCONNECT_TIMEOUT);
-    setTunnelState(kTunnelClosed);
-    SignalStreamClosed(peer_id_);
-    peer_id_.clear();
-}
-
-void P2PConductor::setTunnelState(P2PConductor::TunnelState state)
-{
-    tunnelState = state;
-}
-
-void P2PConductor::AddIceServer(const std::string &uri,
-                                const std::string &username,
-                                const std::string &password)
-{
-    PeerTunnelInterface::IceServer server;
-    server.uri = uri;
-    server.username = username.empty()? "lht":username;
-    server.password = password.empty()? "123456":password;
-    g_servers.push_back(server);
-}
-//将g_servers置为jstrServers中的server
-void P2PConductor::AddIceServers(std::string jstrServers)
-{
-
-    Json::Reader reader;
-    Json::Value jservers;
-    if (!reader.parse(jstrServers, jservers)) {
-        LOG(WARNING) << "P2PConductor::AddIceServers---"<<
-                        "unknown json string " << jstrServers;
-        return;
-    }
-    //每次都重新添加
-    g_servers.clear();
-    std::vector<Json::Value> jServersArray;
-    if(JsonArrayToValueVector(jservers,&jServersArray)){
-        for(int i=0;i<jServersArray.size();i++){
-            Json::Value jserver = jServersArray[i];
-            std::string uri,username,password;
-            GetStringFromJsonObject(jserver,"uri",&uri);
-            GetStringFromJsonObject(jserver,"username",&username);
-            GetStringFromJsonObject(jserver,"password",&password);
-            P2PConductor::AddIceServer(uri,username,password);
-        }
-    }
-}
-
-
-bool P2PConductor::InitializePeerConnection()
-{
-    if(g_servers.empty()){
-        //lht TODO: turn server should get by the server
-//        P2PConductor::AddIceServer("stun:222.174.213.181:5389","","");
-        P2PConductor::AddIceServer(GetPeerConnectionString(),"","");
-//        P2PConductor::AddIceServer("turn:222.174.213.185:5766",
-//                                   "lht","123456");
-    }
-
-    stream_process_.reset(new StreamProcess(stream_thread_));
-    stream_process_->SignalOpened.connect(
-                this,&P2PConductor::OnTunnelEstablished);
-    stream_process_->SignalClosed.connect(
-                this,&P2PConductor::OnTunnelTerminate);
-
-    talk_base::scoped_refptr<PeerTunnel> pt (
-                new talk_base::RefCountedObject<PeerTunnel>(
-                    signal_thread_,stream_thread_));
-    if(!pt->Initialize(g_servers,this)){
-        return false;
-    }
-    setTunnelState(kTunnelConnecting);
-
-    peer_connection_ = PeerTunnelProxy::Create(pt->signaling_thread(), pt);
-    LOG(INFO)<<"P2PConductor::InitializePeerConnection---connect timeout is "<<kConnectTimeout;
-    signal_thread_->PostDelayed(kConnectTimeout,this,MSG_CONNECT_TIMEOUT);
-
-    return true;
-}
-
-void P2PConductor::DeletePeerConnection()
-{
-    LOG(INFO) << "P2PConductor::DeletePeerConnection---" << this->peer_id_;
-    setTunnelState(kTunnelDisconnecting);
-    signal_thread_->Clear(this,MSG_CONNECT_TIMEOUT);
-    //when close peer_connection the session will terminate and destroy the channels
-    //the channel destroy will make the StreamProcess clean up
-    if(peer_connection_.get()){
-        peer_connection_->Close();
-        peer_connection_.release();
-    }
-}
-
 void P2PConductor::OnSuccess(SessionDescriptionInterface *desc)
 {
+
+    if(kTunnelConnecting != this->tunnelState){
+        LOG_T_F(WARNING)<<" the stat should be kTunnelConnecting";
+    }
     peer_connection_->SetLocalDescription(
                 DummySetSessionDescriptionObserver::Create(),desc);
     //get stream process
     talk_base::StreamInterface* stream = peer_connection_->GetStream();
     if(!stream_process_)
     {
+        LOG_F(WARNING) << " get stream error";
         return ;
     }
     bool result = stream_thread_->Invoke<bool>(
@@ -357,6 +387,10 @@ void P2PConductor::OnRenegotiationNeeded()
 
 void P2PConductor::OnIceCandidate(const IceCandidateInterface *candidate)
 {
+    if(kTunnelConnecting != this->tunnelState){
+        LOG_T_F(WARNING)<<" the stat should be kTunnelConnecting";
+    }
+
     Json::StyledWriter writer;
     Json::Value jmessage;
     jmessage[kCandidateSdpMidName] = candidate->sdp_mid();
@@ -394,7 +428,6 @@ void P2PConductor::OnMessage(talk_base::Message *msg)
         this->OnMessageFromPeer_s(param->peerId,param->message);
         delete param;
     }else if(msg->message_id == MSG_DISCONNECT){
-
         DeletePeerConnection();
     }else if(msg->message_id == MSG_DISCONNECT_TIMEOUT){
         LOG(WARNING)<<"P2PConductor::OnMessage-----"<<"disconnect timeout";

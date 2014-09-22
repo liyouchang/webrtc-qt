@@ -15,7 +15,7 @@
 using namespace std;
 
 
-int kVersion = 56;
+int kVersion = 60;
 
 int main()
 {
@@ -48,8 +48,9 @@ int main()
 
 //    ProfilerStart("zmq.prof");
 
-    CameraClient client(strMac,clientVer);
+    CameraClient client(strMac,clientVer,"simulator");
     client.Connect(router_value.asString(),strDealerId);
+    client.Login();
 
     kaerp2p::PeerTerminal * terminal = new kaerp2p::PeerTerminal(&client);
 //    kaerp2p::LocalUdpTerminal * terminal = new kaerp2p::LocalUdpTerminal();
@@ -61,7 +62,6 @@ int main()
     if(!GetStringFromJson(jsampleFile,&sampleFileName)){
         return 2;
     }
-
 
     KeVideoSimulator * simulator = new KeVideoSimulator(sampleFileName);
     if(!simulator->Init(terminal)){

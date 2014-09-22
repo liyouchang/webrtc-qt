@@ -37,9 +37,10 @@ protected:
                               const std::string &filename);
     virtual void OnRecvTalkData(const std::string & peer_id,
                                 const char * data,int len);
-    virtual void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
-    virtual void ReportResult(const std::string &peerId,
-                              const std::string & command, bool result);
+    virtual void OnCommandJsonMsg(const Json::Value &jmessage,
+                                  Json::Value * jresult);
+
+    virtual Json::Value GetResultMsg(const std::string & command, bool result);
     virtual void ReportJsonMsg(const std::string &peerId,Json::Value &jmessage);
 };
 
@@ -63,9 +64,10 @@ protected:
     virtual void RecvAskMediaReq(talk_base::Buffer &msgData);
     virtual void RecvPlayFile(talk_base::Buffer &msgData);
     virtual void RecvTalkData(talk_base::Buffer &msgData);
-protected:
-    virtual void RespAskMediaReq(const VideoInfo & info);
     virtual void RespPlayFileReq(int resp);
+    virtual void RespAskMediaReq(const VideoInfo & info);
+    virtual void ReportMediaStatus(int video,int audio,int talk);
+protected:
     virtual void ConnectMedia(int video,int audio,int talk);
     virtual void OnRecordProcess(int percent);
 private:

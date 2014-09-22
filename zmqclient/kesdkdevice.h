@@ -5,6 +5,15 @@
 #include "libjingle_app/ketunnelcamera.h"
 #include "talk/base/messagehandler.h"
 
+#include "zmq.h"
+#include "zmq.hpp"
+#include "zhelpers.hpp"
+#include "zmsg.hpp"
+
+#include "keapi/alarm_define.h"
+
+
+
 class KeSdkDevice : public kaerp2p::KeTunnelCamera,public talk_base::MessageHandler
 {
 public:
@@ -12,6 +21,8 @@ public:
         MSG_MEDIA_CONTROL,
         MSG_NET_CHECK,
         MSG_CheckCloseStream,
+        MSG_ZMQ_RECV,
+        MSG_RECV_TALK
     };
 
     KeSdkDevice();
@@ -20,7 +31,8 @@ public:
     void GetCameraVideoInfo(int level, kaerp2p::VideoInfo *info);
     void OnTunnelOpened(kaerp2p::PeerTerminalInterface *t, const std::string &peer_id);
 
-    void OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage);
+    virtual void OnCommandJsonMsg(const Json::Value &jmessage,
+                                  Json::Value * jresult);
 
     virtual void OnMessage(talk_base::Message *msg);
 
@@ -31,12 +43,14 @@ public:
     // 1 for main video stream , 2 for sub video stream ,3 for extern video stream ,
     // 4 for audio stream
     void MediaStreamOpen(int level);
+    bool TalkAvaliable();
 
     //get a IDR frame , the IDR frame will get in 5 frames.
     void MediaGetIDR(int level);
     void SetNetInfo();
 
     std::string GetMacAddress();
+    std::string GetTerminalType();
     //设置Ntp,zone is like +8:00
     void SetNtp(const std::string & ntpIp, int port, const std::string &zone);
     //接受对讲数据
@@ -52,7 +66,7 @@ protected:
     bool QueryRecord(Json::Value condition,Json::Value * jrecordList,int * totalNum);
     bool SetArmingStatus(int status);
     int GetArmingStatus();
-
+    void QuitMainThread();
 protected:
     //发送视频帧数据,level 1~3
     void SendVideoFrame(const char *data, int len,int level);
@@ -67,17 +81,7 @@ protected:
     //初始化视频信息
     void InitVideoInfo();
 
-    class RegisterCallBack{
-    public:
-        RegisterCallBack();
-        static RegisterCallBack *Instance();
-        sigslot::signal3<const char *, int ,int> SignalVideoFrame;
-        sigslot::signal2<const char *, int > SignalAudioFrame;
-        static int MainStreamCallBack(char * pFrameData,int iFrameLen);
-        static int SubStreamCallBack(char * pFrameData,int iFrameLen);
-        static int ExtStreamCallBack(char * pFrameData,int iFrameLen);
-        static int AudioStreamCallBack(char * pFrameData,int iFrameLen);
-    };
+    void ZmqRepMsg_z();
 
     int video1_handle_;
     int video2_handle_;
@@ -90,9 +94,32 @@ protected:
 
     talk_base::Thread *deviceThread;
 
-    int clock_handle;
+    talk_base::Thread *zmqThread;
 
+    zmq::context_t *zmqContext;
+    zmq::socket_t *repSocket;
+
+    int clock_handle;
+    int ntp_chandle;
+    int gpio_handle;
     int oldIp;
+
+public:
+    class RegisterCallBack{
+    public:
+        RegisterCallBack();
+        static RegisterCallBack *Instance();
+        sigslot::signal3<const char *, int ,int> SignalVideoFrame;
+        sigslot::signal2<const char *, int > SignalAudioFrame;
+        sigslot::signal0<> SignalReboot;
+        sigslot::signal3<int,const std::string &,const std::string &> SignalTerminalAlarm;
+        static int MainStreamCallBack(char * pFrameData,int iFrameLen);
+        static int SubStreamCallBack(char * pFrameData,int iFrameLen);
+        static int ExtStreamCallBack(char * pFrameData,int iFrameLen);
+        static int AudioStreamCallBack(char * pFrameData,int iFrameLen);
+        static int RebootCallback();
+        static int AlarmCallback(st_alarm_upload_t *,char * pJpegData,int iJpegLen);
+    };
 
 };
 
@@ -105,6 +132,45 @@ protected:
     void ConnectMedia(int video, int audio, int talk);
 };
 
+
+
+//class SdkDeviceFunction : public talk_base::MessageHandler
+//{
+//public:
+//    SdkDeviceFunction();
+
+//    virtual ~SdkDeviceFunction();
+
+//    class RegisterCallBack{
+//    public:
+//        RegisterCallBack();
+//        static RegisterCallBack *Instance();
+//        sigslot::signal3<const char *, int ,int> SignalVideoFrame;
+//        sigslot::signal2<const char *, int > SignalAudioFrame;
+//        sigslot::signal0<> SignalReboot;
+//        static int MainStreamCallBack(char * pFrameData,int iFrameLen);
+//        static int SubStreamCallBack(char * pFrameData,int iFrameLen);
+//        static int ExtStreamCallBack(char * pFrameData,int iFrameLen);
+//        static int AudioStreamCallBack(char * pFrameData,int iFrameLen);
+//        static int RebootCallback();
+//    };
+
+
+
+//protected:
+//    int video1_handle_;
+//    int video2_handle_;
+//    int video3_handle_;
+//    int audio_handle_;
+
+
+//    int clock_handle;
+//    int gpio_handle;
+//    int oldIp;
+
+//    talk_base::Thread *mainThread;
+
+//};
 
 
 #endif // KESDKDEVICE_H

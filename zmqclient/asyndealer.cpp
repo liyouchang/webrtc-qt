@@ -50,6 +50,7 @@ bool AsynDealer::send(const std::string & addr, const std::string & data)
 
 void AsynDealer::AsynSend(const std::string &addr, const std::string &data)
 {
+
     zmq::zmsg * pzmsg = new zmq::zmsg() ;
     pzmsg->wrap(addr,"");
     pzmsg->append(data);
@@ -73,8 +74,10 @@ bool AsynDealer::initialize_z(const std::string &id, const std::string &router)
 {
     ASSERT(zmq_thread_->IsCurrent());
     try{
-        context_ = new zmq::context_t();
-        socket_ = new zmq::socket_t(*context_,ZMQ_DEALER);
+//        context_ = new zmq::context_t(1,5);
+        context_ = new zmq::context_t(1,2);
+
+
     }catch(zmq::error_t e){
         LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
         return false;
@@ -102,7 +105,6 @@ bool AsynDealer::send_z(const std::string & addr,const std::string & data)
     zmq::zmsg msg;
     msg.wrap(addr,"");
     msg.append(data);
-    //std::cout<<"send :"<<msg.GetBody()<<" data:"<<data<<std::endl;
     msg.send(*socket_);
     return true;
 }
@@ -130,6 +132,15 @@ bool AsynDealer::connect_z(const std::string & id,const std::string & router)
 {
     ASSERT(zmq_thread_->IsCurrent());
     try{
+        socket_ = new zmq::socket_t(*context_,ZMQ_DEALER);
+        int reconnectInterval = 10000;
+        socket_->setsockopt(ZMQ_RECONNECT_IVL,&reconnectInterval,sizeof(reconnectInterval));
+        int highwater = 3;
+        socket_->setsockopt(ZMQ_SNDHWM,&highwater,sizeof(highwater));
+        socket_->setsockopt(ZMQ_RCVHWM,&highwater,sizeof(highwater));
+        int ligger = 100;
+        socket_->setsockopt(ZMQ_LINGER,&ligger,sizeof(ligger));
+
         if(id.empty()){
             id_ = s_set_id(*socket_);
         }
@@ -152,8 +163,10 @@ void AsynDealer::disconnect_z()
 {
     zmq_thread_->Clear(this,MSG_TOREAD);
     zmq_thread_->Clear(this,MSG_TOSEND);
-    if(socket_){
+    if ( socket_ ) {
         socket_->disconnect(router_.c_str());
+        delete socket_;
+        socket_ = NULL;
     }
 }
 
@@ -167,11 +180,11 @@ void AsynDealer::OnMessage(talk_base::Message *msg)
         break;
     case MSG_TOSEND:
     {
-        talk_base::scoped_ptr<PostZmqMessage>  pData(
-                    static_cast <PostZmqMessage*>(msg->pdata));
+        PostZmqMessage *pData = static_cast <PostZmqMessage*>(msg->pdata);
         zmq::zmsg * pzmsg = pData->data().get();
         pzmsg->send(*socket_);
         SignalSent();
+        delete pData;
     }
         break;
     default:

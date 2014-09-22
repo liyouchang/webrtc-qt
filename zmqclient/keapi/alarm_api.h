@@ -11,10 +11,14 @@
 extern "C" {
 #endif
 
-int ALARM_Initialize(void);								//åˆå§‹åŒ–åª’ä½“ç¼–ç 
-int ALARM_Cleanup(void);								//ååˆå§‹åŒ–åª’ä½“ç¼–ç 
+int ALARM_Initialize(void);								//³õÊ¼»¯Ã½Ìå±àÂë
+int ALARM_Cleanup(void);								//·´³õÊ¼»¯Ã½Ìå±àÂë
 
+int ALARM_MD_Defense(int iChn);
+int ALARM_MD_UnDefense(int iChn);
 int ALARM_Register_Callback(ALARM_CALLBACK alarm_callback);
+
+int ALARM_Get_Defense_Status(e_fifo_alarm enAlarm,int iChn,int iArea);//²éÑ¯±¨¾¯²¼³··À×´Ì¬£¬iArea±íÊ¾ÒÆ¶¯Õì²âµÄËÄ¸öÇøÓòµÄÇøÓòºÅ£¬²éÑ¯ÆäËû±¨¾¯ÀàĞÍ¿ÉÒÔÌî0£¬Èç¹ûÊÇÒ»¼ü²¼³··ÀµÄÊ±ºò¿ÉÒÔÌî0
 
 #ifdef __cplusplus
 }

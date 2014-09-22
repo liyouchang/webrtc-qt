@@ -8,19 +8,19 @@ QT       -= core gui
 
 TARGET = cppzmq
 TEMPLATE = lib
+
 CONFIG += staticlib
 
+
+#DEFINES += CPPZMQ_LIBRARY
 
 
 include( ../third_party.pri)
 
 DESTDIR = $$output_dir/libs
 
-#target.path = $$output_dir/libs
-#INSTALLS += target
 
-
-INCLUDEPATH   +=    include
+INCLUDEPATH += include
 
 
 
@@ -61,10 +61,9 @@ linux {
 android {
 
     DEFINES -= ZMQ_HAVE_SOCK_CLOEXEC ZMQ_HAVE_IFADDRS
-    DEFINES +=ZMQ_HAVE_ANDROID
+    DEFINES += ZMQ_HAVE_ANDROID
 }
 
-#message($$DEFINES)
 
 SOURCES += \
     src/address.cpp \

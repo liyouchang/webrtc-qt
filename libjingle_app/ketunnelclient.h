@@ -41,6 +41,8 @@ public:
      */
     virtual bool StartPeerMedia(std::string  peer_id,int video);
     virtual bool StopPeerMedia(std::string peer_id);
+    virtual bool StartPeerTalk(std::string  peer_id,bool withListen = false);
+    virtual bool StopPeerTalk(std::string  peer_id,bool withListen = false);
     virtual bool StartPeerVideoCut(const std::string &peer_id,
                                    const std::string & filename);
     virtual bool StopPeerVideoCut(const std::string & peer_id);
@@ -63,6 +65,7 @@ protected:
 //                                  const char * data,int len);
     virtual void OnRecordStatus(const std::string & peer_id,int status,
                                 int position,int speed);
+    virtual void OnMediaStatus(const std::string &peer_id,int video,int audio,int talk);
 };
 
 
@@ -88,10 +91,12 @@ protected:
     virtual void OnRecvRecordMsg(talk_base::Buffer & msgData);
     virtual void RecvAskMediaResp(talk_base::Buffer & msgData);
     virtual void RecvPlayFileResp(talk_base::Buffer & msgData);
+    virtual void RecvMediaStatus(talk_base::Buffer &msgData);
 private:
     //RecorderAvi *cutter_;
     RecordSaverInterface *recordSaver;
     std::string requestReocrdFileName;
+    int talk_status;
 };
 
 }

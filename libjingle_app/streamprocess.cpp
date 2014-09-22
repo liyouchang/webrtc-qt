@@ -4,9 +4,21 @@
 #include "talk/base/bind.h"
 namespace kaerp2p {
 
+//#ifdef ARM
 
-const int kWriteBufferSize = 512*1024;
-const int kReadBufferSize = 128*1024;
+//const int kWriteBufferSize = 500*1024;
+//const int kReadBufferSize = 60*1024;
+
+//#else
+
+//const int kWriteBufferSize = 512*1024;
+//const int kReadBufferSize = 256*1024;
+
+//#endif
+
+const int kWriteBufferSize = 400*1024;
+const int kReadBufferSize = 60*1024;
+
 StreamProcess::StreamProcess(talk_base::Thread * stream_thread):
     write_buf_(kWriteBufferSize,stream_thread),
     writeBufferFull(false),stream_thread_(stream_thread),stream_(NULL)
@@ -16,8 +28,8 @@ StreamProcess::StreamProcess(talk_base::Thread * stream_thread):
 
 StreamProcess::~StreamProcess()
 {
-    LOG_T_F(INFO)<<"delete stream process";
-    if(stream_){
+    if( stream_ ) {
+        LOG_T_F(INFO)<<"delete stream";
         delete stream_;
     }
 }
@@ -30,6 +42,7 @@ bool StreamProcess::ProcessStream(talk_base::StreamInterface *stream)
         LOG(LS_ERROR) << "Failed to establish P2P tunnel";
         return false;
     }
+    //当一个链接建立后,保存这个stream,当一个链接断开后,delete此stream
     stream_ = stream;
     if (stream->GetState() == talk_base::SS_OPEN) {
         OnStreamEvent(stream,
@@ -45,17 +58,17 @@ void StreamProcess::OnStreamEvent(talk_base::StreamInterface *stream,
 
     if (events & talk_base::SE_CLOSE) {
         if (error == 0) {
-            LOG(LS_INFO) << "Tunnel closed normally";
+            LOG_T_F(LS_INFO) << "Tunnel closed normally";
         } else {
-            LOG(LS_WARNING) << "Tunnel closed with error: " << error << std::endl;
+            LOG_T_F(LS_WARNING) << "Tunnel closed with error: " << error << std::endl;
         }
         Cleanup(stream);
 
         return;
     }
     if (events & talk_base::SE_OPEN) {
-        LOG(INFO)<<"StreamProcess::OnStreamEvent"<<"Tunnel Connected";
-        SignalOpened();
+        LOG_F(INFO)<<" Tunnel Connected, stream opened";
+        SignalOpened(this);
     }
     size_t count;
     if (events & talk_base::SE_WRITE) {
@@ -129,20 +142,10 @@ void StreamProcess::WriteStreamInternel()
 }
 
 void StreamProcess::Cleanup(talk_base::StreamInterface *stream, bool delay) {
-    LOG(INFO) << "StreamProcess::Cleanup";
+    LOG_T_F(INFO) << "StreamProcess Cleanup";
+    stream->SignalEvent.disconnect(this);
     stream->Close();
     SignalClosed(this);
-}
-
-void StreamProcess::Close()
-{
-    if(stream_){
-        stream_thread_->Invoke<void>(
-                    talk_base::Bind(&StreamProcess::Cleanup,this,stream_,false));
-        //Cleanup(stream_);
-        delete stream_;
-        stream_ = NULL;
-    }
 }
 
 bool StreamProcess::WriteStream(const char *data, int len)
@@ -168,7 +171,7 @@ bool StreamProcess::WriteStream(const char *data, int len)
     }
     int error;
     talk_base::StreamResult result = write_buf_.Write(data,len,&wlen,&error);
-    if(result != talk_base::SR_SUCCESS){
+    if( result != talk_base::SR_SUCCESS ){
         LOG(INFO) << "StreamProcess::WriteStream---"<<
                      "write_buf_ write buf error ";
         return false;

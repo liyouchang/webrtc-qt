@@ -47,36 +47,35 @@ void KeTunnelCamera::OnRecvTalkData(const std::string &peer_id,
 {
 }
 
-void KeTunnelCamera::OnCommandJsonMsg(const std::string &peerId, Json::Value &jmessage)
+void KeTunnelCamera::OnCommandJsonMsg(const Json::Value &jmessage,
+                                      Json::Value *jresult)
 {
-    std::string strMsg = JsonValueToString(jmessage);
+//
     std::string command;
     bool ret = GetStringFromJsonObject(jmessage, kKaerMsgCommandName, &command);
-    if(!ret){
-        LOG(WARNING)<<"get command error-"<<command<<" from"<<peerId ;
+    if( !ret ){
+        LOG(WARNING)<<"get command error-"<<command<<" from";
         return;
     }
-   if(command.compare("echo") == 0){
-        LOG_F(INFO)<<"receive echo command "<<peerId<< " msg"<<strMsg;
-
-        this->terminal_->SendByRouter(peerId,strMsg);
+    if( command.compare("echo") == 0 ) {
+//        std::string strMsg = JsonValueToString(jmessage);
+//        LOG_F(INFO)<<"receive echo command "<<peerId<<" msg"<<strMsg;
+        *jresult = jmessage;
+//      this->terminal_->SendByRouter(peerId,strMsg);
     }
-    else{
-        LOG(WARNING)<<"receive unexpected command from "<<
-                      peerId<< " msg"<<strMsg;
+    else {
+        std::string strMsg = JsonValueToString(jmessage);
+        LOG(WARNING)<<"receive unexpected command "<<" msg"<<strMsg;
     }
 }
 
-void KeTunnelCamera::ReportResult(const std::string &peerId, const std::string &command, bool result)
+Json::Value KeTunnelCamera::GetResultMsg(const std::string &command, bool result)
 {
     Json::Value jmessage;
     jmessage["type"] = "tunnel";
     jmessage["command"] = command;
     jmessage["result"] = result;
-    Json::StyledWriter writer;
-    std::string msg = writer.write(jmessage);
-    this->terminal_->SendByRouter(peerId,msg);
-
+    return jmessage;
 }
 
 void KeTunnelCamera::ReportJsonMsg(const std::string &peerId, Json::Value &jmessage)
@@ -93,14 +92,20 @@ void KeTunnelCamera::OnRouterMessage(const std::string &peer_id,
 {
     std::string strMsg(msg.data(),msg.length());
     Json::Reader reader;
-//    LOG_T(INFO)<<"KeTunnelCamera::OnRouterMessage---"<<peer_id << " msg "<<msg.data();
+    //    LOG_T(INFO)<<"KeTunnelCamera::OnRouterMessage---"<<peer_id << " msg "<<msg.data();
     Json::Value jmessage;
     if (!reader.parse(strMsg, jmessage)) {
         LOG(WARNING) << "Received unknown message. ";
         return;
     }
+    Json::Value jresult;
 
-    this->OnCommandJsonMsg(peer_id,jmessage);
+    this->OnCommandJsonMsg(jmessage,&jresult);
+
+    if(!jresult.isNull()){
+        this->ReportJsonMsg(peer_id,jresult);
+    }
+
 }
 
 void KeTunnelCamera::OnRecvVideoClarity(std::string peer_id, int clarity)
@@ -216,9 +221,7 @@ void KeMessageProcessCamera::RecvPlayFile(talk_base::Buffer &msgData)
             recordReader->StopRead();
         }else{
             LOG_T_F(WARNING)<<"stop play file error file not start";
-
         }
-//        recordReader->StopRead();
     }else{
         LOG_T_F(WARNING)<<"unknown file type";
     }
@@ -255,6 +258,29 @@ void KeMessageProcessCamera::RespAskMediaReq(const VideoInfo &info)
     msg->frameType = info.frameResolution;
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
+/**
+ * @brief KeMessageProcessCamera::ReportMediaStatus
+ * @param video
+ * @param audio
+ * @param talk 0-对讲未开始 1-可以对讲 2-对讲失败,已有对讲
+ */
+void KeMessageProcessCamera::ReportMediaStatus(int video, int audio, int talk)
+{
+    talk_base::Buffer sendBuf;
+    int msgLen = sizeof(KEMediaStatus);
+    sendBuf.SetLength(msgLen);
+    KEMediaStatus * msg = (KEMediaStatus *)sendBuf.data();
+    msg->protocal = PROTOCOL_HEAD;
+    msg->msgType = KEMSG_TYPE_MEDIASTATUS;
+    msg->msgLength = msgLen;
+    msg->videoID = 0;
+    msg->channelNo = 0;
+    msg->respType = 0;
+    msg->video = video;
+    msg->listen = audio;
+    msg->talk = talk;
+    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+}
 
 void KeMessageProcessCamera::RespPlayFileReq(int resp)
 {
@@ -271,7 +297,7 @@ void KeMessageProcessCamera::RespPlayFileReq(int resp)
     msg->resp = resp;
     msg->frameRate = recordReader->recordInfo.frameRate;
     msg->frameResolution = recordReader->recordInfo.frameResolution;
-//    talk_base::strcpyn(msg->fileName,80,fileName);
+    //talk_base::strcpyn(msg->fileName,80,fileName);
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
@@ -322,6 +348,7 @@ void KeMessageProcessCamera::ConnectMedia(int video, int audio, int talk)
         this->SignalRecvTalkData.connect(camera,&KeTunnelCamera::OnRecvTalkData);
         talk_status = talk;
     }
+    ReportMediaStatus(video_status,audio_status,talk_status);
 }
 
 void KeMessageProcessCamera::OnRecordProcess(int percent)
@@ -442,20 +469,20 @@ void KeMessageProcessCamera::OnRecordReadEnd(RecordReaderInterface *reader)
     this->RespPlayFileReq(RESP_END);
     recordReader->StopRead();
 
-//    delete recordReader;
-//    recordReader = NULL;
+    //    delete recordReader;
+    //    recordReader = NULL;
 
-//    int msgLen = sizeof(KEPlayRecordDataHead);
-//    talk_base::Buffer sendBuf;
-//    KEPlayRecordDataHead streamHead;
-//    streamHead.protocal = PROTOCOL_HEAD;
-//    streamHead.msgType = KEMSG_RecordPlayData;
-//    streamHead.msgLength = msgLen;
-//    streamHead.channelNo = 1;
-//    streamHead.videoID = 0;
-//    streamHead.resp = RESP_END;
-//    sendBuf.AppendData(&streamHead,sizeof(KEPlayRecordDataHead));
-//    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
+    //    int msgLen = sizeof(KEPlayRecordDataHead);
+    //    talk_base::Buffer sendBuf;
+    //    KEPlayRecordDataHead streamHead;
+    //    streamHead.protocal = PROTOCOL_HEAD;
+    //    streamHead.msgType = KEMSG_RecordPlayData;
+    //    streamHead.msgLength = msgLen;
+    //    streamHead.channelNo = 1;
+    //    streamHead.videoID = 0;
+    //    streamHead.resp = RESP_END;
+    //    sendBuf.AppendData(&streamHead,sizeof(KEPlayRecordDataHead));
+    //    SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
 }

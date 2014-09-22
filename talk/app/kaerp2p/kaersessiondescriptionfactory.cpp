@@ -126,7 +126,9 @@ void KaerSessionDescriptionFactory::PostCreateSessionDescriptionFailed(webrtc::C
 
 }
 
-void KaerSessionDescriptionFactory::PostCreateSessionDescriptionSucceeded(webrtc::CreateSessionDescriptionObserver *observer, webrtc::SessionDescriptionInterface *description)
+void KaerSessionDescriptionFactory::PostCreateSessionDescriptionSucceeded(
+        webrtc::CreateSessionDescriptionObserver *observer,
+        webrtc::SessionDescriptionInterface *description)
 {
     CreateSessionDescriptionMsg* msg = new CreateSessionDescriptionMsg(observer);
     msg->description.reset(description);

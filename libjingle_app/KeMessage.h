@@ -19,6 +19,7 @@ enum KEMsgType
     KEMSG_TYPE_VideoSvrOnline = 0x8B,//13.	请求视频服务器的状态
     KEMSG_TYPE_MEDIATRANS = 0x8F,
     KEMSG_TYPE_VIDEOSERVER = 0x0C,
+    KEMSG_TYPE_MEDIASTATUS = 0x0D,
     KEMSG_TYPE_AUDIOSTREAM = 0x38,
     KEMSG_TYPE_VIDEOSTREAM = 0x39,
     DevMsg_SETVIDEOPARAM= 0x3B,
@@ -32,8 +33,11 @@ enum KEMsgType
 #define RESP_NAK 0x05
 #define RESP_END 0x06
 #define RESP_CTRL 0x07
+#define RESP_TALK_INUSE 0x08
 
 #define KE_Terminal_Port 22616
+
+#define MEDIA_NOCHANGE 100
 
 inline int CreateCameraID(int vid,int chNo){
     return (vid<<8) + chNo;
@@ -65,6 +69,7 @@ struct KERTStreamHead
     int videoID;
     char channelNo;
 };
+
 struct KEFrameHead {
     short frameNo;
     short piecesNo;
@@ -91,6 +96,7 @@ struct KEDevClientGetKeyResp{
     int clientID;
     char key[8];
 };
+
 struct KEDevClientLoginReq{
     unsigned char protocal;
     unsigned char msgType;//0xE1
@@ -115,6 +121,7 @@ struct KeDeviceGetKeyResp{
     int videoID;
     char key[8];
 };
+
 struct KeDeviceLoginResp{
     unsigned char protocal;
     unsigned char msgType;//0x44
@@ -230,10 +237,10 @@ struct KEVideoServerReq
     int msgLength;
     int videoID;
     int clientID;
-    char channelNo;//1 for main frame 2 for sub frame
-    char video;//视频=1 request main,2 request sub   =0 停止
-    char listen;//监听=1请求 =0 停止
-    char talk;// 对讲=1请求 =0 停止
+    char channelNo;
+    char video;//视频=1 request main,2 request sub   =0 停止 100 状态不变
+    char listen;//监听=1请求 =0 停止 100 状态不变
+    char talk;// 对讲=1请求 =0 停止 100 状态不变
     char protocalType;//0/tcp ,1/udp
     int transSvrIp;//服务器IP
 };
@@ -249,6 +256,19 @@ struct KEVideoServerResp
     char respType;// ACK/NAK
     char frameRate; //lht add frame rate and frametype
     char frameType;
+};
+
+struct KEMediaStatus{
+    unsigned char protocal;
+    unsigned char msgType;//0x0D KEMSG_TYPE_MEDIASTATUS
+    unsigned int msgLength;
+    int clientID;
+    int videoID;
+    char channelNo;
+    int video;//0:无视频,1:主通道视频(高清),2:子通道视频(均衡),3:扩展通道视频(流畅),100:无效
+    int listen;//0:无监听,1:有监听,100:无效
+    int talk;//1:有对讲,0:无对讲,100:无效
+    char respType;//error num 预留
 };
 
 typedef struct _KEMsgMediaTransReq
@@ -410,6 +430,7 @@ struct KEAlarmVideoReq
     char msecond;//时间戳millisecond devide 10
     char number;//序号
 };
+
 struct KEAlarmVideoResp
 {
     unsigned char protocal;

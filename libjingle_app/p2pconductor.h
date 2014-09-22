@@ -73,7 +73,7 @@ protected:
     bool InitializePeerConnection();
     //close peerconnection
     void DeletePeerConnection();
-    void OnTunnelEstablished();
+    void OnTunnelEstablished(StreamProcess * stream);
     void OnTunnelTerminate(StreamProcess * stream);
     void OnMessageFromPeer_s(const std::string &peerId,
                              const std::string &message);

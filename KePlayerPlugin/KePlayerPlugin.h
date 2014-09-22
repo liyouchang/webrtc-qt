@@ -46,7 +46,6 @@ class KePlayerPlugin : public QWidget
         #ifdef NPAPI
         , public QtNPBindable
         #endif
-
 {
     Q_OBJECT
     Q_PROPERTY( QString m_savePath READ savePath WRITE setSavePath )
@@ -59,7 +58,7 @@ class KePlayerPlugin : public QWidget
     Q_CLASSINFO("ToSuperClass", "KePlayerPlugin")
 
 public:
-    KePlayerPlugin(QWidget *parent = 0);
+    KePlayerPlugin(QWidget * parent = 0);
     ~KePlayerPlugin();
 
 #ifdef QAXSERVER
@@ -72,12 +71,13 @@ public:
 signals:
     void TunnelOpened(const QString &);
     void TunnelClosed(const QString &);
-    void RecordStatus(const QString &,int,int,int );
-    void RecvPeerMsg(const QString &,const QString &);
+    void RecordStatus(const QString &, int , int , int);
+    void RecvPeerMsg(const QString &, const QString &);
 //    void RemoteFileDownloadEnd(QString peer_id);
     void LocalDeviceInfo(const QString & devInfo);
     //for ie to change the size of object after fullscreen the wall
     void ResizeToNormal();
+    void MediaStatus(const QString &, int , int , int);
 
 public slots:
     void DestroyAll();
@@ -106,8 +106,10 @@ public slots:
     bool OpenSound(QString peerId);
     bool CloseSound(QString peerId);
 
-    bool StartTalk();
-    bool StopTalk();
+    bool StartTalk(QString peerId);
+    bool StopTalk(QString peerId);
+
+    void OnMediaStatus(const QString &peerId, int video, int audio, int talk);
 
     int SendCommand(QString peer_id,QString msg);
 
@@ -119,8 +121,8 @@ public slots:
 
     void setSavePath(const QString &path);
     QString savePath() const;
+    //媒体状态回调响应
 
-    void OnRecordStatus(QString peer_id,int status);
     //saveType: 在保存路径(savePath)中的保存类型如 "CaptureFiles","RecordFiles"
     QString GetSaveDirList(QString saveType);
     //dateDir:需要"saveType/dateDir",如: "CaptureFiles/2014-05-20"
@@ -146,8 +148,6 @@ private:
     QString m_savePath;
     bool is_inited;
     QSettings *myconfig;
-
-
     // QWidget interface
 protected:
 //    void paintEvent(QPaintEvent *);

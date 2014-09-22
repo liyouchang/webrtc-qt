@@ -3,12 +3,16 @@ TEMPLATE = subdirs
 SUBDIRS += \
     third_party \
     talk \
-    libjingle_app
+    webrtc/system_wrappers \
+    libjingle_app \
+    hisi
 
 
 
 hisi {
-  SUBDIRS +=  zmqclient
+  SUBDIRS +=  zmqclient \
+    hisi
+
 }
 
 
@@ -19,7 +23,6 @@ android {
 }
 
 win32 {
-
 }
 else{
 

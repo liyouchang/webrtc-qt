@@ -57,7 +57,6 @@ using cricket::TransportInfo;
 using talk_base::SocketAddress;
 using cricket::NS_JINGLE_ICE_UDP;
 
-
 namespace cricket {
 class SessionDescription;
 }

@@ -10,11 +10,20 @@
 const int kHeartInterval = 60000;//ms
 //const int kHeartInterval = 3000;//ms
 const int kHeartReconnect = 1;//1次没有收到心跳则重连
-CameraClient::CameraClient(std::string mac,std::string ver):
+CameraClient::CameraClient(std::string mac, std::string ver, std::string terminalType):
     mac_(mac),messageServer("Backstage"),alarmServer("Alarmstage"),
-    heartCount(0),clientVersion(ver),oldNetType(-1),oldIp(-1)
+    heartCount(0),clientVersion(ver),oldNetType(-1),oldIp(-1),terminalType(terminalType)
 {
     comm_thread_ = talk_base::Thread::Current();
+}
+
+void CameraClient::ntp()
+{
+    Json::StyledWriter writer;
+    Json::Value jmessage;
+    jmessage["type"] = "Terminal_NTP";
+    std::string msg = writer.write(jmessage);
+    this->SendToPeer(messageServer,msg);
 }
 
 void CameraClient::Login()
@@ -24,7 +33,9 @@ void CameraClient::Login()
     jmessage["type"] = "Terminal_Login";
     jmessage["MAC"] = mac_;
     jmessage["Version"] = clientVersion;
+    jmessage["TermType"] = terminalType;
     std::string msg = writer.write(jmessage);
+//    LOG_F(INFO)<< "client login " <<msg;
     this->SendToPeer(messageServer,msg);
 }
 
@@ -43,6 +54,9 @@ void CameraClient::SendAlarm(int alarmType, const std::string &alarmInfo,
 
     std::string msg = writer.write(jmessage);
     this->SendToPeer(alarmServer,msg);
+    LOG_F(INFO)<<" send alarm "<< alarmType <<" msg size "<< msg.size() <<
+                 " alarm time "<< kaerp2p::GetCurrentDatetime("%F %T");
+
 }
 
 bool CameraClient::Connect(const std::string &router, const std::string &id)
@@ -125,6 +139,7 @@ void CameraClient::OnMessageFromPeer(const std::string &peer_id,
         }
         else if(type.compare("Terminal_NTP") == 0)
         {
+            LOG_F(INFO)<<"get ntp msg "<< message;
             std::string ntpIp;
             std::string timezone;
             int port;

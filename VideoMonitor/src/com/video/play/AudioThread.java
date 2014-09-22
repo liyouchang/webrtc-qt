@@ -94,7 +94,7 @@ public class AudioThread extends Thread {
 				if ((writeBuf != null) && (readBuf != null) && (readBufLen > 0)) {
 					readBufLen = G711Decoder(writeBuf, readBuf, readBufLen);
 					int playPosition = 0;
-					while ((audioTrack != null) && (readBufLen > playPosition)) {
+					while ( (audioTrack != null) && (readBufLen > playPosition) ) {
 						if (readBufLen - playPosition > audioTrackPlaySize) {
 							audioTrack.write(writeBuf, playPosition, audioTrackPlaySize);
 							playPosition = playPosition + audioTrackPlaySize;

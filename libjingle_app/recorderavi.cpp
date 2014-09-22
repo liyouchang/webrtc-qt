@@ -637,7 +637,7 @@ void RecordReaderAvi::MoveTo(int percent)
         aviFile_->SetPosition(indexPos);
         char indexType[5] = {0};
         result = aviFile_->Read(indexType,4,NULL,NULL);
-        if(strcmp(indexType,"idx1") != 0){
+        if(strcmp(indexType,"idx1") != 0) {
             LOG_F(WARNING)<<"index type error ";
             return ;
         }
@@ -677,7 +677,8 @@ void RecordReaderAvi::ReadRecord()
         talk_base::scoped_ptr<char[]> moviBuf(new char[moviLen]);
         result = aviFile_->ReadAll(moviBuf.get(),moviLen,NULL,NULL);
         if(result != talk_base::SR_SUCCESS){
-            LOG_T_F(WARNING)<<"RecordReaderAvi::OnMessage---"<<"read file error ";
+            LOG_T_F(WARNING)<<"Read video---"<<"read file error ";
+            SignalRecordEnd(this);
             return ;
         }
         bool  isIdr = ((moviBuf.get()[4]&0x1f)==0x07) ;//判断idr帧
@@ -706,7 +707,8 @@ void RecordReaderAvi::ReadRecord()
         talk_base::scoped_ptr<char[]> moviBuf(new char[moviLen]);
         result = aviFile_->ReadAll(moviBuf.get(),moviLen,NULL,NULL);
         if(result != talk_base::SR_SUCCESS){
-            LOG(WARNING)<<"RecordReaderAvi::OnMessage---"<<"read file error ";
+            LOG_F(WARNING)<<"read audio---"<<"read file error ";
+            SignalRecordEnd(this);
             return ;
         }
         //if(speed == kNormalSpeed){

@@ -28,10 +28,10 @@ function load(){
         infoDiv.textContent = devInfo;
     }
 
-//    var iceServers = [{"uri":"stun:192.168.40.179:5389"},
-//                      {"uri":"turn:192.168.40.179:5766","username":"lht1","password":"1234567"}];
+    var iceServers = [{"uri":"stun:192.168.40.179:5389"},
+                      {"uri":"turn:192.168.40.179:5766","username":"lht","password":"123456"}];
 
-    var iceServers = [{"uri":"stun:192.168.40.179:5389"}];
+//    var iceServers = [{"uri":"stun:192.168.40.179:5389"}];
     var strIceServers = JSON.stringify(iceServers);
 //    var strRouterUrl = "tcp://222.174.213.181:5555"
     var strRouterUrl = "tcp://192.168.40.179:5555"
@@ -67,7 +67,7 @@ function SetPosition(){
     var pos = parseInt(playPosition.value);
     console.log(pos);
 
-//    KePlayerPlugin.SetPlayPosition(PeerID.value,parseInt(Position.value))
+    KePlayerPlugin.SetPlayPosition(PeerID.value,parseInt(Position.value))
 }
 
 var eventFunction = function(){
@@ -97,7 +97,7 @@ function QueryCameraRemoteFile(){
     g_peer_id =  PeerID.value;
     var query_command = {type:"tunnel",command:"query_record",
         condition:{startTime:"2013/04/17 17:51:00",
-            endTime:"2014/06/18 17:55:00",offset:0,toQuery:3}};
+            endTime:"2014/09/18 17:55:00",offset:0,toQuery:3}};
     var query_str = JSON.stringify(query_command);
     kePlayerObj.SendCommand(g_peer_id,query_str);
 }
@@ -113,7 +113,7 @@ function PlayCameraRemoteFile(){
 //                 "fileName" : "/mnt/sd/20140428/video/01/104750_1.avi",
 //                 "fileSize" : 12323578 }];
 //    var record_str = JSON.stringify(record_list);
-    var recordFile = "Sample.avi";
+    var recordFile = "/mnt/sd/20140901/video/01/103028_1.avi";
     kePlayerObj.PlayRecordFile(g_peer_id,recordFile);
 }
 
@@ -186,5 +186,24 @@ function Ptz(side){
     console.log(str);
     kePlayerObj.SendCommand(g_peer_id,str);
 }
+function ArmingStatus(){
+    g_peer_id =  PeerID.value;
+    var ptz ={
+                "type":"tunnel",
+                "command":"arming_status",
+                "value":1
+            };
+    var str = JSON.stringify(ptz);
+    console.log(str);
+    kePlayerObj.SendCommand(g_peer_id,str);
+}
 
-
+function Reboot(){
+    g_peer_id =  PeerID.value;
+    var echo =
+    {"type":"tunnel",
+     "command":"reboot"
+    };
+    var str = JSON.stringify(echo);
+    kePlayerObj.SendCommand(g_peer_id,str);
+}
