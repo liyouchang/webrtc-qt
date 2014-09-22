@@ -11,7 +11,7 @@ public class AudioCache {
 
 	public AudioCache(int size) {
 		mBufferLen = size;
-		mBuffer = new byte[mBufferLen];
+		mBuffer = new byte[size];
 		clearBuffer();
 	}
 
@@ -33,7 +33,7 @@ public class AudioCache {
 	 */
 	public boolean push(byte[] buf, int offset, int len) {
 		boolean result = (len + inPtr < mBufferLen);
-		if (result) {
+		if ((result) && (buf != null)) {
 			synchronized (mLock) {
 				Tools.CopyByteArray(mBuffer, inPtr, buf, offset, len);
 				inPtr += len;
@@ -52,7 +52,7 @@ public class AudioCache {
 	 */
 	public int pop(byte[] buf, int offset) {
 		int result = inPtr;
-		if (result > 0) {
+		if ((result > 0) && (buf != null)) {
 			synchronized (mLock) {
 				Tools.CopyByteArray(buf, offset, mBuffer, 0, inPtr);
 				inPtr = 0;

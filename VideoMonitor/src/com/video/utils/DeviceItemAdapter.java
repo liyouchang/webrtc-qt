@@ -96,24 +96,24 @@ public class DeviceItemAdapter extends BaseAdapter {
 			holder.device_net_state.setBackgroundResource(R.drawable.icon_online);
 		} else {
 			holder.device_net_state.setBackgroundResource(R.drawable.icon_offline);
-			holder.device_link.setText("无法联机");
+			holder.device_link.setText(MainApplication.getInstance().getResources().getString(R.string.unable_online));
 			holder.device_link_icon.setBackgroundResource(R.drawable.device_not_linked_icon);
 		}
 		// 联机的4种状态：linked:已联机 notlink:无法联机 linking:正在联机... timeout:联机超时
 		String linkState = list.get(position).get("LinkState");
 		if (linkState.equals("linked")) {
-			holder.device_link.setText("已联机");
+			holder.device_link.setText(MainApplication.getInstance().getResources().getString(R.string.is_online));
 			holder.device_link_icon.setBackgroundResource(R.drawable.device_linked_icon);
 		}
 		else if (linkState.equals("timeout")) {
-			holder.device_link.setText("联机超时");
+			holder.device_link.setText(MainApplication.getInstance().getResources().getString(R.string.online_overtime));
 			holder.device_link_icon.setBackgroundResource(R.drawable.device_not_linked_icon);
 		} 
 		else if (linkState.equals("linking")) {
-			holder.device_link.setText("正在联机...");
+			holder.device_link.setText(MainApplication.getInstance().getResources().getString(R.string.is_being_online));
 			holder.device_link_icon.setBackgroundResource(R.drawable.device_not_linked_icon);
 		} else {
-			holder.device_link.setText("无法联机");
+			holder.device_link.setText(MainApplication.getInstance().getResources().getString(R.string.unable_online));
 			holder.device_link_icon.setBackgroundResource(R.drawable.device_not_linked_icon);
 		}
 		holder.device_name.setText(list.get(position).get("deviceName"));
@@ -162,9 +162,9 @@ public class DeviceItemAdapter extends BaseAdapter {
 											context.startActivity(intent);
 										} else {
 											final OkCancelDialog myDialog=new OkCancelDialog(context);
-											myDialog.setTitle("温馨提示");
-											myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
-											myDialog.setPositiveButton("确认", new OnClickListener() {
+											myDialog.setTitle("");
+											myDialog.setMessage(MainApplication.getInstance().getResources().getString(R.string.the_current_network_is_not_WiFi));
+											myDialog.setPositiveButton(MainApplication.getInstance().getResources().getString(R.string.confirm), new OnClickListener() {
 												@Override
 												public void onClick(View v) {
 													myDialog.dismiss();
@@ -177,7 +177,7 @@ public class DeviceItemAdapter extends BaseAdapter {
 													context.startActivity(intent);
 												}
 											});
-											myDialog.setNegativeButton("取消", new OnClickListener() {
+											myDialog.setNegativeButton(MainApplication.getInstance().getResources().getString(R.string.cancel), new OnClickListener() {
 												@Override
 												public void onClick(View v) {
 													myDialog.dismiss();
@@ -186,14 +186,14 @@ public class DeviceItemAdapter extends BaseAdapter {
 										}
 									}
 								} else {
-									Toast.makeText(context, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
+									Toast.makeText(context, MainApplication.getInstance().getResources().getString(R.string.no_online), Toast.LENGTH_SHORT).show();
 								}
 							}
 						} else {
 							final OkOnlyDialog myDialog=new OkOnlyDialog(context);
-							myDialog.setTitle("温馨提示");
-							myDialog.setMessage("网络不稳定，请重新登录！");
-							myDialog.setPositiveButton("确认", new OnClickListener() {
+							myDialog.setTitle("");
+							myDialog.setMessage(MainApplication.getInstance().getResources().getString(R.string.network_instability));
+							myDialog.setPositiveButton(MainApplication.getInstance().getResources().getString(R.string.confirm), new OnClickListener() {
 								@Override
 								public void onClick(View v) {
 									myDialog.dismiss();
@@ -206,10 +206,10 @@ public class DeviceItemAdapter extends BaseAdapter {
 							});
 						}
 					} else {
-						Toast.makeText(context, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
+						Toast.makeText(context, MainApplication.getInstance().getResources().getString(R.string.no_online), Toast.LENGTH_SHORT).show();
 					}
 				} else {
-					Toast.makeText(context, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, MainApplication.getInstance().getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 				}
 			}
 		});

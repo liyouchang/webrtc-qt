@@ -142,16 +142,16 @@ public class ViewLocalImageActivity extends Activity implements OnClickListener 
 	 */
 	private void showDeleteImageDialog() {
 		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-		myDialog.setTitle("温馨提示");
-		myDialog.setMessage("确认删除该张图片？");
-		myDialog.setPositiveButton("确认", new OnClickListener() {
+		myDialog.setTitle("");
+		myDialog.setMessage(getResources().getString(R.string.delete_the_image));
+		myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
 				deleteImage();
 			}
 		});
-		myDialog.setNegativeButton("取消", new OnClickListener() {
+		myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();

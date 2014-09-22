@@ -17,7 +17,6 @@ import com.video.R;
 import com.video.data.DeviceValue;
 import com.video.data.Value;
 import com.video.data.XmlMessage;
-import com.video.main.MainActivity;
 import com.video.play.PlayerActivity;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
@@ -105,8 +104,28 @@ public class ZmqHandler extends Handler {
 		    			break;
 		    		}
 		    	}
-			    item.put("msgMAC", "来自: "+alarmDevice); 
-			    item.put("msgEvent", "事件: "+obj.getString("AlarmInfo"));
+			    item.put("msgMAC", MainApplication.getInstance().getResources().getString(R.string.from)+":"+alarmDevice);//来自
+			    // alarmType 0:开关量报警 3:移动侦测 4:遮挡报警 6:敲门事件
+			    int alarmType = obj.getInt("AlarmType");
+			    String alarmInfo = "";
+			    switch (alarmType) {
+				    case 0: 
+				    	alarmInfo = MainApplication.getInstance().getResources().getString(R.string.switch_alarm);//"开关量报警"
+				    	break;
+				    case 3: 
+				    	alarmInfo = MainApplication.getInstance().getResources().getString(R.string.mobile_detection_alarm);//"移动侦测报警";
+				    	break;
+				    case 4: 
+				    	alarmInfo = MainApplication.getInstance().getResources().getString(R.string.block_alarm);//"遮挡报警";
+				    	break;
+				    case 6: 
+				    	alarmInfo = MainApplication.getInstance().getResources().getString(R.string.knock_door_event);//"敲门事件";
+				    	break;
+				    default :
+				    	alarmInfo = MainApplication.getInstance().getResources().getString(R.string.unknown_alarm);//"未知报警";
+				    	break;
+			    }
+			    item.put("msgEvent", MainApplication.getInstance().getResources().getString(R.string.event)+":"+alarmInfo);//事件
 				item.put("msgTime", obj.getString("DateTime"));
 				
 				String pictureURL = "null";
@@ -151,19 +170,6 @@ public class ZmqHandler extends Handler {
 		return null;
 	}
 	
-	private int getWiFiLevelIconResource(int level) {
-		if (level <= 25) {
-			return R.drawable.wifi_level1;
-		} else if (level > 25 && level <= 50) {
-			return R.drawable.wifi_level2;
-		} else if (level > 50 && level <= 75) {
-			return R.drawable.wifi_level3;
-		} else if (level > 75) {
-			return R.drawable.wifi_level4;
-		}
-		return R.drawable.wifi_level1;
-	}
-	
 	/**
 	 * 请求终端周围WiFi列表
 	 */
@@ -176,7 +182,7 @@ public class ZmqHandler extends Handler {
 		    	JSONObject obj = (JSONObject) jsonArray.get(i); 
 		    	map = new HashMap<String, Object>();
 		    	map.put("WiFiSSID", obj.getString("ssid"));
-		    	map.put("WiFiLevel", getWiFiLevelIconResource(obj.getInt("signalStrength")));
+		    	map.put("WiFiLevel", Utils.getWiFiIconResIdByLevel(obj.getInt("signalStrength")));
 		    	map.put("WiFiEncryptMode", obj.getInt("encryptMode"));
 		    	map.put("WiFiEncryptFormat", obj.getInt("encryptFormat"));
 		    	map.put("WiFiEnable", obj.getInt("enable"));
@@ -242,19 +248,32 @@ public class ZmqHandler extends Handler {
 			if (type.equals("Backstage_message")) {
 				Value.isNeedReqAlarmListFlag = true;
 				Value.newAlarmMessageCount++;
-				int alarmCount = 0;
+				int unreadAlarmCount = 0;
 				if (MainApplication.getInstance().preferData.isExist("AlarmCount")) {
-					alarmCount = MainApplication.getInstance().preferData.readInt("AlarmCount");
+					unreadAlarmCount = MainApplication.getInstance().preferData.readInt("AlarmCount");
 				}
-				alarmCount++;
-				MainApplication.getInstance().preferData.writeData("AlarmCount", alarmCount);
-				MainActivity.mainHandler.obtainMessage(0, alarmCount, 0).sendToTarget();
+				unreadAlarmCount++;
+				MainApplication.getInstance().preferData.writeData("AlarmCount", unreadAlarmCount);
 				
-				if (MainActivity.isCurrentTab(MainActivity.TAB_THREE)) {
-					Intent intent = new Intent();
-					intent.setAction(BackstageService.BACKSTAGE_MESSAGE_ACTION);
-					MainApplication.getInstance().sendBroadcast(intent);
+				String alarmMac = "";
+				if (!obj.isNull("MAC")) {
+					alarmMac = obj.getString("MAC");
 				}
+				// alarmType 0:开关量报警 3:移动侦测 4:遮挡报警 6:敲门事件
+				int alarmType = 0;
+				if (!obj.isNull("AlarmType")) {
+					alarmType = obj.getInt("AlarmType");
+				}
+				Intent intent = new Intent();
+				intent.putExtra("alarmCount", unreadAlarmCount);
+				intent.putExtra("alarmMac", alarmMac);
+				if (alarmType == 6) {
+					intent.putExtra("alarmType", BackstageService.ALARM_TYPE_DOOR);
+				} else {
+					intent.putExtra("alarmType", BackstageService.ALARM_TYPE_PUSH);
+				}
+				intent.setAction(BackstageService.BACKSTAGE_MESSAGE_ACTION);
+				MainApplication.getInstance().sendBroadcast(intent);
 			}
 			// 终端上下线消息推送
 			else if (type.equals("Backstage_TermActive")) {
@@ -323,13 +342,15 @@ public class ZmqHandler extends Handler {
 			// 未读报警消息数
 			else if (type.equals("Client_NotReadAlarm")) {
 				if (obj.isNull("NotReadCount")) {
-					MainApplication.getInstance().unreadAlarmCount = 0;
+					BackstageService.unreadAlarmCount = 0;
 				} else {
-					MainApplication.getInstance().unreadAlarmCount = obj.getInt("NotReadCount");
+					BackstageService.unreadAlarmCount = obj.getInt("NotReadCount");
 				}
-				Utils.log("未读报警消息数: "+MainApplication.getInstance().unreadAlarmCount);
+				Utils.log("未读报警消息数: "+BackstageService.unreadAlarmCount);
 				Intent intent = new Intent();
-				intent.setAction(MainActivity.UNREAD_ALARM_COUNT_ACTION);
+				intent.putExtra("alarmCount", BackstageService.unreadAlarmCount);
+				intent.putExtra("alarmType", BackstageService.ALARM_TYPE_UNREAD);
+				intent.setAction(BackstageService.BACKSTAGE_MESSAGE_ACTION);
 				MainApplication.getInstance().sendBroadcast(intent);
 			} else {
 				// 各个界面下的handler操作
@@ -384,7 +405,7 @@ public class ZmqHandler extends Handler {
 							JSONArray jsonArray = obj.getJSONArray("Terminal");
 							mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, getReqTermList(jsonArray)).sendToTarget();
 						} else {
-							mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0, "请求终端列表失败").sendToTarget();
+							mHandler.obtainMessage(R.id.request_terminal_list_id, resultCode, 0,MainApplication.getInstance().getResources().getString(R.string.request_terminal_list_failed)).sendToTarget();
 						}
 					}
 					//修改终端名称
@@ -404,7 +425,7 @@ public class ZmqHandler extends Handler {
 							JSONArray jsonArray = obj.getJSONArray("AlarmData");
 							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, getReqAlarmList(jsonArray)).sendToTarget();
 						} else {
-							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "请求报警数据失败").sendToTarget();
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, MainApplication.getInstance().getResources().getString(R.string.request_alarm_data_failed)).sendToTarget();
 						}
 					}
 					//删除该条报警
@@ -413,7 +434,7 @@ public class ZmqHandler extends Handler {
 						if (resultCode == 0) {
 							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
 						} else {
-							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "删除该条报警失败").sendToTarget();
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, MainApplication.getInstance().getResources().getString(R.string.failed_to_delete_the_clause_alarm)).sendToTarget();
 						}
 					}
 					//删除当前全部报警
@@ -422,7 +443,7 @@ public class ZmqHandler extends Handler {
 						if (resultCode == 0) {
 							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
 						} else {
-							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "删除当前全部报警失败").sendToTarget();
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, MainApplication.getInstance().getResources().getString(R.string.all_alarms_failed_to_delete_the_current)).sendToTarget();
 						}
 					}
 					//标记该条报警
@@ -431,7 +452,7 @@ public class ZmqHandler extends Handler {
 						if (resultCode == 0) {
 							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
 						} else {
-							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "标记该条报警失败").sendToTarget();
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, MainApplication.getInstance().getResources().getString(R.string.mark_which_alarm_failure)).sendToTarget();
 						}
 					}
 					//标记当前全部报警
@@ -440,7 +461,7 @@ public class ZmqHandler extends Handler {
 						if (resultCode == 0) {
 							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0).sendToTarget();
 						} else {
-							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, "标记当前全部报警失败").sendToTarget();
+							mHandler.obtainMessage(R.id.request_alarm_id, resultCode, 0, MainApplication.getInstance().getResources().getString(R.string.mark_all_the_current_alarm_failure)).sendToTarget();
 						}
 					}
 					//上传背景图片
@@ -469,7 +490,7 @@ public class ZmqHandler extends Handler {
 							JSONArray jsonArray = obj.getJSONArray("Terminal");
 							mHandler.obtainMessage(R.id.request_device_share_id, resultCode, 0, getReqTermList(jsonArray)).sendToTarget();
 						} else {
-							mHandler.obtainMessage(R.id.request_device_share_id, resultCode, 0, "请求分享列表失败").sendToTarget();
+							mHandler.obtainMessage(R.id.request_device_share_id, resultCode, 0, MainApplication.getInstance().getResources().getString(R.string.share_the_list_of_failed_request)).sendToTarget();
 						}
 					}
 					//删除终端分享

@@ -240,9 +240,9 @@ public class LocalPlayerActivity extends Activity implements OnClickListener {
 				isOnline = false;
 
 				new AlertDialog.Builder(mContext)
-				.setTitle("对不起")
-				.setMessage("您所播的视频格式不正确，播放已停止。")
-				.setPositiveButton("知道了",
+				.setTitle(getResources().getString(R.string.sorry))
+				.setMessage(getResources().getString(R.string.the_video_format_is_not_correct))
+				.setPositiveButton(getResources().getString(R.string.noted),
 					new AlertDialog.OnClickListener() {
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
@@ -379,7 +379,7 @@ public class LocalPlayerActivity extends Activity implements OnClickListener {
 					hideControllerDelay();
 				} else {
 					position++;
-					Toast.makeText(mContext, "前面没有了！", Toast.LENGTH_LONG).show();
+					Toast.makeText(mContext, getResources().getString(R.string.no_pictures_front), Toast.LENGTH_LONG).show();
 				}
 				break;
 			case R.id.ib_play_pause: // 播放、暂停
@@ -404,7 +404,7 @@ public class LocalPlayerActivity extends Activity implements OnClickListener {
 					hideControllerDelay();
 				} else {
 					position--;
-					Toast.makeText(mContext, "后面没有了！", Toast.LENGTH_LONG).show();
+					Toast.makeText(mContext,getResources().getString(R.string.no_pictures_behind), Toast.LENGTH_LONG).show();
 				}
 				break;
 			case R.id.ib_voice: // 视频声音

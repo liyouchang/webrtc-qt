@@ -194,7 +194,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 			switch (msg.what) {
 				case IS_ADDING:
 					if (mDialog == null) {
-						mDialog = Utils.createLoadingDialog(mContext, "正在添加设备...");
+						mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.adding_equipment));
 						mDialog.show();
 					}
 					break;
@@ -206,7 +206,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
 					}
-					Toast.makeText(mContext, "添加终端失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.terminal_adding_failed_network_timeout), Toast.LENGTH_SHORT).show();
 					break;
 				case SEARCH_TIMEOUT:
 					if ((mDialog != null) && (mDialog.isShowing())) {
@@ -216,7 +216,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 					if (handler.hasMessages(SEARCH_TIMEOUT)) {
 						handler.removeMessages(SEARCH_TIMEOUT);
 					}
-					Toast.makeText(mContext, "搜索完毕，暂无本地设备", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext,getResources().getString(R.string.the_search_is_completed_no_local_device), Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.add_device_id:
 					if (handler.hasMessages(ADD_TIMEOUT)) {
@@ -230,12 +230,12 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 							HashMap<String, String> item = getDeviceItem(mDeviceName, mDeviceId, dealerName);
 							xmlData.writeItem(item);
 							MainApplication.getInstance().deviceList.add(item);
-							Toast.makeText(mContext, "添加终端成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.adding_terminal_success), Toast.LENGTH_SHORT).show();
 							setResult(2);
 							AddDeviceActivity.this.finish();
 							overridePendingTransition(R.anim.fragment_nochange, R.anim.up_out);
 						} else {
-							Toast.makeText(mContext, "添加终端失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.adding_terminal_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.add_device_id);
@@ -275,7 +275,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.network_connection_is_not_available), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -334,21 +334,21 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		
 		if (termName.equals("")) {
 			resultFlag = false;
-			Toast.makeText(mContext, "请输入设备名称！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.please_enter_the_device_name), Toast.LENGTH_SHORT).show();
 		}
 		else if ((termName.length()<2) || (termName.length()>20)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "设备名称长度范围2~20！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.The_length_range_of_device_name), Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			mDeviceName = termName;
 			if (termMac.equals("")) {
 				resultFlag = false;
-				Toast.makeText(mContext, "请输入设备ID，您可以通过扫描二维码或搜索设备输入设备ID！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.please_enter_the_device_ID), Toast.LENGTH_SHORT).show();
 			}
 			else if ((termMac.length()<3) || (termMac.length()>20)) {
 				resultFlag = false;
-				Toast.makeText(mContext, "设备ID长度范围3~20！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.the_length_range_of_device_name), Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 				mDeviceId = termMac;
@@ -383,10 +383,10 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 		View pop_view = inflater.inflate(R.layout.pop_main, null);
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
 		
-		List<String> item_list = new ArrayList<String>();
-		item_list.add("扫描二维码");
-		item_list.add("搜索设备");
-		AddPopupWindowAdapter popAdapter = new AddPopupWindowAdapter(mContext, item_list);
+		List<String> popList = new ArrayList<String>();
+		popList.add(getResources().getString(R.string.qr_code_scanning));
+		popList.add(getResources().getString(R.string.search_for_device));
+		AddPopupWindowAdapter popAdapter = new AddPopupWindowAdapter(mContext, popList);
 		pop_listView.setAdapter(popAdapter);
 		
 		final PopupWindow mPopupWindow = new PopupWindow(pop_view, Utils.screenWidth/2, 190, true);
@@ -408,7 +408,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 						break;
 					case 1:
 						TunnelCommunication.getInstance().searchLocalDevice();
-						mDialog = Utils.createLoadingDialog(mContext, "正在搜索设备...");
+						mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_searching_for_devices));
 						mDialog.show();
 						sendHandlerMsg(SEARCH_TIMEOUT, Value.REQ_TIME_10S);
 						break;
@@ -484,7 +484,7 @@ public class AddDeviceActivity extends Activity implements OnClickListener {
 	 */
 	private void showLocalDeviceList() {
 		localDeviceDialog = new WiFiAlertDialog(mContext);
-		localDeviceDialog.setTitle("本地设备列表");
+		localDeviceDialog.setTitle(getResources().getString(R.string.local_device_list));
 		localDeviceAdapter = new LocalDeviceAdapter(mContext, localDeviceList);
 		localDeviceDialog.setAdapter(localDeviceAdapter);
 		localDeviceDialog.setOnItemClickListenerLocalDevice(et_id, localDeviceList);

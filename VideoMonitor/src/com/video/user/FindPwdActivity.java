@@ -153,7 +153,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 			switch (msg.what) {
 				case IS_SUBMITTING:
 					if (mDialog == null) {
-						mDialog = Utils.createLoadingDialog(mContext, "正在找回...");
+						mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_being_Back));
 						mDialog.show();
 					}
 					break;
@@ -165,7 +165,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 					if (handler.hasMessages(SUBMIT_TIMEOUT)) {
 						handler.removeMessages(SUBMIT_TIMEOUT);
 					}
-					Toast.makeText(mContext, "重置密码失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.reset_password_failed_timeout), Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.find_pwd_id:
 					if (handler.hasMessages(SUBMIT_TIMEOUT)) {
@@ -175,9 +175,9 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 							mDialog = null;
 						}
 						if (msg.arg1 == 0) {
-							Toast.makeText(mContext, "恭喜您，重置密码成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.reset_the_password_successfully), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "重置密码失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.reset_password_failed)+":"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.find_pwd_id);
@@ -216,7 +216,7 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(SUBMIT_TIMEOUT, Value.REQ_TIME_10S);
 			}
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -255,49 +255,49 @@ public class FindPwdActivity extends Activity implements OnClickListener {
 		
 		if (userName.equals("")) {
 			resultFlag = false;
-			Toast.makeText(mContext, "请输入用户名！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.please_enter_the_user_name), Toast.LENGTH_SHORT).show();
 		}
 		else if (Utils.isChineseString(userName)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_SHORT).show();
 		}
 		else if ((userName.length()<3) || (userName.length()>20)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "用户名长度范围3~20！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext,getResources().getString(R.string.the_length_range_of_user_name), Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			if (userEmail.equals("")) {
 				resultFlag = false;
-				Toast.makeText(mContext, "请输入电子邮箱！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.please_enter_the_email), Toast.LENGTH_SHORT).show();
 			}
 			else if (Utils.isChineseString(userEmail)) {
 				resultFlag = false;
-				Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_SHORT).show();
 			}
 			else if ((userEmail.length()<6) || (userEmail.length()>20)) {
 				resultFlag = false;
-				Toast.makeText(mContext, "电子邮箱长度范围6~20！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.email_lengths_range), Toast.LENGTH_SHORT).show();
 			}
 			else if (userEmail.indexOf("@")<=0) {
 				resultFlag = false;
-				Toast.makeText(mContext, "邮箱格式不正确！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.email_format_is_incorrect), Toast.LENGTH_SHORT).show();
 			}
 			else if (userEmail.indexOf(".")<=0) {
 				resultFlag = false;
-				Toast.makeText(mContext, "邮箱格式不正确！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.email_format_is_incorrect), Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 				if (userPassword.equals("")) {
 					resultFlag = false;
-					Toast.makeText(mContext, "请输入新密码！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext,getResources().getString(R.string.please_enter_a_new_password), Toast.LENGTH_SHORT).show();
 				}
 				else if (Utils.isChineseString(userPassword)) {
 					resultFlag = false;
-					Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_SHORT).show();
 				}
 				else if ((userPassword.length()<6) || (userPassword.length()>20)) {
 					resultFlag = false;
-					Toast.makeText(mContext, "密码长度范围6~20！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.password_length), Toast.LENGTH_SHORT).show();
 				} else {
 					resultFlag = true;
 				}

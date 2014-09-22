@@ -139,9 +139,9 @@ public class DeviceOperationActivity extends Activity implements OnClickListener
 						}
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							Toast.makeText(mContext, "删除终端绑定成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.removing_the_terminal_binding_success), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "删除终端绑定失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext,getResources().getString(R.string.removing_the_terminal_binding_failed)+","+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_device_item_id);
@@ -157,9 +157,9 @@ public class DeviceOperationActivity extends Activity implements OnClickListener
 						}
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							Toast.makeText(mContext, "上传背景图片成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.uploading_background_images_success), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "上传背景图片失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.uploading_background_image_failed)+","+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.upload_back_image_id);
@@ -175,9 +175,9 @@ public class DeviceOperationActivity extends Activity implements OnClickListener
 						}
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							Toast.makeText(mContext, "删除背景图片成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.deleting_the_background_image_success), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "删除背景图片失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.deleting_the_background_image_failed)+","+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_back_image_id);
@@ -247,23 +247,23 @@ public class DeviceOperationActivity extends Activity implements OnClickListener
 			// 删除背景图片
 			case R.id.btn_delete_device_bg:
 				if (deviceBg.equals("null")) {
-					Toast.makeText(mContext, "无背景图片，不需要删除！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.no_background_image), Toast.LENGTH_SHORT).show();
 				} else {
 					final OkCancelDialog myDialog1=new OkCancelDialog(mContext);
-					myDialog1.setTitle("温馨提示");
-					myDialog1.setMessage("确认删除背景图片？");
-					myDialog1.setPositiveButton("确认", new OnClickListener() {
+					myDialog1.setTitle("");
+					myDialog1.setMessage(getResources().getString(R.string.delete_the_background_image));
+					myDialog1.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 						@Override
 						public void onClick(View v) {
 							myDialog1.dismiss();
 							Handler sendHandler = ZmqThread.zmqThreadHandler;
 							String data = generateDeleteImageJson(deviceId);
-							sendHandlerMsg(IS_REQUESTING, "正在删除图片...");
-							sendHandlerMsg(REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
+							sendHandlerMsg(IS_REQUESTING,getResources().getString(R.string.is_deleting_images));
+							sendHandlerMsg(REQUEST_TIMEOUT, getResources().getString(R.string.delete_picture_failure), Value.REQ_TIME_10S);
 							sendHandlerMsg(sendHandler, R.id.zmq_send_data_id, data);
 						}
 					});
-					myDialog1.setNegativeButton("取消", new OnClickListener() {
+					myDialog1.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 						@Override
 						public void onClick(View v) {
 							myDialog1.dismiss();

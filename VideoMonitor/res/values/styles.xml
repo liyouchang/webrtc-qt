@@ -4,7 +4,17 @@
     <style name="AppThemeNoTitle" parent="android:Theme.Black.NoTitleBar" />
     <style name="AppThemeFullscreen" parent="android:Theme.Black.NoTitleBar.Fullscreen" />
     <style name="MyThemeBlack" parent="android:Theme.Black" />
-    <style name="AppMyDialogActivity" parent="@android:style/Theme.Dialog"/>
+    
+    <style name="DialogActivityTheme" parent="android:style/Theme.Dialog">
+        <item name="android:windowBackground">@color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@+android:style/Animation.Translucent</item>
+        <item name="android:windowCloseOnTouchOutside">false</item>
+    </style>
     
     <style name="CustomWindowTitleBackground">
         <item name="android:background">@color/title_bg_black</item>

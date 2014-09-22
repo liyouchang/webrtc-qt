@@ -27,7 +27,7 @@ public class AudioThread extends Thread {
 					AudioFormat.ENCODING_PCM_16BIT);
 			
 			audioTrackPlaySize = audioTrackBufferSize * 2;
-			audioTrackBufferSize = audioTrackBufferSize * 100;
+			audioTrackBufferSize = audioTrackBufferSize * 2;//100
 			
 			audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
 					AudioFormat.CHANNEL_CONFIGURATION_MONO,
@@ -53,11 +53,11 @@ public class AudioThread extends Thread {
 					audioTrack.stop();
 				}
 				audioTrack.release();
-				audioTrack = null;
-				readBuf = null;
-				writeBuf = null;
+//				audioTrack = null;
+//				readBuf = null;
+//				writeBuf = null;
 			} catch (Exception e) {
-				audioTrack = null;
+//				audioTrack = null;
 				Utils.log("uninitAudioThread()异常！");
 				e.printStackTrace();
 			}
@@ -91,7 +91,7 @@ public class AudioThread extends Thread {
 					continue;
 				}
 				int readBufLen = TunnelCommunication.audioDataCache.pop(readBuf, 0);
-				if (readBufLen > 0) {
+				if ((writeBuf != null) && (readBuf != null) && (readBufLen > 0)) {
 					readBufLen = G711Decoder(writeBuf, readBuf, readBufLen);
 					int playPosition = 0;
 					while ((audioTrack != null) && (readBufLen > playPosition)) {

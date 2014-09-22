@@ -1,14 +1,15 @@
 package com.video.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.widget.ProgressBar;
-
 import com.video.R;
 
+@SuppressLint({ "ResourceAsColor", "DrawAllocation" })
 public class TextProgressBar extends ProgressBar {
 	Paint paint;
 	String text;
@@ -37,6 +38,9 @@ public class TextProgressBar extends ProgressBar {
 	protected synchronized void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		Rect rect = new Rect();
+		if (text == null) {
+			return ;
+		}
 		this.paint.getTextBounds(this.text, 0, this.text.length(), rect);
 		int x = (getWidth() / 2) - rect.centerX();
 		int y = (getHeight() / 2) - rect.centerY();

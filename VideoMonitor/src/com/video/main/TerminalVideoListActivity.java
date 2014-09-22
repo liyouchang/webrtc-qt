@@ -180,7 +180,7 @@ public class TerminalVideoListActivity extends Activity implements
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUSTING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在请求终端录像列表...");
+					mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_requesting_a_list_of_terminal_video));
 					mDialog.show();
 					break;
 				case REQUST_TIMEOUT:
@@ -194,7 +194,7 @@ public class TerminalVideoListActivity extends Activity implements
 					if (handler.hasMessages(REQUST_TIMEOUT)) {
 						handler.removeMessages(REQUST_TIMEOUT);
 					}
-					Toast.makeText(mContext, "请求终端录像列表超时，请重试！ ", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.request_a_list_of_terminal_video_failed), Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.request_terminal_video_list_id:
 					if (mPullToRefreshView.getFooterState() == PullToRefreshView.REFRESHING) {
@@ -208,14 +208,14 @@ public class TerminalVideoListActivity extends Activity implements
 					}
 					totalNum = msg.arg1;
 					if (totalNum == 0) {
-						Toast.makeText(mContext, "您请求的这个时间段没有录像文件！ ", Toast.LENGTH_LONG).show();
+						Toast.makeText(mContext, getResources().getString(R.string.no_video_file_during_the_period), Toast.LENGTH_LONG).show();
 					} else {
 						ArrayList<HashMap<String, String>> bufferList = (ArrayList<HashMap<String, String>>) msg.obj;
 						if (bufferList != null) {
 							fileList.addAll(indexNum, bufferList);
 							fileAdapter.notifyDataSetChanged();
 						} else {
-							Toast.makeText(mContext, "请求终端录像列表错误，请重试！ ", Toast.LENGTH_LONG).show();
+							Toast.makeText(mContext,getResources().getString(R.string.requesting_terminal_video_list_error), Toast.LENGTH_LONG).show();
 						}
 					}
 					break;
@@ -236,7 +236,7 @@ public class TerminalVideoListActivity extends Activity implements
 					requestTerminalVideoFile(indexNum);
 				} else {
 					mPullToRefreshView.onFooterRefreshComplete();
-					Toast.makeText(mContext, "后面没有了 ", Toast.LENGTH_LONG).show();
+					Toast.makeText(mContext, getResources().getString(R.string.no_pictures_behind), Toast.LENGTH_LONG).show();
 				}
 			}
 		}, 1000);
@@ -252,13 +252,13 @@ public class TerminalVideoListActivity extends Activity implements
 		mPullToRefreshView.postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				file_refresh_time = "上次更新于: " + Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
-				file_refresh_terminal = "终端: " + Build.MODEL;
+				file_refresh_time = getResources().getString(R.string.last_Updated_on)+":" + Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
+				file_refresh_terminal = getResources().getString(R.string.terminal)+":" + Build.MODEL;
 				preferData.writeData("fileRefreshTime", file_refresh_time);
 				preferData.writeData("fileRefreshTerminal", file_refresh_terminal);
 				mPullToRefreshView.onHeaderRefreshComplete(file_refresh_time, file_refresh_terminal);
 
-				Toast.makeText(mContext, "前面没有了 ", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, getResources().getString(R.string.no_pictures_front), Toast.LENGTH_LONG).show();
 			}
 		}, 1000);
 	}
@@ -335,8 +335,8 @@ public class TerminalVideoListActivity extends Activity implements
 				holder = (ViewHolder) convertView.getTag();
 			}
 			String dateString = list.get(position).get("fileDate");
-			holder.file_name.setText("结束时间：" + dateString);
-			holder.file_size.setText("文件大小：" + list.get(position).get("fileSize"));
+			holder.file_name.setText(getResources().getString(R.string.the_end_time)+":" + dateString);
+			holder.file_size.setText(getResources().getString(R.string.the_file_size)+":" + list.get(position).get("fileSize"));
 
 			return convertView;
 		}

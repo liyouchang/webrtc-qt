@@ -234,7 +234,7 @@ public class SetDateActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUSTING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在请求终端录像列表...");
+					mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_requesting_a_list_of_terminal_video));
 					mDialog.show();
 					break;
 				case REQUST_TIMEOUT:
@@ -243,7 +243,7 @@ public class SetDateActivity extends Activity implements OnClickListener {
 					if (handler.hasMessages(REQUST_TIMEOUT)) {
 						handler.removeMessages(REQUST_TIMEOUT);
 					}
-					Toast.makeText(mContext, "请求终端录像列表超时，请重试！ ", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.request_a_list_of_terminal_video_failed), Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.request_terminal_video_list_id:
 					if (mDialog != null)
@@ -256,7 +256,7 @@ public class SetDateActivity extends Activity implements OnClickListener {
 					}
 					int totalNum = msg.arg1;
 					if (totalNum == 0) {
-						Toast.makeText(mContext, "您请求的这个时间段没有录像文件！ ", Toast.LENGTH_LONG).show();
+						Toast.makeText(mContext, getResources().getString(R.string.no_video_file_during_the_period), Toast.LENGTH_LONG).show();
 					} else {
 						ArrayList<HashMap<String, String>> fileList = (ArrayList<HashMap<String, String>>) msg.obj;
 						if (fileList != null) {
@@ -269,7 +269,7 @@ public class SetDateActivity extends Activity implements OnClickListener {
 							startActivity(intent);
 							overridePendingTransition(R.anim.right_in, R.anim.fragment_nochange);
 						} else {
-							Toast.makeText(mContext, "请求终端录像列表错误，请重试！ ", Toast.LENGTH_LONG).show();
+							Toast.makeText(mContext, getResources().getString(R.string.requesting_terminal_video_list_error), Toast.LENGTH_LONG).show();
 						}
 					}
 					break;
@@ -287,11 +287,11 @@ public class SetDateActivity extends Activity implements OnClickListener {
 				break;
 			case R.id.btn_set_start_date:
 				startDate = new MyDateClass();
-				showDateTimeDialog("设置开始时间", start_date, startDate);
+				showDateTimeDialog(getResources().getString(R.string.set_the_start_time), start_date, startDate);
 				break;
 			case R.id.btn_set_end_date:
 				endDate = new MyDateClass();
-				showDateTimeDialog("设置结束时间", end_date, endDate);
+				showDateTimeDialog(getResources().getString(R.string.set_the_end_time), end_date, endDate);
 				break;
 			case R.id.btn_set_date_submit:
 				requestTerminalVideoFile();
@@ -318,35 +318,35 @@ public class SetDateActivity extends Activity implements OnClickListener {
 		int endDateLen = end_date.getText().toString().trim().length();
 		
 		if ((startDate == null) || (endDate == null) || (startDateLen < 15) || (endDateLen < 15)) {
-			Toast.makeText(mContext, "请点击图标设置开始和结束时间", Toast.LENGTH_LONG).show();
+			Toast.makeText(mContext, getResources().getString(R.string.set_the_start_and_end_time), Toast.LENGTH_LONG).show();
 			return false;
 		} else {
 			if (startDate.mYear > endDate.mYear) {
-				Toast.makeText(mContext, "开始时间年份不能大于结束时间年份", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, getResources().getString(R.string.start_time_of_the_year), Toast.LENGTH_LONG).show();
 				return false;
 			} else {
 				if (startDate.mYear == endDate.mYear) {
 					if (startDate.mMonth > endDate.mMonth) {
-						Toast.makeText(mContext, "开始时间月份不能大于结束时间月份", Toast.LENGTH_LONG).show();
+						Toast.makeText(mContext, getResources().getString(R.string.start_time_of_the_month), Toast.LENGTH_LONG).show();
 						return false;
 					} else {
 						if (startDate.mMonth == endDate.mMonth) {
 							if (startDate.mDay > endDate.mDay) {
-								Toast.makeText(mContext, "开始时间日份不能大于结束时间日份", Toast.LENGTH_LONG).show();
+								Toast.makeText(mContext, getResources().getString(R.string.start_time_of_the_day), Toast.LENGTH_LONG).show();
 								return false;
 							} else {
 								if (startDate.mDay == endDate.mDay) {
 									if (startDate.mHour > endDate.mHour) {
-										Toast.makeText(mContext, "开始时间小时不能大于结束时间小时", Toast.LENGTH_LONG).show();
+										Toast.makeText(mContext, getResources().getString(R.string.start_time_hours), Toast.LENGTH_LONG).show();
 										return false;
 									} else {
 										if (startDate.mHour == endDate.mHour) {
 											if (startDate.mMinute > endDate.mMinute) {
-												Toast.makeText(mContext, "开始时间分钟不能大于结束时间分钟", Toast.LENGTH_LONG).show();
+												Toast.makeText(mContext, getResources().getString(R.string.start_time_minutes), Toast.LENGTH_LONG).show();
 												return false;
 											}
 											else if (startDate.mMinute == endDate.mMinute) {
-												Toast.makeText(mContext, "开始时间分钟不能等于结束时间分钟", Toast.LENGTH_LONG).show();
+												Toast.makeText(mContext, getResources().getString(R.string.start_time_minutes_equal), Toast.LENGTH_LONG).show();
 												return false;
 											} else {
 												return true;

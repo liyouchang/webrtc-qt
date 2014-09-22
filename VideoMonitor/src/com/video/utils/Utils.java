@@ -36,6 +36,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.video.R;
+import com.video.service.MainApplication;
 
 @SuppressLint({ "DefaultLocale", "SimpleDateFormat" })
 public class Utils {
@@ -65,43 +66,68 @@ public class Utils {
 				result = "Block!";
 				break;
 			case 2:
-				result = "用户名或密码错误！";
+				result = MainApplication.getInstance().getResources().getString(R.string.user_name_or_password_is_incorrect);
 				break;
 			case 3:
-				result = "服务器端查询数据库时错误！";
+				result = MainApplication.getInstance().getResources().getString(R.string.when_querying_the_database_server_error);
 				break;
 			case 4:
-				result = "用户已存在！";
+				result = MainApplication.getInstance().getResources().getString(R.string.user_already_exists);
 				break;
 			case 5:
-				result = "用户不存在！";
+				result = MainApplication.getInstance().getResources().getString(R.string.user_does_not_exist);
 				break;
 			case 6:
-				result = "该设备已被绑定！";
+				result = MainApplication.getInstance().getResources().getString(R.string.the_device_has_been_bound);
 				break;
 			case 7:
-				result = "用户名和邮箱不匹配！";
+				result = MainApplication.getInstance().getResources().getString(R.string.does_not_match_the_user_name_and_mailbox);
 				break;
 			case 8:
-				result = "超出数量限制！";
+				result =MainApplication.getInstance().getResources().getString(R.string.beyond_the_quantitative_restrictions);
 				break;
 			case 9:
-				result = "用户未登录！";
+				result = MainApplication.getInstance().getResources().getString(R.string.the_user_is_not_logged_in);
 				break;
 			case 10:
-				result = "设备未注册！";
+				result = MainApplication.getInstance().getResources().getString(R.string.device_is_not_registered);
 				break;
 			case 11:
-				result = "未知类型！";
+				result = MainApplication.getInstance().getResources().getString(R.string.unknown_type);
 				break;
 			case 12:
-				result = "重复添加！";
+				result = MainApplication.getInstance().getResources().getString(R.string.repeat_to_add);
+				break;
+			case 13:
+				result = MainApplication.getInstance().getResources().getString(R.string.no_record);
+				break;
+			case 14:
+				result = MainApplication.getInstance().getResources().getString(R.string.realm_error);
+				break;
+			case 15:
+				result = MainApplication.getInstance().getResources().getString(R.string.equipment_is_not_online);
 				break;
 			default: 
-				result = "不明原因！";
+				result = MainApplication.getInstance().getResources().getString(R.string.unexplained);
 				break;
 		}
 		return result;
+	}
+	
+	/**
+	 * 根据WiFi信号的强度获得WiFi图片资源索引
+	 */
+	public static int getWiFiIconResIdByLevel(int level) {
+		if (level <= 25) {
+			return R.drawable.wifi_level1;
+		} else if (level > 25 && level <= 50) {
+			return R.drawable.wifi_level2;
+		} else if (level > 50 && level <= 75) {
+			return R.drawable.wifi_level3;
+		} else if (level > 75) {
+			return R.drawable.wifi_level4;
+		}
+		return R.drawable.wifi_level1;
 	}
 	
 	/**

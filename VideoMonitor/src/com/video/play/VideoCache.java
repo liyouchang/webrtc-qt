@@ -12,7 +12,7 @@ public class VideoCache {
 	
 	public VideoCache(int size) {
 		mBufferLen = size;
-		mBuffer = new byte[mBufferLen];
+		mBuffer = new byte[size];
 		clearBuffer();
 	}
 

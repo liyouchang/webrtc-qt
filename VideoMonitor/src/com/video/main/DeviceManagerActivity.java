@@ -252,11 +252,11 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	public void deleteDeviceEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			String data = generateDeleteDeviceJson();
-			sendHandlerMsg(handler, IS_REQUESTING, "正在删除设备...");
-			sendHandlerMsg(handler, REQUEST_TIMEOUT, "删除设备失败，网络超时！", Value.REQ_TIME_10S);
+			sendHandlerMsg(handler, IS_REQUESTING, getResources().getString(R.string.is_deleting_device));
+			sendHandlerMsg(handler, REQUEST_TIMEOUT, getResources().getString(R.string.deleting_the_device_failed), Value.REQ_TIME_10S);
 			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -267,8 +267,8 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 		Bundle bundle = intent.getExtras();
 		deviceBg = bundle.getString("ImageBgPath");
 		String sendData = generateUploadBgJson(deviceBg);
-		sendHandlerMsg(handler, IS_REQUESTING, "正在上传图片...");
-		sendHandlerMsg(handler, REQUEST_TIMEOUT, "上传图片失败，请重试！", 20000);
+		sendHandlerMsg(handler, IS_REQUESTING, getResources().getString(R.string.is_uploading_images));
+		sendHandlerMsg(handler, REQUEST_TIMEOUT, getResources().getString(R.string.uploading_images_failed), 20000);
 		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, sendData);
 	}
 	
@@ -295,22 +295,22 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	 */
 	private void deleteDeviceBg() {
 		if (mDeviceBg.equals("null")) {
-			Toast.makeText(mContext, "无背景图片，不需要删除！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_background_image), Toast.LENGTH_SHORT).show();
 		} else {
 			final OkCancelDialog myDialog = new OkCancelDialog(mContext);
-			myDialog.setTitle("温馨提示");
-			myDialog.setMessage("确认删除背景图片？");
-			myDialog.setPositiveButton("确认", new OnClickListener() {
+			myDialog.setTitle("");
+			myDialog.setMessage(getResources().getString(R.string.delete_the_background_image));
+			myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					myDialog.dismiss();
 					String data = generateDeleteBgJson();
-					sendHandlerMsg(handler, IS_REQUESTING, "正在删除图片...");
-					sendHandlerMsg(handler, REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
+					sendHandlerMsg(handler, IS_REQUESTING, getResources().getString(R.string.is_deleting_images));
+					sendHandlerMsg(handler, REQUEST_TIMEOUT, getResources().getString(R.string.delete_picture_failure), Value.REQ_TIME_10S);
 					sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 				}
 			});
-			myDialog.setNegativeButton("取消", new OnClickListener() {
+			myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					myDialog.dismiss();
@@ -324,16 +324,16 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	 */
 	private void deleteDevice() {
 		final OkCancelDialog myDialog = new OkCancelDialog(mContext);
-		myDialog.setTitle("温馨提示");
-		myDialog.setMessage("确认删除终端绑定？");
-		myDialog.setPositiveButton("确认", new OnClickListener() {
+		myDialog.setTitle("");
+		myDialog.setMessage(getResources().getString(R.string.delete_the_terminal_binding));
+		myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
 				deleteDeviceEvent();
 			}
 		});
-		myDialog.setNegativeButton("取消", new OnClickListener() {
+		myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
@@ -380,9 +380,9 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 								setDeviceBg(deviceBg);
 							}
 							mDeviceBg = (String) msg.obj;
-							Toast.makeText(mContext, "上传背景图片成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.uploading_background_images_success), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "上传背景图片失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.uploading_background_image_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.upload_back_image_id);
@@ -403,9 +403,9 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 							Utils.deleteLocalFile(filePath);
 							rl_device_bg.setBackgroundResource(R.drawable.device_item_bg);
 							mDeviceBg = "null";
-							Toast.makeText(mContext, "删除背景图片成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.deleting_the_background_image_success), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "删除背景图片失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.deleting_the_background_image_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_back_image_id);
@@ -422,10 +422,10 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 						if (msg.arg1 == 0) {
 							isNeedRefresh = true;
 							MainApplication.getInstance().xmlDevice.deleteItem(mDeviceID);
-							Toast.makeText(mContext, "删除设备成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.deleting_the_device_success), Toast.LENGTH_SHORT).show();
 							closeActivity();
 						} else {
-							Toast.makeText(mContext, "删除设备失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.delete_the_device_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_device_item_id);

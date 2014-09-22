@@ -70,7 +70,6 @@ public class ZmqSocket {
 	}
 	
 	public class ExitSocketThread extends Thread {
-
 		@Override
 		public void run() {
 			try {

@@ -42,17 +42,15 @@ public class XmlMessage {
 	 * 初始化xml文件
 	 */
 	public void init() {
-		if (Utils.checkSDCard()) {
-			filePath = context.getFilesDir().getPath() + File.separator + "MessageList.xml";
-			File file = new File(filePath);
-			if (!file.exists()) {
-				try {
-					file.createNewFile();
-					initXmlFile(file);
-				} catch (IOException e) {
-					e.printStackTrace();
-					System.out.println("MyDebug: init()异常！");
-				}
+		filePath = context.getFilesDir().getPath() + File.separator + "MessageList.xml";
+		File file = new File(filePath);
+		if (!file.exists()) {
+			try {
+				file.createNewFile();
+				initXmlFile(file);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("MyDebug: init() abnormal ！");
 			}
 		}
 	}
@@ -76,7 +74,7 @@ public class XmlMessage {
 			os.close();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: initXmlFile()异常！");
+			System.out.println("MyDebug: initXmlFile() abnormal ！");
 		}
 	}
 
@@ -93,7 +91,7 @@ public class XmlMessage {
 			return document;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: loadInit()异常！");
+			System.out.println("MyDebug: loadInit() abnormal ！");
 		}
 		return null;
 	}
@@ -111,7 +109,7 @@ public class XmlMessage {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: addList()异常！�");
+			System.out.println("MyDebug: addList() abnormal ！�");
 		}
 		return false;
 	}
@@ -157,7 +155,7 @@ public class XmlMessage {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: addItem()异常！");
+			System.out.println("MyDebug: addItem() abnormal ！");
 		}
 		return false;
 	}
@@ -180,7 +178,7 @@ public class XmlMessage {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: isItemExit()异常！");
+			System.out.println("MyDebug: isItemExit() abnormal ！");
 		}
 		return false;
 	}
@@ -207,7 +205,7 @@ public class XmlMessage {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: deleteItem()异常！");
+			System.out.println("MyDebug: deleteItem() abnormal ！");
 		}
 		return false;
 	}
@@ -223,7 +221,7 @@ public class XmlMessage {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: deleteAllItem()异常！");
+			System.out.println("MyDebug: deleteAllItem() abnormal ！");
 		}
 		return false;
 	}
@@ -239,7 +237,7 @@ public class XmlMessage {
 			addList(list);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()异常！");
+			System.out.println("MyDebug: updateItem() abnormal ！");
 		}
 		return false;
 	}
@@ -264,7 +262,7 @@ public class XmlMessage {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()异常！");
+			System.out.println("MyDebug: updateItem() abnormal ！");
 		}
 		return false;
 	}
@@ -293,7 +291,7 @@ public class XmlMessage {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: updateItem()异常！");
+			System.out.println("MyDebug: updateItem() abnormal ！");
 		}
 		return false;
 	}
@@ -317,7 +315,7 @@ public class XmlMessage {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getItemState()异常！");
+			System.out.println("MyDebug: getItemState() abnormal ！");
 		}
 		return false;
 	}
@@ -332,7 +330,7 @@ public class XmlMessage {
 			return nodeList.getLength();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getListSize()异常！");
+			System.out.println("MyDebug: getListSize() abnormal ！");
 		}
 		return 0;
 	}
@@ -356,7 +354,7 @@ public class XmlMessage {
 			return idArray[0];
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getDownUpdateID()异常！");
+			System.out.println("MyDebug: getDownUpdateID() abnormal ！");
 		}
 		return result;
 	}
@@ -380,7 +378,7 @@ public class XmlMessage {
 			return idArray[len-1];
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: getDownUpdateID()异常！");
+			System.out.println("MyDebug: getDownUpdateID() abnormal ！");
 		}
 		return result;
 	}
@@ -399,7 +397,7 @@ public class XmlMessage {
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: writeXML()异常！");
+			System.out.println("MyDebug: writeXML() abnormal ！");
 		}
 		return false;
 	}
@@ -433,7 +431,7 @@ public class XmlMessage {
 			return list;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("MyDebug: readXml()异常！");
+			System.out.println("MyDebug: readXml() abnormal ！");
 		}
 		return null;
 	}
