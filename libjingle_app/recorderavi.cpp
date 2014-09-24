@@ -656,13 +656,10 @@ void RecordReaderAvi::MoveTo(int percent)
             recordIndex.push_back(entry);
         }
     }
-
     int pos = recordIndex.size()*percent/100;
     AVIINDEXENTRY index = recordIndex[pos];
     aviFile_->SetPosition(index.dwChunkOffset);
     this->currentFrame = pos;
-//    LOG_T_F(INFO)<<"move start";
-//    readThread->Post(this,MSG_READ);
 }
 
 void RecordReaderAvi::ReadRecord()
@@ -722,7 +719,6 @@ void RecordReaderAvi::ReadRecord()
         LOG_T_F(INFO)<<"Read record end with no data";
         SignalRecordEnd(this);
     }
-
 }
 
 int RecordReaderAvi::GetPlayedPercent()

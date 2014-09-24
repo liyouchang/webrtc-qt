@@ -230,9 +230,7 @@ void KeSdkDevice::OnRecvTalkData(const std::string &peer_id, const char *data, i
 {
     KEFrameHead * head = (KEFrameHead *)data;
     int nowTime = talk_base::Time();
-    LOG_T_F(INFO)<<" talk time is "<< head->second*1000 + head->millisecond*10<<
-                   " now time is "<< nowTime;
-//    const int nalLen = 4;
+    LOG_T_F(LS_VERBOSE)<<"talk data len "<<len;
     int dataPos =  sizeof(KEFrameHead);
     if(head->frameLen == len - dataPos){
         //放入另外的线程播放声音,以防止在数据接受线程中阻塞.若阻塞会产生异常
@@ -314,12 +312,13 @@ void KeSdkDevice::OnCommandJsonMsg(const Json::Value &jmessage,Json::Value * jre
     }
     else if( command.compare("arming_status") == 0 ){
         int status;
+        (*jresult) = jmessage;//return the same message when set value
         if( GetIntFromJsonObject(jmessage,"value",&status) &&
                 status != kCommandGetValue ) {//set value
             SetArmingStatus(status);
+        }else{
+            (*jresult)["value"] = GetArmingStatus();
         }
-        (*jresult) = jmessage;
-        (*jresult)["value"] = this->GetArmingStatus();
     }
     else if( command.compare("reboot") == 0 ) {
         *jresult = this->GetResultMsg(command,ret);
@@ -343,8 +342,8 @@ void KeSdkDevice::OnMessage(talk_base::Message *msg)
                 static_cast<talk_base::TypedMessageData<int>*>(msg->pdata);
         this->MediaStreamOpen_d(mcd->data());
         delete mcd;
-    }
         break;
+    }
     case MSG_NET_CHECK:
         CheckNetIp_d();
         //        RegisterCallBack::Instance()->SignalTerminalAlarm(6,"test alarm","");
@@ -358,7 +357,7 @@ void KeSdkDevice::OnMessage(talk_base::Message *msg)
         break;
     case MSG_RECV_TALK:{
         TalkPacket * msgData = static_cast<TalkPacket *>(msg->pdata);
-        LOG_F(INFO)<<" talk "<<msgData->talkData.length();
+        LOG_T_F(LS_VERBOSE)<<" post time is  "<< msgData->timespan<<" now time is "<< talk_base::Time();
         MEDIA_Audio_Talk(const_cast<char *>(msgData->talkData.data()),msgData->talkData.length());
         delete msgData;
     }
@@ -679,41 +678,36 @@ bool KeSdkDevice::QueryRecord(Json::Value jcondition, Json::Value *jrecordList, 
 {    
     std::string startTime,endTime;
     int offset,toQuery;
-
     if( !GetStringFromJsonObject(jcondition,"startTime",&startTime) ||
             !GetStringFromJsonObject(jcondition,"endTime",&endTime) ||
-            ! GetIntFromJsonObject(jcondition,"offset",&offset) ||
+            !GetIntFromJsonObject(jcondition,"offset",&offset) ||
             !GetIntFromJsonObject(jcondition,"toQuery",&toQuery))
     {
         LOG_F(WARNING)<<"parse condition error";
         return false;
     }
-
     st_clock_t startClock,endClock;
     if(!StringToClock(startTime,&startClock) || !StringToClock(endTime,&endClock))
     {
         LOG_F(WARNING)<<"input time  format error";
         return false;
     }
-    int list_num  = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,0,NULL);
+    int list_num = STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,0,NULL);
 
-    if(list_num <= 0){
+    if (list_num <= 0) {
         *totalNum = 0;
         LOG_F(WARNING)<<"No record found";
         return true;
     }
     LOG_F(INFO)<<"get num "<<list_num;
     *totalNum = list_num;
-    if(offset > list_num ) {
+    if(offset > list_num) {
         LOG_F(WARNING)<<" offset is large than total num ";
         return false;
     }
     st_store_list_t * stList  = new st_store_list_t[list_num];
-
     STORE_Get_File_List(&startClock,&endClock,0,STORE_TYPE_PLAN,list_num,stList);
-
     int copyNum = std::min(list_num-offset,toQuery);
-
     for(int i = offset ; i < offset + copyNum ; i++) {
         Json::Value jrecord;
         jrecord["fileName"] = stList[i].filePath;
@@ -940,7 +934,7 @@ void KeSdkDevice::MediaStreamOpen_d(int level)
         }
         break;
     case kLevelAudioStream:
-        if( audio_handle_ == kNullStreamHandle ){
+        if( audio_handle_ == kNullStreamHandle ) {
             audio_handle_ = FIFO_Stream_Open(FIFO_STREAM_AUDIO,0,0,0);
             LOG_F(INFO)<<"open audio stream"<<audio_handle_;
         }

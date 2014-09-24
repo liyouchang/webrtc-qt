@@ -44,6 +44,7 @@ bool KeTunnelClient::StartPeerMedia(std::string peer_id, int video)
         LOG(WARNING) << "process not found "<<peer_id;
         return false;
     }
+//    process->AskVideo(0,0,0);
     process->AskVideo(video,1,0);
     return true;
 }

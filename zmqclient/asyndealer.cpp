@@ -50,8 +50,7 @@ bool AsynDealer::send(const std::string & addr, const std::string & data)
 
 void AsynDealer::AsynSend(const std::string &addr, const std::string &data)
 {
-
-    zmq::zmsg * pzmsg = new zmq::zmsg() ;
+    zmq::zmsg * pzmsg = new zmq::zmsg();
     pzmsg->wrap(addr,"");
     pzmsg->append(data);
     PostZmqMessage * msgData = new  PostZmqMessage(pzmsg);
@@ -76,8 +75,6 @@ bool AsynDealer::initialize_z(const std::string &id, const std::string &router)
     try{
 //        context_ = new zmq::context_t(1,5);
         context_ = new zmq::context_t(1,2);
-
-
     }catch(zmq::error_t e){
         LOG_F(WARNING) <<" failed , enum:"<<e.num()<<" edes:" <<e.what();
         return false;
