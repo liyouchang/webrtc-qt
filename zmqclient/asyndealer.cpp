@@ -179,7 +179,8 @@ void AsynDealer::OnMessage(talk_base::Message *msg)
     {
         PostZmqMessage *pData = static_cast <PostZmqMessage*>(msg->pdata);
         zmq::zmsg * pzmsg = pData->data().get();
-        pzmsg->send(*socket_);
+        pzmsg->send(*socket_,true);
+        LOG_F(INFO)<<"sent "<<pzmsg->address();
         SignalSent();
         delete pData;
     }

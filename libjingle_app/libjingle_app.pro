@@ -15,9 +15,13 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 
+
 include (../talk/talk_common.pri)
 
 DESTDIR = $$output_dir/libs
+
+INCLUDEPATH += ../third_party/mp4v2/include
+
 #target.path = /libs
 #INSTALLS += target
 #target_lib.files = $$OUT_PWD/libjingle_app.a
@@ -49,7 +53,8 @@ SOURCES += \
     ke08recorder.cpp \
     kelocalclient.cpp \
     ../talk/app/kaerp2p/udpstreamchannel.cpp \
-    ../talk/session/tunnel/streamchannelinterface.cpp
+    ../talk/session/tunnel/streamchannelinterface.cpp \
+    mp4encoder.cpp
 
 
 HEADERS += \
@@ -80,7 +85,8 @@ HEADERS += \
     ke08recorder.h \
     kelocalclient.h \
     ../talk/app/kaerp2p/udpstreamchannel.h \
-    ../talk/session/tunnel/streamchannelinterface.h
+    ../talk/session/tunnel/streamchannelinterface.h \
+    mp4encoder.h
 
 OTHER_FILES += \
     ClientCameraMsg.json
