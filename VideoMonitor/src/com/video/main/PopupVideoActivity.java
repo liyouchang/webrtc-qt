@@ -11,6 +11,7 @@ import android.os.PowerManager;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.video.R;
@@ -25,6 +26,8 @@ public class PopupVideoActivity extends Activity implements OnClickListener {
 
 	private Context mContext;
 	private PreferData preferData;
+	
+	private TextView tv_message;
 	
 	private static String mDeviceName = null;
 	private static String mDeviceId = null;
@@ -55,6 +58,8 @@ public class PopupVideoActivity extends Activity implements OnClickListener {
 	}
 
 	private void initView() {
+		tv_message = (TextView) this.findViewById(R.id.message);
+		
 		Button btn_smartdoor_ok = (Button) this.findViewById(R.id.btn_smartdoor_ok);
 		btn_smartdoor_ok.setOnClickListener(this);
 
@@ -81,6 +86,8 @@ public class PopupVideoActivity extends Activity implements OnClickListener {
 			mDealerName = MainApplication.getInstance().deviceList.get(position).get("dealerName");
 			mLinkState = MainApplication.getInstance().deviceList.get(position).get("LinkState");
 			mPlayerClarity = MainApplication.getInstance().deviceList.get(position).get("playerClarity");
+			
+			tv_message.setText("【"+mDeviceName+"】"+getResources().getString(R.string.someone_knock_the_door));
 		}
 	}
 
@@ -97,16 +104,22 @@ public class PopupVideoActivity extends Activity implements OnClickListener {
 	}
 
 	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+	}
+
+	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		// 一定要释放唤醒锁和恢复键盘
-		if (mWakeLock != null) {
-			mWakeLock.release();
-			mWakeLock = null;
-		}
 		if (mKeyguardLock != null) {
 			mKeyguardLock.reenableKeyguard();
 			mKeyguardLock = null;
+		}
+		if (mWakeLock != null) {
+			mWakeLock.release();
+			mWakeLock = null;
 		}
 	}
 	

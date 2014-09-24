@@ -1,5 +1,7 @@
 package com.video.utils;
 
+import java.io.File;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -103,6 +105,20 @@ public class Tools {
 	public static String getAppName(Context context) {
 		return context.getResources().getText(R.string.app_name).toString();
 	}
+	
+	/** 
+     * 安装应用程序
+     */ 
+	public static void installAPK(Context context, String apkSavePath, String packageName) {  
+		File apkfile = new File(apkSavePath, packageName);
+        if (!apkfile.exists()) 
+        	return ; 
+        Intent intent = new Intent(Intent.ACTION_VIEW);  
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  
+        intent.setDataAndType(Uri.parse("file://" + apkfile.toString()), "application/vnd.android.package-archive");  
+        context.startActivity(intent);  
+        android.os.Process.killProcess(android.os.Process.myPid());
+    }
 	
     /** 
      * 卸载应用程序

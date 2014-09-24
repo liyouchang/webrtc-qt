@@ -36,7 +36,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -69,7 +68,6 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private WakeLock wakeLock = null; //锁屏对象
 	
 	private PlayerReceiver playerReceiver;
-	public static final String ALARM_DEFENCE_ACTION = "PlayerActivity.alarm_defence_action";
 
 	private TextView tv_title = null;
 	private static String deviceID = null;
@@ -121,6 +119,8 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private boolean isActivityShow = false;
 	private int playerClarity = DeviceValue.NORMAL_CLARITY; // 1:主通道高清  2:子通道标清  3:子通道流畅
 	
+	public static final String RENAME_DEVICE_ACTION = "PlayerActivity.rename_device_action";
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -134,6 +134,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	protected void onStart() {
 		// TODO Auto-generated method stub
 		super.onStart();
+		Value.isPlayerActivityDisplay = true;
 		isActivityShow = true;
 		initPlayer();
 	}
@@ -167,15 +168,13 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		//注册广播
 		playerReceiver = new PlayerReceiver();
 		IntentFilter filter = new IntentFilter();
-		filter.addAction(ALARM_DEFENCE_ACTION);
 		filter.addAction(BackstageService.TUNNEL_REQUEST_ACTION);
+		filter.addAction(RENAME_DEVICE_ACTION);
 		registerReceiver(playerReceiver, filter);
 		
 		// 视频
 		videoView = new VideoView(mContext);
 		setContentView(videoView);
-		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		
 		// 音频
 		audioThread = new AudioThread();
 		
@@ -228,6 +227,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				changeClarityView(playerClarity);
 				videoView.playVideo();
 				sendHandlerMsg(DISPLAY_VIDEO_VIEW, 3000);
+				sendSetCameraNameData(deviceName);
 			} else {
 				closePlayer();
 				PlayerActivity.this.finish();
@@ -260,6 +260,29 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 				return false;
 			}
 		});
+	}
+	
+	private String generateSetCameraNameJson(String deviceName) {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "tunnel");
+			jsonObj.put("command", "rename");
+			jsonObj.put("name", deviceName);
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 设置视频的名称
+	 */
+	private void sendSetCameraNameData(String deviceName) {
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("peerId", dealerName);
+		map.put("peerData", generateSetCameraNameJson(deviceName));
+		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.send_to_peer_id, map); 
 	}
 	
 	/**
@@ -732,6 +755,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			mDialog = createLoadingDialog(getResources().getString(R.string.is_requesting_video));
 			mDialog.show();
 		}
+		TunnelCommunication.getInstance().stopMediaData(dealerName);
 		changeClarityView(clarity);
 		hidePopupWindow();
 		sendHandlerMsg(CHANGE_VIDEO_TYPE, 3000);
@@ -902,6 +926,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		// TODO Auto-generated method stub
 		super.onStop();
 		destroyDialogView();
+		Value.isPlayerActivityDisplay = false;
 		isActivityShow = false;
 	}
 
@@ -1041,6 +1066,12 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 						toastNotify(mContext, getResources().getString(R.string.video_connection_broken), Toast.LENGTH_SHORT);
 					}
 					PlayerActivity.this.finish();
+				}
+			}
+			// 设置实时视频画面名称
+			else if (action.equals(RENAME_DEVICE_ACTION)) {
+				if (!intent.getBooleanExtra("renameDevice", false)) {
+					sendSetCameraNameData(deviceName);
 				}
 			}
 		}

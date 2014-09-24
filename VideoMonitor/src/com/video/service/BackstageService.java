@@ -186,7 +186,7 @@ public class BackstageService extends Service {
 						timeTick ++;
 						
 						// 联机操作
-						if ((timeTick % 10) == 0) {
+						if ((timeTick % 15) == 0) {
 							linkDevice();
 						}
 						
@@ -281,6 +281,9 @@ public class BackstageService extends Service {
 			return ;
 		}
 		else if (alarmType == ALARM_TYPE_DOOR) {
+			if (Value.isPlayerActivityDisplay) {
+				return ;
+			}
 			alarmMusicResid = R.raw.dingdong;
 			Intent intentPopup = new Intent(BackstageService.this, PopupVideoActivity.class);
 			intentPopup.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

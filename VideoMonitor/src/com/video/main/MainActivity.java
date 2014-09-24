@@ -391,7 +391,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	 */
 	public void exitVideoMonitorApp() {
 		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-		myDialog.setTitle("");
+		myDialog.setTitle(getResources().getString(R.string.tips));
 		myDialog.setMessage(getResources().getString(R.string.exit_from_the_platform));
 		myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 			@Override

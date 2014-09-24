@@ -127,6 +127,11 @@ public class Value {
 	public static boolean ownFragmentRequestAlarmFlag = false;
 	
 	/**
+	 * 实时播放器是否显示
+	 */
+	public static boolean isPlayerActivityDisplay = false;
+	
+	/**
 	 * 初始化应用程序的全局变量
 	 */
 	public static void resetValues() {
@@ -142,5 +147,6 @@ public class Value {
 		isSharedUser = false;
 		ownFragmentRequestAlarmFlag = false;
 		MainActivity.lastFragment = 0;
+		isPlayerActivityDisplay = false;
 	}
 }
