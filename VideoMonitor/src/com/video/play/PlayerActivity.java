@@ -735,9 +735,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		changeClarityView(clarity);
 		hidePopupWindow();
 		sendHandlerMsg(CHANGE_VIDEO_TYPE, 3000);
+		TunnelCommunication.getInstance().stopMediaData(dealerName);
 		TunnelCommunication.getInstance().startMediaData(dealerName, playerClarity);
 		if (!Value.isSharedUser) {
-			if (xmlDevice == null) {
+			if (xmlDevice == null) 
+			{
 				xmlDevice = new XmlDevice(mContext);
 			}
 			xmlDevice.changePlayerClarity(deviceID, playerClarity);
@@ -772,7 +774,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	 * @param order: "move_left", "move_right", "move_up", "move_down", "stop" 
 	 * @return 返回生成JSON云台控制的字符串
 	 */
-	private String generatePtzControlJson(String order) {
+	private String generatePtzControlJson(String odeviceIDrder) {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj.put("type", "tunnel");

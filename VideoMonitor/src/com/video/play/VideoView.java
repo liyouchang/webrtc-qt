@@ -186,7 +186,7 @@ public class VideoView extends View {
 					bitHeight = 720;
 					break;
 			}
-			Utils.log("videoType: "+videoType+"  bitWidth: "+bitWidth+"  bitHeight: "+bitHeight);
+//			Utils.log("videoType: "+videoType+"  bitWidth: "+bitWidth+"  bitHeight: "+bitHeight);
 
 			srcRect.left = 0;
 			srcRect.top = 0;
