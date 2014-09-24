@@ -18,7 +18,7 @@
 #include "keapi/common_api.h"
 #endif//arm
 
-int kVersion = 70;
+int kVersion = 71;
 
 int main()
 {

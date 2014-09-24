@@ -117,8 +117,6 @@ PseudoTcpChannel::PseudoTcpChannel(Thread* stream_thread, BaseSession* session)
     ASSERT(NULL != session_);
 }
 PseudoTcpChannel::~PseudoTcpChannel() {
-    LOG_T_F(INFO)<<" destroyed start";
-
   ASSERT(signal_thread_->IsCurrent());
   ASSERT(worker_thread_ == NULL);
   ASSERT(session_ == NULL);
