@@ -186,7 +186,7 @@ public class BackstageService extends Service {
 						timeTick ++;
 						
 						// 联机操作
-						if ((timeTick % 15) == 0) {
+						if ((timeTick % 20) == 0) {
 							linkDevice();
 						}
 						
@@ -238,7 +238,7 @@ public class BackstageService extends Service {
 						} else {
 							// 发送超时正在联机延时消息
 							if (!handler.hasMessages(LINK_TIMEOUT)) {
-								MainApplication.getInstance().sendHandlerMsg(handler, LINK_TIMEOUT, i, 0, peerId, 3000);
+								MainApplication.getInstance().sendHandlerMsg(handler, LINK_TIMEOUT, i, 0, peerId, 5000);
 							}
 						}
 					}

@@ -120,6 +120,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 	private int playerClarity = DeviceValue.NORMAL_CLARITY; // 1:主通道高清  2:子通道标清  3:子通道流畅
 	
 	public static final String RENAME_DEVICE_ACTION = "PlayerActivity.rename_device_action";
+	public static final String TALK_MEDIA_ACTION = "PlayerActivity.talk_media_action";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -170,6 +171,7 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(BackstageService.TUNNEL_REQUEST_ACTION);
 		filter.addAction(RENAME_DEVICE_ACTION);
+		filter.addAction(TALK_MEDIA_ACTION);
 		registerReceiver(playerReceiver, filter);
 		
 		// 视频
@@ -561,6 +563,29 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 		}
 	}
 	
+	/**
+	 * 打开对讲
+	 */
+	private void openTalk() {
+		isTalkEnable = true;
+		player_talkback.setBackgroundResource(R.drawable.player_talkback_enable);
+		talkThread = new TalkThread();
+		if (talkThread != null) {
+			talkThread.start();
+		}
+	}
+	
+	/**
+	 * 关闭对讲
+	 */
+	private void closeTalk() {
+		isTalkEnable = false;
+		player_talkback.setBackgroundResource(R.drawable.player_talkback_disable);
+		if (talkThread != null) {
+			talkThread.stopTalkThread();
+		}
+	}
+	
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
@@ -657,20 +682,11 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 					if (!isLocalDevice) {
 						playMyMusic(R.raw.di);
 						if (isTalkEnable) {
-							// 停止对讲
-							isTalkEnable =false;
-							player_talkback.setBackgroundResource(R.drawable.player_talkback_disable);
-							if (talkThread != null) {
-								talkThread.stopTalkThread();
-							}
+							isTalkEnable = false;
+							TunnelCommunication.getInstance().stopTalk(dealerName);
 						} else {
-							// 开始对讲
 							isTalkEnable = true;
-							player_talkback.setBackgroundResource(R.drawable.player_talkback_enable);
-							talkThread = new TalkThread();
-							if (talkThread != null) {
-								talkThread.start();
-							}
+							TunnelCommunication.getInstance().startTalk(dealerName);
 						}
 					} else {
 						toastNotify(mContext, getResources().getString(R.string.this_feature_is_temporarily_unavailable), Toast.LENGTH_SHORT);
@@ -1074,6 +1090,20 @@ public class PlayerActivity  extends Activity implements OnClickListener  {
 			else if (action.equals(RENAME_DEVICE_ACTION)) {
 				if (!intent.getBooleanExtra("renameDevice", false)) {
 					sendSetCameraNameData(deviceName);
+				}
+			}
+			// 对讲操作广播接收
+			else if (action.equals(TALK_MEDIA_ACTION)) {
+				switch (intent.getIntExtra("mediaTalk", 0)) {
+					case 0: // 对讲关闭
+						closeTalk();
+						break;
+					case 1:   // 对讲打开
+						openTalk();
+						break;
+					case 2: // 已经有人对讲了
+						toastNotify(mContext, getResources().getString(R.string.someone_is_talking), Toast.LENGTH_LONG);
+						break;
 				}
 			}
 		}

@@ -384,5 +384,6 @@
     <string name="restart_device_failed">设备重启失败</string>
     <string name="someone_knock_the_door">有人敲门</string>
     <string name="watch_the_video">查看</string>
+    <string name="someone_is_talking">有人正在对讲，暂无法使用</string>
     
 </resources>
