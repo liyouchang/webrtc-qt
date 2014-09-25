@@ -165,11 +165,8 @@ SOURCES += \
     src/mp4atom.cpp \
     src/mp4container.cpp \
     src/mp4descriptor.cpp \
-    src/mp4file.cpp \
     src/mp4file_io.cpp \
-    src/mp4info.cpp \
     src/mp4property.cpp \
-    src/mp4track.cpp \
     src/mp4util.cpp \
     src/ocidescriptors.cpp \
     src/odcommands.cpp \
@@ -184,15 +181,6 @@ SOURCES += \
     src/qtff/coding.cpp \
     src/qtff/ColorParameterBox.cpp \
     src/qtff/PictureAspectRatioBox.cpp \
-    util/mp4art.cpp \
-    util/mp4chaps.cpp \
-    util/mp4extract.cpp \
-    util/mp4file.cpp \
-    util/mp4info.cpp \
-    util/mp4subtitle.cpp \
-    util/mp4tags.cpp \
-    util/mp4track.cpp \
-    util/mp4trackdump.cpp \
     libutil/crc.cpp \
     libutil/Database.cpp \
     libutil/other.cpp \
@@ -204,7 +192,11 @@ SOURCES += \
     libplatform/prog/option.cpp \
     libplatform/sys/error.cpp \
     libplatform/time/time.cpp \
+    src/mp4file.cpp \
+    src/mp4info.cpp \
+    src/mp4track.cpp \
 
+#message($$OBJECTS)
 
 OTHER_FILES += \
     libplatform/stamp-h1

@@ -225,5 +225,20 @@ std::string ToStringVersion(int intVer)
 //    talk_base::IPAddress addr(netIp);
 //    return addr.ToString();
 //}
+void Reso2WidthHeigh(int reso,int *width,int *high)
+{
+    switch(reso)
+    {
+    case 1: *width = 176; *high = 144; break;//QCIF
+    case 2: *width = 352; *high = 288; break;//CIF
+    case 3: *width = 704; *high = 288; break;//HD
+    case 4: *width = 320; *high = 240; break;//QVGA
+    case 7:	*width = 640; *high = 480; break;	//VGA
+    case 10: *width = 1280; *high = 720; break;//720P
+    case 12: *width = 1280; *high = 960; break;//960P
+    case 6:  *width = 1920; *high = 1080;break;//1080P
+    default: *width = 704; *high = 576; break;//D1
+    }
+}
 
 }

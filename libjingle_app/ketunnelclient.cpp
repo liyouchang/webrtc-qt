@@ -9,7 +9,8 @@
 #include "KeMessage.h"
 #include "defaults.h"
 #include "recorderavi.h"
-#include "ke08recorder.h"
+#include "recordermp4.h"
+//#include "ke08recorder.h"
 
 namespace kaerp2p {
 
@@ -295,15 +296,21 @@ void KeMessageProcessClient::OnTalkData(const char *data, int len)
     SignalNeedSendData(this->peer_id(),sendBuf.data(),sendBuf.length());
 }
 
+
 bool KeMessageProcessClient::StartVideoCut(const std::string &filename)
 {
     if(recordSaver){
-        LOG(INFO)<<"KeMessageProcessClient::StartVideoCut---"<<
-                   "record already started";
+        LOG_F(INFO)<<"record already started";
         return false;
     }
-    recordSaver = new RecorderAvi(this->peer_id(),videoInfo_.frameRate,
-                                  videoInfo_.frameResolution);
+    LOG_F(INFO)<<" start video cut frame rate "<<videoInfo_.frameRate<<" resolution "<<videoInfo_.frameResolution;
+//    recordSaver = new RecorderAvi(this->peer_id(),videoInfo_.frameRate,
+//                                  videoInfo_.frameResolution);
+
+    int height,width;
+    Reso2WidthHeigh(videoInfo_.frameResolution,&width,&height);
+    recordSaver = new RecorderMp4(this->peer_id(),videoInfo_.frameRate,width,height);
+
     bool ret = recordSaver->StartSave(filename);
     this->SignalRecvVideoData.connect(recordSaver,&RecordSaverInterface::OnVideoData);
     this->SignalRecvAudioData.connect(recordSaver,&RecordSaverInterface::OnAudioData);
@@ -316,6 +323,7 @@ bool KeMessageProcessClient::StartVideoCut(const std::string &filename)
 
 bool KeMessageProcessClient::StopVideoCut()
 {
+
     if(recordSaver == NULL){
         LOG(INFO)<<"KeMessageProcessClient::StopVideoCut---"<<
                    "video cut is not start";
@@ -323,6 +331,7 @@ bool KeMessageProcessClient::StopVideoCut()
     }
     this->SignalRecvVideoData.disconnect(recordSaver);
     this->SignalRecvAudioData.disconnect(recordSaver);
+    LOG_F(INFO)<<"stop save";
     bool ret = recordSaver->StopSave();
     delete recordSaver;
     recordSaver = NULL;

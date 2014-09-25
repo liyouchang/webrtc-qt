@@ -81,6 +81,7 @@ std::string GetAppFilePath(std::string filename);
 
 std::string ToStringVersion(int intVer);
 
+void Reso2WidthHeigh(int reso,int *width,int *high);
 //std::string GetLittleEndianIp(int srcIp);
 }
 #endif  // PEERCONNECTION_SAMPLES_CLIENT_DEFAULTS_H_

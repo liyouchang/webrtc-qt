@@ -42,6 +42,9 @@ public:
     bool Write264Metadata(MP4FileHandle hMp4File,LPMP4ENC_Metadata lpMetadata);
     // wirte 264 data, data can contain  multiple frame.
     int WriteH264Data(MP4FileHandle hMp4File,const unsigned char* pData,int size);
+    //audio data
+    int WriteULawData(MP4FileHandle hMp4File,const unsigned char* pData,int size);
+
     // close mp4 file.
     void CloseMP4File(MP4FileHandle hMp4File);
     // convert H264 file to mp4 file.
@@ -49,6 +52,8 @@ public:
     bool WriteH264File(const char* pFile264,const char* pFileMp4);
     // Prase H264 metamata from H264 data frame
     static bool PraseMetadata(const unsigned char* pData,int size,MP4ENC_Metadata &metadata);
+
+
 private:
     // read one nalu from H264 data buffer
     static int ReadOneNaluFromBuf(const unsigned char *buffer,unsigned int nBufferSize,unsigned int offSet,MP4ENC_NaluUnit &nalu);
@@ -58,6 +63,8 @@ private:
     int m_nFrameRate;
     int m_nTimeScale;
     MP4TrackId m_videoId;
+
+    MP4TrackId m_audioId;
 
 };
 

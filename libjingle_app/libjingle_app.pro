@@ -54,7 +54,8 @@ SOURCES += \
     kelocalclient.cpp \
     ../talk/app/kaerp2p/udpstreamchannel.cpp \
     ../talk/session/tunnel/streamchannelinterface.cpp \
-    mp4encoder.cpp
+    mp4encoder.cpp \
+    recordermp4.cpp
 
 
 HEADERS += \
@@ -86,7 +87,8 @@ HEADERS += \
     kelocalclient.h \
     ../talk/app/kaerp2p/udpstreamchannel.h \
     ../talk/session/tunnel/streamchannelinterface.h \
-    mp4encoder.h
+    mp4encoder.h \
+    recordermp4.h
 
 OTHER_FILES += \
     ClientCameraMsg.json

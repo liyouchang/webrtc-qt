@@ -26,8 +26,10 @@ win32 {
 } else {
     #QMAKE_CXXFLAGS += -std=c++11
     LIBS += -L$$output_dir/libs
-    LIBS +=   -ljingle_app  -ljingle_p2p  -ljingle
-    LIBS += -lcppzmq -ljsoncpp
+    LIBS +=  -ljingle_app  -ljingle_p2p  -ljingle
+    LIBS += -lmp4v2
+
+    LIBS +=  -lcppzmq -ljsoncpp
     LIBS += -pthread -ldl
     #PRE_TARGETDEPS += $$DESTDIR/libjsoncpp.a $$DESTDIR/libjingle_p2p.a $$DESTDIR/libjingle.a $$DESTDIR/libjingle_app.a
 }
