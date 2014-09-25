@@ -52,7 +52,6 @@ public class TunnelCommunication {
 	private native int naMessageFromPeer(String peerId, String msg);
 	private native int naStartMediaData(String peerId, int level);
 	private native int naStopMediaData(String peerId);
-	private native int naSendTalkData(byte[] ulawData, int ulawDataLen);
 	private native int naStartPeerVideoCut(String peerId, String filepath);
 	private native int naStopPeerVideoCut(String peerId);
 	private native int naDownloadRemoteFile(String peerId, String remoteFileName, String saveFilePath, int playSize);
@@ -68,6 +67,11 @@ public class TunnelCommunication {
 	private native int naStopRemoteFile(String peerId);
 	private native int naSetPlayPosition(String peerId, int position);
 	private native int naSetPlaySpeed(String peerId, int speed);
+	
+	//对讲
+	private native int naStartTalk(String peerId);
+	private native int naStopTalk(String peerId);
+	private native int naSendTalkData(byte[] ulawData, int ulawDataLen);
 
 	synchronized public static TunnelCommunication getInstance() {
 		if (tunnel == null) {
@@ -182,13 +186,6 @@ public class TunnelCommunication {
 	 */
 	public int stopRecordVideo(String peerId) {
 		return naStopPeerVideoCut(peerId);
-	}
-	
-	/**
-	 * 发送对讲数据
-	 */
-	public int sendTalkData(byte[] ulawData, int ulawDataLen) {
-		return naSendTalkData(ulawData, ulawDataLen);
 	}
 	
 	/**
@@ -374,12 +371,50 @@ public class TunnelCommunication {
 	 */
 	public void RecordStatus(String peerId, int status, int position, int speed) {
 		Utils.log("peerId:"+peerId+" status:"+status+" position:"+position+" speed"+speed);
+		
 		Intent intent = new Intent();
 		intent.putExtra("peerId", peerId);
 		intent.putExtra("status", status);
 		intent.putExtra("position", position);
 		intent.putExtra("speed", speed);
 		intent.setAction(RemoteFilePlayerActivity.REQUEST_REMOTE_FILE_PLAYER_ACTION);
+		MainApplication.getInstance().sendBroadcast(intent);
+	}
+	
+	/**
+	 * 开始对讲
+	 */
+	public int startTalk(String peerId) {
+		return naStartTalk(peerId);
+	}
+	
+	/**
+	 * 停止对讲
+	 */
+	public int stopTalk(String peerId) {
+		return naStopTalk(peerId);
+	}
+	
+	/**
+	 * 发送对讲数据
+	 */
+	public int sendTalkData(byte[] ulawData, int ulawDataLen) {
+		return naSendTalkData(ulawData, ulawDataLen);
+	}
+	
+	/**
+	 * 多媒体状态信息（回调）
+	 * @param peerId
+	 * @param video
+	 * @param audio
+	 * @param talk：对讲
+	 */
+	public void MediaStatus(String peerId, int video, int audio, int talk) {
+		Utils.log("peerId:"+peerId+" talk:"+talk);
+		
+		Intent intent = new Intent();
+		intent.putExtra("mediaTalk", talk);
+		intent.setAction(PlayerActivity.TALK_MEDIA_ACTION);
 		MainApplication.getInstance().sendBroadcast(intent);
 	}
 }

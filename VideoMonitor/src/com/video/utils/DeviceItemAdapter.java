@@ -191,7 +191,7 @@ public class DeviceItemAdapter extends BaseAdapter {
 							}
 						} else {
 							final OkOnlyDialog myDialog=new OkOnlyDialog(context);
-							myDialog.setTitle("");
+							myDialog.setTitle(context.getResources().getString(R.string.tips));
 							myDialog.setMessage(MainApplication.getInstance().getResources().getString(R.string.network_instability));
 							myDialog.setPositiveButton(MainApplication.getInstance().getResources().getString(R.string.confirm), new OnClickListener() {
 								@Override

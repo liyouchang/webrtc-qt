@@ -44,9 +44,9 @@ public class VideoView extends View {
 	public boolean isDisplayView = false;
 
 	//视频解码库JNI接口
-	private native int initDecoder(int width, int height); 
-	private native int uninitDecoder();
-	private native int decodeNalu(byte[] in, int insize, byte[] out);
+	public native int initDecoder(int width, int height); 
+	public native int uninitDecoder();
+	public native int decodeNalu(byte[] in, int insize, byte[] out);
 
 	public VideoView(Context context) {
 		super(context);
@@ -186,8 +186,7 @@ public class VideoView extends View {
 					bitHeight = 720;
 					break;
 			}
-//			Utils.log("videoType: "+videoType+"  bitWidth: "+bitWidth+"  bitHeight: "+bitHeight);
-
+			
 			srcRect.left = 0;
 			srcRect.top = 0;
 			srcRect.right = bitWidth;
@@ -227,6 +226,7 @@ public class VideoView extends View {
 
 			// 绘制图像
 			canvas.drawBitmap(videoBmp, srcRect, dstRect, null);
+//			Utils.log("srcRect: "+srcRect.toString()+"  dstRect: "+dstRect.toString());
 			if (mCanvas == null) {
 				mCanvas = canvas;
 			}

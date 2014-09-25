@@ -17,6 +17,7 @@ import com.video.R;
 import com.video.data.DeviceValue;
 import com.video.data.Value;
 import com.video.data.XmlMessage;
+import com.video.main.DeviceManagerActivity;
 import com.video.play.PlayerActivity;
 import com.video.service.BackstageService;
 import com.video.service.MainApplication;
@@ -511,6 +512,7 @@ public class ZmqHandler extends Handler {
 					//接收到终端发回的数据
 					else if (type.equals("tunnel")) {
 						String resultCode = obj.getString("command");
+						// 获得WiFi列表信息
 						if (resultCode.equals("wifi_info")) {
 							if (!obj.isNull("wifis")) {
 								JSONArray jsonArray = obj.getJSONArray("wifis");
@@ -519,6 +521,7 @@ public class ZmqHandler extends Handler {
 								mHandler.obtainMessage(R.id.requst_wifi_list_id, -1, 0, "null").sendToTarget();
 							}
 						}
+						// 设置终端WiFi
 						else if (resultCode.equals("set_wifi")) {
 							boolean result = obj.getBoolean("result");//0:失败  1:成功
 							if (result) {
@@ -527,6 +530,7 @@ public class ZmqHandler extends Handler {
 								mHandler.obtainMessage(R.id.set_term_wifi_id, 0, 0).sendToTarget();
 							}
 						}
+						// 终端录像回放
 						else if (resultCode.equals("query_record")) {
 							int totalNum = obj.getInt("totalNum");//录像文件总数
 							if (totalNum == 0) {
@@ -536,12 +540,31 @@ public class ZmqHandler extends Handler {
 								mHandler.obtainMessage(R.id.request_terminal_video_list_id, totalNum, 0, getTerminalFileList(jsonArray)).sendToTarget();
 							}
 						}
-						else if (resultCode.equals("alarm_status")) {
+						// 一键布撤防
+						else if (resultCode.equals("arming_status")) {
 							Intent intent = new Intent();
 							if (!obj.isNull("value")) {
 								intent.putExtra("alarmDefence", obj.getInt("value"));
 							}
-							intent.setAction(PlayerActivity.ALARM_DEFENCE_ACTION);
+							intent.setAction(DeviceManagerActivity.ALARM_DEFENCE_ACTION);
+							MainApplication.getInstance().sendBroadcast(intent);
+						}
+						// 重启设备
+						else if (resultCode.equals("reboot")) {
+							Intent intent = new Intent();
+							if (!obj.isNull("result")) {
+								intent.putExtra("rebootDevice", obj.getBoolean("result"));
+							}
+							intent.setAction(DeviceManagerActivity.REBOOT_DEVICE_ACTION);
+							MainApplication.getInstance().sendBroadcast(intent);
+						}
+						// 设置实时视频画面名称
+						else if (resultCode.equals("rename")) {
+							Intent intent = new Intent();
+							if (!obj.isNull("result")) {
+								intent.putExtra("renameDevice", obj.getBoolean("result"));
+							}
+							intent.setAction(PlayerActivity.RENAME_DEVICE_ACTION);
 							MainApplication.getInstance().sendBroadcast(intent);
 						}
 					}

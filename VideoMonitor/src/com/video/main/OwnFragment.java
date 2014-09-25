@@ -418,7 +418,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		} else {
 			if (Utils.isNetworkAvailable(mActivity)) {
 				final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
-				myDialog.setTitle("");
+				myDialog.setTitle(getResources().getString(R.string.tips));
 				myDialog.setMessage(getResources().getString(R.string.network_instability));
 				myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 					@Override
@@ -524,7 +524,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						}
 					} else {
 						final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
-						myDialog.setTitle("");
+						myDialog.setTitle(getResources().getString(R.string.tips));
 						myDialog.setMessage(getResources().getString(R.string.no_available_network_connection));
 						myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 							@Override

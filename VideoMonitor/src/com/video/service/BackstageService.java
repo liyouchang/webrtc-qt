@@ -186,7 +186,7 @@ public class BackstageService extends Service {
 						timeTick ++;
 						
 						// 联机操作
-						if ((timeTick % 10) == 0) {
+						if ((timeTick % 20) == 0) {
 							linkDevice();
 						}
 						
@@ -238,7 +238,7 @@ public class BackstageService extends Service {
 						} else {
 							// 发送超时正在联机延时消息
 							if (!handler.hasMessages(LINK_TIMEOUT)) {
-								MainApplication.getInstance().sendHandlerMsg(handler, LINK_TIMEOUT, i, 0, peerId, 3000);
+								MainApplication.getInstance().sendHandlerMsg(handler, LINK_TIMEOUT, i, 0, peerId, 5000);
 							}
 						}
 					}
@@ -281,6 +281,9 @@ public class BackstageService extends Service {
 			return ;
 		}
 		else if (alarmType == ALARM_TYPE_DOOR) {
+			if (Value.isPlayerActivityDisplay) {
+				return ;
+			}
 			alarmMusicResid = R.raw.dingdong;
 			Intent intentPopup = new Intent(BackstageService.this, PopupVideoActivity.class);
 			intentPopup.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

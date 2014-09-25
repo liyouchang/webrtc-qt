@@ -550,7 +550,7 @@ public class SharedActivity extends Activity implements OnClickListener, OnHeade
 						}
 					} else {
 						final OkOnlyDialog myDialog=new OkOnlyDialog(mContext);
-						myDialog.setTitle("");
+						myDialog.setTitle(getResources().getString(R.string.tips));
 						myDialog.setMessage(getResources().getString(R.string.network_instability));
 						myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 							@Override

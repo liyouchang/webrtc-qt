@@ -39,7 +39,7 @@ void KeJniTunnelClient::OnRecordStatus(const std::string & peer_id,int status,
 
 void KeJniTunnelClient::OnMediaStatus(const std::string &peer_id, int video, int audio, int talk)
 {
-
+	JniUtil::GetInstance()->JniMediaStatus(peer_id.c_str(), video, audio, talk);
 }
 
 //on tunnel closed

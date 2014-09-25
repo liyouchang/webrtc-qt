@@ -82,7 +82,7 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	 */
 	public void showHandleDialog() {
 		final OkCancelDialog myDialog=new OkCancelDialog(mActivity);
-		myDialog.setTitle("");
+		myDialog.setTitle(getResources().getString(R.string.tips));
 		myDialog.setMessage(getResources().getString(R.string.exit_from_the_current_account_logining));
 		myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 			@Override

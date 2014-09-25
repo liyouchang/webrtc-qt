@@ -48,7 +48,7 @@
             android:layout_weight="1"
             android:background="@drawable/button_left"
             android:gravity="center"
-            android:text="@string/btn_ok"
+            android:text="@string/watch_the_video"
             android:textColor="@color/light_black"
             android:textSize="16sp" />
 

@@ -36,6 +36,9 @@ public class ZmqThread extends Thread {
 		byte[] requestContentByteArray = requestContentString.getBytes();
 		requestContentByteArray[requestContentByteArray.length - 1] = 0;
 
+		if (zmq_socket == null) {
+			return false;
+		}
 		result = zmq_socket.send(stage, ZMQ.SNDMORE);
 		result = zmq_socket.send(requestContentByteArray, 0);
 
