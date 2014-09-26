@@ -224,6 +224,8 @@ void MP4Encoder::CloseMP4File(MP4FileHandle hMp4File)
     {
         MP4Close(hMp4File);
         hMp4File = NULL;
+        m_videoId = NULL;
+        m_audioId = NULL;
     }
 }
 

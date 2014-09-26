@@ -10,7 +10,8 @@ LOCAL_LDLIBS := -llog  -landroid  \
 	$(P2P_LIB_PATH)/libjingle_app.a \
 	$(P2P_LIB_PATH)/libjingle_p2p.a \
 	$(P2P_LIB_PATH)/libjingle.a \
- 	$(P2P_LIB_PATH)/libjsoncpp.a 
+ 	$(P2P_LIB_PATH)/libjsoncpp.a \
+ 	$(P2P_LIB_PATH)/libmp4v2.a
  		
 LOCAL_CFLAGS := -DPOSIX  
 
