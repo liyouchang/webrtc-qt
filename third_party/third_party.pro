@@ -2,7 +2,9 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     jsoncpp \
-    cppzmq
+    cppzmq \
+    mp4v2
+
 
 
 #    libyuv \

@@ -44,9 +44,9 @@ public class VideoView extends View {
 	public boolean isDisplayView = false;
 
 	//视频解码库JNI接口
-	private native int initDecoder(int width, int height); 
-	private native int uninitDecoder();
-	private native int decodeNalu(byte[] in, int insize, byte[] out);
+	public native int initDecoder(int width, int height); 
+	public native int uninitDecoder();
+	public native int decodeNalu(byte[] in, int insize, byte[] out);
 
 	public VideoView(Context context) {
 		super(context);
@@ -155,30 +155,38 @@ public class VideoView extends View {
 			videoBmp.copyPixelsFromBuffer(videoBuffer); // bmp从缓冲区获得数据
 
 			videoType = (byte) (TunnelCommunication.videoFrameType & 0x5F);
-
-			if (videoType == 0) {// D1
-				bitWidth = 704;
-				bitHeight = 576;
-			} else if (videoType == 1) {// QCF
-				bitWidth = 176;
-				bitHeight = 144;
-			} else if (videoType == 2) {// CIF
-				bitWidth = 352;
-				bitHeight = 288;
-			} else if (videoType == 3) {// HD1
-				bitWidth = 704;
-				bitHeight = 288;
-			} else if (videoType == 7) {// VGA
-				bitWidth = 640;
-				bitHeight = 480;
-			} else if (videoType == 10) {// 720P
-				bitWidth = 1280;
-				bitHeight = 720;
-			} else if (videoType == 4) {// QVGA
-				bitWidth = 320;
-				bitHeight = 240;
+			
+			switch (videoType) {
+				case 0:// D1
+					bitWidth = 704;
+					bitHeight = 576;
+					break;
+				case 1:// QCF
+					bitWidth = 176;
+					bitHeight = 144;
+					break;
+				case 2:// CIF
+					bitWidth = 352;
+					bitHeight = 288;
+					break;
+				case 3:// HD1
+					bitWidth = 704;
+					bitHeight = 288;
+					break;
+				case 4:// QVGA
+					bitWidth = 320;
+					bitHeight = 240;
+					break;		
+				case 7:// VGA
+					bitWidth = 640;
+					bitHeight = 480;
+					break;
+				case 10:// 720P
+					bitWidth = 1280;
+					bitHeight = 720;
+					break;
 			}
-
+			
 			srcRect.left = 0;
 			srcRect.top = 0;
 			srcRect.right = bitWidth;
@@ -218,6 +226,7 @@ public class VideoView extends View {
 
 			// 绘制图像
 			canvas.drawBitmap(videoBmp, srcRect, dstRect, null);
+//			Utils.log("srcRect: "+srcRect.toString()+"  dstRect: "+dstRect.toString());
 			if (mCanvas == null) {
 				mCanvas = canvas;
 			}
@@ -231,7 +240,7 @@ public class VideoView extends View {
 	 * 抓拍图片
 	 */
 	public boolean captureVideo() {
-		if (mCanvas == null || !MainApplication.getInstance().isSDExist) {
+		if (mCanvas == null || !MainApplication.isSDExist) {
 			return false;
 		}
 		Bitmap bm = Bitmap.createBitmap(videoBmp, 0, 0, bitWidth, bitHeight);
@@ -261,7 +270,7 @@ public class VideoView extends View {
 	 * 抓拍录像的缩略图
 	 */
 	public String captureThumbnails() {
-		if (mCanvas == null || !MainApplication.getInstance().isSDExist) {
+		if (mCanvas == null || !MainApplication.isSDExist) {
 			return null;
 		}
 		Bitmap bm = Bitmap.createBitmap(videoBmp, 0, 0, bitWidth, bitHeight);

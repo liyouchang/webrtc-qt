@@ -126,7 +126,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_REQUESTING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在提交修改...");
+					mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_submitting_the_modification));
 					mDialog.show();
 					break;
 				case REQUEST_TIMEOUT:
@@ -136,7 +136,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 						handler.removeMessages(REQUEST_TIMEOUT);
 					}
 					Value.isNeedReqTermListFlag = false;
-					Toast.makeText(mContext, "修改终端名称失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.modifying_the_terminal_name_failed), Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.modify_device_name_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
@@ -145,7 +145,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							Toast.makeText(mContext, "修改终端名称成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.modifying_the_terminal_name_success), Toast.LENGTH_SHORT).show();
 							xmlData.updateItemName(mDeviceId, mDeviceName);
 							
 							Bundle bundle = new Bundle();
@@ -157,7 +157,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 							finish();
 							overridePendingTransition(0, R.anim.down_out);
 						} else {
-							Toast.makeText(mContext, "修改终端名称失败，"+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.modifying_terminal_name_failed)+","+Utils.getErrorReason(resultCode)+"！", Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.modify_device_name_id);
@@ -196,7 +196,7 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -228,11 +228,11 @@ public class ModifyDeviceNameActivity extends Activity implements OnClickListene
 		
 		if (newDeviceName.equals("")) {
 			resultFlag = false;
-			Toast.makeText(mContext, "请输入设备名称！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.please_enter_the_device_name), Toast.LENGTH_SHORT).show();
 		}
 		else if ((newDeviceName.length()<2) || (newDeviceName.length()>20)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "设备名称长度范围2~20！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext,getResources().getString(R.string.The_length_range_of_device_name), Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			mDeviceName = newDeviceName;

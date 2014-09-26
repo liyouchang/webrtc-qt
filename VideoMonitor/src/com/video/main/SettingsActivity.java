@@ -1,8 +1,5 @@
 package com.video.main;
 
-import com.video.R;
-import com.video.data.PreferData;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +7,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
+
+import com.video.R;
+import com.video.data.PreferData;
+import com.video.service.BackstageService;
 
 public class SettingsActivity extends Activity implements OnClickListener  {
 
@@ -89,12 +90,12 @@ public class SettingsActivity extends Activity implements OnClickListener  {
 			case R.id.ib_play_music_switch:
 				if (isPlayAlarmMusic) {
 					isPlayAlarmMusic = false;
-					MainActivity.isPlayAlarmMusic = false;
+					BackstageService.isPlayAlarmMusic = false;
 					preferData.writeData("PlayAlarmMusic", isPlayAlarmMusic);
 					playMusic.setBackgroundResource(R.drawable.icon_set_off);
 				} else {
 					isPlayAlarmMusic = true;
-					MainActivity.isPlayAlarmMusic = true;
+					BackstageService.isPlayAlarmMusic = true;
 					preferData.writeData("PlayAlarmMusic", isPlayAlarmMusic);
 					playMusic.setBackgroundResource(R.drawable.icon_set_on);
 				}

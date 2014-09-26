@@ -43,7 +43,6 @@ jint naInitialize(JNIEnv *env, jobject thiz, jstring jstrIceServers) {
 
     return 0;
 }
-
 jint naChangeIceServers(JNIEnv *env, jobject thiz, jstring jstrIceServers)
 {
     const char * iceservers = env->GetStringUTFChars(jstrIceServers, NULL);
@@ -118,8 +117,6 @@ jint naCloseTunnel(JNIEnv *env, jobject thiz, jstring peer_id) {
     return ret;
 }
 
-
-
 jint naStartMediaData(JNIEnv *env, jobject thiz, jstring peer_id,jint level) {
     LOGI("5. naAskMediaData()");
     if (client == NULL) {
@@ -137,6 +134,27 @@ jint naStopMediaData(JNIEnv *env, jobject thiz, jstring peer_id) {
     }
     const char * pid = env->GetStringUTFChars(peer_id, NULL);
     client->StopPeerMedia(pid);
+    env->ReleaseStringUTFChars(peer_id,pid);
+    return 0;
+}
+
+jint naStartTalk(JNIEnv *env, jobject thiz, jstring peer_id) {
+    LOGI("5. naStartTalk()");
+    if (client == NULL) {
+        return -1;
+    }
+    const char * pid = env->GetStringUTFChars(peer_id, NULL);
+    client->StartPeerTalk(pid);
+    env->ReleaseStringUTFChars(peer_id,pid);
+    return 0;
+}
+jint naStopTalk(JNIEnv *env, jobject thiz, jstring peer_id) {
+    LOGI("5. naStopTalk()");
+    if (client == NULL) {
+        return -1;
+    }
+    const char * pid = env->GetStringUTFChars(peer_id, NULL);
+    client->StopPeerTalk(pid);
     env->ReleaseStringUTFChars(peer_id,pid);
     return 0;
 }
@@ -232,6 +250,7 @@ jint naSetPlayPosition(JNIEnv *env, jobject thiz,jstring peerId,jint position){
     env->ReleaseStringUTFChars(peerId,pid);
     return returnValue;
 }
+
 //0-puase 100-continue
 jint naSetPlaySpeed(JNIEnv *env, jobject thiz,jstring peerId,jint speed){
     if (client == NULL){
@@ -329,14 +348,19 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
     if (pVm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
         return -1;
     }
-    LOGI(" loading labrary~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    LOG_F(INFO)<<" loading labrary";
     JNINativeMethod nm[] = {
         { "naInitialize", "(Ljava/lang/String;)I", (void*) naInitialize },
+        { "naChangeIceServers", "(Ljava/lang/String;)I", (void*) naChangeIceServers },
         { "naTerminate", "()I", (void*) naTerminate },
+
         { "naOpenTunnel", "(Ljava/lang/String;)I", (void*) naOpenTunnel },
         { "naCloseTunnel", "(Ljava/lang/String;)I", (void*) naCloseTunnel },
         { "naStartMediaData", "(Ljava/lang/String;I)I", (void*) naStartMediaData },
         { "naStopMediaData", "(Ljava/lang/String;)I", (void*) naStopMediaData },
+        { "naStartTalk", "(Ljava/lang/String;)I", (void*) naStartTalk },
+        { "naStopTalk", "(Ljava/lang/String;)I", (void*) naStopTalk },
+
         { "naMessageFromPeer", "(Ljava/lang/String;Ljava/lang/String;)I",
           (void*) naMessageFromPeer },
 
@@ -357,8 +381,7 @@ jint JNI_OnLoad(JavaVM * pVm, void * reserved) {
         { "naDisconnectLocalDevice", "(Ljava/lang/String;)I", (void*) naDisconnectLocalDevice },
         { "naStartLocalVideo", "(Ljava/lang/String;)I", (void*) naStartLocalVideo },
         { "naStopLocalVideo", "(Ljava/lang/String;)I", (void*) naStopLocalVideo },
-        { "naIsTunnelOpened", "(Ljava/lang/String;)Z", (void*) naIsTunnelOpened },
-        { "naChangeIceServers", "(Ljava/lang/String;)I", (void*) naChangeIceServers },
+        { "naIsTunnelOpened", "(Ljava/lang/String;)Z", (void*) naIsTunnelOpened }
 
     };
 

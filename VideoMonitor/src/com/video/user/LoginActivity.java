@@ -2,6 +2,7 @@ package com.video.user;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
@@ -28,9 +29,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.main.APSearchActivity;
 import com.video.main.MainActivity;
 import com.video.play.TunnelCommunication;
 import com.video.service.BackstageService;
@@ -92,7 +95,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	}
 	
 	private void initView() {
-		
+		mContext = LoginActivity.this;
 		//注册广播
 		localDeviceReceiver = new LocalDeviceReceiver();
 		IntentFilter filter = new IntentFilter();
@@ -164,7 +167,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 		mContext = LoginActivity.this;
 		ZmqCtrl.getInstance().init();
 		ZmqHandler.mHandler = handler;
-		
+
 		if (preferData == null) {
 			preferData = new PreferData(mContext);
 		}
@@ -195,8 +198,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_LOGINNING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在登录...");
-					mDialog.show();
+					if ((mDialog == null) || (!mDialog.isShowing())) {
+						mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_logging_in));
+						mDialog.show();
+					}
 					break;
 				case LOGIN_TIMEOUT:
 					loginTimes ++;
@@ -214,7 +219,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 							mDialog.dismiss();
 							mDialog = null;
 						}
-						Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
+						Toast.makeText(mContext, getResources().getString(R.string.Login_timeout), Toast.LENGTH_SHORT).show();
 					} else {
 						ZmqCtrl.getInstance().init();
 						String data = MainApplication.getInstance().generateLoginJson(userName, userPwd);
@@ -224,7 +229,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 					break;
 				case SEARCH_TIMEOUT:
 					if ((mDialog != null) && (mDialog.isShowing())) {
-						Toast.makeText(mContext, "搜索完毕，暂无本地设备", Toast.LENGTH_SHORT).show();
+						Toast.makeText(mContext, getResources().getString(R.string.no_local_device), Toast.LENGTH_SHORT).show();
 						mDialog.dismiss();
 					}
 					if (handler.hasMessages(SEARCH_TIMEOUT)) {
@@ -257,7 +262,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 							// 初始化IceServers
 							TunnelCommunication.getInstance().tunnelInitialize(MainApplication.getInstance().generateIceServersJson(Value.stun, Value.turn, userName, userPwd));
 						} else {
-							Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext,getResources().getString(R.string.login_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.login_id);
@@ -326,10 +331,10 @@ public class LoginActivity extends Activity implements OnClickListener {
 				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
-	
+
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
@@ -352,11 +357,13 @@ public class LoginActivity extends Activity implements OnClickListener {
 				et_pwd.setText("");
 				break;
 			case R.id.iv_login_demo:
-				ZmqCtrl.getInstance().init();
-				TunnelCommunication.getInstance().searchLocalDevice();
-				mDialog = Utils.createLoadingDialog(mContext, "正在搜索设备...");
-				mDialog.show();
-				sendHandlerMsg(SEARCH_TIMEOUT, Value.REQ_TIME_10S);
+//				ZmqCtrl.getInstance().init();
+//				TunnelCommunication.getInstance().searchLocalDevice();
+//				mDialog = Utils.createLoadingDialog(mContext, "正在搜索设备...");
+//				mDialog.show();
+//				sendHandlerMsg(SEARCH_TIMEOUT, Value.REQ_TIME_10S);
+				startActivity(new Intent(mContext, APSearchActivity.class));
+				overridePendingTransition(R.anim.up_in, R.anim.fragment_nochange);
 				break;
 		}
 	}
@@ -389,29 +396,29 @@ public class LoginActivity extends Activity implements OnClickListener {
 		
 		if (name.equals("")) {
 			resultFlag = false;
-			Toast.makeText(mContext, "请输入用户名！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.please_enter_the_user_name), Toast.LENGTH_SHORT).show();
 		}
 		else if (Utils.isChineseString(name)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_SHORT).show();
 		}
 		else if ((name.length()<3) || (name.length()>20)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "用户名长度范围3~20！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.the_length_range_of_user_name), Toast.LENGTH_SHORT).show();
 		} else {
 			resultFlag = true;
 			userName = name;
 			if (pwd.equals("")) {
 				resultFlag = false;
-				Toast.makeText(mContext, "请输入密码！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.please_enter_password), Toast.LENGTH_SHORT).show();
 			}
 			else if (Utils.isChineseString(pwd)) {
 				resultFlag = false;
-				Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_SHORT).show();
 			}
 			else if ((pwd.length()<6) || (pwd.length()>20)) {
 				resultFlag = false;
-				Toast.makeText(mContext, "密码长度范围6~20！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mContext, getResources().getString(R.string.password_length), Toast.LENGTH_SHORT).show();
 			} else {
 				resultFlag = true;
 				userPwd = pwd;
@@ -433,7 +440,7 @@ public class LoginActivity extends Activity implements OnClickListener {
 	 */
 	private void showLocalDeviceList() {
 		localDeviceDialog = new WiFiAlertDialog(mContext);
-		localDeviceDialog.setTitle("本地设备列表");
+		localDeviceDialog.setTitle(getResources().getString(R.string.local_device_list));
 		localDeviceAdapter = new LocalDeviceAdapter(mContext, localDeviceList);
 		localDeviceDialog.setAdapter(localDeviceAdapter);
 		localDeviceDialog.setOnItemClickListenerLocalDevice(localDeviceList);

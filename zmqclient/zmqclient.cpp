@@ -18,7 +18,7 @@
 #include "keapi/common_api.h"
 #endif//arm
 
-int kVersion = 70;
+int kVersion = 72;
 
 int main()
 {
@@ -107,7 +107,6 @@ int main()
     delete terminal;
 #endif //arm
     LOG(INFO)<<"quit main "<<mainRet;
-
     return mainRet;
 
 }

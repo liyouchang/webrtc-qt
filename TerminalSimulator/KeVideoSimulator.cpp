@@ -99,12 +99,12 @@ void KeVideoSimulator::OnMessage(talk_base::Message *msg)
 {
     switch (msg->message_id) {
     case MSG_ZMQ_RECV:{
-        LOG_F(INFO) << " start recv rep";
+//        LOG_F(INFO) << " start recv rep";
         zmq::message_t zmsg;
         repSocket->recv(&zmsg);
         std::string strMsg((char *)zmsg.data(),zmsg.size());
         Json::Reader reader;
-        LOG_F(INFO)<<"rep msg "<<strMsg;
+//        LOG_F(INFO)<<"rep msg "<<strMsg;
         Json::Value jmessage;
         if (!reader.parse(strMsg, jmessage)) {
             LOG(WARNING) << "Received unknown message. ";

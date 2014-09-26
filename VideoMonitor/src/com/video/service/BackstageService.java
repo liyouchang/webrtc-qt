@@ -9,15 +9,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.view.View;
+import android.widget.TextView;
 
 import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
+import com.video.main.MainActivity;
+import com.video.main.MsgFragment;
+import com.video.main.PopupVideoActivity;
 import com.video.play.TunnelCommunication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqThread;
@@ -32,11 +39,20 @@ public class BackstageService extends Service {
 	private PreferData preferData = null;
 	private String userName = null;
 	
+	// 报警消息
+	public static TextView tv_alarm_number;
+	public static boolean isPlayAlarmMusic = true;
+	public static int unreadAlarmCount = 0;
+	
 	public static final String TUNNEL_REQUEST_ACTION = "BackstageService.TunnelRequest"; // 通道是否被打开
 	public static final String BACKSTAGE_MESSAGE_ACTION = "BackstageService.backstage_message"; // 接收报警消息
 	public static final String SEARCH_LOCAL_DEVICE_ACTION = "BackstageService.search_local_device"; // 搜索本地设备
 	public static final String CHANGE_DEVICE_LIST_ACTION = "BackstageService.change_device_list"; // 更新设备列表状态
 	public static final String TERM_ONLINE_STATE_ACTION = "BackstageService.term_online_state"; // 终端上下线状态
+	
+	public static final int ALARM_TYPE_PUSH = 1;
+	public static final int ALARM_TYPE_UNREAD = 2;
+	public static final int ALARM_TYPE_DOOR = 3;
 	
 	@Override
 	public void onCreate() {
@@ -55,6 +71,7 @@ public class BackstageService extends Service {
 		//注册广播
 		IntentFilter mFilter = new IntentFilter();
 		mFilter.addAction(TUNNEL_REQUEST_ACTION);
+		mFilter.addAction(BACKSTAGE_MESSAGE_ACTION);
 		mFilter.addAction(TERM_ONLINE_STATE_ACTION);
         mFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         registerReceiver(serviceReceiver, mFilter);
@@ -169,7 +186,7 @@ public class BackstageService extends Service {
 						timeTick ++;
 						
 						// 联机操作
-						if ((timeTick % 10) == 0) {
+						if ((timeTick % 20) == 0) {
 							linkDevice();
 						}
 						
@@ -221,7 +238,7 @@ public class BackstageService extends Service {
 						} else {
 							// 发送超时正在联机延时消息
 							if (!handler.hasMessages(LINK_TIMEOUT)) {
-								MainApplication.getInstance().sendHandlerMsg(handler, LINK_TIMEOUT, i, 0, peerId, 3000);
+								MainApplication.getInstance().sendHandlerMsg(handler, LINK_TIMEOUT, i, 0, peerId, 5000);
 							}
 						}
 					}
@@ -231,6 +248,79 @@ public class BackstageService extends Service {
 					continue;
 				}
 			}
+		}
+	}
+	
+	/**
+	 * 设置显示报警消息的数量
+	 */
+	public void alarmMsgComing(int alarmCount, int alarmType, String alarmMac) {
+		if (preferData == null) {
+			preferData = new PreferData(BackstageService.this);
+		}
+		preferData.writeData("AlarmCount", alarmCount);
+		// 更新报警显示
+		if (tv_alarm_number != null) {
+			if ((alarmCount > 0) && (alarmCount < 100)) {
+				tv_alarm_number.setVisibility(View.VISIBLE);
+				tv_alarm_number.setText(""+alarmCount);
+			} 
+			else if (alarmCount >= 100) {
+				tv_alarm_number.setVisibility(View.VISIBLE);
+				tv_alarm_number.setText("99+");
+			} else {
+				tv_alarm_number.setVisibility(View.INVISIBLE);
+			}
+		}
+		
+		int alarmMusicResid = R.raw.alarm;
+		if (alarmType == ALARM_TYPE_UNREAD) {
+			return ;
+		}
+		else if ((alarmMac == null) || (alarmMac.equals(""))) {
+			return ;
+		}
+		else if (alarmType == ALARM_TYPE_DOOR) {
+			if (Value.isPlayerActivityDisplay) {
+				return ;
+			}
+			alarmMusicResid = R.raw.dingdong;
+			Intent intentPopup = new Intent(BackstageService.this, PopupVideoActivity.class);
+			intentPopup.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intentPopup.putExtra("deviceID", alarmMac);
+			startActivity(intentPopup);
+		}
+		
+		// 播放报警语音
+		try {
+			if ((!Value.isPlayMp3) && (isPlayAlarmMusic)) {
+				Value.isPlayMp3 = true;
+				MediaPlayer mediaPlayer = null;
+				if (mediaPlayer == null) {
+					mediaPlayer = MediaPlayer.create(MainApplication.getInstance(), alarmMusicResid);
+					mediaPlayer.stop();
+				}
+				sendHandlerMsg(REFRESH_ALARM_VALUE, mediaPlayer.getDuration());
+				mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+					@Override
+					public void onCompletion(MediaPlayer mp) {
+						if (mp != null) {
+							mp.release();
+							mp = null;
+						}
+						Value.isPlayMp3 = false;
+					}
+				});
+				try {
+					mediaPlayer.prepare();
+					mediaPlayer.start();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("MyDebug: MediaPlayer.create()异常！");
+			e.printStackTrace();
 		}
 	}
 	
@@ -248,6 +338,7 @@ public class BackstageService extends Service {
 	private final static int LOGIN_TIMEOUT = 1;
 	private final int LOGIN_AGAIN = 2;
 	private final int LINK_TIMEOUT = 3;
+	private final int REFRESH_ALARM_VALUE = 4;
 	
 	private Handler handler = new Handler() {
 		@Override
@@ -293,6 +384,13 @@ public class BackstageService extends Service {
 						handler.removeMessages(LINK_TIMEOUT);
 					}
 					sendChangeDeviceListBroadcast(false);
+					break;
+				// 刷新报警数据
+				case REFRESH_ALARM_VALUE:
+					Value.isPlayMp3 = false;
+					if (preferData.isExist("PlayAlarmMusic")) {
+			        	isPlayAlarmMusic = preferData.readBoolean("PlayAlarmMusic");
+					}
 					break;
 			}
 		}
@@ -372,6 +470,20 @@ public class BackstageService extends Service {
 				}
 				MainApplication.getInstance().xmlDevice.updateItemState(mac, isOnline, dealerName);
 				sendChangeDeviceListBroadcast(true);
+			}
+			else if (action.equals(BACKSTAGE_MESSAGE_ACTION)) {
+				// 报警消息处理
+				int alarmCount = intent.getIntExtra("alarmCount", 0);
+				int alarmType = intent.getIntExtra("alarmType", ALARM_TYPE_UNREAD);
+				String alarmMac = intent.getStringExtra("alarmMac");
+				alarmMsgComing(alarmCount, alarmType, alarmMac);
+				
+				if ((MainActivity.isCurrentTab(MainActivity.TAB_ONE)) || (MainActivity.isCurrentTab(MainActivity.TAB_TWO)) || 
+					(MainActivity.isCurrentTab(MainActivity.TAB_THREE)) || (MainActivity.isCurrentTab(MainActivity.TAB_FOUR))) {
+					Intent updateIntent = new Intent();
+					updateIntent.setAction(MsgFragment.UPDATE_MESSAGE_ACTION);
+					MainApplication.getInstance().sendBroadcast(updateIntent);
+				}
 			}
 		}
 	};

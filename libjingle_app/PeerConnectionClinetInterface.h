@@ -22,9 +22,6 @@ protected:
     virtual ~PeerConnectionClientInterface() {}
 };
 
-
-
-
 }
 
 #endif // PEERCONNECTIONCLINETINTERFACE_H

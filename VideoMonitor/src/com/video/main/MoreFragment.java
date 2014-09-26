@@ -80,18 +80,18 @@ public class MoreFragment extends Fragment implements OnClickListener {
 	/**
 	 * 显示操作的提示
 	 */
-	private void showHandleDialog() {
+	public void showHandleDialog() {
 		final OkCancelDialog myDialog=new OkCancelDialog(mActivity);
-		myDialog.setTitle("温馨提示");
-		myDialog.setMessage("确认退出当前账号的登录？");
-		myDialog.setPositiveButton("确定", new OnClickListener() {
+		myDialog.setTitle(getResources().getString(R.string.tips));
+		myDialog.setMessage(getResources().getString(R.string.exit_from_the_current_account_logining));
+		myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
 				exitActivityandService();
 			}
 		});
-		myDialog.setNegativeButton("取消", new OnClickListener() {
+		myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
@@ -152,10 +152,12 @@ public class MoreFragment extends Fragment implements OnClickListener {
 				break;
 			case R.id.btn_logout:
 				showHandleDialog();
+//				Intent intentPopup = new Intent(mActivity, PopupVideoActivity.class);
+//				intentPopup.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//				startActivity(intentPopup);
 				break;
 		}
 	}
-
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		// TODO Auto-generated method stub

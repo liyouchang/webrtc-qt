@@ -15,6 +15,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/msg_time_item_bg"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:paddingLeft="10dp"
         android:paddingRight="10dp"

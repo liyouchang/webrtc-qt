@@ -173,7 +173,7 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 		infoView = getLayoutInflater().inflate(R.layout.terminal_player_info, null);
 		infoPopupWindow = new PopupWindow(infoView, screenWidth, bottomHeight, false);
 		tv_info = (TextView) infoView.findViewById(R.id.tv_info_content);
-		tv_info.setText("正在播放");
+		tv_info.setText(getResources().getString(R.string.playing));
 		
 		// 处理显示
 		seekBar.setMax((int)fileInfo.fileSize);
@@ -204,7 +204,7 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 			TunnelCommunication.getInstance().playRemoteFile(dealerName, fileInfo.fileName);
 			sendHandlerMsg(REQUEST_TIME_OUT, Value.REQ_TIME_15S);
 			if ((mDialog == null) || (!mDialog.isShowing())) {
-				mDialog = createLoadingDialog("正在请求远程录像...");
+				mDialog = createLoadingDialog(getResources().getString(R.string.is_requesting_remote_video));
 				mDialog.show();
 			}
 		}
@@ -262,11 +262,11 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 		}
 		
 		if (index < 0) {
-			toastNotify(mContext, "前面没有了", Toast.LENGTH_SHORT);
+			toastNotify(mContext, getResources().getString(R.string.no_pictures_front), Toast.LENGTH_SHORT);
 			return 1;
 		}
 		else if (index >= fileSize) {
-			toastNotify(mContext, "后面没有了", Toast.LENGTH_SHORT);
+			toastNotify(mContext, getResources().getString(R.string.no_pictures_behind), Toast.LENGTH_SHORT);
 			return 2;
 		} else {
 			closePlayer();
@@ -277,9 +277,9 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 			sendHandlerMsg(REQUEST_TIME_OUT, Value.REQ_TIME_15S);
 			if ((mDialog == null) || (!mDialog.isShowing())) {
 				if (isFrontFile) {
-					mDialog = createLoadingDialog("正在请求前一个远程录像...");
+					mDialog = createLoadingDialog(getResources().getString(R.string.requesting_frount_video));
 				} else {
-					mDialog = createLoadingDialog("正在请求后一个远程录像...");
+					mDialog = createLoadingDialog(getResources().getString(R.string.requesting_back_video));
 				}
 				mDialog.show();
 			}
@@ -293,7 +293,7 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 	private void playTerminalVideoFile() {
 		TunnelCommunication.getInstance().setPlaySpeed(dealerName, CONTINUE_PLAY_REMOTE_FILE);
 		button_play_pause.setImageResource(R.drawable.local_player_pause);
-		tv_info.setText("正在播放");
+		tv_info.setText(getResources().getString(R.string.playing));
 	}
 	
 	/**
@@ -302,7 +302,7 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 	private void pauseTerminalVideoFile() {
 		TunnelCommunication.getInstance().setPlaySpeed(dealerName, PAUSE_PLAY_REMOTE_FILE);
 		button_play_pause.setImageResource(R.drawable.local_player_play);
-		tv_info.setText("已暂停");
+		tv_info.setText(getResources().getString(R.string.paused));
 	}
 	
 	@Override
@@ -365,7 +365,7 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 						mDialog.dismiss();
 						mDialog = null;
 					}
-					toastNotify(mContext, "请求远程录像超时，请重试！", Toast.LENGTH_SHORT);
+					toastNotify(mContext, getResources().getString(R.string.request_remote_video_timeout), Toast.LENGTH_SHORT);
 					RemoteFilePlayerActivity.this.finish();
 					break;
 				// 更新播放进度条
@@ -674,7 +674,7 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 						break;
 					case 2: // 请求录像文件错误
 					case 5: // 返回错误的消息
-						Toast.makeText(mContext, "请求远程录像错误，请重试！", Toast.LENGTH_SHORT).show();
+						Toast.makeText(mContext, getResources().getString(R.string.request_remote_recording_error), Toast.LENGTH_SHORT).show();
 						RemoteFilePlayerActivity.this.finish();
 						break;
 				}
@@ -689,7 +689,7 @@ public class RemoteFilePlayerActivity  extends Activity implements OnClickListen
 					case 0: // 通道打开
 						break;
 					case 1: // 通道关闭
-						toastNotify(mContext, "对不起，连接意外中断！", Toast.LENGTH_SHORT);
+						toastNotify(mContext, getResources().getString(R.string.connection_is_interrupted), Toast.LENGTH_SHORT);
 						RemoteFilePlayerActivity.this.finish();
 						break;
 				}

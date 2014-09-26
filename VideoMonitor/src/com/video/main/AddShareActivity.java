@@ -161,7 +161,7 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
 		}
-		userShareExplain.setText("【"+mDeviceName+"】终端已分享给以下用户：");
+		userShareExplain.setText("【"+mDeviceName+"】"+getResources().getString(R.string.the_terminal_has_been_shared));
 		
 		reqMACShareListEvent();
 	}
@@ -225,13 +225,13 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 			super.handleMessage(msg);
 			switch (msg.what) {
 				case IS_ADDING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在分享...");
+					mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_sharing));
 					mDialog.show();
 					break;
 				case ADD_TIMEOUT:
 					if (mDialog != null)
 						mDialog.dismiss();
-					Toast.makeText(mContext, "添加终端分享失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.adding_terminal_sharing_failed), Toast.LENGTH_SHORT).show();
 					if (handler.hasMessages(ADD_TIMEOUT)) {
 						handler.removeMessages(ADD_TIMEOUT);
 					}
@@ -240,16 +240,16 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 					if (handler.hasMessages(R.id.requst_device_share_user_id)) {
 						handler.removeMessages(R.id.requst_device_share_user_id);
 					}
-					userShareExplain.setText("请求指定终端分享用户列表超时，请重试！");
+					userShareExplain.setText(getResources().getString(R.string.requesting_specified_terminal));
 					break;
 				case IS_DELETING:
-					mDialog = Utils.createLoadingDialog(mContext, "正在取消终端分享...");
+					mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_canceling_terminal_share));
 					mDialog.show();
 					break;
 				case DELETE_TIMEOUT:
 					if (mDialog != null)
 						mDialog.dismiss();
-					Toast.makeText(mContext, "取消终端分享失败，网络超时！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext, getResources().getString(R.string.canceling_terminal_share_failed), Toast.LENGTH_SHORT).show();
 					break;
 				//添加终端分享
 				case R.id.add_device_share_id:
@@ -259,11 +259,11 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 							mDialog.dismiss();
 						int resultCode = msg.arg1;
 						if (resultCode == 0) {
-							Toast.makeText(mContext, "添加终端分享成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.adding_terminal_share_success), Toast.LENGTH_SHORT).show();
 							// 重新请求分享设备的用户名列表
 							reqMACShareListEvent();
 						} else {
-							Toast.makeText(mContext, "添加终端分享失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.failed_to_add_terminal_share)+","+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.add_device_share_id);
@@ -277,14 +277,14 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 						if (resultCode == 0) {
 							userList = (ArrayList<String>) msg.obj;
 							if (userList.size() == 0) {
-								userShareExplain.setText("【"+mDeviceName+"】还未分享给任何人！");
+								userShareExplain.setText("【"+mDeviceName+"】"+getResources().getString(R.string.not_yet_shared));
 							} else {
-								userShareExplain.setText("【"+mDeviceName+"】终端已分享给以下用户：");
+								userShareExplain.setText("【"+mDeviceName+"】"+getResources().getString(R.string.Terminal_has_been_shared));
 								userAdapter = new ShareUserAdapter(mContext, userList);
 								userListView.setAdapter(userAdapter);
 							}
 						} else {
-							userShareExplain.setText("请求指定终端分享用户列表失败，"+Utils.getErrorReason(resultCode));
+							userShareExplain.setText(getResources().getString(R.string.requesting_specified_terminal_share_user_list_failed)+","+Utils.getErrorReason(resultCode));
 						}
 					} else {
 						handler.removeMessages(R.id.requst_device_share_user_id);
@@ -302,12 +302,12 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 						if (resultCode == 0) {
 							userList.remove(userListPosition);
 							userAdapter.notifyDataSetChanged();
-							Toast.makeText(mContext, "取消终端分享成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.canceling_terminal_share_success), Toast.LENGTH_SHORT).show();
 							if (userList.size() == 0) {
-								userShareExplain.setText("【"+mDeviceName+"】还未分享给任何人！");
+								userShareExplain.setText("【"+mDeviceName+"】"+getResources().getString(R.string.not_yet_shared));
 							}
 						} else {
-							Toast.makeText(mContext, "取消终端分享失败，"+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.share_failed)+","+Utils.getErrorReason(resultCode), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_device_share_id);
@@ -346,7 +346,7 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 				sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 			}
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -435,18 +435,18 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 		
 		if (shareName.equals("")) {
 			resultFlag = false;
-			Toast.makeText(mContext, "请输入用户名！", Toast.LENGTH_LONG).show();
+			Toast.makeText(mContext, getResources().getString(R.string.please_enter_the_user_name), Toast.LENGTH_LONG).show();
 		}
 		else if (Utils.isChineseString(shareName)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "不支持中文！", Toast.LENGTH_LONG).show();
+			Toast.makeText(mContext, getResources().getString(R.string.not_support_Chinese), Toast.LENGTH_LONG).show();
 		}
 		else if ((shareName.length()<3) || (shareName.length()>20)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "用户名长度范围3~20！", Toast.LENGTH_LONG).show();
+			Toast.makeText(mContext, getResources().getString(R.string.the_length_range_of_user_name), Toast.LENGTH_LONG).show();
 		} else if (userName.equals(shareName)) {
 			resultFlag = false;
-			Toast.makeText(mContext, "不能将设备分享给自己！", Toast.LENGTH_LONG).show();
+			Toast.makeText(mContext,getResources().getString(R.string.device_not_be_shared_to_itself), Toast.LENGTH_LONG).show();
 		} else {
 			resultFlag = true;
 		}
@@ -510,7 +510,7 @@ public class AddShareActivity extends Activity implements OnClickListener, OnPag
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
 		
 		List<String> item_list = new ArrayList<String>();
-		item_list.add("取消分享该用户");
+		item_list.add(getResources().getString(R.string.cancel_sharing_the_user));
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mContext, item_list);
 		pop_listView.setAdapter(popAdapter);
 		

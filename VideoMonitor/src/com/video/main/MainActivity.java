@@ -5,12 +5,8 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -33,6 +29,7 @@ import com.video.R;
 import com.video.data.PreferData;
 import com.video.data.Value;
 import com.video.play.TunnelCommunication;
+import com.video.service.BackstageService;
 import com.video.service.MainApplication;
 import com.video.socket.ZmqCtrl;
 import com.video.socket.ZmqHandler;
@@ -58,7 +55,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
     public static final int TAB_THREE = 2;
     public static final int TAB_FOUR = 3;
     
-    private static TextView tab_three_number;
     private RelativeLayout tab_one_layout;
     private RelativeLayout tab_two_layout;
     private RelativeLayout tab_three_layout;
@@ -70,7 +66,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	private boolean isAutoLogin = false;
 	private boolean isActivityShow = false;
 	private boolean isStartupThreadRun = false;
-	public static boolean isPlayAlarmMusic = true;
 	
 	private static Dialog mDialog = null;
 	private int loginTimes = 0;
@@ -79,21 +74,12 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	private final static int LOGIN_TIMEOUT = 2;
 	private final int LOGIN_AGAIN = 3;
 	
-	private MainReceiver mainReceiver = null;
-	public static final String UNREAD_ALARM_COUNT_ACTION = "MainActivity.unread_alarm_count_action";
-	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = MainActivity.this;
         preferData = new PreferData(mContext);
         ZmqCtrl.getInstance().init();
-        
-        // 注册广播
-        mainReceiver = new MainReceiver();
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(UNREAD_ALARM_COUNT_ACTION);
-		registerReceiver(mainReceiver, filter);
         
         if (!Value.isLoginSuccess) {
         	setFullScreen();
@@ -122,6 +108,10 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 			    		startActivity(new Intent(mContext, HelpActivity.class));
 			    		MainActivity.this.finish();
 			    	} else {
+			    		// 手机没有SD卡退出应用
+			    		if (!MainApplication.isSDExist) {
+			    			Toast.makeText(mContext, getResources().getString(R.string.use_it_will_cause_abnormality), Toast.LENGTH_SHORT).show();
+			    		}
 						if (isAutoLogin) {
 							// 自动登录，不进入登录界面
 							if (Utils.isNetworkAvailable(mContext)) {
@@ -137,7 +127,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 								sendHandlerMsg(LOGIN_TIMEOUT, Value.REQ_TIME_6S);
 							} else {
 								// 无可用网络
-								Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+								Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 								startActivity(new Intent(mContext, LoginActivity.class));
 								MainActivity.this.finish();
 							}
@@ -166,7 +156,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	}
 
 	private void initView() {
-		tab_three_number = (TextView) this.findViewById(R.id.tab_three_number);
+		BackstageService.tv_alarm_number = (TextView) this.findViewById(R.id.tab_three_number);
     	tab_one_layout = (RelativeLayout) this.findViewById(R.id.tab_one_layout);
     	tab_two_layout = (RelativeLayout) this.findViewById(R.id.tab_two_layout);
     	tab_three_layout = (RelativeLayout) this.findViewById(R.id.tab_three_layout);
@@ -180,15 +170,23 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
         Utils.screenHeight = dm.heightPixels;
         
         if (preferData.isExist("PlayAlarmMusic")) {
-			isPlayAlarmMusic = preferData.readBoolean("PlayAlarmMusic");
+        	BackstageService.isPlayAlarmMusic = preferData.readBoolean("PlayAlarmMusic");
 		}
+        if (preferData.isExist("AlarmCount")) {
+        	BackstageService.unreadAlarmCount = preferData.readInt("AlarmCount");
+		}
+        Intent intent = new Intent();
+		intent.putExtra("alarmCount", BackstageService.unreadAlarmCount);
+		intent.putExtra("alarmType", BackstageService.ALARM_TYPE_UNREAD);
+		intent.setAction(BackstageService.BACKSTAGE_MESSAGE_ACTION);
+		MainApplication.getInstance().sendBroadcast(intent);
+		
         mFragmentList.clear();
         mFragmentList.add(new OwnFragment());
         mFragmentList.add(new LocalFragment());
         mFragmentList.add(new MsgFragment());
         mFragmentList.add(new MoreFragment());
         setCurrentFragment(lastFragment);
-        showAlarmMsgCount(MainApplication.getInstance().unreadAlarmCount);
 	}
 	
 	/**
@@ -282,65 +280,6 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 		return false;
 	}
 	
-	/**
-	 * 设置显示报警消息的数量
-	 */
-	public static void showAlarmMsgCount(int alarmCount) {
-		if (tab_three_number != null) {
-			if ((alarmCount > 0) && (alarmCount < 100)) {
-				tab_three_number.setVisibility(View.VISIBLE);
-				tab_three_number.setText(""+alarmCount);
-			} 
-			else if (alarmCount >= 100) {
-				tab_three_number.setVisibility(View.VISIBLE);
-				tab_three_number.setText("99+");
-			} else {
-				tab_three_number.setVisibility(View.INVISIBLE);
-			}
-		}
-	}
-	
-	public static Handler mainHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			// TODO Auto-generated method stub
-			super.handleMessage(msg);
-			switch (msg.what) {
-				case 0:
-					showAlarmMsgCount(msg.arg1);
-					try {
-						//播放报警语音
-						if (!Value.isPlayMp3 && isPlayAlarmMusic) {
-							Value.isPlayMp3 = true;
-							MediaPlayer mediaPlayer = null;
-							if (mediaPlayer == null) {
-								mediaPlayer = MediaPlayer.create(MainApplication.getInstance(), R.raw.alarm);
-								mediaPlayer.stop();
-							}
-							mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-								@Override
-								public void onCompletion(MediaPlayer mp) {
-									mp.release();
-									mp = null;
-									Value.isPlayMp3 = false;
-								}
-							});
-							try {
-								mediaPlayer.prepare();
-								mediaPlayer.start();
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						}
-					} catch (Exception e) {
-						System.out.println("MyDebug: MediaPlayer.create()异常！");
-						e.printStackTrace();
-					}
-					break;
-			}
-		}
-	};
-	
 	private Handler handler = new Handler() {
 		@Override
 		public void handleMessage(Message msg) {
@@ -350,7 +289,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 				//正在登录
 				case IS_LOGINNING:
 					if (isActivityShow) {
-						mDialog = Utils.createLoadingDialog(mContext, "正在登录...");
+						mDialog = Utils.createLoadingDialog(mContext, getResources().getString(R.string.is_logging_in));
 						mDialog.show();
 					}
 					break;
@@ -372,7 +311,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 							mDialog.dismiss();
 							mDialog = null;
 						}
-						Toast.makeText(mContext, "登录超时，请重试！", Toast.LENGTH_SHORT).show();
+						Toast.makeText(mContext, getResources().getString(R.string.Login_timeout), Toast.LENGTH_SHORT).show();
 						startActivity(new Intent(mContext, LoginActivity.class));
 		    			MainActivity.this.finish();
 					} else {
@@ -414,7 +353,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 						    // 初始化IceServers
 							TunnelCommunication.getInstance().tunnelInitialize(MainApplication.getInstance().generateIceServersJson(Value.stun, Value.turn, userName, userPwd));
 							} else {
-								Toast.makeText(mContext, "登录失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+								Toast.makeText(mContext, getResources().getString(R.string.login_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 								startActivity(new Intent(mContext, LoginActivity.class));
 				    			MainActivity.this.finish();
 							}
@@ -452,9 +391,9 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	 */
 	public void exitVideoMonitorApp() {
 		final OkCancelDialog myDialog=new OkCancelDialog(mContext);
-		myDialog.setTitle("温馨提示");
-		myDialog.setMessage("确认退出视界通？");
-		myDialog.setPositiveButton("确认", new OnClickListener() {
+		myDialog.setTitle(getResources().getString(R.string.tips));
+		myDialog.setMessage(getResources().getString(R.string.exit_from_the_platform));
+		myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
@@ -462,7 +401,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 				finish();
 			}
 		});
-		myDialog.setNegativeButton("取消", new OnClickListener() {
+		myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
@@ -495,7 +434,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(Menu.NONE, 1, 1, "退出视界通").setIcon(R.drawable.icon_close);
+		menu.add(Menu.NONE, 1, 1, getResources().getString(R.string.exit_from)).setIcon(R.drawable.icon_close);
 		return true;
 	}
 
@@ -528,27 +467,7 @@ public class MainActivity extends FragmentActivity implements OnClickListener {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
-		if (mainReceiver != null) {
-			unregisterReceiver(mainReceiver);
-		}
 		Value.isManulLogout = false;
-	}
-
-	public class MainReceiver extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// TODO Auto-generated method stub
-			String action = intent.getAction();
-			// 更新未读报警消息的显示
-			if (action.equals(UNREAD_ALARM_COUNT_ACTION)) {
-				showAlarmMsgCount(MainApplication.getInstance().unreadAlarmCount);
-				if (preferData == null) {
-					preferData = new PreferData(mContext);
-				}
-				preferData.writeData("AlarmCount", MainApplication.getInstance().unreadAlarmCount);
-			}
-		}
 	}
 }
 

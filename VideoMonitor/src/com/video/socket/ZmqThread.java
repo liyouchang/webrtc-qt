@@ -1,20 +1,19 @@
 package com.video.socket;
 
 import java.util.HashMap;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.zeromq.ZMQ;
-
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
-
 import com.video.R;
 import com.video.data.Value;
 import com.video.play.TunnelCommunication;
 
+@SuppressLint("HandlerLeak")
 public class ZmqThread extends Thread {
 
 	private ZMQ.Socket zmq_socket = null;
@@ -27,10 +26,8 @@ public class ZmqThread extends Thread {
 	/**
 	 * ZMQ发送数据
 	 * 
-	 * @param stage
-	 *            服务器名称
-	 * @param data
-	 *            要发送的数据
+	 * @param stage 服务器名称
+	 * @param data 要发送的数据
 	 * @return true:发送成功 false:发送失败
 	 */
 	private boolean sendZmqData(String stage, String data) {
@@ -39,6 +36,9 @@ public class ZmqThread extends Thread {
 		byte[] requestContentByteArray = requestContentString.getBytes();
 		requestContentByteArray[requestContentByteArray.length - 1] = 0;
 
+		if (zmq_socket == null) {
+			return false;
+		}
 		result = zmq_socket.send(stage, ZMQ.SNDMORE);
 		result = zmq_socket.send(requestContentByteArray, 0);
 
@@ -47,7 +47,6 @@ public class ZmqThread extends Thread {
 
 	/**
 	 * ZMQ接收数据
-	 * 
 	 * @return null:没有数据否则接收到数据
 	 */
 	private String recvZmqData() {
@@ -100,7 +99,6 @@ public class ZmqThread extends Thread {
 	@Override
 	public void run() {
 		zmq_socket.connect(Value.BackstageIPPort);
-
 		Looper.prepare();
 		zmqThreadHandler = new Handler() {
 			@SuppressWarnings("unchecked")

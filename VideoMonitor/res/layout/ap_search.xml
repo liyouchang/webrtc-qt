@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/page_bg_grey"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/rl_search_ap"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/title_height_size"
+        android:background="@color/title_bg_black"
+        android:orientation="horizontal" >
+
+        <ImageButton
+            android:id="@+id/ib_search_ap_back"
+            android:layout_width="60dp"
+            android:layout_height="@dimen/title_height_size"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/title_more_xml"
+            android:contentDescription="@null"
+            android:gravity="center_vertical|center_horizontal"
+            android:src="@drawable/btn_title_back_selected" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/search_ap"
+            android:textColor="@color/orange"
+            android:textSize="@dimen/title_text_size" />
+    </RelativeLayout>
+    
+    <TextView
+        android:id="@+id/tv_ap_explain_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20.0dip"
+        android:layout_marginRight="20.0dip"
+        android:layout_marginTop="10.0dip"
+        android:text="@string/ap_explain_title"
+        android:textColor="@color/light_black"
+        android:textSize="20.0sp" />
+    
+    <TextView
+        android:id="@+id/tv_ap_explain_step"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20.0dip"
+        android:layout_marginRight="20.0dip"
+        android:layout_marginTop="5.0dip"
+        android:text="@string/ap_explain_step"
+        android:textColor="@color/light_black"
+        android:textSize="16.0sp" />
+    
+    <Button
+        android:id="@+id/btn_search"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/button_style"
+        android:text="@string/search"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+
+</LinearLayout>

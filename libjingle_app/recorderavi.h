@@ -32,7 +32,7 @@ typedef struct {
 }AVIINDEXENTRY;
 
 
-class RecorderAvi:public RecordSaverInterface
+class RecorderAvi : public RecordSaverInterface
 {
 public:
     RecorderAvi(const std::string &peerId, int frameRate, int frameType);

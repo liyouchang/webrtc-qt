@@ -331,8 +331,8 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 							//请求终端列表成功
 							Value.isNeedReqTermListFlag = false;
 							if (mPullToRefreshHeaderView.getHeaderState() == PullToRefreshView.REFRESHING) {
-								own_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
-								own_refresh_terminal = "终端: "+Build.MODEL;
+								own_refresh_time = getResources().getString(R.string.last_Updated_on)+":"+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
+								own_refresh_terminal = getResources().getString(R.string.terminal)+":"+Build.MODEL;
 								preferData.writeData("ownRefreshTime", own_refresh_time);
 								preferData.writeData("ownRefreshTerminal", own_refresh_terminal);
 								mPullToRefreshHeaderView.onHeaderRefreshComplete(own_refresh_time, own_refresh_terminal);
@@ -413,14 +413,14 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 			if (!isPullToRefresh) {
 //				sendHandlerMsg(deviceHandler, IS_REQUESTING, "正在请求终端列表...");
 			}
-			sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT, "请求终端列表失败，网络超时！", Value.REQ_TIME_10S);
+			sendHandlerMsg(deviceHandler, REQUEST_TIMEOUT,getResources().getString(R.string.requesting_terminal_list_failed), Value.REQ_TIME_10S);
 			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		} else {
 			if (Utils.isNetworkAvailable(mActivity)) {
 				final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
-				myDialog.setTitle("温馨提示");
-				myDialog.setMessage("网络不稳定，请重新登录！");
-				myDialog.setPositiveButton("确认", new OnClickListener() {
+				myDialog.setTitle(getResources().getString(R.string.tips));
+				myDialog.setMessage(getResources().getString(R.string.network_instability));
+				myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						myDialog.dismiss();
@@ -436,7 +436,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 					}
 				});
 			} else {
-				Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mActivity, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -496,9 +496,9 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 									mActivity.startActivity(intent);
 								} else {
 									final OkCancelDialog myDialog=new OkCancelDialog(mActivity);
-									myDialog.setTitle("温馨提示");
-									myDialog.setMessage("当前网络不是WiFi，继续观看视频？");
-									myDialog.setPositiveButton("确认", new OnClickListener() {
+									myDialog.setTitle("");
+									myDialog.setMessage(getResources().getString(R.string.the_current_network_is_not_WiFi));
+									myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 										@Override
 										public void onClick(View v) {
 											myDialog.dismiss();
@@ -511,7 +511,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 											mActivity.startActivity(intent);
 										}
 									});
-									myDialog.setNegativeButton("取消", new OnClickListener() {
+									myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 										@Override
 										public void onClick(View v) {
 											myDialog.dismiss();
@@ -520,13 +520,13 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 								}
 							}
 						} else {
-							Toast.makeText(mActivity, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, getResources().getString(R.string.not_online), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
-						myDialog.setTitle("温馨提示");
-						myDialog.setMessage("网络不稳定，请重新登录！");
-						myDialog.setPositiveButton("确认", new OnClickListener() {
+						myDialog.setTitle(getResources().getString(R.string.tips));
+						myDialog.setMessage(getResources().getString(R.string.no_available_network_connection));
+						myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 							@Override
 							public void onClick(View v) {
 								myDialog.dismiss();
@@ -543,10 +543,10 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 						});
 					}
 				} else {
-					Toast.makeText(mActivity, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mActivity,getResources().getString(R.string.not_online), Toast.LENGTH_SHORT).show();
 				}
 			} else {
-				Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mActivity, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -573,8 +573,8 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
 		
 		List<String> item_list = new ArrayList<String>();
-		item_list.add("设备管理");
-		item_list.add("远程录像");
+		item_list.add(getResources().getString(R.string.device_Management));
+		item_list.add(getResources().getString(R.string.remote_video));
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mActivity, item_list);
 		pop_listView.setAdapter(popAdapter);
 		
@@ -615,7 +615,7 @@ public class OwnFragment extends Fragment implements OnClickListener, OnHeaderRe
 							intent.putExtra("dealerName", dealerName);
 							startActivity(intent);
 						} else {
-							Toast.makeText(mActivity, "未联机，无法请求视频！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, getResources().getString(R.string.not_online), Toast.LENGTH_SHORT).show();
 						}
 						break;
 				}

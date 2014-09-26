@@ -123,7 +123,7 @@ public:
         return true;
     }
 
-    void send(zmq::socket_t & socket) {
+    void send(zmq::socket_t & socket,bool nowait = false) {
         for (size_t part_nbr = 0; part_nbr < m_part_data.size(); part_nbr++) {
             zmq::message_t message;
             ustring data = m_part_data[part_nbr];
@@ -138,7 +138,11 @@ public:
                 memcpy(message.data(), data.c_str(), data.size());
             }
             try {
-                socket.send(message, part_nbr < m_part_data.size() - 1 ? ZMQ_SNDMORE : 0);
+                if(nowait){
+                    socket.send(message, part_nbr < m_part_data.size() - 1 ? ZMQ_SNDMORE|ZMQ_DONTWAIT : ZMQ_DONTWAIT);
+                }else{
+                    socket.send(message, part_nbr < m_part_data.size() - 1 ? ZMQ_SNDMORE : 0);
+                }
             } catch (zmq::error_t error) {
                 assert(error.num()!=0);
             }

@@ -61,6 +61,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 	private Dialog mDialog = null;
 	
 	private BackstageMessageReceiver backstageMessageReceiver = null;
+	public final static String UPDATE_MESSAGE_ACTION = "MsgFragment.update_message_action";
 	public final static String READ_MESSAGE_ACTION = "MsgFragment.read_message_action";
 	
 	/**
@@ -137,9 +138,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		} else {
 			if (Utils.isNetworkAvailable(mActivity)) {
 				final OkOnlyDialog myDialog=new OkOnlyDialog(mActivity);
-				myDialog.setTitle("温馨提示");
-				myDialog.setMessage("网络不稳定，请重新登录！");
-				myDialog.setPositiveButton("确认", new OnClickListener() {
+				myDialog.setTitle(getResources().getString(R.string.tips));
+				myDialog.setMessage(getResources().getString(R.string.network_instability));
+				myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						myDialog.dismiss();
@@ -155,7 +156,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 					}
 				});
 			} else {
-				Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+				Toast.makeText(mActivity, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 			}
 		}
 	}
@@ -180,6 +181,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		//注册广播
 		backstageMessageReceiver = new BackstageMessageReceiver();
 		IntentFilter filter = new IntentFilter();
+		filter.addAction(UPDATE_MESSAGE_ACTION);
 		filter.addAction(READ_MESSAGE_ACTION);
 		filter.addAction(BackstageService.BACKSTAGE_MESSAGE_ACTION);
 		mActivity.registerReceiver(backstageMessageReceiver, filter);
@@ -306,7 +308,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			switch (msg.what) {
 				case IS_REQUESTING:
 					if (mDialog == null) {
-						mDialog = Utils.createLoadingDialog(mActivity, "正在请求报警数据...");
+						mDialog = Utils.createLoadingDialog(mActivity, getResources().getString(R.string.is_requesting_alarm_data));
 						mDialog.show();
 					}
 					break;
@@ -324,7 +326,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 					if (mPullToRefreshView.getFooterState() == PullToRefreshView.REFRESHING) {
 						mPullToRefreshView.onFooterRefreshComplete();
 					}
-					Toast.makeText(mActivity, "请求报警数据超时，请重试！", Toast.LENGTH_SHORT).show();
+					Toast.makeText(mActivity, getResources().getString(R.string.request_alarm_data_timeout), Toast.LENGTH_SHORT).show();
 					break;
 				case R.id.request_alarm_id:
 					if (handler.hasMessages(REQUEST_TIMEOUT)) {
@@ -339,8 +341,8 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 								//正常请求和下拉请求
 								case 0:
 									if (mPullToRefreshView.getHeaderState() == PullToRefreshView.REFRESHING) {
-										msg_refresh_time = "上次更新于: "+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
-										msg_refresh_terminal = "终端: "+Build.MODEL;
+										msg_refresh_time = getResources().getString(R.string.last_Updated_on)+":"+Utils.getNowTime("yyyy-MM-dd HH:mm:ss");
+										msg_refresh_terminal = getResources().getString(R.string.terminal)+":"+Build.MODEL;
 										preferData.writeData("msgRefreshTime", msg_refresh_time);
 										preferData.writeData("msgRefreshTerminal", msg_refresh_terminal);
 										mPullToRefreshView.onHeaderRefreshComplete(msg_refresh_time, msg_refresh_terminal);
@@ -374,7 +376,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 										}
 										msgAdapter.notifyDataSetChanged();
 									} else {
-										Toast.makeText(mActivity, "后面没有了", Toast.LENGTH_SHORT).show();
+										Toast.makeText(mActivity, getResources().getString(R.string.no_pictures_behind), Toast.LENGTH_SHORT).show();
 									}
 									break;
 								//请求新的报警数据
@@ -476,7 +478,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 			sendHandlerMsg(IS_REQUESTING);
 			sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 		} else {
-			Toast.makeText(mActivity, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mActivity, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -530,6 +532,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 			// TODO Auto-generated method stub
+			ZmqHandler.mHandler = handler;
 			listPosition = position;
 			HashMap<String, String> item = msgList.get(listPosition);
 			mMsgID = item.get("msgID");
@@ -564,10 +567,10 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		ListView pop_listView = (ListView)pop_view.findViewById(R.id.pop_list);
 		
 		List<String> item_list = new ArrayList<String>();
-		item_list.add("删除该条报警");
-		item_list.add("删除该页报警");
-		item_list.add("标记该条已读");
-		item_list.add("全部标记已读");
+		item_list.add(getResources().getString(R.string.delete_this_alarm));
+		item_list.add(getResources().getString(R.string.delete_the_page_of_alarm));
+		item_list.add(getResources().getString(R.string.mark_this_item_has_been_read));
+		item_list.add(getResources().getString(R.string.mark_all_read));
 		PopupWindowAdapter popAdapter = new PopupWindowAdapter(mActivity, item_list);
 		pop_listView.setAdapter(popAdapter);
 		
@@ -605,7 +608,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 						reqAlarmType = 5;
 						sendData = generateMarkThisItemJson(Integer.parseInt(mMsgID));
 						if (sendData == null) {
-							Toast.makeText(mActivity, "该条报警已标记！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity,getResources().getString(R.string.this_alarm_has_been_marked), Toast.LENGTH_SHORT).show();
 						} else {
 							sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 							sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, sendData);
@@ -615,7 +618,7 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 						reqAlarmType = 6;
 						sendData = generateMarkThisListJson();
 						if (sendData == null) {
-							Toast.makeText(mActivity, "当前全部报警已标记！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mActivity, getResources().getString(R.string.all_current_alarm_has_been_marked), Toast.LENGTH_SHORT).show();
 						} else {
 							sendHandlerMsg(REQUEST_TIMEOUT, Value.REQ_TIME_10S);
 							sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_alarm_id, sendData);
@@ -664,8 +667,9 @@ public class MsgFragment extends Fragment implements OnClickListener, OnHeaderRe
 		public void onReceive(Context context, Intent intent) {
 			// TODO Auto-generated method stub
 			String action = intent.getAction();
-			if ((Value.isNeedReqAlarmListFlag) && (action.equals(BackstageService.BACKSTAGE_MESSAGE_ACTION))) {
+			if ((Value.isNeedReqAlarmListFlag) && (action.equals(UPDATE_MESSAGE_ACTION))) {
 				// 请求新的报警消息
+				ZmqHandler.mHandler = handler;
 				reqAlarmType = 2;
 				Value.ownFragmentRequestAlarmFlag = false;
 				requestAlarmEvent(0, Value.newAlarmMessageCount);

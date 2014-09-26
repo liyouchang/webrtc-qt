@@ -66,7 +66,7 @@
             android:inputType="textPassword"
             android:padding="0.0dip"
             android:textColor="@color/black"
-            android:textSize="18.0sp" />
+            android:textSize="12.0sp" />
 
         <Button
             android:id="@+id/btn_modify_old_password_del"
@@ -113,7 +113,7 @@
             android:inputType="textPassword"
             android:padding="0.0dip"
             android:textColor="@color/black"
-            android:textSize="18.0sp" />
+            android:textSize="12.0sp" />
 
         <Button
             android:id="@+id/btn_modify_new_password_del"
@@ -160,7 +160,7 @@
             android:inputType="textPassword"
             android:padding="0.0dip"
             android:textColor="@color/black"
-            android:textSize="18.0sp" />
+            android:textSize="12.0sp" />
 
         <Button
             android:id="@+id/btn_modify_new_repassword_del"

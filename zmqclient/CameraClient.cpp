@@ -85,6 +85,8 @@ void CameraClient::Reconnect()
     dealer_->disconnect();
     dealer_->connect(strDealerId,oldAddr);
     this->Login();
+    this->ntp();
+
 }
 
 
@@ -103,7 +105,7 @@ void CameraClient::OnMessage(talk_base::Message *msg)
         break;
     }
     case MSG_RECEIVE_HEART:{
-        //LOG(INFO)<<"receive heart at count "<<heartCount;
+        LOG(INFO)<<"receive heart at count "<<heartCount;
         heartCount = 0;
         break;
     }

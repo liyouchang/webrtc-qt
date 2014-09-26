@@ -1,6 +1,7 @@
 package com.video.main;
 
 import java.io.File;
+import java.util.HashMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -8,8 +9,10 @@ import org.json.JSONObject;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -43,6 +46,7 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	private PreferData preferData = null;
 	private Dialog mDialog = null;
 	private boolean isNeedRefresh = false;
+	private boolean isDefence = true;
 	
 	private String userName = "";
 	private String deviceBg = "";
@@ -56,6 +60,12 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	private RelativeLayout rl_device_bg;
 	private TextView tv_device_name;
 	private TextView tv_device_mac;
+	private ImageButton ib_set_defence;
+	private Button btn_restart_device;
+	
+	private DeviceManagerReceiver deviceManagerReceiver;
+	public static final String ALARM_DEFENCE_ACTION = "DeviceManagerActivity.alarm_defence_action";
+	public static final String REBOOT_DEVICE_ACTION = "DeviceManagerActivity.reboot_device_action";
 	
 	private final int IS_REQUESTING = 1;
 	private final int REQUEST_TIMEOUT = 2;
@@ -92,6 +102,9 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 		tv_device_name = (TextView) this.findViewById(R.id.tv_device_name);
 		tv_device_mac = (TextView) this.findViewById(R.id.tv_device_mac);
 		
+		ib_set_defence = (ImageButton) this.findViewById(R.id.ib_set_defence_switch);
+		ib_set_defence.setOnClickListener(this);
+		
 		Button btn_wifi = (Button) this.findViewById(R.id.btn_wifi);
 		btn_wifi.setOnClickListener(this);
 		
@@ -100,12 +113,22 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 		
 		Button btn_delete_device = (Button) this.findViewById(R.id.btn_delete_device);
 		btn_delete_device.setOnClickListener(this);
+		
+		btn_restart_device = (Button) this.findViewById(R.id.btn_restart_device);
+		btn_restart_device.setOnClickListener(this);
 	}
 	
 	private void initData() {
 		mContext = DeviceManagerActivity.this;
 		ZmqHandler.mHandler = handler;
 		preferData = new PreferData(mContext);
+		
+		//注册广播
+		deviceManagerReceiver = new DeviceManagerReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(ALARM_DEFENCE_ACTION);
+		filter.addAction(REBOOT_DEVICE_ACTION);
+		registerReceiver(deviceManagerReceiver, filter);
 		
 		if (preferData.isExist("UserName")) {
 			userName = preferData.readString("UserName");
@@ -116,6 +139,9 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 		mDeviceID = (String) intent.getCharSequenceExtra("deviceID");
 		mDeviceBg = (String) intent.getCharSequenceExtra("deviceBg");
 		mDealerName = (String) intent.getCharSequenceExtra("dealerName");
+		
+		// 获得一键布撤防
+		sendGetDefanceData();
 		
 		if (mDeviceName != null) {
 			tv_device_name.setText(mDeviceName);
@@ -158,12 +184,22 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 				startActivityForResult(intent, 1);
 				overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 				break;
+			// 一键布撤防
+			case R.id.ib_set_defence_switch:
+				if (isDefence) {
+					sendSetDefanceData(0);
+				} else {
+					sendSetDefanceData(1);
+				}
+				break;
+			// 终端WiFi配置
 			case R.id.btn_wifi:
 				intent = new Intent(mContext, WiFiActivity.class);
 				intent.putExtra("dealerName", mDealerName);
 				startActivityForResult(intent, 1);
 				overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 				break;
+			// 设备分享管理
 			case R.id.btn_shared_device_manager:
 				intent = new Intent(mContext, AddShareActivity.class);
 				intent.putExtra("deviceName", mDeviceName);
@@ -171,6 +207,12 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 				startActivity(intent);
 				overridePendingTransition(R.anim.down_in, R.anim.fragment_nochange);
 				break;
+			// 重启设备
+			case R.id.btn_restart_device:
+				sendRebootDeviceData();
+				btn_restart_device.setEnabled(false);
+				break;
+			// 删除设备
 			case R.id.btn_delete_device:
 				deleteDevice();
 				break;
@@ -195,6 +237,75 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 			closeActivity();
 		}
 		return super.onKeyDown(keyCode, event);
+	}
+	
+	private String generateGetDefanceJson() {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "tunnel");
+			jsonObj.put("command", "arming_status");
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 获得布撤防信息
+	 */
+	private void sendGetDefanceData() {
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("peerId", mDealerName);
+		map.put("peerData", generateGetDefanceJson());
+		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.send_to_peer_id, map); 
+	}
+	
+	private String generateSetDefanceJson(int order) {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "tunnel");
+			jsonObj.put("command", "arming_status");
+			jsonObj.put("value", order);
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 发送布撤防信息：0撤防  1布防
+	 */
+	private void sendSetDefanceData(int order) {
+		String data = generateSetDefanceJson(order);
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("peerId", mDealerName);
+		map.put("peerData", data);
+		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.send_to_peer_id, map); 
+	}
+	
+	private String generateRebootDeviceJson() {
+		JSONObject jsonObj = new JSONObject();
+		try {
+			jsonObj.put("type", "tunnel");
+			jsonObj.put("command", "reboot");
+			return jsonObj.toString();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 发送重启设备防信息
+	 */
+	private void sendRebootDeviceData() {
+		String data = generateRebootDeviceJson();
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put("peerId", mDealerName);
+		map.put("peerData", data);
+		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.send_to_peer_id, map); 
 	}
 	
 	/**
@@ -252,11 +363,11 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	public void deleteDeviceEvent() {
 		if (Utils.isNetworkAvailable(mContext)) {
 			String data = generateDeleteDeviceJson();
-			sendHandlerMsg(handler, IS_REQUESTING, "正在删除设备...");
-			sendHandlerMsg(handler, REQUEST_TIMEOUT, "删除设备失败，网络超时！", Value.REQ_TIME_10S);
+			sendHandlerMsg(handler, IS_REQUESTING, getResources().getString(R.string.is_deleting_device));
+			sendHandlerMsg(handler, REQUEST_TIMEOUT, getResources().getString(R.string.deleting_the_device_failed), Value.REQ_TIME_10S);
 			sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 		} else {
-			Toast.makeText(mContext, "没有可用的网络连接，请确认后重试！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_available_network_connection), Toast.LENGTH_SHORT).show();
 		}
 	}
 	
@@ -267,8 +378,8 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 		Bundle bundle = intent.getExtras();
 		deviceBg = bundle.getString("ImageBgPath");
 		String sendData = generateUploadBgJson(deviceBg);
-		sendHandlerMsg(handler, IS_REQUESTING, "正在上传图片...");
-		sendHandlerMsg(handler, REQUEST_TIMEOUT, "上传图片失败，请重试！", 20000);
+		sendHandlerMsg(handler, IS_REQUESTING, getResources().getString(R.string.is_uploading_images));
+		sendHandlerMsg(handler, REQUEST_TIMEOUT, getResources().getString(R.string.uploading_images_failed), 20000);
 		sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, sendData);
 	}
 	
@@ -295,22 +406,22 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	 */
 	private void deleteDeviceBg() {
 		if (mDeviceBg.equals("null")) {
-			Toast.makeText(mContext, "无背景图片，不需要删除！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, getResources().getString(R.string.no_background_image), Toast.LENGTH_SHORT).show();
 		} else {
 			final OkCancelDialog myDialog = new OkCancelDialog(mContext);
-			myDialog.setTitle("温馨提示");
-			myDialog.setMessage("确认删除背景图片？");
-			myDialog.setPositiveButton("确认", new OnClickListener() {
+			myDialog.setTitle("");
+			myDialog.setMessage(getResources().getString(R.string.delete_the_background_image));
+			myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					myDialog.dismiss();
 					String data = generateDeleteBgJson();
-					sendHandlerMsg(handler, IS_REQUESTING, "正在删除图片...");
-					sendHandlerMsg(handler, REQUEST_TIMEOUT, "删除图片失败，网络超时！", Value.REQ_TIME_10S);
+					sendHandlerMsg(handler, IS_REQUESTING, getResources().getString(R.string.is_deleting_images));
+					sendHandlerMsg(handler, REQUEST_TIMEOUT, getResources().getString(R.string.delete_picture_failure), Value.REQ_TIME_10S);
 					sendHandlerMsg(ZmqThread.zmqThreadHandler, R.id.zmq_send_data_id, data);
 				}
 			});
-			myDialog.setNegativeButton("取消", new OnClickListener() {
+			myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					myDialog.dismiss();
@@ -324,16 +435,16 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	 */
 	private void deleteDevice() {
 		final OkCancelDialog myDialog = new OkCancelDialog(mContext);
-		myDialog.setTitle("温馨提示");
-		myDialog.setMessage("确认删除终端绑定？");
-		myDialog.setPositiveButton("确认", new OnClickListener() {
+		myDialog.setTitle("");
+		myDialog.setMessage(getResources().getString(R.string.delete_the_terminal_binding));
+		myDialog.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
 				deleteDeviceEvent();
 			}
 		});
-		myDialog.setNegativeButton("取消", new OnClickListener() {
+		myDialog.setNegativeButton(getResources().getString(R.string.cancel), new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				myDialog.dismiss();
@@ -380,9 +491,9 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 								setDeviceBg(deviceBg);
 							}
 							mDeviceBg = (String) msg.obj;
-							Toast.makeText(mContext, "上传背景图片成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.uploading_background_images_success), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "上传背景图片失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.uploading_background_image_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.upload_back_image_id);
@@ -403,9 +514,9 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 							Utils.deleteLocalFile(filePath);
 							rl_device_bg.setBackgroundResource(R.drawable.device_item_bg);
 							mDeviceBg = "null";
-							Toast.makeText(mContext, "删除背景图片成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.deleting_the_background_image_success), Toast.LENGTH_SHORT).show();
 						} else {
-							Toast.makeText(mContext, "删除背景图片失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.deleting_the_background_image_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_back_image_id);
@@ -422,10 +533,10 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 						if (msg.arg1 == 0) {
 							isNeedRefresh = true;
 							MainApplication.getInstance().xmlDevice.deleteItem(mDeviceID);
-							Toast.makeText(mContext, "删除设备成功！", Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.deleting_the_device_success), Toast.LENGTH_SHORT).show();
 							closeActivity();
 						} else {
-							Toast.makeText(mContext, "删除设备失败，"+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
+							Toast.makeText(mContext, getResources().getString(R.string.delete_the_device_failed)+","+Utils.getErrorReason(msg.arg1), Toast.LENGTH_SHORT).show();
 						}
 					} else {
 						handler.removeMessages(R.id.delete_device_item_id);
@@ -441,6 +552,12 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	public void sendHandlerMsg(Handler handler, int what) {
 		Message msg = new Message();
 		msg.what = what;
+		handler.sendMessage(msg);
+	}
+	public void sendHandlerMsg(Handler handler, int what, HashMap<String, String> obj) {
+		Message msg = new Message();
+		msg.what = what;
+		msg.obj = obj;
 		handler.sendMessage(msg);
 	}
 	public void sendHandlerMsg(Handler handler, int what, String obj) {
@@ -497,5 +614,37 @@ public class DeviceManagerActivity extends Activity implements OnClickListener, 
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+		unregisterReceiver(deviceManagerReceiver);
+	}
+	
+	public class DeviceManagerReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// TODO Auto-generated method stub
+			String action = intent.getAction();
+			if (action.equals(ALARM_DEFENCE_ACTION)) {
+				if (intent.hasExtra("alarmDefence")) {
+					// 0:撤防  1:布防
+					int alarmDefence = intent.getIntExtra("alarmDefence", 0);
+					if (alarmDefence == 0) {
+						isDefence = false;
+						ib_set_defence.setBackgroundResource(R.drawable.icon_set_off);
+					} 
+					else if (alarmDefence == 1) {
+						isDefence = true;
+						ib_set_defence.setBackgroundResource(R.drawable.icon_set_on);
+					}
+				}
+			}
+			else if (action.equals(REBOOT_DEVICE_ACTION)) {
+				if (intent.getBooleanExtra("rebootDevice", false)) {
+					Toast.makeText(mContext, getResources().getString(R.string.restarting_device), Toast.LENGTH_SHORT).show();
+				} else {
+					Toast.makeText(mContext, getResources().getString(R.string.restart_device_failed), Toast.LENGTH_SHORT).show();
+					btn_restart_device.setEnabled(true);
+				}
+			}
+		}
 	}
 }

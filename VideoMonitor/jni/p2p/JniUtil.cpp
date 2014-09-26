@@ -7,6 +7,7 @@
 
 #include "JniUtil.h"
 #include <unistd.h>
+
 JniUtil::JniUtil() {
     g_vm_ = NULL;
 }
@@ -14,9 +15,9 @@ JniUtil::~JniUtil() {
     // TODO Auto-generated destructor stub
 }
 
-jboolean JniUtil::getObjectField(JNIEnv* env, jobject obj,
-                                 const char* fieldName, const char* fieldDescriptor, jobject* out) {
-
+jboolean JniUtil::getObjectField(JNIEnv* env, jobject obj,const char* fieldName,
+                                 const char* fieldDescriptor, jobject* out)
+{
     jclass clazz = env->GetObjectClass(obj);
     if (clazz == NULL)
         return JNI_FALSE;
@@ -26,7 +27,6 @@ jboolean JniUtil::getObjectField(JNIEnv* env, jobject obj,
         return JNI_FALSE;
     *out = env->GetObjectField(obj, fieldID);
     return JNI_TRUE;
-
 }
 
 JniUtil* JniUtil::GetInstance() {
@@ -53,12 +53,10 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message)
         LOGE("g_vm is null");
         return false;
     }
-
     JNIEnv *p_env;
     bool attached = false;
     int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
     if(status != JNI_OK){
-        //LOGI("g_vm GetEnv error %d", status);
         status = g_vm_->AttachCurrentThread(&p_env,NULL);
         if(status != JNI_OK){
             LOGE("g_vm AttachCurrentThread error %d", status);
@@ -66,20 +64,17 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message)
         }
         attached = true;
     }
-
     jclass callBackCls = p_env->GetObjectClass(g_obj_);
     if (!callBackCls) {
         LOGE("Get class %s error", call_class_name_.c_str());
         return false;
     }
-
     jmethodID mid = p_env->GetMethodID(callBackCls, "SendToPeer",
                                        "(Ljava/lang/String;Ljava/lang/String;)V");
     if (!mid) {
         LOGE("get method SendToPeer error");
         return false;
     }
-
     jstring jni_pid = p_env->NewStringUTF(peer_id);
     jstring jni_msg = p_env->NewStringUTF(message);
     LOGI("JniUtil::JniSendToPeer----message: %s", message);
@@ -90,15 +85,14 @@ bool JniUtil::JniSendToPeer(const char* peer_id, const char* message)
 
     p_env->DeleteLocalRef(jni_pid);
     p_env->DeleteLocalRef(jni_msg);
-
     if(attached){
         g_vm_->DetachCurrentThread();
     }
     return true;
 }
 
-bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
-
+bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len)
+{
     if(g_vm_ == 0){
         LOGE("g_vm is null");
         return false;
@@ -107,7 +101,6 @@ bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
     bool attached = false;
     int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
     if(status != JNI_OK){
-        //LOGI("g_vm GetEnv error %d", status);
         status = g_vm_->AttachCurrentThread(&p_env,NULL);
         if(status != JNI_OK){
             LOGE("g_vm AttachCurrentThread error %d", status);
@@ -137,23 +130,17 @@ bool JniUtil::JniRecvVideoData(const char* peer_id, const char* data, int len) {
     p_env->CallVoidMethod(g_obj_, mid, jni_pid, byteArr);
 
     p_env->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
-
     p_env->DeleteLocalRef(byteArr);
-
     p_env->DeleteLocalRef(callBackCls);
-
     p_env->DeleteLocalRef(jni_pid);
-
     if(attached){
         g_vm_->DetachCurrentThread();
     }
     return true;
 }
 
-
-
-bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
-
+bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len)
+{
     if(g_vm_ == 0){
         LOGE("g_vm is null");
         return false;
@@ -162,7 +149,6 @@ bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
     bool attached = false;
     int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
     if(status != JNI_OK){
-        //LOGI("g_vm GetEnv error %d", status);
         status = g_vm_->AttachCurrentThread(&p_env,NULL);
         if(status != JNI_OK){
             LOGE("g_vm AttachCurrentThread error %d", status);
@@ -170,13 +156,11 @@ bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
         }
         attached = true;
     }
-
     jclass callBackCls = p_env->GetObjectClass(g_obj_);
     if (!callBackCls) {
         LOGE("Get class %s error", call_class_name_.c_str());
         return false;
     }
-
     jmethodID mid = p_env->GetMethodID(callBackCls, "RecvAudioData",
                                        "(Ljava/lang/String;[B)V");
     if (!mid) {
@@ -193,65 +177,15 @@ bool JniUtil::JniRecvAudioData(const char* peer_id, const char* data, int len) {
 
     p_env->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
     p_env->DeleteLocalRef(byteArr);
-
     p_env->DeleteLocalRef(callBackCls);
-
     p_env->DeleteLocalRef(jni_pid);
-
     if(attached){
         g_vm_->DetachCurrentThread();
     }
-
-    return true;
-}
-bool JniUtil::JniTunnelOpened(const char * peer_id){
-
-    if(g_vm_ == 0){
-        LOGE("g_vm is null");
-        return false;
-    }
-    JNIEnv *p_env;
-    bool attached = false;
-    int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
-    if(status != JNI_OK){
-        //LOGI("g_vm GetEnv error %d", status);
-        status = g_vm_->AttachCurrentThread(&p_env,NULL);
-        if(status != JNI_OK){
-            LOGE("g_vm AttachCurrentThread error %d", status);
-            return false ;
-        }
-        attached = true;
-    }
-
-    jclass callBackCls = p_env->GetObjectClass(g_obj_);
-    if (!callBackCls) {
-        LOGE("Get class %s error", call_class_name_.c_str());
-        return false;
-    }
-
-    jmethodID mid = p_env->GetMethodID(callBackCls, "TunnelOpened",
-                                       "(Ljava/lang/String;)V");
-    if (!mid) {
-        LOGE("get method TunnelOpened error");
-        return false;
-    }
-
-    jstring jni_pid = p_env->NewStringUTF(peer_id);
-
-    p_env->CallVoidMethod(g_obj_, mid, jni_pid);
-
-    p_env->DeleteLocalRef(callBackCls);
-
-    p_env->DeleteLocalRef(jni_pid);
-
-    if(attached){
-        g_vm_->DetachCurrentThread();
-    }
-
     return true;
 }
 
-bool JniUtil::JniRecordStatus(const char *peer_id, int recordstatus,int playPos,int playSpeed)
+bool JniUtil::JniTunnelOpened(const char * peer_id)
 {
     if(g_vm_ == 0){
         LOGE("g_vm is null");
@@ -269,7 +203,47 @@ bool JniUtil::JniRecordStatus(const char *peer_id, int recordstatus,int playPos,
         }
         attached = true;
     }
+    jclass callBackCls = p_env->GetObjectClass(g_obj_);
+    if (!callBackCls) {
+        LOGE("Get class %s error", call_class_name_.c_str());
+        return false;
+    }
+    jmethodID mid = p_env->GetMethodID(callBackCls, "TunnelOpened",
+                                       "(Ljava/lang/String;)V");
+    if (!mid) {
+        LOGE("get method TunnelOpened error");
+        return false;
+    }
+    jstring jni_pid = p_env->NewStringUTF(peer_id);
 
+    p_env->CallVoidMethod(g_obj_, mid, jni_pid);
+
+    p_env->DeleteLocalRef(callBackCls);
+    p_env->DeleteLocalRef(jni_pid);
+    if(attached){
+        g_vm_->DetachCurrentThread();
+    }
+    return true;
+}
+
+bool JniUtil::JniRecordStatus(const char *peer_id, int recordstatus,int playPos,
+                              int playSpeed)
+{
+    if(g_vm_ == 0){
+        LOGE("g_vm is null");
+        return false;
+    }
+    JNIEnv *p_env;
+    bool attached = false;
+    int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
+    if(status != JNI_OK){
+        status = g_vm_->AttachCurrentThread(&p_env,NULL);
+        if(status != JNI_OK){
+            LOGE("g_vm AttachCurrentThread error %d", status);
+            return false ;
+        }
+        attached = true;
+    }
     jclass callBackCls = p_env->GetObjectClass(g_obj_);
     if (!callBackCls) {
         LOGE("Get class %s error", call_class_name_.c_str());
@@ -287,16 +261,56 @@ bool JniUtil::JniRecordStatus(const char *peer_id, int recordstatus,int playPos,
     p_env->CallVoidMethod(g_obj_, mid, jni_pid,recordstatus,playPos,playSpeed);
 
     p_env->DeleteLocalRef(callBackCls);
-
     p_env->DeleteLocalRef(jni_pid);
-
     if(attached){
         g_vm_->DetachCurrentThread();
     }
-
     return true;
 }
-bool JniUtil::getSendToPeerMethod(JNIEnv* env, jobject obj) {
+
+bool JniUtil::JniMediaStatus(const char *peer_id, int video, int audio, int talk)
+{
+    if(g_vm_ == 0){
+        LOGE("g_vm is null");
+        return false;
+    }
+    JNIEnv *p_env;
+    bool attached = false;
+    int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
+    if(status != JNI_OK){
+        status = g_vm_->AttachCurrentThread(&p_env,NULL);
+        if(status != JNI_OK){
+            LOGE("g_vm AttachCurrentThread error %d", status);
+            return false ;
+        }
+        attached = true;
+    }
+    jclass callBackCls = p_env->GetObjectClass(g_obj_);
+    if (!callBackCls) {
+        LOGE("Get class %s error", call_class_name_.c_str());
+        return false;
+    }
+    const char * methodName = "MediaStatus";
+    jmethodID mid = p_env->GetMethodID(callBackCls, methodName,
+                                       "(Ljava/lang/String;III)V");
+    if (!mid) {
+        LOGE("JniUtil::JniRecordStatus ---get method %s error",methodName);
+        return false;
+    }
+    jstring jni_pid = p_env->NewStringUTF(peer_id);
+
+    p_env->CallVoidMethod(g_obj_, mid, jni_pid,video,audio,talk);
+
+    p_env->DeleteLocalRef(callBackCls);
+    p_env->DeleteLocalRef(jni_pid);
+    if(attached){
+        g_vm_->DetachCurrentThread();
+    }
+    return true;
+}
+
+bool JniUtil::getSendToPeerMethod(JNIEnv* env, jobject obj)
+{
     callBackCls = env->FindClass(call_class_name_.c_str());
     if (!callBackCls) {
         LOGE("Get class %s error", call_class_name_.c_str());
@@ -310,9 +324,10 @@ bool JniUtil::getSendToPeerMethod(JNIEnv* env, jobject obj) {
     }
     return true;
 }
+
 //method callback for notify
-bool JniUtil::JniTunnelMethodCallback(const char* methodName,
-                                      const char* strParam) {
+bool JniUtil::JniTunnelMethodCallback(const char* methodName,const char* strParam)
+{
     if(g_vm_ == 0){
         LOGE("g_vm is null");
         return false;
@@ -321,7 +336,6 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
     bool attached = false;
     int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
     if(status != JNI_OK){
-        //LOGI("g_vm GetEnv error %d", status);
         status = g_vm_->AttachCurrentThread(&p_env,NULL);
         if(status != JNI_OK){
             LOGE("g_vm AttachCurrentThread error %d", status);
@@ -329,28 +343,23 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
         }
         attached = true;
     }
-
     jclass callBackCls = p_env->GetObjectClass(g_obj_);
     if (!callBackCls) {
         LOGE("Get class %s error", call_class_name_.c_str());
         return false;
     }
-
     jmethodID mid = p_env->GetMethodID(callBackCls, methodName,
                                        "(Ljava/lang/String;)V");
     if (!mid) {
         LOGE("JniUtil::JniTunnelMethodCallback 1 ---get method %s error",methodName);
         return false;
     }
-
     jstring jni_pid = p_env->NewStringUTF(strParam);
 
     p_env->CallVoidMethod(g_obj_, mid, jni_pid);
 
     p_env->DeleteLocalRef(callBackCls);
-
     p_env->DeleteLocalRef(jni_pid);
-
     if(attached){
         g_vm_->DetachCurrentThread();
     }
@@ -358,8 +367,9 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
     return true;
 }
 //method callback for data
-bool JniUtil::JniTunnelMethodCallback(const char* methodName,
-                                      const char* peer_id, const char* data, int len) {
+bool JniUtil::JniTunnelMethodCallback(const char* methodName,const char* peer_id,
+                                      const char* data, int len)
+{
     if(g_vm_ == 0){
         LOGE("g_vm is null");
         return false;
@@ -368,7 +378,6 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
     bool attached = false;
     int status = g_vm_->GetEnv((void **)&p_env,JNI_VERSION_1_6);
     if(status != JNI_OK){
-        //LOGI("g_vm GetEnv error %d", status);
         status = g_vm_->AttachCurrentThread(&p_env,NULL);
         if(status != JNI_OK){
             LOGE("g_vm AttachCurrentThread error %d", status);
@@ -376,13 +385,11 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
         }
         attached = true;
     }
-
     jclass callBackCls = p_env->GetObjectClass(g_obj_);
     if (!callBackCls) {
         LOGE("Get class %s error", call_class_name_.c_str());
         return false;
     }
-
     jmethodID mid = p_env->GetMethodID(callBackCls, methodName,
                                        "(Ljava/lang/String;[B)V");
     if (!mid) {
@@ -399,15 +406,11 @@ bool JniUtil::JniTunnelMethodCallback(const char* methodName,
 
     p_env->ReleasePrimitiveArrayCritical(byteArr, rd, JNI_ABORT);
     p_env->DeleteLocalRef(byteArr);
-
     p_env->DeleteLocalRef(callBackCls);
-
     p_env->DeleteLocalRef(jni_pid);
-
     if(attached){
         g_vm_->DetachCurrentThread();
     }
-
     return true;
 }
 

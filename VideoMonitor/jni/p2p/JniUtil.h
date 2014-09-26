@@ -28,6 +28,7 @@ public:
   bool JniRecvAudioData(const char * peer_id,const char* data, int len);
   bool JniTunnelOpened(const char * peer_id);
   bool JniRecordStatus(const char * peer_id, int recordstatus,int playPos,int playSpeed);
+  bool JniMediaStatus(const char * peer_id, int video,int audio,int talk);
 
   //method call back
   bool JniTunnelMethodCallback(const char * methodName, const char * strParam);

@@ -73,14 +73,14 @@ struct AVIStreamHeader{
 
 struct keBITMAPINFOHEADER{
     uint32_t      biSize;
-    long       biWidth;
-    long       biHeight;
+    uint32_t       biWidth;
+    uint32_t       biHeight;
     uint16_t       biPlanes;
     uint16_t       biBitCount;
     uint32_t      biCompression;
     uint32_t      biSizeImage;
-    long       biXPelsPerMeter;
-    long       biYPelsPerMeter;
+    uint32_t       biXPelsPerMeter;
+    uint32_t       biYPelsPerMeter;
     uint32_t      biClrUsed;
     uint32_t      biClrImportant;
 };
@@ -110,49 +110,6 @@ typedef struct {
 
 
 
-
-void Reso2WidthHeigh(int reso,int *width,int *high)
-{
-    switch(reso)
-    {
-    case 1:                     //QCIF
-        *width = 176;
-        *high = 144;
-        break;
-    case 2:                     //CIF
-        *width = 352;
-        *high = 288;
-        break;
-    case 3:                     //HD
-        *width = 704;
-        *high = 288;
-        break;
-    case 4:                     //QVGA
-        *width = 320;
-        *high = 240;
-        break;
-    case 7:						//VGA
-        *width = 640;
-        *high = 480;
-        break;
-    case 10:                    //720P
-        *width = 1280;
-        *high = 720;
-        break;
-    case 12:                    //960P
-        *width = 1280;
-        *high = 960;
-        break;
-    case 6:                     //1080P
-        *width = 1920;
-        *high = 1080;
-        break;
-    default:                    //D1
-        *width = 704;
-        *high = 576;
-        break;
-    }
-}
 
 int WH2Resolution(int width,int height){
     if(width == 704 && height == 576)
@@ -608,6 +565,7 @@ bool RecordReaderAvi::SetSpeed(int speed)
     readThread->Send(this,MSG_SETSPEED,msgData);
     return true;
 }
+
 int RecordReaderAvi::GetSpeed()
 {
     return this->speed;
@@ -656,13 +614,10 @@ void RecordReaderAvi::MoveTo(int percent)
             recordIndex.push_back(entry);
         }
     }
-
     int pos = recordIndex.size()*percent/100;
     AVIINDEXENTRY index = recordIndex[pos];
     aviFile_->SetPosition(index.dwChunkOffset);
     this->currentFrame = pos;
-//    LOG_T_F(INFO)<<"move start";
-//    readThread->Post(this,MSG_READ);
 }
 
 void RecordReaderAvi::ReadRecord()
@@ -722,7 +677,6 @@ void RecordReaderAvi::ReadRecord()
         LOG_T_F(INFO)<<"Read record end with no data";
         SignalRecordEnd(this);
     }
-
 }
 
 int RecordReaderAvi::GetPlayedPercent()

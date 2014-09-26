@@ -33,6 +33,15 @@ protected:
      */
     virtual void OnRecordStatus(const std::string & peer_id,int status,
                                 int position,int speed);
+    /**
+     * @brief OnMediaStatus 媒体状态
+     * @param peer_id
+     * @param video
+     * @param audio
+     * @param talk
+     */
+    virtual void OnMediaStatus(const std::string &peer_id,int video,int audio,int talk);
+
 };
 
 
